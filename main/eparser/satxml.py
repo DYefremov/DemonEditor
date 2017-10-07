@@ -34,3 +34,7 @@ for elem in dom.getElementsByTagName("sat"):
 
 for sat in satellites:
     print(sat)
+
+
+if __name__ == "__main__":
+    pass

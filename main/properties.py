@@ -2,12 +2,15 @@ import json
 import os
 from pathlib import Path
 
+
 CONFIG_PATH = str(Path.home()) + "/.config/demon-editor/"
 CONFIG_FILE = CONFIG_PATH + "config.json"
+DATA_PATH = "data/"
 
 
 def get_config():
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)  # create dir if not exist
+    os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         with open(CONFIG_FILE, "w") as default_config_file:
             json.dump(get_default_settings(), default_config_file)
@@ -27,12 +30,9 @@ def get_default_settings():
             "user": "root", "password": "root",
             "services_path": "/etc/enigma2/",
             "user_bouquet_path": "/etc/enigma2/",
-            "satellites_xml_path": "/etc/tuxbox/"}
+            "satellites_xml_path": "/etc/tuxbox/",
+            "data_dir_path": "/data"}
 
 
 if __name__ == "__main__":
-    prop = get_config()
-    print(prop)
-    prop["host"] = "192.168.1.11"
-    write_config(prop)
-    print(get_config())
+    pass
