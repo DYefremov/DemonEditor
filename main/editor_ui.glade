@@ -3,43 +3,47 @@
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkAction" id="action2"/>
+  <object class="GtkListStore" id="fav_liststore"/>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-edit</property>
   </object>
-  <object class="GtkListStore" id="liststore1">
-    <columns>
-      <!-- column-name Service -->
-      <column type="gchararray"/>
-      <!-- column-name Package -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">ntv</col>
-        <col id="1" translatable="yes">ntv+</col>
-      </row>
-    </data>
+  <object class="GtkTreeViewColumn" id="package_column">
+    <property name="resizable">True</property>
+    <property name="sizing">autosize</property>
+    <property name="title" translatable="yes">Package</property>
   </object>
-  <object class="GtkListStore" id="liststore2">
+  <object class="GtkTreeViewColumn" id="service_column">
+    <property name="resizable">True</property>
+    <property name="sizing">autosize</property>
+    <property name="title" translatable="yes">Service</property>
+  </object>
+  <object class="GtkListStore" id="services_liststore">
     <columns>
-      <!-- column-name Fav -->
+      <!-- column-name service -->
       <column type="gchararray"/>
-      <!-- column-name Srv -->
+      <!-- column-name package -->
+      <column type="gchararray"/>
+      <!-- column-name ssid -->
+      <column type="gchararray"/>
+      <!-- column-name freq -->
+      <column type="gchararray"/>
+      <!-- column-name rate -->
+      <column type="gchararray"/>
+      <!-- column-name pol -->
+      <column type="gchararray"/>
+      <!-- column-name fec -->
+      <column type="gchararray"/>
+      <!-- column-name system -->
       <column type="gchararray"/>
     </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">ort</col>
-        <col id="1" translatable="yes">NTV+</col>
-      </row>
-    </data>
   </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="width_request">560</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Enigma2ChannelEditor</property>
+    <property name="title" translatable="yes">DemonEditor</property>
+    <property name="icon_name">accessories-text-editor</property>
     <signal name="delete-event" handler="on_close_main_window" swapped="no"/>
     <child>
       <object class="GtkBox" id="box1">
@@ -61,12 +65,13 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem1">
+                      <object class="GtkImageMenuItem" id="open_men_iutem">
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_data_open" object="services_liststore" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -82,7 +87,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_connect" swapped="no"/>
+                        <signal name="activate" handler="on_download" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -238,13 +243,13 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkToolButton" id="toolbutton1">
+              <object class="GtkToolButton" id="download_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton1</property>
+                <property name="label" translatable="yes">Download</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-connect</property>
-                <signal name="clicked" handler="on_connect" swapped="no"/>
+                <signal name="clicked" handler="on_download" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -262,10 +267,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton3">
+              <object class="GtkToolButton" id="save_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton3</property>
+                <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-floppy</property>
               </object>
@@ -285,10 +290,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton14">
+              <object class="GtkToolButton" id="up_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton14</property>
+                <property name="label" translatable="yes">Up</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-go-up</property>
               </object>
@@ -298,10 +303,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton13">
+              <object class="GtkToolButton" id="down_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton13</property>
+                <property name="label" translatable="yes">Down</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-go-down</property>
               </object>
@@ -321,10 +326,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton5">
+              <object class="GtkToolButton" id="cat_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton5</property>
+                <property name="label" translatable="yes">Cut</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-cut</property>
               </object>
@@ -334,10 +339,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton6">
+              <object class="GtkToolButton" id="copy_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton6</property>
+                <property name="label" translatable="yes">Copy</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-copy</property>
               </object>
@@ -347,10 +352,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton7">
+              <object class="GtkToolButton" id="paste_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton7</property>
+                <property name="label" translatable="yes">Paste</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-paste</property>
               </object>
@@ -360,10 +365,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton8">
+              <object class="GtkToolButton" id="remove_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton8</property>
+                <property name="label" translatable="yes">Remove</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-remove</property>
               </object>
@@ -383,10 +388,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton10">
+              <object class="GtkToolButton" id="preferences_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton10</property>
+                <property name="label" translatable="yes">Preferences</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-preferences</property>
                 <signal name="clicked" handler="on_preferences" swapped="no"/>
@@ -407,10 +412,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton12">
+              <object class="GtkToolButton" id="about_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">toolbutton12</property>
+                <property name="label" translatable="yes">About</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-about</property>
                 <signal name="clicked" handler="on_about_app" swapped="no"/>
@@ -429,42 +434,133 @@
         </child>
         <child>
           <object class="GtkPaned" id="paned1">
-            <property name="height_request">150</property>
+            <property name="height_request">250</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_left">2</property>
+            <property name="margin_right">2</property>
             <property name="wide_handle">True</property>
             <child>
-              <object class="GtkTreeView" id="treeview1">
+              <object class="GtkScrolledWindow" id="scrolledwindow1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">liststore1</property>
-                <property name="enable_grid_lines">both</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection1"/>
-                </child>
+                <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="service">
-                    <property name="resizable">True</property>
-                    <property name="sizing">autosize</property>
-                    <property name="title" translatable="yes">Service</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext1"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
+                  <object class="GtkTreeView" id="treeview1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="margin_right">13</property>
+                    <property name="model">services_liststore</property>
+                    <property name="enable_grid_lines">both</property>
+                    <signal name="key-release-event" handler="on_tree_view_key_release" object="services_liststore" swapped="no"/>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="treeview-selection1">
+                        <property name="mode">multiple</property>
+                      </object>
                     </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="package_column1">
-                    <property name="resizable">True</property>
-                    <property name="sizing">autosize</property>
-                    <property name="title" translatable="yes">Package</property>
                     <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext2"/>
-                      <attributes>
-                        <attribute name="text">1</attribute>
-                      </attributes>
+                      <object class="GtkTreeViewColumn" id="service_column2">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Service</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="package_column2">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Package</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="ssid_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Ssid</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext5"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="freq_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Freq</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext6"/>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="rate_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Rate</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext7"/>
+                          <attributes>
+                            <attribute name="text">4</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="pol_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Pol</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext8"/>
+                          <attributes>
+                            <attribute name="text">5</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="fec_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">FEC</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext9"/>
+                          <attributes>
+                            <attribute name="text">6</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="system_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">System</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext10"/>
+                          <attributes>
+                            <attribute name="text">7</attribute>
+                          </attributes>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </child>
@@ -475,37 +571,47 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTreeView" id="treeview2">
+              <object class="GtkScrolledWindow" id="scrolledwindow2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">liststore2</property>
-                <property name="enable_grid_lines">both</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection2"/>
-                </child>
+                <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="fav_column">
-                    <property name="resizable">True</property>
-                    <property name="sizing">autosize</property>
-                    <property name="title" translatable="yes">FAV</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext3"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
+                  <object class="GtkTreeView" id="treeview2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">fav_liststore</property>
+                    <property name="enable_grid_lines">both</property>
+                    <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_liststore" swapped="no"/>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="treeview-selection2">
+                        <property name="mode">multiple</property>
+                      </object>
                     </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="srv_column">
-                    <property name="resizable">True</property>
-                    <property name="sizing">autosize</property>
-                    <property name="title" translatable="yes">Srv</property>
                     <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext4"/>
-                      <attributes>
-                        <attribute name="text">1</attribute>
-                      </attributes>
+                      <object class="GtkTreeViewColumn" id="fav_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">FAV</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="srv_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Srv</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext4"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </child>
@@ -984,15 +1090,5 @@
       <action-widget response="-6">cancel_button</action-widget>
       <action-widget response="-5">ok_button</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkTreeViewColumn" id="package_column">
-    <property name="resizable">True</property>
-    <property name="sizing">autosize</property>
-    <property name="title" translatable="yes">Package</property>
-  </object>
-  <object class="GtkTreeViewColumn" id="service_column">
-    <property name="resizable">True</property>
-    <property name="sizing">autosize</property>
-    <property name="title" translatable="yes">Service</property>
   </object>
 </interface>

@@ -1,12 +1,15 @@
 import gi
 from ftplib import FTP
+
 from main.properties import get_config, write_config
+from main.eparser.lamedb import parse
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 __status_bar = None
 __options = get_config()
+__services_model = None
 
 
 def on_about_app(item):
@@ -22,9 +25,19 @@ def get_handlers():
         "on_close_main_window": Gtk.main_quit,
         "on_about_app": on_about_app,
         "on_preferences": on_preferences,
-        "on_connect": on_connect,
-        "on_data_dir_field_icon_press": on_path_open
+        "on_download": on_download,
+        "on_data_dir_field_icon_press": on_path_open,
+        "on_data_open": on_data_open,
+        "on_tree_view_key_release": on_tree_view_key_release
     }
+
+
+def on_data_open(item):
+    if isinstance(item, Gtk.ListStore):
+        channels = parse(get_config()["data_dir_path"] + "lamedb_example")
+        for ch in channels:
+            item.append(ch)
+        # item.append()
 
 
 def on_path_open(*args):
@@ -72,7 +85,21 @@ def on_preferences(item):
     dialog.destroy()
 
 
-def on_connect(item):
+def on_tree_view_key_release(widget, event):
+    key = event.keyval
+    if key == Gdk.KEY_Tab:
+        print("Tab")
+    if key == Gdk.KEY_Delete:
+        print("Delete")
+    if key == Gdk.KEY_Up:
+        print("Up")
+    if key == Gdk.KEY_Down:
+        print("Down")
+
+    print(widget.get_name())
+
+
+def on_download(item):
     connect(__options)
 
 

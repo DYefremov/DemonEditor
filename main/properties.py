@@ -31,7 +31,7 @@ def get_default_settings():
             "services_path": "/etc/enigma2/",
             "user_bouquet_path": "/etc/enigma2/",
             "satellites_xml_path": "/etc/tuxbox/",
-            "data_dir_path": "/data"}
+            "data_dir_path": DATA_PATH}
 
 
 if __name__ == "__main__":
