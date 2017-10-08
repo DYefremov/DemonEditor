@@ -73,10 +73,10 @@ def get_channels(*args):
         transponder = transponders.get(str(data[1] + _SEP + data[2] + _SEP + data[3]), None)
         if transponder is not None:
             tr = str(transponder)[2:].split(_SEP)  # Removing type of DVB transponders (s , t, c) and split
-        pack = pack[2:pack.find(",")]
-        channels.append(Channel(ch[1], pack, data[0], tr[0],
-                                tr[1], Polarization(int(tr[2])).name,
-                                FEC[int(tr[3])], System[int(tr[6])]))
+            pack = pack[2:pack.find(",")]
+            channels.append(Channel(ch[1], pack, data[0], tr[0],
+                                    tr[1], Polarization(int(tr[2])).name,
+                                    FEC[int(tr[3])], System[int(tr[6])]))
 
     return channels
 
