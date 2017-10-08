@@ -1,2 +1,2 @@
 # DemonEditor
-Enigma2 channel editor for GNU/Linux
+Enigma2 channel list editor for GNU/Linux
