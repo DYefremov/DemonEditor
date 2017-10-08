@@ -1,13 +1,12 @@
-"""
-    This module used for parsing lamedb file
+"""   This module used for parsing lamedb file
 
-    Currently implemented only for satellite channels!!!
-    Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
+      Currently implemented only for satellite channels!!!
+     Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
 from collections import namedtuple
 from enum import Enum
 
-Channel = namedtuple("Channel", ["service", "package", "ssid", "freq", "rate", "pol", "fec", "system"])
+Channel = namedtuple("Channel", ["service", "package", "service_type", "ssid", "freq", "rate", "pol", "fec", "system"])
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb_example"
@@ -34,7 +33,11 @@ FEC = {0: "None", 1: "Auto", 2: "1/2",
        6: "7/8", 7: "3/5", 8: "4/5",
        9: "8/9", 10: "9/10"}
 
-System = {0: "DVB-S", 1: "DVB_S2"}
+SYSTEM = {0: "DVB-S", 1: "DVB_S2"}
+
+SERVICE_TYPE = {-2: "Unknown", 1: "TV", 2: "Radio", 3: "Data",
+                10: "Radio", 12: "Data", 22: "TV", 25: "HD TV",
+                136: "Data", 139: "Data"}
 
 
 def parse(path):
@@ -43,6 +46,7 @@ def parse(path):
         data = str(file.read())
     transponders, sep, services = data.partition("transponders")  # 1 step
     transponders, sep, services = services.partition("services")  # 2 step
+    services, sep, _ = services.partition("end")  # 3 step
 
     return get_channels(services.split("\n"), transponders.split("/"))
 
@@ -74,9 +78,9 @@ def get_channels(*args):
         if transponder is not None:
             tr = str(transponder)[2:].split(_SEP)  # Removing type of DVB transponders (s , t, c) and split
             pack = pack[2:pack.find(",")]
-            channels.append(Channel(ch[1], pack, data[0], tr[0],
+            channels.append(Channel(ch[1], pack, SERVICE_TYPE.get(int(data[4]), SERVICE_TYPE[-2]), data[0], tr[0],
                                     tr[1], Polarization(int(tr[2])).name,
-                                    FEC[int(tr[3])], System[int(tr[6])]))
+                                    FEC[int(tr[3])], SYSTEM[int(tr[6])]))
 
     return channels
 

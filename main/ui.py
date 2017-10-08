@@ -26,6 +26,7 @@ def get_handlers():
         "on_about_app": on_about_app,
         "on_preferences": on_preferences,
         "on_download": on_download,
+        "on_upload": on_upload,
         "on_data_dir_field_icon_press": on_path_open,
         "on_data_open": on_data_open,
         "on_tree_view_key_release": on_tree_view_key_release
@@ -99,18 +100,25 @@ def on_tree_view_key_release(widget, event):
     print(widget.get_name())
 
 
+def on_upload(item):
+    connect(__options, False)
+
+
 def on_download(item):
     connect(__options)
 
 
-def connect(properties):
+def connect(properties, download=True):
     assert isinstance(properties, dict)
     try:
         with FTP(properties["host"]) as ftp:
             ftp.login(user=properties["user"], passwd=properties["password"])
-            __status_bar.push(1, ftp.voidcmd("NOOP"))
-            ftp.cwd(properties["services_path"])
-            ftp.retrlines("LIST")
+            if download:
+                __status_bar.push(1, ftp.voidcmd("NOOP"))
+                ftp.cwd(properties["services_path"])
+                ftp.retrlines("LIST")
+            else:
+                pass
     except Exception as e:
         __status_bar.remove_all(1)
         __status_bar.push(1, getattr(e, "message", repr(e)))  # Or maybe so: getattr(e, 'message', str(e))

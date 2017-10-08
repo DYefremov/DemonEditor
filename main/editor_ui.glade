@@ -2,12 +2,23 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkAccelGroup" id="accelgroup1"/>
   <object class="GtkAction" id="action2"/>
   <object class="GtkListStore" id="fav_liststore"/>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-edit</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">go-bottom</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">go-top</property>
   </object>
   <object class="GtkTreeViewColumn" id="package_column">
     <property name="resizable">True</property>
@@ -24,6 +35,8 @@
       <!-- column-name service -->
       <column type="gchararray"/>
       <!-- column-name package -->
+      <column type="gchararray"/>
+      <!-- column-name service_type -->
       <column type="gchararray"/>
       <!-- column-name ssid -->
       <column type="gchararray"/>
@@ -81,22 +94,26 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem2">
-                        <property name="label">gtk-connect</property>
+                      <object class="GtkImageMenuItem" id="menuitem">
+                        <property name="label">Download</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Download data from receiver</property>
                         <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">image2</property>
+                        <property name="use_stock">False</property>
                         <signal name="activate" handler="on_download" swapped="no"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem3">
-                        <property name="label">gtk-disconnect</property>
+                      <object class="GtkImageMenuItem" id="upload_menu_item">
+                        <property name="label">Upload</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Upload data into receiver</property>
                         <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">image3</property>
+                        <property name="use_stock">False</property>
                       </object>
                     </child>
                     <child>
@@ -243,13 +260,52 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
+              <object class="GtkToolButton" id="open_tool_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Open</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-open</property>
+                <signal name="clicked" handler="on_data_open" object="services_liststore" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="download_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Download data from receiver</property>
                 <property name="label" translatable="yes">Download</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-connect</property>
+                <property name="stock_id">gtk-goto-bottom</property>
                 <signal name="clicked" handler="on_download" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="upload_tool_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Upload data into receiver</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-goto-top</property>
+                <signal name="clicked" handler="on_upload" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -313,16 +369,6 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparatorToolItem" id="separatortoolitem1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -464,7 +510,7 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Service</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                          <object class="GtkCellRendererText" id="service_cellrenderertext"/>
                           <attributes>
                             <attribute name="text">0</attribute>
                           </attributes>
@@ -477,9 +523,20 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Package</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                          <object class="GtkCellRendererText" id="package_cellrenderertext"/>
                           <attributes>
                             <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="service_type_column">
+                        <property name="title" translatable="yes">Type</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="type_cellrenderertex"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -490,9 +547,9 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Ssid</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext5"/>
+                          <object class="GtkCellRendererText" id="ssid_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -503,9 +560,9 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Freq</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext6"/>
+                          <object class="GtkCellRendererText" id="freq_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">3</attribute>
+                            <attribute name="text">4</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -516,9 +573,9 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Rate</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext7"/>
+                          <object class="GtkCellRendererText" id="rate_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">4</attribute>
+                            <attribute name="text">5</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -529,9 +586,9 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Pol</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext8"/>
+                          <object class="GtkCellRendererText" id="pol_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">5</attribute>
+                            <attribute name="text">6</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -542,9 +599,9 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">FEC</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext9"/>
+                          <object class="GtkCellRendererText" id="fec_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">6</attribute>
+                            <attribute name="text">7</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -555,9 +612,9 @@
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">System</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext10"/>
+                          <object class="GtkCellRendererText" id="system_cellrenderertex"/>
                           <attributes>
-                            <attribute name="text">7</attribute>
+                            <attribute name="text">8</attribute>
                           </attributes>
                         </child>
                       </object>
