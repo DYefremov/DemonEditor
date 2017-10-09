@@ -27,7 +27,7 @@ Fec = {0: "None", 1: "Auto", 2: "1/2",
        6: "7/8", 7: "3/5", 8: "4/5",
        9: "8/9", 10: "9/10"}
 
-System = {0: "DVB-S", 1: "DVB_S2"}
+System = {0: "DVB-S", 1: "DVB-S2"}
 
 Modulation = {0: "Auto", 1: "QPSK", 2: "8PSK", 3: "16APSK", 5: "32APSK"}
 
