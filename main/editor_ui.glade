@@ -532,6 +532,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="service_type_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Type</property>
                         <child>
                           <object class="GtkCellRendererText" id="type_cellrenderertex"/>

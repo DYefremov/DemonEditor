@@ -1,4 +1,5 @@
 import gi
+import os
 from ftplib import FTP
 
 from main.properties import get_config, write_config
@@ -10,6 +11,7 @@ from gi.repository import Gtk, Gdk
 __status_bar = None
 __options = get_config()
 __services_model = None
+__DATA_FILES_LIST = ("tv", "radio", "lamedb")
 
 
 def on_about_app(item):
@@ -35,10 +37,9 @@ def get_handlers():
 
 def on_data_open(item):
     if isinstance(item, Gtk.ListStore):
-        channels = parse(get_config()["data_dir_path"] + "lamedb_example")
+        channels = parse(get_config()["data_dir_path"] + "lamedb")
         for ch in channels:
             item.append(ch)
-        # item.append()
 
 
 def on_path_open(*args):
@@ -113,12 +114,38 @@ def connect(properties, download=True):
     try:
         with FTP(properties["host"]) as ftp:
             ftp.login(user=properties["user"], passwd=properties["password"])
+            save_path = properties["data_dir_path"]
             if download:
-                __status_bar.push(1, ftp.voidcmd("NOOP"))
+                # bouquets section
                 ftp.cwd(properties["services_path"])
-                ftp.retrlines("LIST")
+                files = []
+                ftp.dir(files.append)
+                for file in files:
+                    name = str(file).strip()
+                    if name.endswith(__DATA_FILES_LIST):
+                        name = name.split()[-1]
+                        with open(save_path + name, 'wb') as f:
+                            ftp.retrbinary('RETR ' + name, f.write)
+                # satellites.xml section
+                ftp.cwd(properties["satellites_xml_path"])
+                files.clear()
+                ftp.dir(files.append)
+                for file in files:
+                    name = str(file).strip()
+                    xml_file = "satellites.xml"
+                    if name.endswith(xml_file):
+                        with open(save_path + xml_file, 'wb') as f:
+                            ftp.retrbinary('RETR ' + xml_file, f.write)
+                __status_bar.push(1, ftp.voidcmd("NOOP"))
+                for name in os.listdir(save_path):
+                    print(name)
             else:
-                pass
+                for file_name in os.listdir(save_path):
+                    print(file_name)
+                    # Open the file for transfer in binary mode
+                    # f = open(file_name, "rb")
+                    # transfer the file into receiver
+                    # send = ftp.storbinary("STOR " + file_name, f)
     except Exception as e:
         __status_bar.remove_all(1)
         __status_bar.push(1, getattr(e, "message", repr(e)))  # Or maybe so: getattr(e, 'message', str(e))

@@ -9,7 +9,7 @@ from enum import Enum
 Channel = namedtuple("Channel", ["service", "package", "service_type", "ssid", "freq", "rate", "pol", "fec", "system"])
 
 _HEADER = "eDVB services /4/"
-_FILE_PATH = "../data/lamedb_example"
+_FILE_PATH = "../data/lamedb"
 _SEP = ":"  # separator
 
 
@@ -36,7 +36,7 @@ FEC = {0: "None", 1: "Auto", 2: "1/2",
 SYSTEM = {0: "DVB-S", 1: "DVB_S2"}
 
 SERVICE_TYPE = {-2: "Unknown", 1: "TV", 2: "Radio", 3: "Data",
-                10: "Radio", 12: "Data", 22: "TV", 25: "HD TV",
+                10: "Radio", 12: "Data", 22: "TV", 25: "TV",
                 136: "Data", 139: "Data"}
 
 
@@ -77,7 +77,7 @@ def get_channels(*args):
         transponder = transponders.get(str(data[1] + _SEP + data[2] + _SEP + data[3]), None)
         if transponder is not None:
             tr = str(transponder)[2:].split(_SEP)  # Removing type of DVB transponders (s , t, c) and split
-            pack = pack[2:pack.find(",")]
+            pack = pack[2:] if pack.find(",") < 0 else pack[2:pack.find(",")]
             channels.append(Channel(ch[1], pack, SERVICE_TYPE.get(int(data[4]), SERVICE_TYPE[-2]), data[0], tr[0],
                                     tr[1], Polarization(int(tr[2])).name,
                                     FEC[int(tr[3])], SYSTEM[int(tr[6])]))
