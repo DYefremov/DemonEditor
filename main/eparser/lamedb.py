@@ -4,7 +4,7 @@
      Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
 from collections import namedtuple
-from enum import Enum
+from main.eparser import Polarization, System, Fec
 
 Channel = namedtuple("Channel", ["service", "package", "service_type",
                       "ssid", "freq", "rate", "pol", "fec", "system", "pos"])
@@ -13,28 +13,6 @@ _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"
 _SEP = ":"  # separator
 
-
-class Type(Enum):
-    """ Types of DVB transponders """
-    Satellite = "s"
-    Terestrial = "t"
-    Cable = "c"
-
-
-class Polarization(Enum):
-    H = 0
-    V = 1
-    L = 2
-    R = 3
-
-
-# Symbol rate
-FEC = {0: "None", 1: "Auto", 2: "1/2",
-       3: "2/3", 4: "3/4", 5: "5/6",
-       6: "7/8", 7: "3/5", 8: "4/5",
-       9: "8/9", 10: "9/10"}
-
-SYSTEM = {0: "DVB-S", 1: "DVB_S2"}
 
 SERVICE_TYPE = {-2: "Unknown", 1: "TV", 2: "Radio", 3: "Data",
                 10: "Radio", 12: "Data", 22: "TV", 25: "TV",
@@ -48,7 +26,6 @@ def parse(path):
     transponders, sep, services = data.partition("transponders")  # 1 step
     transponders, sep, services = services.partition("services")  # 2 step
     services, sep, _ = services.partition("end")  # 3 step
-
     return get_channels(services.split("\n"), transponders.split("/"))
 
 
@@ -59,7 +36,6 @@ def get_transponders(arg):
         tr = ar.replace("\n", "").split("\t")
         if len(tr) == 2:
             transponders[tr[0]] = tr[1]
-
     return transponders
 
 
@@ -81,8 +57,7 @@ def get_channels(*args):
             pack = pack[2:] if pack.find(",") < 0 else pack[2:pack.find(",")]
             channels.append(Channel(ch[1], pack, SERVICE_TYPE.get(int(data[4]), SERVICE_TYPE[-2]), data[0], tr[0],
                                     tr[1], Polarization(int(tr[2])).name,
-                                    FEC[int(tr[3])], SYSTEM[int(tr[6])], "{}{}.{}".format(*list(tr[4]))))
-
+                                    Fec[int(tr[3])], System[int(tr[6])], "{}{}.{}".format(*list(tr[4]))))
     return channels
 
 
