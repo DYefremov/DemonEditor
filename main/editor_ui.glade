@@ -4,7 +4,18 @@
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkAccelGroup" id="accelgroup1"/>
   <object class="GtkAction" id="action2"/>
-  <object class="GtkListStore" id="fav_liststore"/>
+  <object class="GtkListStore" id="fav_liststore">
+    <columns>
+      <!-- column-name Num -->
+      <column type="gint"/>
+      <!-- column-name Service -->
+      <column type="gchararray"/>
+      <!-- column-name Type -->
+      <column type="gchararray"/>
+      <!-- column-name pos -->
+      <column type="gfloat"/>
+    </columns>
+  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -49,6 +60,8 @@
       <!-- column-name fec -->
       <column type="gchararray"/>
       <!-- column-name system -->
+      <column type="gchararray"/>
+      <!-- column-name pos -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -620,6 +633,18 @@
                         </child>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="pos_column1">
+                        <property name="resizable">True</property>
+                        <property name="title" translatable="yes">Pos</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pos_cellrenderertext1"/>
+                          <attributes>
+                            <attribute name="text">9</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -646,12 +671,12 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTreeViewColumn" id="fav_column">
+                      <object class="GtkTreeViewColumn" id="num_column">
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
-                        <property name="title" translatable="yes">FAV</property>
+                        <property name="title" translatable="yes">Num</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                          <object class="GtkCellRendererText" id="num_cellrenderertext"/>
                           <attributes>
                             <attribute name="text">0</attribute>
                           </attributes>
@@ -659,14 +684,36 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTreeViewColumn" id="srv_column">
+                      <object class="GtkTreeViewColumn" id="service_column1">
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
-                        <property name="title" translatable="yes">Srv</property>
+                        <property name="title" translatable="yes">Service</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext4"/>
+                          <object class="GtkCellRendererText" id="service_cellrenderertext1"/>
                           <attributes>
                             <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="type_column">
+                        <property name="title" translatable="yes">Type</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="type_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="pos_column">
+                        <property name="title" translatable="yes">Pos</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>

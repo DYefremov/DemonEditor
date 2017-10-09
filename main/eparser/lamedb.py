@@ -6,7 +6,8 @@
 from collections import namedtuple
 from enum import Enum
 
-Channel = namedtuple("Channel", ["service", "package", "service_type", "ssid", "freq", "rate", "pol", "fec", "system"])
+Channel = namedtuple("Channel", ["service", "package", "service_type",
+                      "ssid", "freq", "rate", "pol", "fec", "system", "pos"])
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"
@@ -80,7 +81,7 @@ def get_channels(*args):
             pack = pack[2:] if pack.find(",") < 0 else pack[2:pack.find(",")]
             channels.append(Channel(ch[1], pack, SERVICE_TYPE.get(int(data[4]), SERVICE_TYPE[-2]), data[0], tr[0],
                                     tr[1], Polarization(int(tr[2])).name,
-                                    FEC[int(tr[3])], SYSTEM[int(tr[6])]))
+                                    FEC[int(tr[3])], SYSTEM[int(tr[6])], "{}{}.{}".format(*list(tr[4]))))
 
     return channels
 
