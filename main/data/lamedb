@@ -117,9 +117,6 @@ transponders
 01680000:0960:036e
 	s 12169000:27500000:1:3:360:2:0:1:2:0:2:-1:1:0
 /
-01682f8e:0001:0001
-	s 12174000:4340000:0:3:360:2:0
-/
 0168affb:0008:0070
 	s 12283000:27500000:3:3:360:2:0:1:2:0:2:-1:1:0
 /
@@ -131,9 +128,6 @@ services
 5a00:01680000:0017:00fd:1:0
 Наш Детектив
 p:TricolorTV
-0001:01682f8e:0001:0001:1:0
-TNV
-p:TNV
 0003:01680000:001f:00fd:1:0
 Союз
 p:TricolorTV
@@ -145,7 +139,7 @@ Nickelodeon HD
 p:TricolorTV,C:0000
 520a:01680000:000b:00fd:1:0
 Мультик HD
-p:TricolorTV,C:0000
+p:TricolorTV
 5a0a:01680000:0017:00fd:1:0
 Travel+Adventure
 p:TricolorTV
@@ -401,6 +395,9 @@ p:TricolorTV
 013f:01680000:0005:00fd:1:0
 НСТ
 p:TricolorTV
+083f:01680000:0015:00fd:1:0
+ТОЧКА ТВ
+p:TricolorTV
 0a3f:01680000:0001:00fd:1:0
 ТНТ MUSIC
 p:TricolorTV
@@ -517,7 +514,7 @@ p:TricolorTV
 p:TricolorTV
 4650:01680000:0012:00fd:1:0
 СЕРИАЛ UHD
-p:TricolorTV
+p:TricolorTV,C:0000
 5a50:01680000:0017:00fd:1:0
 Тонус ТВ
 p:TricolorTV
@@ -529,19 +526,19 @@ p:TricolorTV
 p:TricolorTV
 4651:01680000:0012:00fd:1:0
 C4K360
-p:TricolorTV
+p:TricolorTV,C:0000
 6151:01680000:0007:00fd:1:0
 Мульт
-p:TricolorTV
+p:TricolorTV,C:0000
 c351:01680000:0015:00fd:1:0
 Сохраните данный канал
 p:TricolorTV
 6152:01680000:0007:00fd:1:0
 Zee TV
-p:TricolorTV
+p:TricolorTV,C:0000
 6153:01680000:0007:00fd:1:0
 Game Show
-p:TricolorTV
+p:TricolorTV,C:0000
 4654:01680000:0012:00fd:1:0
 Test 10bit
 p:TricolorTV
@@ -562,7 +559,7 @@ p:TricolorTV
 p:TricolorTV
 9859:01680000:0027:00fd:1:0
 AMEDIA HIT HD
-p:TricolorTV,C:0000
+p:TricolorTV
 0d5a:01680000:0001:00fd:1:0
 BRIDGE TV DANCE
 p:TricolorTV
@@ -652,7 +649,7 @@ p:TricolorTV,C:0000
 p:TricolorTV,C:0000
 0385:01680000:0009:00fd:1:0
 ОТР
-p:TricolorTV,C:0000
+p:TricolorTV
 6987:01680000:001b:00fd:1:0
 НТВ 
 p:TricolorTV,C:0000
@@ -667,7 +664,7 @@ CANDYMAN
 p:TricolorTV
 908a:01680000:00ed:00fd:1:0
 Охотник и рыболов HD
-p:TricolorTV
+p:TricolorTV,C:0000
 138b:01680000:0005:00fd:1:0
 Живая Планета
 p:TricolorTV
@@ -676,7 +673,7 @@ Ginger HD
 p:TricolorTV
 038c:01680000:0009:00fd:1:0
 Русская ночь
-p:TricolorTV,C:0000
+p:TricolorTV
 5a8c:01680000:0017:00fd:1:0
 ВМЕСТЕ-РФ 
 p:TricolorTV
@@ -739,7 +736,7 @@ p:TricolorTV
 p:TricolorTV
 69aa:01680000:001b:00fd:1:0
 Пятый канал 
-p:TricolorTV,C:0000
+p:TricolorTV
 61ab:01680000:0019:00fd:1:0
 ПЯТНИЦА!
 p:TricolorTV
@@ -754,16 +751,16 @@ p:TricolorTV
 p:TricolorTV
 88b8:01680000:014f:00fd:1:0
 МАТЧ! ФУТБОЛ 1 HD
-p:TricolorTV,C:0000
+p:TricolorTV
 0bb9:01680000:00cb:00fd:1:0
 Russian Extreme HD
 p:TricolorTV,C:0000
 88b9:01680000:014f:00fd:1:0
 МАТЧ! ФУТБОЛ 2 HD
-p:TricolorTV,C:0000
+p:TricolorTV
 0bba:01680000:00cb:00fd:1:0
 Кинопоказ HD1
-p:TricolorTV
+p:TricolorTV,C:0000
 88ba:01680000:014f:00fd:1:0
 МАТЧ! ФУТБОЛ 3 HD
 p:TricolorTV
@@ -835,7 +832,7 @@ Fashion One (4K)
 p:HTB+,C:0500
 32c9:01680000:00d5:00fd:1:0
 Россия 1 HD
-p:TricolorTV,C:0000
+p:TricolorTV
 3ac9:01680000:000f:00fd:1:0
 ТНТ (+2) 
 p:TricolorTV
@@ -883,7 +880,7 @@ p:TricolorTV
 p:TricolorTV
 84d0:01680000:0022:00fd:1:0
 INSIGHT UHD
-p:TricolorTV,C:0000
+p:TricolorTV
 07d1:01680000:0002:00fd:1:0
 Первый Ярославский
 p:TricolorTV,C:0000
@@ -967,13 +964,13 @@ A2
 p:TricolorTV,C:0000
 03ea:01680000:0001:00fd:1:0
 НАШЕ ТВ
-p:TricolorTV
+p:TricolorTV,C:0000
 03eb:01680000:0001:00fd:1:0
 Paramount Comedy
-p:
+p:,c:000111,c:010112,c:030111,c:050001,C:4ae1,C:2710
 59ec:01680000:0017:00fd:1:0
 FOX Life
-p:TricolorTV,C:0000
+p:TricolorTV
 61ee:01680000:0019:00fd:1:0
 МУЗ-ТВ
 p:TricolorTV
@@ -982,7 +979,7 @@ BRIDGE TV
 p:TricolorTV
 59f6:01680000:0017:00fd:1:0
 Остросюжетное
-p:TricolorTV,C:0000
+p:TricolorTV
 03f7:01680000:000a:0070:1:0
 ТВОЙ ДОМ
 p:HTB+,C:0500
@@ -1009,7 +1006,7 @@ Humor FM
 p:Connecto
 4269:01680000:0011:00fd:2:0
 Радио Монте-Карло
-p:TricolorTV,C:0000
+p:TricolorTV
 426a:01680000:0011:00fd:2:0
 МАКС-FM
 p:TricolorTV
@@ -1603,7 +1600,7 @@ Fox Life
 p:HTB+,C:0500
 0326:0168affc:0008:0070:22:0
 Fox Life
-p:HTB+,C:0500
+p:HTB+,c:0000ce,c:010132,c:0300ce,c:050001,C:0500
 0526:01680000:000d:0070:22:0
 Телеканал КХЛ
 p:HTB+,C:0500
@@ -1765,7 +1762,7 @@ AMC
 p:HTB+,C:0500
 0841:01680000:0015:0070:22:0
 ТВЦ
-p:HTB+,C:0500
+p:HTB+,c:0000d5,c:010139,c:020201,c:0300d5,c:050001,C:0500
 0842:01680000:0015:0070:22:0
 Москва 24
 p:HTB+,C:0500
@@ -1825,7 +1822,7 @@ p:HTB+,C:0500
 p:HTB+,C:0500
 0451:01680000:000b:0070:22:0
 СТС
-p:HTB+,C:0500
+p:HTB+,c:0000cd,c:010131,c:0300cd,c:050001,C:0500
 0452:01680000:000b:0070:22:0
 CTC Love
 p:HTB+,C:0500
@@ -1837,7 +1834,7 @@ p:HTB+,C:0500
 p:HTB+,C:0500
 0455:01680000:000b:0070:22:0
 Че
-p:HTB+,C:0500
+p:HTB+,c:0000d1,c:010135,c:0300d1,c:050001,C:0500
 0555:01680000:000d:0070:22:0
 TEST VIRTUAL
 p:HTB+,C:0500
@@ -2188,7 +2185,7 @@ p:HTB+,C:0500
 p:HTB+,C:0500
 03eb:01680000:000a:0070:22:0
 Пятый канал
-p:HTB+,C:0500
+p:HTB+,c:0000cb,c:01012f,c:0201f7,c:0300cb,c:050001,C:0500
 03ec:01680000:000a:0070:22:0
 РЕН ТВ
 p:HTB+,C:0500
@@ -2203,10 +2200,10 @@ p:HTB+,C:0500
 p:HTB+,C:0500
 03f0:01680000:000a:0070:22:0
 ТВ-3
-p:HTB+,C:0500
+p:HTB+,c:0000d0,c:010134,c:0300d0,c:050001,C:0500
 03f1:01680000:000a:0070:22:0
 ПЯТНИЦА
-p:HTB+,C:0500
+p:HTB+,c:0000d1,c:010135,c:0300d1,c:050001,C:0500
 03f2:01680000:000a:0070:22:0
 МИР
 p:HTB+,C:0500
@@ -2281,10 +2278,10 @@ MGM HD
 p:HTB+,C:0500
 4e89:01680000:0014:0070:25:0
 Первый канал HD
-p:HTB+,C:0500
+p:HTB+,c:0000cd,c:010131,c:0201f9,c:0300cd,c:050001,C:0500
 4e8a:01680000:0014:0070:25:0
 Россия 1 HD
-p:HTB+,C:0500
+p:HTB+,c:0000ce,c:010132,c:0300ce,c:050001,C:0500
 4e8b:01680000:0014:0070:25:0
 1HD
 p:HTB+,C:0500
@@ -2329,7 +2326,7 @@ BRIDGE HD
 p:HTB+,C:0500
 089f:01680000:0016:0070:25:0
 THT HD
-p:HTB+,C:0500
+p:HTB+,c:0000cf,c:010133,c:0300cf,c:050001,C:0500
 42cd:01680000:0011:0070:25:0
 FOX HD
 p:HTB+,C:0500

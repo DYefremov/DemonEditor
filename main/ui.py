@@ -1,9 +1,8 @@
 import gi
 import os
 from ftplib import FTP
-
 from main.properties import get_config, write_config
-from main.eparser.lamedb import parse
+from main.eparser import get_channels, get_transponders, get_bouquets
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -36,10 +35,14 @@ def get_handlers():
 
 
 def on_data_open(item):
-    if isinstance(item, Gtk.ListStore):
-        channels = parse(get_config()["data_dir_path"] + "lamedb")
+    try:
+        data_path = get_config()["data_dir_path"]
+        channels = get_channels(data_path + "lamedb")
         for ch in channels:
-            item.append(ch)
+            item.append(ch[:-2])
+        bouquets = get_bouquets(data_path)
+    except Exception as e:
+        __status_bar.push(1, getattr(e, "message", repr(e)))
 
 
 def on_path_open(*args):
@@ -107,6 +110,10 @@ def on_upload(item):
 
 def on_download(item):
     connect(__options)
+
+
+def on_reload(item):
+    pass
 
 
 def connect(properties, download=True):

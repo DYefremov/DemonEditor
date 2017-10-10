@@ -14,10 +14,9 @@ pls_code: 0 - 262142
 """
 from collections import namedtuple
 from xml.dom.minidom import parse
-
-from main.eparser import Polarization, System, Fec, Modulation, Plsmode
-
-XML_PATH = "../data/satellites.xml"
+from main.eparser.__constants import Polarization, FEC, SYSTEM, MODULATION, PlsMode
+# temporary
+__XML_PATH = "../data/satellites.xml"
 
 Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
 
@@ -25,7 +24,11 @@ Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarizati
                                          "system", "modulation", "pls_mode", "pls_code", "is_id"])
 
 
-def get_transponders(elem):
+def get_transponders(path):
+    return parse_satellites(path)
+
+
+def parse_transponders(elem):
     """ Parsing satellite transponders """
     transponders = []
     for el in elem.getElementsByTagName("transponder"):
@@ -34,31 +37,31 @@ def get_transponders(elem):
             tr = Transponder(atr["frequency"].value,
                              atr["symbol_rate"].value,
                              Polarization(int(atr["polarization"].value)).name,
-                             Fec[int(atr["fec_inner"].value)],
-                             System[int(atr["system"].value)],
-                             Modulation[int(atr["modulation"].value)],
-                             Plsmode(int(atr["pls_mode"].value)).name if "pls_mode" in atr else None,
+                             FEC[int(atr["fec_inner"].value)],
+                             SYSTEM[int(atr["system"].value)],
+                             MODULATION[int(atr["modulation"].value)],
+                             PlsMode(int(atr["pls_mode"].value)).name if "pls_mode" in atr else None,
                              atr["pls_code"].value if "pls_code" in atr else None,
                              atr["is_id"].value if "is_id" in atr else None)
             transponders.append(tr)
     return transponders
 
 
-def get_sat(elem):
+def parse_sat(elem):
     """ Parsing satellite """
     return Satellite(elem.attributes["name"].value,
                      elem.attributes["flags"].value,
                      elem.attributes["position"].value,
-                     get_transponders(elem))
+                     parse_transponders(elem))
 
 
-def get_satellites(path):
+def parse_satellites(path):
     """ Parsing satellites from xml"""
     dom = parse(path)
     satellites = []
     for elem in dom.getElementsByTagName("sat"):
         if elem.hasAttributes():
-            satellites.append(get_sat(elem))
+            satellites.append(parse_sat(elem))
     return satellites
 
 
