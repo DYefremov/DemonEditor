@@ -10,6 +10,7 @@ from gi.repository import Gtk, Gdk
 __status_bar = None
 __options = get_config()
 __services_model = None
+__bouquets_model = None
 __DATA_FILES_LIST = ("tv", "radio", "lamedb")
 
 
@@ -29,20 +30,28 @@ def get_handlers():
         "on_download": on_download,
         "on_upload": on_upload,
         "on_data_dir_field_icon_press": on_path_open,
-        "on_data_open": on_data_open,
+        "on_data_open_services": on_data_open_services,
+        "on_data_open_bouquets": on_data_open_bouquets,
         "on_tree_view_key_release": on_tree_view_key_release
     }
 
 
-def on_data_open(item):
+def on_data_open_services(items):
     try:
         data_path = get_config()["data_dir_path"]
-        channels = get_channels(data_path + "lamedb")
-        for ch in channels:
-            item.append(ch[:-2])
-        bouquets = get_bouquets(data_path)
+        for ch in get_channels(data_path + "lamedb"):
+            items.append(ch)
     except Exception as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
+
+
+def on_data_open_bouquets(item):
+    data_path = get_config()["data_dir_path"]
+    data = get_bouquets(data_path)
+    for name, bouquets in data:
+        parent = item.append(None, [name])
+        for bouquet in bouquets:
+            item.append(parent, [bouquet])
 
 
 def on_path_open(*args):

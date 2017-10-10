@@ -2,8 +2,12 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <object class="GtkAccelGroup" id="accelgroup1"/>
-  <object class="GtkAction" id="action2"/>
+  <object class="GtkTreeStore" id="bouquets_treestore">
+    <columns>
+      <!-- column-name bouquet -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="fav_liststore">
     <columns>
       <!-- column-name Num -->
@@ -322,10 +326,14 @@
       <column type="gchararray"/>
       <!-- column-name pos -->
       <column type="gchararray"/>
+      <!-- column-name data_id -->
+      <column type="gchararray"/>
+      <!-- column-name fav_id -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkApplicationWindow" id="main_window">
-    <property name="width_request">560</property>
+    <property name="width_request">640</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">DemonEditor</property>
     <property name="icon_name">accessories-text-editor</property>
@@ -356,7 +364,8 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_data_open" object="services_liststore" swapped="no"/>
+                        <signal name="activate" handler="on_data_open_bouquets" object="bouquets_treestore" swapped="no"/>
+                        <signal name="activate" handler="on_data_open_services" object="services_liststore" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -538,7 +547,8 @@
                 <property name="label" translatable="yes">Open</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
-                <signal name="clicked" handler="on_data_open" object="services_liststore" swapped="no"/>
+                <signal name="clicked" handler="on_data_open_bouquets" object="bouquets_treestore" swapped="no"/>
+                <signal name="clicked" handler="on_data_open_services" object="services_liststore" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -760,6 +770,18 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="separator5">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">2</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -777,10 +799,9 @@
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkTreeView" id="treeview1">
+                  <object class="GtkTreeView" id="services_tree_view">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="margin_right">13</property>
                     <property name="model">services_liststore</property>
                     <property name="enable_grid_lines">both</property>
                     <signal name="key-release-event" handler="on_tree_view_key_release" object="services_liststore" swapped="no"/>
@@ -917,6 +938,30 @@
                         </child>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="data_id_column">
+                        <property name="visible">False</property>
+                        <property name="title" translatable="yes">data_id</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="data_id_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">10</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="fav_id_column">
+                        <property name="visible">False</property>
+                        <property name="title" translatable="yes">fav_id</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="fav_id_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">11</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -926,71 +971,116 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolledwindow2">
+              <object class="GtkPaned" id="paned3">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
+                <property name="wide_handle">True</property>
                 <child>
-                  <object class="GtkTreeView" id="treeview2">
+                  <object class="GtkScrolledWindow" id="scrolledwindow2">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">fav_liststore</property>
-                    <property name="enable_grid_lines">both</property>
-                    <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_liststore" swapped="no"/>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="treeview-selection2">
-                        <property name="mode">multiple</property>
-                      </object>
-                    </child>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeViewColumn" id="num_column">
-                        <property name="resizable">True</property>
-                        <property name="sizing">autosize</property>
-                        <property name="title" translatable="yes">Num</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="num_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
+                      <object class="GtkTreeView" id="fav_tree_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">fav_liststore</property>
+                        <property name="enable_grid_lines">both</property>
+                        <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_liststore" swapped="no"/>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection2">
+                            <property name="mode">multiple</property>
+                          </object>
                         </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="service_column1">
-                        <property name="resizable">True</property>
-                        <property name="sizing">autosize</property>
-                        <property name="title" translatable="yes">Service</property>
                         <child>
-                          <object class="GtkCellRendererText" id="service_cellrenderertext1"/>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="num_column">
+                            <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
+                            <property name="title" translatable="yes">Num</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="num_cellrenderertext"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="type_column">
-                        <property name="title" translatable="yes">Type</property>
                         <child>
-                          <object class="GtkCellRendererText" id="type_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">2</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="service_column1">
+                            <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
+                            <property name="title" translatable="yes">Service</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="service_cellrenderertext1"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="pos_column">
-                        <property name="title" translatable="yes">Pos</property>
                         <child>
-                          <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">3</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="type_column">
+                            <property name="title" translatable="yes">Type</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="type_cellrenderertext"/>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="pos_column">
+                            <property name="title" translatable="yes">Pos</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
+                              <attributes>
+                                <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="resize">True</property>
+                    <property name="shrink">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTreeView" id="bouquets_tree_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">bouquets_treestore</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection5"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="bouquets_column">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Bouquets</property>
+                            <property name="expand">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="resize">True</property>
+                    <property name="shrink">True</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -1002,7 +1092,21 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
+            <property name="padding">1</property>
             <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="separator4">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_bottom">2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -1019,7 +1123,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>
