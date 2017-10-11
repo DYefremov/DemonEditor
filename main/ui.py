@@ -1,8 +1,11 @@
 import gi
 import os
 from ftplib import FTP
+
+from threading import Thread
+from main.eparser.__constants import SERVICE_TYPE
 from main.properties import get_config, write_config
-from main.eparser import get_channels, get_transponders, get_bouquets
+from main.eparser import get_channels, get_transponders, get_bouquets, get_bouquet
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -11,7 +14,9 @@ __status_bar = None
 __options = get_config()
 __services_model = None
 __bouquets_model = None
+__fav_model = None
 __DATA_FILES_LIST = ("tv", "radio", "lamedb")
+__channels = {}
 
 
 def on_about_app(item):
@@ -30,28 +35,49 @@ def get_handlers():
         "on_download": on_download,
         "on_upload": on_upload,
         "on_data_dir_field_icon_press": on_path_open,
-        "on_data_open_services": on_data_open_services,
-        "on_data_open_bouquets": on_data_open_bouquets,
-        "on_tree_view_key_release": on_tree_view_key_release
+        "on_data_open": on_data_open,
+        "on_tree_view_key_release": on_tree_view_key_release,
+        "on_bouquets_selection": on_bouquets_selection
     }
 
 
-def on_data_open_services(items):
+def data_open(model):
     try:
+        model.clear()
+        __fav_model.clear()
+        model_id = model.get_name()
         data_path = get_config()["data_dir_path"]
-        for ch in get_channels(data_path + "lamedb"):
-            items.append(ch)
+        if model_id == "services_list_store":
+            for ch in get_channels(data_path + "lamedb"):
+                #  adding channels to dict with fav_id as keys
+                __channels[ch.fav_id] = ch
+                model.append(ch)
+        if model_id == "bouquets_tree_store":
+            data = get_bouquets(data_path)
+            for name, bouquets in data:
+                parent = model.append(None, [name])
+                for bouquet in bouquets:
+                    model.append(parent, [bouquet])
     except Exception as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
 
 
-def on_data_open_bouquets(item):
-    data_path = get_config()["data_dir_path"]
-    data = get_bouquets(data_path)
-    for name, bouquets in data:
-        parent = item.append(None, [name])
-        for bouquet in bouquets:
-            item.append(parent, [bouquet])
+def on_data_open(model):
+    # Maybe is not necessary? Need testing.
+    task = Thread(target=data_open(model))
+    task.start()
+
+
+def on_bouquets_selection(model, path, column):
+    if len(path) > 1:
+        tree_iter = model.get_iter(path)
+        name = model.get_value(tree_iter, 0)
+        # 'tv' Temporary! It is necessary to implement a row type attribute.
+        bq = get_bouquet(__options["data_dir_path"], name, SERVICE_TYPE[1].lower())
+        __fav_model.clear()
+        for num, ch_id in enumerate(bq):
+            channel = __channels.get(ch_id, None)
+            __fav_model.append((num + 1, channel[0], channel[2], channel[9]))
 
 
 def on_path_open(*args):
@@ -171,6 +197,8 @@ def init_ui():
     builder = Gtk.Builder()
     builder.add_from_file("editor_ui.glade")
     main_window = builder.get_object("main_window")
+    global __fav_model
+    __fav_model = builder.get_object("fav_list_store")
     global __status_bar
     __status_bar = builder.get_object("status_bar")
     builder.connect_signals(get_handlers())

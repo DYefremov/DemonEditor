@@ -46,7 +46,7 @@ def parse_channels(*args):
     for ch in srv:
         data = str(ch[0]).split(_SEP)
         sp = "0"
-        # For comparison in bouquets
+        # For comparison in bouquets. Needed in upper case!!!
         fav_id = "{}:{}:{}:{}".format(str(data[0]).lstrip(sp), str(data[2]).lstrip(sp),
                                       str(data[3]).lstrip(sp), str(data[1]).lstrip(sp))
         pack = str(ch[2])
@@ -56,7 +56,7 @@ def parse_channels(*args):
             pack = pack[2:] if pack.find(",") < 0 else pack[2:pack.find(",")]
             channels.append(Channel(ch[1], pack, SERVICE_TYPE.get(int(data[4]), SERVICE_TYPE[-2]), data[0], tr[0],
                                     tr[1], Polarization(int(tr[2])).name, FEC[int(tr[3])], SYSTEM[int(tr[6])],
-                                    "{}{}.{}".format(*list(tr[4])), ch[0], fav_id))
+                                    "{}{}.{}".format(*list(tr[4])), ch[0], fav_id.upper()))
     return channels
 
 
@@ -73,5 +73,4 @@ def split(itr, size):
 
 
 if __name__ == "__main__":
-    for ch in get_channels(_FILE_PATH):
-        print(ch)
+    pass

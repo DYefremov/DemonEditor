@@ -14,8 +14,13 @@ def get_bouquets(path):
 
 
 def get_bouquet(path, name, type):
-    with open(path + "userbouquet.{}.{}".format(name, type)) as file:
-        print(file.read())
+    with open(path + "userbouquet.{}.{}".format(name, str(type))) as file:
+        chs_list = file.read()
+        ids = []
+        for ch in chs_list.split("#SERVICE")[1:]:
+            ch_data = ch.strip().split(":")
+            ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))
+    return ids
 
 
 def parse_bouquets(path, name):
@@ -33,5 +38,4 @@ def parse_bouquets(path, name):
 
 
 if __name__ == "__main__":
-    # print(get_bouquet(__BOUQUETS_PATH, "TV", "tv"))
     pass

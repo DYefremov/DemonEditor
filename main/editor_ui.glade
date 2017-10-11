@@ -2,22 +2,22 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <object class="GtkTreeStore" id="bouquets_treestore">
+  <object class="GtkTreeStore" id="bouquets_tree_store">
     <columns>
       <!-- column-name bouquet -->
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="fav_liststore">
+  <object class="GtkListStore" id="fav_list_store">
     <columns>
-      <!-- column-name Num -->
+      <!-- column-name num -->
       <column type="gint"/>
-      <!-- column-name Service -->
+      <!-- column-name service -->
       <column type="gchararray"/>
-      <!-- column-name Type -->
+      <!-- column-name type -->
       <column type="gchararray"/>
       <!-- column-name pos -->
-      <column type="gfloat"/>
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkImage" id="image1">
@@ -304,7 +304,7 @@
     <property name="sizing">autosize</property>
     <property name="title" translatable="yes">Service</property>
   </object>
-  <object class="GtkListStore" id="services_liststore">
+  <object class="GtkListStore" id="services_list_store">
     <columns>
       <!-- column-name service -->
       <column type="gchararray"/>
@@ -364,8 +364,8 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_data_open_bouquets" object="bouquets_treestore" swapped="no"/>
-                        <signal name="activate" handler="on_data_open_services" object="services_liststore" swapped="no"/>
+                        <signal name="activate" handler="on_data_open" object="bouquets_tree_store" swapped="no"/>
+                        <signal name="activate" handler="on_data_open" object="services_list_store" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -547,8 +547,8 @@
                 <property name="label" translatable="yes">Open</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
-                <signal name="clicked" handler="on_data_open_bouquets" object="bouquets_treestore" swapped="no"/>
-                <signal name="clicked" handler="on_data_open_services" object="services_liststore" swapped="no"/>
+                <signal name="clicked" handler="on_data_open" object="bouquets_tree_store" swapped="no"/>
+                <signal name="clicked" handler="on_data_open" object="services_list_store" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -802,9 +802,9 @@
                   <object class="GtkTreeView" id="services_tree_view">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">services_liststore</property>
+                    <property name="model">services_list_store</property>
                     <property name="enable_grid_lines">both</property>
-                    <signal name="key-release-event" handler="on_tree_view_key_release" object="services_liststore" swapped="no"/>
+                    <signal name="key-release-event" handler="on_tree_view_key_release" object="services_list_store" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="treeview-selection1">
                         <property name="mode">multiple</property>
@@ -984,9 +984,9 @@
                       <object class="GtkTreeView" id="fav_tree_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">fav_liststore</property>
+                        <property name="model">fav_list_store</property>
                         <property name="enable_grid_lines">both</property>
-                        <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_liststore" swapped="no"/>
+                        <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_list_store" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview-selection2">
                             <property name="mode">multiple</property>
@@ -1057,7 +1057,10 @@
                       <object class="GtkTreeView" id="bouquets_tree_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">bouquets_treestore</property>
+                        <property name="model">bouquets_tree_store</property>
+                        <property name="headers_clickable">False</property>
+                        <property name="activate_on_single_click">True</property>
+                        <signal name="row-activated" handler="on_bouquets_selection" object="bouquets_tree_store" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview-selection5"/>
                         </child>
