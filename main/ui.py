@@ -1,11 +1,12 @@
-import gi
 import os
 from ftplib import FTP
-
 from threading import Thread
+
+import gi
+
+from main.eparser import get_channels, get_satellites, get_bouquets, get_bouquet
 from main.eparser.__constants import SERVICE_TYPE
 from main.properties import get_config, write_config
-from main.eparser import get_channels, get_transponders, get_bouquets, get_bouquet
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -37,8 +38,30 @@ def get_handlers():
         "on_data_dir_field_icon_press": on_path_open,
         "on_data_open": on_data_open,
         "on_tree_view_key_release": on_tree_view_key_release,
-        "on_bouquets_selection": on_bouquets_selection
+        "on_bouquets_selection": on_bouquets_selection,
+        "on_satellite_editor_show": on_satellite_editor_show,
+        "on_satellites_list_load": on_satellites_list_load
     }
+
+
+def on_satellite_editor_show(model):
+    """ Shows satellites editor dialog """
+    builder = Gtk.Builder()
+    builder.add_from_file("editor_ui.glade")
+    builder.connect_signals(get_handlers())
+    dialog = builder.get_object("satellites_editor_dialog")
+    dialog.run()
+    dialog.destroy()
+
+
+def on_satellites_list_load(model):
+    """ Load satellites data into model """
+    satellites = get_satellites(__options["data_dir_path"])
+    model.clear()
+    for name, flags, pos, transponders in satellites:
+        parent = model.append(None, [name, *[None for x in range(9)]])
+        for transponder in transponders:
+            model.append(parent, ["Transponder:", *transponder])
 
 
 def data_open(model):

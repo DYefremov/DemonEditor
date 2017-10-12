@@ -24,8 +24,8 @@ Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarizati
                                          "system", "modulation", "pls_mode", "pls_code", "is_id"])
 
 
-def get_transponders(path):
-    return parse_satellites(path)
+def get_satellites(path):
+    return parse_satellites(path + "satellites.xml")
 
 
 def parse_transponders(elem):
