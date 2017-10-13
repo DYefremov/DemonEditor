@@ -16,6 +16,9 @@ __options = get_config()
 __services_model = None
 __bouquets_model = None
 __fav_model = None
+__services_view = None
+__fav_view = None
+__bouquets_view = None
 __DATA_FILES_LIST = ("tv", "radio", "lamedb")
 __channels = {}
 
@@ -40,8 +43,48 @@ def get_handlers():
         "on_tree_view_key_release": on_tree_view_key_release,
         "on_bouquets_selection": on_bouquets_selection,
         "on_satellite_editor_show": on_satellite_editor_show,
-        "on_satellites_list_load": on_satellites_list_load
+        "on_satellites_list_load": on_satellites_list_load,
+        "on_services_selection": on_services_selection,
+        "on_fav_selection": on_fav_selection,
+        "on_up": on_up,
+        "on_down": on_down,
+        "on_cut": on_cut,
+        "on_copy": on_copy,
+        "on_paste": on_paste,
+        "on_delete": on_delete
     }
+
+
+def on_up(item):
+    pass
+
+
+def on_down(item):
+    pass
+
+
+def on_cut(item):
+    pass
+
+
+def on_copy(item):
+    pass
+
+
+def on_paste(item):
+    pass
+
+
+def on_delete(item):
+    """ Delete selected items from views """
+    for view in [__services_view, __fav_view, __bouquets_view]:
+        selection = view.get_selection()
+        store, paths = selection.get_selected_rows()
+        itrs = []
+        for path in paths:
+            itrs.append(store.get_iter(path))
+        for itr in itrs:
+            store.remove(itr)
 
 
 def on_satellite_editor_show(model):
@@ -91,8 +134,17 @@ def on_data_open(model):
     task.start()
 
 
+def on_services_selection(model, path, column):
+    delete_selection(__fav_view, __bouquets_view)
+
+
+def on_fav_selection(model, path, column):
+    delete_selection(__services_view, __bouquets_view)
+
+
 def on_bouquets_selection(model, path, column):
     if len(path) > 1:
+        delete_selection(__services_view)
         tree_iter = model.get_iter(path)
         name = model.get_value(tree_iter, 0)
         # 'tv' Temporary! It is necessary to implement a row type attribute.
@@ -101,6 +153,12 @@ def on_bouquets_selection(model, path, column):
         for num, ch_id in enumerate(bq):
             channel = __channels.get(ch_id, None)
             __fav_model.append((num + 1, channel[0], channel[2], channel[9]))
+
+
+def delete_selection(view, *args):
+    """ Used for clear selection on given view(s) """
+    for v in [view, *args]:
+        v.get_selection().unselect_all()
 
 
 def on_path_open(*args):
@@ -154,12 +212,11 @@ def on_tree_view_key_release(widget, event):
         print("Tab")
     if key == Gdk.KEY_Delete:
         print("Delete")
+        on_delete(widget)
     if key == Gdk.KEY_Up:
         print("Up")
     if key == Gdk.KEY_Down:
         print("Down")
-
-    print(widget.get_name())
 
 
 def on_upload(item):
@@ -220,6 +277,16 @@ def init_ui():
     builder = Gtk.Builder()
     builder.add_from_file("editor_ui.glade")
     main_window = builder.get_object("main_window")
+    global __services_view
+    __services_view = builder.get_object("services_tree_view")
+    global __fav_view
+    __fav_view = builder.get_object("fav_tree_view")
+    global __bouquets_view
+    __bouquets_view = builder.get_object("bouquets_tree_view")
+    # global __services_model
+    # __services_model = builder.get_object("services_list_store")
+    # global __bouquets_model
+    # __bouquets_model = builder.get_object("bouquets_tree_store")
     global __fav_model
     __fav_model = builder.get_object("fav_list_store")
     global __status_bar
