@@ -1,16 +1,15 @@
-import os
-from ftplib import FTP
-from threading import Thread
-
 import gi
-
-from main.eparser import get_channels, get_satellites, get_bouquets, get_bouquet
+from threading import Thread
+from main.eparser import get_channels, get_bouquets, get_bouquet
 from main.eparser.__constants import SERVICE_TYPE
 from main.properties import get_config, write_config
+from main.ftp import download_data, upload_data
+from .satellites_dialog import SatellitesDialog
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
+__main_window = None
 __status_bar = None
 __options = get_config()
 __services_model = None
@@ -19,13 +18,12 @@ __fav_model = None
 __services_view = None
 __fav_view = None
 __bouquets_view = None
-__DATA_FILES_LIST = ("tv", "radio", "lamedb")
 __channels = {}
 
 
 def on_about_app(item):
     builder = Gtk.Builder()
-    builder.add_from_file("editor_ui.glade")
+    builder.add_from_file("ui/main.glade")
     dialog = builder.get_object("about_dialog")
     dialog.run()
     dialog.destroy()
@@ -43,7 +41,6 @@ def get_handlers():
         "on_tree_view_key_release": on_tree_view_key_release,
         "on_bouquets_selection": on_bouquets_selection,
         "on_satellite_editor_show": on_satellite_editor_show,
-        "on_satellites_list_load": on_satellites_list_load,
         "on_services_selection": on_services_selection,
         "on_fav_selection": on_fav_selection,
         "on_up": on_up,
@@ -89,22 +86,7 @@ def on_delete(item):
 
 def on_satellite_editor_show(model):
     """ Shows satellites editor dialog """
-    builder = Gtk.Builder()
-    builder.add_from_file("editor_ui.glade")
-    builder.connect_signals(get_handlers())
-    dialog = builder.get_object("satellites_editor_dialog")
-    dialog.run()
-    dialog.destroy()
-
-
-def on_satellites_list_load(model):
-    """ Load satellites data into model """
-    satellites = get_satellites(__options["data_dir_path"])
-    model.clear()
-    for name, flags, pos, transponders in satellites:
-        parent = model.append(None, [name, *[None for x in range(9)]])
-        for transponder in transponders:
-            model.append(parent, ["Transponder:", *transponder])
+    SatellitesDialog(__main_window, __options["data_dir_path"]).show()
 
 
 def data_open(model):
@@ -163,7 +145,7 @@ def delete_selection(view, *args):
 
 def on_path_open(*args):
     builder = Gtk.Builder()
-    builder.add_from_file("editor_ui.glade")
+    builder.add_from_file("ui/main.glade")
     dialog = builder.get_object("path_chooser_dialog")
     response = dialog.run()
     if response == -12:  # for fix assertion 'gtk_widget_get_can_default (widget)' failed
@@ -173,7 +155,7 @@ def on_path_open(*args):
 
 def on_preferences(item):
     builder = Gtk.Builder()
-    builder.add_from_file("editor_ui.glade")
+    builder.add_from_file("main.glade")
     builder.connect_signals(get_handlers())
     dialog = builder.get_object("settings_dialog")
     host_field = builder.get_object("host_field")
@@ -232,42 +214,9 @@ def on_reload(item):
 
 
 def connect(properties, download=True):
-    assert isinstance(properties, dict)
     try:
-        with FTP(properties["host"]) as ftp:
-            ftp.login(user=properties["user"], passwd=properties["password"])
-            save_path = properties["data_dir_path"]
-            if download:
-                # bouquets section
-                ftp.cwd(properties["services_path"])
-                files = []
-                ftp.dir(files.append)
-                for file in files:
-                    name = str(file).strip()
-                    if name.endswith(__DATA_FILES_LIST):
-                        name = name.split()[-1]
-                        with open(save_path + name, 'wb') as f:
-                            ftp.retrbinary('RETR ' + name, f.write)
-                # satellites.xml section
-                ftp.cwd(properties["satellites_xml_path"])
-                files.clear()
-                ftp.dir(files.append)
-                for file in files:
-                    name = str(file).strip()
-                    xml_file = "satellites.xml"
-                    if name.endswith(xml_file):
-                        with open(save_path + xml_file, 'wb') as f:
-                            ftp.retrbinary('RETR ' + xml_file, f.write)
-                __status_bar.push(1, ftp.voidcmd("NOOP"))
-                for name in os.listdir(save_path):
-                    print(name)
-            else:
-                for file_name in os.listdir(save_path):
-                    print(file_name)
-                    # Open the file for transfer in binary mode
-                    # f = open(file_name, "rb")
-                    # transfer the file into receiver
-                    # send = ftp.storbinary("STOR " + file_name, f)
+        res = download_data(properties=properties) if download else upload_data(properties=properties)
+        __status_bar.push(1, res)
     except Exception as e:
         __status_bar.remove_all(1)
         __status_bar.push(1, getattr(e, "message", repr(e)))  # Or maybe so: getattr(e, 'message', str(e))
@@ -275,8 +224,9 @@ def connect(properties, download=True):
 
 def init_ui():
     builder = Gtk.Builder()
-    builder.add_from_file("editor_ui.glade")
-    main_window = builder.get_object("main_window")
+    builder.add_from_file("ui/main.glade")
+    global __main_window
+    __main_window = builder.get_object("main_window")
     global __services_view
     __services_view = builder.get_object("services_tree_view")
     global __fav_view
@@ -292,7 +242,7 @@ def init_ui():
     global __status_bar
     __status_bar = builder.get_object("status_bar")
     builder.connect_signals(get_handlers())
-    main_window.show_all()
+    __main_window.show_all()
 
 
 def start_app():
