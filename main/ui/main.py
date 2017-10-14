@@ -4,7 +4,8 @@ from main.eparser import get_channels, get_bouquets, get_bouquet
 from main.eparser.__constants import SERVICE_TYPE
 from main.properties import get_config, write_config
 from main.ftp import download_data, upload_data
-from .satellites_dialog import SatellitesDialog
+from .satellites_dialog import show_satellites_dialog
+from .settings_dialog import show_settings_dialog
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -23,7 +24,7 @@ __channels = {}
 
 def on_about_app(item):
     builder = Gtk.Builder()
-    builder.add_from_file("ui/main.glade")
+    builder.add_from_file("ui/main_window.glade")
     dialog = builder.get_object("about_dialog")
     dialog.run()
     dialog.destroy()
@@ -36,7 +37,6 @@ def get_handlers():
         "on_preferences": on_preferences,
         "on_download": on_download,
         "on_upload": on_upload,
-        "on_data_dir_field_icon_press": on_path_open,
         "on_data_open": on_data_open,
         "on_tree_view_key_release": on_tree_view_key_release,
         "on_bouquets_selection": on_bouquets_selection,
@@ -86,7 +86,7 @@ def on_delete(item):
 
 def on_satellite_editor_show(model):
     """ Shows satellites editor dialog """
-    SatellitesDialog(__main_window, __options["data_dir_path"]).show()
+    show_satellites_dialog(__main_window, __options["data_dir_path"])
 
 
 def data_open(model):
@@ -143,49 +143,8 @@ def delete_selection(view, *args):
         v.get_selection().unselect_all()
 
 
-def on_path_open(*args):
-    builder = Gtk.Builder()
-    builder.add_from_file("ui/main.glade")
-    dialog = builder.get_object("path_chooser_dialog")
-    response = dialog.run()
-    if response == -12:  # for fix assertion 'gtk_widget_get_can_default (widget)' failed
-        args[0].set_text(dialog.get_filename())
-    dialog.destroy()
-
-
 def on_preferences(item):
-    builder = Gtk.Builder()
-    builder.add_from_file("main.glade")
-    builder.connect_signals(get_handlers())
-    dialog = builder.get_object("settings_dialog")
-    host_field = builder.get_object("host_field")
-    host_field.set_text(__options["host"])
-    port_field = builder.get_object("port_field")
-    port_field.set_text(__options["port"])
-    login_field = builder.get_object("login_field")
-    login_field.set_text(__options["user"])
-    password_field = builder.get_object("password_field")
-    password_field.set_text(__options["password"])
-    services_field = builder.get_object("services_field")
-    services_field.set_text(__options["services_path"])
-    user_bouquet_field = builder.get_object("user_bouquet_field")
-    user_bouquet_field.set_text(__options["user_bouquet_path"])
-    satellites_xml_field = builder.get_object("satellites_xml_field")
-    satellites_xml_field.set_text(__options["satellites_xml_path"])
-    data_dir_field = builder.get_object("data_dir_field")
-    data_dir_field.set_text(__options["data_dir_path"])
-
-    if dialog.run() == Gtk.ResponseType.OK:
-        __options["host"] = host_field.get_text()
-        __options["port"] = port_field.get_text()
-        __options["user"] = login_field.get_text()
-        __options["password"] = password_field.get_text()
-        __options["services_path"] = services_field.get_text()
-        __options["user_bouquet_path"] = user_bouquet_field.get_text()
-        __options["satellites_xml_path"] = satellites_xml_field.get_text()
-        __options["data_dir_path"] = data_dir_field.get_text()
-        write_config(__options)
-    dialog.destroy()
+    show_settings_dialog(__main_window, __options)
 
 
 def on_tree_view_key_release(widget, event):
@@ -224,7 +183,7 @@ def connect(properties, download=True):
 
 def init_ui():
     builder = Gtk.Builder()
-    builder.add_from_file("ui/main.glade")
+    builder.add_from_file("ui/main_window.glade")
     global __main_window
     __main_window = builder.get_object("main_window")
     global __services_view

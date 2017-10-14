@@ -439,28 +439,4 @@
       <action-widget response="-6">sat_ed_cancel_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkTreeStore" id="satellites_tree_store1">
-    <columns>
-      <!-- column-name satelitte -->
-      <column type="gchararray"/>
-      <!-- column-name freq -->
-      <column type="gchararray"/>
-      <!-- column-name rate -->
-      <column type="gchararray"/>
-      <!-- column-name pol -->
-      <column type="gchararray"/>
-      <!-- column-name fec -->
-      <column type="gchararray"/>
-      <!-- column-name system -->
-      <column type="gchararray"/>
-      <!-- column-name mod -->
-      <column type="gchararray"/>
-      <!-- column-name pls_mode -->
-      <column type="gchararray"/>
-      <!-- column-name pls_code -->
-      <column type="gchararray"/>
-      <!-- column-name is_id -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
 </interface>
