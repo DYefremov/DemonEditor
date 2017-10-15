@@ -1,14 +1,12 @@
-import gi
 from threading import Thread
+
 from main.eparser import get_channels, get_bouquets, get_bouquet
 from main.eparser.__constants import SERVICE_TYPE
-from main.properties import get_config, write_config
 from main.ftp import download_data, upload_data
+from main.properties import get_config
+from . import Gtk, Gdk
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
 
 __main_window = None
 __status_bar = None
@@ -48,7 +46,10 @@ def get_handlers():
         "on_cut": on_cut,
         "on_copy": on_copy,
         "on_paste": on_paste,
-        "on_delete": on_delete
+        "on_delete": on_delete,
+        "on_services_tree_view_drag_data_get": on_services_tree_view_drag_data_get,
+        "on_fav_tree_view_drag_data_get": on_fav_tree_view_drag_data_get,
+        "on_fav_tree_view_drag_data_received": on_fav_tree_view_drag_data_received
     }
 
 
@@ -76,12 +77,45 @@ def on_delete(item):
     """ Delete selected items from views """
     for view in [__services_view, __fav_view, __bouquets_view]:
         selection = view.get_selection()
-        store, paths = selection.get_selected_rows()
-        itrs = []
-        for path in paths:
-            itrs.append(store.get_iter(path))
+        model, paths = selection.get_selected_rows()
+        itrs = [model.get_iter(path) for path in paths]
         for itr in itrs:
-            store.remove(itr)
+            model.remove(itr)
+
+
+def on_services_tree_view_drag_data_get(view, drag_context, data, info, time):
+    """  DnD  """
+    selection = view.get_selection()
+    model, paths = selection.get_selected_rows()
+    itrs = [model.get_iter(path) for path in paths]
+    rows = [model.get(itr, *[x for x in range(view.get_n_columns())]) for itr in itrs]
+    print(rows)
+    data.set_text(str(rows), -1)
+
+
+def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
+    selection = view.get_selection()
+    model, paths = selection.get_selected_rows()
+    itrs = [model.get_iter(path) for path in paths]
+    rows = [model.get(itr, *[x for x in range(view.get_n_columns())]) for itr in itrs]
+    print(rows)
+    data.set_text(str(rows), -1)
+
+
+def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
+    """ DnD """
+    print(data.get_data())
+    # Gtk.SelectionData().get_data
+    model = view.get_model()
+    dest_iter = None
+    dest_tid = None
+    drop_info = view.get_dest_row_at_pos(x, y)
+    if drop_info:
+        path, position = drop_info
+        dest_iter = model.get_iter(path)
+        if dest_iter:
+            dest_tid = model.get_value(dest_iter, 0)
+            print("Destination ", dest_tid)
 
 
 def on_satellite_editor_show(model):
@@ -201,7 +235,18 @@ def init_ui():
     global __status_bar
     __status_bar = builder.get_object("status_bar")
     builder.connect_signals(get_handlers())
+    init_drag_and_drop()  # drag and drop
     __main_window.show_all()
+
+
+def init_drag_and_drop():
+    """ Enable drag and drop """
+    target_name = ""
+    dnd_targets = [(target_name, Gtk.TargetFlags.SAME_APP, 0)]
+    __services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, dnd_targets, Gdk.DragAction.COPY)
+    __fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, dnd_targets,
+                                        Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+    __fav_view.enable_model_drag_dest(dnd_targets, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
 
 
 def start_app():

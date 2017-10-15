@@ -543,7 +543,7 @@
             <property name="margin_right">2</property>
             <property name="wide_handle">True</property>
             <child>
-              <object class="GtkScrolledWindow" id="scrolledwindow1">
+              <object class="GtkScrolledWindow" id="services_scrolled_window">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -554,6 +554,7 @@
                     <property name="model">services_list_store</property>
                     <property name="enable_grid_lines">both</property>
                     <property name="activate_on_single_click">True</property>
+                    <signal name="drag-data-get" handler="on_services_tree_view_drag_data_get" swapped="no"/>
                     <signal name="key-release-event" handler="on_tree_view_key_release" object="services_list_store" swapped="no"/>
                     <signal name="row-activated" handler="on_services_selection" object="services_list_store" swapped="no"/>
                     <child internal-child="selection">
@@ -566,6 +567,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Service</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">0</property>
                         <child>
@@ -581,6 +583,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Package</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">1</property>
                         <child>
@@ -595,6 +598,7 @@
                       <object class="GtkTreeViewColumn" id="service_type_column">
                         <property name="resizable">True</property>
                         <property name="title" translatable="yes">Type</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">2</property>
                         <child>
@@ -610,6 +614,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Ssid</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">3</property>
                         <child>
@@ -625,6 +630,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Freq</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">4</property>
                         <child>
@@ -640,6 +646,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Rate</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">5</property>
                         <child>
@@ -655,6 +662,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Pol</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">6</property>
                         <child>
@@ -670,6 +678,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">FEC</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">7</property>
                         <child>
@@ -685,6 +694,7 @@
                         <property name="resizable">True</property>
                         <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">System</property>
+                        <property name="expand">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">8</property>
                         <child>
@@ -699,7 +709,7 @@
                       <object class="GtkTreeViewColumn" id="pos_column1">
                         <property name="resizable">True</property>
                         <property name="title" translatable="yes">Pos</property>
-                        <property name="reorderable">True</property>
+                        <property name="expand">True</property>
                         <property name="sort_column_id">9</property>
                         <child>
                           <object class="GtkCellRendererText" id="pos_cellrenderertext1"/>
@@ -760,6 +770,8 @@
                         <property name="model">fav_list_store</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
+                        <signal name="drag-data-get" handler="on_fav_tree_view_drag_data_get" swapped="no"/>
+                        <signal name="drag-data-received" handler="on_fav_tree_view_drag_data_received" swapped="no"/>
                         <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_list_store" swapped="no"/>
                         <signal name="row-activated" handler="on_fav_selection" object="fav_list_store" swapped="no"/>
                         <child internal-child="selection">

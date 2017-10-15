@@ -1,9 +1,5 @@
-import gi
-
 from main.eparser import get_satellites
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from . import Gtk
 
 __data_path = None
 

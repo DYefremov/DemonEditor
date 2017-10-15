@@ -1,9 +1,5 @@
-import gi
-
 from main.properties import write_config
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from . import Gtk
 
 
 def show_settings_dialog(transient, options):
