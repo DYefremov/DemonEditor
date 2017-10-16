@@ -85,37 +85,56 @@ def on_delete(item):
 
 def on_services_tree_view_drag_data_get(view, drag_context, data, info, time):
     """  DnD  """
-    selection = view.get_selection()
-    model, paths = selection.get_selected_rows()
-    itrs = [model.get_iter(path) for path in paths]
-    rows = [model.get(itr, *[x for x in range(view.get_n_columns())]) for itr in itrs]
-    print(rows)
-    data.set_text(str(rows), -1)
+    # rows = [model.get(itr, *[x for x in range(view.get_n_columns())]) for itr in itrs]
+    text = get_dnd_selection(view)
+    # print(text)
+    data.set_text(text, -1)
 
 
 def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
+    """ DnD """
+    data.set_text(get_dnd_selection(view), -1)
+
+
+def get_dnd_selection(view):
+    """ Creates a string from the iterators of the selected rows """
     selection = view.get_selection()
     model, paths = selection.get_selected_rows()
     itrs = [model.get_iter(path) for path in paths]
-    rows = [model.get(itr, *[x for x in range(view.get_n_columns())]) for itr in itrs]
-    print(rows)
-    data.set_text(str(rows), -1)
+    return "{}:{}".format(",".join([model.get_string_from_iter(itr) for itr in itrs]), model.get_name())
 
 
 def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
     """ DnD """
-    print(data.get_data())
-    # Gtk.SelectionData().get_data
     model = view.get_model()
-    dest_iter = None
-    dest_tid = None
+    dest_index = 0
     drop_info = view.get_dest_row_at_pos(x, y)
     if drop_info:
         path, position = drop_info
         dest_iter = model.get_iter(path)
         if dest_iter:
-            dest_tid = model.get_value(dest_iter, 0)
-            print("Destination ", dest_tid)
+            dest_index = model.get_value(dest_iter, 0)
+    itr_str, sep, source = data.get_text().partition(":")
+    itrs = itr_str.split(",")
+    try:
+        if source == "services_list_store":
+            ext_model = __services_view.get_model()
+            ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
+            ext_rows = [ext_model.get(ext_itr, *[x for x in range(__services_view.get_n_columns())]) for ext_itr in
+                        ext_itrs]
+            for ext_row in ext_rows:
+                fav_id = ext_row[11]
+                channel = __channels[fav_id]
+                model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos))
+        elif source == "fav_list_store":
+            in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
+            in_rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in in_itrs]
+            for row in in_rows:
+                model.insert(dest_index, row)
+            for in_itr in in_itrs:
+                model.remove(in_itr)
+    except ValueError as e:
+        __status_bar.push(1, getattr(e, "message", repr(e)))
 
 
 def on_satellite_editor_show(model):
@@ -226,10 +245,6 @@ def init_ui():
     __fav_view = builder.get_object("fav_tree_view")
     global __bouquets_view
     __bouquets_view = builder.get_object("bouquets_tree_view")
-    # global __services_model
-    # __services_model = builder.get_object("services_list_store")
-    # global __bouquets_model
-    # __bouquets_model = builder.get_object("bouquets_tree_store")
     global __fav_model
     __fav_model = builder.get_object("fav_list_store")
     global __status_bar
@@ -241,12 +256,17 @@ def init_ui():
 
 def init_drag_and_drop():
     """ Enable drag and drop """
-    target_name = ""
-    dnd_targets = [(target_name, Gtk.TargetFlags.SAME_APP, 0)]
-    __services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, dnd_targets, Gdk.DragAction.COPY)
-    __fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, dnd_targets,
+    target = []
+    __services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
+    __fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target,
                                         Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
-    __fav_view.enable_model_drag_dest(dnd_targets, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+    __fav_view.enable_model_drag_dest(target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+    __fav_view.drag_dest_set_target_list(None)
+    __fav_view.drag_source_set_target_list(None)
+    __fav_view.drag_dest_add_text_targets()
+    __fav_view.drag_source_add_text_targets()
+    __services_view.drag_source_set_target_list(None)
+    __services_view.drag_source_add_text_targets()
 
 
 def start_app():
