@@ -2,6 +2,29 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkMenu" id="bouquets_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="menuitem6">
+        <property name="label">gtk-add</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="menuitem7">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_delete" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkTreeStore" id="bouquets_tree_store">
     <columns>
       <!-- column-name bouquet -->
@@ -19,6 +42,44 @@
       <!-- column-name pos -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkMenu" id="fav_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_cut_popoup_menuitem">
+        <property name="label">gtk-cut</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="imagemenuitem4">
+        <property name="label">gtk-paste</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="imagemenuitem9">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_delete" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
@@ -554,6 +615,7 @@
                     <property name="model">services_list_store</property>
                     <property name="enable_grid_lines">both</property>
                     <property name="activate_on_single_click">True</property>
+                    <signal name="button-press-event" handler="on_view_popup_menu" object="services_popup_menu" swapped="no"/>
                     <signal name="drag-data-get" handler="on_services_tree_view_drag_data_get" swapped="no"/>
                     <signal name="key-release-event" handler="on_tree_view_key_release" object="services_list_store" swapped="no"/>
                     <signal name="row-activated" handler="on_services_selection" object="services_list_store" swapped="no"/>
@@ -770,6 +832,7 @@
                         <property name="model">fav_list_store</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
+                        <signal name="button-press-event" handler="on_view_popup_menu" object="fav_popup_menu" swapped="no"/>
                         <signal name="drag-data-get" handler="on_fav_tree_view_drag_data_get" swapped="no"/>
                         <signal name="drag-data-received" handler="on_fav_tree_view_drag_data_received" swapped="no"/>
                         <signal name="key-release-event" handler="on_tree_view_key_release" object="fav_list_store" swapped="no"/>
@@ -847,6 +910,7 @@
                         <property name="model">bouquets_tree_store</property>
                         <property name="headers_clickable">False</property>
                         <property name="activate_on_single_click">True</property>
+                        <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
                         <signal name="row-activated" handler="on_bouquets_selection" object="bouquets_tree_store" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="bouquets_selection"/>
@@ -976,6 +1040,29 @@
             <property name="position">0</property>
           </packing>
         </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMenu" id="services_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="imagemenuitem1">
+        <property name="label">gtk-go-forward</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="imagemenuitem2">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_delete" swapped="no"/>
       </object>
     </child>
   </object>

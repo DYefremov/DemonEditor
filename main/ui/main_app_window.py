@@ -49,7 +49,8 @@ def get_handlers():
         "on_delete": on_delete,
         "on_services_tree_view_drag_data_get": on_services_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_get": on_fav_tree_view_drag_data_get,
-        "on_fav_tree_view_drag_data_received": on_fav_tree_view_drag_data_received
+        "on_fav_tree_view_drag_data_received": on_fav_tree_view_drag_data_received,
+        "on_view_popup_menu": on_view_popup_menu
     }
 
 
@@ -76,19 +77,17 @@ def on_paste(item):
 def on_delete(item):
     """ Delete selected items from views """
     for view in [__services_view, __fav_view, __bouquets_view]:
-        selection = view.get_selection()
-        model, paths = selection.get_selected_rows()
-        itrs = [model.get_iter(path) for path in paths]
-        for itr in itrs:
-            model.remove(itr)
+        if view.is_focus():
+            selection = view.get_selection()
+            model, paths = selection.get_selected_rows()
+            itrs = [model.get_iter(path) for path in paths]
+            for itr in itrs:
+                model.remove(itr)
 
 
 def on_services_tree_view_drag_data_get(view, drag_context, data, info, time):
     """  DnD  """
-    # rows = [model.get(itr, *[x for x in range(view.get_n_columns())]) for itr in itrs]
-    text = get_dnd_selection(view)
-    # print(text)
-    data.set_text(text, -1)
+    data.set_text(get_dnd_selection(view), -1)
 
 
 def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
@@ -135,6 +134,12 @@ def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, ti
                 model.remove(in_itr)
     except ValueError as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
+
+
+def on_view_popup_menu(menu, event):
+    """ Shows popup menu for any view """
+    if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+        menu.popup(None, None, None, None, event.button, event.time)
 
 
 def on_satellite_editor_show(model):
