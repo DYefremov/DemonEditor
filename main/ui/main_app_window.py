@@ -47,10 +47,12 @@ def get_handlers():
         "on_copy": on_copy,
         "on_paste": on_paste,
         "on_delete": on_delete,
+        "on_to_fav_move": on_to_fav_move,
         "on_services_tree_view_drag_data_get": on_services_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_get": on_fav_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_received": on_fav_tree_view_drag_data_received,
-        "on_view_popup_menu": on_view_popup_menu
+        "on_view_popup_menu": on_view_popup_menu,
+        "on_fav_list_changed": on_fav_list_changed
     }
 
 
@@ -85,35 +87,33 @@ def on_delete(item):
                 model.remove(itr)
 
 
-def on_services_tree_view_drag_data_get(view, drag_context, data, info, time):
-    """  DnD  """
-    data.set_text(get_dnd_selection(view), -1)
+def on_to_fav_move(view):
+    """ Move items from main to fav list """
+    selection = get_selection(view)
+    if selection:
+        receive_selection(view=__fav_view, drop_info=None, data=selection)
 
 
-def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
-    """ DnD """
-    data.set_text(get_dnd_selection(view), -1)
-
-
-def get_dnd_selection(view):
+def get_selection(view):
     """ Creates a string from the iterators of the selected rows """
     selection = view.get_selection()
     model, paths = selection.get_selected_rows()
-    itrs = [model.get_iter(path) for path in paths]
-    return "{}:{}".format(",".join([model.get_string_from_iter(itr) for itr in itrs]), model.get_name())
+    if len(paths) > 0:
+        itrs = [model.get_iter(path) for path in paths]
+        return "{}:{}".format(",".join([model.get_string_from_iter(itr) for itr in itrs]), model.get_name())
 
 
-def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
-    """ DnD """
+def receive_selection(*, view, drop_info, data):
+    """  Update fav view  after data received  """
     model = view.get_model()
     dest_index = 0
-    drop_info = view.get_dest_row_at_pos(x, y)
     if drop_info:
         path, position = drop_info
+        print(path, position)
         dest_iter = model.get_iter(path)
         if dest_iter:
             dest_index = model.get_value(dest_iter, 0)
-    itr_str, sep, source = data.get_text().partition(":")
+    itr_str, sep, source = data.partition(":")
     itrs = itr_str.split(",")
     try:
         if source == "services_list_store":
@@ -134,6 +134,26 @@ def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, ti
                 model.remove(in_itr)
     except ValueError as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
+
+
+def on_services_tree_view_drag_data_get(view, drag_context, data, info, time):
+    """  DnD  """
+    data.set_text(get_selection(view), -1)
+
+
+def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
+    """ DnD """
+    data.set_text(get_selection(view), -1)
+
+
+def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
+    """ DnD """
+    receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
+
+
+def on_fav_list_changed(*args):
+    """    """
+    print("Changed")
 
 
 def on_view_popup_menu(menu, event):
@@ -210,7 +230,6 @@ def on_tree_view_key_release(widget, event):
     if key == Gdk.KEY_Tab:
         print("Tab")
     if key == Gdk.KEY_Delete:
-        print("Delete")
         on_delete(widget)
     if key == Gdk.KEY_Up:
         print("Up")

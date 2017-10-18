@@ -42,6 +42,7 @@
       <!-- column-name pos -->
       <column type="gchararray"/>
     </columns>
+    <signal name="rows-reordered" handler="on_fav_list_changed" swapped="no"/>
   </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
@@ -146,7 +147,7 @@
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkMenuBar" id="menubar1">
+          <object class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -341,7 +342,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkToolbar" id="toolbar1">
+          <object class="GtkToolbar" id="toolbar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -425,6 +426,20 @@
               <object class="GtkSeparatorToolItem" id="toolbutton4">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="to_fav_tool_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Move</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-go-forward</property>
+                <signal name="clicked" handler="on_to_fav_move" object="services_tree_view" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1047,12 +1062,13 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="imagemenuitem1">
+      <object class="GtkImageMenuItem" id="to_fav_move_popup_menu_item">
         <property name="label">gtk-go-forward</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="on_to_fav_move" object="services_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
