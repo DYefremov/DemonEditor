@@ -3,7 +3,7 @@ from threading import Thread
 from main.eparser import get_channels, get_bouquets, get_bouquet
 from main.eparser.__constants import SERVICE_TYPE
 from main.ftp import download_data, upload_data
-from main.properties import get_config
+from main.properties import get_config, write_config
 from . import Gtk, Gdk
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -30,7 +30,8 @@ def on_about_app(item):
 
 def get_handlers():
     return {
-        "on_close_main_window": Gtk.main_quit,
+        "on_close_main_window": on_quit,
+        "on_resize": on_resize,
         "on_about_app": on_about_app,
         "on_preferences": on_preferences,
         "on_download": on_download,
@@ -54,6 +55,17 @@ def get_handlers():
         "on_view_popup_menu": on_view_popup_menu,
         "on_fav_list_changed": on_fav_list_changed
     }
+
+
+def on_quit(*args):
+    """  Called before app quit """
+    write_config(__options)  # storing current config
+    Gtk.main_quit()
+
+
+def on_resize(window):
+    """ Stores new size properties for main window after resize """
+    __options["window_size"] = window.get_size()
 
 
 def on_up(item):
@@ -263,6 +275,10 @@ def init_ui():
     builder.add_from_file("ui/main_window.glade")
     global __main_window
     __main_window = builder.get_object("main_window")
+    main_window_size = __options.get("window_size", None)
+    # Setting the last size of the window if it was saved
+    if main_window_size:
+        __main_window.resize(*main_window_size)
     global __services_view
     __services_view = builder.get_object("services_tree_view")
     global __fav_view
