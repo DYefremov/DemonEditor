@@ -8,6 +8,9 @@ from . import Gtk, Gdk
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
+SERVICE_LIST_NAME = "services_list_store"
+FAV_LIST_NAME = "fav_list_store"
+
 __main_window = None
 __status_bar = None
 __options = get_config()
@@ -52,8 +55,7 @@ def get_handlers():
         "on_services_tree_view_drag_data_get": on_services_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_get": on_fav_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_received": on_fav_tree_view_drag_data_received,
-        "on_view_popup_menu": on_view_popup_menu,
-        "on_fav_list_changed": on_fav_list_changed
+        "on_view_popup_menu": on_view_popup_menu
     }
 
 
@@ -121,14 +123,13 @@ def receive_selection(*, view, drop_info, data):
     dest_index = 0
     if drop_info:
         path, position = drop_info
-        print(path, position)
         dest_iter = model.get_iter(path)
         if dest_iter:
             dest_index = model.get_value(dest_iter, 0)
     itr_str, sep, source = data.partition(":")
     itrs = itr_str.split(",")
     try:
-        if source == "services_list_store":
+        if source == SERVICE_LIST_NAME:
             ext_model = __services_view.get_model()
             ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
             ext_rows = [ext_model.get(ext_itr, *[x for x in range(__services_view.get_n_columns())]) for ext_itr in
@@ -137,13 +138,15 @@ def receive_selection(*, view, drop_info, data):
                 fav_id = ext_row[11]
                 channel = __channels[fav_id]
                 model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos))
-        elif source == "fav_list_store":
+        elif source == FAV_LIST_NAME:
             in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
             in_rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in in_itrs]
             for row in in_rows:
                 model.insert(dest_index, row)
             for in_itr in in_itrs:
                 model.remove(in_itr)
+        # Iterate through model and updates values for Num column
+        model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
     except ValueError as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
 
@@ -161,11 +164,6 @@ def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
 def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
     """ DnD """
     receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
-
-
-def on_fav_list_changed(*args):
-    """    """
-    print("Changed")
 
 
 def on_view_popup_menu(menu, event):
@@ -237,16 +235,19 @@ def on_preferences(item):
     show_settings_dialog(__main_window, __options)
 
 
-def on_tree_view_key_release(widget, event):
+def on_tree_view_key_release(view, event):
+    """  Handling  keystrokes  """
     key = event.keyval
-    if key == Gdk.KEY_Tab:
-        print("Tab")
+    # print(event.state)
     if key == Gdk.KEY_Delete:
-        on_delete(widget)
+        on_delete(view)
     if key == Gdk.KEY_Up:
         print("Up")
     if key == Gdk.KEY_Down:
         print("Down")
+    if key == Gdk.KEY_Insert and view.get_model().get_name() == SERVICE_LIST_NAME:
+        # Move items from main to fav list
+        on_to_fav_move(view)
 
 
 def on_upload(item):
