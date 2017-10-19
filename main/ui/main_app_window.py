@@ -10,6 +10,7 @@ from .settings_dialog import show_settings_dialog
 
 SERVICE_LIST_NAME = "services_list_store"
 FAV_LIST_NAME = "fav_list_store"
+BOUQUETS_LIST_NAME = "bouquets_tree_store"
 
 __main_window = None
 __status_bar = None
@@ -20,6 +21,10 @@ __fav_model = None
 __services_view = None
 __fav_view = None
 __bouquets_view = None
+# Used for copy/paste
+# When adding the previous data will not be deleted.
+# Clearing only after the insertion!
+__rows_buffer = []
 __channels = {}
 
 
@@ -78,27 +83,42 @@ def on_down(item):
     pass
 
 
-def on_cut(item):
-    pass
+def on_cut(view):
+    for row in on_delete(view):
+        __rows_buffer.append(row)
 
 
 def on_copy(item):
     pass
 
 
-def on_paste(item):
-    pass
+def on_paste(view):
+    selection = view.get_selection()
+    if not selection.count_selected_rows():
+        return
+    model, paths = selection.get_selected_rows()
+    dest_index = int(paths[0][0]) + 1
+    for row in reversed(__rows_buffer):
+        model.insert(dest_index, row)
+    __rows_buffer.clear()
 
 
 def on_delete(item):
-    """ Delete selected items from views """
+    """ Delete selected items from views
+
+        returns deleted rows list!
+    """
     for view in [__services_view, __fav_view, __bouquets_view]:
         if view.is_focus():
             selection = view.get_selection()
             model, paths = selection.get_selected_rows()
             itrs = [model.get_iter(path) for path in paths]
+            rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in itrs]
             for itr in itrs:
                 model.remove(itr)
+            if model.get_name() == FAV_LIST_NAME:
+                update_fav_num_column(model)
+            return rows
 
 
 def on_to_fav_move(view):
@@ -145,10 +165,14 @@ def receive_selection(*, view, drop_info, data):
                 model.insert(dest_index, row)
             for in_itr in in_itrs:
                 model.remove(in_itr)
-        # Iterate through model and updates values for Num column
-        model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
+        update_fav_num_column(model)
     except ValueError as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
+
+
+def update_fav_num_column(model):
+    """ Iterate through model and updates values for Num column """
+    model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
 
 
 def on_services_tree_view_drag_data_get(view, drag_context, data, info, time):
@@ -181,14 +205,14 @@ def data_open(model):
     try:
         model.clear()
         __fav_model.clear()
-        model_id = model.get_name()
+        model_name = model.get_name()
         data_path = get_config()["data_dir_path"]
-        if model_id == "services_list_store":
+        if model_name == SERVICE_LIST_NAME:
             for ch in get_channels(data_path + "lamedb"):
                 #  adding channels to dict with fav_id as keys
                 __channels[ch.fav_id] = ch
                 model.append(ch)
-        if model_id == "bouquets_tree_store":
+        if model_name == BOUQUETS_LIST_NAME:
             data = get_bouquets(data_path)
             for name, bouquets in data:
                 parent = model.append(None, [name])
@@ -238,16 +262,20 @@ def on_preferences(item):
 def on_tree_view_key_release(view, event):
     """  Handling  keystrokes  """
     key = event.keyval
-    # print(event.state)
+    ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
     if key == Gdk.KEY_Delete:
         on_delete(view)
-    if key == Gdk.KEY_Up:
+    elif key == Gdk.KEY_Up:
         print("Up")
-    if key == Gdk.KEY_Down:
+    elif key == Gdk.KEY_Down:
         print("Down")
-    if key == Gdk.KEY_Insert and view.get_model().get_name() == SERVICE_LIST_NAME:
+    elif key == Gdk.KEY_Insert and view.get_model().get_name() == SERVICE_LIST_NAME:
         # Move items from main to fav list
         on_to_fav_move(view)
+    elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
+        on_cut(view)
+    elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
+        on_paste(view)
 
 
 def on_upload(item):

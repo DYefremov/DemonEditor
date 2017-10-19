@@ -47,21 +47,23 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="fav_cut_popoup_menuitem">
+      <object class="GtkImageMenuItem" id="fav_cut_popoup_menu_item">
         <property name="label">gtk-cut</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="on_cut" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="imagemenuitem4">
+      <object class="GtkImageMenuItem" id="fav_paste_popup_menu_item">
         <property name="label">gtk-paste</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="on_paste" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
@@ -71,7 +73,7 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="imagemenuitem9">
+      <object class="GtkImageMenuItem" id="fav_popoup_menu_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -447,6 +449,16 @@
               </packing>
             </child>
             <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="up_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -481,7 +493,7 @@
                 <property name="label" translatable="yes">Cut</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-cut</property>
-                <signal name="clicked" handler="on_cut" swapped="no"/>
+                <signal name="clicked" handler="on_cut" object="fav_tree_view" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -509,6 +521,7 @@
                 <property name="label" translatable="yes">Paste</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-paste</property>
+                <signal name="clicked" handler="on_paste" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
