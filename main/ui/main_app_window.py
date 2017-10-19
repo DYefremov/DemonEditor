@@ -100,6 +100,8 @@ def on_paste(view):
     dest_index = int(paths[0][0]) + 1
     for row in reversed(__rows_buffer):
         model.insert(dest_index, row)
+    if model.get_name() == FAV_LIST_NAME:
+        update_fav_num_column(model)
     __rows_buffer.clear()
 
 
