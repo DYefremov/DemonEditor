@@ -1,6 +1,4 @@
 """ Module for parsing bouquets """
-
-#  temporary
 from collections import namedtuple
 
 __BOUQUETS_PATH = "../data/"
@@ -11,6 +9,10 @@ Bouquets = namedtuple("Bouquets", ["name", "bouquets"])
 
 def get_bouquets(path):
     return [parse_bouquets(path, "bouquets.tv"), parse_bouquets(path, "bouquets.radio")]
+
+
+def write_bouquets(path, channels):
+    pass
 
 
 def get_bouquet(path, name, type):

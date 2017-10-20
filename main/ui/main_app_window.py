@@ -45,6 +45,7 @@ def get_handlers():
         "on_download": on_download,
         "on_upload": on_upload,
         "on_data_open": on_data_open,
+        "on_data_save": on_data_save,
         "on_tree_view_key_release": on_tree_view_key_release,
         "on_bouquets_selection": on_bouquets_selection,
         "on_satellite_editor_show": on_satellite_editor_show,
@@ -162,7 +163,7 @@ def receive_selection(*, view, drop_info, data):
             for ext_row in ext_rows:
                 fav_id = ext_row[11]
                 channel = __channels[fav_id]
-                model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos))
+                model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos, channel.fav_id))
         elif source == FAV_LIST_NAME:
             in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
             in_rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in in_itrs]
@@ -236,6 +237,16 @@ def on_data_open(model):
     task.start()
 
 
+def on_data_save(*args):
+    #  Perhaps needs a dialog to choose what we need to save!!!
+    if is_bouquet_selected() and __fav_view.is_focus():  # bouquets
+        fav_ids = []
+        __fav_model.foreach(lambda model, path, itr: fav_ids.append(model.get(model.get_iter(path), 4)))
+        print(fav_ids)
+    elif __services_view.is_focus():
+        pass
+
+
 def on_services_selection(model, path, column):
     delete_selection(__fav_view)
 
@@ -254,7 +265,7 @@ def on_bouquets_selection(model, path, column):
         bq = get_bouquet(__options["data_dir_path"], name, SERVICE_TYPE[1].lower())
         for num, ch_id in enumerate(bq):
             channel = __channels.get(ch_id, None)
-            __fav_model.append((num + 1, channel[0], channel[2], channel[9]))
+            __fav_model.append((num + 1, channel.service, channel.service_type, channel.pos, channel.fav_id))
 
 
 def is_bouquet_selected():

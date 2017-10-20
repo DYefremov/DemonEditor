@@ -41,6 +41,8 @@
       <column type="gchararray"/>
       <!-- column-name pos -->
       <column type="gchararray"/>
+      <!-- column-name fav_id -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkMenu" id="fav_popup_menu">
@@ -418,6 +420,7 @@
                 <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-floppy</property>
+                <signal name="clicked" handler="on_data_save" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -878,6 +881,7 @@
                             <property name="resizable">True</property>
                             <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Num</property>
+                            <property name="expand">True</property>
                             <child>
                               <object class="GtkCellRendererText" id="num_cellrenderertext"/>
                               <attributes>
@@ -891,6 +895,7 @@
                             <property name="resizable">True</property>
                             <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Service</property>
+                            <property name="expand">True</property>
                             <child>
                               <object class="GtkCellRendererText" id="service_cellrenderertext1"/>
                               <attributes>
@@ -902,6 +907,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="type_column">
                             <property name="title" translatable="yes">Type</property>
+                            <property name="expand">True</property>
                             <child>
                               <object class="GtkCellRendererText" id="type_cellrenderertext"/>
                               <attributes>
@@ -913,10 +919,23 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="pos_column">
                             <property name="title" translatable="yes">Pos</property>
+                            <property name="expand">True</property>
                             <child>
                               <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
                               <attributes>
                                 <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="fav_id_column1">
+                            <property name="visible">False</property>
+                            <property name="title" translatable="yes">fav_id</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="fav_id_cellrenderertext2"/>
+                              <attributes>
+                                <attribute name="text">4</attribute>
                               </attributes>
                             </child>
                           </object>
