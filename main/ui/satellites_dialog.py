@@ -1,6 +1,5 @@
-from main.eparser import get_satellites
-from main.eparser.satxml import Satellite, Transponder
-from . import Gtk
+from main.eparser import get_satellites, write_satellites, Satellite, Transponder
+from . import Gtk, Gdk
 
 __data_path = None
 
@@ -8,7 +7,9 @@ __data_path = None
 def show_satellites_dialog(transient, data_path):
     global __data_path
     __data_path = data_path
-    handlers = {"on_satellites_list_load": on_satellites_list_load, "on_remove": on_remove, "on_save": on_save}
+    handlers = {"on_satellites_list_load": on_satellites_list_load,
+                "on_remove": on_remove, "on_save": on_save,
+                "on_popup_menu": on_popup_menu}
     builder = Gtk.Builder()
     builder.add_from_file("./ui/satellites_dialog.glade")
     builder.connect_signals(handlers)
@@ -41,8 +42,7 @@ def on_save(view):
     model = view.get_model()
     satellites = []
     model.foreach(parse_data, satellites)
-    for sat in satellites:
-        print(sat)
+    write_satellites(satellites, __data_path)
 
 
 def parse_data(model, path, itr, sats):
@@ -56,6 +56,11 @@ def parse_data(model, path, itr, sats):
         sat = model.get(itr, *[item for item in range(model.get_n_columns())])
         satellite = Satellite(sat[0], sat[-2], sat[-1], transponders)
         sats.append(satellite)
+
+
+def on_popup_menu(menu, event):
+    if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+        menu.popup(None, None, None, None, event.button, event.time)
 
 
 if __name__ == "__main__":

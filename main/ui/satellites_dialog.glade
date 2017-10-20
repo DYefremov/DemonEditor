@@ -2,6 +2,39 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="reserve_toggle_size">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="add_popoup_menu_item">
+        <property name="label">gtk-add</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="edit_popoup_menu_item">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="remove_popup_menu_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_remove" object="satellites_editor_tree_view" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkTreeStore" id="satellites_tree_store">
     <columns>
       <!-- column-name satelitte -->
@@ -299,6 +332,7 @@
                     <property name="can_focus">True</property>
                     <property name="model">satellites_tree_store</property>
                     <property name="search_column">0</property>
+                    <signal name="button-press-event" handler="on_popup_menu" object="popup_menu" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="tree_view_selection">
                         <property name="mode">multiple</property>
@@ -390,6 +424,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="pls_mode_column">
+                        <property name="visible">False</property>
                         <property name="title" translatable="yes">Pls mode</property>
                         <property name="expand">True</property>
                         <child>
@@ -402,6 +437,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="pls_code_column">
+                        <property name="visible">False</property>
                         <property name="title" translatable="yes">Pls code</property>
                         <property name="expand">True</property>
                         <child>
@@ -414,6 +450,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="is_id_column">
+                        <property name="visible">False</property>
                         <property name="resizable">True</property>
                         <property name="title" translatable="yes">Is ID</property>
                         <property name="expand">True</property>

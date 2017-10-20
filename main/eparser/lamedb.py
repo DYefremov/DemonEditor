@@ -3,7 +3,7 @@
       Currently implemented only for satellite channels!!!
      Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
-from main.eparser.__constants import Polarization, SYSTEM, FEC, Channel, SERVICE_TYPE
+from main.eparser.__constants import POLARIZATION, SYSTEM, FEC, Channel, SERVICE_TYPE
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"
@@ -55,7 +55,7 @@ def parse_channels(*args):
             tr = str(transponder)[2:].split(_SEP)  # Removing type of DVB transponders (s , t, c) and split
             pack = pack[2:] if pack.find(",") < 0 else pack[2:pack.find(",")]
             channels.append(Channel(ch[1], pack, SERVICE_TYPE.get(int(data[4]), SERVICE_TYPE[-2]), data[0], tr[0],
-                                    tr[1], Polarization(int(tr[2])).name, FEC[int(tr[3])], SYSTEM[int(tr[6])],
+                                    tr[1], POLARIZATION[tr[2]], FEC[tr[3]], SYSTEM[tr[6]],
                                     "{}{}.{}".format(*list(tr[4])), ch[0], fav_id.upper()))
     return channels
 

@@ -127,7 +127,10 @@ def on_to_fav_move(view):
     """ Move items from main to fav list """
     selection = get_selection(view)
     if selection:
-        receive_selection(view=__fav_view, drop_info=None, data=selection)
+        if is_bouquet_selected():
+            receive_selection(view=__fav_view, drop_info=None, data=selection)
+        else:
+            show_message_dialog("Error. No bouquet is selected!")
 
 
 def get_selection(view):
@@ -189,7 +192,10 @@ def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
 
 def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
     """ DnD """
-    receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
+    if is_bouquet_selected():
+        receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
+    else:
+        show_message_dialog("Error. No bouquet is selected!")
 
 
 def on_view_popup_menu(menu, event):
@@ -231,24 +237,42 @@ def on_data_open(model):
 
 
 def on_services_selection(model, path, column):
-    delete_selection(__fav_view, __bouquets_view)
+    delete_selection(__fav_view)
 
 
 def on_fav_selection(model, path, column):
-    delete_selection(__services_view, __bouquets_view)
+    delete_selection(__services_view)
 
 
 def on_bouquets_selection(model, path, column):
+    __fav_model.clear()
     if len(path) > 1:
         delete_selection(__services_view)
         tree_iter = model.get_iter(path)
         name = model.get_value(tree_iter, 0)
         # 'tv' Temporary! It is necessary to implement a row type attribute.
         bq = get_bouquet(__options["data_dir_path"], name, SERVICE_TYPE[1].lower())
-        __fav_model.clear()
         for num, ch_id in enumerate(bq):
             channel = __channels.get(ch_id, None)
             __fav_model.append((num + 1, channel[0], channel[2], channel[9]))
+
+
+def is_bouquet_selected():
+    """ Checks whether the bouquet is selected """
+    selection = __bouquets_view.get_selection()
+    model, path = selection.get_selected_rows()
+    if len(path) < 1:
+        return False
+    return not model.iter_has_child(model.get_iter(path))
+
+
+def show_message_dialog(text):
+    builder = Gtk.Builder()
+    builder.add_from_file("ui/main_window.glade")
+    dialog = builder.get_object("message_dialog")
+    dialog.set_markup(text)
+    dialog.run()
+    dialog.destroy()
 
 
 def delete_selection(view, *args):

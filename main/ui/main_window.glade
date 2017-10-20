@@ -1022,8 +1022,11 @@
     <property name="transient_for">main_window</property>
     <property name="program_name">DemonEditor</property>
     <property name="version">0.1 Pre-alpha</property>
+    <property name="copyright" translatable="yes">2017 Dmitriy Yefremov
+</property>
     <property name="comments" translatable="yes">Enigma2 channel list editor for GNU/Linux</property>
-    <property name="authors">Dmitriy Yefremov</property>
+    <property name="authors">Dmitriy Yefremov 
+</property>
     <property name="logo_icon_name">accessories-text-editor</property>
     <property name="license_type">mit-x11</property>
     <child internal-child="vbox">
@@ -1048,12 +1051,15 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="messagedialog1">
+  <object class="GtkMessageDialog" id="message_dialog">
     <property name="can_focus">False</property>
+    <property name="default_width">320</property>
+    <property name="default_height">240</property>
+    <property name="icon_name">accessories-text-editor</property>
     <property name="type_hint">dialog</property>
     <property name="transient_for">main_window</property>
-    <property name="message_type">question</property>
-    <property name="buttons">ok-cancel</property>
+    <property name="message_type">error</property>
+    <property name="buttons">ok</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="messagedialog-vbox">
         <property name="can_focus">False</property>
