@@ -1,7 +1,6 @@
 from threading import Thread
 
-from main.eparser import get_channels, get_bouquets, get_bouquet
-from main.eparser.__constants import SERVICE_TYPE
+from main.eparser import get_channels, get_bouquets, write_bouquet, write_channels
 from main.ftp import download_data, upload_data
 from main.properties import get_config, write_config
 from . import Gtk, Gdk
@@ -26,6 +25,7 @@ __bouquets_view = None
 # Clearing only after the insertion!
 __rows_buffer = []
 __channels = {}
+__bouquets = {}
 
 
 def on_about_app(item):
@@ -121,6 +121,11 @@ def on_delete(item):
                 model.remove(itr)
             if model.get_name() == FAV_LIST_NAME:
                 update_fav_num_column(model)
+            if model.get_name() == SERVICE_LIST_NAME:
+                for row in rows:
+                    # There are channels with the same parameters except for the name.
+                    # None because it can have duplicates! Need fix
+                    __channels.pop(row[-1], None)
             return rows
 
 
@@ -222,11 +227,13 @@ def data_open(model):
                 __channels[ch.fav_id] = ch
                 model.append(ch)
         if model_name == BOUQUETS_LIST_NAME:
-            data = get_bouquets(data_path)
-            for name, bouquets in data:
-                parent = model.append(None, [name])
-                for bouquet in bouquets:
-                    model.append(parent, [bouquet])
+            bouquets = get_bouquets(data_path)
+            for bouquet in bouquets:
+                parent = model.append(None, [bouquet.name, None])
+                for bt in bouquet.bouquets:
+                    name, bt_type = bt.name, bt.type
+                    model.append(parent, [name, bt_type])
+                    __bouquets["{}:{}".format(name, bt_type)] = bt.services
     except Exception as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
 
@@ -239,12 +246,15 @@ def on_data_open(model):
 
 def on_data_save(*args):
     #  Perhaps needs a dialog to choose what we need to save!!!
-    if is_bouquet_selected() and __fav_view.is_focus():  # bouquets
+    bouquet_name = is_bouquet_selected()
+    path = __options["data_dir_path"]
+    if bouquet_name and __fav_view.is_focus():  # bouquets
         fav_ids = []
-        __fav_model.foreach(lambda model, path, itr: fav_ids.append(model.get(model.get_iter(path), 4)))
-        print(fav_ids)
+        __fav_model.foreach(lambda model, p, itr: fav_ids.append(model.get(model.get_iter(p), 4)))
+        channels = [__channels[fav_id[0]] for fav_id in fav_ids]
+        write_bouquet(path, bouquet_name, channels)
     elif __services_view.is_focus():
-        pass
+        write_channels(path, __channels.values())
 
 
 def on_services_selection(model, path, column):
@@ -259,22 +269,30 @@ def on_bouquets_selection(model, path, column):
     __fav_model.clear()
     if len(path) > 1:
         delete_selection(__services_view)
-        tree_iter = model.get_iter(path)
-        name = model.get_value(tree_iter, 0)
-        # 'tv' Temporary! It is necessary to implement a row type attribute.
-        bq = get_bouquet(__options["data_dir_path"], name, SERVICE_TYPE[1].lower())
-        for num, ch_id in enumerate(bq):
-            channel = __channels.get(ch_id, None)
+        update_bouquet_channels(model, path)
+
+
+def update_bouquet_channels(model, path):
+    """ Updates list of bouquet channels """
+    tree_iter = model.get_iter(path)
+    key = "{}:{}".format(*model.get(tree_iter, 0, 1))
+    services = __bouquets[key]
+    for num, ch_id in enumerate(services):
+        channel = __channels.get(ch_id, None)
+        if channel:
             __fav_model.append((num + 1, channel.service, channel.service_type, channel.pos, channel.fav_id))
 
 
 def is_bouquet_selected():
-    """ Checks whether the bouquet is selected """
+    """ Checks whether the bouquet is selected
+
+        returns name of selected bouquet or False
+    """
     selection = __bouquets_view.get_selection()
     model, path = selection.get_selected_rows()
-    if len(path) < 1:
+    if len(path) < 1 or model.iter_has_child(model.get_iter(path)):
         return False
-    return not model.iter_has_child(model.get_iter(path))
+    return model.get_value(model.get_iter(path), 0)
 
 
 def show_message_dialog(text):

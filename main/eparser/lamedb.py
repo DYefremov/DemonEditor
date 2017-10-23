@@ -14,6 +14,10 @@ def get_channels(path):
     return parse(path)
 
 
+def write_channels(path, channels):
+    print(channels)
+
+
 def parse(path):
     """ Parsing lamedb """
     with open(path, "r") as file:

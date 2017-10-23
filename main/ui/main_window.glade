@@ -29,6 +29,8 @@
     <columns>
       <!-- column-name bouquet -->
       <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkListStore" id="fav_list_store">
@@ -697,7 +699,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">2</property>
                         <child>
-                          <object class="GtkCellRendererText" id="type_cellrenderertex"/>
+                          <object class="GtkCellRendererText" id="type_cellrenderertex">
+                            <property name="xalign">0.51999998092651367</property>
+                          </object>
                           <attributes>
                             <attribute name="text">2</attribute>
                           </attributes>
@@ -713,7 +717,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">3</property>
                         <child>
-                          <object class="GtkCellRendererText" id="ssid_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="ssid_cellrenderertext">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">3</attribute>
                           </attributes>
@@ -729,7 +735,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">4</property>
                         <child>
-                          <object class="GtkCellRendererText" id="freq_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="freq_cellrenderertext">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">4</attribute>
                           </attributes>
@@ -745,7 +753,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">5</property>
                         <child>
-                          <object class="GtkCellRendererText" id="rate_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="rate_cellrenderertext">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">5</attribute>
                           </attributes>
@@ -761,7 +771,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">6</property>
                         <child>
-                          <object class="GtkCellRendererText" id="pol_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="pol_cellrenderertext">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">6</attribute>
                           </attributes>
@@ -777,7 +789,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">7</property>
                         <child>
-                          <object class="GtkCellRendererText" id="fec_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="fec_cellrenderertext">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">7</attribute>
                           </attributes>
@@ -793,7 +807,9 @@
                         <property name="reorderable">True</property>
                         <property name="sort_column_id">8</property>
                         <child>
-                          <object class="GtkCellRendererText" id="system_cellrenderertex"/>
+                          <object class="GtkCellRendererText" id="system_cellrenderertex">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">8</attribute>
                           </attributes>
@@ -807,7 +823,9 @@
                         <property name="expand">True</property>
                         <property name="sort_column_id">9</property>
                         <child>
-                          <object class="GtkCellRendererText" id="pos_cellrenderertext1"/>
+                          <object class="GtkCellRendererText" id="pos_cellrenderertext1">
+                            <property name="xalign">0.50999999046325684</property>
+                          </object>
                           <attributes>
                             <attribute name="text">9</attribute>
                           </attributes>
@@ -909,7 +927,9 @@
                             <property name="title" translatable="yes">Type</property>
                             <property name="expand">True</property>
                             <child>
-                              <object class="GtkCellRendererText" id="type_cellrenderertext"/>
+                              <object class="GtkCellRendererText" id="type_cellrenderertext">
+                                <property name="xalign">0.50999999046325684</property>
+                              </object>
                               <attributes>
                                 <attribute name="text">2</attribute>
                               </attributes>
@@ -921,7 +941,9 @@
                             <property name="title" translatable="yes">Pos</property>
                             <property name="expand">True</property>
                             <child>
-                              <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
+                              <object class="GtkCellRendererText" id="pos_cellrenderertext">
+                                <property name="xalign">0.50999999046325684</property>
+                              </object>
                               <attributes>
                                 <attribute name="text">3</attribute>
                               </attributes>
@@ -945,7 +967,7 @@
                   </object>
                   <packing>
                     <property name="resize">True</property>
-                    <property name="shrink">False</property>
+                    <property name="shrink">True</property>
                   </packing>
                 </child>
                 <child>
@@ -969,12 +991,26 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="bouquets_column">
                             <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Bouquets</property>
                             <property name="expand">True</property>
                             <child>
-                              <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                              <object class="GtkCellRendererText" id="bouquets_cellrenderertext"/>
                               <attributes>
                                 <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="bouquet_type_column">
+                            <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
+                            <property name="title" translatable="yes">Type</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="bouquet_type_cellrenderertext"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -984,7 +1020,7 @@
                   </object>
                   <packing>
                     <property name="resize">True</property>
-                    <property name="shrink">True</property>
+                    <property name="shrink">False</property>
                   </packing>
                 </child>
               </object>
@@ -1043,7 +1079,7 @@
     <property name="version">0.1 Pre-alpha</property>
     <property name="copyright" translatable="yes">2017 Dmitriy Yefremov
 </property>
-    <property name="comments" translatable="yes">Enigma2 channel list editor for GNU/Linux</property>
+    <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>
     <property name="authors">Dmitriy Yefremov 
 </property>
     <property name="logo_icon_name">accessories-text-editor</property>
