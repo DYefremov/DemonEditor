@@ -131,6 +131,12 @@ def on_delete(item):
             for itr in itrs:
                 if fav_bouquet and model_name == FAV_LIST_NAME:
                     del fav_bouquet[int(model.get_path(itr)[0])]
+                if model_name == BOUQUETS_LIST_NAME:
+                    if model.iter_has_child(itr):
+                        show_message_dialog("This item is not allowed to be removed!")
+                        return
+                    else:
+                        __bouquets.pop(bq_selected)
                 model.remove(itr)
             if model_name == FAV_LIST_NAME:
                 update_fav_num_column(model)
