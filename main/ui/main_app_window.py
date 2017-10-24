@@ -1,3 +1,4 @@
+from contextlib import suppress
 from threading import Thread
 
 from main.eparser import get_channels, get_bouquets, write_bouquet, write_channels
@@ -95,12 +96,17 @@ def on_copy(item):
 
 def on_paste(view):
     selection = view.get_selection()
-    if not selection.count_selected_rows():
-        return
+    dest_index = 0
+    bq_selected = is_bouquet_selected()
+    if bq_selected:
+        fav_bouquet = __bouquets[bq_selected]
     model, paths = selection.get_selected_rows()
-    dest_index = int(paths[0][0]) + 1
-    for row in reversed(__rows_buffer):
+    if paths:
+        dest_index = int(paths[0][0])
+    for row in __rows_buffer:
+        dest_index += 1
         model.insert(dest_index, row)
+        fav_bouquet.insert(dest_index, row[-1])
     if model.get_name() == FAV_LIST_NAME:
         update_fav_num_column(model)
     __rows_buffer.clear()
@@ -115,17 +121,31 @@ def on_delete(item):
         if view.is_focus():
             selection = view.get_selection()
             model, paths = selection.get_selected_rows()
+            model_name = model.get_name()
             itrs = [model.get_iter(path) for path in paths]
             rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in itrs]
+            bq_selected = is_bouquet_selected()
+            fav_bouquet = None
+            if bq_selected:
+                fav_bouquet = __bouquets[bq_selected]
             for itr in itrs:
+                if fav_bouquet and model_name == FAV_LIST_NAME:
+                    del fav_bouquet[int(model.get_path(itr)[0])]
                 model.remove(itr)
-            if model.get_name() == FAV_LIST_NAME:
+            if model_name == FAV_LIST_NAME:
                 update_fav_num_column(model)
-            if model.get_name() == SERVICE_LIST_NAME:
+            if model_name == SERVICE_LIST_NAME:
                 for row in rows:
                     # There are channels with the same parameters except for the name.
                     # None because it can have duplicates! Need fix
-                    __channels.pop(row[-1], None)
+                    fav_id = row[-1]
+                    for bq in __bouquets:
+                        services = __bouquets[bq]
+                        with suppress(ValueError):
+                            services.remove(fav_id)
+                    __channels.pop(fav_id, None)
+                __fav_model.clear()
+                update_bouquet_channels(__fav_model, None, bq_selected)
             return rows
 
 
@@ -133,10 +153,7 @@ def on_to_fav_move(view):
     """ Move items from main to fav list """
     selection = get_selection(view)
     if selection:
-        if is_bouquet_selected():
-            receive_selection(view=__fav_view, drop_info=None, data=selection)
-        else:
-            show_message_dialog("Error. No bouquet is selected!")
+        receive_selection(view=__fav_view, drop_info=None, data=selection)
 
 
 def get_selection(view):
@@ -150,6 +167,10 @@ def get_selection(view):
 
 def receive_selection(*, view, drop_info, data):
     """  Update fav view  after data received  """
+    bq_selected = is_bouquet_selected()
+    if not bq_selected:
+        show_message_dialog("Error. No bouquet is selected!")
+        return
     model = view.get_model()
     dest_index = 0
     if drop_info:
@@ -160,21 +181,27 @@ def receive_selection(*, view, drop_info, data):
     itr_str, sep, source = data.partition(":")
     itrs = itr_str.split(",")
     try:
+        fav_bouquet = __bouquets[bq_selected]
         if source == SERVICE_LIST_NAME:
             ext_model = __services_view.get_model()
             ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
             ext_rows = [ext_model.get(ext_itr, *[x for x in range(__services_view.get_n_columns())]) for ext_itr in
                         ext_itrs]
+            dest_index -= 1
             for ext_row in ext_rows:
+                dest_index += 1
                 fav_id = ext_row[11]
                 channel = __channels[fav_id]
                 model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos, channel.fav_id))
+                fav_bouquet.insert(dest_index, channel.fav_id)
         elif source == FAV_LIST_NAME:
             in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
             in_rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in in_itrs]
             for row in in_rows:
                 model.insert(dest_index, row)
+                fav_bouquet.insert(dest_index, row[4])
             for in_itr in in_itrs:
+                del fav_bouquet[int(model.get_path(in_itr)[0])]
                 model.remove(in_itr)
         update_fav_num_column(model)
     except ValueError as e:
@@ -198,10 +225,7 @@ def on_fav_tree_view_drag_data_get(view, drag_context, data, info, time):
 
 def on_fav_tree_view_drag_data_received(view, drag_context, x, y, data, info, time):
     """ DnD """
-    if is_bouquet_selected():
-        receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
-    else:
-        show_message_dialog("Error. No bouquet is selected!")
+    receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
 
 
 def on_view_popup_menu(menu, event):
@@ -246,13 +270,13 @@ def on_data_open(model):
 
 def on_data_save(*args):
     #  Perhaps needs a dialog to choose what we need to save!!!
-    bouquet_name = is_bouquet_selected()
+    bouquet_selected = is_bouquet_selected()
     path = __options["data_dir_path"]
-    if bouquet_name and __fav_view.is_focus():  # bouquets
+    if bouquet_selected and __fav_view.is_focus():  # bouquets
         fav_ids = []
         __fav_model.foreach(lambda model, p, itr: fav_ids.append(model.get(model.get_iter(p), 4)))
         channels = [__channels[fav_id[0]] for fav_id in fav_ids]
-        write_bouquet(path, bouquet_name, channels)
+        write_bouquet(path, bouquet_selected, channels)
     elif __services_view.is_focus():
         write_channels(path, __channels.values())
 
@@ -272,10 +296,12 @@ def on_bouquets_selection(model, path, column):
         update_bouquet_channels(model, path)
 
 
-def update_bouquet_channels(model, path):
+def update_bouquet_channels(model, path, bq_key=None):
     """ Updates list of bouquet channels """
-    tree_iter = model.get_iter(path)
-    key = "{}:{}".format(*model.get(tree_iter, 0, 1))
+    tree_iter = None
+    if path:
+        tree_iter = model.get_iter(path)
+    key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, 0, 1))
     services = __bouquets[key]
     for num, ch_id in enumerate(services):
         channel = __channels.get(ch_id, None)
@@ -286,13 +312,13 @@ def update_bouquet_channels(model, path):
 def is_bouquet_selected():
     """ Checks whether the bouquet is selected
 
-        returns name of selected bouquet or False
+        returns 'name:type' of selected bouquet or False
     """
     selection = __bouquets_view.get_selection()
     model, path = selection.get_selected_rows()
     if len(path) < 1 or model.iter_has_child(model.get_iter(path)):
         return False
-    return model.get_value(model.get_iter(path), 0)
+    return "{}:{}".format(*model.get(model.get_iter(path), 0, 1))
 
 
 def show_message_dialog(text):
@@ -318,6 +344,7 @@ def on_tree_view_key_release(view, event):
     """  Handling  keystrokes  """
     key = event.keyval
     ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+    model_name = view.get_model().get_name()
     if key == Gdk.KEY_Delete:
         on_delete(view)
     elif key == Gdk.KEY_Up:
@@ -328,7 +355,8 @@ def on_tree_view_key_release(view, event):
         # Move items from main to fav list
         on_to_fav_move(view)
     elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
-        on_cut(view)
+        if model_name == FAV_LIST_NAME:
+            on_cut(view)
     elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
         on_paste(view)
 
