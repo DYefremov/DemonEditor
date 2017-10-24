@@ -151,7 +151,8 @@ def on_delete(item):
                             services.remove(fav_id)
                     __channels.pop(fav_id, None)
                 __fav_model.clear()
-                update_bouquet_channels(__fav_model, None, bq_selected)
+                if bq_selected:
+                    update_bouquet_channels(__fav_model, None, bq_selected)
             return rows
 
 
