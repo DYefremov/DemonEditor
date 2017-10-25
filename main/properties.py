@@ -11,6 +11,7 @@ DATA_PATH = "data/"
 def get_config():
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)  # create dir if not exist
     os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
+
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         with open(CONFIG_FILE, "w") as default_config_file:
             json.dump(get_default_settings(), default_config_file)

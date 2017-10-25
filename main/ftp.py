@@ -13,6 +13,7 @@ def download_data(*, properties):
         ftp.cwd(properties["services_path"])
         files = []
         ftp.dir(files.append)
+
         for file in files:
             name = str(file).strip()
             if name.endswith(__DATA_FILES_LIST):
@@ -23,19 +24,23 @@ def download_data(*, properties):
         ftp.cwd(properties["satellites_xml_path"])
         files.clear()
         ftp.dir(files.append)
+
         for file in files:
             name = str(file).strip()
             xml_file = "satellites.xml"
             if name.endswith(xml_file):
                 with open(save_path + xml_file, 'wb') as f:
                     ftp.retrbinary('RETR ' + xml_file, f.write)
+
         for name in os.listdir(save_path):
             print(name)
+
         return ftp.voidcmd("NOOP")
 
 
 def upload_data(*, properties):
     load_path = properties["data_dir_path"]
+
     for file_name in os.listdir(load_path):
         print(file_name)
         # Open the file for transfer in binary mode

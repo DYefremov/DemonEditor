@@ -16,8 +16,7 @@ from collections import namedtuple
 from xml.dom.minidom import parse, Document
 from main.eparser.__constants import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE
 
-# temporary
-__XML_PATH = "../data/"
+__FILE_NAME = "satellites.xml"
 
 Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
 
@@ -59,12 +58,14 @@ def write_satellites(satellites, data_path):
     doc.appendChild(comment)
     root = doc.createElement("satellites")
     doc.appendChild(root)
+
     for sat in satellites:
         #    Create Element
         sat_child = doc.createElement("sat")
         sat_child.setAttribute("name", sat.name)
         sat_child.setAttribute("flags", sat.flags)
         sat_child.setAttribute("position", sat.position)
+
         for tr in sat.transponders:
             transponder_child = doc.createElement("transponder")
             transponder_child.setAttribute("frequency", tr.frequency)
@@ -81,7 +82,7 @@ def write_satellites(satellites, data_path):
                 transponder_child.setAttribute("is_id", tr.is_id)
             sat_child.appendChild(transponder_child)
         root.appendChild(sat_child)
-    doc.writexml(open(data_path + "new_satellites.xml", "w"),
+    doc.writexml(open(data_path + __FILE_NAME, "w"),
                  # indent="",
                  addindent="    ",
                  newl='\n',
@@ -120,9 +121,11 @@ def parse_satellites(path):
     """ Parsing satellites from xml"""
     dom = parse(path)
     satellites = []
+
     for elem in dom.getElementsByTagName("sat"):
         if elem.hasAttributes():
             satellites.append(parse_sat(elem))
+
     return satellites
 
 
@@ -133,9 +136,4 @@ def get_key_by_value(dictionary, value):
 
 
 if __name__ == "__main__":
-    sats = get_satellites(__XML_PATH)
-    for sat in sats:
-        trnsp = sat.transponders
-        for tr in trnsp:
-            if tr.pls_mode or tr.pls_code or tr.is_id:
-                print(tr, sat.name)
+    pass

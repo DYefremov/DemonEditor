@@ -1,10 +1,5 @@
 """ This module only for common constants """
-from collections import namedtuple
 from enum import Enum
-
-Channel = namedtuple("Channel", ["service", "package", "service_type",
-                                 "ssid", "freq", "rate", "pol", "fec",
-                                 "system", "pos", "data_id", "fav_id"])
 
 
 class Type(Enum):

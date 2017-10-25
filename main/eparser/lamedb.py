@@ -3,11 +3,17 @@
       Currently implemented only for satellite channels!!!
      Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
-from main.eparser.__constants import POLARIZATION, SYSTEM, FEC, Channel, SERVICE_TYPE
+from collections import namedtuple
+
+from main.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"
 _SEP = ":"  # separator
+
+Channel = namedtuple("Channel", ["service", "package", "service_type",
+                                 "ssid", "freq", "rate", "pol", "fec",
+                                 "system", "pos", "data_id", "fav_id"])
 
 
 def get_channels(path):
@@ -25,6 +31,7 @@ def parse(path):
     transponders, sep, services = data.partition("transponders")  # 1 step
     transponders, sep, services = services.partition("services")  # 2 step
     services, sep, _ = services.partition("end")  # 3 step
+
     return parse_channels(services.split("\n"), transponders.split("/"))
 
 
@@ -35,18 +42,19 @@ def parse_transponders(arg):
         tr = ar.replace("\n", "").split("\t")
         if len(tr) == 2:
             transponders[tr[0]] = tr[1]
+
     return transponders
 
 
 def parse_channels(*args):
     """ Parsing channels """
+    channels = []
     transponders = parse_transponders(args[1])
 
     srv = split(args[0], 3)
     if srv[0][0] == "":  # remove first empty element
         srv.remove(srv[0])
 
-    channels = []
     for ch in srv:
         data = str(ch[0]).split(_SEP)
         sp = "0"
@@ -73,6 +81,7 @@ def split(itr, size):
         if i % size == 0:
             srv.append(tuple(tmp))
             tmp.clear()
+
     return srv
 
 
