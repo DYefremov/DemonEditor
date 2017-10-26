@@ -1,4 +1,4 @@
-from .lamedb import get_channels, write_channels
+from .lamedb import get_channels, write_channels, Channel
 from .bouquets import get_bouquets, write_bouquets, Bouquet, Bouquets
 from .satxml import get_satellites, write_satellites, Satellite, Transponder
 

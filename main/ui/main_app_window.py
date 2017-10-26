@@ -1,7 +1,7 @@
 from contextlib import suppress
 
 from main.commons import run_task
-from main.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet
+from main.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from main.ftp import download_data, upload_data
 from main.properties import get_config, write_config
 from . import Gtk, Gdk
@@ -320,7 +320,7 @@ def on_data_save(*args):
     write_bouquets(path + "tmp/", bouquets, __bouquets)
     # Getting services
     services_model.foreach(lambda model, s_path, itr:
-                           services.append(model.get(itr, *[item for item in range(s_n_columns)])))
+                           services.append(Channel(*model.get(itr, *[item for item in range(s_n_columns)]))))
     write_channels(path + "tmp/", services)
 
 
