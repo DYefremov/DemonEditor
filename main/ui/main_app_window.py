@@ -30,11 +30,7 @@ __bouquets = {}
 
 
 def on_about_app(item):
-    builder = Gtk.Builder()
-    builder.add_from_file("ui/main_window.glade")
-    dialog = builder.get_object("about_dialog")
-    dialog.run()
-    dialog.destroy()
+    show_dialog("about_dialog")
 
 
 def get_handlers():
@@ -78,11 +74,29 @@ def on_resize(window):
 
 
 def on_up(item):
-    pass
+    move_items(Gdk.KEY_Up)
 
 
 def on_down(item):
-    pass
+    move_items(Gdk.KEY_Down)
+
+
+def move_items(key):
+    """ Move items in fav tree view """
+    selection = __fav_view.get_selection()
+    model, paths = selection.get_selected_rows()
+
+    if paths:
+        for path in paths:
+            itr = model.get_iter(path)
+            if key == Gdk.KEY_Down:
+                next_itr = model.iter_next(itr)
+                if next_itr:
+                    model.move_after(itr, next_itr)
+            elif key == Gdk.KEY_Up:
+                prev_itr = model.iter_previous(itr)
+                if prev_itr:
+                    model.move_before(itr, prev_itr)
 
 
 def on_cut(view):
@@ -143,7 +157,7 @@ def on_delete(item):
 
                 if model_name == BOUQUETS_LIST_NAME:
                     if model.iter_has_child(itr):
-                        show_message_dialog("This item is not allowed to be removed!")
+                        show_dialog("error_dialog", "This item is not allowed to be removed!")
                         return
                     else:
                         __bouquets.pop(bq_selected)
@@ -155,7 +169,7 @@ def on_delete(item):
                 for row in rows:
                     # There are channels with the same parameters except for the name.
                     # None because it can have duplicates! Need fix
-                    fav_id = row[-1]
+                    fav_id = row[-2]
                     for bq in __bouquets:
                         services = __bouquets[bq]
                         with suppress(ValueError):
@@ -191,7 +205,7 @@ def receive_selection(*, view, drop_info, data):
     bq_selected = is_bouquet_selected()
 
     if not bq_selected:
-        show_message_dialog("Error. No bouquet is selected!")
+        show_dialog("error_dialog", "Error. No bouquet is selected!")
         return
 
     model = view.get_model()
@@ -217,7 +231,7 @@ def receive_selection(*, view, drop_info, data):
             dest_index -= 1
             for ext_row in ext_rows:
                 dest_index += 1
-                fav_id = ext_row[11]
+                fav_id = ext_row[13]
                 channel = __channels[fav_id]
                 model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos, channel.fav_id))
                 fav_bouquet.insert(dest_index, channel.fav_id)
@@ -295,6 +309,9 @@ def on_data_open(model):
 @run_task
 def on_data_save(*args):
     #  Perhaps needs a dialog to choose what we need to save!!!
+    if show_dialog("question dialog") == Gtk.ResponseType.CANCEL:
+        return
+
     path = __options["data_dir_path"]
     bouquets = []
     services = []
@@ -369,13 +386,18 @@ def is_bouquet_selected():
     return "{}:{}".format(*model.get(model.get_iter(path), 0, 1))
 
 
-def show_message_dialog(text):
+def show_dialog(dialog_name, text=None):
+    """ Shows dialogs by name id """
     builder = Gtk.Builder()
-    builder.add_from_file("ui/main_window.glade")
-    dialog = builder.get_object("message_dialog")
-    dialog.set_markup(text)
-    dialog.run()
+    builder.add_from_file("ui/dialogs.glade")
+    dialog = builder.get_object(dialog_name)
+    dialog.set_transient_for(__main_window)
+    if text:
+        dialog.set_markup(text)
+    response = dialog.run()
     dialog.destroy()
+
+    return response
 
 
 def delete_selection(view, *args):
@@ -393,12 +415,13 @@ def on_tree_view_key_release(view, event):
     key = event.keyval
     ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
     model_name = view.get_model().get_name()
+
     if key == Gdk.KEY_Delete:
         on_delete(view)
-    elif key == Gdk.KEY_Up:
-        print("Up")
-    elif key == Gdk.KEY_Down:
-        print("Down")
+    elif ctrl and key == Gdk.KEY_Up:
+        move_items(Gdk.KEY_Up)
+    elif ctrl and key == Gdk.KEY_Down:
+        move_items(Gdk.KEY_Down)
     elif key == Gdk.KEY_Insert and view.get_model().get_name() == SERVICE_LIST_NAME:
         # Move items from main to fav list
         on_to_fav_move(view)

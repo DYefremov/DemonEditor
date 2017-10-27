@@ -653,7 +653,7 @@
                     <property name="can_focus">True</property>
                     <property name="model">services_list_store</property>
                     <property name="search_column">2</property>
-                    <property name="hover_selection">True</property>
+                    <property name="rubber_banding">True</property>
                     <property name="enable_grid_lines">both</property>
                     <property name="activate_on_single_click">True</property>
                     <signal name="button-press-event" handler="on_view_popup_menu" object="services_popup_menu" swapped="no"/>
@@ -927,6 +927,7 @@
                         <property name="can_focus">True</property>
                         <property name="model">fav_list_store</property>
                         <property name="search_column">1</property>
+                        <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
                         <signal name="button-press-event" handler="on_view_popup_menu" object="fav_popup_menu" swapped="no"/>
@@ -1049,6 +1050,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="bouquet_type_column">
+                            <property name="visible">False</property>
                             <property name="resizable">True</property>
                             <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Type</property>
@@ -1110,72 +1112,6 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">5</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAboutDialog" id="about_dialog">
-    <property name="can_focus">False</property>
-    <property name="icon_name">system-help</property>
-    <property name="type_hint">normal</property>
-    <property name="transient_for">main_window</property>
-    <property name="program_name">DemonEditor</property>
-    <property name="version">0.1 Pre-alpha</property>
-    <property name="copyright" translatable="yes">2017 Dmitriy Yefremov
-</property>
-    <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>
-    <property name="authors">Dmitriy Yefremov 
-</property>
-    <property name="logo_icon_name">accessories-text-editor</property>
-    <property name="license_type">mit-x11</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="aboutdialog-vbox1">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="aboutdialog-action_area1">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkMessageDialog" id="message_dialog">
-    <property name="can_focus">False</property>
-    <property name="default_width">320</property>
-    <property name="default_height">240</property>
-    <property name="icon_name">accessories-text-editor</property>
-    <property name="type_hint">dialog</property>
-    <property name="transient_for">main_window</property>
-    <property name="message_type">error</property>
-    <property name="buttons">ok</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="messagedialog-vbox">
-        <property name="can_focus">False</property>
-        <property name="resize_mode">immediate</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="messagedialog-action_area">
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
           </packing>
         </child>
       </object>

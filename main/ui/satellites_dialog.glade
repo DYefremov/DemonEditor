@@ -355,7 +355,9 @@
                         <property name="title" translatable="yes">Freq.</property>
                         <property name="expand">True</property>
                         <child>
-                          <object class="GtkCellRendererText" id="frequency_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="frequency_cellrenderertext">
+                            <property name="editable">True</property>
+                          </object>
                           <attributes>
                             <attribute name="text">1</attribute>
                           </attributes>
@@ -367,7 +369,9 @@
                         <property name="title" translatable="yes">Rate</property>
                         <property name="expand">True</property>
                         <child>
-                          <object class="GtkCellRendererText" id="sat_rate_cellrenderertext"/>
+                          <object class="GtkCellRendererText" id="sat_rate_cellrenderertext">
+                            <property name="editable">True</property>
+                          </object>
                           <attributes>
                             <attribute name="text">2</attribute>
                           </attributes>

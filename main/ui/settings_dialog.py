@@ -1,6 +1,8 @@
 from main.properties import write_config
 from . import Gtk
 
+__current_data_path = ""
+
 
 def show_settings_dialog(transient, options):
     handlers = {"on_data_dir_field_icon_press": on_data_dir_field_icon_press}
@@ -25,6 +27,8 @@ def show_settings_dialog(transient, options):
     satellites_xml_field.set_text(options["satellites_xml_path"])
     data_dir_field = builder.get_object("data_dir_field")
     data_dir_field.set_text(options["data_dir_path"])
+    global __current_data_path
+    __current_data_path = options["data_dir_path"]
 
     if dialog.run() == Gtk.ResponseType.OK:
         options["host"] = host_field.get_text()
@@ -43,10 +47,13 @@ def on_data_dir_field_icon_press(*args):
     builder = Gtk.Builder()
     builder.add_from_file("ui/settings_dialog.glade")
     dialog = builder.get_object("path_chooser_dialog")
+    dialog.set_current_folder(__current_data_path)
     response = dialog.run()
     if response == -12:  # for fix assertion 'gtk_widget_get_can_default (widget)' failed
         args[0].set_text(dialog.get_filename())
     dialog.destroy()
+
+    return response
 
 
 if __name__ == "__main__":
