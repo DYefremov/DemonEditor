@@ -27,6 +27,8 @@ __bouquets_view = None
 __rows_buffer = []
 __channels = {}
 __bouquets = {}
+# dynamically active elements depending on the selected view
+__tool_elements = None
 
 
 def on_about_app(item):
@@ -58,7 +60,8 @@ def get_handlers():
         "on_services_tree_view_drag_data_get": on_services_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_get": on_fav_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_received": on_fav_tree_view_drag_data_received,
-        "on_view_popup_menu": on_view_popup_menu
+        "on_view_popup_menu": on_view_popup_menu,
+        "on_view_focus": on_view_focus
     }
 
 
@@ -282,28 +285,35 @@ def on_satellite_editor_show(model):
 
 @run_task
 def on_data_open(model):
+    if show_dialog("path_chooser_dialog") == Gtk.ResponseType.CANCEL:
+        return
+
+    open_data()
+
+
+def open_data():
+    """ Opening data and fill views. """
     try:
-        model.clear()
+        __bouquets_model.clear()
         __fav_model.clear()
-        model_name = model.get_name()
-        data_path = get_config()["data_dir_path"]
+        __services_model.clear()
+        data_path = __options["data_dir_path"]
 
-        if model_name == SERVICE_LIST_NAME:
-            for ch in get_channels(data_path + "lamedb"):
-                #  adding channels to dict with fav_id as keys
-                __channels[ch.fav_id] = ch
-                model.append(ch)
+        for ch in get_channels(data_path + "lamedb"):
+            #  adding channels to dict with fav_id as keys
+            __channels[ch.fav_id] = ch
+            __services_model.append(ch)
 
-        if model_name == BOUQUETS_LIST_NAME:
-            bouquets = get_bouquets(data_path)
-            for bouquet in bouquets:
-                parent = model.append(None, [bouquet.name, bouquet.type])
-                for bt in bouquet.bouquets:
-                    name, bt_type = bt.name, bt.type
-                    model.append(parent, [name, bt_type])
-                    __bouquets["{}:{}".format(name, bt_type)] = bt.services
+        bouquets = get_bouquets(data_path)
+        for bouquet in bouquets:
+            parent = __bouquets_model.append(None, [bouquet.name, bouquet.type])
+            for bt in bouquet.bouquets:
+                name, bt_type = bt.name, bt.type
+                __bouquets_model.append(parent, [name, bt_type])
+                __bouquets["{}:{}".format(name, bt_type)] = bt.services
     except Exception as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
+        raise e  # temp for debug
 
 
 @run_task
@@ -394,6 +404,8 @@ def show_dialog(dialog_name, text=None):
     dialog.set_transient_for(__main_window)
     if text:
         dialog.set_markup(text)
+    if dialog_name == "path_chooser_dialog":
+        dialog.set_current_folder(__options["data_dir_path"])
     response = dialog.run()
     dialog.destroy()
 
@@ -432,16 +444,46 @@ def on_tree_view_key_release(view, event):
         on_paste(view)
 
 
+@run_task
 def on_upload(item):
     connect(__options, False)
 
 
+@run_task
 def on_download(item):
     connect(__options)
+    open_data()
 
 
 def on_reload(item):
     pass
+
+
+def on_view_focus(view, focus_event):
+    model = view.get_model()
+    model_name = model.get_name()
+
+    empty = len(model) == 0  # if  > 0 model has items
+
+    if empty:
+        return
+
+    fav_elements = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button")
+    service_elements = ("copy_tool_button", "to_fav_tool_button")
+
+    if model_name == BOUQUETS_LIST_NAME:
+        for elem in __tool_elements:
+            __tool_elements[elem].set_sensitive(False)
+        __tool_elements["new_tool_button"].set_sensitive(True)
+    else:
+        is_service = model_name == SERVICE_LIST_NAME
+        for elem in fav_elements:
+            __tool_elements[elem].set_sensitive(not is_service)
+        for elem in service_elements:
+            __tool_elements[elem].set_sensitive(is_service)
+        __tool_elements["new_tool_button"].set_sensitive(False)
+
+    __tool_elements["remove_tool_button"].set_sensitive(not empty)
 
 
 def connect(properties, download=True):
@@ -470,8 +512,18 @@ def init_ui():
     __bouquets_view = builder.get_object("bouquets_tree_view")
     global __fav_model
     __fav_model = builder.get_object("fav_list_store")
+    global __services_model
+    __services_model = builder.get_object("services_list_store")
+    global __bouquets_model
+    __bouquets_model = builder.get_object("bouquets_tree_store")
     global __status_bar
     __status_bar = builder.get_object("status_bar")
+    # dynamically active elements depending on the selected view
+    global __tool_elements
+    __tool_elements = {k: builder.get_object(k) for k in ("up_tool_button", "down_tool_button",
+                                                          "cut_tool_button", "copy_tool_button",
+                                                          "paste_tool_button", "to_fav_tool_button",
+                                                          "new_tool_button", "remove_tool_button")}
     builder.connect_signals(get_handlers())
     init_drag_and_drop()  # drag and drop
     __main_window.show_all()

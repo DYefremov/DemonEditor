@@ -32,9 +32,6 @@ def download_data(*, properties):
                 with open(save_path + xml_file, 'wb') as f:
                     ftp.retrbinary('RETR ' + xml_file, f.write)
 
-        for name in os.listdir(save_path):
-            print(name)
-
         return ftp.voidcmd("NOOP")
 
 

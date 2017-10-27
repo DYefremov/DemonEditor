@@ -7,7 +7,7 @@ __current_data_path = ""
 def show_settings_dialog(transient, options):
     handlers = {"on_data_dir_field_icon_press": on_data_dir_field_icon_press}
     builder = Gtk.Builder()
-    builder.add_from_file("ui/settings_dialog.glade")
+    builder.add_from_file("ui/dialogs.glade")
     builder.connect_signals(handlers)
     dialog = builder.get_object("settings_dialog")
     dialog.set_transient_for(transient)
@@ -43,14 +43,14 @@ def show_settings_dialog(transient, options):
     dialog.destroy()
 
 
-def on_data_dir_field_icon_press(*args):
+def on_data_dir_field_icon_press(entry, icon, event_button):
     builder = Gtk.Builder()
-    builder.add_from_file("ui/settings_dialog.glade")
+    builder.add_from_file("ui/dialogs.glade")
     dialog = builder.get_object("path_chooser_dialog")
     dialog.set_current_folder(__current_data_path)
     response = dialog.run()
-    if response == -12:  # for fix assertion 'gtk_widget_get_can_default (widget)' failed
-        args[0].set_text(dialog.get_filename())
+    if response == -12:  # -12 for fix assertion 'gtk_widget_get_can_default (widget)' failed
+        entry.set_text(dialog.get_filename() if dialog.get_filename() else __current_data_path)
     dialog.destroy()
 
     return response
