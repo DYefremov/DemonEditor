@@ -29,6 +29,10 @@ __channels = {}
 __bouquets = {}
 # dynamically active elements depending on the selected view
 __tool_elements = None
+_SERVICE__ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item")
+_REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item")
+_FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button",
+                 "paste_tool_button", "cut_menu_item", "paste_menu_item")
 
 
 def on_about_app(item):
@@ -107,8 +111,11 @@ def on_cut(view):
         __rows_buffer.append(row)
 
 
-def on_copy(item):
-    pass
+def on_copy(view):
+    model, paths = view.get_selection().get_selected_rows()
+    itrs = [model.get_iter(path) for path in paths]
+    rows = [(0, *model.get(in_itr, 2, 4, 11, 13)) for in_itr in itrs]
+    __rows_buffer.extend(rows)
 
 
 def on_paste(view):
@@ -434,9 +441,11 @@ def on_tree_view_key_release(view, event):
         move_items(Gdk.KEY_Up)
     elif ctrl and key == Gdk.KEY_Down:
         move_items(Gdk.KEY_Down)
-    elif key == Gdk.KEY_Insert and view.get_model().get_name() == SERVICE_LIST_NAME:
+    elif key == Gdk.KEY_Insert and model_name == SERVICE_LIST_NAME:
         # Move items from main to fav list
         on_to_fav_move(view)
+    elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C) and model_name == SERVICE_LIST_NAME:
+        on_copy(view)
     elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
         if model_name == FAV_LIST_NAME:
             on_cut(view)
@@ -468,22 +477,20 @@ def on_view_focus(view, focus_event):
     if empty:
         return
 
-    fav_elements = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button")
-    service_elements = ("copy_tool_button", "to_fav_tool_button")
-
     if model_name == BOUQUETS_LIST_NAME:
         for elem in __tool_elements:
             __tool_elements[elem].set_sensitive(False)
         __tool_elements["new_tool_button"].set_sensitive(True)
     else:
         is_service = model_name == SERVICE_LIST_NAME
-        for elem in fav_elements:
+        for elem in _FAV_ELEMENTS:
             __tool_elements[elem].set_sensitive(not is_service)
-        for elem in service_elements:
+        for elem in _SERVICE__ELEMENTS:
             __tool_elements[elem].set_sensitive(is_service)
         __tool_elements["new_tool_button"].set_sensitive(False)
 
-    __tool_elements["remove_tool_button"].set_sensitive(not empty)
+    for elem in _REMOVE_ELEMENTS:
+        __tool_elements[elem].set_sensitive(not empty)
 
 
 def connect(properties, download=True):
@@ -523,7 +530,9 @@ def init_ui():
     __tool_elements = {k: builder.get_object(k) for k in ("up_tool_button", "down_tool_button",
                                                           "cut_tool_button", "copy_tool_button",
                                                           "paste_tool_button", "to_fav_tool_button",
-                                                          "new_tool_button", "remove_tool_button")}
+                                                          "new_tool_button", "remove_tool_button",
+                                                          "cut_menu_item", "copy_menu_item",
+                                                          "paste_menu_item", "delete_menu_item")}
     builder.connect_signals(get_handlers())
     init_drag_and_drop()  # drag and drop
     __main_window.show_all()
