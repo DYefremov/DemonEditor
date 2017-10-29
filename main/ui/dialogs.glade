@@ -4,6 +4,8 @@
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
@@ -42,11 +44,13 @@ dmitry.v.yefremov@gmail.com
     </child>
   </object>
   <object class="GtkMessageDialog" id="error_dialog">
+    <property name="width_request">320</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="default_width">320</property>
     <property name="default_height">240</property>
+    <property name="destroy_with_parent">True</property>
     <property name="icon_name">accessories-text-editor</property>
     <property name="type_hint">dialog</property>
     <property name="message_type">error</property>
@@ -71,12 +75,105 @@ dmitry.v.yefremov@gmail.com
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="question dialog">
+  <object class="GtkDialog" id="input_dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes"> </property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">gtk-edit</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="input_dialog_vbox">
+        <property name="width_request">320</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area2">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button3">
+                <property name="label">gtk-undo</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button4">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="input_dialog_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">5</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkEntry" id="input_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="primary_icon_stock">gtk-edit</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="secondary_icon_sensitive">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button3</action-widget>
+      <action-widget response="-5">button4</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkMessageDialog" id="question_dialog">
+    <property name="width_request">320</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="default_width">320</property>
     <property name="default_height">240</property>
+    <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="message_type">question</property>
     <property name="buttons">ok-cancel</property>

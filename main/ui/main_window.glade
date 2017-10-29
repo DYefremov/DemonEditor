@@ -6,16 +6,27 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="menuitem6">
-        <property name="label">gtk-add</property>
+      <object class="GtkImageMenuItem" id="bouquets_new_popup_menui_tem">
+        <property name="label">gtk-new</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="menuitem7">
+      <object class="GtkImageMenuItem" id="bouguets_edit_popup_menui_tem">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_bouquets_edit" object="bouquets_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquets_remove_popup_menui_tem">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -569,10 +580,36 @@
                 <property name="label" translatable="yes">New</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
+                <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="edit_tool_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Edit </property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-edit</property>
+                <signal name="clicked" handler="on_bouquets_edit" object="bouquets_tree_view" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -618,6 +655,7 @@
               <object class="GtkToolButton" id="tools_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Satellites edit tool</property>
                 <property name="label" translatable="yes">Tools</property>
                 <property name="use_underline">True</property>
                 <property name="icon_name">applications-utilities</property>
@@ -1071,6 +1109,7 @@
                         <property name="activate_on_single_click">True</property>
                         <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
                         <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
+                        <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
                         <signal name="row-activated" handler="on_bouquets_selection" object="bouquets_tree_store" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="bouquets_selection"/>

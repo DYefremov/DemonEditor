@@ -29,7 +29,8 @@ __channels = {}
 __bouquets = {}
 # dynamically active elements depending on the selected view
 __tool_elements = None
-_SERVICE__ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item")
+_SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item")
+_BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button")
 _REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item")
 _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button",
                  "paste_tool_button", "cut_menu_item", "paste_menu_item")
@@ -60,6 +61,8 @@ def get_handlers():
         "on_copy": on_copy,
         "on_paste": on_paste,
         "on_delete": on_delete,
+        "on_new_bouquet": on_new_bouquet,
+        "on_bouquets_edit": on_bouquets_edit,
         "on_to_fav_move": on_to_fav_move,
         "on_services_tree_view_drag_data_get": on_services_tree_view_drag_data_get,
         "on_fav_tree_view_drag_data_get": on_fav_tree_view_drag_data_get,
@@ -159,14 +162,14 @@ def on_delete(item):
             fav_bouquet = None
 
             if bq_selected:
-                fav_bouquet = __bouquets[bq_selected]
+                fav_bouquet = __bouquets.get(bq_selected, None)
 
             for itr in itrs:
                 if fav_bouquet and model_name == FAV_LIST_NAME:
                     del fav_bouquet[int(model.get_path(itr)[0])]
 
                 if model_name == BOUQUETS_LIST_NAME:
-                    if model.iter_has_child(itr):
+                    if len(model.get_path(itr)) < 2:
                         show_dialog("error_dialog", "This item is not allowed to be removed!")
                         return
                     else:
@@ -190,6 +193,61 @@ def on_delete(item):
                     update_bouquet_channels(__fav_model, None, bq_selected)
 
             return rows
+
+
+def on_new_bouquet(view):
+    """ Creates a new item in the bouquets tree """
+    model, paths = view.get_selection().get_selected_rows()
+
+    if paths:
+        itr = model.get_iter(paths[0])
+        bq_type = model.get_value(itr, 1)
+        bq_name = "bouquet"
+        count = 0
+        key = "{}:{}".format(bq_name, bq_type)
+        #  Generating name of new bouquet
+        while key in __bouquets:
+            count += 1
+            bq_name = "bouquet{}".format(count)
+            key = "{}:{}".format(bq_name, bq_type)
+
+        response = show_dialog("input_dialog", bq_name)
+
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        bq = response, bq_type
+
+        if model.iter_n_children(itr):  # parent
+            model.insert(itr, 0, bq)
+        else:
+            parent_itr = model.iter_parent(itr)
+            if parent_itr:
+                index = int(model.get_path(itr)[1]) + 1
+                model.insert(parent_itr, index, bq)
+            else:
+                model.append(itr, bq)
+        __bouquets[key] = []
+
+
+def on_bouquets_edit(view):
+    """ Rename bouquets """
+    if not is_bouquet_selected():
+        show_dialog("error_dialog", "This item is not allowed to edit!")
+        return
+
+    model, paths = view.get_selection().get_selected_rows()
+
+    if paths:
+        itr = model.get_iter(paths[0])
+        bq_name, bq_type = model.get(itr, 0, 1)
+        response = show_dialog("input_dialog", bq_name)
+
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        model.set_value(itr, 0, response)
+        __bouquets["{}:{}".format(response, bq_type)] = __bouquets.pop("{}:{}".format(bq_name, bq_type))
 
 
 def on_to_fav_move(view):
@@ -312,6 +370,7 @@ def open_data():
             __services_model.append(ch)
 
         bouquets = get_bouquets(data_path)
+
         for bouquet in bouquets:
             parent = __bouquets_model.append(None, [bouquet.name, bouquet.type])
             for bt in bouquet.bouquets:
@@ -320,13 +379,12 @@ def open_data():
                 __bouquets["{}:{}".format(name, bt_type)] = bt.services
     except Exception as e:
         __status_bar.push(1, getattr(e, "message", repr(e)))
-        raise e  # temp for debug
 
 
 @run_task
 def on_data_save(*args):
     #  Perhaps needs a dialog to choose what we need to save!!!
-    if show_dialog("question dialog") == Gtk.ResponseType.CANCEL:
+    if show_dialog("question_dialog") == Gtk.ResponseType.CANCEL:
         return
 
     path = __options["data_dir_path"]
@@ -397,7 +455,7 @@ def is_bouquet_selected():
     selection = __bouquets_view.get_selection()
     model, path = selection.get_selected_rows()
 
-    if len(path) < 1 or model.iter_has_child(model.get_iter(path)):
+    if not path or len(path[0]) < 2:
         return False
 
     return "{}:{}".format(*model.get(model.get_iter(path), 0, 1))
@@ -409,10 +467,22 @@ def show_dialog(dialog_name, text=None):
     builder.add_from_file("ui/dialogs.glade")
     dialog = builder.get_object(dialog_name)
     dialog.set_transient_for(__main_window)
-    if text:
-        dialog.set_markup(text)
+
     if dialog_name == "path_chooser_dialog":
         dialog.set_current_folder(__options["data_dir_path"])
+
+    if dialog_name == "input_dialog":
+        entry = builder.get_object("input_entry")
+        entry.set_text(text)
+        response = dialog.run()
+        txt = entry.get_text()
+        dialog.destroy()
+
+        return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
+
+    if text:
+        dialog.set_markup(text)
+
     response = dialog.run()
     dialog.destroy()
 
@@ -441,9 +511,14 @@ def on_tree_view_key_release(view, event):
         move_items(Gdk.KEY_Up)
     elif ctrl and key == Gdk.KEY_Down:
         move_items(Gdk.KEY_Down)
-    elif key == Gdk.KEY_Insert and model_name == SERVICE_LIST_NAME:
+    elif key == Gdk.KEY_Insert:
         # Move items from main to fav list
-        on_to_fav_move(view)
+        if model_name == SERVICE_LIST_NAME:
+            on_to_fav_move(view)
+        elif model_name == BOUQUETS_LIST_NAME:
+            on_new_bouquet(view)
+    elif key == Gdk.KEY_F2 and model_name == BOUQUETS_LIST_NAME:
+        on_bouquets_edit(view)
     elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C) and model_name == SERVICE_LIST_NAME:
         on_copy(view)
     elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
@@ -468,6 +543,7 @@ def on_reload(item):
     pass
 
 
+@run_task
 def on_view_focus(view, focus_event):
     model = view.get_model()
     model_name = model.get_name()
@@ -480,14 +556,16 @@ def on_view_focus(view, focus_event):
     if model_name == BOUQUETS_LIST_NAME:
         for elem in __tool_elements:
             __tool_elements[elem].set_sensitive(False)
-        __tool_elements["new_tool_button"].set_sensitive(True)
+        for elem in _BOUQUET_ELEMENTS:
+            __tool_elements[elem].set_sensitive(True)
     else:
         is_service = model_name == SERVICE_LIST_NAME
         for elem in _FAV_ELEMENTS:
             __tool_elements[elem].set_sensitive(not is_service)
-        for elem in _SERVICE__ELEMENTS:
+        for elem in _SERVICE_ELEMENTS:
             __tool_elements[elem].set_sensitive(is_service)
-        __tool_elements["new_tool_button"].set_sensitive(False)
+        for elem in _BOUQUET_ELEMENTS:
+            __tool_elements[elem].set_sensitive(False)
 
     for elem in _REMOVE_ELEMENTS:
         __tool_elements[elem].set_sensitive(not empty)
@@ -532,7 +610,8 @@ def init_ui():
                                                           "paste_tool_button", "to_fav_tool_button",
                                                           "new_tool_button", "remove_tool_button",
                                                           "cut_menu_item", "copy_menu_item",
-                                                          "paste_menu_item", "delete_menu_item")}
+                                                          "paste_menu_item", "delete_menu_item",
+                                                          "edit_tool_button")}
     builder.connect_signals(get_handlers())
     init_drag_and_drop()  # drag and drop
     __main_window.show_all()
