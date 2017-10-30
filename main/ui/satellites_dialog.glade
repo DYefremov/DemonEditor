@@ -2,6 +2,87 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkListStore" id="fec_store">
+    <columns>
+      <!-- column-name fec -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">1/2</col>
+      </row>
+      <row>
+        <col id="0">2/3</col>
+      </row>
+      <row>
+        <col id="0">3/4</col>
+      </row>
+      <row>
+        <col id="0">5/6</col>
+      </row>
+      <row>
+        <col id="0">6/7</col>
+      </row>
+      <row>
+        <col id="0">7/8</col>
+      </row>
+      <row>
+        <col id="0">8/9</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">3/5</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">4/5</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">9/10</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="mod_store">
+    <columns>
+      <!-- column-name mod -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">Auto</col>
+      </row>
+      <row>
+        <col id="0">QPSK</col>
+      </row>
+      <row>
+        <col id="0">8PSK</col>
+      </row>
+      <row>
+        <col id="0">16APSK</col>
+      </row>
+      <row>
+        <col id="0">32APSK</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="pol_store">
+    <columns>
+      <!-- column-name pol -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">H</col>
+      </row>
+      <row>
+        <col id="0">V</col>
+      </row>
+      <row>
+        <col id="0">R</col>
+      </row>
+      <row>
+        <col id="0">L</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkMenu" id="popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -62,6 +143,20 @@
       <!-- column-name pos -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkListStore" id="system_store">
+    <columns>
+      <!-- column-name system -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">DVB-S</col>
+      </row>
+      <row>
+        <col id="0">DVB-S2</col>
+      </row>
+    </data>
   </object>
   <object class="GtkDialog" id="satellites_editor_dialog">
     <property name="width_request">640</property>
@@ -290,6 +385,7 @@
                 <child>
                   <object class="GtkToolButton" id="edit_tool_button">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Edit</property>
                     <property name="use_underline">True</property>
@@ -340,6 +436,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="satellite_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Satellite</property>
                         <property name="expand">True</property>
                         <child>
@@ -352,11 +449,13 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="freq_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Freq.</property>
                         <property name="expand">True</property>
                         <child>
                           <object class="GtkCellRendererText" id="frequency_cellrenderertext">
                             <property name="editable">True</property>
+                            <signal name="edited" handler="on_edited" object="satellites_editor_tree_view" swapped="no"/>
                           </object>
                           <attributes>
                             <attribute name="text">1</attribute>
@@ -365,12 +464,14 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkTreeViewColumn" id="rate_column1">
+                      <object class="GtkTreeViewColumn" id="rate_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Rate</property>
                         <property name="expand">True</property>
                         <child>
                           <object class="GtkCellRendererText" id="sat_rate_cellrenderertext">
                             <property name="editable">True</property>
+                            <signal name="edited" handler="on_edited" object="satellites_editor_tree_view" swapped="no"/>
                           </object>
                           <attributes>
                             <attribute name="text">2</attribute>
@@ -380,10 +481,16 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="pol_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Pol.</property>
                         <property name="expand">True</property>
                         <child>
-                          <object class="GtkCellRendererText" id="sat_pol_cellrenderertext"/>
+                          <object class="GtkCellRendererCombo" id="sat_pol_cellrenderertext">
+                            <property name="editable">True</property>
+                            <property name="model">pol_store</property>
+                            <property name="text_column">0</property>
+                            <signal name="changed" handler="on_edited" object="satellites_editor_tree_view" swapped="no"/>
+                          </object>
                           <attributes>
                             <attribute name="text">3</attribute>
                           </attributes>
@@ -392,10 +499,16 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="fec_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Fec.</property>
                         <property name="expand">True</property>
                         <child>
-                          <object class="GtkCellRendererText" id="set_fec_cellrenderertext"/>
+                          <object class="GtkCellRendererCombo" id="set_fec_cellrenderertext">
+                            <property name="editable">True</property>
+                            <property name="model">fec_store</property>
+                            <property name="text_column">0</property>
+                            <signal name="changed" handler="on_edited" object="satellites_editor_tree_view" swapped="no"/>
+                          </object>
                           <attributes>
                             <attribute name="text">4</attribute>
                           </attributes>
@@ -404,10 +517,16 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="sys_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">System</property>
                         <property name="expand">True</property>
                         <child>
-                          <object class="GtkCellRendererText" id="sys_cellrenderertext"/>
+                          <object class="GtkCellRendererCombo" id="sys_cellrenderertext">
+                            <property name="editable">True</property>
+                            <property name="model">system_store</property>
+                            <property name="text_column">0</property>
+                            <signal name="changed" handler="on_edited" object="satellites_editor_tree_view" swapped="no"/>
+                          </object>
                           <attributes>
                             <attribute name="text">5</attribute>
                           </attributes>
@@ -416,10 +535,16 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="mod_column">
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Mod.</property>
                         <property name="expand">True</property>
                         <child>
-                          <object class="GtkCellRendererText" id="mod_cellrenderertext"/>
+                          <object class="GtkCellRendererCombo" id="mod_cellrenderertext">
+                            <property name="editable">True</property>
+                            <property name="model">mod_store</property>
+                            <property name="text_column">0</property>
+                            <signal name="changed" handler="on_edited" object="satellites_editor_tree_view" swapped="no"/>
+                          </object>
                           <attributes>
                             <attribute name="text">6</attribute>
                           </attributes>
@@ -429,6 +554,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="pls_mode_column">
                         <property name="visible">False</property>
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Pls mode</property>
                         <property name="expand">True</property>
                         <child>
@@ -442,6 +568,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="pls_code_column">
                         <property name="visible">False</property>
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Pls code</property>
                         <property name="expand">True</property>
                         <child>
@@ -469,6 +596,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="flags_column">
                         <property name="visible">False</property>
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Flags</property>
                         <child>
                           <object class="GtkCellRendererText" id="flags_cellrenderertext"/>
@@ -481,6 +609,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="pos_column">
                         <property name="visible">False</property>
+                        <property name="resizable">True</property>
                         <property name="title" translatable="yes">Pos:</property>
                         <child>
                           <object class="GtkCellRendererText" id="pos_cellrenderertext"/>

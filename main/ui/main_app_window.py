@@ -389,9 +389,7 @@ def on_data_save(*args):
 
     path = __options["data_dir_path"]
     bouquets = []
-    services = []
     services_model = __services_view.get_model()
-    s_n_columns = services_model.get_n_columns()
 
     def parse_bouquets(model, b_path, itr):
         if model.iter_has_child(itr):
@@ -411,8 +409,7 @@ def on_data_save(*args):
     __bouquets_view.get_model().foreach(parse_bouquets)
     write_bouquets(path + "tmp/", bouquets, __bouquets)
     # Getting services
-    services_model.foreach(lambda model, s_path, itr:
-                           services.append(Channel(*model.get(itr, *[item for item in range(s_n_columns)]))))
+    services = [Channel(*row[:]) for row in services_model]
     write_channels(path + "tmp/", services)
 
 

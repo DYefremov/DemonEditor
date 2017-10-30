@@ -1,16 +1,6 @@
 """ Module foe parsing Satellites.xml
 
-Transponder parameters:
-polarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular
-fec_inner: 0 - Auto, 1 - 1/2, 2 - 2_3, 3 - 3/4, 4 - 5/6, 5 - 6/7, 6 - 7/8, 7 - 8/9, 8 - 3/5, 9 - 4/5, 10 - 9/10
-modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 3 - 16APSK, 5 - 32APSK
-rolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto
-pilot: 0 - Off, 1 - On, 2 - Auto
-inversion: 0 = Off, 1 = On, 2 = Auto (default)
-system: 0 = DVB-S, 1 = DVB-S2
-is_id: 0 - 255
-pls_mode: 0 - Root, 1 - Gold, 2 - Combo
-pls_code: 0 - 262142
+    For more info see __COMMENT
 """
 from collections import namedtuple
 from xml.dom.minidom import parse, Document
@@ -34,7 +24,7 @@ __COMMENT = ("   File was created in DemonEditor\n\n"
 
              "transponder parameters:\n"
              "polarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular\n"
-             "fec_inner: 0 - Auto, 1 - 1/2, 2 - 2_3, 3 - 3/4, 4 - 5/6, 5 - 6/7, 6 - 7/8, 7 - 8/9, "
+             "fec_inner: 0 - Auto, 1 - 1/2, 2 - 2/3, 3 - 3/4, 4 - 5/6, 5 - 6/7, 6 - 7/8, 7 - 8/9, "
              "8 - 3/5, 9 - 4/5, 10 - 9/10\n"
              "modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 3 - 16APSK, 5 - 32APSK\n"
              "rolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto\n"

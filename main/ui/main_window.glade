@@ -98,11 +98,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-edit</property>
-  </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -655,7 +650,7 @@
               <object class="GtkToolButton" id="tools_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Satellites edit tool</property>
+                <property name="tooltip_text" translatable="yes">Satellites editor</property>
                 <property name="label" translatable="yes">Tools</property>
                 <property name="use_underline">True</property>
                 <property name="icon_name">applications-utilities</property>
