@@ -31,6 +31,7 @@ class SatellitesDialog:
 
         self._dialog = builder.get_object("satellites_editor_dialog")
         self._dialog.set_transient_for(transient)
+        self._dialog.get_content_area().set_border_width(0)  # The width of the border around the main dialog area!
         self._stores = {3: builder.get_object("pol_store"),
                         4: builder.get_object("fec_store"),
                         5: builder.get_object("system_store"),
@@ -227,4 +228,4 @@ class SatelliteDialog:
 
 
 if __name__ == "__main__":
-    pass
+    Gtk.STYLE_CLASS_VIEW
