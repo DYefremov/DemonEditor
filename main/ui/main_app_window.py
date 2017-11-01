@@ -345,7 +345,7 @@ def on_view_popup_menu(menu, event):
 
 def on_satellite_editor_show(model):
     """ Shows satellites editor dialog """
-    show_satellites_dialog(__main_window, __options["data_dir_path"])
+    show_satellites_dialog(__main_window, __options)
 
 
 @run_task

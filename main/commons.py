@@ -8,6 +8,7 @@ def run_task(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         task = Thread(target=func(*args, **kwargs))
+        task.setDaemon(True)
         task.start()
 
     return wrapper

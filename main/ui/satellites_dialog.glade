@@ -172,8 +172,11 @@
     <property name="width_request">640</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Satellites</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
     <property name="icon_name">applications-utilities</property>
     <property name="type_hint">dialog</property>
+    <signal name="check-resize" handler="on_resize" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox">
         <property name="can_focus">False</property>
@@ -306,6 +309,7 @@
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_edit" object="satellites_editor_tree_view" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -315,6 +319,7 @@
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_remove" object="tree_view_selection" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -443,7 +448,10 @@
                     <property name="can_focus">True</property>
                     <property name="model">satellites_tree_store</property>
                     <property name="search_column">0</property>
+                    <property name="rubber_banding">True</property>
+                    <property name="enable_tree_lines">True</property>
                     <signal name="button-press-event" handler="on_popup_menu" object="popup_menu" swapped="no"/>
+                    <signal name="key-release-event" handler="on_key_release" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="tree_view_selection">
                         <property name="mode">multiple</property>

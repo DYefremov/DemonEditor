@@ -5,24 +5,28 @@ from main.eparser import get_satellites, write_satellites, Satellite, Transponde
 from . import Gtk, Gdk
 
 
-def show_satellites_dialog(transient, data_path):
-    dialog = SatellitesDialog(transient, data_path)
+def show_satellites_dialog(transient, options):
+    dialog = SatellitesDialog(transient, options)
     dialog.run()
     dialog.destroy()
 
 
 class SatellitesDialog:
-    __slots__ = ["_dialog", "_data_path", "_stores"]
+    _aggr = [None for x in range(9)]  # aggregate
+    __slots__ = ["_dialog", "_data_path", "_stores", "_options"]
 
-    def __init__(self, transient, data_path):
-        self._data_path = data_path
+    def __init__(self, transient, options):
+        self._data_path = options["data_dir_path"]
+        self._options = options
 
         handlers = {"on_satellites_list_load": self.on_satellites_list_load,
                     "on_remove": self.on_remove,
                     "on_save": self.on_save,
                     "on_popup_menu": self.on_popup_menu,
                     "on_add": self.on_add,
-                    "on_edit": self.on_edit}
+                    "on_edit": self.on_edit,
+                    "on_key_release": self.on_key_release,
+                    "on_resize": self.on_resize}
 
         builder = Gtk.Builder()
         builder.add_objects_from_file("./ui/satellites_dialog.glade",
@@ -32,6 +36,11 @@ class SatellitesDialog:
         self._dialog = builder.get_object("satellites_editor_dialog")
         self._dialog.set_transient_for(transient)
         self._dialog.get_content_area().set_border_width(0)  # The width of the border around the main dialog area!
+        # Setting the last size of the dialog window if it was saved
+        window_size = self._options.get("sat_editor_window_size", None)
+        if window_size:
+            self._dialog.resize(*window_size)
+
         self._stores = {3: builder.get_object("pol_store"),
                         4: builder.get_object("fec_store"),
                         5: builder.get_object("system_store"),
@@ -43,15 +52,31 @@ class SatellitesDialog:
     def destroy(self):
         self._dialog.destroy()
 
+    def on_resize(self, window):
+        """ Stores new size properties for dialog window after resize """
+        if self._options:
+            self._options["sat_editor_window_size"] = window.get_size()
+
+    def on_key_release(self, view, event):
+        """  Handling  keystrokes  """
+        key = event.keyval
+        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+
+        if key == Gdk.KEY_Delete:
+            self.on_remove(view)
+        elif key == Gdk.KEY_Insert:
+            self.on_add(view)
+        elif key == Gdk.KEY_F2:
+            self.on_edit(view)
+
     @run_task
     def on_satellites_list_load(self, model):
         """ Load satellites data into model """
         satellites = get_satellites(self._data_path)
         model.clear()
-        aggr = [None for x in range(9)]
 
         for name, flags, pos, transponders in satellites:
-            parent = model.append(None, [name, *aggr, flags, pos])
+            parent = model.append(None, [name, *self._aggr, flags, pos])
             for transponder in transponders:
                 model.append(parent, ["Transponder:", *transponder, None, None])
 
@@ -69,26 +94,41 @@ class SatellitesDialog:
             print("Error dialog!")
             return
 
-        row = model.get(model.get_iter(paths[0]), *[x for x in range(view.get_n_columns())])
+        itr = model.get_iter(paths[0])
+        row = model.get(itr, *[x for x in range(view.get_n_columns())])
         # maybe temporary!
         if row[-1]:  # satellite
-            self.on_satellite(None if force else Satellite(row[0], None, row[-1], None))
+            sat = self.on_satellite(None if force else Satellite(row[0], None, row[-1], None))
+            if not sat:
+                return
+            if force:
+                model.insert(None, int(paths[0][0] + 1), [sat.name, *self._aggr, sat.flags, sat.position])
+            else:
+                model.set(itr, {0: sat.name, 10: sat.flags, 11: sat.position})
         else:
-            self.on_transponder(None if force else Transponder(*row[1:-2]))
+            tr = self.on_transponder(None if force else Transponder(*row[1:-2]))
+            if not tr:
+                return
+            if force:
+                model.insert(model.iter_parent(itr), int(paths[0][0] + 1), ["Transponder:", *tr, None, None])
+            else:
+                model.set(itr, {1: tr.frequency, 2: tr.symbol_rate, 3: tr.polarization,
+                                4: tr.fec_inner, 5: tr.system, 6: tr.modulation,
+                                7: tr.pls_mode, 8: tr.pls_code, 9: tr.is_id})
 
     def on_satellite(self, satellite=None):
         sat_dialog = SatelliteDialog(self._dialog, satellite)
         sat = sat_dialog.run()
-        if sat:
-            print(sat)
         sat_dialog.destroy()
+
+        return sat
 
     def on_transponder(self, transponder=None):
         dialog = TransponderDialog(self._dialog, transponder)
         tr = dialog.run()
-        if tr:
-            print(tr)
         dialog.destroy()
+
+        return tr
 
     @staticmethod
     def on_remove(view):
@@ -164,7 +204,6 @@ class TransponderDialog:
         self._dialog.destroy()
 
     def init_transponder(self, transponder):
-        print(transponder)
         self._freq_entry.set_text(transponder.frequency)
         self._rate_entry.set_text(transponder.symbol_rate)
         self._pol_box.set_active_id(transponder.polarization)
@@ -177,7 +216,7 @@ class TransponderDialog:
 
     def to_transponder(self):
         return Transponder(frequency=self._freq_entry.get_text(),
-                           symbol_rate=self._freq_entry.get_text(),
+                           symbol_rate=self._rate_entry.get_text(),
                            polarization=self._pol_box.get_active_id(),
                            fec_inner=self._fec_box.get_active_id(),
                            system=self._sys_box.get_active_id(),
@@ -219,13 +258,13 @@ class SatelliteDialog:
 
     def to_satellite(self):
         name = self._sat_name.get_text()
-        pos = self._sat_position.get_value()
+        pos = round(self._sat_position.get_value(), 1)
         side = self._side.get_active()
-        name = "{}({}{})".format(name, pos, self._side.get_active_id())
+        name = "{} ({}{})".format(name, pos, self._side.get_active_id())
         pos = "{}{}{}".format("-" if side == 1 else "", *str(pos).split("."))
 
         return Satellite(name=name, flags=None, position=pos, transponders=None)
 
 
 if __name__ == "__main__":
-    Gtk.STYLE_CLASS_VIEW
+    pass
