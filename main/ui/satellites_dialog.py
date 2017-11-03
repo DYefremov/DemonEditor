@@ -13,19 +13,21 @@ def show_satellites_dialog(transient, options):
 
 class SatellitesDialog:
     _aggr = [None for x in range(9)]  # aggregate
-    __slots__ = ["_dialog", "_data_path", "_stores", "_options"]
+
+    __slots__ = ["_dialog", "_data_path", "_stores", "_options", "_sat_view"]
 
     def __init__(self, transient, options):
         self._data_path = options["data_dir_path"]
         self._options = options
 
-        handlers = {"on_satellites_list_load": self.on_satellites_list_load,
+        handlers = {"on_open": self.on_open,
                     "on_remove": self.on_remove,
                     "on_save": self.on_save,
                     "on_popup_menu": self.on_popup_menu,
                     "on_add": self.on_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
+                    "on_row_activated": self.on_row_activated,
                     "on_resize": self.on_resize}
 
         builder = Gtk.Builder()
@@ -36,6 +38,7 @@ class SatellitesDialog:
         self._dialog = builder.get_object("satellites_editor_dialog")
         self._dialog.set_transient_for(transient)
         self._dialog.get_content_area().set_border_width(0)  # The width of the border around the main dialog area!
+        self._sat_view = builder.get_object("satellites_editor_tree_view")
         # Setting the last size of the dialog window if it was saved
         window_size = self._options.get("sat_editor_window_size", None)
         if window_size:
@@ -45,6 +48,7 @@ class SatellitesDialog:
                         4: builder.get_object("fec_store"),
                         5: builder.get_object("system_store"),
                         6: builder.get_object("mod_store")}
+        self.on_satellites_list_load(self._sat_view.get_model())
 
     def run(self):
         self._dialog.run()
@@ -57,6 +61,27 @@ class SatellitesDialog:
         if self._options:
             self._options["sat_editor_window_size"] = window.get_size()
 
+    def on_open(self, model):
+        builder = Gtk.Builder()
+        builder.add_objects_from_file("./ui/dialogs.glade", ("path_chooser_dialog",))
+        ch_dialog = builder.get_object("path_chooser_dialog")
+        ch_dialog.set_transient_for(self._dialog)
+
+        if ch_dialog.run() == 12:
+            path = ch_dialog.get_filename()
+            if path:
+                print(path)
+                self._data_path = path
+            self.on_satellites_list_load(model)
+        ch_dialog.destroy()
+
+    @staticmethod
+    def on_row_activated(view, path, column):
+        if view.row_expanded(path):
+            view.collapse_row(path)
+        else:
+            view.expand_row(path, column)
+
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
         key = event.keyval
@@ -68,6 +93,12 @@ class SatellitesDialog:
             self.on_add(view)
         elif key == Gdk.KEY_F2:
             self.on_edit(view)
+        elif ctrl and Gdk.KEY_s or Gdk.KEY_S:
+            self.on_satellite()
+        elif ctrl and Gdk.KEY_t or Gdk.KEY_T:
+            self.on_transponder()
+        elif key == Gdk.KEY_space:
+            pass
 
     @run_task
     def on_satellites_list_load(self, model):

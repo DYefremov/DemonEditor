@@ -107,6 +107,14 @@ def move_items(key):
                 prev_itr = model.iter_previous(itr)
                 if prev_itr:
                     model.move_before(itr, prev_itr)
+            elif key == Gdk.KEY_Page_Up:
+                up_itr = model.get_iter(__fav_view.get_cursor()[0])
+                if up_itr:
+                    model.move_before(itr, up_itr)
+            elif key == Gdk.KEY_Page_Down:
+                down_itr = model.get_iter(__fav_view.get_cursor()[0])
+                if down_itr:
+                    model.move_after(itr, down_itr)
 
 
 def on_cut(view):
@@ -424,6 +432,11 @@ def on_fav_selection(model, path, column):
 def on_bouquets_selection(model, path, column):
     __fav_model.clear()
 
+    if __bouquets_view.row_expanded(path):
+        __bouquets_view.collapse_row(path)
+    else:
+        __bouquets_view.expand_row(path, column)
+
     if len(path) > 1:
         delete_selection(__services_view)
         update_bouquet_channels(model, path)
@@ -496,18 +509,21 @@ def on_preferences(item):
     show_settings_dialog(__main_window, __options)
 
 
-def on_tree_view_key_release(view, event):
+def on_tree_view_key_release(view: Gtk.TreeView, event):
     """  Handling  keystrokes  """
     key = event.keyval
     ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+    alt = event.state & Gdk.ModifierType.MOD1_MASK
     model_name = view.get_model().get_name()
 
     if key == Gdk.KEY_Delete:
         on_delete(view)
-    elif ctrl and key == Gdk.KEY_Up:
-        move_items(Gdk.KEY_Up)
-    elif ctrl and key == Gdk.KEY_Down:
-        move_items(Gdk.KEY_Down)
+    elif ctrl and key == Gdk.KEY_Up or key == Gdk.KEY_Page_Up:
+        move_items(key)
+    elif ctrl and key == Gdk.KEY_Down or key == Gdk.KEY_Page_Down:
+        move_items(key)
+    elif model_name == FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
+        update_fav_num_column(view.get_model())
     elif key == Gdk.KEY_Insert:
         # Move items from main to fav list
         if model_name == SERVICE_LIST_NAME:
@@ -523,6 +539,10 @@ def on_tree_view_key_release(view, event):
             on_cut(view)
     elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
         on_paste(view)
+    elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
+        on_data_save()
+    elif key == Gdk.KEY_space and model_name == FAV_LIST_NAME:
+        pass
 
 
 @run_task
