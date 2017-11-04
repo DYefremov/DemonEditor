@@ -95,6 +95,9 @@ def move_items(key):
     """ Move items in fav tree view """
     selection = __fav_view.get_selection()
     model, paths = selection.get_selected_rows()
+    # for correct down move!
+    if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
+        paths = reversed(paths)
 
     if paths:
         for path in paths:
@@ -107,11 +110,11 @@ def move_items(key):
                 prev_itr = model.iter_previous(itr)
                 if prev_itr:
                     model.move_before(itr, prev_itr)
-            elif key == Gdk.KEY_Page_Up:
+            elif key == Gdk.KEY_Page_Up or key == Gdk.KEY_KP_Page_Up:
                 up_itr = model.get_iter(__fav_view.get_cursor()[0])
                 if up_itr:
                     model.move_before(itr, up_itr)
-            elif key == Gdk.KEY_Page_Down:
+            elif key == Gdk.KEY_Page_Down or key == Gdk.KEY_KP_Page_Down:
                 down_itr = model.get_iter(__fav_view.get_cursor()[0])
                 if down_itr:
                     model.move_after(itr, down_itr)
@@ -518,9 +521,9 @@ def on_tree_view_key_release(view: Gtk.TreeView, event):
 
     if key == Gdk.KEY_Delete:
         on_delete(view)
-    elif ctrl and key == Gdk.KEY_Up or key == Gdk.KEY_Page_Up:
+    elif ctrl and key in (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up):  # KEY_KP_Page_Up for laptop!
         move_items(key)
-    elif ctrl and key == Gdk.KEY_Down or key == Gdk.KEY_Page_Down:
+    elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
         move_items(key)
     elif model_name == FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
         update_fav_num_column(view.get_model())

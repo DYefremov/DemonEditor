@@ -93,9 +93,9 @@ class SatellitesDialog:
             self.on_add(view)
         elif key == Gdk.KEY_F2:
             self.on_edit(view)
-        elif ctrl and Gdk.KEY_s or Gdk.KEY_S:
+        elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
             self.on_satellite()
-        elif ctrl and Gdk.KEY_t or Gdk.KEY_T:
+        elif ctrl and key == Gdk.KEY_t or key == Gdk.KEY_T:
             self.on_transponder()
         elif key == Gdk.KEY_space:
             pass
