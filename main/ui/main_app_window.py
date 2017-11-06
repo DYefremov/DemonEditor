@@ -2,9 +2,9 @@ from contextlib import suppress
 
 from main.commons import run_task
 from main.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
-from main.ftp import download_data, upload_data
 from main.properties import get_config, write_config
 from . import Gtk, Gdk
+from .download_dialog import show_download_dialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
@@ -47,7 +47,6 @@ def get_handlers():
         "on_about_app": on_about_app,
         "on_preferences": on_preferences,
         "on_download": on_download,
-        "on_upload": on_upload,
         "on_data_open": on_data_open,
         "on_data_save": on_data_save,
         "on_tree_view_key_release": on_tree_view_key_release,
@@ -95,11 +94,12 @@ def move_items(key):
     """ Move items in fav tree view """
     selection = __fav_view.get_selection()
     model, paths = selection.get_selected_rows()
-    # for correct down move!
-    if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
-        paths = reversed(paths)
 
     if paths:
+        # for correct down move!
+        if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
+            paths = reversed(paths)
+
         for path in paths:
             itr = model.get_iter(path)
             if key == Gdk.KEY_Down:
@@ -549,18 +549,8 @@ def on_tree_view_key_release(view: Gtk.TreeView, event):
 
 
 @run_task
-def on_upload(item):
-    connect(__options, False)
-
-
-@run_task
 def on_download(item):
-    connect(__options)
-    open_data()
-
-
-def on_reload(item):
-    pass
+    show_download_dialog(__main_window, __options, open_data)
 
 
 @run_task
@@ -589,15 +579,6 @@ def on_view_focus(view, focus_event):
 
     for elem in _REMOVE_ELEMENTS:
         __tool_elements[elem].set_sensitive(not empty)
-
-
-def connect(properties, download=True):
-    try:
-        res = download_data(properties=properties) if download else upload_data(properties=properties)
-        __status_bar.push(1, res)
-    except Exception as e:
-        __status_bar.remove_all(1)
-        __status_bar.push(1, getattr(e, "message", repr(e)))  # Or maybe so: getattr(e, 'message', str(e))
 
 
 def init_ui():
