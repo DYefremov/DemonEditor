@@ -101,12 +101,7 @@
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">go-bottom</property>
-  </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">go-top</property>
+    <property name="icon_name">mail-send-receive</property>
   </object>
   <object class="GtkTreeViewColumn" id="package_column">
     <property name="resizable">True</property>
@@ -190,13 +185,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkSeparatorMenuItem" id="separatormenuitem2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menuitem">
+                      <object class="GtkImageMenuItem" id="download_menu_item">
                         <property name="label">Download</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -205,17 +194,6 @@
                         <property name="image">image2</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="on_download" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="upload_menu_item">
-                        <property name="label">Upload</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Upload data into receiver</property>
-                        <property name="use_underline">True</property>
-                        <property name="image">image3</property>
-                        <property name="use_stock">False</property>
                       </object>
                     </child>
                     <child>

@@ -15,7 +15,6 @@ class DownloadDataType(Enum):
 
 def download_data(*, properties, download_type=DownloadDataType.ALL):
     with FTP(properties["host"]) as ftp:
-        print(download_type)
         ftp.login(user=properties["user"], passwd=properties["password"])
         save_path = properties["data_dir_path"]
         files = []

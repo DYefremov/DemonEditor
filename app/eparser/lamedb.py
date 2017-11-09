@@ -5,7 +5,7 @@
 """
 from collections import namedtuple
 
-from main.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE
+from app.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"

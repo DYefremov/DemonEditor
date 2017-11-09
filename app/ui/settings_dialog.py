@@ -1,4 +1,4 @@
-from main.properties import write_config
+from app.properties import write_config
 from . import Gtk
 
 
@@ -10,7 +10,7 @@ class SettingsDialog:
     def __init__(self, transient, options):
         handlers = {"on_data_dir_field_icon_press": self.on_data_dir_field_icon_press}
         builder = Gtk.Builder()
-        builder.add_objects_from_file("ui/dialogs.glade", ("settings_dialog", ))
+        builder.add_objects_from_file("app/ui/dialogs.glade", ("settings_dialog", ))
         builder.connect_signals(handlers)
         self._dialog = builder.get_object("settings_dialog")
         self._dialog.set_transient_for(transient)

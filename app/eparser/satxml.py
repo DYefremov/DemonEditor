@@ -5,7 +5,7 @@
 from collections import namedtuple
 from xml.dom.minidom import parse, Document
 
-from main.eparser.__constants import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE
+from app.eparser.__constants import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE
 
 __FILE_NAME = "satellites.xml"
 

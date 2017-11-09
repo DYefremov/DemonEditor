@@ -1,5 +1,5 @@
-from main.commons import run_task
-from main.ftp import download_data, upload_data, DownloadDataType
+from app.commons import run_task
+from app.ftp import download_data, upload_data, DownloadDataType
 from . import Gtk
 
 
@@ -19,7 +19,7 @@ class DownloadDialog:
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file("./ui/dialogs.glade", ("download_dialog",))
+        builder.add_objects_from_file("app/ui/dialogs.glade", ("download_dialog",))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("download_dialog")
