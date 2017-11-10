@@ -111,7 +111,30 @@
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_add" object="satellites_editor_tree_view" swapped="no"/>
+        <child type="submenu">
+          <object class="GtkMenu" id="add_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="add_sat_popup_menu_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Satellite</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_satellite_add" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="add_tr_popup_menu_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Transponder</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_transponder_add" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
     <child>
@@ -228,16 +251,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkImageMenuItem" id="new_menu_item">
-                            <property name="label">gtk-new</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="use_underline">True</property>
-                            <property name="use_stock">True</property>
-                            <signal name="activate" handler="on_add" object="satellites_editor_tree_view" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
                           <object class="GtkImageMenuItem" id="open_menu_item">
                             <property name="label">gtk-open</property>
                             <property name="visible">True</property>
@@ -303,7 +316,30 @@
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
-                            <signal name="activate" handler="on_add" object="satellites_editor_tree_view" swapped="no"/>
+                            <child type="submenu">
+                              <object class="GtkMenu" id="menu3">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkMenuItem" id="add_sat_menu_item">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Satellite</property>
+                                    <property name="use_underline">True</property>
+                                    <signal name="activate" handler="on_satellite_add" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkMenuItem" id="add_tr_menu_item">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Transponder</property>
+                                    <property name="use_underline">True</property>
+                                    <signal name="activate" handler="on_transponder_add" swapped="no"/>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                         </child>
                         <child>
@@ -396,7 +432,6 @@
                     <property name="label" translatable="yes">Add</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-add</property>
-                    <signal name="clicked" handler="on_add" object="satellites_editor_tree_view" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

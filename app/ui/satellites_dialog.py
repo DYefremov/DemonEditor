@@ -25,7 +25,8 @@ class SatellitesDialog:
                     "on_remove": self.on_remove,
                     "on_save": self.on_save,
                     "on_popup_menu": self.on_popup_menu,
-                    "on_add": self.on_add,
+                    "on_satellite_add": self.on_satellite_add,
+                    "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
                     "on_row_activated": self.on_row_activated,
@@ -94,7 +95,8 @@ class SatellitesDialog:
         if key == Gdk.KEY_Delete:
             self.on_remove(view)
         elif key == Gdk.KEY_Insert:
-            self.on_add(view)
+            pass
+            # self.on_add(view)
         elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
             self.on_edit(view)
         elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
@@ -123,16 +125,22 @@ class SatellitesDialog:
         """ Common adding """
         self.on_edit(view, force=True)
 
+    def on_satellite_add(self, item):
+        self.on_satellite(None)
+
+    def on_transponder_add(self, item):
+        self.on_transponder(None)
+
     def on_edit(self, view, force=False):
         """ Common edit """
-        paths = self.check_selection(view)
+        paths = self.check_selection(view, "Please, select only one item!")
         if not paths:
             return
 
         model = view.get_model()
         itr = model.get_iter(paths[0])
         row = model.get(itr, *[x for x in range(view.get_n_columns())])
-        # maybe temporary!
+
         if row[-1]:  # satellite
             self.on_satellite(None if force else Satellite(row[0], None, row[-1], None), itr)
         else:
@@ -152,13 +160,13 @@ class SatellitesDialog:
             else:
                 index = self.get_sat_position_index(sat.position, model)
                 model.insert(None, index, [sat.name, *self._aggr, sat.flags, sat.position])
-                view.scroll_to_cell(index, None)
-                selection = view.get_selection()
-                selection.unselect_all()
-                selection.select_path(index)
+                self.scroll_to(index, view)
 
     def on_transponder(self, transponder=None, edited_itr=None):
         """ Create or edit transponder """
+        if not self.check_selection(self._sat_view, "Please, select only one satellite!"):
+            return
+
         dialog = TransponderDialog(self._dialog, transponder)
         tr = dialog.run()
         dialog.destroy()
@@ -171,8 +179,38 @@ class SatellitesDialog:
                                        4: tr.fec_inner, 5: tr.system, 6: tr.modulation,
                                        7: tr.pls_mode, 8: tr.pls_code, 9: tr.is_id})
             else:
-                # model.insert(model.iter_parent(itr), int(paths[0][0] + 1), ["Transponder:", *tr, None, None])
-                pass
+                row = ["Transponder:", *tr, None, None]
+                model, paths = view.get_selection().get_selected_rows()
+                itr = model.get_iter(paths[0])
+                view.expand_row(paths[0], 0)
+                # Get parent iter if selected transponder
+                parent_itr = model.iter_parent(itr)
+                if parent_itr:
+                    itr = parent_itr
+
+                freq = int(tr.frequency)
+                tr_itr = model.iter_children(itr)
+                # Inserting according to frequency value.
+                while tr_itr:
+                    cur_freq = int(model.get_value(tr_itr, 1))
+                    if freq <= cur_freq:
+                        path = model.get_path(tr_itr)
+                        index = path.get_indices()[1]
+                        model.insert(model.iter_parent(tr_itr), index, row)
+                        self.scroll_to(path, view)
+                        break
+                    else:
+                        tr_itr = model.iter_next(tr_itr)
+                else:
+                    itr = model.append(itr, row)
+                    self.scroll_to(model.get_path(itr), view)
+
+    def scroll_to(self, index, view):
+        """ Scrolling to and selecting  given index(path) """
+        view.scroll_to_cell(index, None)
+        selection = view.get_selection()
+        selection.unselect_all()
+        selection.select_path(index)
 
     def get_sat_position_index(self, pos, model):
         """ Search and returns index after given position """
@@ -181,7 +219,7 @@ class SatellitesDialog:
 
         return row.path[0] if row else len(model)
 
-    def check_selection(self, view):
+    def check_selection(self, view, message):
         """ Checks if any row is selected. Shows error dialog if selected more than one.
 
         returns selected path or None
@@ -190,7 +228,7 @@ class SatellitesDialog:
         paths_count = len(paths)
 
         if paths_count > 1:
-            show_dialog("error_dialog", self._dialog, "Please, select only one item!")
+            show_dialog("error_dialog", self._dialog, message)
             return
 
         return paths
