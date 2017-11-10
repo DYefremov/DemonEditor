@@ -35,12 +35,12 @@ def write_channels(path, channels):
             tr_set.add(tr_id)
         # Services
         flags = "," + ch.flags_cas if ch.flags_cas else ""
-        services_lines.append("{}\n{}\np:{}{}".format(ch.data_id, ch.service, ch.package, flags))
+        services_lines.append("{}\n{}\np:{}{}\n".format(ch.data_id, ch.service, ch.package, flags))
 
     tr_lines.sort()
     lines.extend(tr_lines)
     lines.extend(services_lines)
-    lines.append("\nend\nFile was created in DemonEditor.\n....Enjoy watching!....\n")
+    lines.append("end\nFile was created in DemonEditor.\n....Enjoy watching!....\n")
 
     with open(path + "lamedb", "w") as file:
         file.writelines(lines)

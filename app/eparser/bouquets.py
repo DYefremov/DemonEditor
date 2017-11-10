@@ -40,7 +40,7 @@ def write_bouquet(path, name, bq_type, channels):
             data_type = 19
         bouquet.append("#SERVICE {}:0:{}:{}:0:0:0:\n".format(1, data_type, ch.fav_id))
 
-    with open(path + "_userbouquet.{}.{}".format(name, bq_type), "w") as file:
+    with open(path + "userbouquet.{}.{}".format(name, bq_type), "w") as file:
         file.writelines(bouquet)
 
 
