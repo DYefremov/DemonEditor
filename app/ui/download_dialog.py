@@ -1,5 +1,6 @@
 from app.commons import run_task
 from app.ftp import download_data, upload_data, DownloadDataType
+from .dialogs import show_dialog
 from . import Gtk
 
 
@@ -39,6 +40,8 @@ class DownloadDialog:
         self.download(True, d_type=self.get_download_type())
 
     def on_send(self, item):
+        if show_dialog("question_dialog", self._dialog) == Gtk.ResponseType.CANCEL:
+            return
         self.download(d_type=self.get_download_type())
 
     def get_download_type(self):
@@ -65,10 +68,12 @@ class DownloadDialog:
             if download:
                 download_data(properties=self._properties, download_type=d_type)
             else:
-                upload_data(properties=self._properties, download_type=d_type)
+                upload_data(properties=self._properties,
+                            download_type=d_type,
+                            remove_unused=self._remove_unused_check_button.get_active())
         except Exception as e:
             self._info_bar.set_message_type(Gtk.MessageType.ERROR)
-            self._message_label.set_text(getattr(e, "message", repr(e)))  # Or maybe so: getattr(e, 'message', str(e))
+            self._message_label.set_text(getattr(e, "message", str(e)))
         else:
             self._info_bar.set_message_type(Gtk.MessageType.INFO)
             self._message_label.set_text("OK")

@@ -427,10 +427,10 @@ class MainAppWindow:
 
         # Getting bouquets
         self.__bouquets_view.get_model().foreach(parse_bouquets)
-        write_bouquets(path + "tmp/", bouquets, self.__bouquets)
+        write_bouquets(path, bouquets, self.__bouquets)
         # Getting services
         services = [Channel(*row[:]) for row in services_model]
-        write_channels(path + "tmp/", services)
+        write_channels(path, services)
 
     def on_services_selection(self, model, path, column):
         self.delete_selection(self.__fav_view)
@@ -561,4 +561,4 @@ def close_app():
 
 
 if __name__ == "__main__":
-   pass
+    pass

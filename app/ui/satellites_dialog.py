@@ -29,7 +29,8 @@ class SatellitesDialog:
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
                     "on_row_activated": self.on_row_activated,
-                    "on_resize": self.on_resize}
+                    "on_resize": self.on_resize,
+                    "on_quit": self.on_quit}
 
         builder = Gtk.Builder()
         builder.add_objects_from_file("app/ui/satellites_dialog.glade",
@@ -61,6 +62,9 @@ class SatellitesDialog:
         """ Stores new size properties for dialog window after resize """
         if self._options:
             self._options["sat_editor_window_size"] = window.get_size()
+
+    def on_quit(self, item):
+        self.destroy()
 
     def on_open(self, model):
         builder = Gtk.Builder()

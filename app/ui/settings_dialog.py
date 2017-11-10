@@ -46,7 +46,7 @@ class SettingsDialog:
 
     def on_data_dir_field_icon_press(self, entry, icon, event_button):
         builder = Gtk.Builder()
-        builder.add_from_file("ui/dialogs.glade")
+        builder.add_from_file("app/ui/dialogs.glade")
         dialog = builder.get_object("path_chooser_dialog")
         dialog.set_transient_for(self._dialog)
         dialog.set_current_folder(self._current_data_path)
