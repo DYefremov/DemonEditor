@@ -250,7 +250,7 @@ class SatellitesDialog:
         model = view.get_model()
         satellites = []
         model.foreach(self.parse_data, satellites)
-        write_satellites(satellites, self._data_path + "tmp/")  # temporary!!!
+        write_satellites(satellites, self._data_path)
 
     @staticmethod
     def parse_data(model, path, itr, sats):

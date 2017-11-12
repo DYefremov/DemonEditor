@@ -50,11 +50,11 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
     # telnet
     tn = telnet(host=host)
     next(tn)
+    # terminate enigma
+    tn.send("init 4")
 
     with FTP(host=host) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
-        # terminate enigma
-        tn.send("init 4")
 
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])
@@ -88,13 +88,13 @@ def send_file(file_name, path, ftp):
         return ftp.storbinary("STOR " + file_name, f)
 
 
-def telnet(host, port=23, user="root", password="root", timeout=2):
+def telnet(host, port=23, user="root", password="root", timeout=1):
     try:
         tn = Telnet(host=host, port=port, timeout=timeout)
     except socket.timeout:
         print("socket timeout")
     else:
-        time.sleep(1)
+        time.sleep(timeout)
         command = yield
         tn.write("{}\r\n".format(command).encode("utf-8"))
         time.sleep(timeout)
