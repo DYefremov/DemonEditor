@@ -1,8 +1,9 @@
+import os
+import socket
+import time
 from enum import Enum
 from ftplib import FTP
-
-import os
-
+from telnetlib import Telnet
 
 __DATA_FILES_LIST = ("tv", "radio", "lamedb")
 
@@ -14,7 +15,7 @@ class DownloadDataType(Enum):
 
 
 def download_data(*, properties, download_type=DownloadDataType.ALL):
-    with FTP(host=properties["host"], timeout=5) as ftp:
+    with FTP(host=properties["host"]) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
         save_path = properties["data_dir_path"]
         files = []
@@ -27,8 +28,8 @@ def download_data(*, properties, download_type=DownloadDataType.ALL):
                 name = str(file).strip()
                 if name.endswith(__DATA_FILES_LIST):
                     name = name.split()[-1]
-                    with open(save_path + name, 'wb') as f:
-                        ftp.retrbinary('RETR ' + name, f.write)
+                    with open(save_path + name, "wb") as f:
+                        ftp.retrbinary("RETR " + name, f.write)
         # satellites.xml section
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])
@@ -40,14 +41,20 @@ def download_data(*, properties, download_type=DownloadDataType.ALL):
                 xml_file = "satellites.xml"
                 if name.endswith(xml_file):
                     with open(save_path + xml_file, 'wb') as f:
-                        ftp.retrbinary('RETR ' + xml_file, f.write)
+                        ftp.retrbinary("RETR " + xml_file, f.write)
 
 
 def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused=False):
     data_path = properties["data_dir_path"]
+    host = properties["host"]
+    # telnet
+    tn = telnet(host=host)
+    next(tn)
 
-    with FTP(host=properties["host"], timeout=5) as ftp:
+    with FTP(host=host) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
+        # terminate enigma
+        tn.send("init 4")
 
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])
@@ -70,7 +77,9 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
             for file_name in os.listdir(data_path):
                 if file_name == "satellites.xml":
                     continue
-                send_file(file_name, data_path, ftp)
+                file_name, send_file(file_name, data_path, ftp)
+        # resume enigma
+        tn.send("init 3")
 
 
 def send_file(file_name, path, ftp):
@@ -79,3 +88,23 @@ def send_file(file_name, path, ftp):
         return ftp.storbinary("STOR " + file_name, f)
 
 
+def telnet(host, port=23, user="root", password="root", timeout=2):
+    try:
+        tn = Telnet(host=host, port=port, timeout=timeout)
+    except socket.timeout:
+        print("socket timeout")
+    else:
+        time.sleep(1)
+        command = yield
+        tn.write("{}\r\n".format(command).encode("utf-8"))
+        time.sleep(timeout)
+        command = yield
+        time.sleep(timeout)
+        tn.write("{}\r\n".format(command).encode("utf-8"))
+        time.sleep(timeout)
+        tn.close()
+        yield
+
+
+if __name__ == "__main__":
+    pass

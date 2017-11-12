@@ -349,6 +349,15 @@ class MainAppWindow:
         """ Iterate through model and updates values for Num column """
         model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
 
+    def update_bouquet_list(self):
+        """ Update bouquet after move items """
+        bq_selected = self.is_bouquet_selected()
+        if bq_selected:
+            fav_bouquet = self.__bouquets[bq_selected]
+            fav_bouquet.clear()
+            for row in self.__fav_model:
+                fav_bouquet.append(row[4])
+
     def on_services_tree_view_drag_data_get(self, view, drag_context, data, info, time):
         """  DnD  """
         data.set_text(self.get_selection(view), -1)
@@ -500,6 +509,7 @@ class MainAppWindow:
             self.move_items(key)
         elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
             self.update_fav_num_column(view.get_model())
+            self.update_bouquet_list()
         elif key == Gdk.KEY_Insert:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
