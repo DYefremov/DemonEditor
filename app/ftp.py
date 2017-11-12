@@ -97,7 +97,7 @@ def telnet(host, port=23, user="root", password="root", timeout=1):
         time.sleep(timeout)
         command = yield
         tn.write("{}\r\n".format(command).encode("utf-8"))
-        time.sleep(timeout)
+        time.sleep(5)  # need more time
         command = yield
         time.sleep(timeout)
         tn.write("{}\r\n".format(command).encode("utf-8"))

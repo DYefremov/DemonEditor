@@ -1,5 +1,7 @@
 from contextlib import suppress
 
+import os
+
 from app.commons import run_task
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.properties import get_config, write_config
@@ -206,6 +208,11 @@ class MainAppWindow:
                             return
                         else:
                             self.__bouquets.pop(bq_selected)
+                            self.__fav_model.clear()
+                            # removing bouquet file
+                            bqf = "{}userbouquet.{}.{}".format(self.__options["data_dir_path"], *bq_selected.split(":"))
+                            with suppress(FileNotFoundError):
+                                os.remove(bqf)
                     model.remove(itr)
 
                 if model_name == self._FAV_LIST_NAME:
