@@ -1,8 +1,7 @@
+import os
 from contextlib import suppress
 
-import os
-
-from app.commons import run_task
+from app.commons import run_idle
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.properties import get_config, write_config
 from . import Gtk, Gdk
@@ -24,7 +23,6 @@ class MainAppWindow:
                      "paste_tool_button", "cut_menu_item", "paste_menu_item")
 
     def __init__(self):
-
         handlers = {"on_close_main_window": self.on_quit,
                     "on_resize": self.on_resize,
                     "on_about_app": self.on_about_app,
@@ -207,12 +205,7 @@ class MainAppWindow:
                             show_dialog("error_dialog", self.__main_window, "This item is not allowed to be removed!")
                             return
                         else:
-                            self.__bouquets.pop(bq_selected)
-                            self.__fav_model.clear()
-                            # removing bouquet file
-                            bqf = "{}userbouquet.{}.{}".format(self.__options["data_dir_path"], *bq_selected.split(":"))
-                            with suppress(FileNotFoundError):
-                                os.remove(bqf)
+                            self.delete_bouquet(bq_selected)
                     model.remove(itr)
 
                 if model_name == self._FAV_LIST_NAME:
@@ -233,6 +226,15 @@ class MainAppWindow:
                         self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
                 return rows
+
+    def delete_bouquet(self, bouquet):
+        """ Deleting bouquet """
+        self.__bouquets.pop(bouquet)
+        self.__fav_model.clear()
+        # removing bouquet file
+        bqf = "{}userbouquet.{}.{}".format(self.__options["data_dir_path"], *bouquet.split(":"))
+        with suppress(FileNotFoundError):
+            os.remove(bqf)
 
     def on_new_bouquet(self, view):
         """ Creates a new item in the bouquets tree """
@@ -386,7 +388,7 @@ class MainAppWindow:
         """ Shows satellites editor dialog """
         show_satellites_dialog(self.__main_window, self.__options)
 
-    @run_task
+    @run_idle
     def on_data_open(self, model):
         if show_dialog("path_chooser_dialog", self.__main_window, options=self.__options) == Gtk.ResponseType.CANCEL:
             return
@@ -399,26 +401,27 @@ class MainAppWindow:
         self.__fav_model.clear()
         self.__services_model.clear()
         data_path = self.__options["data_dir_path"]
-
         try:
-            for ch in get_channels(data_path + "lamedb"):
-                #  adding channels to dict with fav_id as keys
-                self.__channels[ch.fav_id] = ch
-                self.__services_model.append(ch)
-
-            bouquets = get_bouquets(data_path)
-
-            for bouquet in bouquets:
-                parent = self.__bouquets_model.append(None, [bouquet.name, bouquet.type])
-                for bt in bouquet.bouquets:
-                    name, bt_type = bt.name, bt.type
-                    self.__bouquets_model.append(parent, [name, bt_type])
-                    self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
+            self.append_services(data_path)
+            self.append_bouquets(data_path)
         except FileNotFoundError as e:
             show_dialog("error_dialog", self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
 
-    @run_task
+    def append_bouquets(self, data_path):
+        for bouquet in get_bouquets(data_path):
+            parent = self.__bouquets_model.append(None, [bouquet.name, bouquet.type])
+            for bt in bouquet.bouquets:
+                name, bt_type = bt.name, bt.type
+                self.__bouquets_model.append(parent, [name, bt_type])
+                self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
+
+    def append_services(self, data_path):
+        for ch in get_channels(data_path + "lamedb"):
+            #  adding channels to dict with fav_id as keys
+            self.__channels[ch.fav_id] = ch
+            self.__services_model.append(ch)
+
     def on_data_save(self, *args):
         if show_dialog("question_dialog", self.__main_window) == Gtk.ResponseType.CANCEL:
             return
@@ -537,11 +540,9 @@ class MainAppWindow:
         elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
             pass
 
-    @run_task
     def on_download(self, item):
         show_download_dialog(self.__main_window, self.__options, self.open_data)
 
-    @run_task
     def on_view_focus(self, view, focus_event):
         model = view.get_model()
         model_name = model.get_name()

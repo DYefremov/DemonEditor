@@ -1,6 +1,6 @@
 from math import fabs
 
-from app.commons import run_task
+from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from . import Gtk, Gdk
 from .dialogs import show_dialog
@@ -106,7 +106,6 @@ class SatellitesDialog:
         elif key == Gdk.KEY_space:
             pass
 
-    @run_task
     def on_satellites_list_load(self, model):
         """ Load satellites data into model """
         try:
@@ -116,10 +115,14 @@ class SatellitesDialog:
                         "\n\nPlease, download files from receiver or setup your path for read data!")
         else:
             model.clear()
-            for name, flags, pos, transponders in satellites:
-                parent = model.append(None, [name, *self._aggr, flags, pos])
-                for transponder in transponders:
-                    model.append(parent, ["Transponder:", *transponder, None, None])
+            self.append_data(model, satellites)
+
+    @run_idle
+    def append_data(self, model, satellites):
+        for name, flags, pos, transponders in satellites:
+            parent = model.append(None, [name, *self._aggr, flags, pos])
+            for transponder in transponders:
+                model.append(parent, ["Transponder:", *transponder, None, None])
 
     def on_add(self, view):
         """ Common adding """
@@ -242,7 +245,6 @@ class SatellitesDialog:
         for itr in itrs:
             model.remove(itr)
 
-    @run_task
     def on_save(self, view):
         if show_dialog("question_dialog", self._dialog) == Gtk.ResponseType.CANCEL:
             return

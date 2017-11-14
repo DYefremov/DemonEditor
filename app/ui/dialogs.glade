@@ -318,7 +318,6 @@ dmitry.v.yefremov@gmail.com
             </child>
             <child>
               <object class="GtkInfoBar" id="info_bar">
-                <property name="app_paintable">True</property>
                 <property name="can_focus">False</property>
                 <property name="show_close_button">True</property>
                 <signal name="response" handler="on_info_bar_close" swapped="no"/>

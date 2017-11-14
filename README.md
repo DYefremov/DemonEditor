@@ -3,15 +3,17 @@ Enigma2 channel and satellites list editor for GNU/Linux.
 Focused on the convenience of working in lists from the keyboard.
 The mouse is also fully supported (Drag and Drop etc)
 
-Terrestrial and cable channels at the moment are not supported!
-
-Keyboard shortcuts currently supported: Ctrl + X, C, V, Up, Down, PageUp, PageDown, S, T, E; Insert, Delete, F2.  
+Keyboard shortcuts:
+Ctrl + X, C, V, Up, Down, PageUp, PageDown, S, T, E, Space; Insert, Delete, F2.
 Insert - copies the selected channels from the main list to the bouquet or inserts (creates) a new bouquet.     
 Ctrl + X  - only  in bouquet list.    
 Ctrl + C - only in services list. Clipboard is "rubber". There is an accumulation before the insertion!                               
 F2 - rename the bouquet.                                                                                                                     
 Ctrl + S, T, E in Satellites edit tool for create and edit satellite or transponder
 
-Tests  only on OpenPLi based image with  GM 990 Spark Reloaded receiver in my preferred linux distro (Linux Mint 18.2 "Sonya" - MATE 64-bit)!
+Tests  only on OpenPLi based image with  GM 990 Spark Reloaded receiver in my preferred linux distro
+(Linux Mint 18.2 "Sonya" - MATE 64-bit)!
 
 Minimum requirements: Python >= 3.5.2 and GTK+ 3 with  PyGObject bindings.
+
+Terrestrial and cable channels at the moment are not supported!

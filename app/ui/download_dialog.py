@@ -1,7 +1,7 @@
-from app.commons import run_task
-from app.ftp import download_data, upload_data, DownloadDataType
-from .dialogs import show_dialog
+from app.commons import run_idle, run_task
+from app.ftp import download_data, DownloadDataType, upload_data
 from . import Gtk
+from .dialogs import show_dialog
 
 
 def show_download_dialog(transient, options, open_data):
@@ -35,14 +35,14 @@ class DownloadDialog:
         self._satellites_radio_button = builder.get_object("satellites_radio_button")
         # self._dialog.get_content_area().set_border_width(0)
 
-    @run_task
+    @run_idle
     def on_receive(self, item):
         self.download(True, d_type=self.get_download_type())
 
+    @run_idle
     def on_send(self, item):
-        if show_dialog("question_dialog", self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-        self.download(d_type=self.get_download_type())
+        if show_dialog("question_dialog", self._dialog) != Gtk.ResponseType.CANCEL:
+            self.download(d_type=self.get_download_type())
 
     def get_download_type(self):
         download_type = DownloadDataType.ALL
@@ -61,24 +61,30 @@ class DownloadDialog:
     def on_info_bar_close(self, *args):
         self._info_bar.set_visible(False)
 
+    @run_idle
+    @run_task
     def download(self, download=False, d_type=DownloadDataType.ALL):
         """ Download/upload data from/to receiver """
         try:
-            self._info_bar.set_visible(True)
             if download:
                 download_data(properties=self._properties, download_type=d_type)
             else:
+                self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
                 upload_data(properties=self._properties,
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active())
         except Exception as e:
-            self._info_bar.set_message_type(Gtk.MessageType.ERROR)
-            self._message_label.set_text(getattr(e, "message", str(e)))
+            self.show_info_message(getattr(e, "message", str(e)), Gtk.MessageType.ERROR)
         else:
-            self._info_bar.set_message_type(Gtk.MessageType.INFO)
-            self._message_label.set_text("OK")
+            self.show_info_message("Done!", Gtk.MessageType.INFO)
             if download and d_type is not DownloadDataType.SATELLITES:
                 self._open_data()
+
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._info_bar.set_visible(True)
+        self._info_bar.set_message_type(message_type)
+        self._message_label.set_text(text)
 
 
 if __name__ == "__main__":

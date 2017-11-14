@@ -88,16 +88,16 @@ def send_file(file_name, path, ftp):
         return ftp.storbinary("STOR " + file_name, f)
 
 
-def telnet(host, port=23, user="root", password="root", timeout=1):
+def telnet(host, port=23, user="root", password="root", timeout=5):
     try:
         tn = Telnet(host=host, port=port, timeout=timeout)
     except socket.timeout:
         print("socket timeout")
     else:
-        time.sleep(timeout)
+        time.sleep(1)
         command = yield
         tn.write("{}\r\n".format(command).encode("utf-8"))
-        time.sleep(5)  # need more time
+        time.sleep(timeout)
         command = yield
         time.sleep(timeout)
         tn.write("{}\r\n".format(command).encode("utf-8"))
