@@ -1,3 +1,4 @@
+import re
 from math import fabs
 
 from app.commons import run_idle
@@ -106,6 +107,7 @@ class SatellitesDialog:
         elif key == Gdk.KEY_space:
             pass
 
+    @run_idle
     def on_satellites_list_load(self, model):
         """ Load satellites data into model """
         try:
@@ -167,7 +169,12 @@ class SatellitesDialog:
 
     def on_transponder(self, transponder=None, edited_itr=None):
         """ Create or edit transponder """
-        if not self.check_selection(self._sat_view, "Please, select only one satellite!"):
+
+        paths = self.check_selection(self._sat_view, "Please, select only one satellite!")
+        if paths is None:
+            return
+        elif len(paths) == 0:
+            show_dialog("error_dialog", self._dialog, "No satellite is selected!")
             return
 
         dialog = TransponderDialog(self._dialog, transponder)
@@ -280,12 +287,16 @@ class TransponderDialog:
     """ Shows dialog for adding or edit transponder """
 
     def __init__(self, transient, transponder: Transponder = None):
+
+        handlers = {"on_entry_changed": self.on_entry_changed}
+
         builder = Gtk.Builder()
         builder.add_objects_from_file("app/ui/satellites_dialog.glade",
                                       ("transponder_dialog",
                                        "pol_store", "fec_store",
                                        "mod_store", "system_store",
                                        "pls_mode_store"))
+        builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("transponder_dialog")
         self._dialog.set_transient_for(transient)
@@ -298,7 +309,15 @@ class TransponderDialog:
         self._pls_mode_box = builder.get_object("pls_mode_box")
         self._pls_code_entry = builder.get_object("pls_code_entry")
         self._is_id_entry = builder.get_object("is_id_entry")
-
+        # pattern for frequency and rate entries (only digits)
+        self._pattern = re.compile("\D")
+        # style
+        self._style_provider = Gtk.CssProvider()
+        self._style_provider.load_from_path("app/ui/style.css")
+        self._freq_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self._rate_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
         if transponder:
             self.init_transponder(transponder)
 
@@ -332,6 +351,9 @@ class TransponderDialog:
                            pls_mode=self._pls_mode_box.get_active_id(),
                            pls_code=self._pls_code_entry.get_text(),
                            is_id=self._is_id_entry.get_text())
+
+    def on_entry_changed(self, entry):
+        entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
 
 
 class SatelliteDialog:

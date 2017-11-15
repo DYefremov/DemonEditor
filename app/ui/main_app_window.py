@@ -388,13 +388,12 @@ class MainAppWindow:
         """ Shows satellites editor dialog """
         show_satellites_dialog(self.__main_window, self.__options)
 
-    @run_idle
     def on_data_open(self, model):
         if show_dialog("path_chooser_dialog", self.__main_window, options=self.__options) == Gtk.ResponseType.CANCEL:
             return
-
         self.open_data()
 
+    @run_idle
     def open_data(self):
         """ Opening data and fill views. """
         self.__bouquets_model.clear()

@@ -417,16 +417,40 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToolButton" id="add_tool_button">
+                  <object class="GtkMenuToolButton" id="add_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Add</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-add</property>
+                    <child type="menu">
+                      <object class="GtkMenu" id="menu4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkMenuItem" id="add_sat_menui_tem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Satellite</property>
+                            <property name="use_underline">True</property>
+                            <signal name="activate" handler="on_satellite_add" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem" id="add_tr_menui_tem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Transponder</property>
+                            <property name="use_underline">True</property>
+                            <signal name="activate" handler="on_transponder_add" swapped="no"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
+                    <property name="homogeneous">False</property>
                   </packing>
                 </child>
                 <child>
@@ -1053,6 +1077,7 @@
                     <property name="secondary_icon_sensitive">False</property>
                     <property name="placeholder_text" translatable="yes">11700000</property>
                     <property name="input_purpose">digits</property>
+                    <signal name="changed" handler="on_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1068,6 +1093,7 @@
                     <property name="primary_icon_stock">gtk-edit</property>
                     <property name="placeholder_text" translatable="yes">27500000</property>
                     <property name="input_purpose">digits</property>
+                    <signal name="changed" handler="on_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>

@@ -180,8 +180,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_data_open" object="bouquets_tree_store" swapped="no"/>
-                        <signal name="activate" handler="on_data_open" object="services_list_store" swapped="no"/>
+                        <signal name="activate" handler="on_data_open" swapped="no"/>
                       </object>
                     </child>
                     <child>
