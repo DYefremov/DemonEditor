@@ -3,8 +3,8 @@ Enigma2 channel and satellites list editor for GNU/Linux.
 Focused on the convenience of working in lists from the keyboard.
 The mouse is also fully supported (Drag and Drop etc)
 
-Keyboard shortcuts:
-Ctrl + X, C, V, Up, Down, PageUp, PageDown, S, T, E, Space; Insert, Delete, F2.
+Keyboard shortcuts:                                
+Ctrl + X, C, V, Up, Down, PageUp, PageDown, S, T, E, Space; Insert, Delete, F2.                                                    
 Insert - copies the selected channels from the main list to the bouquet or inserts (creates) a new bouquet.     
 Ctrl + X  - only  in bouquet list.    
 Ctrl + C - only in services list. Clipboard is "rubber". There is an accumulation before the insertion!                               
