@@ -6,9 +6,10 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="bouquets_new_popup_menui_tem">
+      <object class="GtkImageMenuItem" id="bouquets_new_popup_item">
         <property name="label">gtk-new</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -16,9 +17,10 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="bouguets_edit_popup_menui_tem">
+      <object class="GtkImageMenuItem" id="bouguets_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -26,9 +28,10 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="bouquets_remove_popup_menui_tem">
+      <object class="GtkImageMenuItem" id="bouquets_remove_popup_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -62,9 +65,10 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="fav_cut_popoup_menu_item">
+      <object class="GtkImageMenuItem" id="fav_cut_popoup_item">
         <property name="label">gtk-cut</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -72,9 +76,10 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="fav_paste_popup_menu_item">
+      <object class="GtkImageMenuItem" id="fav_paste_popup_item">
         <property name="label">gtk-paste</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -88,9 +93,10 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="fav_popoup_menu_item">
+      <object class="GtkImageMenuItem" id="fav_remove_popoup_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -1239,9 +1245,10 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="to_fav_move_popup_menu_item">
+      <object class="GtkImageMenuItem" id="services_to_fav_move_popup_item">
         <property name="label">gtk-go-forward</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -1249,9 +1256,10 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="imagemenuitem2">
+      <object class="GtkImageMenuItem" id="services_remove_popup_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>

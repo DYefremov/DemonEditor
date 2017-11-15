@@ -16,11 +16,18 @@ class MainAppWindow:
     _FAV_LIST_NAME = "fav_list_store"
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
-    _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item")
-    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button")
-    _REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item")
-    _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button",
-                     "paste_tool_button", "cut_menu_item", "paste_menu_item")
+    _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item")
+    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouguets_edit_popup_item")
+    _REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item", "services_remove_popup_item",
+                        "bouquets_remove_popup_item", "fav_remove_popoup_item")
+    _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
+                     "paste_menu_item", "fav_cut_popoup_item", "fav_paste_popup_item")
+    __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
+                          "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
+                          "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
+                          "services_to_fav_move_popup_item", "services_remove_popup_item", "fav_cut_popoup_item",
+                          "fav_paste_popup_item", "bouquets_new_popup_item", "bouguets_edit_popup_item",
+                          "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popoup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -72,13 +79,7 @@ class MainAppWindow:
         self.__bouquets_model = builder.get_object("bouquets_tree_store")
         self.__status_bar = builder.get_object("status_bar")
         # dynamically active elements depending on the selected view
-        self.__tool_elements = {k: builder.get_object(k) for k in ("up_tool_button", "down_tool_button",
-                                                                   "cut_tool_button", "copy_tool_button",
-                                                                   "paste_tool_button", "to_fav_tool_button",
-                                                                   "new_tool_button", "remove_tool_button",
-                                                                   "cut_menu_item", "copy_menu_item",
-                                                                   "paste_menu_item", "delete_menu_item",
-                                                                   "edit_tool_button")}
+        self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         builder.connect_signals(handlers)
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show_all()
@@ -199,7 +200,6 @@ class MainAppWindow:
                 for itr in itrs:
                     if fav_bouquet and model_name == self._FAV_LIST_NAME:
                         del fav_bouquet[int(model.get_path(itr)[0])]
-
                     if model_name == self._BOUQUETS_LIST_NAME:
                         if len(model.get_path(itr)) < 2:
                             show_dialog("error_dialog", self.__main_window, "This item is not allowed to be removed!")
@@ -207,25 +207,30 @@ class MainAppWindow:
                         else:
                             self.delete_bouquet(bq_selected)
                     model.remove(itr)
-
                 if model_name == self._FAV_LIST_NAME:
                     self.update_fav_num_column(model)
                 elif model_name == self._SERVICE_LIST_NAME:
-                    for row in rows:
-                        # There are channels with the same parameters except for the name.
-                        # None because it can have duplicates! Need fix
-                        fav_id = row[-2]
-                        for bq in self.__bouquets:
-                            services = self.__bouquets[bq]
-                            with suppress(ValueError):
-                                services.remove(fav_id)
-                        self.__channels.pop(fav_id, None)
-                    self.__fav_model.clear()
+                    self.delete_services(bq_selected, rows)
 
-                    if bq_selected:
-                        self.update_bouquet_channels(self.__fav_model, None, bq_selected)
+                self.on_view_focus(view, None)
 
                 return rows
+
+    def delete_services(self, bq_selected, rows):
+        """ Deleting services """
+        for row in rows:
+            # There are channels with the same parameters except for the name.
+            # None because it can have duplicates! Need fix
+            fav_id = row[-2]
+            for bq in self.__bouquets:
+                services = self.__bouquets[bq]
+                with suppress(ValueError):
+                    services.remove(fav_id)
+            self.__channels.pop(fav_id, None)
+        self.__fav_model.clear()
+
+        if bq_selected:
+            self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     def delete_bouquet(self, bouquet):
         """ Deleting bouquet """
@@ -542,13 +547,12 @@ class MainAppWindow:
     def on_download(self, item):
         show_download_dialog(self.__main_window, self.__options, self.open_data)
 
+    @run_idle
     def on_view_focus(self, view, focus_event):
         model = view.get_model()
         model_name = model.get_name()
 
-        empty = len(model) == 0  # if  > 0 model has items
-        if empty:
-            return
+        not_empty = len(model) > 0  # if  > 0 model has items
 
         if model_name == self._BOUQUETS_LIST_NAME:
             for elem in self.__tool_elements:
@@ -558,14 +562,17 @@ class MainAppWindow:
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
             for elem in self._FAV_ELEMENTS:
-                self.__tool_elements[elem].set_sensitive(not is_service)
+                if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
+                    self.__tool_elements[elem].set_sensitive(not_empty and not is_service and self.__rows_buffer)
+                else:
+                    self.__tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:
-                self.__tool_elements[elem].set_sensitive(is_service)
+                self.__tool_elements[elem].set_sensitive(not_empty and is_service)
             for elem in self._BOUQUET_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(False)
 
         for elem in self._REMOVE_ELEMENTS:
-            self.__tool_elements[elem].set_sensitive(not empty)
+            self.__tool_elements[elem].set_sensitive(not_empty)
 
 
 def start_app():
