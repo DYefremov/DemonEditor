@@ -1225,11 +1225,22 @@
             <property name="margin_top">6</property>
             <property name="margin_bottom">6</property>
             <property name="spacing">2</property>
+            <property name="homogeneous">True</property>
             <child>
               <placeholder/>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Ver. 0.1 Pre-alpha</property>
+                <property name="xalign">0.94999998807907104</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
             </child>
           </object>
           <packing>

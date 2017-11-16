@@ -78,6 +78,7 @@ class MainAppWindow:
         self.__services_model = builder.get_object("services_list_store")
         self.__bouquets_model = builder.get_object("bouquets_tree_store")
         self.__status_bar = builder.get_object("status_bar")
+        self.__status_bar.push(0, "Current IP: " + self.__options["host"])
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         builder.connect_signals(handlers)
@@ -178,6 +179,7 @@ class MainAppWindow:
             self.update_fav_num_column(model)
 
         self.__rows_buffer.clear()
+        self.on_view_focus(view, None)
 
     def on_delete(self, item):
         """ Delete selected items from views
@@ -507,6 +509,7 @@ class MainAppWindow:
 
     def on_preferences(self, item):
         show_settings_dialog(self.__main_window, self.__options)
+        self.__status_bar.push(0, "Current IP: " + self.__options["host"])
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -551,14 +554,13 @@ class MainAppWindow:
     def on_view_focus(self, view, focus_event):
         model = view.get_model()
         model_name = model.get_name()
-
         not_empty = len(model) > 0  # if  > 0 model has items
 
         if model_name == self._BOUQUETS_LIST_NAME:
             for elem in self.__tool_elements:
                 self.__tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
-                self.__tool_elements[elem].set_sensitive(True)
+                self.__tool_elements[elem].set_sensitive(not_empty)
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
             for elem in self._FAV_ELEMENTS:
