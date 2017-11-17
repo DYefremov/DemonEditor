@@ -162,6 +162,7 @@ class MainAppWindow:
         bq_selected = self.is_bouquet_selected()
 
         if not bq_selected:
+            show_dialog("error_dialog", self.__main_window, "Error. No bouquet is selected!")
             return
 
         fav_bouquet = self.__bouquets[bq_selected]
@@ -565,7 +566,7 @@ class MainAppWindow:
             is_service = model_name == self._SERVICE_LIST_NAME
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
-                    self.__tool_elements[elem].set_sensitive(not_empty and not is_service and self.__rows_buffer)
+                    self.__tool_elements[elem].set_sensitive(not is_service and self.__rows_buffer)
                 else:
                     self.__tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:

@@ -197,8 +197,7 @@ class SatellitesDialog:
                 parent_itr = model.iter_parent(itr)
                 if parent_itr:
                     itr = parent_itr
-
-                freq = int(tr.frequency)
+                freq = int(tr.frequency if tr.frequency else 0)
                 tr_itr = model.iter_children(itr)
                 # Inserting according to frequency value.
                 while tr_itr:
@@ -375,7 +374,7 @@ class SatelliteDialog:
             pos = satellite.position
             pos = float("{}.{}".format(pos[:-1], pos[-1:]))
             self._sat_position.set_value(fabs(pos))
-            self._side.set_active(0 if pos >= 0 else 1)
+            self._side.set_active(0 if pos >= 0 else 1)  # E or W
 
     def run(self):
         if self._dialog.run() == Gtk.ResponseType.CANCEL:

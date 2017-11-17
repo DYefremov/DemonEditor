@@ -1261,6 +1261,7 @@
                         <property name="primary_icon_activatable">False</property>
                         <property name="placeholder_text" translatable="yes">0 - 262142</property>
                         <property name="input_purpose">digits</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1277,6 +1278,7 @@
                         <property name="primary_icon_activatable">False</property>
                         <property name="placeholder_text" translatable="yes">0 - 255</property>
                         <property name="input_purpose">digits</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
