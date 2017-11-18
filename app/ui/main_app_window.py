@@ -63,6 +63,7 @@ class MainAppWindow:
         self.__rows_buffer = []
         self.__channels = {}
         self.__bouquets = {}
+        self.__bouquets_to_del = []
 
         builder = Gtk.Builder()
         builder.add_from_file("app/ui/main_window.glade")
@@ -239,10 +240,8 @@ class MainAppWindow:
         """ Deleting bouquet """
         self.__bouquets.pop(bouquet)
         self.__fav_model.clear()
-        # removing bouquet file
-        bqf = "{}userbouquet.{}.{}".format(self.__options["data_dir_path"], *bouquet.split(":"))
-        with suppress(FileNotFoundError):
-            os.remove(bqf)
+        bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options["data_dir_path"], *bouquet.split(":"))
+        self.__bouquets_to_del.append(bouquet_file_name)
 
     def on_new_bouquet(self, view):
         """ Creates a new item in the bouquets tree """
@@ -261,22 +260,27 @@ class MainAppWindow:
                 key = "{}:{}".format(bq_name, bq_type)
 
             response = show_dialog("input_dialog", self.__main_window, bq_name)
-
             if response == Gtk.ResponseType.CANCEL:
                 return
 
             bq = response, bq_type
 
             if model.iter_n_children(itr):  # parent
-                model.insert(itr, 0, bq)
+                ch_itr = model.insert(itr, 0, bq)
+                self.scroll_to(model.get_path(ch_itr), paths, view)
             else:
-                parent_itr = model.iter_parent(itr)
-                if parent_itr:
-                    index = int(model.get_path(itr)[1]) + 1
-                    model.insert(parent_itr, index, bq)
-                else:
-                    model.append(itr, bq)
+                p_itr = model.iter_parent(itr)
+                it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
+                self.scroll_to(model.get_path(it), paths, view)
             self.__bouquets[key] = []
+
+    def scroll_to(self, path, paths, view):
+        """ Scrolling to and selecting given path """
+        view.expand_row(paths[0], 0)
+        selection = view.get_selection()
+        selection.unselect_all()
+        view.scroll_to_cell(path, None)
+        selection.select_path(path)
 
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
@@ -436,6 +440,12 @@ class MainAppWindow:
         path = self.__options["data_dir_path"]
         bouquets = []
         services_model = self.__services_view.get_model()
+
+        # removing bouquet files
+        for bqf in self.__bouquets_to_del:
+            with suppress(FileNotFoundError):
+                os.remove(bqf)
+        self.__bouquets_to_del.clear()
 
         def parse_bouquets(model, b_path, itr):
             if model.iter_has_child(itr):
