@@ -2,6 +2,34 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkImage" id="add_menu_icon">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-add</property>
+    <property name="icon_size">3</property>
+  </object>
+  <object class="GtkMenu" id="add_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="add_sat_popoup_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Satellite</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_satellite_add" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="add_tr_popoup_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Transponder</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_transponder_add" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="fec_store">
     <columns>
       <!-- column-name fec -->
@@ -372,6 +400,7 @@
                   <object class="GtkToolButton" id="load_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Open</property>
                     <property name="label" translatable="yes">Load</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-open</property>
@@ -396,6 +425,7 @@
                   <object class="GtkToolButton" id="save_tool_button1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Save</property>
                     <property name="label" translatable="yes">Save</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-floppy</property>
@@ -417,33 +447,19 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkMenuToolButton" id="add_tool_button">
+                  <object class="GtkToolItem" id="toolitem1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Add</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-add</property>
-                    <child type="menu">
-                      <object class="GtkMenu" id="menu4">
+                    <child>
+                      <object class="GtkMenuButton" id="add_menu_tool_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Add</property>
+                        <property name="popup">add_popup_menu</property>
+                        <property name="direction">none</property>
                         <child>
-                          <object class="GtkMenuItem" id="add_sat_menui_tem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Satellite</property>
-                            <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_satellite_add" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem" id="add_tr_menui_tem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Transponder</property>
-                            <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_transponder_add" swapped="no"/>
-                          </object>
+                          <placeholder/>
                         </child>
                       </object>
                     </child>
@@ -457,6 +473,7 @@
                   <object class="GtkToolButton" id="edit_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Edit</property>
                     <property name="label" translatable="yes">Edit</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-edit</property>
@@ -471,6 +488,8 @@
                   <object class="GtkToolButton" id="remove_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Remove</property>
+                    <property name="resize_mode">immediate</property>
                     <property name="label" translatable="yes">Remove</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-remove</property>

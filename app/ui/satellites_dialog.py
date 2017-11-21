@@ -36,8 +36,12 @@ class SatellitesDialog:
 
         builder = Gtk.Builder()
         builder.add_objects_from_file("app/ui/satellites_dialog.glade",
-                                      ("satellites_editor_dialog", "satellites_tree_store", "popup_menu"))
+                                      ("satellites_editor_dialog", "satellites_tree_store",
+                                       "popup_menu", "add_popup_menu", "add_menu_icon"))
         builder.connect_signals(handlers)
+        # Adding custom image for add_menu_tool_button
+        add_menu_tool_button = builder.get_object("add_menu_tool_button")
+        add_menu_tool_button.set_image(builder.get_object("add_menu_icon"))
 
         self._dialog = builder.get_object("satellites_editor_dialog")
         self._dialog.set_transient_for(transient)
@@ -321,10 +325,11 @@ class TransponderDialog:
             self.init_transponder(transponder)
 
     def run(self):
-        if self._dialog.run() == Gtk.ResponseType.CANCEL:
-            return
-
-        return self.to_transponder()
+        while self._dialog.run() != Gtk.ResponseType.CANCEL:
+            tr = self.to_transponder()
+            if self.is_accept(tr):
+                return tr
+            show_dialog("error_dialog", self._dialog, "Please check your parameters and try again.")
 
     def destroy(self):
         self._dialog.destroy()
@@ -353,6 +358,18 @@ class TransponderDialog:
 
     def on_entry_changed(self, entry):
         entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
+
+    def is_accept(self, tr):
+        if self._pattern.search(tr.frequency) or not tr.frequency:
+            return False
+        elif self._pattern.search(tr.symbol_rate) or not tr.symbol_rate:
+            return False
+        elif None in (tr.polarization, tr.fec_inner, tr.system, tr.modulation):
+            return False
+        elif self._pattern.search(tr.pls_code) or self._pattern.search(tr.is_id):
+            return False
+
+        return True
 
 
 class SatelliteDialog:
