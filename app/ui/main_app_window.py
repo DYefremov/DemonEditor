@@ -3,6 +3,7 @@ from contextlib import suppress
 
 from app.commons import run_idle
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
+from app.eparser.__constants import CAS
 from app.properties import get_config, write_config
 from . import Gtk, Gdk
 from .dialogs import show_dialog
@@ -82,6 +83,7 @@ class MainAppWindow:
         self.__status_bar.push(0, "Current IP: " + self.__options["host"])
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
+        self.__cas_label = builder.get_object("cas_label")
         builder.connect_signals(handlers)
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show_all()
@@ -470,6 +472,13 @@ class MainAppWindow:
 
     def on_services_selection(self, model, path, column):
         self.delete_selection(self.__fav_view)
+        values = model.get_value(model.get_iter(path), 0).split(",")
+        for val in values:
+            if val.startswith("C:"):
+                self.__cas_label.set_text(CAS[val])
+                break
+        else:
+            self.__cas_label.set_text("")
 
     def on_fav_selection(self, model, path, column):
         self.delete_selection(self.__services_view)

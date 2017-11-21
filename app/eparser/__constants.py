@@ -25,3 +25,5 @@ MODULATION = {"0": "Auto", "1": "QPSK", "2": "8PSK", "3": "16APSK", "5": "32APSK
 SERVICE_TYPE = {"-2": "Unknown", "1": "TV", "2": "Radio", "3": "Data",
                 "10": "Radio", "12": "Data", "22": "TV", "25": "TV (HD)",
                 "136": "Data", "139": "Data"}
+
+CAS = {"C:0500": "VIACCESS"}
