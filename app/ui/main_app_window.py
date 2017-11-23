@@ -3,7 +3,7 @@ from contextlib import suppress
 
 from app.commons import run_idle
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
-from app.eparser.__constants import CAS
+from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
 from . import Gtk, Gdk
 from .dialogs import show_dialog
@@ -56,7 +56,9 @@ class MainAppWindow:
                     "on_fav_tree_view_drag_data_get": self.on_fav_tree_view_drag_data_get,
                     "on_fav_tree_view_drag_data_received": self.on_fav_tree_view_drag_data_received,
                     "on_view_popup_menu": self.on_view_popup_menu,
-                    "on_view_focus": self.on_view_focus}
+                    "on_view_focus": self.on_view_focus,
+                    "on_hide": self.on_hide,
+                    "on_locked": self.on_locked}
 
         self.__options = get_config()
         # Used for copy/paste. When adding the previous data will not be deleted.
@@ -84,9 +86,11 @@ class MainAppWindow:
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         self.__cas_label = builder.get_object("cas_label")
+        self.__hide_check_button = builder.get_object("hide_check_button")
+        self.__lock_check_button = builder.get_object("lock_check_button")
         builder.connect_signals(handlers)
         self.init_drag_and_drop()  # drag and drop
-        self.__main_window.show_all()
+        self.__main_window.show()
 
     def init_drag_and_drop(self):
         """ Enable drag and drop """
@@ -312,8 +316,7 @@ class MainAppWindow:
 
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
-        selection = view.get_selection()
-        model, paths = selection.get_selected_rows()
+        model, paths = view.get_selection().get_selected_rows()
 
         if len(paths) > 0:
             itrs = [model.get_iter(path) for path in paths]
@@ -442,7 +445,6 @@ class MainAppWindow:
         path = self.__options["data_dir_path"]
         bouquets = []
         services_model = self.__services_view.get_model()
-
         # removing bouquet files
         for bqf in self.__bouquets_to_del:
             with suppress(FileNotFoundError):
@@ -472,13 +474,22 @@ class MainAppWindow:
 
     def on_services_selection(self, model, path, column):
         self.delete_selection(self.__fav_view)
+        self.update_service_bar(model, path)
+
+    def update_service_bar(self, model, path):
+        def_val = "Unknown"
         values = model.get_value(model.get_iter(path), 0).split(",")
-        for val in values:
-            if val.startswith("C:"):
-                self.__cas_label.set_text(CAS[val])
-                break
-        else:
-            self.__cas_label.set_text("")
+        cas_values = list(filter(lambda val: val.startswith("C:"), values))
+        flags_values = list(filter(lambda val: val.startswith("f:"), values))
+
+        if FLAG.HIDE in flags_values:
+            self.__hide_check_button.set_active(True)
+        if FLAG.LOCK in flags_values:
+            self.__lock_check_button.set_active(True)
+
+        self.__cas_label.set_text(",".join(map(str, [CAS.get(val, def_val) for val in cas_values])))
+        # self.__hide_check_button.set_sensitive(True)
+        # self.__lock_check_button.set_sensitive(True)
 
     def on_fav_selection(self, model, path, column):
         self.delete_selection(self.__services_view)
@@ -595,6 +606,23 @@ class MainAppWindow:
 
         for elem in self._REMOVE_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
+
+    def on_hide(self, item):
+        self.set_service_flags(FLAG.HIDE)
+
+    def on_locked(self, item):
+        self.set_service_flags(FLAG.LOCK)
+
+    def set_service_flags(self, flag):
+        model, paths = self.__services_view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
+        if flag is FLAG.HIDE:
+            pass
+            # print(self.__hide_check_button.get_active())
+        elif flag is FLAG.LOCK:
+            pass
 
 
 def start_app():
