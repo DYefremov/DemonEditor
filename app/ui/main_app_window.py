@@ -2,7 +2,8 @@ import os
 from contextlib import suppress
 
 from app.commons import run_idle
-from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
+from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel, \
+    get_blacklist
 from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
 from . import Gtk, Gdk
@@ -67,6 +68,7 @@ class MainAppWindow:
         self.__channels = {}
         self.__bouquets = {}
         self.__bouquets_to_del = []
+        self.__blacklist = set()
 
         builder = Gtk.Builder()
         builder.add_from_file("app/ui/main_window.glade")
@@ -416,13 +418,20 @@ class MainAppWindow:
         self.__bouquets_model.clear()
         self.__fav_model.clear()
         self.__services_model.clear()
+        self.__blacklist.clear()
         data_path = self.__options["data_dir_path"]
         try:
+            self.append_blacklist(data_path)
             self.append_services(data_path)
             self.append_bouquets(data_path)
         except FileNotFoundError as e:
             show_dialog("error_dialog", self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
+
+    def append_blacklist(self, data_path):
+        black_list = get_blacklist(data_path)
+        if black_list:
+            self.__blacklist.update(black_list)
 
     def append_bouquets(self, data_path):
         for bouquet in get_bouquets(data_path):
@@ -433,10 +442,14 @@ class MainAppWindow:
                 self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
 
     def append_services(self, data_path):
-        for ch in get_channels(data_path + "lamedb"):
-            #  adding channels to dict with fav_id as keys
-            self.__channels[ch.fav_id] = ch
-            self.__services_model.append(ch)
+        channels = get_channels(data_path + "lamedb")
+        if channels:
+            for ch in channels:
+                #  adding channels to dict with fav_id as keys
+                self.__channels[ch.fav_id] = ch
+                self.__services_model.append(ch)
+        else:
+            show_dialog("error_dialog", self.__main_window, "Error opening data!")
 
     def on_data_save(self, *args):
         if show_dialog("question_dialog", self.__main_window) == Gtk.ResponseType.CANCEL:
@@ -460,11 +473,10 @@ class MainAppWindow:
                     bq_itr = model.iter_nth_child(itr, num)
                     bq_name, bq_type = model.get(bq_itr, 0, 1)
                     favs = self.__bouquets["{}:{}".format(bq_name, bq_type)]
-                    bq = Bouquet(bq_name, bq_type, [self.__channels[f_id] for f_id in favs])
+                    bq = Bouquet(bq_name, bq_type, [self.__channels.get(f_id, None) for f_id in favs])
                     bqs.append(bq)
                 bqs = Bouquets(*model.get(itr, 0, 1), bqs)
                 bouquets.append(bqs)
-
         # Getting bouquets
         self.__bouquets_view.get_model().foreach(parse_bouquets)
         write_bouquets(path, bouquets, self.__bouquets)
@@ -488,8 +500,6 @@ class MainAppWindow:
             self.__lock_check_button.set_active(True)
 
         self.__cas_label.set_text(",".join(map(str, [CAS.get(val, def_val) for val in cas_values])))
-        # self.__hide_check_button.set_sensitive(True)
-        # self.__lock_check_button.set_sensitive(True)
 
     def on_fav_selection(self, model, path, column):
         self.delete_selection(self.__services_view)
@@ -620,7 +630,6 @@ class MainAppWindow:
 
         if flag is FLAG.HIDE:
             pass
-            # print(self.__hide_check_button.get_active())
         elif flag is FLAG.LOCK:
             pass
 

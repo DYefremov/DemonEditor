@@ -1,7 +1,26 @@
+import logging
 from functools import wraps
 from threading import Thread
 
 from gi.repository import GLib
+
+
+_LOG_FILE = "app_log.log"
+_DATE_FORMAT = "%d-%m-%y %H:%M:%S"
+_LOGGER_NAME = "main_logger"
+logging.Logger(_LOGGER_NAME)
+logging.basicConfig(level=logging.INFO,
+                    filename=_LOG_FILE,
+                    format="%(asctime)s %(message)s",
+                    datefmt=_DATE_FORMAT)
+
+
+def get_logger():
+    return logging.getLogger(_LOGGER_NAME)
+
+
+def log(message, level=logging.ERROR):
+    get_logger().log(level, message)
 
 
 def run_idle(func):
@@ -21,6 +40,18 @@ def run_task(func):
     def wrapper(*args, **kwargs):
         task = Thread(target=func, args=args, kwargs=kwargs, daemon=True)
         task.start()
+
+    return wrapper
+
+
+def catch_exceptions(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, *kwargs)
+        except Exception as e:
+            log(e)
+            
     return wrapper
 
 

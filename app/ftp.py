@@ -5,7 +5,7 @@ from enum import Enum
 from ftplib import FTP
 from telnetlib import Telnet
 
-__DATA_FILES_LIST = ("tv", "radio", "lamedb")
+__DATA_FILES_LIST = ("tv", "radio", "lamedb", "blacklist", "whitelist")
 
 
 class DownloadDataType(Enum):

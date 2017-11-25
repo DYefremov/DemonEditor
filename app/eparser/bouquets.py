@@ -33,6 +33,8 @@ def write_bouquet(path, name, bq_type, channels):
     bouquet = ["#NAME {}\n".format(name)]
 
     for ch in channels:
+        if not ch:  # if was duplicate
+            continue
         data_type = int(ch.data_id.split(":")[-2])
         if data_type == 22:
             data_type = 16

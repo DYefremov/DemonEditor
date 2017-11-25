@@ -74,7 +74,8 @@ class DownloadDialog:
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active())
         except Exception as e:
-            self.show_info_message(getattr(e, "message", str(e)), Gtk.MessageType.ERROR)
+            message = str(getattr(e, "message", str(e)))
+            self.show_info_message(message, Gtk.MessageType.ERROR)
         else:
             self.show_info_message("Done!", Gtk.MessageType.INFO)
             if download and d_type is not DownloadDataType.SATELLITES:

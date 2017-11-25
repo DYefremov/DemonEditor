@@ -5,6 +5,7 @@
 """
 from collections import namedtuple
 
+from app.commons import log
 from app.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE
 
 _HEADER = "eDVB services /4/"
@@ -34,8 +35,7 @@ def write_channels(path, channels):
             tr_lines.append(transponder)
             tr_set.add(tr_id)
         # Services
-        flags = "," + ch.flags_cas if ch.flags_cas else ""
-        services_lines.append("{}\n{}\np:{}{}\n".format(ch.data_id, ch.service, ch.package, flags))
+        services_lines.append("{}\n{}\n{}\n".format(ch.data_id, ch.service, ch.flags_cas))
 
     tr_lines.sort()
     lines.extend(tr_lines)
@@ -49,12 +49,16 @@ def write_channels(path, channels):
 def parse(path):
     """ Parsing lamedb """
     with open(path, "r") as file:
-        data = str(file.read())
-    transponders, sep, services = data.partition("transponders")  # 1 step
-    transponders, sep, services = services.partition("services")  # 2 step
-    services, sep, _ = services.partition("end")  # 3 step
+        try:
+            data = str(file.read())
+        except UnicodeDecodeError as e:
+            log("lamedb parse error: " + str(e))
+        else:
+            transponders, sep, services = data.partition("transponders")  # 1 step
+            transponders, sep, services = services.partition("services")  # 2 step
+            services, sep, _ = services.partition("end")  # 3 step
 
-    return parse_channels(services.split("\n"), transponders.split("/"))
+            return parse_channels(services.split("\n"), transponders.split("/"))
 
 
 def parse_transponders(arg):
@@ -83,9 +87,8 @@ def parse_channels(*args):
         # For comparison in bouquets. Needed in upper case!!!
         fav_id = "{}:{}:{}:{}".format(str(data[0]).lstrip(sp), str(data[2]).lstrip(sp),
                                       str(data[3]).lstrip(sp), str(data[1]).lstrip(sp))
-
-        package, sp, cas = str(ch[2]).partition(",")
-        _, sp, package = package.partition(_SEP)
+        package = list(filter(lambda x: x.startswith("p:"), ch[2].split(",")))
+        package = package[0][2:] if package else None
 
         transponder_id = "{}:{}:{}".format(data[1], data[2], data[3])
         transponder = transponders.get(transponder_id, None)
@@ -94,7 +97,7 @@ def parse_channels(*args):
             tr_type, sp, tr = str(transponder).partition(" ")
             tr = tr.split(_SEP)
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
-            channels.append(Channel(flags_cas=cas,
+            channels.append(Channel(flags_cas=ch[2],
                                     transponder_type=tr_type,
                                     service=ch[1],
                                     package=package,
