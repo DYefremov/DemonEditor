@@ -104,7 +104,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="image2">
+  <object class="GtkImage" id="send_recive_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">mail-send-receive</property>
@@ -115,8 +115,14 @@
       <column type="gchararray"/>
       <!-- column-name type -->
       <column type="gchararray"/>
+      <!-- column-name coded -->
+      <column type="GdkPixbuf"/>
       <!-- column-name service -->
       <column type="gchararray"/>
+      <!-- column-name locked -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name hide -->
+      <column type="GdkPixbuf"/>
       <!-- column-name package -->
       <column type="gchararray"/>
       <!-- column-name service_type -->
@@ -186,7 +192,7 @@
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Download data from receiver</property>
                         <property name="use_underline">True</property>
-                        <property name="image">image2</property>
+                        <property name="image">send_recive_image</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="on_download" swapped="no"/>
                       </object>
@@ -472,6 +478,16 @@
               </packing>
             </child>
             <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="cut_tool_button">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
@@ -742,14 +758,33 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="service_column">
                             <property name="resizable">True</property>
+                            <property name="spacing">2</property>
                             <property name="title" translatable="yes">Service</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">2</property>
+                            <property name="sort_column_id">3</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="coded_cellrendererpixbuf"/>
+                              <attributes>
+                                <attribute name="pixbuf">2</attribute>
+                              </attributes>
+                            </child>
                             <child>
                               <object class="GtkCellRendererText" id="service_cellrenderertext"/>
                               <attributes>
-                                <attribute name="text">2</attribute>
+                                <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="locked_cellrendererpixbuf"/>
+                              <attributes>
+                                <attribute name="pixbuf">4</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="hide_cellrendererpixbuf"/>
+                              <attributes>
+                                <attribute name="pixbuf">5</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -757,14 +792,15 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="package_column">
                             <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Package</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">3</property>
+                            <property name="sort_column_id">6</property>
                             <child>
                               <object class="GtkCellRendererText" id="package_cellrenderertext"/>
                               <attributes>
-                                <attribute name="text">3</attribute>
+                                <attribute name="text">6</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -775,13 +811,13 @@
                             <property name="title" translatable="yes">Type</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">4</property>
+                            <property name="sort_column_id">7</property>
                             <child>
                               <object class="GtkCellRendererText" id="service_type_cellrenderertex">
                                 <property name="xalign">0.51999998092651367</property>
                               </object>
                               <attributes>
-                                <attribute name="text">4</attribute>
+                                <attribute name="text">7</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -792,13 +828,13 @@
                             <property name="title" translatable="yes">Ssid</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">5</property>
+                            <property name="sort_column_id">8</property>
                             <child>
                               <object class="GtkCellRendererText" id="ssid_cellrenderertext">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">5</attribute>
+                                <attribute name="text">8</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -809,13 +845,13 @@
                             <property name="title" translatable="yes">Freq</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">6</property>
+                            <property name="sort_column_id">9</property>
                             <child>
                               <object class="GtkCellRendererText" id="freq_cellrenderertext">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">6</attribute>
+                                <attribute name="text">9</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -826,13 +862,13 @@
                             <property name="title" translatable="yes">Rate</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">7</property>
+                            <property name="sort_column_id">10</property>
                             <child>
                               <object class="GtkCellRendererText" id="rate_cellrenderertext">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">7</attribute>
+                                <attribute name="text">10</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -843,13 +879,13 @@
                             <property name="title" translatable="yes">Pol</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">8</property>
+                            <property name="sort_column_id">11</property>
                             <child>
                               <object class="GtkCellRendererText" id="pol_cellrenderertext">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">8</attribute>
+                                <attribute name="text">11</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -860,13 +896,13 @@
                             <property name="title" translatable="yes">FEC</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">9</property>
+                            <property name="sort_column_id">12</property>
                             <child>
                               <object class="GtkCellRendererText" id="fec_cellrenderertext">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">9</attribute>
+                                <attribute name="text">12</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -877,13 +913,13 @@
                             <property name="title" translatable="yes">System</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
-                            <property name="sort_column_id">10</property>
+                            <property name="sort_column_id">13</property>
                             <child>
                               <object class="GtkCellRendererText" id="system_cellrenderertex">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">10</attribute>
+                                <attribute name="text">13</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -893,13 +929,13 @@
                             <property name="resizable">True</property>
                             <property name="title" translatable="yes">Pos</property>
                             <property name="expand">True</property>
-                            <property name="sort_column_id">11</property>
+                            <property name="sort_column_id">14</property>
                             <child>
                               <object class="GtkCellRendererText" id="pos_cellrenderertext1">
                                 <property name="xalign">0.50999999046325684</property>
                               </object>
                               <attributes>
-                                <attribute name="text">11</attribute>
+                                <attribute name="text">14</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -911,7 +947,7 @@
                             <child>
                               <object class="GtkCellRendererText" id="data_id_cellrenderertext"/>
                               <attributes>
-                                <attribute name="text">12</attribute>
+                                <attribute name="text">15</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -923,7 +959,7 @@
                             <child>
                               <object class="GtkCellRendererText" id="fav_id_cellrenderertext"/>
                               <attributes>
-                                <attribute name="text">13</attribute>
+                                <attribute name="text">16</attribute>
                               </attributes>
                             </child>
                           </object>
@@ -933,9 +969,9 @@
                             <property name="visible">False</property>
                             <property name="title" translatable="yes">transponder</property>
                             <child>
-                              <object class="GtkCellRendererText" id="transponder_cellrenderertext3"/>
+                              <object class="GtkCellRendererText" id="transponder_cellrenderertext"/>
                               <attributes>
-                                <attribute name="text">14</attribute>
+                                <attribute name="text">17</attribute>
                               </attributes>
                             </child>
                           </object>

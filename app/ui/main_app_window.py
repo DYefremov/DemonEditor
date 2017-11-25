@@ -2,8 +2,8 @@ import os
 from contextlib import suppress
 
 from app.commons import run_idle
-from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel, \
-    get_blacklist
+from app.eparser import get_blacklist, write_blacklist
+from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
 from . import Gtk, Gdk
@@ -442,7 +442,7 @@ class MainAppWindow:
                 self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
 
     def append_services(self, data_path):
-        channels = get_channels(data_path + "lamedb")
+        channels = get_channels(data_path)
         if channels:
             for ch in channels:
                 #  adding channels to dict with fav_id as keys
@@ -483,6 +483,8 @@ class MainAppWindow:
         # Getting services
         services = [Channel(*row[:]) for row in services_model]
         write_channels(path, services)
+        # blacklist
+        write_blacklist(path, self.__blacklist)
 
     def on_services_selection(self, model, path, column):
         self.delete_selection(self.__fav_view)
@@ -631,7 +633,8 @@ class MainAppWindow:
         if flag is FLAG.HIDE:
             pass
         elif flag is FLAG.LOCK:
-            pass
+            if self.__lock_check_button.get_active():
+                pass
 
 
 def start_app():
