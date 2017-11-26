@@ -202,7 +202,7 @@ class MainAppWindow:
                 model, paths = selection.get_selected_rows()
                 model_name = model.get_name()
                 itrs = [model.get_iter(path) for path in paths]
-                rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in itrs]
+                rows = [model.get(in_itr, *[x for x in range(model.get_n_columns())]) for in_itr in itrs]
                 bq_selected = self.is_bouquet_selected()
                 fav_bouquet = None
 
@@ -236,8 +236,9 @@ class MainAppWindow:
             fav_id = row[-2]
             for bq in self.__bouquets:
                 services = self.__bouquets[bq]
-                with suppress(ValueError):
-                    services.remove(fav_id)
+                if services:
+                    with suppress(ValueError):
+                        services.remove(fav_id)
             self.__channels.pop(fav_id, None)
         self.__fav_model.clear()
 
@@ -350,19 +351,18 @@ class MainAppWindow:
             if source == self._SERVICE_LIST_NAME:
                 ext_model = self.__services_view.get_model()
                 ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
-                ext_rows = [ext_model.get(ext_itr, *[x for x in range(self.__services_view.get_n_columns())]) for
-                            ext_itr in
-                            ext_itrs]
+                ext_rows = [ext_model.get(ext_itr, *[x for x in range(ext_model.get_n_columns())]) for
+                            ext_itr in ext_itrs]
                 dest_index -= 1
                 for ext_row in ext_rows:
                     dest_index += 1
-                    fav_id = ext_row[13]
+                    fav_id = ext_row[-2]
                     channel = self.__channels[fav_id]
                     model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos, channel.fav_id))
                     fav_bouquet.insert(dest_index, channel.fav_id)
             elif source == self._FAV_LIST_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
-                in_rows = [model.get(in_itr, *[x for x in range(view.get_n_columns())]) for in_itr in in_itrs]
+                in_rows = [model.get(in_itr, *[x for x in range(model.get_n_columns())]) for in_itr in in_itrs]
                 for row in in_rows:
                     model.insert(dest_index, row)
                     fav_bouquet.insert(dest_index, row[4])

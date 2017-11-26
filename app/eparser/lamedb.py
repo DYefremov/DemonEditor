@@ -79,7 +79,7 @@ def parse_channels(services, transponders, path):
     """ Parsing channels """
     channels = []
     transponders = parse_transponders(transponders)
-    blacklist = get_blacklist(path)
+    blacklist = str(get_blacklist(path))
 
     srv = split(services, 3)
     if srv[0][0] == "":  # remove first empty element
@@ -95,7 +95,7 @@ def parse_channels(services, transponders, path):
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
         hide = HIDE_ICON if flags and int(flags[0][2:]) == 2 else None
-        locked = LOCKED_ICON if blacklist and fav_id in blacklist else None
+        locked = LOCKED_ICON if fav_id in blacklist else None
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))
         package = package[0][2:] if package else None
