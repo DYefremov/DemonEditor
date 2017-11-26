@@ -2,11 +2,11 @@ import os
 from contextlib import suppress
 
 from app.commons import run_idle
-from app.eparser import get_blacklist, write_blacklist
+from app.eparser import get_blacklist, write_blacklist, to_bouquet_id
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
-from . import Gtk, Gdk
+from . import Gtk, Gdk, LOCKED_ICON
 from .dialogs import show_dialog
 from .download_dialog import show_download_dialog
 from .satellites_dialog import show_satellites_dialog
@@ -24,12 +24,14 @@ class MainAppWindow:
                         "bouquets_remove_popup_item", "fav_remove_popoup_item")
     _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popoup_item", "fav_paste_popup_item")
+    _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
     __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
                           "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
                           "services_to_fav_move_popup_item", "services_remove_popup_item", "fav_cut_popoup_item",
                           "fav_paste_popup_item", "bouquets_new_popup_item", "bouguets_edit_popup_item",
-                          "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popoup_item")
+                          "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popoup_item",
+                          "locked_tool_button", "hide_tool_button")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -88,8 +90,6 @@ class MainAppWindow:
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         self.__cas_label = builder.get_object("cas_label")
-        self.__hide_check_button = builder.get_object("hide_check_button")
-        self.__lock_check_button = builder.get_object("lock_check_button")
         builder.connect_signals(handlers)
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show()
@@ -477,6 +477,7 @@ class MainAppWindow:
                     bqs.append(bq)
                 bqs = Bouquets(*model.get(itr, 0, 1), bqs)
                 bouquets.append(bqs)
+
         # Getting bouquets
         self.__bouquets_view.get_model().foreach(parse_bouquets)
         write_bouquets(path, bouquets, self.__bouquets)
@@ -615,6 +616,8 @@ class MainAppWindow:
                 self.__tool_elements[elem].set_sensitive(not_empty and is_service)
             for elem in self._BOUQUET_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(False)
+            for elem in self._LOCK_HIDE_ELEMENTS:
+                self.__tool_elements[elem].set_sensitive(not_empty)
 
         for elem in self._REMOVE_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
@@ -633,8 +636,20 @@ class MainAppWindow:
         if flag is FLAG.HIDE:
             pass
         elif flag is FLAG.LOCK:
-            if self.__lock_check_button.get_active():
-                pass
+            locked = self.has_locked(model, paths)
+            for path in paths:
+                itr = model.get_iter(path)
+                channel = self.__channels.get(model.get_value(itr, 16), None)
+                if channel:
+                    bq_id = to_bouquet_id(channel)
+                    self.__blacklist.discard(bq_id) if locked else self.__blacklist.add(bq_id)
+                    model.set_value(itr, 4, None) if locked else model.set_value(itr, 4, LOCKED_ICON)
+
+    def has_locked(self, model, paths):
+        for path in paths:
+            if model.get_value(model.get_iter(path), 4):
+                return True
+        return False
 
 
 def start_app():

@@ -153,7 +153,7 @@ class SatellitesDialog:
         if row[-1]:  # satellite
             self.on_satellite(None if force else Satellite(row[0], None, row[-1], None), itr)
         else:
-            self.on_transponder(None if force else Transponder(*row[1:-2]))
+            self.on_transponder(None if force else Transponder(*row[1:-2]), itr)
 
     def on_satellite(self, satellite=None, edited_itr=None):
         """ Create or edit satellite"""

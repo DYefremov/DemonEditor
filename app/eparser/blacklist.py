@@ -15,8 +15,8 @@ def get_blacklist(path):
 
 
 def write_blacklist(path, channels):
-    if channels:
-        with open(path + __FILE_NAME, "w") as file:
+    with open(path + __FILE_NAME, "w") as file:
+        if channels:
             file.writelines("\n".join(channels))
 
 

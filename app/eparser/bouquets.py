@@ -35,15 +35,22 @@ def write_bouquet(path, name, bq_type, channels):
     for ch in channels:
         if not ch:  # if was duplicate
             continue
-        data_type = int(ch.data_id.split(":")[-2])
-        if data_type == 22:
-            data_type = 16
-        elif data_type == 25:
-            data_type = 19
-        bouquet.append("#SERVICE {}:0:{}:{}:0:0:0:\n".format(1, data_type, ch.fav_id))
+        bouquet.append("#SERVICE {}\n".format(to_bouquet_id(ch)))
 
     with open(path + "userbouquet.{}.{}".format(name, bq_type), "w") as file:
         file.writelines(bouquet)
+
+
+def to_bouquet_id(ch):
+    """ Creates bouquet channel id """
+    data_type = int(ch.data_id.split(":")[-2])
+    if data_type == 22:
+        data_type = 16
+    elif data_type == 25:
+        data_type = 19
+    service = "{}:0:{}:{}:0:0:0:".format(1, data_type, ch.fav_id)
+
+    return service
 
 
 def get_bouquet(path, name, bq_type):
