@@ -6,7 +6,7 @@ from app.eparser import get_blacklist, write_blacklist, to_bouquet_id
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
-from . import Gtk, Gdk, LOCKED_ICON
+from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog
 from .download_dialog import show_download_dialog
 from .satellites_dialog import show_satellites_dialog
@@ -495,13 +495,6 @@ class MainAppWindow:
         def_val = "Unknown"
         values = model.get_value(model.get_iter(path), 0).split(",")
         cas_values = list(filter(lambda val: val.startswith("C:"), values))
-        flags_values = list(filter(lambda val: val.startswith("f:"), values))
-
-        if FLAG.HIDE in flags_values:
-            self.__hide_check_button.set_active(True)
-        if FLAG.LOCK in flags_values:
-            self.__lock_check_button.set_active(True)
-
         self.__cas_label.set_text(",".join(map(str, [CAS.get(val, def_val) for val in cas_values])))
 
     def on_fav_selection(self, model, path, column):
@@ -588,6 +581,10 @@ class MainAppWindow:
             self.on_paste(view)
         elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
             self.on_data_save()
+        elif ctrl and key == Gdk.KEY_l or key == Gdk.KEY_L:
+            self.on_locked(None)
+        elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
+            self.on_hide(None)
         elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
             pass
 
@@ -634,20 +631,28 @@ class MainAppWindow:
             return
 
         if flag is FLAG.HIDE:
-            pass
+            col_num = 5
+            hide = self.has_locked_hide(model, paths, col_num)
+            for path in paths:
+                itr = model.get_iter(path)
+                model.set_value(itr, col_num, None) if hide else model.set_value(itr, col_num, HIDE_ICON)
+                flags = {*model.get_value(itr, 0).split(",")}
+                flags.discard(FLAG.HIDE.value) if hide else flags.add(FLAG.HIDE.value)
+                model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
         elif flag is FLAG.LOCK:
-            locked = self.has_locked(model, paths)
+            col_num = 4
+            locked = self.has_locked_hide(model, paths, col_num)
             for path in paths:
                 itr = model.get_iter(path)
                 channel = self.__channels.get(model.get_value(itr, 16), None)
                 if channel:
                     bq_id = to_bouquet_id(channel)
                     self.__blacklist.discard(bq_id) if locked else self.__blacklist.add(bq_id)
-                    model.set_value(itr, 4, None) if locked else model.set_value(itr, 4, LOCKED_ICON)
+                    model.set_value(itr, col_num, None) if locked else model.set_value(itr, col_num, LOCKED_ICON)
 
-    def has_locked(self, model, paths):
+    def has_locked_hide(self, model, paths, col_num):
         for path in paths:
-            if model.get_value(model.get_iter(path), 4):
+            if model.get_value(model.get_iter(path), col_num):
                 return True
         return False
 

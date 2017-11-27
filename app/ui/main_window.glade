@@ -377,7 +377,7 @@
               <object class="GtkToolButton" id="download_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Download data from receiver</property>
+                <property name="tooltip_text" translatable="yes">FTP-transfer</property>
                 <property name="label" translatable="yes">Download</property>
                 <property name="use_underline">True</property>
                 <property name="icon_name">mail-send-receive</property>
@@ -547,6 +547,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
                 <property name="label" translatable="yes">Locked</property>
                 <property name="use_underline">True</property>
                 <property name="icon_name">system-lock-screen</property>
@@ -562,6 +563,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
                 <property name="label" translatable="yes">Hide</property>
                 <property name="use_underline">True</property>
                 <property name="icon_name">go-jump</property>
