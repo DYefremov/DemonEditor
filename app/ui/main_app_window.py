@@ -61,7 +61,8 @@ class MainAppWindow:
                     "on_view_popup_menu": self.on_view_popup_menu,
                     "on_view_focus": self.on_view_focus,
                     "on_hide": self.on_hide,
-                    "on_locked": self.on_locked}
+                    "on_locked": self.on_locked,
+                    "on_model_changed": self.on_model_changed}
 
         self.__options = get_config()
         # Used for copy/paste. When adding the previous data will not be deleted.
@@ -90,6 +91,11 @@ class MainAppWindow:
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         self.__cas_label = builder.get_object("cas_label")
+        self.__fav_count_label = builder.get_object("fav_count_label")
+        self.__bouquets_count_label = builder.get_object("bouquets_count_label")
+        self.__tv_count_label = builder.get_object("tv_count_label")
+        self.__radio_count_label = builder.get_object("radio_count_label")
+        self.__data_count_label = builder.get_object("data_count_label")
         builder.connect_signals(handlers)
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show()
@@ -424,6 +430,7 @@ class MainAppWindow:
             self.append_blacklist(data_path)
             self.append_services(data_path)
             self.append_bouquets(data_path)
+            self.update_services_counts()
         except FileNotFoundError as e:
             show_dialog("error_dialog", self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
@@ -655,6 +662,40 @@ class MainAppWindow:
             if model.get_value(model.get_iter(path), col_num):
                 return True
         return False
+
+    @run_idle
+    def on_model_changed(self, model, path, itr=None):
+        model_name = model.get_name()
+
+        if model_name == self._FAV_LIST_NAME:
+            self.__fav_count_label.set_text(str(len(model)))
+        elif model_name == self._SERVICE_LIST_NAME:
+            self.update_services_counts()
+        elif model_name == self._BOUQUETS_LIST_NAME:
+            self.__bouquets_count_label.set_text(str(len(self.__bouquets.keys())))
+
+    @run_idle
+    def update_services_counts(self):
+        """ Updates counters for services
+
+            May be temporary! (Needs optimising.)
+        """
+        tv_count = 0
+        radio_count = 0
+        data_count = 0
+
+        for ch in self.__channels.values():
+            ch_type = ch.service_type
+            if ch_type in ("TV", "TV (HD)"):
+                tv_count += 1
+            elif ch_type == "Radio":
+                radio_count += 1
+            elif ch_type == "Data":
+                data_count += 1
+
+        self.__tv_count_label.set_text(str(tv_count))
+        self.__radio_count_label.set_text(str(radio_count))
+        self.__data_count_label.set_text(str(data_count))
 
 
 def start_app():

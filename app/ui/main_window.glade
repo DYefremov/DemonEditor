@@ -46,6 +46,8 @@
       <!-- column-name type -->
       <column type="gchararray"/>
     </columns>
+    <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkListStore" id="fav_list_store">
     <columns>
@@ -60,6 +62,8 @@
       <!-- column-name fav_id -->
       <column type="gchararray"/>
     </columns>
+    <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
@@ -148,6 +152,7 @@
       <!-- column-name transponder -->
       <column type="gchararray"/>
     </columns>
+    <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="width_request">640</property>
@@ -1029,18 +1034,18 @@
                 </child>
                 <child>
                   <object class="GtkBox" id="services_bar_box">
-                    <property name="width_request">85</property>
                     <property name="height_request">25</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resize_mode">queue</property>
+                    <property name="spacing">2</property>
                     <child>
-                      <object class="GtkLabel" id="label1">
+                      <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">10</property>
+                        <property name="margin_left">5</property>
                         <property name="margin_right">2</property>
-                        <property name="label" translatable="yes">CAS:</property>
+                        <property name="icon_name">system-lock-screen</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1052,6 +1057,9 @@
                       <object class="GtkLabel" id="cas_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">CAS</property>
+                        <property name="width_chars">8</property>
+                        <property name="xalign">0</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1070,6 +1078,83 @@
                         <property name="fill">True</property>
                         <property name="padding">5</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="tv_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">tv-symbolic</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="tv_count_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">TV</property>
+                        <property name="margin_right">5</property>
+                        <property name="label" translatable="yes">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="radio_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">network-wireless-symbolic</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="radio_count_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Radio</property>
+                        <property name="margin_right">5</property>
+                        <property name="label" translatable="yes">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="data_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">system-run</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="data_count_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Data</property>
+                        <property name="label" translatable="yes">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">8</property>
                       </packing>
                     </child>
                   </object>
@@ -1213,12 +1298,12 @@
                         <property name="height_request">25</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="spacing">2</property>
                         <child>
                           <object class="GtkLabel" id="label3">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Channels:</property>
+                            <property name="label" translatable="yes">Services:</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1230,6 +1315,9 @@
                           <object class="GtkLabel" id="fav_count_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">0</property>
+                            <property name="width_chars">5</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1332,10 +1420,10 @@
                         <property name="height_request">25</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="spacing">2</property>
                         <child>
                           <object class="GtkLabel" id="label4">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Bouquets:</property>
                           </object>
@@ -1349,6 +1437,9 @@
                           <object class="GtkLabel" id="bouquets_count_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">0</property>
+                            <property name="width_chars">5</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
