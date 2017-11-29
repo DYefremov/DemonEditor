@@ -1,5 +1,6 @@
 import os
 from contextlib import suppress
+from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import get_blacklist, write_blacklist, to_bouquet_id
@@ -430,7 +431,7 @@ class MainAppWindow:
             self.append_blacklist(data_path)
             self.append_services(data_path)
             self.append_bouquets(data_path)
-            self.update_services_counts()
+            self.update_services_counts(len(self.__services_model))
         except FileNotFoundError as e:
             show_dialog("error_dialog", self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
@@ -670,16 +671,13 @@ class MainAppWindow:
         if model_name == self._FAV_LIST_NAME:
             self.__fav_count_label.set_text(str(len(model)))
         elif model_name == self._SERVICE_LIST_NAME:
-            self.update_services_counts()
+            self.update_services_counts(len(model))
         elif model_name == self._BOUQUETS_LIST_NAME:
             self.__bouquets_count_label.set_text(str(len(self.__bouquets.keys())))
 
-    @run_idle
-    def update_services_counts(self):
-        """ Updates counters for services
-
-            May be temporary! (Needs optimising.)
-        """
+    @lru_cache(maxsize=1)
+    def update_services_counts(self, size=0):
+        """ Updates counters for services. May be temporary! """
         tv_count = 0
         radio_count = 0
         data_count = 0

@@ -4,7 +4,6 @@ from threading import Thread
 
 from gi.repository import GLib
 
-
 _LOG_FILE = "app_log.log"
 _DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 _LOGGER_NAME = "main_logger"
@@ -41,17 +40,6 @@ def run_task(func):
         task = Thread(target=func, args=args, kwargs=kwargs, daemon=True)
         task.start()
 
-    return wrapper
-
-
-def catch_exceptions(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, *kwargs)
-        except Exception as e:
-            log(e)
-            
     return wrapper
 
 
