@@ -1045,7 +1045,7 @@
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">2</property>
-                        <property name="icon_name">system-lock-screen</property>
+                        <property name="icon_name">dialog-password-symbolic</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1058,7 +1058,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">CAS</property>
-                        <property name="width_chars">8</property>
+                        <property name="width_chars">10</property>
                         <property name="xalign">0</property>
                       </object>
                       <packing>
@@ -1110,7 +1110,7 @@
                       <object class="GtkImage" id="radio_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="icon_name">network-wireless-symbolic</property>
+                        <property name="icon_name">internet-radio-new</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1300,10 +1300,10 @@
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
                         <child>
-                          <object class="GtkLabel" id="label3">
+                          <object class="GtkImage" id="image2">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Services:</property>
+                            <property name="stock">gtk-properties</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1316,7 +1316,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">0</property>
-                            <property name="width_chars">5</property>
+                            <property name="width_chars">10</property>
                             <property name="xalign">0</property>
                           </object>
                           <packing>
@@ -1338,7 +1338,7 @@
                   </object>
                   <packing>
                     <property name="resize">True</property>
-                    <property name="shrink">True</property>
+                    <property name="shrink">False</property>
                   </packing>
                 </child>
                 <child>
@@ -1422,10 +1422,10 @@
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
                         <child>
-                          <object class="GtkLabel" id="label4">
+                          <object class="GtkImage" id="image3">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Bouquets:</property>
+                            <property name="stock">gtk-properties</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1466,7 +1466,7 @@
               </object>
               <packing>
                 <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
           </object>
