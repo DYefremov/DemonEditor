@@ -53,8 +53,14 @@
     <columns>
       <!-- column-name num -->
       <column type="gint"/>
+      <!-- column-name fav_coded -->
+      <column type="GdkPixbuf"/>
       <!-- column-name service -->
       <column type="gchararray"/>
+      <!-- column-name fav_locked -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name fav_hide -->
+      <column type="GdkPixbuf"/>
       <!-- column-name type -->
       <column type="gchararray"/>
       <!-- column-name pos -->
@@ -764,7 +770,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">services_list_store</property>
-                        <property name="search_column">2</property>
+                        <property name="search_column">3</property>
                         <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
@@ -972,7 +978,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkTreeViewColumn" id="pos_column1">
+                          <object class="GtkTreeViewColumn" id="pos_column">
                             <property name="resizable">True</property>
                             <property name="title" translatable="yes">Pos</property>
                             <property name="expand">True</property>
@@ -1000,7 +1006,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkTreeViewColumn" id="fav_id_column">
+                          <object class="GtkTreeViewColumn" id="service_fav_id_column">
                             <property name="visible">False</property>
                             <property name="title" translatable="yes">fav_id</property>
                             <child>
@@ -1040,12 +1046,11 @@
                     <property name="resize_mode">queue</property>
                     <property name="spacing">2</property>
                     <child>
-                      <object class="GtkImage" id="image1">
+                      <object class="GtkImage" id="cas_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
-                        <property name="margin_right">2</property>
-                        <property name="icon_name">dialog-password-symbolic</property>
+                        <property name="icon_name">gtk-dialog-authentication-panel</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1202,7 +1207,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="model">fav_list_store</property>
-                            <property name="search_column">1</property>
+                            <property name="search_column">2</property>
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <property name="activate_on_single_click">True</property>
@@ -1232,20 +1237,39 @@
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="service_column1">
+                              <object class="GtkTreeViewColumn" id="fav_service_column">
                                 <property name="resizable">True</property>
+                                <property name="spacing">2</property>
                                 <property name="title" translatable="yes">Service</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="service_cellrenderertext1"/>
+                                  <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf"/>
                                   <attributes>
-                                    <attribute name="text">1</attribute>
+                                    <attribute name="pixbuf">1</attribute>
+                                  </attributes>
+                                </child>
+                                <child>
+                                  <object class="GtkCellRendererText" id="fav_service_cellrenderertext"/>
+                                  <attributes>
+                                    <attribute name="text">2</attribute>
+                                  </attributes>
+                                </child>
+                                <child>
+                                  <object class="GtkCellRendererPixbuf" id="fav_locked_cellrendererpixbuf"/>
+                                  <attributes>
+                                    <attribute name="pixbuf">3</attribute>
+                                  </attributes>
+                                </child>
+                                <child>
+                                  <object class="GtkCellRendererPixbuf" id="fav_hide_cellrendererpixbuf"/>
+                                  <attributes>
+                                    <attribute name="pixbuf">4</attribute>
                                   </attributes>
                                 </child>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="type_column1">
+                              <object class="GtkTreeViewColumn" id="fav_type_column">
                                 <property name="title" translatable="yes">Type</property>
                                 <property name="expand">True</property>
                                 <child>
@@ -1253,13 +1277,13 @@
                                     <property name="xalign">0.50999999046325684</property>
                                   </object>
                                   <attributes>
-                                    <attribute name="text">2</attribute>
+                                    <attribute name="text">5</attribute>
                                   </attributes>
                                 </child>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="pos_column">
+                              <object class="GtkTreeViewColumn" id="fav_pos_column">
                                 <property name="title" translatable="yes">Pos</property>
                                 <property name="expand">True</property>
                                 <child>
@@ -1267,19 +1291,19 @@
                                     <property name="xalign">0.50999999046325684</property>
                                   </object>
                                   <attributes>
-                                    <attribute name="text">3</attribute>
+                                    <attribute name="text">6</attribute>
                                   </attributes>
                                 </child>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="fav_id_column1">
+                              <object class="GtkTreeViewColumn" id="fav_id_column">
                                 <property name="visible">False</property>
                                 <property name="title" translatable="yes">fav_id</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="fav_id_cellrenderertext4"/>
                                   <attributes>
-                                    <attribute name="text">4</attribute>
+                                    <attribute name="text">7</attribute>
                                   </attributes>
                                 </child>
                               </object>

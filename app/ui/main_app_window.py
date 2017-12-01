@@ -532,7 +532,8 @@ class MainAppWindow:
         for num, ch_id in enumerate(services):
             channel = self.__channels.get(ch_id, None)
             if channel:
-                self.__fav_model.append((num + 1, channel.service, channel.service_type, channel.pos, channel.fav_id))
+                self.__fav_model.append((num + 1, channel.coded, channel.service, channel.locked,
+                                         channel.hide, channel.service_type, channel.pos, channel.fav_id))
 
     def is_bouquet_selected(self):
         """ Checks whether the bouquet is selected
@@ -622,7 +623,7 @@ class MainAppWindow:
             for elem in self._BOUQUET_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(False)
             for elem in self._LOCK_HIDE_ELEMENTS:
-                self.__tool_elements[elem].set_sensitive(not_empty)
+                self.__tool_elements[elem].set_sensitive(not_empty and is_service)
 
         for elem in self._REMOVE_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
@@ -647,16 +648,26 @@ class MainAppWindow:
                 flags = {*model.get_value(itr, 0).split(",")}
                 flags.discard(FLAG.HIDE.value) if hide else flags.add(FLAG.HIDE.value)
                 model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
+                fav_id = model.get_value(itr, 16)
+                channel = self.__channels.get(fav_id, None)
+                if channel:
+                    self.__channels[fav_id] = Channel(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
         elif flag is FLAG.LOCK:
             col_num = 4
             locked = self.has_locked_hide(model, paths, col_num)
             for path in paths:
                 itr = model.get_iter(path)
-                channel = self.__channels.get(model.get_value(itr, 16), None)
+                fav_id = model.get_value(itr, 16)
+                channel = self.__channels.get(fav_id, None)
                 if channel:
                     bq_id = to_bouquet_id(channel)
                     self.__blacklist.discard(bq_id) if locked else self.__blacklist.add(bq_id)
                     model.set_value(itr, col_num, None) if locked else model.set_value(itr, col_num, LOCKED_ICON)
+                    self.__channels[fav_id] = Channel(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
+        bq_selected = self.is_bouquet_selected()
+        if bq_selected:
+            self.__fav_model.clear()
+            self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     def has_locked_hide(self, model, paths, col_num):
         for path in paths:
