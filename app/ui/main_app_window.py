@@ -280,7 +280,7 @@ class MainAppWindow:
                 return
 
             bq = response, bq_type
-            print()
+            key = "{}:{}".format(response, bq_type)
 
             if model.iter_n_children(itr):  # parent
                 ch_itr = model.insert(itr, 0, bq)
@@ -289,7 +289,6 @@ class MainAppWindow:
                 p_itr = model.iter_parent(itr)
                 it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
                 self.scroll_to(model.get_path(it), paths, view)
-            print(key)
             self.__bouquets[key] = []
 
     def scroll_to(self, path, paths, view):
