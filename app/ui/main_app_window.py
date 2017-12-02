@@ -163,13 +163,13 @@ class MainAppWindow:
                         model.move_after(itr, down_itr)
 
     def on_cut(self, view):
-        for row in self.on_delete(view):
+        for row in tuple(self.on_delete(view)):
             self.__rows_buffer.append(row)
 
     def on_copy(self, view):
         model, paths = view.get_selection().get_selected_rows()
         itrs = [model.get_iter(path) for path in paths]
-        rows = [(0, *model.get(in_itr, 2, 4, 11, 13)) for in_itr in itrs]
+        rows = [(0, *model.get(in_itr, 2, 3, 4, 5, 7, 14, 16)) for in_itr in itrs]
         self.__rows_buffer.extend(rows)
 
     def on_paste(self, view):
@@ -212,7 +212,7 @@ class MainAppWindow:
                 rows = [model.get(in_itr, *[x for x in range(model.get_n_columns())]) for in_itr in itrs]
                 bq_selected = self.is_bouquet_selected()
                 fav_bouquet = None
-
+                
                 if bq_selected:
                     fav_bouquet = self.__bouquets.get(bq_selected, None)
 
@@ -365,7 +365,8 @@ class MainAppWindow:
                     dest_index += 1
                     fav_id = ext_row[-2]
                     channel = self.__channels[fav_id]
-                    model.insert(dest_index, (0, channel.service, channel.service_type, channel.pos, channel.fav_id))
+                    model.insert(dest_index, (0, channel.coded, channel.service, channel.locked, channel.hide,
+                                              channel.service_type, channel.pos, channel.fav_id))
                     fav_bouquet.insert(dest_index, channel.fav_id)
             elif source == self._FAV_LIST_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
