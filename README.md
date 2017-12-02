@@ -14,7 +14,7 @@ Ctrl + L - parental lock.
 Ctrl + H - hide/skip.                                                                                                                 
 
 Tests  only on OpenPLi based image with  GM 990 Spark Reloaded receiver in my preferred linux distro
-(Linux Mint 18.2 "Sonya" - MATE 64-bit)!
+(Last Linux Mint 18.* - MATE 64-bit)!
 
 Minimum requirements: Python >= 3.5.2 and GTK+ 3 with  PyGObject bindings.
 
