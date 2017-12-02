@@ -212,7 +212,7 @@ class MainAppWindow:
                 rows = [model.get(in_itr, *[x for x in range(model.get_n_columns())]) for in_itr in itrs]
                 bq_selected = self.is_bouquet_selected()
                 fav_bouquet = None
-                
+
                 if bq_selected:
                     fav_bouquet = self.__bouquets.get(bq_selected, None)
 
@@ -280,6 +280,7 @@ class MainAppWindow:
                 return
 
             bq = response, bq_type
+            print()
 
             if model.iter_n_children(itr):  # parent
                 ch_itr = model.insert(itr, 0, bq)
@@ -288,6 +289,7 @@ class MainAppWindow:
                 p_itr = model.iter_parent(itr)
                 it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
                 self.scroll_to(model.get_path(it), paths, view)
+            print(key)
             self.__bouquets[key] = []
 
     def scroll_to(self, path, paths, view):
@@ -392,7 +394,7 @@ class MainAppWindow:
             fav_bouquet = self.__bouquets[bq_selected]
             fav_bouquet.clear()
             for row in self.__fav_model:
-                fav_bouquet.append(row[4])
+                fav_bouquet.append(row[7])
 
     def on_services_tree_view_drag_data_get(self, view, drag_context, data, info, time):
         """  DnD  """
