@@ -505,7 +505,7 @@ class MainAppWindow:
         def_val = "Unknown"
         values = model.get_value(model.get_iter(path), 0).split(",")
         cas_values = list(filter(lambda val: val.startswith("C:"), values))
-        self.__cas_label.set_text(",".join(map(str, [CAS.get(val, def_val) for val in cas_values])))
+        self.__cas_label.set_text(",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values)))))
 
     def on_fav_selection(self, model, path, column):
         self.delete_selection(self.__services_view)
