@@ -71,11 +71,16 @@
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">media-import-audio-cd</property>
+  </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="fav_cut_popoup_item">
+      <object class="GtkImageMenuItem" id="fav_cut_popup_item">
         <property name="label">gtk-cut</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
@@ -103,7 +108,24 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="fav_remove_popoup_item">
+      <object class="GtkImageMenuItem" id="fav_import_m3u_popup_item">
+        <property name="label" translatable="yes">Import m3u</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_import_m3u" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_remove_popup_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
@@ -201,7 +223,7 @@
                         <property name="label">Download</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Download data from receiver</property>
+                        <property name="tooltip_text" translatable="yes">FTP-transfer</property>
                         <property name="use_underline">True</property>
                         <property name="image">send_recive_image</property>
                         <property name="use_stock">False</property>
@@ -627,6 +649,33 @@
             </child>
             <child>
               <object class="GtkSeparatorToolItem" id="separatortoolitem4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="import_m3u_tool_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Import m3u file</property>
+                <property name="opacity">0.93999999999999995</property>
+                <property name="label" translatable="yes">IPTV</property>
+                <property name="use_underline">True</property>
+                <property name="icon_name">media-import-audio-cd</property>
+                <signal name="clicked" handler="on_import_m3u" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem7">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>

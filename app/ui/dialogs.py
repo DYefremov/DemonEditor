@@ -11,6 +11,11 @@ def show_dialog(dialog_name, transient, text=None, options=None):
 
     if dialog_name == "path_chooser_dialog" and options:
         dialog.set_current_folder(options["data_dir_path"])
+        response = dialog.run()
+        if response == -12:
+            response = dialog.get_filename() if dialog.get_filename() else options["data_dir_path"]
+        dialog.destroy()
+        return response
 
     if dialog_name == "input_dialog":
         entry = builder.get_object("input_entry")

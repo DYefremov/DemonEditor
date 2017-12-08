@@ -35,7 +35,7 @@ def write_bouquet(path, name, bq_type, channels):
     for ch in channels:
         if not ch:  # if was duplicate
             continue
-        bouquet.append("#SERVICE {}\n".format(to_bouquet_id(ch)))
+        bouquet.append("#SERVICE {}\n".format(ch.fav_id if ch.service_type == "IPTV" else to_bouquet_id(ch)))
 
     with open(path + "userbouquet.{}.{}".format(name, bq_type), "w") as file:
         file.writelines(bouquet)
@@ -58,9 +58,12 @@ def get_bouquet(path, name, bq_type):
     with open(path + "userbouquet.{}.{}".format(name, bq_type)) as file:
         chs_list = file.read()
         ids = []
-        for ch in chs_list.split("#SERVICE")[1:]:
-            ch_data = ch.strip().split(":")
-            ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))
+        for ch in list(filter(lambda x: len(x) > 1, chs_list.split("#SERVICE")[1:])):  # filtering ['']
+            if "#DESCRIPTION" in ch:  # IPTV
+                ids.append(ch.strip())
+            else:
+                ch_data = ch.strip().split(":")
+                ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))
 
     return ids
 

@@ -3,7 +3,7 @@ from contextlib import suppress
 from functools import lru_cache
 
 from app.commons import run_idle
-from app.eparser import get_blacklist, write_blacklist, to_bouquet_id
+from app.eparser import get_blacklist, write_blacklist, to_bouquet_id, parse_m3u
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
@@ -22,17 +22,19 @@ class MainAppWindow:
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item")
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouguets_edit_popup_item")
     _REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item", "services_remove_popup_item",
-                        "bouquets_remove_popup_item", "fav_remove_popoup_item")
+                        "bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
-                     "paste_menu_item", "fav_cut_popoup_item", "fav_paste_popup_item")
+                     "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
+                     "fav_import_m3u_popup_item")
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
     __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
                           "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
-                          "services_to_fav_move_popup_item", "services_remove_popup_item", "fav_cut_popoup_item",
+                          "services_to_fav_move_popup_item", "services_remove_popup_item", "fav_cut_popup_item",
                           "fav_paste_popup_item", "bouquets_new_popup_item", "bouguets_edit_popup_item",
-                          "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popoup_item",
-                          "locked_tool_button", "hide_tool_button")
+                          "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popup_item",
+                          "locked_tool_button", "hide_tool_button", "import_m3u_tool_button",
+                          "fav_import_m3u_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -63,7 +65,8 @@ class MainAppWindow:
                     "on_view_focus": self.on_view_focus,
                     "on_hide": self.on_hide,
                     "on_locked": self.on_locked,
-                    "on_model_changed": self.on_model_changed}
+                    "on_model_changed": self.on_model_changed,
+                    "on_import_m3u": self.on_import_m3u}
 
         self.__options = get_config()
         # Used for copy/paste. When adding the previous data will not be deleted.
@@ -450,6 +453,12 @@ class MainAppWindow:
                 name, bt_type = bt.name, bt.type
                 self.__bouquets_model.append(parent, [name, bt_type])
                 self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
+                # IPTV services
+                for srv in bt.services:
+                    if "#DESCRIPTION" in srv:
+                        fav_id, sep, name = str(srv).partition("#DESCRIPTION:")
+                        aggr = [None] * 8
+                        self.__channels[srv] = Channel(*aggr[0:3], name.strip(), *aggr[0:3], "IPTV", *aggr, srv, None)
 
     def append_services(self, data_path):
         channels = get_channels(data_path)
@@ -503,8 +512,10 @@ class MainAppWindow:
 
     def update_service_bar(self, model, path):
         def_val = "Unknown"
-        values = model.get_value(model.get_iter(path), 0).split(",")
-        cas_values = list(filter(lambda val: val.startswith("C:"), values))
+        cas = model.get_value(model.get_iter(path), 0)
+        if not cas:
+            return
+        cas_values = list(filter(lambda val: val.startswith("C:"), cas.split(",")))
         self.__cas_label.set_text(",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values)))))
 
     def on_fav_selection(self, model, path, column):
@@ -542,8 +553,7 @@ class MainAppWindow:
 
             returns 'name:type' of selected bouquet or False
         """
-        selection = self.__bouquets_view.get_selection()
-        model, path = selection.get_selected_rows()
+        model, path = self.__bouquets_view.get_selection().get_selected_rows()
 
         if not path or len(path[0]) < 2:
             return False
@@ -618,6 +628,8 @@ class MainAppWindow:
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
                     self.__tool_elements[elem].set_sensitive(not is_service and self.__rows_buffer)
+                elif elem in ("import_m3u_tool_button", "fav_import_m3u_popup_item"):
+                    self.__tool_elements[elem].set_sensitive(self.is_bouquet_selected() and not is_service)
                 else:
                     self.__tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:
@@ -707,6 +719,20 @@ class MainAppWindow:
         self.__tv_count_label.set_text(str(tv_count))
         self.__radio_count_label.set_text(str(radio_count))
         self.__data_count_label.set_text(str(data_count))
+
+    def on_import_m3u(self, item):
+        response = show_dialog("path_chooser_dialog", self.__main_window, options=self.__options)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        channels = parse_m3u(response)
+        bq_selected = self.is_bouquet_selected()
+        if channels and bq_selected:
+            bq_services = self.__bouquets.get(bq_selected)
+            for ch in channels:
+                self.__channels[ch.fav_id] = ch
+                bq_services.append(ch.fav_id)
+            self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
 
 def start_app():
