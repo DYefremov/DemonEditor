@@ -63,7 +63,7 @@ def get_bouquet(path, name, bq_type):
         ids = []
         for ch in list(filter(lambda x: len(x) > 1, chs_list.split("#SERVICE")[1:])):  # filtering ['']
             if "#DESCRIPTION" in ch:  # IPTV
-                ids.append(ch.strip())
+                ids.append("#SERVICE{}".format(ch))
             else:
                 ch_data = ch.strip().split(":")
                 ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))

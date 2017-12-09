@@ -1,7 +1,7 @@
 from app.commons import run_idle, run_task
 from app.ftp import download_data, DownloadDataType, upload_data
 from . import Gtk
-from .dialogs import show_dialog
+from .dialogs import show_dialog, DialogType
 
 
 def show_download_dialog(transient, options, open_data):
@@ -41,7 +41,7 @@ class DownloadDialog:
 
     @run_idle
     def on_send(self, item):
-        if show_dialog("question_dialog", self._dialog) != Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.CANCEL:
             self.download(d_type=self.get_download_type())
 
     def get_download_type(self):

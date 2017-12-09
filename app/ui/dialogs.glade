@@ -514,7 +514,7 @@ dmitry.v.yefremov@gmail.com
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">document-open</property>
     <property name="type_hint">dialog</property>
-    <property name="action">save</property>
+    <property name="action">select-folder</property>
     <property name="do_overwrite_confirmation">True</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="filechooser_dialog_vbox">

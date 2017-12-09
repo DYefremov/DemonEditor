@@ -4,7 +4,7 @@ from math import fabs
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from . import Gtk, Gdk
-from .dialogs import show_dialog
+from .dialogs import show_dialog, DialogType
 
 
 def show_satellites_dialog(transient, options):
@@ -73,17 +73,10 @@ class SatellitesDialog:
         self.destroy()
 
     def on_open(self, model):
-        builder = Gtk.Builder()
-        builder.add_objects_from_file("app/ui/dialogs.glade", ("path_chooser_dialog",))
-        ch_dialog = builder.get_object("path_chooser_dialog")
-        ch_dialog.set_transient_for(self._dialog)
-
-        if ch_dialog.run() == -12:
-            path = ch_dialog.get_filename()
-            if path:
-                self._data_path = path
+        response = show_dialog(dialog_type=DialogType.CHOOSER, transient=self._dialog, options=self._options)
+        if response != Gtk.ResponseType.CANCEL:
+            self._data_path = response
             self.on_satellites_list_load(model)
-        ch_dialog.destroy()
 
     @staticmethod
     def on_row_activated(view, path, column):
@@ -117,7 +110,7 @@ class SatellitesDialog:
         try:
             satellites = get_satellites(self._data_path)
         except FileNotFoundError as e:
-            show_dialog("error_dialog", self._dialog, getattr(e, "message", str(e)) +
+            show_dialog(DialogType.ERROR, self._dialog, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
         else:
             model.clear()
@@ -178,7 +171,7 @@ class SatellitesDialog:
         if paths is None:
             return
         elif len(paths) == 0:
-            show_dialog("error_dialog", self._dialog, "No satellite is selected!")
+            show_dialog(DialogType.ERROR, self._dialog, "No satellite is selected!")
             return
 
         dialog = TransponderDialog(self._dialog, transponder)
@@ -241,7 +234,7 @@ class SatellitesDialog:
         paths_count = len(paths)
 
         if paths_count > 1:
-            show_dialog("error_dialog", self._dialog, message)
+            show_dialog(DialogType.ERROR, self._dialog, message)
             return
 
         return paths
@@ -256,7 +249,7 @@ class SatellitesDialog:
             model.remove(itr)
 
     def on_save(self, view):
-        if show_dialog("question_dialog", self._dialog) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
         model = view.get_model()
@@ -329,7 +322,7 @@ class TransponderDialog:
             tr = self.to_transponder()
             if self.is_accept(tr):
                 return tr
-            show_dialog("error_dialog", self._dialog, "Please check your parameters and try again.")
+            show_dialog(DialogType.ERROR, self._dialog, "Please check your parameters and try again.")
 
     def destroy(self):
         self._dialog.destroy()

@@ -8,7 +8,7 @@ from app.eparser import get_channels, get_bouquets, write_bouquets, write_channe
 from app.eparser.__constants import CAS, FLAG
 from app.properties import get_config, write_config
 from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
-from .dialogs import show_dialog
+from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -134,7 +134,7 @@ class MainAppWindow:
         self.move_items(Gdk.KEY_Down)
 
     def on_about_app(self, item):
-        show_dialog("about_dialog", self.__main_window)
+        show_dialog(DialogType.ABOUT, self.__main_window)
 
     def move_items(self, key):
         """ Move items in fav tree view """
@@ -181,7 +181,7 @@ class MainAppWindow:
         bq_selected = self.is_bouquet_selected()
 
         if not bq_selected:
-            show_dialog("error_dialog", self.__main_window, "Error. No bouquet is selected!")
+            show_dialog(DialogType.ERROR, self.__main_window, "Error. No bouquet is selected!")
             return
 
         fav_bouquet = self.__bouquets[bq_selected]
@@ -224,7 +224,7 @@ class MainAppWindow:
                         del fav_bouquet[int(model.get_path(itr)[0])]
                     if model_name == self._BOUQUETS_LIST_NAME:
                         if len(model.get_path(itr)) < 2:
-                            show_dialog("error_dialog", self.__main_window, "This item is not allowed to be removed!")
+                            show_dialog(DialogType.ERROR, self.__main_window, "This item is not allowed to be removed!")
                             return
                         else:
                             self.delete_bouquet(bq_selected)
@@ -278,7 +278,7 @@ class MainAppWindow:
                 bq_name = "bouquet{}".format(count)
                 key = "{}:{}".format(bq_name, bq_type)
 
-            response = show_dialog("input_dialog", self.__main_window, bq_name)
+            response = show_dialog(DialogType.INPUT, self.__main_window, bq_name)
             if response == Gtk.ResponseType.CANCEL:
                 return
 
@@ -305,7 +305,7 @@ class MainAppWindow:
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
         if not self.is_bouquet_selected():
-            show_dialog("error_dialog", self.__main_window, "This item is not allowed to edit!")
+            show_dialog(DialogType.ERROR, self.__main_window, "This item is not allowed to edit!")
             return
 
         model, paths = view.get_selection().get_selected_rows()
@@ -313,7 +313,7 @@ class MainAppWindow:
         if paths:
             itr = model.get_iter(paths[0])
             bq_name, bq_type = model.get(itr, 0, 1)
-            response = show_dialog("input_dialog", self.__main_window, bq_name)
+            response = show_dialog(DialogType.INPUT, self.__main_window, bq_name)
 
             if response == Gtk.ResponseType.CANCEL:
                 return
@@ -341,7 +341,7 @@ class MainAppWindow:
         bq_selected = self.is_bouquet_selected()
 
         if not bq_selected:
-            show_dialog("error_dialog", self.__main_window, "Error. No bouquet is selected!")
+            show_dialog(DialogType.ERROR, self.__main_window, "Error. No bouquet is selected!")
             return
 
         model = view.get_model()
@@ -420,7 +420,7 @@ class MainAppWindow:
         show_satellites_dialog(self.__main_window, self.__options)
 
     def on_data_open(self, model):
-        if show_dialog("path_chooser_dialog", self.__main_window, options=self.__options) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.CHOOSER, self.__main_window, options=self.__options) == Gtk.ResponseType.CANCEL:
             return
         self.open_data()
 
@@ -438,7 +438,7 @@ class MainAppWindow:
             self.append_bouquets(data_path)
             self.update_services_counts(len(self.__services_model))
         except FileNotFoundError as e:
-            show_dialog("error_dialog", self.__main_window, getattr(e, "message", str(e)) +
+            show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
 
     def append_blacklist(self, data_path):
@@ -468,10 +468,10 @@ class MainAppWindow:
                 self.__channels[ch.fav_id] = ch
                 self.__services_model.append(ch)
         else:
-            show_dialog("error_dialog", self.__main_window, "Error opening data!")
+            show_dialog(DialogType.ERROR, self.__main_window, "Error opening data!")
 
     def on_data_save(self, *args):
-        if show_dialog("question_dialog", self.__main_window) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self.__main_window) == Gtk.ResponseType.CANCEL:
             return
 
         path = self.__options["data_dir_path"]
@@ -721,14 +721,26 @@ class MainAppWindow:
         self.__data_count_label.set_text(str(data_count))
 
     def on_import_m3u(self, item):
-        response = show_dialog("path_chooser_dialog", self.__main_window, options=self.__options)
+        file_filter = Gtk.FileFilter()
+        file_filter.add_pattern("*.m3u")
+        file_filter.set_name("m3u files")
+        response = show_dialog(dialog_type=DialogType.CHOOSER,
+                               transient=self.__main_window,
+                               options=self.__options,
+                               action_type=Gtk.FileChooserAction.OPEN,
+                               file_filter=file_filter)
         if response == Gtk.ResponseType.CANCEL:
+            return
+
+        if not str(response).endswith("m3u"):
+            show_dialog(DialogType.ERROR, self.__main_window, text="No m3u file is selected!")
             return
 
         channels = parse_m3u(response)
         bq_selected = self.is_bouquet_selected()
         if channels and bq_selected:
             bq_services = self.__bouquets.get(bq_selected)
+            self.__fav_model.clear()
             for ch in channels:
                 self.__channels[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)

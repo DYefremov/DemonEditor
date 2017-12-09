@@ -1,4 +1,5 @@
 from app.properties import write_config
+from app.ui.dialogs import show_dialog, DialogType
 from . import Gtk
 
 
@@ -12,6 +13,7 @@ class SettingsDialog:
         builder = Gtk.Builder()
         builder.add_objects_from_file("app/ui/dialogs.glade", ("settings_dialog", ))
         builder.connect_signals(handlers)
+        self._options = options
         self._dialog = builder.get_object("settings_dialog")
         self._dialog.set_transient_for(transient)
         self._host_field = builder.get_object("host_field")
@@ -30,7 +32,6 @@ class SettingsDialog:
         self._satellites_xml_field.set_text(options["satellites_xml_path"])
         self._data_dir_field = builder.get_object("data_dir_field")
         self._data_dir_field.set_text(options["data_dir_path"])
-        self._current_data_path = options["data_dir_path"]
 
         if self._dialog.run() == Gtk.ResponseType.OK:
             options["host"] = self._host_field.get_text()
@@ -45,17 +46,9 @@ class SettingsDialog:
         self._dialog.destroy()
 
     def on_data_dir_field_icon_press(self, entry, icon, event_button):
-        builder = Gtk.Builder()
-        builder.add_from_file("app/ui/dialogs.glade")
-        dialog = builder.get_object("path_chooser_dialog")
-        dialog.set_transient_for(self._dialog)
-        dialog.set_current_folder(self._current_data_path)
-        response = dialog.run()
-        if response == -12:  # -12 for fix assertion 'gtk_widget_get_can_default (widget)' failed
-            entry.set_text(dialog.get_filename() if dialog.get_filename() else self._current_data_path)
-        dialog.destroy()
-
-        return response
+        response = show_dialog(dialog_type=DialogType.CHOOSER, transient=self._dialog, options=self._options)
+        if response != Gtk.ResponseType.CANCEL:
+            entry.set_text(response)
 
 
 if __name__ == "__main__":
