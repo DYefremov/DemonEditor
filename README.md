@@ -13,8 +13,10 @@ Ctrl + S, T, E in Satellites edit tool for create and edit satellite or transpon
 Ctrl + L - parental lock.                                                                                                             
 Ctrl + H - hide/skip.                                                                                                                 
 
-Tests  only on OpenPLi based image with  GM 990 Spark Reloaded receiver in my preferred linux distro
-(Last Linux Mint 18.* - MATE 64-bit)!
+Ability to import IPTV into bouquet from m3u files!                                                                                   
+
+Tests  only on OpenPLi based image with  GM 990 Spark Reloaded receiver                                                               
+in my preferred linux distro (Last Linux Mint 18.* - MATE 64-bit)!
 
 Minimum requirements: Python >= 3.5.2 and GTK+ 3 with  PyGObject bindings.
 
