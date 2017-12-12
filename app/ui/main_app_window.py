@@ -420,18 +420,20 @@ class MainAppWindow:
         show_satellites_dialog(self.__main_window, self.__options)
 
     def on_data_open(self, model):
-        if show_dialog(DialogType.CHOOSER, self.__main_window, options=self.__options) == Gtk.ResponseType.CANCEL:
+        response = show_dialog(DialogType.CHOOSER, self.__main_window, options=self.__options)
+        if response == Gtk.ResponseType.CANCEL:
             return
-        self.open_data()
+        self.open_data(response)
 
     @run_idle
-    def open_data(self):
+    def open_data(self, data_path=None):
         """ Opening data and fill views. """
         self.__bouquets_model.clear()
         self.__fav_model.clear()
         self.__services_model.clear()
         self.__blacklist.clear()
-        data_path = self.__options["data_dir_path"]
+
+        data_path = self.__options["data_dir_path"] if data_path is None else data_path
         try:
             self.append_blacklist(data_path)
             self.append_services(data_path)
