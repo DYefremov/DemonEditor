@@ -136,6 +136,11 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">applications-utilities</property>
+  </object>
   <object class="GtkImage" id="send_recive_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -323,6 +328,7 @@
                         <property name="label" translatable="yes">Satellites editor</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="image">image4</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="on_satellite_editor_show" swapped="no"/>
                       </object>
@@ -386,6 +392,7 @@
               <object class="GtkToolButton" id="open_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Open</property>
                 <property name="label" translatable="yes">Open</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
@@ -435,6 +442,7 @@
               <object class="GtkToolButton" id="save_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Save</property>
                 <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-floppy</property>
@@ -622,6 +630,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">New bouquet</property>
                 <property name="label" translatable="yes">New</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
@@ -637,6 +646,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Rename bouquet</property>
                 <property name="label" translatable="yes">Edit </property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-edit</property>
@@ -1164,7 +1174,7 @@
                       <object class="GtkImage" id="radio_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="icon_name">internet-radio-new</property>
+                        <property name="icon_name">network-wireless-symbolic</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

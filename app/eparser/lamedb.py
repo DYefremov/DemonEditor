@@ -51,7 +51,7 @@ def write_channels(path, channels):
 
 def parse(path):
     """ Parsing lamedb """
-    with open(path + _FILE_NAME, "r") as file:
+    with open(path + _FILE_NAME, "r", encoding="utf-8", errors="replace") as file:
         try:
             data = str(file.read())
         except UnicodeDecodeError as e:
@@ -121,7 +121,7 @@ def parse_channels(services, transponders, path):
                                     pol=POLARIZATION[tr[2]],
                                     fec=FEC[tr[3]],
                                     system=SYSTEM[tr[6]],
-                                    pos="{}{}.{}".format(*list(tr[4])),
+                                    pos="{}.{}".format(tr[4][:-1], tr[4][-1:]),
                                     data_id=ch[0],
                                     fav_id=fav_id,
                                     transponder=transponder))
