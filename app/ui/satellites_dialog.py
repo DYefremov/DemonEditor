@@ -19,7 +19,7 @@ class SatellitesDialog:
     _aggr = [None for x in range(9)]  # aggregate
 
     def __init__(self, transient, options):
-        self._data_path = options["data_dir_path"]
+        self._data_path = options["data_dir_path"] + "satellites.xml"
         self._options = options
 
         handlers = {"on_open": self.on_open,
@@ -73,10 +73,22 @@ class SatellitesDialog:
         self.destroy()
 
     def on_open(self, model):
-        response = show_dialog(dialog_type=DialogType.CHOOSER, transient=self._dialog, options=self._options)
-        if response != Gtk.ResponseType.CANCEL:
-            self._data_path = response
-            self.on_satellites_list_load(model)
+        file_filter = Gtk.FileFilter()
+        file_filter.add_pattern("satellites.xml")
+        file_filter.set_name("satellites.xml")
+        response = show_dialog(dialog_type=DialogType.CHOOSER,
+                               transient=self._dialog,
+                               options=self._options,
+                               action_type=Gtk.FileChooserAction.OPEN,
+                               file_filter=file_filter)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        if not str(response).endswith("satellites.xml"):
+            show_dialog(DialogType.ERROR, self._dialog, text="No satellites.xml file is selected!")
+            return
+        self._data_path = response
+        self.on_satellites_list_load(model)
 
     @staticmethod
     def on_row_activated(view, path, column):

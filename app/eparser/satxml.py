@@ -7,8 +7,6 @@ from xml.dom.minidom import parse, Document
 
 from app.eparser.__constants import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE
 
-__FILE_NAME = "satellites.xml"
-
 Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
 
 Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner",
@@ -37,7 +35,7 @@ __COMMENT = ("   File was created in DemonEditor\n\n"
 
 
 def get_satellites(path):
-    return parse_satellites(path + "satellites.xml")
+    return parse_satellites(path)
 
 
 def write_satellites(satellites, data_path):
@@ -71,7 +69,7 @@ def write_satellites(satellites, data_path):
                 transponder_child.setAttribute("is_id", tr.is_id)
             sat_child.appendChild(transponder_child)
         root.appendChild(sat_child)
-    doc.writexml(open(data_path + __FILE_NAME, "w"),
+    doc.writexml(open(data_path, "w"),
                  # indent="",
                  addindent="    ",
                  newl='\n',
