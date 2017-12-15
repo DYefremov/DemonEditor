@@ -1299,6 +1299,7 @@
                               <object class="GtkTreeViewColumn" id="fav_service_column">
                                 <property name="resizable">True</property>
                                 <property name="spacing">2</property>
+                                <property name="sizing">autosize</property>
                                 <property name="title" translatable="yes">Service</property>
                                 <property name="expand">True</property>
                                 <child>

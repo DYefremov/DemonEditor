@@ -458,9 +458,10 @@ class MainAppWindow:
                 # IPTV services
                 for srv in bt.services:
                     if "#DESCRIPTION" in srv:
-                        fav_id, sep, name = str(srv).partition("#DESCRIPTION:")
+                        fav_id, sep, name = str(srv).partition("#DESCRIPTION")
+                        name = name.strip() if ":" not in name else name.strip()[1:]
                         aggr = [None] * 8
-                        self.__channels[srv] = Channel(*aggr[0:3], name.strip(), *aggr[0:3], "IPTV", *aggr, srv, None)
+                        self.__channels[srv] = Channel(*aggr[0:3], name, *aggr[0:3], "IPTV", *aggr, srv, None)
 
     def append_services(self, data_path):
         channels = get_channels(data_path)
