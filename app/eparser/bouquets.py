@@ -46,11 +46,13 @@ def write_bouquet(path, name, bq_type, channels):
 
 def to_bouquet_id(ch):
     """ Creates bouquet channel id """
-    data_type = int(ch.data_id.split(":")[-2])
-    if data_type == 22:
-        data_type = 16
-    elif data_type == 25:
-        data_type = 19
+    data_type = ch.data_id
+    if data_type:
+        data_type = int(ch.data_id.split(":")[-2])
+        if data_type == 22:
+            data_type = 16
+        elif data_type == 25:
+            data_type = 19
     service = "{}:0:{}:{}:0:0:0:".format(1, data_type, ch.fav_id)
 
     return service
@@ -62,11 +64,12 @@ def get_bouquet(path, name, bq_type):
         chs_list = file.read()
         ids = []
         for ch in list(filter(lambda x: len(x) > 1, chs_list.split("#SERVICE")[1:])):  # filtering ['']
-            if "#DESCRIPTION" in ch:  # IPTV
+            if "#DESCRIPTION" in ch:
                 ids.append("#SERVICE{}".format(ch))
             else:
                 ch_data = ch.strip().split(":")
-                ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))
+                if len(ch_data) > 5:
+                    ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))
 
     return ids
 
