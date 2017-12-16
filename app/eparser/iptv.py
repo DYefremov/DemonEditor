@@ -13,8 +13,8 @@ def parse_m3u(path):
                 count += 1
             elif count == 1:
                 count = 0
-                fav_id = "#SERVICE 1:0:1:0:0:0:0:0:0:0:{}:{}\n#DESCRIPTION: {}\n".format(
-                    line.strip().replace(":", "%3a"), name, name)
+                fav_id = "IPTV:::1:0:1:0:0:0:0:0:0:0:{}:{}\n#DESCRIPTION: {}\n:::{}".format(
+                    line.strip().replace(":", "%3a"), name, name, None)
                 channels.append(Channel(*aggr[0:3], name, *aggr[0:3], "IPTV", *aggr, fav_id, None))
 
     return channels

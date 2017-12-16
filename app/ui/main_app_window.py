@@ -455,14 +455,17 @@ class MainAppWindow:
                 name, bt_type = bt.name, bt.type
                 self.__bouquets_model.append(parent, [name, bt_type])
                 self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
-                # IPTV services
+                aggr = [None] * 8
+                # IPTV and DECR services
                 for srv in bt.services:
-                    if "#DESCRIPTION" in srv:
-                        fav_id, sep, name = str(srv).partition("#DESCRIPTION")
-                        name = name.strip() if ":" not in name else name.strip()[1:]
-                        ch_type = "IPTV" if "http" in fav_id else None
-                        aggr = [None] * 8
-                        self.__channels[srv] = Channel(*aggr[0:3], name, *aggr[0:3], "IPTV", *aggr, srv, None)
+                    srv_ids = srv.split(":::")
+                    if srv_ids:
+                        if srv_ids[0] == "DECR":
+                            self.__channels[srv] = Channel(*aggr[0:3], srv_ids[-1], *aggr[0:3], "DECR", *aggr, srv,
+                                                           None)
+                        elif srv_ids[0] == "IPTV":
+                            self.__channels[srv] = Channel(*aggr[0:3], srv_ids[-1], *aggr[0:3], "IPTV", *aggr, srv,
+                                                           None)
 
     def append_services(self, data_path):
         channels = get_channels(data_path)
