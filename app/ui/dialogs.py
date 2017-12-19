@@ -42,7 +42,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
 
     if dialog_type is DialogType.INPUT:
         entry = builder.get_object("input_entry")
-        entry.set_text(text)
+        entry.set_text(text if text else "")
         response = dialog.run()
         txt = entry.get_text()
         dialog.destroy()

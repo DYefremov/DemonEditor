@@ -74,7 +74,22 @@
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">media-import-audio-cd</property>
+    <property name="icon_name">insert-object</property>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">applications-utilities</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">insert-text</property>
+  </object>
+  <object class="GtkImage" id="image6">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-edit</property>
   </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
@@ -102,7 +117,37 @@
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="separatormenuitem3">
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_insert_marker_popup_item">
+        <property name="label" translatable="yes">Insert marker</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="image">image5</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_insert_marker" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_edit_marker_popup_item">
+        <property name="label" translatable="yes">Edit mаrker text</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="image">image6</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_edit_marker" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_2">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -113,13 +158,14 @@
         <property name="visible">True</property>
         <property name="sensitive">False</property>
         <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
         <property name="image">image1</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_import_m3u" swapped="no"/>
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="separatormenuitem2">
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -135,11 +181,6 @@
         <signal name="activate" handler="on_delete" swapped="no"/>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="image4">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">applications-utilities</property>
   </object>
   <object class="GtkImage" id="send_recive_image">
     <property name="visible">True</property>
@@ -676,7 +717,7 @@
                 <property name="opacity">0.93999999999999995</property>
                 <property name="label" translatable="yes">IPTV</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">media-import-audio-cd</property>
+                <property name="icon_name">insert-object</property>
                 <signal name="clicked" handler="on_import_m3u" swapped="no"/>
               </object>
               <packing>
@@ -1270,6 +1311,7 @@
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <property name="activate_on_single_click">True</property>
+                            <signal name="button-press-event" handler="on_fav_popup" swapped="no"/>
                             <signal name="button-press-event" handler="on_view_popup_menu" object="fav_popup_menu" swapped="no"/>
                             <signal name="drag-data-get" handler="on_fav_tree_view_drag_data_get" swapped="no"/>
                             <signal name="drag-data-received" handler="on_fav_tree_view_drag_data_received" swapped="no"/>
@@ -1387,7 +1429,7 @@
                           <object class="GtkImage" id="image2">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="stock">gtk-properties</property>
+                            <property name="icon_name">document-properties</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1509,7 +1551,7 @@
                           <object class="GtkImage" id="image3">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="stock">gtk-properties</property>
+                            <property name="icon_name">document-properties</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>

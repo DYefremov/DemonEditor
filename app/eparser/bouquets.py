@@ -1,12 +1,21 @@
 """ Module for parsing bouquets """
 from collections import namedtuple
+from enum import Enum
 
 _BOUQUETS_PATH = "../data/"
 _TV_ROOT_FILE_NAME = "bouquets.tv"
 _RADIO_ROOT_FILE_NAME = "bouquets.radio"
 
+
+class BqServiceType(Enum):
+    DEFAULT = "DEFAULT"
+    IPTV = "IPTV"
+    MARKER = "MARKER"  # 64
+
+
 Bouquet = namedtuple("Bouquet", ["name", "type", "services"])
 Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
+BouquetService = namedtuple("BouquetService", ["name", "type", "data"])
 
 
 def get_bouquets(path):
@@ -35,8 +44,9 @@ def write_bouquet(path, name, bq_type, channels):
     for ch in channels:
         if not ch:  # if was duplicate
             continue
-        if ch.service_type == "IPTV" or ch.service_type == "DESC":
-            bouquet.append("#SERVICE {}".format(ch.fav_id.split(":::")[1]))
+
+        if ch.service_type == BqServiceType.IPTV.name or ch.service_type == BqServiceType.MARKER.name:
+            bouquet.append("#SERVICE {}".format(ch.fav_id))
         else:
             bouquet.append("#SERVICE {}\n".format(to_bouquet_id(ch)))
 
@@ -62,17 +72,18 @@ def get_bouquet(path, name, bq_type):
     """ Parsing services ids from bouquet file """
     with open(path + "userbouquet.{}.{}".format(name, bq_type)) as file:
         chs_list = file.read()
-        ids = []
+        services = []
         for ch in list(filter(lambda x: len(x) > 1, chs_list.split("#SERVICE")[1:])):  # filtering ['']
             ch_data = ch.strip().split(":")
             if ch_data[1] == "64":
-                ids.append("{}:::{}:::{}".format("DECR", ch, ch_data[-1].split("\n")[0]))
+                services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.MARKER, ch))
             elif "http" in ch:
-                ids.append("{}:::{}:::{}".format("IPTV", ch, ch_data[-1].split("\n")[0]))
+                services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.IPTV, ch))
             else:
-                ids.append("{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]))
+                services.append(BouquetService(None, BqServiceType.DEFAULT,
+                                               "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])))
 
-    return ids
+    return services
 
 
 def parse_bouquets(path, bq_name, bq_type):

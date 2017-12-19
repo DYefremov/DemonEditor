@@ -6,6 +6,7 @@ from app.commons import run_idle
 from app.eparser import get_blacklist, write_blacklist, to_bouquet_id, parse_m3u
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
+from app.eparser.bouquets import BqServiceType
 from app.properties import get_config, write_config
 from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
@@ -25,7 +26,7 @@ class MainAppWindow:
                         "bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
-                     "fav_import_m3u_popup_item")
+                     "fav_import_m3u_popup_item", "fav_insert_marker_popup_item")
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
     __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
@@ -34,7 +35,7 @@ class MainAppWindow:
                           "fav_paste_popup_item", "bouquets_new_popup_item", "bouguets_edit_popup_item",
                           "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popup_item",
                           "locked_tool_button", "hide_tool_button", "import_m3u_tool_button",
-                          "fav_import_m3u_popup_item")
+                          "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -66,7 +67,10 @@ class MainAppWindow:
                     "on_hide": self.on_hide,
                     "on_locked": self.on_locked,
                     "on_model_changed": self.on_model_changed,
-                    "on_import_m3u": self.on_import_m3u}
+                    "on_import_m3u": self.on_import_m3u,
+                    "on_insert_marker": self.on_insert_marker,
+                    "on_edit_marker": self.on_edit_marker,
+                    "on_fav_popup": self.on_fav_popup}
 
         self.__options = get_config()
         # Used for copy/paste. When adding the previous data will not be deleted.
@@ -100,6 +104,7 @@ class MainAppWindow:
         self.__tv_count_label = builder.get_object("tv_count_label")
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
+        self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
         builder.connect_signals(handlers)
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show()
@@ -454,18 +459,18 @@ class MainAppWindow:
             for bt in bouquet.bouquets:
                 name, bt_type = bt.name, bt.type
                 self.__bouquets_model.append(parent, [name, bt_type])
-                self.__bouquets["{}:{}".format(name, bt_type)] = bt.services
-                aggr = [None] * 8
-                # IPTV and DECR services
+                services = []
+                agr = [None] * 8
                 for srv in bt.services:
-                    srv_ids = srv.split(":::")
-                    if srv_ids:
-                        if srv_ids[0] == "DECR":
-                            self.__channels[srv] = Channel(*aggr[0:3], srv_ids[-1], *aggr[0:3], "DECR", *aggr, srv,
-                                                           None)
-                        elif srv_ids[0] == "IPTV":
-                            self.__channels[srv] = Channel(*aggr[0:3], srv_ids[-1], *aggr[0:3], "IPTV", *aggr, srv,
-                                                           None)
+                    f_id = srv.data
+                    # IPTV and MARKER services
+                    s_type = srv.type
+                    if s_type is BqServiceType.MARKER:
+                        self.__channels[f_id] = Channel(*agr[0:3], srv.name, *agr[0:3], s_type.name, *agr, f_id, None)
+                    elif s_type is BqServiceType.IPTV:
+                        self.__channels[f_id] = Channel(*agr[0:3], srv.name, *agr[0:3], srv.type.name, *agr, f_id, None)
+                    services.append(f_id)
+                self.__bouquets["{}:{}".format(name, bt_type)] = services
 
     def append_services(self, data_path):
         channels = get_channels(data_path)
@@ -567,6 +572,7 @@ class MainAppWindow:
 
         return "{}:{}".format(*model.get(model.get_iter(path), 0, 1))
 
+    @run_idle
     def delete_selection(self, view, *args):
         """ Used for clear selection on given view(s) """
         for v in [view, *args]:
@@ -752,6 +758,23 @@ class MainAppWindow:
                 self.__channels[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
+
+    def on_insert_marker(self, view):
+        response = show_dialog(DialogType.INPUT, self.__main_window)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+    def on_edit_marker(self, view):
+        model, paths = view.get_selection().get_selected_rows()
+        response = show_dialog(DialogType.INPUT, self.__main_window, text=model.get_value(model.get_iter(paths[0]), 2))
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+    @run_idle
+    def on_fav_popup(self, view, event):
+        model, paths = view.get_selection().get_selected_rows()
+        self.__fav_edit_marker_popup_item.set_sensitive(
+            len(paths) == 1 and model.get_value(model.get_iter(paths[0]), 5) == BqServiceType.MARKER.name)
 
 
 def start_app():
