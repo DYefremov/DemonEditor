@@ -1,3 +1,4 @@
+from app.eparser.bouquets import BqServiceType
 from . import Channel
 
 
@@ -13,9 +14,9 @@ def parse_m3u(path):
                 count += 1
             elif count == 1:
                 count = 0
-                fav_id = "IPTV:::1:0:1:0:0:0:0:0:0:0:{}:{}\n#DESCRIPTION: {}\n:::{}".format(
+                fav_id = " 1:0:1:0:0:0:0:0:0:0:{}:{}\n#DESCRIPTION: {}\n".format(
                     line.strip().replace(":", "%3a"), name, name, None)
-                channels.append(Channel(*aggr[0:3], name, *aggr[0:3], "IPTV", *aggr, fav_id, None))
+                channels.append(Channel(*aggr[0:3], name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None))
 
     return channels
 

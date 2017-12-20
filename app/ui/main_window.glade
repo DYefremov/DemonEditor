@@ -74,7 +74,7 @@
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">insert-object</property>
+    <property name="icon_name">emblem-downloads</property>
   </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
@@ -717,7 +717,7 @@
                 <property name="opacity">0.93999999999999995</property>
                 <property name="label" translatable="yes">IPTV</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">insert-object</property>
+                <property name="icon_name">emblem-downloads</property>
                 <signal name="clicked" handler="on_import_m3u" swapped="no"/>
               </object>
               <packing>
