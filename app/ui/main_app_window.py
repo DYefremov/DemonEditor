@@ -8,6 +8,7 @@ from app.eparser import get_channels, get_bouquets, write_bouquets, write_channe
 from app.eparser.__constants import CAS, FLAG
 from app.eparser.bouquets import BqServiceType
 from app.properties import get_config, write_config
+from .main_helper import edit_marker, insert_marker
 from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
@@ -447,6 +448,8 @@ class MainAppWindow:
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
+        except SyntaxError as e:
+            show_dialog(DialogType.ERROR, self.__main_window, str(e))
 
     def append_blacklist(self, data_path):
         black_list = get_blacklist(data_path)
@@ -736,6 +739,7 @@ class MainAppWindow:
         self.__data_count_label.set_text(str(data_count))
 
     def on_import_m3u(self, item):
+        """ Imports iptv from m3u files. """
         file_filter = Gtk.FileFilter()
         file_filter.add_pattern("*.m3u")
         file_filter.set_name("m3u files")
@@ -762,26 +766,12 @@ class MainAppWindow:
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     def on_insert_marker(self, view):
-        response = show_dialog(DialogType.INPUT, self.__main_window)
-        if response == Gtk.ResponseType.CANCEL:
-            return
+        """ Inserts marker into bouquet services list. """
+        insert_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__channels, self.__main_window)
+        self.update_fav_num_column(self.__fav_model)
 
     def on_edit_marker(self, view):
-        model, paths = view.get_selection().get_selected_rows()
-        itr = model.get_iter(paths[0])
-        name, fav_id = model.get(itr, 2, 7)
-        response = show_dialog(DialogType.INPUT, self.__main_window, text=name)
-        if response == Gtk.ResponseType.CANCEL:
-            return
-
-        bq_services = self.__bouquets[self.is_bouquet_selected()]
-        index = bq_services.index(fav_id)
-        old_ch = self.__channels.pop(fav_id, None)
-        new_fav_id = "{}::{}\n#DESCRIPTION {}\n".format(fav_id.split("::")[0], response, response)
-        model.set(itr, {2: response, 7: new_fav_id})
-        self.__channels[new_fav_id] = Channel(*old_ch[0:3], response, *old_ch[4:15], old_ch.data_id, new_fav_id, None)
-        bq_services.pop(index)
-        bq_services.insert(index, new_fav_id)
+        edit_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__channels, self.__main_window)
 
     @run_idle
     def on_fav_popup(self, view, event):

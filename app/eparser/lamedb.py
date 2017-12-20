@@ -58,6 +58,10 @@ def parse(path):
             log("lamedb parse error: " + str(e))
         else:
             transponders, sep, services = data.partition("transponders")  # 1 step
+            if not transponders.endswith("/4/\n"):
+                msg = "lamedb parsing error: unsupported format.\n Only version 4 is supported!"
+                log(msg)
+                raise SyntaxError(msg)
             transponders, sep, services = services.partition("services")  # 2 step
             services, sep, _ = services.partition("end")  # 3 step
 
