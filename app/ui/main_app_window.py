@@ -460,16 +460,18 @@ class MainAppWindow:
                 name, bt_type = bt.name, bt.type
                 self.__bouquets_model.append(parent, [name, bt_type])
                 services = []
-                agr = [None] * 8
+                agr = [None] * 7
                 for srv in bt.services:
-                    f_id = srv.data
+                    fav_id = srv.data
                     # IPTV and MARKER services
                     s_type = srv.type
                     if s_type is BqServiceType.MARKER:
-                        self.__channels[f_id] = Channel(*agr[0:3], srv.name, *agr[0:3], s_type.name, *agr, f_id, None)
+                        self.__channels[fav_id] = Channel(*agr[0:3], srv.name, *agr[0:3],
+                                                          s_type.name, *agr, srv.num, fav_id, None)
                     elif s_type is BqServiceType.IPTV:
-                        self.__channels[f_id] = Channel(*agr[0:3], srv.name, *agr[0:3], srv.type.name, *agr, f_id, None)
-                    services.append(f_id)
+                        self.__channels[fav_id] = Channel(*agr[0:3], srv.name, *agr[0:3],
+                                                          srv.type.name, *agr, srv.num, fav_id, None)
+                    services.append(fav_id)
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
 
     def append_services(self, data_path):
@@ -766,9 +768,20 @@ class MainAppWindow:
 
     def on_edit_marker(self, view):
         model, paths = view.get_selection().get_selected_rows()
-        response = show_dialog(DialogType.INPUT, self.__main_window, text=model.get_value(model.get_iter(paths[0]), 2))
+        itr = model.get_iter(paths[0])
+        name, fav_id = model.get(itr, 2, 7)
+        response = show_dialog(DialogType.INPUT, self.__main_window, text=name)
         if response == Gtk.ResponseType.CANCEL:
             return
+
+        bq_services = self.__bouquets[self.is_bouquet_selected()]
+        index = bq_services.index(fav_id)
+        old_ch = self.__channels.pop(fav_id, None)
+        new_fav_id = "{}::{}\n#DESCRIPTION {}\n".format(fav_id.split("::")[0], response, response)
+        model.set(itr, {2: response, 7: new_fav_id})
+        self.__channels[new_fav_id] = Channel(*old_ch[0:3], response, *old_ch[4:15], old_ch.data_id, new_fav_id, None)
+        bq_services.pop(index)
+        bq_services.insert(index, new_fav_id)
 
     @run_idle
     def on_fav_popup(self, view, event):
