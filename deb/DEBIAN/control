@@ -1,0 +1,9 @@
+Package: DemonEditor
+Version: 0.1.1-Pre-alpha
+Section: utils
+Priority: optional
+Architecture: all
+Essential: no
+Depends: python3 (>= 3.5)
+Maintainer: Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>
+Description: Enigma2 channels and satellites editor

@@ -4,7 +4,7 @@ from threading import Thread
 
 from gi.repository import GLib
 
-_LOG_FILE = "app_log.log"
+_LOG_FILE = "demon-editor.log"
 _DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 _LOGGER_NAME = "main_logger"
 logging.Logger(_LOGGER_NAME)

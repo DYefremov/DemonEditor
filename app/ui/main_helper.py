@@ -15,12 +15,15 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
         show_dialog(DialogType.ERROR, parent_window, "The text of marker is empty, please try again!")
         return
 
-    counter = 0
-    fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(counter, response, response)
+    # Searching for max num value in all marker services (if empty default = 0)
+    max_num = max(map(lambda num: int(num.data_id, 16),
+                      filter(lambda ch: ch.service_type == BqServiceType.MARKER.name, channels.values())), default=0)
+    max_num = '{:x}'.format(max_num + 1)
+    fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
     itr = model.insert_before(model.get_iter(paths[0]), (None, None, response, None, None, s_type, None, fav_id))
-    channels[fav_id] = Channel(None, None, None, response, None, None, None, s_type, *[None] * 7, counter, fav_id, None)
+    channels[fav_id] = Channel(None, None, None, response, None, None, None, s_type, *[None] * 7, max_num, fav_id, None)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
 
 
