@@ -1,11 +1,20 @@
-""" This is helper module for main_app_window """
+""" This is helper module for ui """
+from enum import Enum
+
 from app.eparser import Channel
 from app.eparser.bouquets import BqServiceType
 from . import Gtk, Gdk
 from .dialogs import show_dialog, DialogType
 
 
-# ***************** Markers section *******************#
+class ViewTarget(Enum):
+    """ Used for set target view """
+    BOUQUET = 0
+    FAV = 1
+    SERVICES = 2
+
+
+# ***************** Markers *******************#
 
 def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     """" Inserts marker into bouquet services list. """
@@ -48,7 +57,7 @@ def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
     bq_services.insert(index, new_fav_id)
 
 
-# ***************** Movement section *******************#
+# ***************** Movement *******************#
 
 def move_items(key, view):
     """ Move items in  tree view """
@@ -78,6 +87,55 @@ def move_items(key, view):
                 down_itr = model.get_iter(view.get_cursor()[0])
                 if down_itr:
                     model.move_after(itr, down_itr)
+
+
+# ***************** Edit *******************#
+
+def edit(view, parent_window, target, fav_view=None, service_view=None, channels=None):
+    model, paths = view.get_selection().get_selected_rows()
+
+    if not paths:
+        return
+    elif len(paths) > 1:
+        show_dialog(DialogType.ERROR, parent_window, "Please, select only one item!")
+        return
+
+    itr = model.get_iter(paths)
+    f_id = None
+    channel_name = None
+
+    if target is ViewTarget.SERVICES:
+        name, fav_id = model.get(itr, 3, 16)
+        f_id = fav_id
+        response = show_dialog(DialogType.INPUT, parent_window, name)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+        channel_name = response
+        model.set_value(itr, 3, response)
+        if fav_view is not None:
+            for row in fav_view.get_model():
+                if row[7] == fav_id:
+                    row[2] = response
+                    break
+    elif target is ViewTarget.FAV:
+        name, fav_id = model.get(itr, 2, 7)
+        f_id = fav_id
+        response = show_dialog(DialogType.INPUT, parent_window, name)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        channel_name = response
+        model.set_value(itr, 2, response)
+
+        if service_view is not None:
+            for row in service_view.get_model():
+                if row[16] == fav_id:
+                    row[3] = response
+                    break
+
+    old_ch = channels.get(f_id, None)
+    if old_ch:
+        channels[f_id] = Channel(*old_ch[0:3], channel_name, *old_ch[4:])
 
 
 if __name__ == "__main__":

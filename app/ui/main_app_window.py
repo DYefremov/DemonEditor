@@ -8,10 +8,10 @@ from app.eparser import get_channels, get_bouquets, write_bouquets, write_channe
 from app.eparser.__constants import CAS, FLAG
 from app.eparser.bouquets import BqServiceType
 from app.properties import get_config, write_config
-from .main_helper import edit_marker, insert_marker, move_items
 from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
+from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
@@ -21,22 +21,24 @@ class MainAppWindow:
     _FAV_LIST_NAME = "fav_list_store"
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
-    _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item")
+    _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
+                         "services_edit_popup_item")
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouguets_edit_popup_item")
     _REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item", "services_remove_popup_item",
                         "bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
-                     "fav_import_m3u_popup_item", "fav_insert_marker_popup_item")
+                     "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item")
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
     __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
                           "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
-                          "services_to_fav_move_popup_item", "services_remove_popup_item", "fav_cut_popup_item",
-                          "fav_paste_popup_item", "bouquets_new_popup_item", "bouguets_edit_popup_item",
-                          "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popup_item",
-                          "locked_tool_button", "hide_tool_button", "import_m3u_tool_button",
-                          "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
+                          "services_to_fav_move_popup_item", "services_edit_popup_item", "locked_tool_button",
+                          "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
+                          "bouquets_new_popup_item", "bouguets_edit_popup_item", "services_remove_popup_item",
+                          "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
+                          "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
+                          "fav_edit_marker_popup_item", "fav_edit_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -56,6 +58,7 @@ class MainAppWindow:
                     "on_cut": self.on_cut,
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
+                    "on_edit": self.on_edit,
                     "on_delete": self.on_delete,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
@@ -181,6 +184,16 @@ class MainAppWindow:
 
         self.__rows_buffer.clear()
         self.on_view_focus(view, None)
+
+    def on_edit(self, view):
+        name = view.get_model().get_name()
+        if name == self._BOUQUETS_LIST_NAME:
+            self.on_bouquets_edit(view)
+            # edit(view, self.__main_window, ViewTarget.BOUQUET)
+        elif name == self._FAV_LIST_NAME:
+            edit(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view, channels=self.__channels)
+        elif name == self._SERVICE_LIST_NAME:
+            edit(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__channels)
 
     def on_delete(self, item):
         """ Delete selected items from views
@@ -599,6 +612,8 @@ class MainAppWindow:
             self.on_locked(None)
         elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
             self.on_hide(None)
+        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
+            self.on_edit(view)
         elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
             pass
 
