@@ -447,6 +447,44 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkToolButton" id="up_tool_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Up</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-go-up</property>
+                    <signal name="clicked" handler="on_up" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="down_tool_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Down</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-go-down</property>
+                    <signal name="clicked" handler="on_down" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparatorToolItem" id="separatortoolitem1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">False</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkToolItem" id="toolitem1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>

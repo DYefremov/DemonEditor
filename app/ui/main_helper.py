@@ -1,9 +1,11 @@
 """ This is helper module for main_app_window """
 from app.eparser import Channel
 from app.eparser.bouquets import BqServiceType
+from . import Gtk, Gdk
 from .dialogs import show_dialog, DialogType
-from . import Gtk
 
+
+# ***************** Markers section *******************#
 
 def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     """" Inserts marker into bouquet services list. """
@@ -27,7 +29,7 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
 
 
-def edit_marker(view, bouquets, selected_bouquet, channels,  parent_window):
+def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
     """ Edits marker text """
     model, paths = view.get_selection().get_selected_rows()
     itr = model.get_iter(paths[0])
@@ -44,6 +46,38 @@ def edit_marker(view, bouquets, selected_bouquet, channels,  parent_window):
     channels[new_fav_id] = Channel(*old_ch[0:3], response, *old_ch[4:15], old_ch.data_id, new_fav_id, None)
     bq_services.pop(index)
     bq_services.insert(index, new_fav_id)
+
+
+# ***************** Movement section *******************#
+
+def move_items(key, view):
+    """ Move items in  tree view """
+    selection = view.get_selection()
+    model, paths = selection.get_selected_rows()
+
+    if paths:
+        # for correct down move!
+        if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
+            paths = reversed(paths)
+
+        for path in paths:
+            itr = model.get_iter(path)
+            if key == Gdk.KEY_Down:
+                next_itr = model.iter_next(itr)
+                if next_itr:
+                    model.move_after(itr, next_itr)
+            elif key == Gdk.KEY_Up:
+                prev_itr = model.iter_previous(itr)
+                if prev_itr:
+                    model.move_before(itr, prev_itr)
+            elif key == Gdk.KEY_Page_Up or key == Gdk.KEY_KP_Page_Up:
+                up_itr = model.get_iter(view.get_cursor()[0])
+                if up_itr:
+                    model.move_before(itr, up_itr)
+            elif key == Gdk.KEY_Page_Down or key == Gdk.KEY_KP_Page_Down:
+                down_itr = model.get_iter(view.get_cursor()[0])
+                if down_itr:
+                    model.move_after(itr, down_itr)
 
 
 if __name__ == "__main__":

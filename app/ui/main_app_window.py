@@ -8,7 +8,7 @@ from app.eparser import get_channels, get_bouquets, write_bouquets, write_channe
 from app.eparser.__constants import CAS, FLAG
 from app.eparser.bouquets import BqServiceType
 from app.properties import get_config, write_config
-from .main_helper import edit_marker, insert_marker
+from .main_helper import edit_marker, insert_marker, move_items
 from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
@@ -144,32 +144,7 @@ class MainAppWindow:
 
     def move_items(self, key):
         """ Move items in fav tree view """
-        selection = self.__fav_view.get_selection()
-        model, paths = selection.get_selected_rows()
-
-        if paths:
-            # for correct down move!
-            if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
-                paths = reversed(paths)
-
-            for path in paths:
-                itr = model.get_iter(path)
-                if key == Gdk.KEY_Down:
-                    next_itr = model.iter_next(itr)
-                    if next_itr:
-                        model.move_after(itr, next_itr)
-                elif key == Gdk.KEY_Up:
-                    prev_itr = model.iter_previous(itr)
-                    if prev_itr:
-                        model.move_before(itr, prev_itr)
-                elif key == Gdk.KEY_Page_Up or key == Gdk.KEY_KP_Page_Up:
-                    up_itr = model.get_iter(self.__fav_view.get_cursor()[0])
-                    if up_itr:
-                        model.move_before(itr, up_itr)
-                elif key == Gdk.KEY_Page_Down or key == Gdk.KEY_KP_Page_Down:
-                    down_itr = model.get_iter(self.__fav_view.get_cursor()[0])
-                    if down_itr:
-                        model.move_after(itr, down_itr)
+        move_items(key, self.__fav_view)
 
     def on_cut(self, view):
         for row in tuple(self.on_delete(view)):

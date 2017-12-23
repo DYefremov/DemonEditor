@@ -3,6 +3,7 @@ from math import fabs
 
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
+from app.ui.main_helper import move_items
 from . import Gtk, Gdk
 from .dialogs import show_dialog, DialogType
 
@@ -25,6 +26,8 @@ class SatellitesDialog:
         handlers = {"on_open": self.on_open,
                     "on_remove": self.on_remove,
                     "on_save": self.on_save,
+                    "on_up": self.on_up,
+                    "on_down": self.on_down,
                     "on_popup_menu": self.on_popup_menu,
                     "on_satellite_add": self.on_satellite_add,
                     "on_transponder_add": self.on_transponder_add,
@@ -97,6 +100,12 @@ class SatellitesDialog:
         else:
             view.expand_row(path, column)
 
+    def on_up(self, item):
+        move_items(Gdk.KEY_Up, self._sat_view)
+
+    def on_down(self, item):
+        move_items(Gdk.KEY_Down, self._sat_view)
+
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
         key = event.keyval
@@ -106,7 +115,6 @@ class SatellitesDialog:
             self.on_remove(view)
         elif key == Gdk.KEY_Insert:
             pass
-            # self.on_add(view)
         elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
             self.on_edit(view)
         elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
@@ -115,6 +123,10 @@ class SatellitesDialog:
             self.on_transponder()
         elif key == Gdk.KEY_space:
             pass
+        elif ctrl and key in (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up):  # KEY_KP_Page_Up for laptop!
+            move_items(key, self._sat_view)
+        elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
+            move_items(key, self._sat_view)
 
     @run_idle
     def on_satellites_list_load(self, model):
