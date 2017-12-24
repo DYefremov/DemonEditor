@@ -2,8 +2,9 @@
 from enum import Enum
 
 from app.eparser import Channel
-from app.eparser.bouquets import BqServiceType
-from . import Gtk, Gdk
+from app.eparser.__constants import FLAG
+from app.eparser.bouquets import BqServiceType, to_bouquet_id
+from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
 from .dialogs import show_dialog, DialogType
 
 
@@ -136,6 +137,96 @@ def edit(view, parent_window, target, fav_view=None, service_view=None, channels
     old_ch = channels.get(f_id, None)
     if old_ch:
         channels[f_id] = Channel(*old_ch[0:3], channel_name, *old_ch[4:])
+
+
+# ***************** Flags *******************#
+
+def set_flags(flag, services_view, fav_view, channels, blacklist):
+    """ Updates flags for services. Returns True if any was changed. """
+    target = ViewTarget.SERVICES if services_view.is_focus() else ViewTarget.FAV if fav_view.is_focus() else None
+    if not target:
+        return
+
+    model, paths = None, None
+
+    if target is ViewTarget.SERVICES:
+        model, paths = services_view.get_selection().get_selected_rows()
+    elif target is ViewTarget.FAV:
+        model, paths = services_view.get_selection().get_selected_rows()
+
+    if not paths:
+        return
+
+    if flag is FLAG.HIDE:
+        set_hide(channels, model, paths, target)
+    elif flag is FLAG.LOCK:
+        set_lock(blacklist, channels, model, paths, target)
+
+    return True
+
+
+def set_lock(blacklist, channels, model, paths, target):
+    if target is ViewTarget.FAV:
+        return
+    col_num = 4
+    locked = has_locked_hide(model, paths, col_num)
+    for path in paths:
+        itr = model.get_iter(path)
+        fav_id = model.get_value(itr, 16)
+        channel = channels.get(fav_id, None)
+        if channel:
+            bq_id = to_bouquet_id(channel)
+            blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
+            model.set_value(itr, col_num, None) if locked else model.set_value(itr, col_num, LOCKED_ICON)
+            channels[fav_id] = Channel(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
+
+
+def set_hide(channels, model, paths, target):
+    if target is ViewTarget.FAV:
+        return
+    col_num = 5
+    hide = has_locked_hide(model, paths, col_num)
+
+    for path in paths:
+        itr = model.get_iter(path)
+        model.set_value(itr, col_num, None) if hide else model.set_value(itr, col_num, HIDE_ICON)
+        flags = [*model.get_value(itr, 0).split(",")]
+        index, flag = None, None
+        for i, fl in enumerate(flags):
+            if fl.startswith("f:"):
+                index = i
+                flag = fl
+                break
+
+        value = int(flag[2:]) if flag else 0
+
+        if not hide:
+            if value in FLAG.hide_values():
+                continue  # skip if already hidden
+            value += FLAG.HIDE.value
+        else:
+            if value not in FLAG.hide_values():
+                continue  # skip if already allowed to show
+            value -= FLAG.HIDE.value
+
+        value = "f:{}".format(value) if value > 10 else "f:0{}".format(value)
+        if index is not None:
+            flags[index] = value
+        else:
+            flags.append(value)
+
+        model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
+        fav_id = model.get_value(itr, 16)
+        channel = channels.get(fav_id, None)
+        if channel:
+            channels[fav_id] = Channel(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
+
+
+def has_locked_hide(model, paths, col_num):
+    for path in paths:
+        if model.get_value(model.get_iter(path), col_num):
+            return True
+    return False
 
 
 if __name__ == "__main__":

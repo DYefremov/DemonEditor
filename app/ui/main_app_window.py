@@ -3,15 +3,15 @@ from contextlib import suppress
 from functools import lru_cache
 
 from app.commons import run_idle
-from app.eparser import get_blacklist, write_blacklist, to_bouquet_id, parse_m3u
+from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
 from app.eparser.bouquets import BqServiceType
 from app.properties import get_config, write_config
-from . import Gtk, Gdk, LOCKED_ICON, HIDE_ICON
+from . import Gtk, Gdk
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
-from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget
+from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
@@ -657,45 +657,11 @@ class MainAppWindow:
         self.set_service_flags(FLAG.LOCK)
 
     def set_service_flags(self, flag):
-        model, paths = self.__services_view.get_selection().get_selected_rows()
-        if not paths:
-            return
-
-        if flag is FLAG.HIDE:
-            col_num = 5
-            hide = self.has_locked_hide(model, paths, col_num)
-            for path in paths:
-                itr = model.get_iter(path)
-                model.set_value(itr, col_num, None) if hide else model.set_value(itr, col_num, HIDE_ICON)
-                flags = {*model.get_value(itr, 0).split(",")}
-                flags.discard(FLAG.HIDE.value) if hide else flags.add(FLAG.HIDE.value)
-                model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
-                fav_id = model.get_value(itr, 16)
-                channel = self.__channels.get(fav_id, None)
-                if channel:
-                    self.__channels[fav_id] = Channel(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
-        elif flag is FLAG.LOCK:
-            col_num = 4
-            locked = self.has_locked_hide(model, paths, col_num)
-            for path in paths:
-                itr = model.get_iter(path)
-                fav_id = model.get_value(itr, 16)
-                channel = self.__channels.get(fav_id, None)
-                if channel:
-                    bq_id = to_bouquet_id(channel)
-                    self.__blacklist.discard(bq_id) if locked else self.__blacklist.add(bq_id)
-                    model.set_value(itr, col_num, None) if locked else model.set_value(itr, col_num, LOCKED_ICON)
-                    self.__channels[fav_id] = Channel(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
-        bq_selected = self.is_bouquet_selected()
-        if bq_selected:
-            self.__fav_model.clear()
-            self.update_bouquet_channels(self.__fav_model, None, bq_selected)
-
-    def has_locked_hide(self, model, paths, col_num):
-        for path in paths:
-            if model.get_value(model.get_iter(path), col_num):
-                return True
-        return False
+        if set_flags(flag, self.__services_view, self.__fav_view, self.__channels, self.__blacklist):
+            bq_selected = self.is_bouquet_selected()
+            if bq_selected:
+                self.__fav_model.clear()
+                self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     @run_idle
     def on_model_changed(self, model, path, itr=None):

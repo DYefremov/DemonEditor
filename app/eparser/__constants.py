@@ -11,9 +11,15 @@ class Type(Enum):
 
 class FLAG(Enum):
     """ Service flags """
-    HIDE = "f:0002"
-    LOCK = "f:0008"
-    NEW = "f:0040"
+    KEEP = 1  # Do not automatically update the services parameters.
+    HIDE = 2
+    PIDS = 4  # Always use the cached instead of current pids.
+    LOCK = 8
+    NEW = 40  # Marked as new at the last scan
+
+    @staticmethod
+    def hide_values():
+        return 2, 3, 6, 7, 10, 42, 43, 46, 47
 
 
 POLARIZATION = {"0": "H", "1": "V", "2": "L", "3": "R"}

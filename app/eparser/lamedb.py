@@ -6,7 +6,7 @@
 from collections import namedtuple
 
 from app.commons import log
-from app.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE
+from app.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
 from app.ui import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
 
@@ -98,7 +98,7 @@ def parse_channels(services, transponders, path):
         all_flags = ch[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
-        hide = HIDE_ICON if flags and int(flags[0][2:]) == 2 else None
+        hide = HIDE_ICON if flags and int(flags[0][2:]) in FLAG.hide_values() else None
         locked = LOCKED_ICON if fav_id in blacklist else None
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))
