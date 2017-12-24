@@ -3,7 +3,7 @@ from math import fabs
 
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
-from app.ui.main_helper import move_items
+from .main_helper import move_items, scroll_to
 from . import Gtk, Gdk
 from .dialogs import show_dialog, DialogType
 
@@ -233,14 +233,7 @@ class SatellitesDialog:
                         tr_itr = model.iter_next(tr_itr)
                 else:
                     itr = model.append(itr, row)
-                    self.scroll_to(model.get_path(itr), view)
-
-    def scroll_to(self, index, view):
-        """ Scrolling to and selecting  given index(path) """
-        view.scroll_to_cell(index, None)
-        selection = view.get_selection()
-        selection.unselect_all()
-        selection.select_path(index)
+                    scroll_to(model.get_path(itr), view)
 
     def get_sat_position_index(self, pos, model):
         """ Search and returns index after given position """

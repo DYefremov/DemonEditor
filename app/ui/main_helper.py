@@ -152,7 +152,7 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
     if target is ViewTarget.SERVICES:
         model, paths = services_view.get_selection().get_selected_rows()
     elif target is ViewTarget.FAV:
-        model, paths = services_view.get_selection().get_selected_rows()
+        model, paths = fav_view.get_selection().get_selected_rows()
 
     if not paths:
         return
@@ -160,25 +160,32 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
     if flag is FLAG.HIDE:
         set_hide(channels, model, paths, target)
     elif flag is FLAG.LOCK:
-        set_lock(blacklist, channels, model, paths, target)
+        set_lock(blacklist, channels, model, paths, target, services_model=services_view.get_model())
 
     return True
 
 
-def set_lock(blacklist, channels, model, paths, target):
-    if target is ViewTarget.FAV:
-        return
-    col_num = 4
+def set_lock(blacklist, channels, model, paths, target, services_model):
+    col_num = 4 if target is ViewTarget.SERVICES else 3
     locked = has_locked_hide(model, paths, col_num)
+
+    ids = []
+
     for path in paths:
         itr = model.get_iter(path)
-        fav_id = model.get_value(itr, 16)
+        fav_id = model.get_value(itr, 16 if target is ViewTarget.SERVICES else 7)
         channel = channels.get(fav_id, None)
         if channel:
             bq_id = to_bouquet_id(channel)
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
-            model.set_value(itr, col_num, None) if locked else model.set_value(itr, col_num, LOCKED_ICON)
+            model.set_value(itr, col_num, None if locked else LOCKED_ICON)
             channels[fav_id] = Channel(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
+            ids.append(fav_id)
+
+    if target is ViewTarget.FAV and ids:
+        for ch in services_model:
+            if ch[16] in ids:
+                ch[4] = None if locked else LOCKED_ICON
 
 
 def set_hide(channels, model, paths, target):
@@ -189,7 +196,7 @@ def set_hide(channels, model, paths, target):
 
     for path in paths:
         itr = model.get_iter(path)
-        model.set_value(itr, col_num, None) if hide else model.set_value(itr, col_num, HIDE_ICON)
+        model.set_value(itr, col_num, None if hide else HIDE_ICON)
         flags = [*model.get_value(itr, 0).split(",")]
         index, flag = None, None
         for i, fl in enumerate(flags):
@@ -227,6 +234,33 @@ def has_locked_hide(model, paths, col_num):
         if model.get_value(model.get_iter(path), col_num):
             return True
     return False
+
+
+# ***************** Location *******************#
+
+def locate_in_services(fav_view, services_view, parent_window):
+    """ Locating and scrolling to the service """
+    model, paths = fav_view.get_selection().get_selected_rows()
+
+    if not paths:
+        return
+    elif len(paths) > 1:
+        show_dialog(DialogType.ERROR, parent_window, "Please, select only one item!")
+        return
+
+    fav_id = model.get_value(model.get_iter(paths[0]), 7)
+    for index, row in enumerate(services_view.get_model()):
+        if row[16] == fav_id:
+            scroll_to(index, services_view)
+            break
+
+
+def scroll_to(index, view):
+    """ Scrolling to and selecting  given index(path) """
+    view.scroll_to_cell(index, None)
+    selection = view.get_selection()
+    selection.unselect_all()
+    selection.select_path(index)
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ from app.properties import get_config, write_config
 from . import Gtk, Gdk
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
-from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags
+from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
@@ -28,7 +28,8 @@ class MainAppWindow:
                         "bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
-                     "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item")
+                     "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
+                     "fav_locate_popup_item")
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
     __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
@@ -38,7 +39,7 @@ class MainAppWindow:
                           "bouquets_new_popup_item", "bouguets_edit_popup_item", "services_remove_popup_item",
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                          "fav_edit_marker_popup_item", "fav_edit_popup_item")
+                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -74,7 +75,8 @@ class MainAppWindow:
                     "on_import_m3u": self.on_import_m3u,
                     "on_insert_marker": self.on_insert_marker,
                     "on_edit_marker": self.on_edit_marker,
-                    "on_fav_popup": self.on_fav_popup}
+                    "on_fav_popup": self.on_fav_popup,
+                    "on_locate_in_services": self.on_locate_in_services}
 
         self.__options = get_config()
         # Used for copy/paste. When adding the previous data will not be deleted.
@@ -597,8 +599,6 @@ class MainAppWindow:
                 self.on_to_fav_move(view)
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_new_bouquet(view)
-        elif key == Gdk.KEY_F2 and model_name == self._BOUQUETS_LIST_NAME:
-            self.on_bouquets_edit(view)
         elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C) and model_name == self._SERVICE_LIST_NAME:
             self.on_copy(view)
         elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
@@ -612,7 +612,7 @@ class MainAppWindow:
             self.on_locked(None)
         elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
             self.on_hide(None)
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
+        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
             self.on_edit(view)
         elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
             pass
@@ -645,7 +645,7 @@ class MainAppWindow:
             for elem in self._BOUQUET_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(False)
             for elem in self._LOCK_HIDE_ELEMENTS:
-                self.__tool_elements[elem].set_sensitive(not_empty and is_service)
+                self.__tool_elements[elem].set_sensitive(not_empty)
 
         for elem in self._REMOVE_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
@@ -734,6 +734,9 @@ class MainAppWindow:
         model, paths = view.get_selection().get_selected_rows()
         self.__fav_edit_marker_popup_item.set_sensitive(
             len(paths) == 1 and model.get_value(model.get_iter(paths[0]), 5) == BqServiceType.MARKER.name)
+
+    def on_locate_in_services(self, view):
+        locate_in_services(view, self.__services_view, self.__main_window)
 
 
 def start_app():

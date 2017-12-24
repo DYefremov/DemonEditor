@@ -91,6 +91,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-edit</property>
   </object>
+  <object class="GtkImage" id="image7">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-find</property>
+  </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -125,6 +130,23 @@
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_locate_popup_item">
+        <property name="label" translatable="yes">Locate in services</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">image7</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_locate_in_services" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
@@ -1641,10 +1663,10 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkLabel" id="label2">
+              <object class="GtkLabel" id="ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Ver. 0.1.1 Pre-alpha</property>
+                <property name="label" translatable="yes">Ver. 0.1.2 Pre-alpha</property>
                 <property name="xalign">0.94999998807907104</property>
               </object>
               <packing>
