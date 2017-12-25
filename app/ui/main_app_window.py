@@ -8,10 +8,11 @@ from app.eparser import get_channels, get_bouquets, write_bouquets, write_channe
 from app.eparser.__constants import CAS, FLAG
 from app.eparser.bouquets import BqServiceType
 from app.properties import get_config, write_config
-from . import Gtk, Gdk
+from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
-from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services
+from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
+    scroll_to
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
@@ -22,10 +23,11 @@ class MainAppWindow:
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item")
-    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouguets_edit_popup_item")
-    _REMOVE_ELEMENTS = ("remove_tool_button", "delete_menu_item", "services_remove_popup_item",
-                        "bouquets_remove_popup_item", "fav_remove_popup_item")
+                         "services_edit_popup_item", "services_copy_popup_item")
+    _BOUQUET_ELEMENTS = ("up_tool_button", "down_tool_button", "edit_tool_button", "new_tool_button",
+                         "bouquets_new_popup_item", "bouquets_edit_popup_item")
+    _COMMONS_ELEMENTS = ("edit_tool_button", "remove_tool_button", "delete_menu_item", "services_remove_popup_item",
+                         "bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
@@ -36,10 +38,11 @@ class MainAppWindow:
                           "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
                           "services_to_fav_move_popup_item", "services_edit_popup_item", "locked_tool_button",
                           "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
-                          "bouquets_new_popup_item", "bouguets_edit_popup_item", "services_remove_popup_item",
+                          "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item")
+                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
+                          "services_copy_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -63,6 +66,7 @@ class MainAppWindow:
                     "on_delete": self.on_delete,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
+                    "on_tool_edit": self.on_tool_edit,
                     "on_to_fav_move": self.on_to_fav_move,
                     "on_services_tree_view_drag_data_get": self.on_services_tree_view_drag_data_get,
                     "on_fav_tree_view_drag_data_get": self.on_fav_tree_view_drag_data_get,
@@ -88,7 +92,7 @@ class MainAppWindow:
         self.__blacklist = set()
 
         builder = Gtk.Builder()
-        builder.add_from_file("app/ui/main_window.glade")
+        builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
         self.__main_window = builder.get_object("main_window")
         main_window_size = self.__options.get("window_size", None)
         # Setting the last size of the window if it was saved
@@ -148,8 +152,13 @@ class MainAppWindow:
         show_dialog(DialogType.ABOUT, self.__main_window)
 
     def move_items(self, key):
-        """ Move items in fav tree view """
-        move_items(key, self.__fav_view)
+        """ Move items in fav or bouquets tree view """
+        if self.__services_view.is_focus():
+            return
+        elif self.__fav_view.is_focus():
+            move_items(key, self.__fav_view)
+        elif self.__bouquets_view and key not in (Gdk.KEY_Page_Up, Gdk.KEY_Page_Down):
+            move_items(key, self.__bouquets_view)
 
     def on_cut(self, view):
         for row in tuple(self.on_delete(view)):
@@ -283,20 +292,21 @@ class MainAppWindow:
 
             if model.iter_n_children(itr):  # parent
                 ch_itr = model.insert(itr, 0, bq)
-                self.scroll_to(model.get_path(ch_itr), paths, view)
+                scroll_to(model.get_path(ch_itr), view, paths)
             else:
                 p_itr = model.iter_parent(itr)
                 it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
-                self.scroll_to(model.get_path(it), paths, view)
+                scroll_to(model.get_path(it), view, paths)
             self.__bouquets[key] = []
 
-    def scroll_to(self, path, paths, view):
-        """ Scrolling to and selecting given path """
-        view.expand_row(paths[0], 0)
-        selection = view.get_selection()
-        selection.unselect_all()
-        view.scroll_to_cell(path, None)
-        selection.select_path(path)
+    def on_tool_edit(self, item):
+        """ Edit tool bar button """
+        if self.__services_view.is_focus():
+            self.on_edit(self.__services_view)
+        elif self.__fav_view.is_focus():
+            self.on_edit(self.__fav_view)
+        elif self.__bouquets_view.is_focus():
+            self.on_edit(self.__bouquets_view)
 
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
@@ -647,7 +657,7 @@ class MainAppWindow:
             for elem in self._LOCK_HIDE_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(not_empty)
 
-        for elem in self._REMOVE_ELEMENTS:
+        for elem in self._COMMONS_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
 
     def on_hide(self, item):

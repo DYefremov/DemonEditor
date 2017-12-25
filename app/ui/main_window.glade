@@ -17,7 +17,7 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="bouguets_edit_popup_item">
+      <object class="GtkImageMenuItem" id="bouquets_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
@@ -724,7 +724,7 @@
                 <property name="label" translatable="yes">Edit </property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-edit</property>
-                <signal name="clicked" handler="on_bouquets_edit" object="bouquets_tree_view" swapped="no"/>
+                <signal name="clicked" handler="on_tool_edit" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1697,6 +1697,23 @@
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_to_fav_move" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem4">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_copy_popup_item">
+        <property name="label">gtk-copy</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_copy" object="services_tree_view" swapped="no"/>
       </object>
     </child>
     <child>

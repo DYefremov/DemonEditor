@@ -3,9 +3,9 @@ from math import fabs
 
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
-from .main_helper import move_items, scroll_to
-from . import Gtk, Gdk
+from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
+from .main_helper import move_items, scroll_to
 
 
 def show_satellites_dialog(transient, options):
@@ -38,7 +38,7 @@ class SatellitesDialog:
                     "on_quit": self.on_quit}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file("app/ui/satellites_dialog.glade",
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_editor_dialog", "satellites_tree_store",
                                        "popup_menu", "add_popup_menu", "add_menu_icon"))
         builder.connect_signals(handlers)
@@ -186,7 +186,7 @@ class SatellitesDialog:
             else:
                 index = self.get_sat_position_index(sat.position, model)
                 model.insert(None, index, [sat.name, *self._aggr, sat.flags, sat.position])
-                self.scroll_to(index, view)
+                scroll_to(index, view)
 
     def on_transponder(self, transponder=None, edited_itr=None):
         """ Create or edit transponder """
@@ -227,7 +227,7 @@ class SatellitesDialog:
                         path = model.get_path(tr_itr)
                         index = path.get_indices()[1]
                         model.insert(model.iter_parent(tr_itr), index, row)
-                        self.scroll_to(path, view)
+                        scroll_to(path, view)
                         break
                     else:
                         tr_itr = model.iter_next(tr_itr)
@@ -304,7 +304,7 @@ class TransponderDialog:
         handlers = {"on_entry_changed": self.on_entry_changed}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file("app/ui/satellites_dialog.glade",
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("transponder_dialog",
                                        "pol_store", "fec_store",
                                        "mod_store", "system_store",
@@ -326,7 +326,7 @@ class TransponderDialog:
         self._pattern = re.compile("\D")
         # style
         self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path("app/ui/style.css")
+        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._freq_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                      Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self._rate_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
@@ -387,7 +387,7 @@ class SatelliteDialog:
 
     def __init__(self, transient, satellite: Satellite = None):
         builder = Gtk.Builder()
-        builder.add_objects_from_file("app/ui/satellites_dialog.glade",
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellite_dialog", "side_store", "pos_adjustment"))
 
         self._dialog = builder.get_object("satellite_dialog")

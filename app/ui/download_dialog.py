@@ -1,6 +1,6 @@
 from app.commons import run_idle, run_task
 from app.ftp import download_data, DownloadDataType, upload_data
-from . import Gtk
+from . import Gtk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
 
 
@@ -20,7 +20,7 @@ class DownloadDialog:
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file("app/ui/dialogs.glade", ("download_dialog",))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("download_dialog",))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("download_dialog")

@@ -255,8 +255,10 @@ def locate_in_services(fav_view, services_view, parent_window):
             break
 
 
-def scroll_to(index, view):
+def scroll_to(index, view, paths=None):
     """ Scrolling to and selecting  given index(path) """
+    if paths is not None:
+        view.expand_row(paths[0], 0)
     view.scroll_to_cell(index, None)
     selection = view.get_selection()
     selection.unselect_all()

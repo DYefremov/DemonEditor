@@ -1,7 +1,7 @@
 """ Common module for showing dialogs """
 from enum import Enum
 
-from . import Gtk
+from . import Gtk, UI_RESOURCES_PATH
 
 
 class DialogType(Enum):
@@ -16,7 +16,7 @@ class DialogType(Enum):
 def show_dialog(dialog_type: DialogType, transient, text=None, options=None, action_type=None, file_filter=None):
     """ Shows dialogs by name """
     builder = Gtk.Builder()
-    builder.add_from_file("app/ui/dialogs.glade")
+    builder.add_from_file(UI_RESOURCES_PATH + "dialogs.glade")
     dialog = builder.get_object(dialog_type.value)
     dialog.set_transient_for(transient)
 
