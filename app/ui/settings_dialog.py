@@ -1,6 +1,6 @@
 from app.properties import write_config
 from app.ui.dialogs import show_dialog, DialogType
-from . import Gtk
+from . import Gtk, UI_RESOURCES_PATH
 
 
 def show_settings_dialog(transient, options):
@@ -11,7 +11,7 @@ class SettingsDialog:
     def __init__(self, transient, options):
         handlers = {"on_data_dir_field_icon_press": self.on_data_dir_field_icon_press}
         builder = Gtk.Builder()
-        builder.add_objects_from_file("app/ui/dialogs.glade", ("settings_dialog", ))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("settings_dialog", ))
         builder.connect_signals(handlers)
         self._options = options
         self._dialog = builder.get_object("settings_dialog")
