@@ -158,7 +158,13 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
         return
 
     if flag is FLAG.HIDE:
-        set_hide(channels, model, paths, target)
+        if target is ViewTarget.SERVICES:
+            set_hide(channels, model, paths)
+        else:
+            fav_ids = [model.get_value(model.get_iter(path), 7) for path in paths]
+            srv_model = services_view.get_model()
+            srv_paths = [row.path for row in srv_model if row[16] in fav_ids]
+            set_hide(channels, srv_model, srv_paths)
     elif flag is FLAG.LOCK:
         set_lock(blacklist, channels, model, paths, target, services_model=services_view.get_model())
 
@@ -188,9 +194,7 @@ def set_lock(blacklist, channels, model, paths, target, services_model):
                 ch[4] = None if locked else LOCKED_ICON
 
 
-def set_hide(channels, model, paths, target):
-    if target is ViewTarget.FAV:
-        return
+def set_hide(channels, model, paths):
     col_num = 5
     hide = has_locked_hide(model, paths, col_num)
 
@@ -216,11 +220,14 @@ def set_hide(channels, model, paths, target):
                 continue  # skip if already allowed to show
             value -= FLAG.HIDE.value
 
-        value = "f:{}".format(value) if value > 10 else "f:0{}".format(value)
-        if index is not None:
-            flags[index] = value
+        if value == 0 and index is not None:
+                del flags[index]
         else:
-            flags.append(value)
+            value = "f:{}".format(value) if value > 10 else "f:0{}".format(value)
+            if index is not None:
+                flags[index] = value
+            else:
+                flags.append(value)
 
         model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
         fav_id = model.get_value(itr, 16)

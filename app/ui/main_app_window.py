@@ -468,12 +468,9 @@ class MainAppWindow:
                     fav_id = srv.data
                     # IPTV and MARKER services
                     s_type = srv.type
-                    if s_type is BqServiceType.MARKER:
+                    if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
                         self.__channels[fav_id] = Channel(*agr[0:3], srv.name, *agr[0:3],
                                                           s_type.name, *agr, srv.num, fav_id, None)
-                    elif s_type is BqServiceType.IPTV:
-                        self.__channels[fav_id] = Channel(*agr[0:3], srv.name, *agr[0:3],
-                                                          srv.type.name, *agr, srv.num, fav_id, None)
                     services.append(fav_id)
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
 
