@@ -7,7 +7,7 @@ from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
 from app.eparser.__constants import CAS, FLAG
 from app.eparser.bouquets import BqServiceType
-from app.properties import get_config, write_config
+from app.properties import get_config, write_config, Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
@@ -83,6 +83,7 @@ class MainAppWindow:
                     "on_locate_in_services": self.on_locate_in_services}
 
         self.__options = get_config()
+        self.__profile = self.__options.get("profile")
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self.__rows_buffer = []
@@ -105,7 +106,9 @@ class MainAppWindow:
         self.__services_model = builder.get_object("services_list_store")
         self.__bouquets_model = builder.get_object("bouquets_tree_store")
         self.__status_bar = builder.get_object("status_bar")
-        self.__status_bar.push(0, "Current IP: " + self.__options["host"])
+        self.__profile_label = builder.get_object("profile_label")
+        self.__status_bar.push(0, "Current IP: " + self.__options.get(self.__profile).get("host"))
+
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         self.__cas_label = builder.get_object("cas_label")
@@ -581,8 +584,11 @@ class MainAppWindow:
             v.get_selection().unselect_all()
 
     def on_preferences(self, item):
-        show_settings_dialog(self.__main_window, self.__options)
-        self.__status_bar.push(0, "Current IP: " + self.__options["host"])
+        response = show_settings_dialog(self.__main_window, self.__options)
+        if response != Gtk.ResponseType.CANCEL:
+            profile = self.__options.get("profile")
+            self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
+            self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """

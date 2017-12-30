@@ -25,11 +25,12 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
             dialog.set_action(action_type)
         if file_filter is not None:
             dialog.add_filter(file_filter)
-        dialog.set_current_folder(options["data_dir_path"])
+
+        path = options.get(options.get("profile")).get("data_dir_path")
+        dialog.set_current_folder(path)
 
         response = dialog.run()
         if response == -12:  # -12 for fix assertion 'gtk_widget_get_can_default (widget)' failed
-            path = options["data_dir_path"]
             if dialog.get_filename():
                 path = dialog.get_filename()
                 if action_type is not Gtk.FileChooserAction.OPEN:

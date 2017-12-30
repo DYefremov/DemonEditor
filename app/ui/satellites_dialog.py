@@ -20,7 +20,7 @@ class SatellitesDialog:
     _aggr = [None for x in range(9)]  # aggregate
 
     def __init__(self, transient, options):
-        self._data_path = options["data_dir_path"] + "satellites.xml"
+        self._data_path = options.get(options.get("profile")).get("data_dir_path") + "satellites.xml"
         self._options = options
 
         handlers = {"on_open": self.on_open,
