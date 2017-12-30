@@ -51,7 +51,7 @@ def get_default_settings():
             "services_path": "/var/tuxbox/config/zapit/",
             "user_bouquet_path": "/var/tuxbox/config/zapit/",
             "satellites_xml_path": "/var/tuxbox/config/",
-            "data_dir_path": DATA_PATH + "neutrino"},
+            "data_dir_path": DATA_PATH + "neutrino/"},
         "profile": Profile.ENIGMA_2.value}
 
 
