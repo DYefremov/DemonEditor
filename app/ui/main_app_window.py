@@ -426,10 +426,11 @@ class MainAppWindow:
 
     def on_satellite_editor_show(self, model):
         """ Shows satellites editor dialog """
-        show_satellites_dialog(self.__main_window, self.__options)
+        show_satellites_dialog(self.__main_window, self.__options.get(self.__options.get("profile")))
 
     def on_data_open(self, model):
-        response = show_dialog(DialogType.CHOOSER, self.__main_window, options=self.__options)
+        options = self.__options.get(self.__options.get("profile"))
+        response = show_dialog(DialogType.CHOOSER, self.__main_window, options=options)
         if response == Gtk.ResponseType.CANCEL:
             return
         self.open_data(response)
@@ -442,7 +443,8 @@ class MainAppWindow:
         self.__services_model.clear()
         self.__blacklist.clear()
 
-        data_path = self.__options["data_dir_path"] if data_path is None else data_path
+        data_path = self.__options.get(
+            self.__options.get("profile")).get("data_dir_path") if data_path is None else data_path
         try:
             self.append_blacklist(data_path)
             self.append_services(data_path)
@@ -491,7 +493,7 @@ class MainAppWindow:
         if show_dialog(DialogType.QUESTION, self.__main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        path = self.__options["data_dir_path"]
+        path = self.__options.get(self.__options.get("profile")).get("data_dir_path")
         bouquets = []
         services_model = self.__services_view.get_model()
         # removing bouquet files
@@ -631,7 +633,7 @@ class MainAppWindow:
             pass
 
     def on_download(self, item):
-        show_download_dialog(self.__main_window, self.__options, self.open_data)
+        show_download_dialog(self.__main_window, self.__options.get(self.__options.get("profile")), self.open_data)
 
     @run_idle
     def on_view_focus(self, view, focus_event):

@@ -44,14 +44,14 @@ def get_default_settings():
             "services_path": "/etc/enigma2/",
             "user_bouquet_path": "/etc/enigma2/",
             "satellites_xml_path": "/etc/tuxbox/",
-            "data_dir_path": DATA_PATH},
+            "data_dir_path": DATA_PATH + "enigma2/"},
         Profile.NEUTRINO_MP.value: {
             "host": "127.0.0.1", "port": "21",
             "user": "root", "password": "root",
             "services_path": "/var/tuxbox/config/zapit/",
             "user_bouquet_path": "/var/tuxbox/config/zapit/",
             "satellites_xml_path": "/var/tuxbox/config/",
-            "data_dir_path": DATA_PATH},
+            "data_dir_path": DATA_PATH + "neutrino"},
         "profile": Profile.ENIGMA_2.value}
 
 

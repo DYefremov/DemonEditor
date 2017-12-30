@@ -26,7 +26,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
         if file_filter is not None:
             dialog.add_filter(file_filter)
 
-        path = options.get(options.get("profile")).get("data_dir_path")
+        path = options.get("data_dir_path")
         dialog.set_current_folder(path)
 
         response = dialog.run()

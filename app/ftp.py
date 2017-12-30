@@ -18,6 +18,7 @@ def download_data(*, properties, download_type=DownloadDataType.ALL):
     with FTP(host=properties["host"]) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
         save_path = properties["data_dir_path"]
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
         # bouquets section
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.BOUQUETS:
