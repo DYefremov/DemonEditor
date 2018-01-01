@@ -10,7 +10,7 @@ def get_bouquets(path):
     return parse_bouquets(path, "bouquets.tv", "tv"), parse_bouquets(path, "bouquets.radio", "radio")
 
 
-def write_bouquets(path, bouquets, bouquets_services):
+def write_bouquets(path, bouquets):
     srv_line = '#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     line = []
 

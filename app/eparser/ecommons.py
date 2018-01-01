@@ -2,7 +2,7 @@
 from collections import namedtuple
 from enum import Enum
 
-Channel = namedtuple("Channel", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide",
+Service = namedtuple("Service", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide",
                                  "package", "service_type", "ssid", "freq", "rate", "pol", "fec",
                                  "system", "pos", "data_id", "fav_id", "transponder"])
 

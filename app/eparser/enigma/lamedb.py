@@ -6,7 +6,7 @@
 from app.commons import log
 from app.ui import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
-from ..ecommons import Channel, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
+from ..ecommons import Service, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"
@@ -14,25 +14,25 @@ _SEP = ":"  # separator
 _FILE_NAME = "lamedb"
 
 
-def get_channels(path):
+def get_services(path):
     return parse(path)
 
 
-def write_channels(path, channels):
+def write_services(path, services):
     lines = [_HEADER, "\ntransponders\n"]
     tr_lines = []
     services_lines = ["end\nservices\n"]
     tr_set = set()
 
-    for ch in channels:
-        data_id = str(ch.data_id).split(_SEP)
+    for srv in services:
+        data_id = str(srv.data_id).split(_SEP)
         tr_id = "{}:{}:{}".format(data_id[1], data_id[2], data_id[3])
         if tr_id not in tr_set:
-            transponder = "{}\n\t{}\n/\n".format(tr_id, ch.transponder)
+            transponder = "{}\n\t{}\n/\n".format(tr_id, srv.transponder)
             tr_lines.append(transponder)
             tr_set.add(tr_id)
         # Services
-        services_lines.append("{}\n{}\n{}\n".format(ch.data_id, ch.service, ch.flags_cas))
+        services_lines.append("{}\n{}\n{}\n".format(srv.data_id, srv.service, srv.flags_cas))
 
     tr_lines.sort()
     lines.extend(tr_lines)
@@ -59,7 +59,7 @@ def parse(path):
             transponders, sep, services = services.partition("services")  # 2 step
             services, sep, _ = services.partition("end")  # 3 step
 
-            return parse_channels(services.split("\n"), transponders.split("/"), path)
+            return parse_services(services.split("\n"), transponders.split("/"), path)
 
 
 def parse_transponders(arg):
@@ -73,7 +73,7 @@ def parse_transponders(arg):
     return transponders
 
 
-def parse_channels(services, transponders, path):
+def parse_services(services, transponders, path):
     """ Parsing channels """
     channels = []
     transponders = parse_transponders(transponders)
@@ -105,7 +105,7 @@ def parse_channels(services, transponders, path):
             tr_type, sp, tr = str(transponder).partition(" ")
             tr = tr.split(_SEP)
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
-            channels.append(Channel(flags_cas=ch[2],
+            channels.append(Service(flags_cas=ch[2],
                                     transponder_type=tr_type,
                                     coded=coded,
                                     service=ch[1],

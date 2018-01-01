@@ -1,7 +1,7 @@
 """ This is helper module for ui """
 from enum import Enum
 
-from app.eparser import Channel
+from app.eparser import Service
 from app.eparser.ecommons import FLAG
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
@@ -35,7 +35,7 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
     itr = model.insert_before(model.get_iter(paths[0]), (None, None, response, None, None, s_type, None, fav_id))
-    channels[fav_id] = Channel(None, None, None, response, None, None, None, s_type, *[None] * 7, max_num, fav_id, None)
+    channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 7, max_num, fav_id, None)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
 
 
@@ -53,7 +53,7 @@ def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
     old_ch = channels.pop(fav_id, None)
     new_fav_id = "{}::{}\n#DESCRIPTION {}\n".format(fav_id.split("::")[0], response, response)
     model.set(itr, {2: response, 7: new_fav_id})
-    channels[new_fav_id] = Channel(*old_ch[0:3], response, *old_ch[4:15], old_ch.data_id, new_fav_id, None)
+    channels[new_fav_id] = Service(*old_ch[0:3], response, *old_ch[4:15], old_ch.data_id, new_fav_id, None)
     bq_services.pop(index)
     bq_services.insert(index, new_fav_id)
 
@@ -136,7 +136,7 @@ def edit(view, parent_window, target, fav_view=None, service_view=None, channels
 
     old_ch = channels.get(f_id, None)
     if old_ch:
-        channels[f_id] = Channel(*old_ch[0:3], channel_name, *old_ch[4:])
+        channels[f_id] = Service(*old_ch[0:3], channel_name, *old_ch[4:])
 
 
 # ***************** Flags *******************#
@@ -185,7 +185,7 @@ def set_lock(blacklist, channels, model, paths, target, services_model):
             bq_id = to_bouquet_id(channel)
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
             model.set_value(itr, col_num, None if locked else LOCKED_ICON)
-            channels[fav_id] = Channel(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
+            channels[fav_id] = Service(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
             ids.append(fav_id)
 
     if target is ViewTarget.FAV and ids:
@@ -233,7 +233,7 @@ def set_hide(channels, model, paths):
         fav_id = model.get_value(itr, 16)
         channel = channels.get(fav_id, None)
         if channel:
-            channels[fav_id] = Channel(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
+            channels[fav_id] = Service(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
 
 
 def has_locked_hide(model, paths, col_num):

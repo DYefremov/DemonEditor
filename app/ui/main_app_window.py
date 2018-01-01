@@ -4,7 +4,7 @@ from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
-from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
+from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
 from app.properties import get_config, write_config, Profile
@@ -87,7 +87,7 @@ class MainAppWindow:
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self.__rows_buffer = []
-        self.__channels = {}
+        self.__services = {}
         self.__bouquets = {}
         self.__bouquets_to_del = []
         self.__blacklist = set()
@@ -205,9 +205,9 @@ class MainAppWindow:
             self.on_bouquets_edit(view)
             # edit(view, self.__main_window, ViewTarget.BOUQUET)
         elif name == self._FAV_LIST_NAME:
-            edit(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view, channels=self.__channels)
+            edit(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view, channels=self.__services)
         elif name == self._SERVICE_LIST_NAME:
-            edit(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__channels)
+            edit(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__services)
 
     def on_delete(self, item):
         """ Delete selected items from views
@@ -257,7 +257,7 @@ class MainAppWindow:
                 if services:
                     with suppress(ValueError):
                         services.remove(fav_id)
-            self.__channels.pop(fav_id, None)
+            self.__services.pop(fav_id, None)
         self.__fav_model.clear()
 
         if bq_selected:
@@ -378,7 +378,7 @@ class MainAppWindow:
                 for ext_row in ext_rows:
                     dest_index += 1
                     fav_id = ext_row[-2]
-                    channel = self.__channels[fav_id]
+                    channel = self.__services[fav_id]
                     model.insert(dest_index, (0, channel.coded, channel.service, channel.locked, channel.hide,
                                               channel.service_type, channel.pos, channel.fav_id))
                     fav_bouquet.insert(dest_index, channel.fav_id)
@@ -461,7 +461,7 @@ class MainAppWindow:
             self.__blacklist.update(black_list)
 
     def append_bouquets(self, data_path):
-        for bouquet in get_bouquets(data_path):
+        for bouquet in get_bouquets(data_path, Profile(self.__profile)):
             parent = self.__bouquets_model.append(None, [bouquet.name, bouquet.type])
             for bt in bouquet.bouquets:
                 name, bt_type = bt.name, bt.type
@@ -473,18 +473,18 @@ class MainAppWindow:
                     # IPTV and MARKER services
                     s_type = srv.type
                     if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
-                        self.__channels[fav_id] = Channel(*agr[0:3], srv.name, *agr[0:3],
+                        self.__services[fav_id] = Service(*agr[0:3], srv.name, *agr[0:3],
                                                           s_type.name, *agr, srv.num, fav_id, None)
                     services.append(fav_id)
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
 
     def append_services(self, data_path):
-        channels = get_channels(data_path)
-        if channels:
-            for ch in channels:
+        services = get_services(data_path, Profile(self.__profile))
+        if services:
+            for srv in services:
                 #  adding channels to dict with fav_id as keys
-                self.__channels[ch.fav_id] = ch
-                self.__services_model.append(ch)
+                self.__services[srv.fav_id] = srv
+                self.__services_model.append(srv)
         else:
             show_dialog(DialogType.ERROR, self.__main_window, "Error opening data!")
 
@@ -510,17 +510,17 @@ class MainAppWindow:
                     bq_itr = model.iter_nth_child(itr, num)
                     bq_name, bq_type = model.get(bq_itr, 0, 1)
                     favs = self.__bouquets["{}:{}".format(bq_name, bq_type)]
-                    bq = Bouquet(bq_name, bq_type, [self.__channels.get(f_id, None) for f_id in favs])
+                    bq = Bouquet(bq_name, bq_type, [self.__services.get(f_id, None) for f_id in favs])
                     bqs.append(bq)
                 bqs = Bouquets(*model.get(itr, 0, 1), bqs)
                 bouquets.append(bqs)
 
         # Getting bouquets
         self.__bouquets_view.get_model().foreach(parse_bouquets)
-        write_bouquets(path, bouquets, self.__bouquets)
+        write_bouquets(path, bouquets, Profile(self.__profile))
         # Getting services
-        services = [Channel(*row[:]) for row in services_model]
-        write_channels(path, services)
+        services = [Service(*row[:]) for row in services_model]
+        write_services(path, services, Profile(self.__profile))
         # blacklist
         write_blacklist(path, self.__blacklist)
 
@@ -561,7 +561,7 @@ class MainAppWindow:
         services = self.__bouquets[key]
 
         for num, ch_id in enumerate(services):
-            channel = self.__channels.get(ch_id, None)
+            channel = self.__services.get(ch_id, None)
             if channel:
                 self.__fav_model.append((num + 1, channel.coded, channel.service, channel.locked,
                                          channel.hide, channel.service_type, channel.pos, channel.fav_id))
@@ -590,6 +590,7 @@ class MainAppWindow:
             profile = self.__options.get("profile")
             self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
             self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
+            self.__profile = profile
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -671,7 +672,7 @@ class MainAppWindow:
         self.set_service_flags(FLAG.LOCK)
 
     def set_service_flags(self, flag):
-        if set_flags(flag, self.__services_view, self.__fav_view, self.__channels, self.__blacklist):
+        if set_flags(flag, self.__services_view, self.__fav_view, self.__services, self.__blacklist):
             bq_selected = self.is_bouquet_selected()
             if bq_selected:
                 self.__fav_model.clear()
@@ -695,7 +696,7 @@ class MainAppWindow:
         radio_count = 0
         data_count = 0
 
-        for ch in self.__channels.values():
+        for ch in self.__services.values():
             ch_type = ch.service_type
             if ch_type in ("TV", "TV (HD)"):
                 tv_count += 1
@@ -731,17 +732,17 @@ class MainAppWindow:
             bq_services = self.__bouquets.get(bq_selected)
             self.__fav_model.clear()
             for ch in channels:
-                self.__channels[ch.fav_id] = ch
+                self.__services[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
-        insert_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__channels, self.__main_window)
+        insert_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__services, self.__main_window)
         self.update_fav_num_column(self.__fav_model)
 
     def on_edit_marker(self, view):
-        edit_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__channels, self.__main_window)
+        edit_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__services, self.__main_window)
 
     @run_idle
     def on_fav_popup(self, view, event):

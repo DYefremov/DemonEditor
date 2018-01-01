@@ -1,4 +1,4 @@
-from .ecommons import BqServiceType, Channel
+from .ecommons import BqServiceType, Service
 
 
 def parse_m3u(path):
@@ -15,7 +15,7 @@ def parse_m3u(path):
                 count = 0
                 fav_id = " 1:0:1:0:0:0:0:0:0:0:{}:{}\n#DESCRIPTION: {}\n".format(
                     line.strip().replace(":", "%3a"), name, name, None)
-                channels.append(Channel(*aggr[0:3], name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None))
+                channels.append(Service(*aggr[0:3], name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None))
 
     return channels
 
