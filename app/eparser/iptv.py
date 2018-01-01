@@ -1,5 +1,4 @@
-from app.eparser.bouquets import BqServiceType
-from . import Channel
+from .ecommons import BqServiceType, Channel
 
 
 def parse_m3u(path):

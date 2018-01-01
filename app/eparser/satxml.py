@@ -2,18 +2,12 @@
 
     For more info see __COMMENT
 """
-from collections import namedtuple
 from xml.dom.minidom import parse, Document
 
-from app.eparser.__constants import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE
-
-Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
-
-Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner",
-                                         "system", "modulation", "pls_mode", "pls_code", "is_id"])
+from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE, Transponder, Satellite
 
 __COMMENT = ("   File was created in DemonEditor\n\n"
-             "useable flags are\n"
+             "usable flags are\n"
              "	1: Network Scan\n"
              "	2: use BAT\n"
              "	4: use ONIT\n"

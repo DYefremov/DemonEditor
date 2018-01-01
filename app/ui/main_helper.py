@@ -2,8 +2,8 @@
 from enum import Enum
 
 from app.eparser import Channel
-from app.eparser.__constants import FLAG
-from app.eparser.bouquets import BqServiceType, to_bouquet_id
+from app.eparser.ecommons import FLAG
+from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
 from .dialogs import show_dialog, DialogType
 

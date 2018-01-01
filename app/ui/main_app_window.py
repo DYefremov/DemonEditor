@@ -5,8 +5,8 @@ from functools import lru_cache
 from app.commons import run_idle
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_channels, get_bouquets, write_bouquets, write_channels, Bouquets, Bouquet, Channel
-from app.eparser.__constants import CAS, FLAG
-from app.eparser.bouquets import BqServiceType
+from app.eparser.ecommons import CAS, FLAG
+from app.eparser.enigma.bouquets import BqServiceType
 from app.properties import get_config, write_config, Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
@@ -108,7 +108,7 @@ class MainAppWindow:
         self.__status_bar = builder.get_object("status_bar")
         self.__profile_label = builder.get_object("profile_label")
         self.__status_bar.push(0, "Current IP: " + self.__options.get(self.__profile).get("host"))
-
+        self.__profile_label.set_text("Enigma2 v.4" if Profile(self.__profile) is Profile.ENIGMA_2 else "Neutrino-MP")
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
         self.__cas_label = builder.get_object("cas_label")
@@ -267,7 +267,8 @@ class MainAppWindow:
         """ Deleting bouquet """
         self.__bouquets.pop(bouquet)
         self.__fav_model.clear()
-        bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options["data_dir_path"], *bouquet.split(":"))
+        bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
+                                                         *bouquet.split(":"))
         self.__bouquets_to_del.append(bouquet_file_name)
 
     def on_new_bouquet(self, view):
@@ -426,11 +427,10 @@ class MainAppWindow:
 
     def on_satellite_editor_show(self, model):
         """ Shows satellites editor dialog """
-        show_satellites_dialog(self.__main_window, self.__options.get(self.__options.get("profile")))
+        show_satellites_dialog(self.__main_window, self.__options.get(self.__profile))
 
     def on_data_open(self, model):
-        options = self.__options.get(self.__options.get("profile"))
-        response = show_dialog(DialogType.CHOOSER, self.__main_window, options=options)
+        response = show_dialog(DialogType.CHOOSER, self.__main_window, options=self.__options.get(self.__profile))
         if response == Gtk.ResponseType.CANCEL:
             return
         self.open_data(response)
@@ -443,8 +443,7 @@ class MainAppWindow:
         self.__services_model.clear()
         self.__blacklist.clear()
 
-        data_path = self.__options.get(
-            self.__options.get("profile")).get("data_dir_path") if data_path is None else data_path
+        data_path = self.__options.get(self.__profile).get("data_dir_path") if data_path is None else data_path
         try:
             self.append_blacklist(data_path)
             self.append_services(data_path)
@@ -493,7 +492,7 @@ class MainAppWindow:
         if show_dialog(DialogType.QUESTION, self.__main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        path = self.__options.get(self.__options.get("profile")).get("data_dir_path")
+        path = self.__options.get(self.__profile).get("data_dir_path")
         bouquets = []
         services_model = self.__services_view.get_model()
         # removing bouquet files
@@ -633,7 +632,7 @@ class MainAppWindow:
             pass
 
     def on_download(self, item):
-        show_download_dialog(self.__main_window, self.__options.get(self.__options.get("profile")), self.open_data)
+        show_download_dialog(self.__main_window, self.__options.get(self.__profile), self.open_data)
 
     @run_idle
     def on_view_focus(self, view, focus_event):
@@ -716,7 +715,7 @@ class MainAppWindow:
         file_filter.set_name("m3u files")
         response = show_dialog(dialog_type=DialogType.CHOOSER,
                                transient=self.__main_window,
-                               options=self.__options,
+                               options=self.__options.get(self.__profile),
                                action_type=Gtk.FileChooserAction.OPEN,
                                file_filter=file_filter)
         if response == Gtk.ResponseType.CANCEL:

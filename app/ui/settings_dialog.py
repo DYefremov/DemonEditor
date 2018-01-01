@@ -44,7 +44,8 @@ class SettingsDialog:
         return response
 
     def on_data_dir_field_icon_press(self, entry, icon, event_button):
-        response = show_dialog(dialog_type=DialogType.CHOOSER, transient=self._dialog, options=self._options)
+        response = show_dialog(dialog_type=DialogType.CHOOSER,
+                               transient=self._dialog, options=self._options.get(self._options.get("profile")))
         if response != Gtk.ResponseType.CANCEL:
             entry.set_text(response)
 

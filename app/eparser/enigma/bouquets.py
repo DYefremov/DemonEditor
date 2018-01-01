@@ -1,21 +1,9 @@
 """ Module for parsing bouquets """
-from collections import namedtuple
-from enum import Enum
+from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet
 
 _BOUQUETS_PATH = "../data/"
 _TV_ROOT_FILE_NAME = "bouquets.tv"
 _RADIO_ROOT_FILE_NAME = "bouquets.radio"
-
-
-class BqServiceType(Enum):
-    DEFAULT = "DEFAULT"
-    IPTV = "IPTV"
-    MARKER = "MARKER"  # 64
-
-
-Bouquet = namedtuple("Bouquet", ["name", "type", "services"])
-Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
-BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 
 
 def get_bouquets(path):

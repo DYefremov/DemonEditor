@@ -1,5 +1,30 @@
-""" This module only for common constants """
+""" Common elements module """
+from collections import namedtuple
 from enum import Enum
+
+Channel = namedtuple("Channel", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide",
+                                 "package", "service_type", "ssid", "freq", "rate", "pol", "fec",
+                                 "system", "pos", "data_id", "fav_id", "transponder"])
+
+
+# ***************** Bouquets *******************#
+
+class BqServiceType(Enum):
+    DEFAULT = "DEFAULT"
+    IPTV = "IPTV"
+    MARKER = "MARKER"  # 64
+
+
+Bouquet = namedtuple("Bouquet", ["name", "type", "services"])
+Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
+BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
+
+# ***************** Satellites *******************#
+
+Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
+
+Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner",
+                                         "system", "modulation", "pls_mode", "pls_code", "is_id"])
 
 
 class Type(Enum):

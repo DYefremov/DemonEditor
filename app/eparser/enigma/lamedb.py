@@ -3,21 +3,15 @@
       Currently implemented only for satellite channels!!!
      Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
-from collections import namedtuple
-
 from app.commons import log
-from app.eparser.__constants import POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
 from app.ui import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
+from ..ecommons import Channel, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
 
 _HEADER = "eDVB services /4/"
 _FILE_PATH = "../data/lamedb"
 _SEP = ":"  # separator
 _FILE_NAME = "lamedb"
-
-Channel = namedtuple("Channel", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide",
-                                 "package", "service_type", "ssid", "freq", "rate", "pol", "fec",
-                                 "system", "pos", "data_id", "fav_id", "transponder"])
 
 
 def get_channels(path):
