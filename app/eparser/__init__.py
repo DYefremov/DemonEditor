@@ -3,9 +3,9 @@ from .ecommons import Service, Satellite, Transponder, Bouquet, Bouquets
 from .enigma.blacklist import get_blacklist, write_blacklist
 from .enigma.bouquets import get_bouquets as get_enigma_bouquets, write_bouquets as write_enigma_bouquets, to_bouquet_id
 from .enigma.lamedb import get_services as get_enigma_services, write_services as write_enigma_services
-from .neutrino.services import get_services as get_neutrino_services, write_services as write_neutrino_services
-from .neutrino.bouquets import get_bouquets as get_neutrino_bouquets, write_bouquets as write_neutrino_bouquets
 from .iptv import parse_m3u
+from .neutrino.bouquets import get_bouquets as get_neutrino_bouquets, write_bouquets as write_neutrino_bouquets
+from .neutrino.services import get_services as get_neutrino_services, write_services as write_neutrino_services
 from .satxml import get_satellites, write_satellites
 
 

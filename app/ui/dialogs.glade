@@ -16,7 +16,7 @@ dmitry.v.yefremov@gmail.com
     <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
 Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
-    <property name="authors">Dmitriy Yefremov 
+    <property name="authors">Dmitriy Yefremov
 </property>
     <property name="logo_icon_name">accessories-text-editor</property>
     <property name="wrap_license">True</property>
