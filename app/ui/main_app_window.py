@@ -438,10 +438,7 @@ class MainAppWindow:
     @run_idle
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
-        self.__bouquets_model.clear()
-        self.__fav_model.clear()
-        self.__services_model.clear()
-        self.__blacklist.clear()
+        self.clear_current_data()
 
         data_path = self.__options.get(self.__profile).get("data_dir_path") if data_path is None else data_path
         try:
@@ -487,6 +484,13 @@ class MainAppWindow:
                 self.__services_model.append(srv)
         else:
             show_dialog(DialogType.ERROR, self.__main_window, "Error opening data!")
+
+    def clear_current_data(self):
+        """ Clearing current data from lists """
+        self.__bouquets_model.clear()
+        self.__fav_model.clear()
+        self.__services_model.clear()
+        self.__blacklist.clear()
 
     def on_data_save(self, *args):
         if show_dialog(DialogType.QUESTION, self.__main_window) == Gtk.ResponseType.CANCEL:
@@ -588,9 +592,11 @@ class MainAppWindow:
         response = show_settings_dialog(self.__main_window, self.__options)
         if response != Gtk.ResponseType.CANCEL:
             profile = self.__options.get("profile")
-            self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
-            self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
-            self.__profile = profile
+            if profile != self.__profile:
+                self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
+                self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
+                self.__profile = profile
+                self.clear_current_data()
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """

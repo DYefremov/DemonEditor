@@ -1,7 +1,7 @@
 import re
 from math import fabs
 
-from app.commons import run_idle
+from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
@@ -128,7 +128,7 @@ class SatellitesDialog:
         elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
             move_items(key, self._sat_view)
 
-    @run_idle
+    @run_task
     def on_satellites_list_load(self, model):
         """ Load satellites data into model """
         try:

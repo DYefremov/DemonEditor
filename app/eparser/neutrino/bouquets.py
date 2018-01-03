@@ -1,6 +1,8 @@
 from enum import Enum
 from xml.dom.minidom import parse, Document
 
+import os
+
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType
 
 _FILE = "bouquets.xml"
@@ -13,13 +15,17 @@ class BqType(Enum):
 
 
 def get_bouquets(path):
-    return (parse_bouquets(path + _FILE, "User bouquets", BqType.BOUQUET.value),
-            parse_bouquets(path + _U_FILE, "User TV", BqType.TV.value))
+    return (parse_bouquets(path + _FILE, "Providers", BqType.BOUQUET.value),
+            parse_bouquets(path + _U_FILE, "FAV", BqType.TV.value))
 
 
 def parse_bouquets(file, name, bq_type):
-    dom = parse(file)
+
     bouquets = Bouquets(name=name, type=bq_type, bouquets=[])
+    if not os.path.exists(file):
+        return bouquets
+
+    dom = parse(file)
 
     for elem in dom.getElementsByTagName("Bouquet"):
         if elem.hasAttributes():
@@ -31,12 +37,7 @@ def parse_bouquets(file, name, bq_type):
             for srv_elem in elem.getElementsByTagName("S"):
                 if srv_elem.hasAttributes():
                     ssid = srv_elem.attributes["i"].value
-                    srv_name = srv_elem.attributes["n"].value
-                    srv_type = srv_elem.attributes["t"].value
                     on = srv_elem.attributes["on"].value
-                    sys = srv_elem.attributes["s"].value
-                    frq = srv_elem.attributes["frq"].value,
-                    l = srv_elem.attributes["l"].value
                     fav_id = "{}:{}".format(on, ssid)
                     services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
             bouquets[2].append(Bouquet(name=bq_name, type=bq_type, services=services))

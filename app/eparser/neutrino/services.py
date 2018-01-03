@@ -71,59 +71,81 @@ def parse_services(path):
     dom = parse(path + _FILE)
     services = []
 
-    for elem in dom.getElementsByTagName("sat"):
-        sat, sat_pos, sat = None, None, None
+    for root in dom.getElementsByTagName("zapit"):
+        api = root.attributes["api"].value
 
-        if elem.hasAttributes():
-            sat_name = elem.attributes["name"].value
-            sat_pos = elem.attributes["position"].value
-            sat = "{}:{}:{}:{}".format(sat_name, sat_pos,
-                                       elem.attributes["diseqc"].value,
-                                       elem.attributes["uncommited"].value)
+        for elem in root.getElementsByTagName("sat"):
+            if elem.hasAttributes():
+                sat_name = elem.attributes["name"].value
+                sat_pos = elem.attributes["position"].value
+                sat_pos = "{}.{}".format(sat_pos[:-1], sat_pos[-1:])
+                sat = "{}:{}:{}:{}".format(sat_name, sat_pos,
+                                           elem.attributes["diseqc"].value,
+                                           elem.attributes["uncommited"].value)
 
-        for tr_elem in elem.getElementsByTagName("TS"):
-            if tr_elem.hasAttributes():
-                tr_id = tr_elem.attributes["id"].value
-                on = tr_elem.attributes["on"].value
-                freq = tr_elem.attributes["frq"].value
-                rate = tr_elem.attributes["sr"].value
-                fec = tr_elem.attributes["fec"].value
-                pol = tr_elem.attributes["pol"].value
-                sys = tr_elem.attributes["sys"].value
-                transponder = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(tr_id, on, freq, tr_elem.attributes["inv"].value,
-                                                                  rate, fec, pol, tr_elem.attributes["mod"].value, sys)
-                for srv_elem in tr_elem.getElementsByTagName("S"):
-                    if srv_elem.hasAttributes():
-                        ssid = srv_elem.attributes["i"].value
-                        name = srv_elem.attributes["n"].value
-                        srv_type = srv_elem.attributes["t"].value
-                        data_id = "{}:{}:{}:{}".format(srv_type,
-                                                       srv_elem.attributes["s"].value,
-                                                       srv_elem.attributes["num"].value,
-                                                       srv_elem.attributes["f"].value)
-                        fav_id = "{}:{}".format(on.lstrip("0"), ssid.lstrip("0"))
+                for tr_elem in elem.getElementsByTagName("TS"):
+                    if tr_elem.hasAttributes():
+                        parse_transponder(api, sat, sat_pos, services, tr_elem)
 
-                        srv = Service(flags_cas=sat,
-                                      transponder_type=None,
-                                      coded=None,
-                                      service=name,
-                                      locked=None,
-                                      hide=None,
-                                      package=PROVIDER.get(int(on, 16)),
-                                      service_type=SERVICE_TYPE.get(str(int(srv_type, 16))),
-                                      ssid=ssid,
-                                      freq=freq,
-                                      rate=rate,
-                                      pol=POLARIZATION.get(pol),
-                                      fec=FEC.get(fec),
-                                      system=SYSTEM.get(sys),
-                                      pos="{}.{}".format(sat_pos[:-1], sat_pos[-1:]),
-                                      data_id=data_id,
-                                      fav_id=fav_id,
-                                      transponder=transponder)
-                        services.append(srv)
+        return services
 
-    return services
+
+def parse_transponder(api, sat, sat_pos, services, tr_elem):
+    tr_id = tr_elem.attributes["id"].value
+    on = tr_elem.attributes["on"].value
+    freq = tr_elem.attributes["frq"].value
+    rate = tr_elem.attributes["sr"].value
+    inv = tr_elem.attributes["inv"].value
+    fec = tr_elem.attributes["fec"].value
+    pol = tr_elem.attributes["pol"].value
+    mod = tr_elem.attributes.get("mod")
+    mod = mod.value if mod else mod
+    sys = tr_elem.attributes.get("sys")
+    sys = sys.value if sys else sys
+
+    tr = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(tr_id, on, freq, inv, rate, fec, pol, mod, sys)
+
+    for srv_elem in tr_elem.getElementsByTagName("S"):
+        if srv_elem.hasAttributes():
+            ssid = srv_elem.attributes["i"].value
+            name = srv_elem.attributes["n"].value
+            srv_type = srv_elem.attributes["t"].value
+            sys = srv_elem.attributes["s"].value
+            num = srv_elem.attributes["num"].value
+            f = srv_elem.attributes["f"].value
+            v, a, p, pmt, tx, vt = [None] * 6
+
+            # For v3 is possible so: '<S i="0001" n="name" t="1" s="0" num="770" f="4"/>' (equals v4 api)
+            if api == "3" and len(srv_elem.attributes) > 6:
+                v = srv_elem.attributes["v"].value
+                a = srv_elem.attributes["a"].value
+                p = srv_elem.attributes["p"].value
+                pmt = srv_elem.attributes["pmt"].value
+                tx = srv_elem.attributes["tx"].value
+                vt = srv_elem.attributes["vt"].value
+
+            data_id = "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}".format(api, srv_type, sys, num, f, v, a, p, pmt, tx, vt)
+            fav_id = "{}:{}".format(on.lstrip("0"), ssid.lstrip("0"))
+
+            srv = Service(flags_cas=sat,
+                          transponder_type=None,
+                          coded=None,
+                          service=name,
+                          locked=None,
+                          hide=None,
+                          package=PROVIDER.get(int(on, 16)),
+                          service_type=SERVICE_TYPE.get(str(int(srv_type, 16))),
+                          ssid=ssid,
+                          freq=freq,
+                          rate=rate,
+                          pol=POLARIZATION.get(pol),
+                          fec=FEC.get(fec),
+                          system=SYSTEM.get(sys),
+                          pos=sat_pos,
+                          data_id=data_id,
+                          fav_id=fav_id,
+                          transponder=tr)
+            services.append(srv)
 
 
 if __name__ == "__main__":
