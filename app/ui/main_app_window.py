@@ -267,9 +267,11 @@ class MainAppWindow:
         """ Deleting bouquet """
         self.__bouquets.pop(bouquet)
         self.__fav_model.clear()
-        bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
-                                                         *bouquet.split(":"))
-        self.__bouquets_to_del.append(bouquet_file_name)
+        profile = Profile(self.__profile)
+        if profile is Profile.ENIGMA_2:
+            bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
+                                                             *bouquet.split(":"))
+            self.__bouquets_to_del.append(bouquet_file_name)
 
     def on_new_bouquet(self, view):
         """ Creates a new item in the bouquets tree """
@@ -499,11 +501,6 @@ class MainAppWindow:
         path = self.__options.get(self.__profile).get("data_dir_path")
         bouquets = []
         services_model = self.__services_view.get_model()
-        # removing bouquet files
-        for bqf in self.__bouquets_to_del:
-            with suppress(FileNotFoundError):
-                os.remove(bqf)
-        self.__bouquets_to_del.clear()
 
         def parse_bouquets(model, b_path, itr):
             if model.iter_has_child(itr):
@@ -519,14 +516,21 @@ class MainAppWindow:
                 bqs = Bouquets(*model.get(itr, 0, 1), bqs)
                 bouquets.append(bqs)
 
+        profile = Profile(self.__profile)
         # Getting bouquets
         self.__bouquets_view.get_model().foreach(parse_bouquets)
-        write_bouquets(path, bouquets, Profile(self.__profile))
+        write_bouquets(path, bouquets, profile)
         # Getting services
         services = [Service(*row[:]) for row in services_model]
-        write_services(path, services, Profile(self.__profile))
-        # blacklist
-        write_blacklist(path, self.__blacklist)
+        write_services(path, services, profile)
+        # removing bouquet files
+        if profile is profile.ENIGMA_2:
+            for bqf in self.__bouquets_to_del:
+                with suppress(FileNotFoundError):
+                    os.remove(bqf)
+            self.__bouquets_to_del.clear()
+            # blacklist
+            write_blacklist(path, self.__blacklist)
 
     def on_services_selection(self, model, path, column):
         self.delete_selection(self.__fav_view)

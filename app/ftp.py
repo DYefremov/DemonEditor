@@ -5,7 +5,8 @@ from enum import Enum
 from ftplib import FTP
 from telnetlib import Telnet
 
-__DATA_FILES_LIST = ("tv", "radio", "lamedb", "blacklist", "whitelist")
+__DATA_FILES_LIST = ("tv", "radio", "lamedb", "blacklist", "whitelist",  # enigma 2
+                     "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
 
 class DownloadDataType(Enum):

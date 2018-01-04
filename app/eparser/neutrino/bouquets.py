@@ -1,7 +1,7 @@
+import os
+from contextlib import suppress
 from enum import Enum
 from xml.dom.minidom import parse, Document
-
-import os
 
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType
 
@@ -20,7 +20,6 @@ def get_bouquets(path):
 
 
 def parse_bouquets(file, name, bq_type):
-
     bouquets = Bouquets(name=name, type=bq_type, bouquets=[])
     if not os.path.exists(file):
         return bouquets
@@ -46,10 +45,14 @@ def parse_bouquets(file, name, bq_type):
 
 
 def write_bouquets(path, bouquets):
+    if len(bouquets) < 2:
+        for f in path + _FILE, path + _U_FILE:
+            with suppress(FileNotFoundError):
+                os.remove(f)
+
     for bq in bouquets:
         bq_type = BqType(bq.type)
-        # write_bouquet(path + (_FILE if bq_type is BqType.BOUQUET else _U_FILE), bq)
-        write_bouquet(path + "_" + (_FILE if bq_type is BqType.BOUQUET else _U_FILE), bq)  # temporary!
+        write_bouquet(path + (_FILE if bq_type is BqType.BOUQUET else _U_FILE), bq)
 
 
 def write_bouquet(file, bouquet):
@@ -62,6 +65,9 @@ def write_bouquet(file, bouquet):
     for bq in bouquet.bouquets:
         bq_elem = doc.createElement("Bouquet")
         bq_elem.setAttribute("name", bq.name)
+        bq_elem.setAttribute("hidden", "0")
+        bq_elem.setAttribute("locked", "0")
+        bq_elem.setAttribute("epg", "0")
         root.appendChild(bq_elem)
 
         for srv in bq.services:
