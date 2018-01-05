@@ -43,6 +43,10 @@
     <columns>
       <!-- column-name bouquet -->
       <column type="gchararray"/>
+      <!-- column-name locked -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name hidden -->
+      <column type="GdkPixbuf"/>
       <!-- column-name type -->
       <column type="gchararray"/>
     </columns>
@@ -1528,7 +1532,7 @@
                             <property name="can_focus">True</property>
                             <property name="model">bouquets_tree_store</property>
                             <property name="headers_clickable">False</property>
-                            <property name="enable_search">False</property>
+                            <property name="search_column">0</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
                             <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
@@ -1540,6 +1544,7 @@
                             <child>
                               <object class="GtkTreeViewColumn" id="bouquets_column">
                                 <property name="resizable">True</property>
+                                <property name="spacing">2</property>
                                 <property name="sizing">autosize</property>
                                 <property name="title" translatable="yes">Bouquets</property>
                                 <property name="expand">True</property>
@@ -1547,6 +1552,20 @@
                                   <object class="GtkCellRendererText" id="bouquets_cellrenderertext"/>
                                   <attributes>
                                     <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                                <child>
+                                  <object class="GtkCellRendererPixbuf" id="boiquets_cellrenderer_locked"/>
+                                  <attributes>
+                                    <attribute name="pixbuf">1</attribute>
+                                  </attributes>
+                                </child>
+                                <child>
+                                  <object class="GtkCellRendererPixbuf" id="boiquets_cellrenderer_hidden">
+                                    <property name="xalign">0</property>
+                                  </object>
+                                  <attributes>
+                                    <attribute name="pixbuf">2</attribute>
                                   </attributes>
                                 </child>
                               </object>
@@ -1560,7 +1579,7 @@
                                 <child>
                                   <object class="GtkCellRendererText" id="bouquet_type_cellrenderertext"/>
                                   <attributes>
-                                    <attribute name="text">1</attribute>
+                                    <attribute name="text">3</attribute>
                                   </attributes>
                                 </child>
                               </object>

@@ -8,7 +8,7 @@ from app.eparser import get_services, get_bouquets, write_bouquets, write_servic
 from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
 from app.properties import get_config, write_config, Profile
-from . import Gtk, Gdk, UI_RESOURCES_PATH
+from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
@@ -269,9 +269,12 @@ class MainAppWindow:
         self.__fav_model.clear()
         profile = Profile(self.__profile)
         if profile is Profile.ENIGMA_2:
-            bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
-                                                             *bouquet.split(":"))
-            self.__bouquets_to_del.append(bouquet_file_name)
+            self.__bouquets_to_del.append(self.get_bouquet_file_name(bouquet))
+
+    def get_bouquet_file_name(self, bouquet):
+        bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
+                                                         *bouquet.split(":"))
+        return bouquet_file_name
 
     def on_new_bouquet(self, view):
         """ Creates a new item in the bouquets tree """
@@ -316,7 +319,8 @@ class MainAppWindow:
 
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
-        if not self.is_bouquet_selected():
+        bq_selected = self.is_bouquet_selected()
+        if not bq_selected:
             show_dialog(DialogType.ERROR, self.__main_window, "This item is not allowed to edit!")
             return
 
@@ -324,7 +328,7 @@ class MainAppWindow:
 
         if paths:
             itr = model.get_iter(paths[0])
-            bq_name, bq_type = model.get(itr, 0, 1)
+            bq_name, bq_type = model.get(itr, 0, 3)
             response = show_dialog(DialogType.INPUT, self.__main_window, bq_name)
 
             if response == Gtk.ResponseType.CANCEL:
@@ -332,6 +336,8 @@ class MainAppWindow:
 
             model.set_value(itr, 0, response)
             self.__bouquets["{}:{}".format(response, bq_type)] = self.__bouquets.pop("{}:{}".format(bq_name, bq_type))
+            if Profile(self.__profile) is Profile.ENIGMA_2:
+                self.__bouquets_to_del.append(self.get_bouquet_file_name(bq_selected))
 
     def on_to_fav_move(self, view):
         """ Move items from app to fav list """
@@ -427,6 +433,7 @@ class MainAppWindow:
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
             menu.popup(None, None, None, None, event.button, event.time)
 
+    @run_idle
     def on_satellite_editor_show(self, model):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self.__main_window, self.__options.get(self.__profile))
@@ -461,10 +468,10 @@ class MainAppWindow:
 
     def append_bouquets(self, data_path):
         for bouquet in get_bouquets(data_path, Profile(self.__profile)):
-            parent = self.__bouquets_model.append(None, [bouquet.name, bouquet.type])
+            parent = self.__bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
             for bt in bouquet.bouquets:
-                name, bt_type = bt.name, bt.type
-                self.__bouquets_model.append(parent, [name, bt_type])
+                name, bt_type, locked, hidden = bt.name, bt.type, bt.locked, bt.hidden
+                self.__bouquets_model.append(parent, [name, locked, hidden, bt_type])
                 services = []
                 agr = [None] * 7
                 for srv in bt.services:
@@ -509,11 +516,11 @@ class MainAppWindow:
 
                 for num in range(num_of_children):
                     bq_itr = model.iter_nth_child(itr, num)
-                    bq_name, bq_type = model.get(bq_itr, 0, 1)
+                    bq_name, locked, hidden, bq_type = model.get(bq_itr, 0, 1, 2, 3)
                     favs = self.__bouquets["{}:{}".format(bq_name, bq_type)]
-                    bq = Bouquet(bq_name, bq_type, [self.__services.get(f_id, None) for f_id in favs])
+                    bq = Bouquet(bq_name, bq_type, [self.__services.get(f_id, None) for f_id in favs], locked, hidden)
                     bqs.append(bq)
-                bqs = Bouquets(*model.get(itr, 0, 1), bqs)
+                bqs = Bouquets(*model.get(itr, 0, 3), bqs)
                 bouquets.append(bqs)
 
         profile = Profile(self.__profile)
@@ -565,7 +572,7 @@ class MainAppWindow:
         if path:
             tree_iter = model.get_iter(path)
 
-        key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, 0, 1))
+        key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, 0, 3))
         services = self.__bouquets[key]
 
         for num, ch_id in enumerate(services):
@@ -584,7 +591,7 @@ class MainAppWindow:
         if not path or len(path[0]) < 2:
             return False
 
-        return "{}:{}".format(*model.get(model.get_iter(path), 0, 1))
+        return "{}:{}".format(*model.get(model.get_iter(path), 0, 3))
 
     @run_idle
     def delete_selection(self, view, *args):
@@ -647,6 +654,7 @@ class MainAppWindow:
 
     @run_idle
     def on_view_focus(self, view, focus_event):
+        profile = Profile(self.__profile)
         model = view.get_model()
         model_name = model.get_name()
         not_empty = len(model) > 0  # if  > 0 model has items
@@ -656,6 +664,9 @@ class MainAppWindow:
                 self.__tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(not_empty)
+            if profile is Profile.NEUTRINO_MP:
+                for elem in self._LOCK_HIDE_ELEMENTS:
+                    self.__tool_elements[elem].set_sensitive(not_empty)
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
             for elem in self._FAV_ELEMENTS:
@@ -670,7 +681,7 @@ class MainAppWindow:
             for elem in self._BOUQUET_ELEMENTS:
                 self.__tool_elements[elem].set_sensitive(False)
             for elem in self._LOCK_HIDE_ELEMENTS:
-                self.__tool_elements[elem].set_sensitive(not_empty)
+                self.__tool_elements[elem].set_sensitive(not_empty and profile is Profile.ENIGMA_2)
 
         for elem in self._COMMONS_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
@@ -682,11 +693,19 @@ class MainAppWindow:
         self.set_service_flags(FLAG.LOCK)
 
     def set_service_flags(self, flag):
-        if set_flags(flag, self.__services_view, self.__fav_view, self.__services, self.__blacklist):
-            bq_selected = self.is_bouquet_selected()
+        profile = Profile(self.__profile)
+        bq_selected = self.is_bouquet_selected()
+        if profile is Profile.ENIGMA_2:
+            if set_flags(flag, self.__services_view, self.__fav_view, self.__services, self.__blacklist):
+                if bq_selected:
+                    self.__fav_model.clear()
+                    self.update_bouquet_channels(self.__fav_model, None, bq_selected)
+        elif profile is Profile.NEUTRINO_MP:
             if bq_selected:
-                self.__fav_model.clear()
-                self.update_bouquet_channels(self.__fav_model, None, bq_selected)
+                model, path = self.__bouquets_view.get_selection().get_selected()
+                value = model.get_value(path, 1 if flag is FLAG.LOCK else 2)
+                value = None if value else LOCKED_ICON if flag is FLAG.LOCK else HIDE_ICON
+                model.set_value(path, 1 if flag is FLAG.LOCK else 2, value)
 
     @run_idle
     def on_model_changed(self, model, path, itr=None):

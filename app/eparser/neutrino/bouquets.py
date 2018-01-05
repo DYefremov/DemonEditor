@@ -3,6 +3,7 @@ from contextlib import suppress
 from enum import Enum
 from xml.dom.minidom import parse, Document
 
+from app.ui import LOCKED_ICON, HIDE_ICON
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType
 
 _FILE = "bouquets.xml"
@@ -29,8 +30,10 @@ def parse_bouquets(file, name, bq_type):
     for elem in dom.getElementsByTagName("Bouquet"):
         if elem.hasAttributes():
             bq_name = elem.attributes["name"].value
-            # hidden = elem.attributes["hidden"].value
-            # locked = elem.attributes["locked"].value
+            hidden = elem.attributes.get("hidden")
+            hidden = hidden.value if hidden else hidden
+            locked = elem.attributes.get("locked")
+            locked = locked.value if locked else locked
             # epg = elem.attributes["epg"].value
             services = []
             for srv_elem in elem.getElementsByTagName("S"):
@@ -39,7 +42,11 @@ def parse_bouquets(file, name, bq_type):
                     on = srv_elem.attributes["on"].value
                     fav_id = "{}:{}".format(on, ssid)
                     services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
-            bouquets[2].append(Bouquet(name=bq_name, type=bq_type, services=services))
+            bouquets[2].append(Bouquet(name=bq_name,
+                                       type=bq_type,
+                                       services=services,
+                                       locked=LOCKED_ICON if locked == "1" else None,
+                                       hidden=HIDE_ICON if hidden == "1" else None))
 
     return bouquets
 
@@ -65,8 +72,8 @@ def write_bouquet(file, bouquet):
     for bq in bouquet.bouquets:
         bq_elem = doc.createElement("Bouquet")
         bq_elem.setAttribute("name", bq.name)
-        bq_elem.setAttribute("hidden", "0")
-        bq_elem.setAttribute("locked", "0")
+        bq_elem.setAttribute("hidden", "1" if bq.hidden else "0")
+        bq_elem.setAttribute("locked", "1" if bq.locked else "0")
         bq_elem.setAttribute("epg", "0")
         root.appendChild(bq_elem)
 

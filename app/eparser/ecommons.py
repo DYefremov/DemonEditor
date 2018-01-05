@@ -15,7 +15,7 @@ class BqServiceType(Enum):
     MARKER = "MARKER"  # 64
 
 
-Bouquet = namedtuple("Bouquet", ["name", "type", "services"])
+Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden"])
 Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
 BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 

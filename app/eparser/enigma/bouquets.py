@@ -86,7 +86,11 @@ def parse_bouquets(path, bq_name, bq_type):
                 bouquets = Bouquets(name.strip(), bq_type, [])
             if bouquets and "#SERVICE" in line:
                 name = line.split(".")[1]
-                bouquets[2].append(Bouquet(name=name, type=bq_type, services=get_bouquet(path, name, bq_type)))
+                bouquets[2].append(Bouquet(name=name,
+                                           type=bq_type,
+                                           services=get_bouquet(path, name, bq_type),
+                                           locked=None,
+                                           hidden=None))
 
     return bouquets
 
