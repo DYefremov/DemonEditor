@@ -296,7 +296,7 @@ class MainAppWindow:
             if response == Gtk.ResponseType.CANCEL:
                 return
 
-            bq = response, bq_type
+            bq = response, None, None, bq_type
             key = "{}:{}".format(response, bq_type)
 
             if model.iter_n_children(itr):  # parent
