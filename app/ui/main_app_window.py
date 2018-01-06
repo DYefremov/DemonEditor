@@ -500,6 +500,10 @@ class MainAppWindow:
         self.__fav_model.clear()
         self.__services_model.clear()
         self.__blacklist.clear()
+        self.__services.clear()
+        self.__rows_buffer.clear()
+        self.__bouquets.clear()
+        self.__bouquets_to_del.clear()
 
     def on_data_save(self, *args):
         if show_dialog(DialogType.QUESTION, self.__main_window) == Gtk.ResponseType.CANCEL:
@@ -608,6 +612,7 @@ class MainAppWindow:
                 self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
                 self.__profile = profile
                 self.clear_current_data()
+                self.update_services_counts()
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
