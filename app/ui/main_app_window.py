@@ -24,15 +24,23 @@ class MainAppWindow:
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
                          "services_edit_popup_item", "services_copy_popup_item")
-    _BOUQUET_ELEMENTS = ("up_tool_button", "down_tool_button", "edit_tool_button", "new_tool_button",
+
+    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
+
     _COMMONS_ELEMENTS = ("edit_tool_button", "remove_tool_button", "delete_menu_item", "services_remove_popup_item",
-                         "bouquets_remove_popup_item", "fav_remove_popup_item")
-    _FAV_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "paste_tool_button", "cut_menu_item",
+                         "bouquets_remove_popup_item", "fav_remove_popup_item", "up_tool_button", "down_tool_button")
+
+    _FAV_ELEMENTS = ("cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
                      "fav_locate_popup_item")
+
+    _FAV_ONLY_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
+                          "fav_edit_marker_popup_item")
+
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
+
     __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
                           "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
@@ -680,8 +688,9 @@ class MainAppWindow:
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
                     self.__tool_elements[elem].set_sensitive(not is_service and self.__rows_buffer)
-                elif elem in ("import_m3u_tool_button", "fav_import_m3u_popup_item"):
-                    self.__tool_elements[elem].set_sensitive(self.is_bouquet_selected() and not is_service)
+                elif elem in self._FAV_ONLY_ELEMENTS:
+                    if profile is Profile.ENIGMA_2:
+                        self.__tool_elements[elem].set_sensitive(self.is_bouquet_selected() and not is_service)
                 else:
                     self.__tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:
