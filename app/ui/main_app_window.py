@@ -655,7 +655,10 @@ class MainAppWindow:
             pass
 
     def on_download(self, item):
-        show_download_dialog(self.__main_window, self.__options.get(self.__profile), self.open_data)
+        show_download_dialog(transient=self.__main_window,
+                             options=self.__options.get(self.__profile),
+                             open_data=self.open_data,
+                             profile=Profile(self.__profile))
 
     @run_idle
     def on_view_focus(self, view, focus_event):

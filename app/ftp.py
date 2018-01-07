@@ -5,6 +5,9 @@ from enum import Enum
 from ftplib import FTP
 from telnetlib import Telnet
 
+from app.commons import log
+from app.properties import Profile
+
 __DATA_FILES_LIST = ("tv", "radio", "lamedb", "blacklist", "whitelist",  # enigma 2
                      "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
@@ -46,13 +49,14 @@ def download_data(*, properties, download_type=DownloadDataType.ALL):
                         ftp.retrbinary("RETR " + xml_file, f.write)
 
 
-def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused=False):
+def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused=False, profile=Profile.ENIGMA_2):
     data_path = properties["data_dir_path"]
     host = properties["host"]
     # telnet
-    tn = telnet(host=host)
+    tn = telnet(host=host, user=None if profile is Profile.ENIGMA_2 else "root", password=None,
+                timeout=5 if profile is Profile.ENIGMA_2 else 1)
     next(tn)
-    # terminate enigma
+    # terminate enigma or enigma
     tn.send("init 4")
 
     with FTP(host=host) as ftp:
@@ -80,8 +84,8 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
                 if file_name == "satellites.xml":
                     continue
                 file_name, send_file(file_name, data_path, ftp)
-        # resume enigma
-        tn.send("init 3")
+        # resume enigma or restart neutrino
+        tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
 
 
 def send_file(file_name, path, ftp):
@@ -90,14 +94,22 @@ def send_file(file_name, path, ftp):
         return ftp.storbinary("STOR " + file_name, f)
 
 
-def telnet(host, port=23, user="root", password="root", timeout=5):
+def telnet(host, port=23, user=None, password=None, timeout=5):
     try:
         tn = Telnet(host=host, port=port, timeout=timeout)
     except socket.timeout:
-        print("socket timeout")
+        log("telnet error: socket timeout")
     else:
         time.sleep(1)
         command = yield
+        if user is not None:
+            tn.read_until(b"login: ")
+            tn.write(user.encode("utf-8") + b"\n")
+            time.sleep(timeout)
+        if password is not None:
+            tn.read_until(b"Password: ")
+            tn.write(password.encode("utf-8") + b"\n")
+            time.sleep(timeout)
         tn.write("{}\r\n".format(command).encode("utf-8"))
         time.sleep(timeout)
         command = yield

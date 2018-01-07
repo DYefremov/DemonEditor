@@ -1,19 +1,21 @@
 from app.commons import run_idle, run_task
 from app.ftp import download_data, DownloadDataType, upload_data
+from app.properties import Profile
 from . import Gtk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
 
 
-def show_download_dialog(transient, options, open_data):
-    dialog = DownloadDialog(transient, options, open_data)
+def show_download_dialog(transient, options, open_data, profile=Profile.ENIGMA_2):
+    dialog = DownloadDialog(transient, options, open_data, profile)
     dialog.run()
     dialog.destroy()
 
 
 class DownloadDialog:
-    def __init__(self, transient, properties, open_data):
+    def __init__(self, transient, properties, open_data, profile):
         self._properties = properties
         self._open_data = open_data
+        self._profile = profile
 
         handlers = {"on_receive": self.on_receive,
                     "on_send": self.on_send,
@@ -72,7 +74,8 @@ class DownloadDialog:
                 self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
                 upload_data(properties=self._properties,
                             download_type=d_type,
-                            remove_unused=self._remove_unused_check_button.get_active())
+                            remove_unused=self._remove_unused_check_button.get_active(),
+                            profile=self._profile)
         except Exception as e:
             message = str(getattr(e, "message", str(e)))
             self.show_info_message(message, Gtk.MessageType.ERROR)

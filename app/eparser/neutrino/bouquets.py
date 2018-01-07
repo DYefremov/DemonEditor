@@ -90,3 +90,7 @@ def write_bouquet(file, bouquet):
             bq_elem.appendChild(srv_elem)
 
     doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+
+
+if __name__ == "__main__":
+    pass
