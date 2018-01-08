@@ -8,6 +8,7 @@ from app.eparser import get_services, get_bouquets, write_bouquets, write_servic
 from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
 from app.properties import get_config, write_config, Profile
+from .picons_dialog import PiconsDialog
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
@@ -88,7 +89,8 @@ class MainAppWindow:
                     "on_insert_marker": self.on_insert_marker,
                     "on_edit_marker": self.on_edit_marker,
                     "on_fav_popup": self.on_fav_popup,
-                    "on_locate_in_services": self.on_locate_in_services}
+                    "on_locate_in_services": self.on_locate_in_services,
+                    "on_picons_loader_show": self.on_picons_loader_show}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -102,6 +104,7 @@ class MainAppWindow:
 
         builder = Gtk.Builder()
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
+        builder.connect_signals(handlers)
         self.__main_window = builder.get_object("main_window")
         main_window_size = self.__options.get("window_size", None)
         # Setting the last size of the window if it was saved
@@ -126,7 +129,9 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
-        builder.connect_signals(handlers)
+        # Adding custom image for tools menu button
+        add_menu_tool_button = builder.get_object("toolbar_tools_menu_button")
+        add_menu_tool_button.set_image(builder.get_object("tools_menu_butoon_image"))
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show()
 
@@ -798,6 +803,10 @@ class MainAppWindow:
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self.__services_view, self.__main_window)
+
+    def on_picons_loader_show(self, item):
+        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile).get("data_dir_path"))
+        dialog.show()
 
 
 def start_app():
