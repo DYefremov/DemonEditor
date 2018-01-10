@@ -11,9 +11,12 @@ class SettingsDialog:
     def __init__(self, transient, options):
         handlers = {"on_data_dir_field_icon_press": self.on_data_dir_field_icon_press,
                     "on_profile_changed": self.on_profile_changed,
-                    "on_reset": self.on_reset}
+                    "on_reset": self.on_reset,
+                    "apply_settings": self.apply_settings}
+
         builder = Gtk.Builder()
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("settings_dialog",))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade",
+                                      ("settings_dialog", "telnet_timeout_adjustment"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("settings_dialog")
@@ -22,6 +25,10 @@ class SettingsDialog:
         self._port_field = builder.get_object("port_field")
         self._login_field = builder.get_object("login_field")
         self._password_field = builder.get_object("password_field")
+        self._telnet_login_field = builder.get_object("telnet_login_field")
+        self._telnet_password_field = builder.get_object("telnet_password_field")
+        self._telnet_port_field = builder.get_object("telnet_port_field")
+        self._telnet_timeout_spin_button = builder.get_object("telnet_timeout_spin_button")
         self._services_field = builder.get_object("services_field")
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
@@ -75,6 +82,10 @@ class SettingsDialog:
         self._port_field.set_text(options.get("port", ""))
         self._login_field.set_text(options.get("user", ""))
         self._password_field.set_text(options.get("password", ""))
+        self._telnet_login_field.set_text(options.get("telnet_user", ""))
+        self._telnet_password_field.set_text(options.get("telnet_password", ""))
+        self._telnet_port_field.set_text(options.get("telnet_port", ""))
+        self._telnet_timeout_spin_button.set_value(options.get("telnet_timeout", 5))
         self._services_field.set_text(options.get("services_path", ""))
         self._user_bouquet_field.set_text(options.get("user_bouquet_path", ""))
         self._satellites_xml_field.set_text(options.get("satellites_xml_path", ""))
@@ -82,7 +93,7 @@ class SettingsDialog:
         self._data_dir_field.set_text(options.get("data_dir_path", ""))
         self._picons_dir_field.set_text(options.get("picons_dir_path", ""))
 
-    def apply_settings(self):
+    def apply_settings(self, item=None):
         profile = Profile.ENIGMA_2.value if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP.value
         self._active_profile = profile
         self._options["profile"] = profile
@@ -91,6 +102,10 @@ class SettingsDialog:
         options["port"] = self._port_field.get_text()
         options["user"] = self._login_field.get_text()
         options["password"] = self._password_field.get_text()
+        options["telnet_user"] = self._telnet_login_field.get_text()
+        options["telnet_password"] = self._telnet_password_field.get_text()
+        options["telnet_port"] = self._telnet_port_field.get_text()
+        options["telnet_timeout"] = self._telnet_timeout_spin_button.get_value()
         options["services_path"] = self._services_field.get_text()
         options["user_bouquet_path"] = self._user_bouquet_field.get_text()
         options["satellites_xml_path"] = self._satellites_xml_field.get_text()

@@ -9,7 +9,7 @@
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">0.2.0 Pre-alpha</property>
+    <property name="version">0.2.1 Pre-alpha</property>
     <property name="copyright" translatable="yes">2018 Dmitriy Yefremov
 dmitry.v.yefremov@gmail.com
 </property>
@@ -116,6 +116,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="max_width_chars">10</property>
                     <property name="text" translatable="yes">127.0.0.1</property>
                     <property name="caps_lock_warning">False</property>
+                    <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -603,6 +604,11 @@ dmitry.v.yefremov@gmail.com
       </object>
     </child>
   </object>
+  <object class="GtkAdjustment" id="telnet_timeout_adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkDialog" id="settings_dialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Options</property>
@@ -626,16 +632,34 @@ dmitry.v.yefremov@gmail.com
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="cancel_button">
-                <property name="label">gtk-undo</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="margin_right">10</property>
                 <property name="use_stock">True</property>
+                <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button5">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="apply_settings" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -645,6 +669,7 @@ dmitry.v.yefremov@gmail.com
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
+                <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -685,6 +710,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">127.0.0.1</property>
+                    <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -718,6 +744,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">21</property>
+                    <property name="primary_icon_name">network-workgroup-symbolic</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -843,6 +870,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">23</property>
+                    <property name="primary_icon_name">network-workgroup-symbolic</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -861,9 +889,11 @@ dmitry.v.yefremov@gmail.com
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="spinbutton1">
+                  <object class="GtkSpinButton" id="telnet_timeout_spin_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="primary_icon_name">alarm-symbolic</property>
+                    <property name="adjustment">telnet_timeout_adjustment</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1155,7 +1185,7 @@ dmitry.v.yefremov@gmail.com
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="text" translatable="yes">/data</property>
-                <property name="secondary_icon_stock">gtk-open</property>
+                <property name="secondary_icon_name">folder-open-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                 <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
@@ -1203,6 +1233,8 @@ dmitry.v.yefremov@gmail.com
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="text" translatable="yes">/data/picons</property>
+            <property name="secondary_icon_name">folder-open-symbolic</property>
+            <property name="secondary_icon_activatable">False</property>
           </object>
           <packing>
             <property name="expand">False</property>

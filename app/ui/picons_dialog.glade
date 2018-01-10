@@ -64,6 +64,7 @@
                   <object class="GtkEntry" id="ip_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -137,7 +138,7 @@
               <object class="GtkEntry" id="url_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="primary_icon_stock">gtk-edit</property>
+                <property name="primary_icon_name">network-workgroup-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="placeholder_text" translatable="yes">https://www.lyngsat.com/packages/'your-provider'.html</property>
                 <property name="input_purpose">url</property>
@@ -165,7 +166,7 @@
               <object class="GtkEntry" id="picons_dir_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="primary_icon_name">emblem-photos</property>
+                <property name="secondary_icon_name">folder-open-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
               </object>
               <packing>
@@ -212,7 +213,7 @@
                     <property name="is_important">True</property>
                     <property name="label" translatable="yes">Receive</property>
                     <property name="use_underline">True</property>
-                    <property name="icon_name">insert-image</property>
+                    <property name="icon_name">go-bottom</property>
                     <signal name="clicked" handler="on_receive" swapped="no"/>
                   </object>
                   <packing>

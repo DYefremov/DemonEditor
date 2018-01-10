@@ -41,6 +41,8 @@ def get_default_settings():
         Profile.ENIGMA_2.value: {
             "host": "127.0.0.1", "port": "21",
             "user": "root", "password": "root",
+            "telnet_user": "", "telnet_password": "",
+            "telnet_port": "21", "telnet_timeout": 5,
             "services_path": "/etc/enigma2/",
             "user_bouquet_path": "/etc/enigma2/",
             "satellites_xml_path": "/etc/tuxbox/",
@@ -50,6 +52,8 @@ def get_default_settings():
         Profile.NEUTRINO_MP.value: {
             "host": "127.0.0.1", "port": "21",
             "user": "root", "password": "root",
+            "telnet_user": "root", "telnet_password": "",
+            "telnet_port": "21", "telnet_timeout": 1,
             "services_path": "/var/tuxbox/config/zapit/",
             "user_bouquet_path": "/var/tuxbox/config/zapit/",
             "satellites_xml_path": "/var/tuxbox/config/",
