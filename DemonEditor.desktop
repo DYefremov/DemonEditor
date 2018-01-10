@@ -1,8 +1,8 @@
 [Desktop Entry]
 Version=1.0
 Name=DemonEditor
-Comment=Channels and satellites editor for Enigma2
-Comment[ru]=Редактор каналов и спутников для Enigma2
+Comment=Channels and satellites list editor for Enigma2
+Comment[ru]=Редактор списка каналов и спутников для Enigma2
 Icon=accessories-text-editor
 Exec=bash -c 'cd $(dirname %k) && ./start.py'
 Terminal=false

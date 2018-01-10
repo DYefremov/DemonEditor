@@ -1005,8 +1005,8 @@ dmitry.v.yefremov@gmail.com
                 <child>
                   <object class="GtkEntry" id="picons_dir_field">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                     <property name="text" translatable="yes">/usr/share/enigma2/picon</property>
                   </object>
                   <packing>

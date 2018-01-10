@@ -26,6 +26,7 @@ class SettingsDialog:
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
         self._data_dir_field = builder.get_object("data_dir_field")
+        self._picons_dir_field = builder.get_object("picons_dir_field")
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
 
@@ -77,6 +78,7 @@ class SettingsDialog:
         self._user_bouquet_field.set_text(options.get("user_bouquet_path"))
         self._satellites_xml_field.set_text(options.get("satellites_xml_path"))
         self._data_dir_field.set_text(options.get("data_dir_path"))
+        self._picons_dir_field.set_text(options.get("data_dir_path") + "picons")
 
     def apply_settings(self):
         profile = Profile.ENIGMA_2.value if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP.value

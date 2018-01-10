@@ -4,7 +4,7 @@ from enum import Enum
 from xml.dom.minidom import parse, Document
 
 from app.ui import LOCKED_ICON, HIDE_ICON
-from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType
+from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER
 
 _FILE = "bouquets.xml"
 _U_FILE = "ubouquets.xml"
@@ -47,6 +47,15 @@ def parse_bouquets(file, name, bq_type):
                                        services=services,
                                        locked=LOCKED_ICON if locked == "1" else None,
                                        hidden=HIDE_ICON if hidden == "1" else None))
+
+    if BqType(bq_type) is BqType.BOUQUET:
+        for bq in bouquets.bouquets:
+            if bq.services:
+                name = bq.name
+                name = name[name.index("]") + 1:]
+                key = int(bq.services[0].data.split(":")[0], 16)
+                if key not in PROVIDER:
+                    PROVIDER[key] = name
 
     return bouquets
 

@@ -465,8 +465,8 @@ class MainAppWindow:
         data_path = self.__options.get(self.__profile).get("data_dir_path") if data_path is None else data_path
         try:
             self.append_blacklist(data_path)
-            self.append_services(data_path)
             self.append_bouquets(data_path)
+            self.append_services(data_path)
             self.update_services_counts(len(self.__services_model))
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
@@ -805,7 +805,7 @@ class MainAppWindow:
         locate_in_services(view, self.__services_view, self.__main_window)
 
     def on_picons_loader_show(self, item):
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile).get("data_dir_path"))
+        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile).get("data_dir_path") + "picons")
         dialog.show()
 
 
