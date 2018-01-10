@@ -926,7 +926,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Services and Bouquets files:</property>
-                    <property name="xalign">0.10000000149011612</property>
+                    <property name="xalign">0</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -949,7 +949,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">User bouquet files:</property>
-                    <property name="xalign">0.10000000149011612</property>
+                    <property name="xalign">2.2351741291171123e-10</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -972,7 +972,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Satellites.xml file:</property>
-                    <property name="xalign">0.10000000149011612</property>
+                    <property name="xalign">0.019999999552965164</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -991,11 +991,11 @@ dmitry.v.yefremov@gmail.com
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label18">
+                  <object class="GtkLabel" id="label20">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Picons directory:</property>
-                    <property name="xalign">0.10000000149011612</property>
+                    <property name="label" translatable="yes">Picons:</property>
+                    <property name="xalign">2.2351741291171123e-10</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1003,10 +1003,9 @@ dmitry.v.yefremov@gmail.com
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="picons_dir_field">
+                  <object class="GtkEntry" id="picons_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="editable">False</property>
                     <property name="text" translatable="yes">/usr/share/enigma2/picon</property>
                   </object>
                   <packing>
@@ -1136,8 +1135,9 @@ dmitry.v.yefremov@gmail.com
           <object class="GtkLabel" id="label8">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Data directory:</property>
+            <property name="label" translatable="yes">Data dir:</property>
             <property name="lines">0</property>
+            <property name="xalign">0.019999999552965164</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1183,6 +1183,31 @@ dmitry.v.yefremov@gmail.com
             <property name="fill">True</property>
             <property name="padding">2</property>
             <property name="position">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label18">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Picons dir:</property>
+            <property name="xalign">0.019999999552965164</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="picons_dir_field">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="text" translatable="yes">/data/picons</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">9</property>
           </packing>
         </child>
       </object>

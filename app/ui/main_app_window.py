@@ -129,9 +129,6 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
-        # Adding custom image for tools menu button
-        add_menu_tool_button = builder.get_object("toolbar_tools_menu_button")
-        add_menu_tool_button.set_image(builder.get_object("tools_menu_butoon_image"))
         self.init_drag_and_drop()  # drag and drop
         self.__main_window.show()
 
@@ -805,7 +802,7 @@ class MainAppWindow:
         locate_in_services(view, self.__services_view, self.__main_window)
 
     def on_picons_loader_show(self, item):
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile).get("data_dir_path") + "picons")
+        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile))
         dialog.show()
 
 

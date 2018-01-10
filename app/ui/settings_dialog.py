@@ -26,6 +26,7 @@ class SettingsDialog:
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
         self._data_dir_field = builder.get_object("data_dir_field")
+        self._picons_field = builder.get_object("picons_field")
         self._picons_dir_field = builder.get_object("picons_dir_field")
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
@@ -70,15 +71,16 @@ class SettingsDialog:
 
     def set_settings(self):
         options = self._options.get(self._active_profile)
-        self._host_field.set_text(options.get("host"))
-        self._port_field.set_text(options.get("port"))
-        self._login_field.set_text(options.get("user"))
-        self._password_field.set_text(options.get("password"))
-        self._services_field.set_text(options.get("services_path"))
-        self._user_bouquet_field.set_text(options.get("user_bouquet_path"))
-        self._satellites_xml_field.set_text(options.get("satellites_xml_path"))
-        self._data_dir_field.set_text(options.get("data_dir_path"))
-        self._picons_dir_field.set_text(options.get("data_dir_path") + "picons")
+        self._host_field.set_text(options.get("host", ""))
+        self._port_field.set_text(options.get("port", ""))
+        self._login_field.set_text(options.get("user", ""))
+        self._password_field.set_text(options.get("password", ""))
+        self._services_field.set_text(options.get("services_path", ""))
+        self._user_bouquet_field.set_text(options.get("user_bouquet_path", ""))
+        self._satellites_xml_field.set_text(options.get("satellites_xml_path", ""))
+        self._picons_field.set_text(options.get("picons_path", ""))
+        self._data_dir_field.set_text(options.get("data_dir_path", ""))
+        self._picons_dir_field.set_text(options.get("picons_dir_path", ""))
 
     def apply_settings(self):
         profile = Profile.ENIGMA_2.value if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP.value
@@ -92,7 +94,9 @@ class SettingsDialog:
         options["services_path"] = self._services_field.get_text()
         options["user_bouquet_path"] = self._user_bouquet_field.get_text()
         options["satellites_xml_path"] = self._satellites_xml_field.get_text()
+        options["picons_path"] = self._picons_field.get_text()
         options["data_dir_path"] = self._data_dir_field.get_text()
+        options["picons_dir_path"] = self._picons_dir_field.get_text()
 
 
 if __name__ == "__main__":
