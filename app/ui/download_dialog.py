@@ -60,7 +60,7 @@ class DownloadDialog:
     def destroy(self):
         self._dialog.destroy()
 
-    def on_info_bar_close(self, *args):
+    def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
 
     @run_idle

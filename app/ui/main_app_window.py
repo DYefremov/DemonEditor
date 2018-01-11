@@ -450,7 +450,7 @@ class MainAppWindow:
 
     def on_data_open(self, model):
         response = show_dialog(DialogType.CHOOSER, self.__main_window, options=self.__options.get(self.__profile))
-        if response == Gtk.ResponseType.CANCEL:
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self.open_data(response)
 

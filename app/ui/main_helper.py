@@ -272,5 +272,16 @@ def scroll_to(index, view, paths=None):
     selection.select_path(index)
 
 
+# ***************** Others *********************#
+
+def update_entry_data(entry, dialog, options):
+    """ Updates value in text entry from chooser dialog """
+    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, options=options)
+    if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+        entry.set_text(response)
+        return response
+    return False
+
+
 if __name__ == "__main__":
     pass

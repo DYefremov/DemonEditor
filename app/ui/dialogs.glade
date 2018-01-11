@@ -1234,7 +1234,7 @@ dmitry.v.yefremov@gmail.com
             <property name="can_focus">True</property>
             <property name="text" translatable="yes">/data/picons</property>
             <property name="secondary_icon_name">folder-open-symbolic</property>
-            <property name="secondary_icon_activatable">False</property>
+            <signal name="icon-press" handler="on_picons_dir_field_icon_press" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>

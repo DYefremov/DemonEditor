@@ -1,6 +1,6 @@
 from app.properties import write_config, Profile, get_default_settings
-from app.ui.dialogs import show_dialog, DialogType
 from . import Gtk, UI_RESOURCES_PATH
+from .main_helper import update_entry_data
 
 
 def show_settings_dialog(transient, options):
@@ -10,6 +10,7 @@ def show_settings_dialog(transient, options):
 class SettingsDialog:
     def __init__(self, transient, options):
         handlers = {"on_data_dir_field_icon_press": self.on_data_dir_field_icon_press,
+                    "on_picons_dir_field_icon_press": self.on_picons_dir_field_icon_press,
                     "on_profile_changed": self.on_profile_changed,
                     "on_reset": self.on_reset,
                     "apply_settings": self.apply_settings}
@@ -53,10 +54,10 @@ class SettingsDialog:
         return response
 
     def on_data_dir_field_icon_press(self, entry, icon, event_button):
-        response = show_dialog(dialog_type=DialogType.CHOOSER,
-                               transient=self._dialog, options=self._options.get(self._options.get("profile")))
-        if response != Gtk.ResponseType.CANCEL:
-            entry.set_text(response)
+        update_entry_data(entry, self._dialog, self._options.get(self._options.get("profile")))
+
+    def on_picons_dir_field_icon_press(self, entry, icon, event_button):
+        update_entry_data(entry, self._dialog, self._options.get(self._options.get("profile")))
 
     def on_profile_changed(self, item):
         self.set_profile(Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP)
