@@ -587,6 +587,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Up</property>
                 <property name="label" translatable="yes">Up</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-go-up</property>
@@ -602,6 +603,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Down</property>
                 <property name="label" translatable="yes">Down</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-go-down</property>
@@ -740,7 +742,7 @@
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Rename bouquet</property>
+                <property name="tooltip_text" translatable="yes">Edit</property>
                 <property name="label" translatable="yes">Edit </property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-edit</property>

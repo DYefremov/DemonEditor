@@ -48,7 +48,7 @@ def get_default_settings():
             "satellites_xml_path": "/etc/tuxbox/",
             "picons_path": "/usr/share/enigma2/picon",
             "data_dir_path": DATA_PATH + "enigma2/",
-            "picons_dir_path": DATA_PATH + "enigma2/picons"},
+            "picons_dir_path": DATA_PATH + "enigma2/picons/"},
         Profile.NEUTRINO_MP.value: {
             "host": "127.0.0.1", "port": "21",
             "user": "root", "password": "root",
@@ -59,7 +59,7 @@ def get_default_settings():
             "satellites_xml_path": "/var/tuxbox/config/",
             "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/",
             "data_dir_path": DATA_PATH + "neutrino/",
-            "picons_dir_path": DATA_PATH + "neutrino/picons"},
+            "picons_dir_path": DATA_PATH + "neutrino/picons/"},
         "profile": Profile.ENIGMA_2.value}
 
 

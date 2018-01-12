@@ -1,14 +1,19 @@
+import subprocess
+import tempfile
 import time
 
 from gi.repository import GLib
 
 from app.commons import run_idle, run_task
+from app.picons.picons import PiconsParser
 from . import Gtk, UI_RESOURCES_PATH
 from .main_helper import update_entry_data
 
 
 class PiconsDialog:
     def __init__(self, transient, options):
+        self._TMP_DIR = tempfile.gettempdir() + "/"
+        self._BASE_URL = "www.lyngsat.com/packages/"
         self._current_process = None
         self._picons_path = options.get("picons_dir_path", "")
 
@@ -50,22 +55,34 @@ class PiconsDialog:
     def start_download(self):
         self._expander.set_expanded(True)
         self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
-        # self._current_process = subprocess.Popen("ls",
-        #                                          stdout=subprocess.PIPE,
-        #                                          stderr=subprocess.PIPE,
-        #                                          universal_newlines=True)
-        # GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
+        url = "https://" + self._BASE_URL + "NTV-Plus.html"
+        self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
+                                                 stdout=subprocess.PIPE,
+                                                 stderr=subprocess.PIPE,
+                                                 universal_newlines=True)
+        GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
+        self.batch_rename()
 
-    @run_idle
+    @run_task
+    def batch_rename(self):
+        self._current_process.wait()
+        path = self._TMP_DIR + self._BASE_URL + "NTV-Plus.html"
+        PiconsParser.parse(path, self._picons_path, self._TMP_DIR)
+        self.show_info_message("Done", Gtk.MessageType.INFO)
+
     def write_to_buffer(self, fd, condition):
         if condition == GLib.IO_IN:
             char = fd.read(1)
-            buf = self._text_view.get_buffer()
-            buf.insert_at_cursor(char)
-            self.scroll_to_end(buf)
+            self.append_output(char)
             return True
         else:
             return False
+
+    @run_idle
+    def append_output(self, char):
+        buf = self._text_view.get_buffer()
+        buf.insert_at_cursor(char)
+        self.scroll_to_end(buf)
 
     def scroll_to_end(self, buf):
         insert = buf.get_insert()
