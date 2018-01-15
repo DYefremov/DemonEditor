@@ -2,6 +2,21 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <!-- interface-css-provider-path style.css -->
+  <object class="GtkListStore" id="providers_list_store">
+    <columns>
+      <!-- column-name logo -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name url -->
+      <column type="gchararray"/>
+      <!-- column-name on_id -->
+      <column type="gchararray"/>
+      <!-- column-name selected -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
   <object class="GtkDialog" id="picons_dialog">
     <property name="width_request">480</property>
     <property name="app_paintable">True</property>
@@ -57,143 +72,6 @@
             <property name="orientation">vertical</property>
             <property name="spacing">2</property>
             <child>
-              <object class="GtkLabel" id="url_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Satellite url (www.lyngsat.com):</property>
-                <property name="xalign">0.019999999552965164</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="url_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="primary_icon_name">network-workgroup-symbolic</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="placeholder_text" translatable="yes">https://www.lyngsat.com/packages/'your-provider'.html</property>
-                <property name="input_purpose">url</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolbar" id="load_toolbar">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkToolItem" id="toolitem2">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="load_providers_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Load providers</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-goto-bottom</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolItem" id="toolitem1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="primary-toolbar"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScrolledWindow" id="providers_scrolled_window">
-                <property name="height_request">120</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">out</property>
-                <child>
-                  <object class="GtkTreeView" id="providers_tree_view">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="treeview_selection"/>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="provider_column">
-                        <property name="title" translatable="yes">Provider</property>
-                        <child>
-                          <object class="GtkCellRendererPixbuf" id="logo_cellrendererpixbuf"/>
-                        </child>
-                        <child>
-                          <object class="GtkCellRendererText" id="name_cellrenderertext"/>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="select_column">
-                        <property name="title" translatable="yes">Select</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="url_column">
-                        <property name="title" translatable="yes">Url</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="separator1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkGrid" id="grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -246,7 +124,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -259,7 +137,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -273,20 +151,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="separator3">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_top">2</property>
-                <property name="margin_bottom">2</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">8</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -349,7 +214,127 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">9</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator" id="separator1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="url_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Satellite url (www.lyngsat.com):</property>
+                <property name="xalign">0.019999999552965164</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="url_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="primary_icon_name">network-workgroup-symbolic</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="placeholder_text" translatable="yes">https://www.lyngsat.com/*satellite*.html</property>
+                <property name="input_purpose">url</property>
+                <signal name="changed" handler="on_url_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="providers_scrolled_window">
+                <property name="height_request">150</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">out</property>
+                <child>
+                  <object class="GtkTreeView" id="providers_tree_view">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">providers_list_store</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="treeview_selection"/>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="provider_column">
+                        <property name="spacing">15</property>
+                        <property name="title" translatable="yes">Providers</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf" id="logo_cellrendererpixbuf"/>
+                          <attributes>
+                            <attribute name="pixbuf">0</attribute>
+                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkCellRendererText" id="name_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="url_column">
+                        <property name="visible">False</property>
+                        <property name="title" translatable="yes">Url</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="on_id_column">
+                        <property name="visible">False</property>
+                        <property name="title" translatable="yes">ONID</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="selected_column">
+                        <property name="title" translatable="yes">Selected</property>
+                        <child>
+                          <object class="GtkCellRendererToggle" id="cellrenderer_toggle">
+                            <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
+                          </object>
+                          <attributes>
+                            <attribute name="active">4</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">7</property>
               </packing>
             </child>
             <child>
@@ -368,11 +353,11 @@
               <object class="GtkToolbar" id="toolbar">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="show_arrow">False</property>
                 <child>
                   <object class="GtkToolButton" id="cancel_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="is_important">True</property>
                     <property name="label" translatable="yes">Cancel</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-cancel</property>
@@ -384,17 +369,46 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToolButton" id="receive_tool_button">
+                  <object class="GtkSeparatorToolItem" id="separatortoolitem2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="receive_tool_button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Receive picons for providers</property>
                     <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Receive</property>
+                    <property name="label" translatable="yes">Receive picons</property>
                     <property name="use_underline">True</property>
                     <property name="icon_name">go-bottom</property>
                     <signal name="clicked" handler="on_receive" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="load_providers_tool_button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Load satellite providers.</property>
+                    <property name="is_important">True</property>
+                    <property name="label" translatable="yes">Load providers</property>
+                    <property name="use_underline">True</property>
+                    <property name="icon_name">network-server-symbolic</property>
+                    <signal name="clicked" handler="on_load_providers" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
                     <property name="homogeneous">True</property>
                   </packing>
                 </child>
@@ -411,8 +425,8 @@
                 <child>
                   <object class="GtkToolButton" id="send_tool_button">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
-                    <property name="is_important">True</property>
                     <property name="label" translatable="yes">Send</property>
                     <property name="use_underline">True</property>
                     <property name="icon_name">go-top</property>
