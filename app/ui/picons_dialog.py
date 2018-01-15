@@ -6,7 +6,7 @@ import time
 from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task
-from app.picons.picons import PiconsParser, parse_providers
+from app.picons.picons import PiconsParser, parse_providers, Provider
 from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .main_helper import update_entry_data
 
@@ -47,6 +47,7 @@ class PiconsDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._load_providers_tool_button = builder.get_object("load_providers_tool_button")
+        self._receive_tool_button = builder.get_object("receive_tool_button")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -82,12 +83,9 @@ class PiconsDialog:
             for p in providers:
                 logo = self.get_pixbuf(p[0])
                 model.append((logo, p.name, p.url, p.on_id, p.selected))
+        self.update_receive_button_state()
 
     def get_pixbuf(self, img_url):
-        # image = Gtk.Image()
-        # image.set_from_file(self._TMP_DIR + "www.lyngsat.com/" + img_url)
-        # image.size_allocate_with_baseline()
-        # return image.get_pixbuf()
         return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self._TMP_DIR + "www.lyngsat.com/" + img_url,
                                                        width=48, height=48, preserve_aspect_ratio=True)
 
@@ -95,22 +93,24 @@ class PiconsDialog:
     def on_receive(self, item):
         self.start_download()
 
+    @run_task
     def start_download(self):
         self._expander.set_expanded(True)
+
+        for prv in self.get_selected_providers():
+            self.process_provider(Provider(*prv))
+
+    def process_provider(self, provider):
+        url = provider.url
         self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
-        url = self._url_entry.get_text()
         self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
                                                  stdout=subprocess.PIPE,
                                                  stderr=subprocess.PIPE,
                                                  universal_newlines=True)
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
-        self.batch_rename(url)
-
-    @run_task
-    def batch_rename(self, url):
         self._current_process.wait()
         path = self._TMP_DIR + self._BASE_URL + url[url.rfind("/") + 1:]
-        PiconsParser.parse(path, self._picons_path, self._TMP_DIR)
+        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, provider.on_id)
         self.show_info_message("Done", Gtk.MessageType.INFO)
 
     def write_to_buffer(self, fd, condition):
@@ -157,14 +157,24 @@ class PiconsDialog:
     def on_picons_dir_open(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, options={"data_dir_path": self._picons_path})
 
+    @run_idle
     def on_selected_toggled(self, toggle, path):
         model = self._providers_tree_view.get_model()
         model.set_value(model.get_iter(path), 4, not toggle.get_active())
+        self.update_receive_button_state()
 
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())
         entry.set_name("GtkEntry" if suit else "digit-entry")
         self._load_providers_tool_button.set_sensitive(suit if suit else False)
+
+    @run_idle
+    def update_receive_button_state(self):
+        self._receive_tool_button.set_sensitive(len(self.get_selected_providers()) > 0)
+
+    def get_selected_providers(self):
+        """ returns selected providers """
+        return [r for r in self._providers_tree_view.get_model() if r[4]]
 
 
 if __name__ == "__main__":

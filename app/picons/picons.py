@@ -3,6 +3,7 @@ import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
+from app.commons import log
 from app.properties import Profile
 
 Provider = namedtuple("Provider", ["logo", "name", "url", "on_id", "selected"])
@@ -22,7 +23,7 @@ class PiconsParser(HTMLParser):
         self._is_th = False
         self._current_row = []
         self._current_cell = []
-        self.rows = []
+        self.picons = []
 
     def handle_starttag(self, tag, attrs):
         if tag == 'td':
@@ -50,34 +51,44 @@ class PiconsParser(HTMLParser):
         elif tag == 'tr':
             row = self._current_row
             ln = len(row)
-            if ln == 10 and row[0].startswith("../logo/"):
-                self.rows.append((row[0], row[-4]))
-            elif ln == 11:
-                self.rows.append((row[0] if row[0].startswith("../logo/") else row[1], row[-4]))
+            if 9 < ln < 13:
+                url = None
+                if row[0].startswith("../logo/"):
+                    url = row[0]
+                elif row[1].startswith("../logo/"):
+                    url = row[1]
+
+                ssid = row[-4]
+                if url and len(ssid) > 2:
+                    self.picons.append(Picon(url, ssid, row[-3]))
+
             self._current_row = []
 
     def error(self, message):
         pass
 
     @staticmethod
-    def parse(open_path, picons_path, tmp_path):
+    def parse(open_path, picons_path, tmp_path, on_id):
         with open(open_path, encoding="utf-8", errors="replace") as f:
             parser = PiconsParser()
             parser.reset()
             parser.feed(f.read())
-            rows = parser.rows
-
-            if rows:
+            picons = parser.picons
+            if picons:
                 os.makedirs(picons_path, exist_ok=True)
-                for r in rows:
-                    shutil.copyfile(tmp_path + "www.lyngsat.com/" + r[0].lstrip("."),
-                                    picons_path + PiconsParser.format(r[1], Profile.ENIGMA_2))
+                for p in picons:
+                    try:
+                        picon_file_name = picons_path + PiconsParser.format(p.ssid, on_id, p.v_pid, Profile.ENIGMA_2)
+                        shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), picon_file_name)
+                    except (TypeError, ValueError) as e:
+                        log("Picons format parse error: {} {} {}".format(p.ref, p.ssid, p.v_pid) + "\n" + str(e))
+                        print(e)
 
     @staticmethod
-    def format(ssid, profile: Profile):
+    def format(ssid, on_id, v_pid, profile: Profile):
         if profile is Profile.ENIGMA_2:
             tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
-            return "1_0_1_{:X}_{:X}_{}_1680000_0_0_0.png".format(int(ssid), tr_id, "70")
+            return "1_0_{}_{:X}_{:X}_{:X}_1680000_0_0_0.png".format(1 if v_pid else 2, int(ssid), tr_id, int(on_id))
         elif profile is Profile.NEUTRINO_MP:
             return "{:x}{}{:x}".format(int(ssid[:-2]), "0070", int(ssid))
         else:
@@ -134,6 +145,7 @@ class ProviderParser(HTMLParser):
             if len(row) == 12:
                 on_id, sep, tid = str(row[-2]).partition("-")
                 if tid and on_id not in self._ON_ID_BLACK_LIST and on_id not in self._ids:
+                    row[-2] = on_id
                     self.rows.append(row)
                     self._ids.add(on_id)
             self._current_row = []
