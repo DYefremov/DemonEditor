@@ -8,6 +8,7 @@ from gi.repository import GLib, GdkPixbuf
 from app.commons import run_idle, run_task
 from app.picons.picons import PiconsParser, parse_providers, Provider
 from . import Gtk, Gdk, UI_RESOURCES_PATH
+from .dialogs import show_dialog, DialogType
 from .main_helper import update_entry_data
 
 
@@ -18,6 +19,7 @@ class PiconsDialog:
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
         self._current_process = None
         self._picons_path = options.get("picons_dir_path", "")
+        self._terminate = False
 
         handlers = {"on_receive": self.on_receive,
                     "on_load_providers": self.on_load_providers,
@@ -95,9 +97,16 @@ class PiconsDialog:
 
     @run_task
     def start_download(self):
+        if self._current_process.poll() is None:
+            self.show_dialog("The task is already running!", DialogType.ERROR)
+            return
+
+        self._terminate = False
         self._expander.set_expanded(True)
 
         for prv in self.get_selected_providers():
+            if self._terminate:
+                break
             self.process_provider(Provider(*prv))
 
     def process_provider(self, provider):
@@ -134,7 +143,8 @@ class PiconsDialog:
     @run_task
     def on_cancel(self, item):
         if self._current_process:
-            self._current_process.kill()
+            self._terminate = True
+            self._current_process.terminate()
             time.sleep(1)
 
     @run_idle
@@ -175,6 +185,10 @@ class PiconsDialog:
     def get_selected_providers(self):
         """ returns selected providers """
         return [r for r in self._providers_tree_view.get_model() if r[4]]
+
+    @run_idle
+    def show_dialog(self, message, dialog_type):
+        show_dialog(dialog_type, self._dialog, message)
 
 
 if __name__ == "__main__":
