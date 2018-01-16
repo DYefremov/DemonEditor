@@ -68,7 +68,7 @@ class PiconsParser(HTMLParser):
         pass
 
     @staticmethod
-    def parse(open_path, picons_path, tmp_path, on_id):
+    def parse(open_path, picons_path, tmp_path, on_id, profile=Profile.ENIGMA_2):
         with open(open_path, encoding="utf-8", errors="replace") as f:
             parser = PiconsParser()
             parser.reset()
@@ -78,7 +78,7 @@ class PiconsParser(HTMLParser):
                 os.makedirs(picons_path, exist_ok=True)
                 for p in picons:
                     try:
-                        picon_file_name = picons_path + PiconsParser.format(p.ssid, on_id, p.v_pid, Profile.ENIGMA_2)
+                        picon_file_name = picons_path + PiconsParser.format(p.ssid, on_id, p.v_pid, profile)
                         shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), picon_file_name)
                     except (TypeError, ValueError) as e:
                         log("Picons format parse error: {} {} {}".format(p.ref, p.ssid, p.v_pid) + "\n" + str(e))
@@ -86,11 +86,11 @@ class PiconsParser(HTMLParser):
 
     @staticmethod
     def format(ssid, on_id, v_pid, profile: Profile):
+        tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
         if profile is Profile.ENIGMA_2:
-            tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
             return "1_0_{}_{:X}_{:X}_{:X}_1680000_0_0_0.png".format(1 if v_pid else 2, int(ssid), tr_id, int(on_id))
         elif profile is Profile.NEUTRINO_MP:
-            return "{:x}{}{:x}".format(int(ssid[:-2]), "0070", int(ssid))
+            return "{:x}{:04x}{:04x}.png".format(tr_id, int(on_id), int(ssid))
         else:
             return "{}.png".format(ssid)
 

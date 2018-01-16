@@ -52,6 +52,8 @@ class PiconsDialog:
         self._message_label = builder.get_object("info_bar_message_label")
         self._load_providers_tool_button = builder.get_object("load_providers_tool_button")
         self._receive_tool_button = builder.get_object("receive_tool_button")
+        self._enigma2_radio_button = builder.get_object("enigma2_radio_button")
+        self._neutrino_mp_radio_button = builder.get_object("neutrino_mp_radio_button")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -124,7 +126,7 @@ class PiconsDialog:
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
         self._current_process.wait()
         path = self._TMP_DIR + self._BASE_URL + url[url.rfind("/") + 1:]
-        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, provider.on_id)
+        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, provider.on_id, self.get_picons_format())
         self.show_info_message("Done", Gtk.MessageType.INFO)
 
     def write_to_buffer(self, fd, condition):
@@ -166,7 +168,7 @@ class PiconsDialog:
 
     @run_task
     def upload_picons(self):
-        if self._current_process.poll() is None:
+        if self._current_process is not None and self._current_process.poll() is None:
             self.show_dialog("The task is already running!", DialogType.ERROR)
             return
 
@@ -209,6 +211,14 @@ class PiconsDialog:
     @run_idle
     def show_dialog(self, message, dialog_type):
         show_dialog(dialog_type, self._dialog, message)
+
+    def get_picons_format(self):
+        picon_format = Profile.ENIGMA_2
+
+        if self._neutrino_mp_radio_button.get_active():
+            picon_format = Profile.NEUTRINO_MP
+
+        return picon_format
 
 
 if __name__ == "__main__":
