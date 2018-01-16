@@ -16,9 +16,10 @@ class DownloadDataType(Enum):
     ALL = 0
     BOUQUETS = 1
     SATELLITES = 2
+    PICONS = 3
 
 
-def download_data(*, properties, download_type=DownloadDataType.ALL):
+def download_data(*, properties, download_type=DownloadDataType.ALL, callback=None):
     with FTP(host=properties["host"]) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
         save_path = properties["data_dir_path"]
@@ -48,8 +49,12 @@ def download_data(*, properties, download_type=DownloadDataType.ALL):
                     with open(save_path + xml_file, 'wb') as f:
                         ftp.retrbinary("RETR " + xml_file, f.write)
 
+        if callback is not None:
+            callback()
 
-def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused=False, profile=Profile.ENIGMA_2):
+
+def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
+                callback=None):
     data_path = properties["data_dir_path"]
     host = properties["host"]
     # telnet
@@ -84,8 +89,28 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
                 if file_name == "satellites.xml":
                     continue
                 file_name, send_file(file_name, data_path, ftp)
+
+        if download_type is DownloadDataType.PICONS:
+            picons_path = properties.get("picons_dir_path")
+            ftp.cwd(properties.get("picons_path"))
+            files = []
+            ftp.dir(files.append)
+            picons_suf = (".jpg", ".png")
+
+            for file in files:
+                name = str(file).strip()
+                if name.endswith(picons_suf):
+                    name = name.split()[-1]
+                    ftp.delete(name)
+            for file_name in os.listdir(picons_path):
+                if file_name.endswith(picons_suf):
+                    send_file(file_name, picons_path, ftp)
+
         # resume enigma or restart neutrino
         tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
+
+        if callback is not None:
+            callback()
 
 
 def send_file(file_name, path, ftp):

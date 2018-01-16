@@ -6,14 +6,16 @@ import time
 from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task
+from app.ftp import upload_data, DownloadDataType
 from app.picons.picons import PiconsParser, parse_providers, Provider
+from app.properties import Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH
 from .dialogs import show_dialog, DialogType
 from .main_helper import update_entry_data
 
 
 class PiconsDialog:
-    def __init__(self, transient, options):
+    def __init__(self, transient, options, profile=Profile.ENIGMA_2):
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
@@ -56,8 +58,11 @@ class PiconsDialog:
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
+        self._properties = options
+        self._profile = profile
         self._ip_entry.set_text(options.get("host", ""))
         self._picons_entry.set_text(options.get("picons_path", ""))
+        self._picons_path = options.get("picons_dir_path", "")
         self._picons_dir_entry.set_text(self._picons_path)
 
     def show(self):
@@ -153,7 +158,22 @@ class PiconsDialog:
         self._dialog.destroy()
 
     def on_send(self, item):
-        pass
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
+        self.upload_picons()
+
+    @run_task
+    def upload_picons(self):
+        if self._current_process.poll() is None:
+            self.show_dialog("The task is already running!", DialogType.ERROR)
+            return
+
+        upload_data(properties=self._properties,
+                    download_type=DownloadDataType.PICONS,
+                    profile=self._profile,
+                    callback=lambda: self.show_info_message("Done!", Gtk.MessageType.INFO))
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

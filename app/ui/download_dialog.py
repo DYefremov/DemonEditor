@@ -75,12 +75,12 @@ class DownloadDialog:
                 upload_data(properties=self._properties,
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active(),
-                            profile=self._profile)
+                            profile=self._profile,
+                            callback=lambda: self.show_info_message("Done!", Gtk.MessageType.INFO))
         except Exception as e:
             message = str(getattr(e, "message", str(e)))
             self.show_info_message(message, Gtk.MessageType.ERROR)
         else:
-            self.show_info_message("Done!", Gtk.MessageType.INFO)
             if download and d_type is not DownloadDataType.SATELLITES:
                 self._open_data()
 

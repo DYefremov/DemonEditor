@@ -802,7 +802,7 @@ class MainAppWindow:
         locate_in_services(view, self.__services_view, self.__main_window)
 
     def on_picons_loader_show(self, item):
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile))
+        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), Profile(self.__profile))
         dialog.show()
 
 

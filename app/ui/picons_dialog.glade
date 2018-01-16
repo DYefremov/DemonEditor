@@ -19,7 +19,6 @@
   </object>
   <object class="GtkDialog" id="picons_dialog">
     <property name="width_request">480</property>
-    <property name="app_paintable">True</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Picons download tool</property>
     <property name="resizable">False</property>
@@ -91,7 +90,6 @@
                 <child>
                   <object class="GtkEntry" id="picons_entry">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                   </object>
                   <packing>
@@ -268,6 +266,7 @@
                   <object class="GtkTreeView" id="providers_tree_view">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="has_focus">True</property>
                     <property name="model">providers_list_store</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="treeview_selection"/>
@@ -426,8 +425,8 @@
                 <child>
                   <object class="GtkToolButton" id="send_tool_button">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Transfer to receiver</property>
                     <property name="label" translatable="yes">Send</property>
                     <property name="use_underline">True</property>
                     <property name="icon_name">go-top</property>
