@@ -58,8 +58,8 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
     data_path = properties["data_dir_path"]
     host = properties["host"]
     # telnet
-    tn = telnet(host=host, user=None if profile is Profile.ENIGMA_2 else "root", password=None,
-                timeout=5 if profile is Profile.ENIGMA_2 else 1)
+    tn = telnet(host=host, user=properties.get("telnet_user", "root"), password=properties.get("telnet_password", ""),
+                timeout=properties.get("telnet_timeout", 5))
     next(tn)
     # terminate enigma or enigma
     tn.send("init 4")
@@ -119,7 +119,7 @@ def send_file(file_name, path, ftp):
         return ftp.storbinary("STOR " + file_name, f)
 
 
-def telnet(host, port=23, user=None, password=None, timeout=5):
+def telnet(host, port=23, user="", password="", timeout=5):
     try:
         tn = Telnet(host=host, port=port, timeout=timeout)
     except socket.timeout:
@@ -127,11 +127,11 @@ def telnet(host, port=23, user=None, password=None, timeout=5):
     else:
         time.sleep(1)
         command = yield
-        if user is not None:
+        if user != "":
             tn.read_until(b"login: ")
             tn.write(user.encode("utf-8") + b"\n")
             time.sleep(timeout)
-        if password is not None:
+        if password != "":
             tn.read_until(b"Password: ")
             tn.write(password.encode("utf-8") + b"\n")
             time.sleep(timeout)

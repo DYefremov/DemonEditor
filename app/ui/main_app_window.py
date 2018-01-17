@@ -613,6 +613,7 @@ class MainAppWindow:
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
+    @run_idle
     def on_preferences(self, item):
         response = show_settings_dialog(self.__main_window, self.__options)
         if response != Gtk.ResponseType.CANCEL:

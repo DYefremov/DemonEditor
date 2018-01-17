@@ -106,7 +106,7 @@ class SettingsDialog:
         options["telnet_user"] = self._telnet_login_field.get_text()
         options["telnet_password"] = self._telnet_password_field.get_text()
         options["telnet_port"] = self._telnet_port_field.get_text()
-        options["telnet_timeout"] = self._telnet_timeout_spin_button.get_value()
+        options["telnet_timeout"] = int(self._telnet_timeout_spin_button.get_value())
         options["services_path"] = self._services_field.get_text()
         options["user_bouquet_path"] = self._user_bouquet_field.get_text()
         options["satellites_xml_path"] = self._satellites_xml_field.get_text()
