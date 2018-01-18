@@ -87,6 +87,8 @@ def write_bouquet(file, bouquet):
         root.appendChild(bq_elem)
 
         for srv in bq.services:
+            if srv is None:  # temporary !!!! (Unknown Provider on 75.0E)
+                continue
             on, sep, ssid = srv.fav_id.partition(":")
             srv_elem = doc.createElement("S")
             srv_elem.setAttribute("i", ssid)

@@ -2,7 +2,7 @@ import os
 from contextlib import suppress
 from functools import lru_cache
 
-from app.commons import run_idle
+from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, FLAG
@@ -495,14 +495,18 @@ class MainAppWindow:
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
 
     def append_services(self, data_path):
-        services = get_services(data_path, Profile(self.__profile))
-        if services:
-            for srv in services:
-                #  adding channels to dict with fav_id as keys
-                self.__services[srv.fav_id] = srv
-                self.__services_model.append(srv)
-        else:
+        try:
+            services = get_services(data_path, Profile(self.__profile))
+        except Exception as e:
+            print(e)
+            log("Append services error: " + str(e))
             show_dialog(DialogType.ERROR, self.__main_window, "Error opening data!")
+        else:
+            if services:
+                for srv in services:
+                    #  adding channels to dict with fav_id as keys
+                    self.__services[srv.fav_id] = srv
+                    self.__services_model.append(srv)
 
     def clear_current_data(self):
         """ Clearing current data from lists """
