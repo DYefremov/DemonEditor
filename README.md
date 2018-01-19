@@ -14,7 +14,9 @@ Ctrl + S, T, E in Satellites edit tool for create and edit satellite or transpon
 Ctrl + L - parental lock.                                                                                                                                                                                                                    
 Ctrl + H - hide/skip.                                                                                                              
 
-Ability to import IPTV into bouquet from m3u files!
+Extra:                                                                                                                             
+Ability to import IPTV into bouquet from m3u files(Enigma2 only)!                                                                                
+Tool for downloading picons from lyngsat.com.                                                                                      
 
 Tests only in image based on OpenPLi or last BPanther(neutrino) images with GM 990 Spark Reloaded receiver
 in my preferred linux distro (Last Linux Mint 18.* - MATE 64-bit)!
