@@ -40,7 +40,8 @@ def parse_bouquets(file, name, bq_type):
                 if srv_elem.hasAttributes():
                     ssid = srv_elem.attributes["i"].value
                     on = srv_elem.attributes["on"].value
-                    fav_id = "{}:{}".format(on, ssid)
+                    tr_id = srv_elem.attributes["t"].value
+                    fav_id = "{}:{}:{}".format(tr_id, on, ssid)
                     services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
             bouquets[2].append(Bouquet(name=bq_name,
                                        type=bq_type,
@@ -53,7 +54,7 @@ def parse_bouquets(file, name, bq_type):
             if bq.services:
                 name = bq.name
                 name = name[name.index("]") + 1:]
-                key = int(bq.services[0].data.split(":")[0], 16)
+                key = int(bq.services[0].data.split(":")[1], 16)
                 if key not in PROVIDER:
                     PROVIDER[key] = name
 
@@ -87,13 +88,11 @@ def write_bouquet(file, bouquet):
         root.appendChild(bq_elem)
 
         for srv in bq.services:
-            if srv is None:  # temporary !!!! (Unknown Provider on 75.0E)
-                continue
-            on, sep, ssid = srv.fav_id.partition(":")
+            tr_id, on, ssid = srv.fav_id.split(":")
             srv_elem = doc.createElement("S")
             srv_elem.setAttribute("i", ssid)
             srv_elem.setAttribute("n", srv.service)
-            srv_elem.setAttribute("t", srv.transponder.split(":")[0].lstrip("0"))
+            srv_elem.setAttribute("t", tr_id)
             srv_elem.setAttribute("on", on)
             srv_elem.setAttribute("s", srv.pos.replace(".", ""))
             srv_elem.setAttribute("frq", srv.freq[:-3])

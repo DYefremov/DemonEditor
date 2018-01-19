@@ -117,6 +117,9 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
 
     tr = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(tr_id, on, freq, inv, rate, fec, pol, mod, sys)
 
+    tr_id = tr_id.lstrip("0")
+    on = on.lstrip("0")
+
     for srv_elem in tr_elem.getElementsByTagName("S"):
         if srv_elem.hasAttributes():
             ssid = srv_elem.attributes["i"].value
@@ -128,7 +131,6 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
             f = srv_elem.attributes.get("f")
             f = f.value if f else f
             v, a, p, pmt, tx, vt = [None] * 6
-
             # For v3 is possible so: '<S i="0001" n="name" t="1" s="0" num="770" f="4"/>' (equals v4 api)
             if api == "3" and len(srv_elem.attributes) > 6:
                 v = srv_elem.attributes["v"].value
@@ -139,7 +141,7 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
                 vt = srv_elem.attributes["vt"].value
 
             data_id = "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}".format(api, srv_type, sys, num, f, v, a, p, pmt, tx, vt)
-            fav_id = "{}:{}".format(on.lstrip("0"), ssid.lstrip("0"))
+            fav_id = "{}:{}:{}".format(tr_id, on, ssid.lstrip("0"))
 
             srv = Service(flags_cas=sat,
                           transponder_type=None,
