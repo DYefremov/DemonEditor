@@ -88,7 +88,7 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
             for file_name in os.listdir(data_path):
                 if file_name == "satellites.xml":
                     continue
-                if file_name in __DATA_FILES_LIST:
+                if file_name.endswith(__DATA_FILES_LIST):
                     send_file(file_name, data_path, ftp)
 
         if download_type is DownloadDataType.PICONS:
