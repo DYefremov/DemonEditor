@@ -54,6 +54,9 @@ class PiconsDialog:
         self._receive_tool_button = builder.get_object("receive_tool_button")
         self._enigma2_radio_button = builder.get_object("enigma2_radio_button")
         self._neutrino_mp_radio_button = builder.get_object("neutrino_mp_radio_button")
+        self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
+        self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
+        self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -127,6 +130,7 @@ class PiconsDialog:
         self._current_process.wait()
         path = self._TMP_DIR + self._BASE_URL + url[url.rfind("/") + 1:]
         PiconsParser.parse(path, self._picons_path, self._TMP_DIR, provider.on_id, self.get_picons_format())
+        self.resize(self._picons_path)
         self.show_info_message("Done", Gtk.MessageType.INFO)
 
     def write_to_buffer(self, fd, condition):
@@ -146,6 +150,16 @@ class PiconsDialog:
     def scroll_to_end(self, buf):
         insert = buf.get_insert()
         self._text_view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
+
+    def resize(self, path):
+        if self._resize_no_radio_button.get_active():
+            return
+
+        self.show_info_message("Resizing...", Gtk.MessageType.INFO)
+        command = "mogrify -resize {}! *.png".format(
+            "320x240" if self._resize_220_132_radio_button.get_active() else "100x60").split()
+        self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
+        self._current_process.wait()
 
     @run_task
     def on_cancel(self, item):
