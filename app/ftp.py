@@ -2,7 +2,7 @@ import os
 import socket
 import time
 from enum import Enum
-from ftplib import FTP
+from ftplib import FTP, error_perm
 from telnetlib import Telnet
 
 from app.commons import log
@@ -92,8 +92,15 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
                     send_file(file_name, data_path, ftp)
 
         if download_type is DownloadDataType.PICONS:
-            picons_path = properties.get("picons_dir_path")
-            ftp.cwd(properties.get("picons_path"))
+            picons_dir_path = properties.get("picons_dir_path")
+            picons_path = properties.get("picons_path")
+            try:
+                ftp.cwd(picons_path)
+            except error_perm as e:
+                if str(e).startswith("550"):
+                    ftp.mkd(picons_path)  # if not exist
+                    ftp.cwd(picons_path)
+
             files = []
             ftp.dir(files.append)
             picons_suf = (".jpg", ".png")
@@ -103,9 +110,9 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
                 if name.endswith(picons_suf):
                     name = name.split()[-1]
                     ftp.delete(name)
-            for file_name in os.listdir(picons_path):
+            for file_name in os.listdir(picons_dir_path):
                 if file_name.endswith(picons_suf):
-                    send_file(file_name, picons_path, ftp)
+                    send_file(file_name, picons_dir_path, ftp)
 
         # resume enigma or restart neutrino
         tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
