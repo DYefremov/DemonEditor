@@ -130,6 +130,9 @@ class MainAppWindow:
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
         self.init_drag_and_drop()  # drag and drop
+        # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
+        self.__services_view.connect("key-press-event", self.force_ctrl)
+        self.__fav_view.connect("key-press-event", self.force_ctrl)
         self.__main_window.show()
 
     def init_drag_and_drop(self):
@@ -145,6 +148,10 @@ class MainAppWindow:
         self.__fav_view.drag_source_add_text_targets()
         self.__services_view.drag_source_set_target_list(None)
         self.__services_view.drag_source_add_text_targets()
+
+    def force_ctrl(self, view, event):
+        """ Function for force ctrl press event for view """
+        event.state |= Gdk.ModifierType.CONTROL_MASK
 
     def on_quit(self, *args):
         """  Called before app quit """
