@@ -242,7 +242,7 @@ class MainAppWindow:
                 model, paths = selection.get_selected_rows()
                 view_name = Gtk.Buildable.get_name(view)
                 itrs = [model.get_iter(path) for path in paths]
-                rows = [model.get(in_itr, *[x for x in range(model.get_n_columns())]) for in_itr in itrs]
+                rows = [model[in_itr][:] for in_itr in itrs]
                 bq_selected = self.is_bouquet_selected()
                 fav_bouquet = None
 
@@ -541,7 +541,7 @@ class MainAppWindow:
 
         path = self.__options.get(self.__profile).get("data_dir_path")
         bouquets = []
-        services_model = self.__services_view.get_model()
+        services_model = self.__services_model
 
         def parse_bouquets(model, b_path, itr):
             if model.iter_has_child(itr):
@@ -559,7 +559,7 @@ class MainAppWindow:
 
         profile = Profile(self.__profile)
         # Getting bouquets
-        self.__bouquets_view.get_model().foreach(parse_bouquets)
+        self.__bouquets_model.foreach(parse_bouquets)
         write_bouquets(path, bouquets, profile)
         # Getting services
         services = [Service(*row[:]) for row in services_model]
@@ -583,7 +583,8 @@ class MainAppWindow:
         if not cas:
             return
         cas_values = list(filter(lambda val: val.startswith("C:"), cas.split(",")))
-        self.__cas_label.set_text(",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values)))))
+        value = ",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values))))
+        self.__cas_label.set_text(value if value else "Free")
 
     def on_fav_selection(self, model, path, column):
         self.delete_selection(self.__services_view)
