@@ -270,6 +270,12 @@
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
   </object>
+  <object class="GtkTreeModelFilter" id="services_model_filter">
+    <property name="child_model">services_list_store</property>
+  </object>
+  <object class="GtkTreeModelSort" id="services_model_tree_model_sort">
+    <property name="model">services_model_filter</property>
+  </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="width_request">640</property>
     <property name="can_focus">False</property>
@@ -893,7 +899,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">2</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -925,12 +931,13 @@
                   <object class="GtkScrolledWindow" id="services_scrolled_window">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="margin_bottom">2</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkTreeView" id="services_tree_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">services_list_store</property>
+                        <property name="model">services_model_tree_model_sort</property>
                         <property name="search_column">3</property>
                         <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
@@ -973,6 +980,7 @@
                           <object class="GtkTreeViewColumn" id="service_column">
                             <property name="resizable">True</property>
                             <property name="spacing">2</property>
+                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Service</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
@@ -1201,7 +1209,7 @@
                 </child>
                 <child>
                   <object class="GtkBox" id="services_bar_box">
-                    <property name="height_request">25</property>
+                    <property name="height_request">30</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resize_mode">queue</property>
@@ -1323,6 +1331,36 @@
                         <property name="position">8</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkSeparator" id="separator2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">5</property>
+                        <property name="position">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="filter_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="margin_right">15</property>
+                        <property name="primary_icon_name">edit-select-all-symbolic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="primary_icon_tooltip_text" translatable="yes">Filter</property>
+                        <property name="placeholder_text" translatable="yes">Data filter</property>
+                        <signal name="changed" handler="on_filter_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">10</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1338,6 +1376,7 @@
             </child>
             <child>
               <object class="GtkPaned" id="fav_bouquets_paned">
+                <property name="width_request">350</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="wide_handle">True</property>
@@ -1362,6 +1401,7 @@
                       <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="margin_bottom">2</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkTreeView" id="fav_tree_view">
@@ -1482,7 +1522,7 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="fav_bar_box">
-                        <property name="height_request">25</property>
+                        <property name="height_request">30</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
@@ -1549,6 +1589,7 @@
                       <object class="GtkScrolledWindow" id="scrolledwindow3">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="margin_bottom">2</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkTreeView" id="bouquets_tree_view">
@@ -1619,7 +1660,7 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="bouquet_bar_box">
-                        <property name="height_request">25</property>
+                        <property name="height_request">30</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
@@ -1676,7 +1717,7 @@
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="padding">1</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -1689,7 +1730,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">2</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -1742,7 +1783,7 @@
               <object class="GtkLabel" id="ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Ver. 0.2.1 Pre-alpha</property>
+                <property name="label" translatable="yes">Ver. 0.2.2 Pre-alpha</property>
                 <property name="xalign">0.94999998807907104</property>
               </object>
               <packing>
@@ -1755,7 +1796,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">7</property>
           </packing>
         </child>
       </object>
