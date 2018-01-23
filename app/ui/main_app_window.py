@@ -24,7 +24,7 @@ class MainAppWindow:
     _BOUQUETS_VIEW_NAME = "bouquets_tree_view"
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item")
+                         "services_edit_popup_item", "services_copy_popup_item", "filter_entry")
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
@@ -51,7 +51,7 @@ class MainAppWindow:
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                          "services_copy_popup_item")
+                          "services_copy_popup_item", "filter_entry")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,

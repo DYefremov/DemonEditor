@@ -554,6 +554,38 @@
               </packing>
             </child>
             <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem8">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="filter_tool_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkEntry" id="filter_entry">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">Services filter</property>
+                    <property name="primary_icon_name">edit-select-all-symbolic</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="primary_icon_tooltip_text" translatable="yes">Services filter</property>
+                    <signal name="changed" handler="on_filter_changed" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkSeparatorToolItem" id="toolbutton4">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -907,8 +939,8 @@
             <property name="height_request">250</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
             <property name="wide_handle">True</property>
             <child>
               <object class="GtkBox" id="box4">
@@ -1209,7 +1241,7 @@
                 </child>
                 <child>
                   <object class="GtkBox" id="services_bar_box">
-                    <property name="height_request">30</property>
+                    <property name="height_request">20</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="resize_mode">queue</property>
@@ -1344,23 +1376,6 @@
                         <property name="position">9</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkEntry" id="filter_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="margin_right">15</property>
-                        <property name="primary_icon_name">edit-select-all-symbolic</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="primary_icon_tooltip_text" translatable="yes">Filter</property>
-                        <property name="placeholder_text" translatable="yes">Data filter</property>
-                        <signal name="changed" handler="on_filter_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">10</property>
-                      </packing>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1376,7 +1391,6 @@
             </child>
             <child>
               <object class="GtkPaned" id="fav_bouquets_paned">
-                <property name="width_request">350</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="wide_handle">True</property>
@@ -1522,7 +1536,7 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="fav_bar_box">
-                        <property name="height_request">30</property>
+                        <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
@@ -1660,7 +1674,7 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="bouquet_bar_box">
-                        <property name="height_request">30</property>
+                        <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
@@ -1739,8 +1753,6 @@
             <property name="can_focus">False</property>
             <property name="margin_start">10</property>
             <property name="margin_end">10</property>
-            <property name="margin_top">6</property>
-            <property name="margin_bottom">6</property>
             <property name="spacing">2</property>
             <property name="homogeneous">True</property>
             <child>
