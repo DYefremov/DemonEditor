@@ -19,12 +19,12 @@ from .settings_dialog import show_settings_dialog
 
 
 class MainAppWindow:
-    _SERVICE_VIEW_NAME = "services_tree_view"
-    _FAV_VIEW_NAME = "fav_tree_view"
-    _BOUQUETS_VIEW_NAME = "bouquets_tree_view"
+    _SERVICE_LIST_NAME = "services_list_store"
+    _FAV_LIST_NAME = "fav_list_store"
+    _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item", "filter_entry")
+                         "services_edit_popup_item", "services_copy_popup_item")
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
@@ -51,7 +51,7 @@ class MainAppWindow:
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                          "services_copy_popup_item", "filter_entry")
+                          "services_copy_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -130,10 +130,6 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
-        # Filter
-        self.__services_model_filter = builder.get_object("services_model_filter")
-        self.__services_model_filter.set_visible_func(self.services_filter_function)
-        self.__filter_entry = builder.get_object("filter_entry")
         self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self.__services_view.connect("key-press-event", self.force_ctrl)
@@ -215,20 +211,20 @@ class MainAppWindow:
             model.insert(dest_index, row)
             fav_bouquet.insert(dest_index, row[-1])
 
-        if model.get_name() == self._FAV_VIEW_NAME:
+        if model.get_name() == self._FAV_LIST_NAME:
             self.update_fav_num_column(model)
 
         self.__rows_buffer.clear()
         self.on_view_focus(view, None)
 
     def on_edit(self, view):
-        name = Gtk.Buildable.get_name(view)
-        if name == self._BOUQUETS_VIEW_NAME:
+        name = view.get_model().get_name()
+        if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
             # edit(view, self.__main_window, ViewTarget.BOUQUET)
-        elif name == self._FAV_VIEW_NAME:
+        elif name == self._FAV_LIST_NAME:
             edit(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view, channels=self.__services)
-        elif name == self._SERVICE_VIEW_NAME:
+        elif name == self._SERVICE_LIST_NAME:
             edit(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__services)
 
     def on_delete(self, item):
@@ -240,7 +236,7 @@ class MainAppWindow:
             if view.is_focus():
                 selection = view.get_selection()
                 model, paths = selection.get_selected_rows()
-                view_name = Gtk.Buildable.get_name(view)
+                model_name = model.get_name()
                 itrs = [model.get_iter(path) for path in paths]
                 rows = [model[in_itr][:] for in_itr in itrs]
                 bq_selected = self.is_bouquet_selected()
@@ -250,22 +246,18 @@ class MainAppWindow:
                     fav_bouquet = self.__bouquets.get(bq_selected, None)
 
                 for itr in itrs:
-                    if fav_bouquet and view_name == self._FAV_VIEW_NAME:
+                    if fav_bouquet and model_name == self._FAV_LIST_NAME:
                         del fav_bouquet[int(model.get_path(itr)[0])]
-                        self.__bouquets_model.remove(itr)
-                    elif view_name == self._BOUQUETS_VIEW_NAME:
+                    if model_name == self._BOUQUETS_LIST_NAME:
                         if len(model.get_path(itr)) < 2:
                             show_dialog(DialogType.ERROR, self.__main_window, "This item is not allowed to be removed!")
                             return
                         else:
                             self.delete_bouquet(bq_selected)
-                        self.__fav_model.remove(itr)
-                    elif view_name == self._SERVICE_VIEW_NAME:
-                        self.__services_model.remove(itr)
-
-                if view_name == self._FAV_VIEW_NAME:
+                    model.remove(itr)
+                if model_name == self._FAV_LIST_NAME:
                     self.update_fav_num_column(model)
-                elif view_name == self._SERVICE_VIEW_NAME:
+                elif model_name == self._SERVICE_LIST_NAME:
                     self.delete_services(bq_selected, rows)
 
                 self.on_view_focus(view, None)
@@ -403,11 +395,10 @@ class MainAppWindow:
         try:
             fav_bouquet = self.__bouquets[bq_selected]
 
-            if source == self._SERVICE_VIEW_NAME:
+            if source == self._SERVICE_LIST_NAME:
                 ext_model = self.__services_view.get_model()
                 ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
-                ext_rows = [ext_model.get(ext_itr, *[x for x in range(ext_model.get_n_columns())]) for
-                            ext_itr in ext_itrs]
+                ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
                 dest_index -= 1
                 for ext_row in ext_rows:
                     dest_index += 1
@@ -416,9 +407,9 @@ class MainAppWindow:
                     model.insert(dest_index, (0, channel.coded, channel.service, channel.locked, channel.hide,
                                               channel.service_type, channel.pos, channel.fav_id))
                     fav_bouquet.insert(dest_index, channel.fav_id)
-            elif source == self._FAV_VIEW_NAME:
+            elif source == self._FAV_LIST_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
-                in_rows = [model.get(in_itr, *[x for x in range(model.get_n_columns())]) for in_itr in in_itrs]
+                in_rows = [model[in_itr][:]for in_itr in in_itrs]
                 for row in in_rows:
                     model.insert(dest_index, row)
                     fav_bouquet.insert(dest_index, row[4])
@@ -541,7 +532,7 @@ class MainAppWindow:
 
         path = self.__options.get(self.__profile).get("data_dir_path")
         bouquets = []
-        services_model = self.__services_model
+        services_model = self.__services_view.get_model()
 
         def parse_bouquets(model, b_path, itr):
             if model.iter_has_child(itr):
@@ -559,7 +550,7 @@ class MainAppWindow:
 
         profile = Profile(self.__profile)
         # Getting bouquets
-        self.__bouquets_model.foreach(parse_bouquets)
+        self.__bouquets_view.get_model().foreach(parse_bouquets)
         write_bouquets(path, bouquets, profile)
         # Getting services
         services = [Service(*row[:]) for row in services_model]
@@ -583,8 +574,7 @@ class MainAppWindow:
         if not cas:
             return
         cas_values = list(filter(lambda val: val.startswith("C:"), cas.split(",")))
-        value = ",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values))))
-        self.__cas_label.set_text(value if value else "Free")
+        self.__cas_label.set_text(",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values)))))
 
     def on_fav_selection(self, model, path, column):
         self.delete_selection(self.__services_view)
@@ -651,7 +641,7 @@ class MainAppWindow:
         key = event.keyval
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        view_name = Gtk.Buildable.get_name(view)
+        model_name = view.get_model().get_name()
 
         if key == Gdk.KEY_Delete:
             self.on_delete(view)
@@ -659,19 +649,19 @@ class MainAppWindow:
             self.move_items(key)
         elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
             self.move_items(key)
-        elif view_name == self._FAV_VIEW_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
+        elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
             self.update_fav_num_column(view.get_model())
             self.update_bouquet_list()
         elif key == Gdk.KEY_Insert:
             # Move items from app to fav list
-            if view_name == self._SERVICE_VIEW_NAME:
+            if model_name == self._SERVICE_LIST_NAME:
                 self.on_to_fav_move(view)
-            elif view_name == self._BOUQUETS_VIEW_NAME:
+            elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_new_bouquet(view)
-        elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C) and view_name == self._SERVICE_VIEW_NAME:
+        elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C) and model_name == self._SERVICE_LIST_NAME:
             self.on_copy(view)
         elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
-            if view_name == self._FAV_VIEW_NAME:
+            if model_name == self._FAV_LIST_NAME:
                 self.on_cut(view)
         elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
             self.on_paste(view)
@@ -683,7 +673,7 @@ class MainAppWindow:
             self.on_hide(None)
         elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
             self.on_edit(view)
-        elif key == Gdk.KEY_space and view_name == self._FAV_VIEW_NAME:
+        elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
             pass
 
     def on_download(self, item):
@@ -696,10 +686,10 @@ class MainAppWindow:
     def on_view_focus(self, view, focus_event):
         profile = Profile(self.__profile)
         model = view.get_model()
-        view_name = Gtk.Buildable.get_name(view)
+        model_name = model.get_name()
         not_empty = len(model) > 0  # if  > 0 model has items
 
-        if view_name == self._BOUQUETS_VIEW_NAME:
+        if model_name == self._BOUQUETS_LIST_NAME:
             for elem in self.__tool_elements:
                 self.__tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
@@ -708,7 +698,7 @@ class MainAppWindow:
                 for elem in self._LOCK_HIDE_ELEMENTS:
                     self.__tool_elements[elem].set_sensitive(not_empty)
         else:
-            is_service = view_name == self._SERVICE_VIEW_NAME
+            is_service = model_name == self._SERVICE_LIST_NAME
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
                     self.__tool_elements[elem].set_sensitive(not is_service and self.__rows_buffer)
@@ -752,11 +742,11 @@ class MainAppWindow:
     def on_model_changed(self, model, path, itr=None):
         model_name = model.get_name()
 
-        if model_name == self._FAV_VIEW_NAME:
+        if model_name == self._FAV_LIST_NAME:
             self.__fav_count_label.set_text(str(len(model)))
-        elif model_name == self._SERVICE_VIEW_NAME:
+        elif model_name == self._SERVICE_LIST_NAME:
             self.update_services_counts(len(model))
-        elif model_name == self._BOUQUETS_VIEW_NAME:
+        elif model_name == self._BOUQUETS_LIST_NAME:
             self.__bouquets_count_label.set_text(str(len(self.__bouquets.keys())))
 
     @lru_cache(maxsize=1)
@@ -827,16 +817,8 @@ class MainAppWindow:
         dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), Profile(self.__profile))
         dialog.show()
 
-    @run_idle
     def on_filter_changed(self, entry):
-        self.__services_model_filter.clear_cache()
-        self.__services_model_filter.refilter()
-
-    def services_filter_function(self,  model, iter, data):
-        if self.__services_model_filter is None or self.__services_model_filter == "None":
-            return True
-        else:
-            return self.__filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14))
+        pass
 
 
 def start_app():

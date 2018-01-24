@@ -270,12 +270,6 @@
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
   </object>
-  <object class="GtkTreeModelFilter" id="services_model_filter">
-    <property name="child_model">services_list_store</property>
-  </object>
-  <object class="GtkTreeModelSort" id="services_model_tree_model_sort">
-    <property name="model">services_model_filter</property>
-  </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="width_request">640</property>
     <property name="can_focus">False</property>
@@ -969,7 +963,7 @@
                       <object class="GtkTreeView" id="services_tree_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">services_model_tree_model_sort</property>
+                        <property name="model">services_list_store</property>
                         <property name="search_column">3</property>
                         <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
@@ -1012,7 +1006,6 @@
                           <object class="GtkTreeViewColumn" id="service_column">
                             <property name="resizable">True</property>
                             <property name="spacing">2</property>
-                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Service</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
@@ -1046,7 +1039,6 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="package_column">
                             <property name="resizable">True</property>
-                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Package</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
@@ -1817,6 +1809,12 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkTreeModelFilter" id="services_model_filter">
+    <property name="child_model">services_list_store</property>
+  </object>
+  <object class="GtkTreeModelSort" id="services_model_tree_model_sort">
+    <property name="model">services_model_filter</property>
   </object>
   <object class="GtkMenu" id="services_popup_menu">
     <property name="visible">True</property>
