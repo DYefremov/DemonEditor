@@ -678,6 +678,8 @@ class MainAppWindow:
             self.on_edit(view)
         elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
             pass
+        elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
+            view.do_unselect_all(view)
 
     def on_download(self, item):
         show_download_dialog(transient=self.__main_window,
