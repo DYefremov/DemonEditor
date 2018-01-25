@@ -94,6 +94,7 @@ def move_items(key, view):
 
 def edit(view, parent_window, target, fav_view=None, service_view=None, channels=None):
     model, paths = view.get_selection().get_selected_rows()
+    model = get_base_model(model)
 
     if not paths:
         return
@@ -157,16 +158,18 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
     if not paths:
         return
 
+    model = get_base_model(model)
+
     if flag is FLAG.HIDE:
         if target is ViewTarget.SERVICES:
             set_hide(channels, model, paths)
         else:
             fav_ids = [model.get_value(model.get_iter(path), 7) for path in paths]
-            srv_model = services_view.get_model()
+            srv_model = get_base_model(services_view.get_model())
             srv_paths = [row.path for row in srv_model if row[16] in fav_ids]
             set_hide(channels, srv_model, srv_paths)
     elif flag is FLAG.LOCK:
-        set_lock(blacklist, channels, model, paths, target, services_model=services_view.get_model())
+        set_lock(blacklist, channels, model, paths, target, services_model=get_base_model(services_view.get_model()))
 
     return True
 
@@ -281,6 +284,13 @@ def update_entry_data(entry, dialog, options):
         entry.set_text(response)
         return response
     return False
+
+
+def get_base_model(model):
+    """ Returns base tree model if has wrappers ("TreeModelSort" and "TreeModelFilter") """
+    if type(model) is Gtk.TreeModelSort:
+        return model.get_model().get_model()
+    return model
 
 
 if __name__ == "__main__":

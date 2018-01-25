@@ -8,12 +8,12 @@ from app.eparser import get_services, get_bouquets, write_bouquets, write_servic
 from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
 from app.properties import get_config, write_config, Profile
-from .picons_dialog import PiconsDialog
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
-    scroll_to
+    scroll_to, get_base_model
+from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 
@@ -222,7 +222,8 @@ class MainAppWindow:
         self.on_view_focus(view, None)
 
     def on_edit(self, view):
-        name = view.get_model().get_name()
+        model = get_base_model(view.get_model())
+        name = model.get_name()
         if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
             # edit(view, self.__main_window, ViewTarget.BOUQUET)
@@ -240,8 +241,7 @@ class MainAppWindow:
             if view.is_focus():
                 selection = view.get_selection()
                 model, paths = selection.get_selected_rows()
-                if type(model) is Gtk.TreeModelSort:  # needs think about it !
-                    model = model.get_model().get_model()
+                model = get_base_model(model)
                 model_name = model.get_name()
                 itrs = [model.get_iter(path) for path in paths]
                 rows = [model[in_itr][:] for in_itr in itrs]
@@ -383,10 +383,7 @@ class MainAppWindow:
             show_dialog(DialogType.ERROR, self.__main_window, "Error. No bouquet is selected!")
             return
 
-        model = view.get_model()
-        if type(model) is Gtk.TreeModelSort:  # needs think about it !
-            model = model.get_model().get_model()
-
+        model = get_base_model(view.get_model())
         dest_index = 0
 
         if drop_info:
@@ -646,9 +643,7 @@ class MainAppWindow:
         key = event.keyval
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        model = view.get_model()
-        if type(model) is Gtk.TreeModelSort:
-            model = model.get_model().get_model()
+        model = get_base_model(view.get_model())
         model_name = model.get_name()
 
         if key == Gdk.KEY_Delete:
@@ -693,9 +688,7 @@ class MainAppWindow:
     @run_idle
     def on_view_focus(self, view, focus_event):
         profile = Profile(self.__profile)
-        model = view.get_model()
-        if type(model) is Gtk.TreeModelSort:  # needs think about it !
-            model = model.get_model().get_model()
+        model = get_base_model(view.get_model())
         model_name = model.get_name()
         not_empty = len(model) > 0  # if  > 0 model has items
 
