@@ -24,7 +24,7 @@ class MainAppWindow:
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item")
+                         "services_edit_popup_item", "services_copy_popup_item", "filter_entry")
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
@@ -51,7 +51,7 @@ class MainAppWindow:
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                          "services_copy_popup_item")
+                          "services_copy_popup_item", "filter_entry")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -95,12 +95,12 @@ class MainAppWindow:
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
+        os.makedirs(os.path.dirname(self.__options.get(self.__profile).get("data_dir_path")), exist_ok=True)
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self.__rows_buffer = []
         self.__services = {}
         self.__bouquets = {}
-        self.__bouquets_to_del = []
         self.__blacklist = set()
 
         builder = Gtk.Builder()
@@ -130,6 +130,10 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
+        # Filter
+        self.__services_model_filter = builder.get_object("services_model_filter")
+        self.__services_model_filter.set_visible_func(self.services_filter_function)
+        self.__filter_entry = builder.get_object("filter_entry")
         self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self.__services_view.connect("key-press-event", self.force_ctrl)
@@ -236,6 +240,8 @@ class MainAppWindow:
             if view.is_focus():
                 selection = view.get_selection()
                 model, paths = selection.get_selected_rows()
+                if type(model) is Gtk.TreeModelSort:  # needs think about it !
+                    model = model.get_model().get_model()
                 model_name = model.get_name()
                 itrs = [model.get_iter(path) for path in paths]
                 rows = [model[in_itr][:] for in_itr in itrs]
@@ -285,9 +291,6 @@ class MainAppWindow:
         """ Deleting bouquet """
         self.__bouquets.pop(bouquet)
         self.__fav_model.clear()
-        profile = Profile(self.__profile)
-        if profile is Profile.ENIGMA_2:
-            self.__bouquets_to_del.append(self.get_bouquet_file_name(bouquet))
 
     def get_bouquet_file_name(self, bouquet):
         bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
@@ -300,7 +303,8 @@ class MainAppWindow:
 
         if paths:
             itr = model.get_iter(paths[0])
-            bq_type = model.get_value(itr, 1)
+            bq_type = model.get_value(itr, 3)
+
             bq_name = "bouquet"
             count = 0
             key = "{}:{}".format(bq_name, bq_type)
@@ -348,14 +352,11 @@ class MainAppWindow:
             itr = model.get_iter(paths[0])
             bq_name, bq_type = model.get(itr, 0, 3)
             response = show_dialog(DialogType.INPUT, self.__main_window, bq_name)
-
             if response == Gtk.ResponseType.CANCEL:
                 return
 
             model.set_value(itr, 0, response)
             self.__bouquets["{}:{}".format(response, bq_type)] = self.__bouquets.pop("{}:{}".format(bq_name, bq_type))
-            if Profile(self.__profile) is Profile.ENIGMA_2:
-                self.__bouquets_to_del.append(self.get_bouquet_file_name(bq_selected))
 
     def on_to_fav_move(self, view):
         """ Move items from app to fav list """
@@ -367,6 +368,8 @@ class MainAppWindow:
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
         model, paths = view.get_selection().get_selected_rows()
+        if model.get_model():  # needs think about it !
+            model = model.get_model().get_model()
 
         if len(paths) > 0:
             itrs = [model.get_iter(path) for path in paths]
@@ -381,6 +384,9 @@ class MainAppWindow:
             return
 
         model = view.get_model()
+        if type(model) is Gtk.TreeModelSort:  # needs think about it !
+            model = model.get_model().get_model()
+
         dest_index = 0
 
         if drop_info:
@@ -409,7 +415,7 @@ class MainAppWindow:
                     fav_bouquet.insert(dest_index, channel.fav_id)
             elif source == self._FAV_LIST_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
-                in_rows = [model[in_itr][:]for in_itr in in_itrs]
+                in_rows = [model[in_itr][:] for in_itr in in_itrs]
                 for row in in_rows:
                     model.insert(dest_index, row)
                     fav_bouquet.insert(dest_index, row[4])
@@ -524,29 +530,32 @@ class MainAppWindow:
         self.__services.clear()
         self.__rows_buffer.clear()
         self.__bouquets.clear()
-        self.__bouquets_to_del.clear()
 
     def on_data_save(self, *args):
         if show_dialog(DialogType.QUESTION, self.__main_window) == Gtk.ResponseType.CANCEL:
             return
 
         path = self.__options.get(self.__profile).get("data_dir_path")
+        # deleting files in data dir(skipping dirs) :)
+        list(map(os.unlink, (os.path.join(path, f) for f in filter(
+            lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)))))
+
         bouquets = []
         services_model = self.__services_view.get_model()
 
         def parse_bouquets(model, b_path, itr):
+            bqs = None
             if model.iter_has_child(itr):
-                num_of_children = model.iter_n_children(itr)
                 bqs = []
-
+                num_of_children = model.iter_n_children(itr)
                 for num in range(num_of_children):
                     bq_itr = model.iter_nth_child(itr, num)
                     bq_name, locked, hidden, bq_type = model.get(bq_itr, 0, 1, 2, 3)
                     favs = self.__bouquets["{}:{}".format(bq_name, bq_type)]
                     bq = Bouquet(bq_name, bq_type, [self.__services.get(f_id, None) for f_id in favs], locked, hidden)
                     bqs.append(bq)
-                bqs = Bouquets(*model.get(itr, 0, 3), bqs)
-                bouquets.append(bqs)
+            if len(b_path) == 1:
+                bouquets.append(Bouquets(*model.get(itr, 0, 3), bqs if bqs else []))
 
         profile = Profile(self.__profile)
         # Getting bouquets
@@ -557,10 +566,6 @@ class MainAppWindow:
         write_services(path, services, profile)
         # removing bouquet files
         if profile is profile.ENIGMA_2:
-            for bqf in self.__bouquets_to_del:
-                with suppress(FileNotFoundError):
-                    os.remove(bqf)
-            self.__bouquets_to_del.clear()
             # blacklist
             write_blacklist(path, self.__blacklist)
 
@@ -641,7 +646,10 @@ class MainAppWindow:
         key = event.keyval
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        model_name = view.get_model().get_name()
+        model = view.get_model()
+        if type(model) is Gtk.TreeModelSort:
+            model = model.get_model().get_model()
+        model_name = model.get_name()
 
         if key == Gdk.KEY_Delete:
             self.on_delete(view)
@@ -650,7 +658,7 @@ class MainAppWindow:
         elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
             self.move_items(key)
         elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
-            self.update_fav_num_column(view.get_model())
+            self.update_fav_num_column(model)
             self.update_bouquet_list()
         elif key == Gdk.KEY_Insert:
             # Move items from app to fav list
@@ -686,6 +694,8 @@ class MainAppWindow:
     def on_view_focus(self, view, focus_event):
         profile = Profile(self.__profile)
         model = view.get_model()
+        if type(model) is Gtk.TreeModelSort:  # needs think about it !
+            model = model.get_model().get_model()
         model_name = model.get_name()
         not_empty = len(model) > 0  # if  > 0 model has items
 
@@ -817,8 +827,16 @@ class MainAppWindow:
         dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), Profile(self.__profile))
         dialog.show()
 
+    @run_idle
     def on_filter_changed(self, entry):
-        pass
+        self.__services_model_filter.clear_cache()
+        self.__services_model_filter.refilter()
+
+    def services_filter_function(self, model, iter, data):
+        if self.__services_model_filter is None or self.__services_model_filter == "None":
+            return True
+        else:
+            return self.__filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14))
 
 
 def start_app():

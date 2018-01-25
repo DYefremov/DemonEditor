@@ -1,7 +1,6 @@
 """ Module for parsing bouquets """
 from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet
 
-_BOUQUETS_PATH = "../data/"
 _TV_ROOT_FILE_NAME = "bouquets.tv"
 _RADIO_ROOT_FILE_NAME = "bouquets.radio"
 

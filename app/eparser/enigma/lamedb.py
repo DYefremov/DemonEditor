@@ -9,7 +9,6 @@ from .blacklist import get_blacklist
 from ..ecommons import Service, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
 
 _HEADER = "eDVB services /4/"
-_FILE_PATH = "../data/lamedb"
 _SEP = ":"  # separator
 _FILE_NAME = "lamedb"
 
