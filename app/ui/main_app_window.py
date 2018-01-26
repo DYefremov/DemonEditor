@@ -241,8 +241,7 @@ class MainAppWindow:
             if view.is_focus():
                 selection = view.get_selection()
                 model, paths = selection.get_selected_rows()
-                model = get_base_model(model)
-                model_name = model.get_name()
+                model_name = get_base_model(model).get_name()
                 itrs = [model.get_iter(path) for path in paths]
                 rows = [model[in_itr][:] for in_itr in itrs]
                 bq_selected = self.is_bouquet_selected()
@@ -251,27 +250,32 @@ class MainAppWindow:
                 if bq_selected:
                     fav_bouquet = self.__bouquets.get(bq_selected, None)
 
-                for itr in itrs:
-                    if fav_bouquet and model_name == self._FAV_LIST_NAME:
-                        del fav_bouquet[int(model.get_path(itr)[0])]
-                    if model_name == self._BOUQUETS_LIST_NAME:
-                        if len(model.get_path(itr)) < 2:
-                            show_dialog(DialogType.ERROR, self.__main_window, "This item is not allowed to be removed!")
-                            return
-                        else:
-                            self.delete_bouquet(bq_selected)
-                    model.remove(itr)
                 if model_name == self._FAV_LIST_NAME:
-                    self.update_fav_num_column(model)
+                    self.remove_favs(fav_bouquet, itrs, model)
+                elif model_name == self._BOUQUETS_LIST_NAME:
+                    self.delete_bouquets(itrs, model, bq_selected)
                 elif model_name == self._SERVICE_LIST_NAME:
-                    self.delete_services(bq_selected, rows)
+                    self.delete_services(bq_selected, itrs, model, rows)
 
                 self.on_view_focus(view, None)
 
                 return rows
 
-    def delete_services(self, bq_selected, rows):
+    def remove_favs(self, fav_bouquet, itrs, model):
+        """ Deleting bouquet services """
+        if fav_bouquet:
+            for itr in itrs:
+                del fav_bouquet[int(model.get_path(itr)[0])]
+                self.__fav_model.remove(itr)
+        self.update_fav_num_column(model)
+
+    def delete_services(self, bq_selected, itrs, model, rows):
         """ Deleting services """
+        srv_itrs = [self.__services_model_filter.convert_iter_to_child_iter(
+            model.convert_iter_to_child_iter(itr)) for itr in itrs]
+        for s_itr in srv_itrs:
+            self.__services_model.remove(s_itr)
+
         for row in rows:
             # There are channels with the same parameters except for the name.
             # None because it can have duplicates! Need fix
@@ -287,10 +291,16 @@ class MainAppWindow:
         if bq_selected:
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
-    def delete_bouquet(self, bouquet):
-        """ Deleting bouquet """
-        self.__bouquets.pop(bouquet)
-        self.__fav_model.clear()
+    def delete_bouquets(self, itrs, model, bouquet):
+        """ Deleting bouquets """
+        for itr in itrs:
+            if len(model.get_path(itr)) < 2:
+                show_dialog(DialogType.ERROR, self.__main_window, "This item is not allowed to be removed!")
+                return
+            else:
+                self.__bouquets.pop(bouquet)
+                self.__fav_model.clear()
+                self.__bouquets_model.remove(itr)
 
     def get_bouquet_file_name(self, bouquet):
         bouquet_file_name = "{}userbouquet.{}.{}".format(self.__options.get(self.__profile).get("data_dir_path"),
@@ -824,7 +834,6 @@ class MainAppWindow:
 
     @run_idle
     def on_filter_changed(self, entry):
-        self.__services_model_filter.clear_cache()
         self.__services_model_filter.refilter()
 
     def services_filter_function(self, model, iter, data):
