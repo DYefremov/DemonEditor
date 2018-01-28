@@ -151,6 +151,8 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
                           hide=None,
                           package=PROVIDER.get(int(on, 16)),
                           service_type=SERVICE_TYPE.get(str(int(srv_type, 16))),
+                          picon=None,
+                          picon_id=None,
                           ssid=ssid,
                           freq=freq,
                           rate=rate,

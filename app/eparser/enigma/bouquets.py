@@ -44,15 +44,14 @@ def write_bouquet(path, name, bq_type, channels):
 def to_bouquet_id(ch):
     """ Creates bouquet channel id """
     data_type = ch.data_id
-    if data_type:
+
+    if data_type and len(data_type) > 2:
         data_type = int(ch.data_id.split(":")[-2])
         if data_type == 22:
             data_type = 16
         elif data_type == 25:
             data_type = 19
-    service = "{}:0:{}:{}:0:0:0:".format(1, data_type, ch.fav_id)
-
-    return service
+        return "{}:0:{}:{}:0:0:0:".format(1, data_type, ch.fav_id)
 
 
 def get_bouquet(path, name, bq_type):
@@ -69,7 +68,6 @@ def get_bouquet(path, name, bq_type):
             else:
                 services.append(BouquetService(None, BqServiceType.DEFAULT,
                                                "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]), 0))
-
     return services
 
 
@@ -90,7 +88,6 @@ def parse_bouquets(path, bq_name, bq_type):
                                            services=get_bouquet(path, name, bq_type),
                                            locked=None,
                                            hidden=None))
-
     return bouquets
 
 

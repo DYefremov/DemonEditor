@@ -2,6 +2,8 @@ import os
 from contextlib import suppress
 from functools import lru_cache
 
+from gi.repository import GdkPixbuf
+
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
@@ -485,6 +487,7 @@ class MainAppWindow:
             self.append_bouquets(data_path)
             self.append_services(data_path)
             self.update_services_counts(len(self.__services_model))
+            self.update_picons()
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
@@ -503,14 +506,14 @@ class MainAppWindow:
                 name, bt_type, locked, hidden = bt.name, bt.type, bt.locked, bt.hidden
                 self.__bouquets_model.append(parent, [name, locked, hidden, bt_type])
                 services = []
-                agr = [None] * 7
+                agr = [None] * 9
                 for srv in bt.services:
                     fav_id = srv.data
                     # IPTV and MARKER services
                     s_type = srv.type
                     if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
-                        self.__services[fav_id] = Service(*agr[0:3], srv.name, *agr[0:3],
-                                                          s_type.name, *agr, srv.num, fav_id, None)
+                        srv = Service(*agr[0:3], srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
+                        self.__services[fav_id] = srv
                     services.append(fav_id)
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
 
@@ -831,6 +834,7 @@ class MainAppWindow:
     def on_picons_loader_show(self, item):
         dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), Profile(self.__profile))
         dialog.show()
+        self.update_picons()
 
     @run_idle
     def on_filter_changed(self, entry):
@@ -840,7 +844,18 @@ class MainAppWindow:
         if self.__services_model_filter is None or self.__services_model_filter == "None":
             return True
         else:
-            return self.__filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14))
+            return self.__filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
+
+    @run_idle
+    def update_picons(self):
+        path = self.__options.get(self.__profile).get("picons_dir_path")
+        if not os.path.exists(path):
+            return
+
+        picons = {file: GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=path + file, width=32, height=24, preserve_aspect_ratio=True) for file in os.listdir(path)}
+        for row in self.__services_model:
+            self.__services_model.set_value(self.__services_model.get_iter(row.path), 8, picons.get(row[9], None))
 
 
 def start_app():

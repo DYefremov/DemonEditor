@@ -85,9 +85,19 @@ def parse_services(services, transponders, path):
     for ch in srv:
         data = str(ch[0]).split(_SEP)
         sp = "0"
+        tid = data[2]
+        on_id = data[3]
+
+        transponder_id = "{}:{}:{}".format(data[1], tid, on_id)
+        transponder = transponders.get(transponder_id, None)
+
+        tid = tid.lstrip(sp).upper()
+        on_id = on_id.lstrip(sp).upper()
+        ssid = str(data[0]).lstrip(sp).upper()
         # For comparison in bouquets. Needed in upper case!!!
-        fav_id = "{}:{}:{}:{}".format(str(data[0]).lstrip(sp), str(data[2]).lstrip(sp),
-                                      str(data[3]).lstrip(sp), str(data[1]).lstrip(sp)).upper()
+        fav_id = "{}:{}:{}:{}".format(ssid, tid, on_id, str(data[1]).lstrip(sp))
+        picon_id = "1_0_{}_{}_{}_{}_1680000_0_0_0.png".format(1, ssid, tid, on_id)
+
         all_flags = ch[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
@@ -96,9 +106,6 @@ def parse_services(services, transponders, path):
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))
         package = package[0][2:] if package else None
-
-        transponder_id = "{}:{}:{}".format(data[1], data[2], data[3])
-        transponder = transponders.get(transponder_id, None)
 
         if transponder is not None:
             tr_type, sp, tr = str(transponder).partition(" ")
@@ -112,6 +119,8 @@ def parse_services(services, transponders, path):
                                     hide=hide,
                                     package=package,
                                     service_type=service_type,
+                                    picon=None,
+                                    picon_id=picon_id,
                                     ssid=data[0],
                                     freq=tr[0],
                                     rate=tr[1],

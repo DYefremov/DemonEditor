@@ -6,6 +6,11 @@ from html.parser import HTMLParser
 from app.commons import log
 from app.properties import Profile
 
+
+_ENIGMA2_PICON_NAME = "1_0_{}_{:X}_{:X}_{:X}_1680000_0_0_0.png"
+_NEUTRINO_PICON_NAME = "{:x}{:04x}{:04x}.png"
+
+
 Provider = namedtuple("Provider", ["logo", "name", "url", "on_id", "selected"])
 Picon = namedtuple("Picon", ["ref", "ssid", "v_pid"])
 
@@ -88,9 +93,9 @@ class PiconsParser(HTMLParser):
     def format(ssid, on_id, v_pid, profile: Profile):
         tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
         if profile is Profile.ENIGMA_2:
-            return "1_0_{}_{:X}_{:X}_{:X}_1680000_0_0_0.png".format(1 if v_pid else 2, int(ssid), tr_id, int(on_id))
+            return _ENIGMA2_PICON_NAME.format(1 if v_pid else 2, int(ssid), tr_id, int(on_id))
         elif profile is Profile.NEUTRINO_MP:
-            return "{:x}{:04x}{:04x}.png".format(tr_id, int(on_id), int(ssid))
+            return _NEUTRINO_PICON_NAME.format(tr_id, int(on_id), int(ssid))
         else:
             return "{}.png".format(ssid)
 

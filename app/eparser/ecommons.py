@@ -2,8 +2,8 @@
 from collections import namedtuple
 from enum import Enum
 
-Service = namedtuple("Service", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide",
-                                 "package", "service_type", "ssid", "freq", "rate", "pol", "fec",
+Service = namedtuple("Service", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide", "package",
+                                 "service_type", "picon", "picon_id", "ssid", "freq", "rate", "pol", "fec",
                                  "system", "pos", "data_id", "fav_id", "transponder"])
 
 

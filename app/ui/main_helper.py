@@ -28,14 +28,14 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
         return
 
     # Searching for max num value in all marker services (if empty default = 0)
-    max_num = max(map(lambda num: int(num.data_id, 16),
+    max_num = max(map(lambda num: int(num.data_id, 18),
                       filter(lambda ch: ch.service_type == BqServiceType.MARKER.name, channels.values())), default=0)
     max_num = '{:x}'.format(max_num + 1)
     fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
     itr = model.insert_before(model.get_iter(paths[0]), (None, None, response, None, None, s_type, None, fav_id))
-    channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 7, max_num, fav_id, None)
+    channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
 
 
@@ -53,7 +53,7 @@ def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
     old_ch = channels.pop(fav_id, None)
     new_fav_id = "{}::{}\n#DESCRIPTION {}\n".format(fav_id.split("::")[0], response, response)
     model.set(itr, {2: response, 7: new_fav_id})
-    channels[new_fav_id] = Service(*old_ch[0:3], response, *old_ch[4:15], old_ch.data_id, new_fav_id, None)
+    channels[new_fav_id] = Service(*old_ch[0:3], response, *old_ch[4:17], old_ch.data_id, new_fav_id, None)
     bq_services.pop(index)
     bq_services.insert(index, new_fav_id)
 
@@ -107,7 +107,7 @@ def edit(view, parent_window, target, fav_view=None, service_view=None, channels
     channel_name = None
 
     if target is ViewTarget.SERVICES:
-        name, fav_id = model.get(itr, 3, 16)
+        name, fav_id = model.get(itr, 3, 18)
         f_id = fav_id
         response = show_dialog(DialogType.INPUT, parent_window, name)
         if response == Gtk.ResponseType.CANCEL:
@@ -131,7 +131,7 @@ def edit(view, parent_window, target, fav_view=None, service_view=None, channels
 
         if service_view is not None:
             for row in service_view.get_model():
-                if row[16] == fav_id:
+                if row[18] == fav_id:
                     row[3] = response
                     break
 
@@ -166,7 +166,7 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
         else:
             fav_ids = [model.get_value(model.get_iter(path), 7) for path in paths]
             srv_model = get_base_model(services_view.get_model())
-            srv_paths = [row.path for row in srv_model if row[16] in fav_ids]
+            srv_paths = [row.path for row in srv_model if row[18] in fav_ids]
             set_hide(channels, srv_model, srv_paths)
     elif flag is FLAG.LOCK:
         set_lock(blacklist, channels, model, paths, target, services_model=get_base_model(services_view.get_model()))
@@ -182,10 +182,12 @@ def set_lock(blacklist, channels, model, paths, target, services_model):
 
     for path in paths:
         itr = model.get_iter(path)
-        fav_id = model.get_value(itr, 16 if target is ViewTarget.SERVICES else 7)
+        fav_id = model.get_value(itr, 18 if target is ViewTarget.SERVICES else 7)
         channel = channels.get(fav_id, None)
         if channel:
             bq_id = to_bouquet_id(channel)
+            if not bq_id:
+                continue
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
             model.set_value(itr, col_num, None if locked else LOCKED_ICON)
             channels[fav_id] = Service(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
@@ -193,7 +195,7 @@ def set_lock(blacklist, channels, model, paths, target, services_model):
 
     if target is ViewTarget.FAV and ids:
         for ch in services_model:
-            if ch[16] in ids:
+            if ch[18] in ids:
                 ch[4] = None if locked else LOCKED_ICON
 
 
@@ -233,7 +235,7 @@ def set_hide(channels, model, paths):
                 flags.append(value)
 
         model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
-        fav_id = model.get_value(itr, 16)
+        fav_id = model.get_value(itr, 18)
         channel = channels.get(fav_id, None)
         if channel:
             channels[fav_id] = Service(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
@@ -260,7 +262,7 @@ def locate_in_services(fav_view, services_view, parent_window):
 
     fav_id = model.get_value(model.get_iter(paths[0]), 7)
     for index, row in enumerate(services_view.get_model()):
-        if row[16] == fav_id:
+        if row[18] == fav_id:
             scroll_to(index, services_view)
             break
 
