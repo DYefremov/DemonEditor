@@ -26,7 +26,8 @@ class MainAppWindow:
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item", "filter_entry")
+                         "services_edit_popup_item", "services_copy_popup_item", "filter_entry",
+                         "services_picon_popup_item")
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
@@ -37,7 +38,7 @@ class MainAppWindow:
     _FAV_ELEMENTS = ("cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
-                     "fav_locate_popup_item")
+                     "fav_locate_popup_item", "fav_picon_popup_item")
 
     _FAV_ONLY_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item")
@@ -52,8 +53,9 @@ class MainAppWindow:
                           "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                          "services_copy_popup_item", "filter_entry")
+                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item", "filter_entry",
+                          "services_copy_popup_item",  "services_picon_popup_item", "fav_picon_popup_item")
+
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -93,7 +95,10 @@ class MainAppWindow:
                     "on_fav_popup": self.on_fav_popup,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_picons_loader_show": self.on_picons_loader_show,
-                    "on_filter_changed": self.on_filter_changed}
+                    "on_filter_changed": self.on_filter_changed,
+                    "on_assign_picon": self.on_assign_picon,
+                    "on_remove_picon": self.on_remove_picon,
+                    "on_reference_picon": self.on_reference_picon}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -856,10 +861,19 @@ class MainAppWindow:
 
         for file in os.listdir(path):
             self.__picons[file] = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=path + file, width=32, height=24, preserve_aspect_ratio=True)
+                filename=path + file, width=32, height=32, preserve_aspect_ratio=True)
 
         for r in self.__services_model:
             self.__services_model.set_value(self.__services_model.get_iter(r.path), 8, self.__picons.get(r[9], None))
+
+    def on_assign_picon(self, model):
+        pass
+
+    def on_remove_picon(self, model):
+        pass
+
+    def on_reference_picon(self, model):
+        pass
 
 
 def start_app():
