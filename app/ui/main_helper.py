@@ -34,7 +34,7 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
-    itr = model.insert_before(model.get_iter(paths[0]), (None, None, response, None, None, s_type, None, fav_id))
+    itr = model.insert_before(model.get_iter(paths[0]), (None, None, response, None, None, s_type, None, fav_id, None))
     channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
 

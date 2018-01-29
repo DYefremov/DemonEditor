@@ -103,6 +103,7 @@ class MainAppWindow:
         self.__rows_buffer = []
         self.__services = {}
         self.__bouquets = {}
+        self.__picons = {}
         self.__blacklist = set()
 
         builder = Gtk.Builder()
@@ -619,7 +620,8 @@ class MainAppWindow:
             channel = self.__services.get(ch_id, None)
             if channel:
                 self.__fav_model.append((num + 1, channel.coded, channel.service, channel.locked,
-                                         channel.hide, channel.service_type, channel.pos, channel.fav_id))
+                                         channel.hide, channel.service_type, channel.pos, channel.fav_id,
+                                         self.__picons.get(channel.picon_id, None)))
 
     def is_bouquet_selected(self):
         """ Checks whether the bouquet is selected
@@ -852,10 +854,12 @@ class MainAppWindow:
         if not os.path.exists(path):
             return
 
-        picons = {file: GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=path + file, width=32, height=24, preserve_aspect_ratio=True) for file in os.listdir(path)}
-        for row in self.__services_model:
-            self.__services_model.set_value(self.__services_model.get_iter(row.path), 8, picons.get(row[9], None))
+        for file in os.listdir(path):
+            self.__picons[file] = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename=path + file, width=32, height=24, preserve_aspect_ratio=True)
+
+        for r in self.__services_model:
+            self.__services_model.set_value(self.__services_model.get_iter(r.path), 8, self.__picons.get(r[9], None))
 
 
 def start_app():

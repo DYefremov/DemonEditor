@@ -71,6 +71,8 @@
       <column type="gchararray"/>
       <!-- column-name fav_id -->
       <column type="gchararray"/>
+      <!-- column-name picon -->
+      <column type="GdkPixbuf"/>
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
@@ -1499,6 +1501,12 @@
                                 <property name="sizing">autosize</property>
                                 <property name="title" translatable="yes">Service</property>
                                 <property name="expand">True</property>
+                                <child>
+                                  <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf"/>
+                                  <attributes>
+                                    <attribute name="pixbuf">8</attribute>
+                                  </attributes>
+                                </child>
                                 <child>
                                   <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf"/>
                                   <attributes>
