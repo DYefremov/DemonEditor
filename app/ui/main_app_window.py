@@ -2,8 +2,6 @@ import os
 from contextlib import suppress
 from functools import lru_cache
 
-from gi.repository import GdkPixbuf
-
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
@@ -11,10 +9,10 @@ from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
 from app.properties import get_config, write_config, Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
-from .dialogs import show_dialog, DialogType
+from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model
+    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -26,8 +24,7 @@ class MainAppWindow:
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item", "filter_entry",
-                         "services_picon_popup_item")
+                         "services_edit_popup_item", "services_copy_popup_item", "services_picon_popup_item")
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
@@ -53,7 +50,7 @@ class MainAppWindow:
                           "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item", "filter_entry",
+                          "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
                           "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item")
 
     def __init__(self):
@@ -97,7 +94,8 @@ class MainAppWindow:
                     "on_filter_changed": self.on_filter_changed,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
-                    "on_reference_picon": self.on_reference_picon}
+                    "on_reference_picon": self.on_reference_picon,
+                    "on_filter_toggled": self.on_filter_toggled}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -141,6 +139,7 @@ class MainAppWindow:
         self.__services_model_filter = builder.get_object("services_model_filter")
         self.__services_model_filter.set_visible_func(self.services_filter_function)
         self.__filter_entry = builder.get_object("filter_entry")
+        self.__filter_info_bar = builder.get_object("filter_info_bar")
         self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self.__services_view.connect("key-press-event", self.force_ctrl)
@@ -797,14 +796,7 @@ class MainAppWindow:
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("*.m3u")
-        file_filter.set_name("m3u files")
-        response = show_dialog(dialog_type=DialogType.CHOOSER,
-                               transient=self.__main_window,
-                               options=self.__options.get(self.__profile),
-                               action_type=Gtk.FileChooserAction.OPEN,
-                               file_filter=file_filter)
+        response = get_chooser_dialog(self.__main_window, self.__options.get(self.__profile), "*.m3u", "m3u files")
         if response == Gtk.ResponseType.CANCEL:
             return
 
@@ -844,6 +836,9 @@ class MainAppWindow:
         dialog.show()
         self.update_picons()
 
+    def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
+        self.__filter_info_bar.set_visible(toggle_button.get_active())
+
     @run_idle
     def on_filter_changed(self, entry):
         self.__services_model_filter.refilter()
@@ -856,19 +851,10 @@ class MainAppWindow:
 
     @run_idle
     def update_picons(self):
-        path = self.__options.get(self.__profile).get("picons_dir_path")
-        if not os.path.exists(path):
-            return
-
-        for file in os.listdir(path):
-            self.__picons[file] = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=path + file, width=32, height=32, preserve_aspect_ratio=True)
-
-        for r in self.__services_model:
-            self.__services_model.set_value(self.__services_model.get_iter(r.path), 8, self.__picons.get(r[9], None))
+        update_picons(self.__options.get(self.__profile).get("picons_dir_path"), self.__picons, self.__services_model)
 
     def on_assign_picon(self, view):
-        pass
+        assign_picon(view, self.__main_window, self.__options.get(self.__profile))
 
     def on_remove_picon(self, view):
         pass
@@ -876,20 +862,8 @@ class MainAppWindow:
     @run_idle
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
-        m, paths = view.get_selection().get_selected_rows()
-        if len(paths) > 1:
-            show_dialog(DialogType.ERROR, self.__main_window, "Please, select only one item!")
-            return
-
-        model = get_base_model(view.get_model())
-        name = model.get_name()
-        if name == self._SERVICE_LIST_NAME:
-            self.__clipboard.set_text(model.get_value(model.get_iter(paths), 9).rstrip(".png"), -1)
-        elif name == self._FAV_LIST_NAME:
-            fav_id = model.get_value(model.get_iter(paths), 7)
-            srv = self.__services.get(fav_id, None)
-            if srv:
-                self.__clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
+        target = ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
+        copy_picon_reference(target, view, self.__services, self.__clipboard, self.__main_window)
 
 
 def start_app():

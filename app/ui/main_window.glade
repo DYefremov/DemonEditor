@@ -787,25 +787,18 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolItem" id="filter_tool_item">
+              <object class="GtkToggleToolButton" id="filter_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkEntry" id="filter_entry">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
-                    <property name="tooltip_text" translatable="yes">Services filter</property>
-                    <property name="primary_icon_name">edit-select-all-symbolic</property>
-                    <property name="primary_icon_activatable">False</property>
-                    <property name="primary_icon_tooltip_text" translatable="yes">Services filter</property>
-                    <signal name="changed" handler="on_filter_changed" swapped="no"/>
-                  </object>
-                </child>
+                <property name="tooltip_text" translatable="yes">Services filter</property>
+                <property name="label" translatable="yes">Services filter</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-find</property>
+                <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
@@ -1497,6 +1490,75 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkInfoBar" id="filter_info_bar">
+                    <property name="app_paintable">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">2</property>
+                    <child internal-child="action_area">
+                      <object class="GtkButtonBox" id="filter_infobar_action_area">
+                        <property name="can_focus">False</property>
+                        <property name="spacing">6</property>
+                        <property name="layout_style">end</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child internal-child="content_area">
+                      <object class="GtkBox" id="filter_infobar_content_area">
+                        <property name="can_focus">False</property>
+                        <property name="spacing">16</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="filter_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">Services filter</property>
+                            <property name="primary_icon_name">edit-select-all-symbolic</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="primary_icon_tooltip_text" translatable="yes">Services filter</property>
+                            <signal name="changed" handler="on_filter_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkBox" id="services_bar_box">
                     <property name="height_request">20</property>
                     <property name="visible">True</property>
@@ -1639,7 +1701,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>

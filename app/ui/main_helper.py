@@ -1,11 +1,15 @@
 """ This is helper module for ui """
 from enum import Enum
 
+import os
+
+from gi.repository import GdkPixbuf
+
 from app.eparser import Service
 from app.eparser.ecommons import FLAG
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
-from .dialogs import show_dialog, DialogType
+from .dialogs import show_dialog, DialogType, get_chooser_dialog
 
 
 class ViewTarget(Enum):
@@ -277,7 +281,60 @@ def scroll_to(index, view, paths=None):
     selection.select_path(index)
 
 
+# ***************** Picons *********************#
+
+def update_picons(path, picons, model):
+    if not os.path.exists(path):
+        return
+
+    for file in os.listdir(path):
+        picons[file] = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=path + file, width=32, height=32, preserve_aspect_ratio=True)
+
+    for r in model:
+        model.set_value(model.get_iter(r.path), 8, picons.get(r[9], None))
+
+
+def assign_picon(view, transient, options):
+    response = get_chooser_dialog(transient, options, "*.png", "png files")
+    if response == Gtk.ResponseType.CANCEL:
+        return
+
+    if not str(response).endswith(".png"):
+        show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
+        return
+
+    print(response)
+
+
+def copy_picon_reference(target, view, services, clipboard, transient):
+    """ Copying picon id to clipboard """
+    model, paths = view.get_selection().get_selected_rows()
+    if len(paths) > 1:
+        show_dialog(DialogType.ERROR, transient, "Please, select only one item!")
+        return
+
+    if not paths:
+        show_dialog(DialogType.ERROR, transient, "No selected item!")
+        return
+
+    if target is ViewTarget.SERVICES:
+        picon_id = model.get_value(model.get_iter(paths), 9)
+        if picon_id:
+            clipboard.set_text(picon_id.rstrip(".png"), -1)
+        else:
+            show_dialog(DialogType.ERROR, transient, "No reference is present!")
+    elif target is ViewTarget.FAV:
+        fav_id = model.get_value(model.get_iter(paths), 7)
+        srv = services.get(fav_id, None)
+        if srv and srv.picon_id:
+            clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
+        else:
+            show_dialog(DialogType.ERROR, transient, "No reference is present!")
+
+
 # ***************** Others *********************#
+
 
 def update_entry_data(entry, dialog, options):
     """ Updates value in text entry from chooser dialog """

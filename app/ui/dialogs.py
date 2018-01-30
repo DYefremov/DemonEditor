@@ -58,5 +58,16 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
     return response
 
 
+def get_chooser_dialog(transient, options, pattern, name):
+    file_filter = Gtk.FileFilter()
+    file_filter.add_pattern(pattern)
+    file_filter.set_name(name)
+    return show_dialog(dialog_type=DialogType.CHOOSER,
+                       transient=transient,
+                       options=options,
+                       action_type=Gtk.FileChooserAction.OPEN,
+                       file_filter=file_filter)
+
+
 if __name__ == "__main__":
     pass
