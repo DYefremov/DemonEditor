@@ -54,8 +54,7 @@ class MainAppWindow:
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item", "filter_entry",
-                          "services_copy_popup_item",  "services_picon_popup_item", "fav_picon_popup_item")
-
+                          "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -146,6 +145,8 @@ class MainAppWindow:
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self.__services_view.connect("key-press-event", self.force_ctrl)
         self.__fav_view.connect("key-press-event", self.force_ctrl)
+        # Clipboard
+        self.__clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         self.__main_window.show()
 
     def init_drag_and_drop(self):
@@ -866,14 +867,29 @@ class MainAppWindow:
         for r in self.__services_model:
             self.__services_model.set_value(self.__services_model.get_iter(r.path), 8, self.__picons.get(r[9], None))
 
-    def on_assign_picon(self, model):
+    def on_assign_picon(self, view):
         pass
 
-    def on_remove_picon(self, model):
+    def on_remove_picon(self, view):
         pass
 
-    def on_reference_picon(self, model):
-        pass
+    @run_idle
+    def on_reference_picon(self, view):
+        """ Copying picon id to clipboard """
+        m, paths = view.get_selection().get_selected_rows()
+        if len(paths) > 1:
+            show_dialog(DialogType.ERROR, self.__main_window, "Please, select only one item!")
+            return
+
+        model = get_base_model(view.get_model())
+        name = model.get_name()
+        if name == self._SERVICE_LIST_NAME:
+            self.__clipboard.set_text(model.get_value(model.get_iter(paths), 9).rstrip(".png"), -1)
+        elif name == self._FAV_LIST_NAME:
+            fav_id = model.get_value(model.get_iter(paths), 7)
+            srv = self.__services.get(fav_id, None)
+            if srv:
+                self.__clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
 
 
 def start_app():

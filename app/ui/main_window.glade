@@ -263,7 +263,7 @@
                 <property name="can_focus">False</property>
                 <property name="image">image14</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_assign_picon" object="fav_list_store" swapped="no"/>
+                <signal name="activate" handler="on_assign_picon" object="fav_tree_view" swapped="no"/>
               </object>
             </child>
             <child>
@@ -273,7 +273,7 @@
                 <property name="can_focus">False</property>
                 <property name="image">image15</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_picon" object="fav_list_store" swapped="no"/>
+                <signal name="activate" handler="on_remove_picon" object="fav_tree_view" swapped="no"/>
               </object>
             </child>
             <child>
@@ -289,7 +289,7 @@
                 <property name="can_focus">False</property>
                 <property name="image">image16</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="fav_list_store" swapped="no"/>
+                <signal name="activate" handler="on_reference_picon" object="fav_tree_view" swapped="no"/>
               </object>
             </child>
           </object>
@@ -392,7 +392,7 @@
                 <property name="can_focus">False</property>
                 <property name="image">image11</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_assign_picon" object="services_list_store" swapped="no"/>
+                <signal name="activate" handler="on_assign_picon" object="services_tree_view" swapped="no"/>
               </object>
             </child>
             <child>
@@ -402,7 +402,7 @@
                 <property name="can_focus">False</property>
                 <property name="image">image12</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_picon" object="services_list_store" swapped="no"/>
+                <signal name="activate" handler="on_remove_picon" object="services_tree_view" swapped="no"/>
               </object>
             </child>
             <child>
@@ -418,7 +418,7 @@
                 <property name="can_focus">False</property>
                 <property name="image">image10</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="services_list_store" swapped="no"/>
+                <signal name="activate" handler="on_reference_picon" object="services_tree_view" swapped="no"/>
               </object>
             </child>
           </object>
