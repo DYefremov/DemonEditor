@@ -95,7 +95,8 @@ class MainAppWindow:
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
                     "on_reference_picon": self.on_reference_picon,
-                    "on_filter_toggled": self.on_filter_toggled}
+                    "on_filter_toggled": self.on_filter_toggled,
+                    "on_search_toggled": self.on_search_toggled}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -135,6 +136,7 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
+        self.__search_info_bar = builder.get_object("search_info_bar")
         # Filter
         self.__services_model_filter = builder.get_object("services_model_filter")
         self.__services_model_filter.set_visible_func(self.services_filter_function)
@@ -696,8 +698,6 @@ class MainAppWindow:
             self.on_hide(None)
         elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
             self.on_edit(view)
-        elif key == Gdk.KEY_space and model_name == self._FAV_LIST_NAME:
-            pass
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
 
@@ -836,6 +836,7 @@ class MainAppWindow:
         dialog.show()
         self.update_picons()
 
+    @run_idle
     def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
         self.__filter_info_bar.set_visible(toggle_button.get_active())
 
@@ -848,6 +849,9 @@ class MainAppWindow:
             return True
         else:
             return self.__filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
+
+    def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
+        self.__search_info_bar.set_visible(toggle_button.get_active())
 
     @run_idle
     def update_picons(self):
