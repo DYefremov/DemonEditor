@@ -289,14 +289,18 @@ def update_picons(path, picons, model):
         return
 
     for file in os.listdir(path):
-        picons[file] = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=path + file, width=32, height=32, preserve_aspect_ratio=True)
+        picons[file] = get_picon_pixbuf(path + file)
 
     for r in model:
         model.set_value(model.get_iter(r.path), 8, picons.get(r[9], None))
 
 
-def assign_picon(view, transient, options):
+def assign_picon(target, srv_view, fav_view, transient, picons, options, services):
+    view = srv_view if target is ViewTarget.SERVICES else fav_view
+    model, paths = view.get_selection().get_selected_rows()
+    if not is_only_one_item_selected(paths, transient):
+        return
+
     response = get_chooser_dialog(transient, options, "*.png", "png files")
     if response == Gtk.ResponseType.CANCEL:
         return
@@ -304,6 +308,31 @@ def assign_picon(view, transient, options):
     if not str(response).endswith(".png"):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
         return
+
+    picon_pos = 8
+    model = get_base_model(model)
+    itr = model.get_iter(paths)
+    fav_id = model.get_value(itr, 18 if target is ViewTarget.SERVICES else 7)
+    picon_id = services.get(fav_id)[9]
+
+    if picon_id:
+        picon_file = options.get("picons_dir_path") + picon_id
+        if os.path.isfile(response):
+            shutil.copy(response, picon_file)
+            picon = get_picon_pixbuf(picon_file)
+            picons[picon_id] = picon
+            model.set_value(itr, picon_pos, picon)
+            if target is ViewTarget.SERVICES:
+                set_picon(fav_id, fav_view.get_model(), picon, 7, picon_pos)
+            else:
+                set_picon(fav_id, get_base_model(srv_view.get_model()), picon, 18, picon_pos)
+
+
+def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):
+    for row in model:
+        if row[fav_id_pos] == fav_id:
+            row[picon_pos] = picon
+            break
 
 
 def remove_picon(target, srv_view, fav_view, picons, options):
@@ -347,12 +376,7 @@ def remove_picon(target, srv_view, fav_view, picons, options):
 def copy_picon_reference(target, view, services, clipboard, transient):
     """ Copying picon id to clipboard """
     model, paths = view.get_selection().get_selected_rows()
-    if len(paths) > 1:
-        show_dialog(DialogType.ERROR, transient, "Please, select only one item!")
-        return
-
-    if not paths:
-        show_dialog(DialogType.ERROR, transient, "No selected item!")
+    if not is_only_one_item_selected(paths, transient):
         return
 
     if target is ViewTarget.SERVICES:
@@ -368,6 +392,22 @@ def copy_picon_reference(target, view, services, clipboard, transient):
             clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
         else:
             show_dialog(DialogType.ERROR, transient, "No reference is present!")
+
+
+def is_only_one_item_selected(paths, transient):
+    if len(paths) > 1:
+        show_dialog(DialogType.ERROR, transient, "Please, select only one item!")
+        return False
+
+    if not paths:
+        show_dialog(DialogType.ERROR, transient, "No selected item!")
+        return False
+
+    return True
+
+
+def get_picon_pixbuf(path):
+    return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=path, width=32, height=32, preserve_aspect_ratio=True)
 
 
 # ***************** Others *********************#

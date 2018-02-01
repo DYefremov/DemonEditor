@@ -862,7 +862,13 @@ class MainAppWindow:
         update_picons(self.__options.get(self.__profile).get("picons_dir_path"), self.__picons, self.__services_model)
 
     def on_assign_picon(self, view):
-        assign_picon(view, self.__main_window, self.__options.get(self.__profile))
+        assign_picon(self.get_target_view(view),
+                     self.__services_view,
+                     self.__fav_view,
+                     self.__main_window,
+                     self.__picons,
+                     self.__options.get(self.__profile),
+                     self.__services)
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view),
@@ -870,7 +876,6 @@ class MainAppWindow:
                      self.__fav_view, self.__picons,
                      self.__options.get(self.__profile))
 
-    @run_idle
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
         copy_picon_reference(self.get_target_view(view), view, self.__services, self.__clipboard, self.__main_window)
