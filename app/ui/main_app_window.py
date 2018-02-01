@@ -12,7 +12,7 @@ from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon
+    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -861,13 +861,18 @@ class MainAppWindow:
         assign_picon(view, self.__main_window, self.__options.get(self.__profile))
 
     def on_remove_picon(self, view):
-        pass
+        remove_picon(self.get_target_view(view),
+                     self.__services_view,
+                     self.__fav_view, self.__picons,
+                     self.__options.get(self.__profile))
 
     @run_idle
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
-        target = ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
-        copy_picon_reference(target, view, self.__services, self.__clipboard, self.__main_window)
+        copy_picon_reference(self.get_target_view(view), view, self.__services, self.__clipboard, self.__main_window)
+
+    def get_target_view(self, view):
+        return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
 
 
 def start_app():

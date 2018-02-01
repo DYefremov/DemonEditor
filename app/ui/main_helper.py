@@ -307,6 +307,36 @@ def assign_picon(view, transient, options):
     print(response)
 
 
+def remove_picon(target, srv_view, fav_view, picons, options):
+    view = srv_view if target is ViewTarget.SERVICES else fav_view
+    model, paths = view.get_selection().get_selected_rows()
+    model = get_base_model(model)
+
+    fav_ids = []
+    picon_ids = []
+    picon_pos = 8  # picon position is equal for services and fav
+    for path in paths:
+        itr = model.get_iter(path)
+        model.set_value(itr, picon_pos, None)
+        if target is ViewTarget.SERVICES:
+            fav_ids.append(model.get_value(itr, 18))
+            picon_ids.append(model.get_value(itr, 9))
+        else:
+            fav_ids.append(model.get_value(itr, 7))
+
+    def remove(md, path, itr):
+        if md.get_value(itr, 7 if target is ViewTarget.SERVICES else 18) in fav_ids:
+            md.set_value(itr, picon_pos, None)
+            if target is ViewTarget.FAV:
+                picon_ids.append(md.get_value(itr, 9))
+
+    fav_view.get_model().foreach(remove) if target is ViewTarget.SERVICES else get_base_model(
+        srv_view.get_model()).foreach(remove)
+
+    for p_id in picon_ids:
+        picons[p_id] = None
+
+
 def copy_picon_reference(target, view, services, clipboard, transient):
     """ Copying picon id to clipboard """
     model, paths = view.get_selection().get_selected_rows()
