@@ -2,6 +2,8 @@ import os
 from contextlib import suppress
 from functools import lru_cache
 
+import shutil
+
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
@@ -554,9 +556,11 @@ class MainAppWindow:
             return
 
         path = self.__options.get(self.__profile).get("data_dir_path")
-        # deleting files in data dir(skipping dirs) :)
-        list(map(os.unlink, (os.path.join(path, f) for f in filter(
-            lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)))))
+        backup_path = path + "backup/"
+        os.makedirs(os.path.dirname(backup_path), exist_ok=True)
+        # backup files in data dir(skipping dirs and satellites.xml)
+        for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+            shutil.move(os.path.join(path, file), backup_path + file)
 
         bouquets = []
         services_model = self.__services_view.get_model()

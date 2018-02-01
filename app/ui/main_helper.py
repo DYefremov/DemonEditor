@@ -3,6 +3,7 @@ from enum import Enum
 
 import os
 
+import shutil
 from gi.repository import GdkPixbuf
 
 from app.eparser import Service
@@ -304,8 +305,6 @@ def assign_picon(view, transient, options):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
         return
 
-    print(response)
-
 
 def remove_picon(target, srv_view, fav_view, picons, options):
     view = srv_view if target is ViewTarget.SERVICES else fav_view
@@ -315,6 +314,7 @@ def remove_picon(target, srv_view, fav_view, picons, options):
     fav_ids = []
     picon_ids = []
     picon_pos = 8  # picon position is equal for services and fav
+
     for path in paths:
         itr = model.get_iter(path)
         model.set_value(itr, picon_pos, None)
@@ -333,8 +333,15 @@ def remove_picon(target, srv_view, fav_view, picons, options):
     fav_view.get_model().foreach(remove) if target is ViewTarget.SERVICES else get_base_model(
         srv_view.get_model()).foreach(remove)
 
+    pions_path = options.get("picons_dir_path")
+    backup_path = options.get("data_dir_path") + "backup/picons/"
+    os.makedirs(os.path.dirname(backup_path), exist_ok=True)
+
     for p_id in picon_ids:
         picons[p_id] = None
+        src = pions_path + p_id
+        if os.path.isfile(src):
+            shutil.move(src, backup_path + p_id)
 
 
 def copy_picon_reference(target, view, services, clipboard, transient):
