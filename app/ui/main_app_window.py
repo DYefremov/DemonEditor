@@ -14,7 +14,7 @@ from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon
+    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -98,7 +98,8 @@ class MainAppWindow:
                     "on_remove_picon": self.on_remove_picon,
                     "on_reference_picon": self.on_reference_picon,
                     "on_filter_toggled": self.on_filter_toggled,
-                    "on_search_toggled": self.on_search_toggled}
+                    "on_search_toggled": self.on_search_toggled,
+                    "on_search": self.on_search}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -856,6 +857,15 @@ class MainAppWindow:
 
     def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
         self.__search_info_bar.set_visible(toggle_button.get_active())
+
+    @run_idle
+    def on_search(self, entry, event):
+        search(entry.get_text(),
+               self.__services_view,
+               self.__fav_view,
+               self.__bouquets_view,
+               self.__services,
+               self.__bouquets)
 
     @run_idle
     def update_picons(self):

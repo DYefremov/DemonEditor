@@ -805,6 +805,7 @@
               <object class="GtkToggleToolButton" id="search_tool_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Global search</property>
                 <property name="label" translatable="yes">Search</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-find</property>
@@ -1201,12 +1202,11 @@
                   <object class="GtkSearchEntry" id="search_entry">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">Not implemented yet!</property>
                     <property name="primary_icon_name">edit-find-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">False</property>
+                    <signal name="key-release-event" handler="on_search" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

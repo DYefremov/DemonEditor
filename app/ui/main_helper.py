@@ -410,6 +410,27 @@ def get_picon_pixbuf(path):
     return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=path, width=32, height=32, preserve_aspect_ratio=True)
 
 
+# ***************** Search *********************#
+
+def search(text, srv_view, fav_view, bqs_view, services, bouquets):
+    for view in srv_view, fav_view:
+        model = get_base_model(view.get_model())
+        selection = view.get_selection()
+        selection.unselect_all()
+        if not text:
+            continue
+        paths = []
+        text = text.upper()
+        for r in model:
+            if text in str(r[:]).upper():
+                path = r.path
+                selection.select_path(r.path)
+                paths.append(path)
+
+        if paths:
+            view.scroll_to_cell(paths[0], None)
+
+
 # ***************** Others *********************#
 
 

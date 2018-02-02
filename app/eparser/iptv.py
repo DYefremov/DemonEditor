@@ -16,7 +16,6 @@ def parse_m3u(path):
                 fav_id = " 1:0:1:0:0:0:0:0:0:0:{}:{}\n#DESCRIPTION: {}\n".format(
                     line.strip().replace(":", "%3a"), name, name, None)
                 srv = Service(*aggr[0:3], name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
-                print(srv)
                 channels.append(srv)
 
     return channels
