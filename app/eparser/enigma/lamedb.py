@@ -56,7 +56,7 @@ def parse(path):
                 log(msg)
                 raise SyntaxError(msg)
             transponders, sep, services = services.partition("services")  # 2 step
-            services, sep, _ = services.partition("end")  # 3 step
+            services, sep, _ = services.partition("\nend")  # 3 step
 
             return parse_services(services.split("\n"), transponders.split("/"), path)
 
