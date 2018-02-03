@@ -86,17 +86,17 @@ def parse_services(services, transponders, path):
         data = str(ch[0]).split(_SEP)
         sp = "0"
         tid = data[2]
-        on_id = data[3]
-
-        transponder_id = "{}:{}:{}".format(data[1], tid, on_id)
+        nid = data[3]
+        transponder_id = "{}:{}:{}".format(data[1], tid, nid)
         transponder = transponders.get(transponder_id, None)
 
         tid = tid.lstrip(sp).upper()
-        on_id = on_id.lstrip(sp).upper()
+        nid = nid.lstrip(sp).upper()
         ssid = str(data[0]).lstrip(sp).upper()
+        onid = str(data[1]).lstrip(sp).upper()
         # For comparison in bouquets. Needed in upper case!!!
-        fav_id = "{}:{}:{}:{}".format(ssid, tid, on_id, str(data[1]).lstrip(sp))
-        picon_id = "1_0_{}_{}_{}_{}_1680000_0_0_0.png".format(1, ssid, tid, on_id)
+        fav_id = "{}:{}:{}:{}".format(ssid, tid, nid, onid)
+        picon_id = "1_0_{}_{}_{}_{}_{}_0_0_0.png".format(1, ssid, tid, nid, onid)
 
         all_flags = ch[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None

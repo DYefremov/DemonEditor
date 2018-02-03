@@ -59,16 +59,17 @@ def get_bouquet(path, name, bq_type):
     with open(path + "userbouquet.{}.{}".format(name, bq_type)) as file:
         chs_list = file.read()
         services = []
-        for ch in list(filter(lambda x: len(x) > 1, chs_list.split("#SERVICE")[1:])):  # filtering ['']
+        srvs = list(filter(None, chs_list.split("\n#SERVICE")))  # filtering ['']
+        for ch in srvs[1:]:
             ch_data = ch.strip().split(":")
             if ch_data[1] == "64":
                 services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.MARKER, ch, ch_data[2]))
             elif "http" in ch:
                 services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.IPTV, ch, 0))
             else:
-                services.append(BouquetService(None, BqServiceType.DEFAULT,
-                                               "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6]), 0))
-    return services
+                fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
+                services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
+    return srvs[0].strip("#NAME").strip(), services
 
 
 def parse_bouquets(path, bq_name, bq_type):
@@ -82,10 +83,10 @@ def parse_bouquets(path, bq_name, bq_type):
                 _, _, name = line.partition(nm_sep)
                 bouquets = Bouquets(name.strip(), bq_type, [])
             if bouquets and "#SERVICE" in line:
-                name = line.split(".")[1]
-                bouquets[2].append(Bouquet(name=name,
+                b_name, services = get_bouquet(path, line.split(".")[1], bq_type)
+                bouquets[2].append(Bouquet(name=b_name,
                                            type=bq_type,
-                                           services=get_bouquet(path, name, bq_type),
+                                           services=services,
                                            locked=None,
                                            hidden=None))
     return bouquets
