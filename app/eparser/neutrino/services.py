@@ -116,9 +116,7 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
     sys = sys.value if sys else sys
 
     tr = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(tr_id, on, freq, inv, rate, fec, pol, mod, sys)
-
     tr_id = tr_id.lstrip("0")
-    on = on.lstrip("0")
 
     for srv_elem in tr_elem.getElementsByTagName("S"):
         if srv_elem.hasAttributes():
@@ -141,7 +139,8 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
                 vt = srv_elem.attributes["vt"].value
 
             data_id = "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}".format(api, srv_type, sys, num, f, v, a, p, pmt, tx, vt)
-            fav_id = "{}:{}:{}".format(tr_id, on, ssid.lstrip("0"))
+            fav_id = "{}:{}:{}".format(tr_id, on.lstrip("0"), ssid.lstrip("0"))
+            picon_id = "{}{}{}.png".format(tr_id, on, ssid)
 
             srv = Service(flags_cas=sat,
                           transponder_type=None,
@@ -152,7 +151,7 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
                           package=PROVIDER.get(int(on, 16)),
                           service_type=SERVICE_TYPE.get(str(int(srv_type, 16))),
                           picon=None,
-                          picon_id=None,
+                          picon_id=picon_id,
                           ssid=ssid,
                           freq=freq,
                           rate=rate,
