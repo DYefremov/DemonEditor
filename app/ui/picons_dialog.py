@@ -15,7 +15,7 @@ from .main_helper import update_entry_data
 
 
 class PiconsDialog:
-    def __init__(self, transient, options, profile=Profile.ENIGMA_2):
+    def __init__(self, transient, options, sat_positions, profile=Profile.ENIGMA_2):
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
@@ -35,7 +35,8 @@ class PiconsDialog:
 
         builder = Gtk.Builder()
         builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_dialog.glade",
-                                      ("picons_dialog", "receive_image", "providers_list_store"))
+                                      ("picons_dialog", "receive_image", "providers_list_store",
+                                       "sat_position_list_store"))
         builder.connect_signals(handlers)
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)
@@ -57,6 +58,10 @@ class PiconsDialog:
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
+        self._position_combo_box = builder.get_object("position_combo_box")
+        self._sat_position_list_store = builder.get_object("sat_position_list_store")
+        for pos in sat_positions:
+            self._sat_position_list_store.append((pos,))
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")

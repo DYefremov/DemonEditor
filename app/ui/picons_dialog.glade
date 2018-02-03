@@ -17,6 +17,12 @@
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="sat_position_list_store">
+    <columns>
+      <!-- column-name pos -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkDialog" id="picons_dialog">
     <property name="width_request">480</property>
     <property name="can_focus">False</property>
@@ -351,6 +357,9 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Satellite url (www.lyngsat.com):</property>
                 <property name="xalign">0.019999999552965164</property>
+                <style>
+                  <class name="primary-toolbar"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -372,6 +381,55 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="position_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">2</property>
+                <child>
+                  <object class="GtkLabel" id="label3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="label" translatable="yes">Satellite position: </property>
+                    <property name="xalign">0.019999999552965164</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="position_combo_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">sat_position_list_store</property>
+                    <property name="active">0</property>
+                    <property name="id_column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <style>
+                  <class name="primary-toolbar"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">8</property>
               </packing>
             </child>
             <child>
@@ -452,7 +510,7 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">7</property>
+                <property name="position">10</property>
               </packing>
             </child>
             <child>
@@ -464,7 +522,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">10</property>
+                <property name="position">11</property>
               </packing>
             </child>
             <child>
@@ -562,7 +620,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">11</property>
+                <property name="position">12</property>
               </packing>
             </child>
             <child>
@@ -599,7 +657,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">12</property>
+                <property name="position">13</property>
               </packing>
             </child>
             <child>
@@ -665,7 +723,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">13</property>
+                <property name="position">14</property>
               </packing>
             </child>
             <child>
@@ -676,7 +734,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">14</property>
+                <property name="position">15</property>
               </packing>
             </child>
           </object>
