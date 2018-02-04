@@ -15,7 +15,7 @@ from .main_helper import update_entry_data
 
 
 class PiconsDialog:
-    def __init__(self, transient, options, sat_positions, profile=Profile.ENIGMA_2):
+    def __init__(self, transient, options, profile=Profile.ENIGMA_2):
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
@@ -31,12 +31,12 @@ class PiconsDialog:
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_picons_dir_open": self.on_picons_dir_open,
                     "on_selected_toggled": self.on_selected_toggled,
-                    "on_url_changed": self.on_url_changed}
+                    "on_url_changed": self.on_url_changed,
+                    "on_position_edited": self.on_position_edited}
 
         builder = Gtk.Builder()
         builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_dialog.glade",
-                                      ("picons_dialog", "receive_image", "providers_list_store",
-                                       "sat_position_list_store"))
+                                      ("picons_dialog", "receive_image", "providers_list_store"))
         builder.connect_signals(handlers)
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)
@@ -58,10 +58,6 @@ class PiconsDialog:
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
-        self._position_combo_box = builder.get_object("position_combo_box")
-        self._sat_position_list_store = builder.get_object("sat_position_list_store")
-        for pos in sat_positions:
-            self._sat_position_list_store.append((pos,))
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -98,8 +94,7 @@ class PiconsDialog:
         providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
         if providers:
             for p in providers:
-                logo = self.get_pixbuf(p[0])
-                model.append((logo, p.name, p.url, p.on_id, p.selected))
+                model.append((self.get_pixbuf(p[0]), p.name, p.pos, p.url, p.on_id, p.selected))
         self.update_receive_button_state()
 
     def get_pixbuf(self, img_url):
@@ -124,8 +119,8 @@ class PiconsDialog:
                 break
             self.process_provider(Provider(*prv))
 
-    def process_provider(self, provider):
-        url = provider.url
+    def process_provider(self, prv):
+        url = prv.url
         self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
         self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
                                                  stdout=subprocess.PIPE,
@@ -134,7 +129,8 @@ class PiconsDialog:
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
         self._current_process.wait()
         path = self._TMP_DIR + self._BASE_URL + url[url.rfind("/") + 1:]
-        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, provider.on_id, self.get_picons_format())
+        pos = "".join(c for c in prv.pos if c.isdigit())
+        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv.on_id, pos, self.get_picons_format())
         self.resize(self._picons_path)
         self.show_info_message("Done", Gtk.MessageType.INFO)
 
@@ -211,13 +207,17 @@ class PiconsDialog:
     @run_idle
     def on_selected_toggled(self, toggle, path):
         model = self._providers_tree_view.get_model()
-        model.set_value(model.get_iter(path), 4, not toggle.get_active())
+        model.set_value(model.get_iter(path), 5, not toggle.get_active())
         self.update_receive_button_state()
 
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())
         entry.set_name("GtkEntry" if suit else "digit-entry")
         self._load_providers_tool_button.set_sensitive(suit if suit else False)
+
+    def on_position_edited(self, render, path, value):
+        model = self._providers_tree_view.get_model()
+        model.set_value(model.get_iter(path), 2, value)
 
     @run_idle
     def update_receive_button_state(self):

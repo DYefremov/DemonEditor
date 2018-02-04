@@ -658,8 +658,8 @@ class MainAppWindow:
         response = show_settings_dialog(self.__main_window, self.__options)
         if response != Gtk.ResponseType.CANCEL:
             profile = self.__options.get("profile")
+            self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
             if profile != self.__profile:
-                self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
                 self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
                 self.__profile = profile
                 self.clear_current_data()
@@ -837,8 +837,7 @@ class MainAppWindow:
         locate_in_services(view, self.__services_view, self.__main_window)
 
     def on_picons_loader_show(self, item):
-        pos = {r[16] for r in self.__services_model}
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), pos, Profile(self.__profile))
+        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), Profile(self.__profile))
         dialog.show()
         self.update_picons()
 

@@ -9,18 +9,14 @@
       <column type="GdkPixbuf"/>
       <!-- column-name name -->
       <column type="gchararray"/>
+      <!-- column-name pos -->
+      <column type="gchararray"/>
       <!-- column-name url -->
       <column type="gchararray"/>
       <!-- column-name on_id -->
       <column type="gchararray"/>
       <!-- column-name selected -->
       <column type="gboolean"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="sat_position_list_store">
-    <columns>
-      <!-- column-name pos -->
-      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkDialog" id="picons_dialog">
@@ -384,55 +380,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="position_box">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="spacing">2</property>
-                <child>
-                  <object class="GtkLabel" id="label3">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="label" translatable="yes">Satellite position: </property>
-                    <property name="xalign">0.019999999552965164</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="position_combo_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="model">sat_position_list_store</property>
-                    <property name="active">0</property>
-                    <property name="id_column">0</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="pos_cellrenderertext"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="primary-toolbar"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">8</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkScrolledWindow" id="providers_scrolled_window">
                 <property name="height_request">150</property>
                 <property name="visible">True</property>
@@ -468,13 +415,28 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkTreeViewColumn" id="pos_column">
+                        <property name="title" translatable="yes">Position</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pos_cellrenderertext1">
+                            <property name="xalign">0.50999999046325684</property>
+                            <property name="editable">True</property>
+                            <signal name="edited" handler="on_position_edited" swapped="no"/>
+                          </object>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkTreeViewColumn" id="url_column">
                         <property name="visible">False</property>
                         <property name="title" translatable="yes">Url</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                          <object class="GtkCellRendererText" id="url_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">2</attribute>
+                            <attribute name="text">3</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -484,9 +446,9 @@
                         <property name="visible">False</property>
                         <property name="title" translatable="yes">ONID</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                          <object class="GtkCellRendererText" id="onid_cellrenderertext"/>
                           <attributes>
-                            <attribute name="text">3</attribute>
+                            <attribute name="text">4</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -499,7 +461,7 @@
                             <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
                           </object>
                           <attributes>
-                            <attribute name="active">4</attribute>
+                            <attribute name="active">5</attribute>
                           </attributes>
                         </child>
                       </object>
@@ -746,5 +708,11 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="sat_position_list_store">
+    <columns>
+      <!-- column-name pos -->
+      <column type="gchararray"/>
+    </columns>
   </object>
 </interface>
