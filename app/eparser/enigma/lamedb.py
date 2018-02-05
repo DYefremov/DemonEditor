@@ -111,10 +111,12 @@ def parse_services(services, transponders, path):
             tr_type, sp, tr = str(transponder).partition(" ")
             tr = tr.split(_SEP)
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
+            # removing all non printable symbols!
+            srv_name = "".join(c for c in ch[1] if c.isprintable())
             channels.append(Service(flags_cas=ch[2],
                                     transponder_type=tr_type,
                                     coded=coded,
-                                    service=ch[1],
+                                    service=srv_name,
                                     locked=locked,
                                     hide=hide,
                                     package=package,

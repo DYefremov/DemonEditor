@@ -18,7 +18,7 @@ def write_bouquets(path, bouquets):
         line.append("#NAME {}\n".format(bqs.name))
 
         for bq in bqs.bouquets:
-            line.append(srv_line.format(bq.name, bq.type))
+            line.append(srv_line.format(bq.name.replace(" ", "_"), bq.type))
             write_bouquet(path, bq.name, bq.type, bq.services)
 
         with open(path + "bouquets.{}".format(bqs.type), "w") as file:
@@ -37,7 +37,7 @@ def write_bouquet(path, name, bq_type, channels):
         else:
             bouquet.append("#SERVICE {}\n".format(to_bouquet_id(ch)))
 
-    with open(path + "userbouquet.{}.{}".format(name, bq_type), "w") as file:
+    with open(path + "userbouquet.{}.{}".format(name.replace(" ", "_"), bq_type), "w") as file:
         file.writelines(bouquet)
 
 

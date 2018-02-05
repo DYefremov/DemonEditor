@@ -22,6 +22,7 @@ class DownloadDataType(Enum):
 def download_data(*, properties, download_type=DownloadDataType.ALL, callback=None):
     with FTP(host=properties["host"]) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
+        ftp.encoding = "utf-8"
         save_path = properties["data_dir_path"]
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
@@ -66,6 +67,7 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
 
     with FTP(host=host) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
+        ftp.encoding = "utf-8"
 
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])

@@ -3,7 +3,7 @@ import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
-from app.commons import log, run_task
+from app.commons import log
 from app.properties import Profile
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{:X}0000"
