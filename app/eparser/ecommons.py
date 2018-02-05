@@ -61,7 +61,7 @@ SYSTEM = {"0": "DVB-S", "1": "DVB-S2"}
 MODULATION = {"0": "Auto", "1": "QPSK", "2": "8PSK", "3": "16APSK", "5": "32APSK"}
 
 SERVICE_TYPE = {"-2": "Unknown", "1": "TV", "2": "Radio", "3": "Data",
-                "10": "Radio", "12": "Data", "22": "TV", "25": "TV (HD)",
+                "10": "Radio", "12": "Data", "22": "TV", "25": "TV (HD)", "31": "TV (UHD)",
                 "136": "Data", "139": "Data"}
 
 CAS = {"C:2600": "BISS", "C:0b00": "Conax", "C:0b01": "Conax", "C:0b02": "Conax", "C:0baa": "Conax", "C:0602": "Irdeto",
