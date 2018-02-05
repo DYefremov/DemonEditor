@@ -15,7 +15,8 @@ from .main_helper import update_entry_data
 
 
 class PiconsDialog:
-    def __init__(self, transient, options, profile=Profile.ENIGMA_2):
+    def __init__(self, transient, options, picon_ids, profile=Profile.ENIGMA_2):
+        self._picon_ids = picon_ids
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
@@ -130,7 +131,8 @@ class PiconsDialog:
         self._current_process.wait()
         path = self._TMP_DIR + self._BASE_URL + url[url.rfind("/") + 1:]
         pos = "".join(c for c in prv.pos if c.isdigit())
-        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv.on_id, pos, self.get_picons_format())
+        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv.on_id, pos,
+                           self._picon_ids, self.get_picons_format())
         self.resize(self._picons_path)
         self.show_info_message("Done", Gtk.MessageType.INFO)
 
@@ -225,7 +227,7 @@ class PiconsDialog:
 
     def get_selected_providers(self):
         """ returns selected providers """
-        return [r for r in self._providers_tree_view.get_model() if r[4]]
+        return [r for r in self._providers_tree_view.get_model() if r[5]]
 
     @run_idle
     def show_dialog(self, message, dialog_type):

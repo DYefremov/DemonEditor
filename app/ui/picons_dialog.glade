@@ -416,6 +416,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="pos_column">
+                        <property name="sizing">autosize</property>
                         <property name="title" translatable="yes">Position</property>
                         <child>
                           <object class="GtkCellRendererText" id="pos_cellrenderertext1">

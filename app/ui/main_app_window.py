@@ -132,6 +132,7 @@ class MainAppWindow:
         self.__profile_label.set_text("Enigma2 v.4" if Profile(self.__profile) is Profile.ENIGMA_2 else "Neutrino-MP")
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
+        self.__picons_download_tool_button = builder.get_object("picons_download_tool_button")
         self.__cas_label = builder.get_object("cas_label")
         self.__fav_count_label = builder.get_object("fav_count_label")
         self.__bouquets_count_label = builder.get_object("bouquets_count_label")
@@ -499,6 +500,7 @@ class MainAppWindow:
             self.append_services(data_path)
             self.update_services_counts(len(self.__services_model))
             self.update_picons()
+            self.__picons_download_tool_button.set_sensitive(len(self.__services_model))
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
@@ -664,6 +666,7 @@ class MainAppWindow:
                 self.__profile = profile
                 self.clear_current_data()
                 self.update_services_counts()
+                self.__picons_download_tool_button.set_sensitive(len(self.__services_model))
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -836,8 +839,15 @@ class MainAppWindow:
     def on_locate_in_services(self, view):
         locate_in_services(view, self.__services_view, self.__main_window)
 
+    @run_idle
     def on_picons_loader_show(self, item):
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), Profile(self.__profile))
+        ids = {}
+        if Profile(self.__profile) is Profile.ENIGMA_2:
+            for r in self.__services_model:
+                data = r[9].split("_")
+                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
+
+        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), ids, Profile(self.__profile))
         dialog.show()
         self.update_picons()
 

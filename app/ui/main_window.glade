@@ -446,7 +446,7 @@
   <object class="GtkImage" id="send_recive_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">mail-send-receive</property>
+    <property name="icon_name">network-transmit-receive</property>
   </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
@@ -743,7 +743,7 @@
                 <property name="tooltip_text" translatable="yes">FTP-transfer</property>
                 <property name="label" translatable="yes">Download</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">mail-send-receive</property>
+                <property name="icon_name">network-transmit-receive</property>
                 <signal name="clicked" handler="on_download" swapped="no"/>
               </object>
               <packing>
@@ -1090,6 +1090,7 @@
             <child>
               <object class="GtkToolButton" id="picons_download_tool_button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Picons</property>
                 <property name="label" translatable="yes">Picons loader</property>

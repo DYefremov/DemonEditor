@@ -3,13 +3,11 @@ import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
-from app.commons import log
+from app.commons import log, run_task
 from app.properties import Profile
 
-
-_ENIGMA2_PICON_NAME = "1_0_{}_{:X}_{:X}_{:X}_{:X}0000_0_0_0.png"
-_NEUTRINO_PICON_NAME = "{:x}{:04x}{:04x}.png"
-
+_ENIGMA2_PICON_KEY = "{:X}:{:X}:{:X}0000"
+_NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
 
 Provider = namedtuple("Provider", ["logo", "name", "pos", "url", "on_id", "selected"])
 Picon = namedtuple("Picon", ["ref", "ssid", "v_pid"])
@@ -73,7 +71,7 @@ class PiconsParser(HTMLParser):
         pass
 
     @staticmethod
-    def parse(open_path, picons_path, tmp_path, on_id, pos, profile=Profile.ENIGMA_2):
+    def parse(open_path, picons_path, tmp_path, on_id, pos, picon_ids, profile=Profile.ENIGMA_2):
         with open(open_path, encoding="utf-8", errors="replace") as f:
             parser = PiconsParser()
             parser.reset()
@@ -83,19 +81,20 @@ class PiconsParser(HTMLParser):
                 os.makedirs(picons_path, exist_ok=True)
                 for p in picons:
                     try:
-                        picon_file_name = picons_path + PiconsParser.format(p.ssid, on_id, p.v_pid, pos, profile)
-                        shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), picon_file_name)
+                        name = PiconsParser.format(p.ssid, on_id, p.v_pid, pos, picon_ids, profile)
+                        p_name = picons_path + (name if name else os.path.basename(p.ref))
+                        shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
                     except (TypeError, ValueError) as e:
-                        log("Picons format parse error: {} {} {}".format(p.ref, p.ssid, p.v_pid) + "\n" + str(e))
+                        log("Picons format parse error: {}".format(p) + "\n" + str(e))
                         print(e)
 
     @staticmethod
-    def format(ssid, on_id, v_pid, pos, profile: Profile):
+    def format(ssid, on_id, v_pid, pos, picon_ids, profile: Profile):
         tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
         if profile is Profile.ENIGMA_2:
-            return _ENIGMA2_PICON_NAME.format(1 if v_pid else 2, int(ssid), tr_id, int(on_id), int(pos))
+            return picon_ids.get(_ENIGMA2_PICON_KEY.format(int(ssid), int(on_id), int(pos)), None)
         elif profile is Profile.NEUTRINO_MP:
-            return _NEUTRINO_PICON_NAME.format(tr_id, int(on_id), int(ssid))
+            return _NEUTRINO_PICON_KEY.format(tr_id, int(on_id), int(ssid))
         else:
             return "{}.png".format(ssid)
 
@@ -168,15 +167,16 @@ class ProviderParser(HTMLParser):
     def error(self, message):
         pass
 
-    def reset_counter(self):
+    def reset(self):
+        super().reset()
         self._counter = 0
 
 
 def parse_providers(open_path):
+    parser = ProviderParser()
+    parser.reset()
+
     with open(open_path, encoding="utf-8", errors="replace") as f:
-        parser = ProviderParser()
-        parser.reset()
-        parser.reset_counter()
         parser.feed(f.read())
         rows = parser.rows
 
