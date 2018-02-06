@@ -39,9 +39,10 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
-    itr = model.insert_before(model.get_iter(paths[0]), (None, None, response, None, None, s_type, None, fav_id, None))
-    channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
+    marker = (None, None, response, None, None, s_type, None, fav_id, None)
+    itr = model.insert_before(model.get_iter(paths[0]), marker) if paths else model.insert(0, marker)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
+    channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
 
 
 def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
@@ -135,7 +136,7 @@ def edit(view, parent_window, target, fav_view=None, service_view=None, channels
         model.set_value(itr, 2, response)
 
         if service_view is not None:
-            for row in service_view.get_model():
+            for row in get_base_model(service_view.get_model()):
                 if row[18] == fav_id:
                     row[3] = response
                     break
