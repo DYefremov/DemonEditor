@@ -206,7 +206,7 @@ class MainAppWindow:
     def on_copy(self, view):
         model, paths = view.get_selection().get_selected_rows()
         itrs = [model.get_iter(path) for path in paths]
-        rows = [(0, *model.get(in_itr, 2, 3, 4, 5, 7, 14, 16)) for in_itr in itrs]
+        rows = [(0, *model.get(in_itr, 2, 3, 4, 5, 7, 16, 18, 8)) for in_itr in itrs]
         self.__rows_buffer.extend(rows)
 
     def on_paste(self, view):
@@ -392,8 +392,7 @@ class MainAppWindow:
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
         model, paths = view.get_selection().get_selected_rows()
-        if model.get_model():  # needs think about it !
-            model = model.get_model().get_model()
+        model = get_base_model(model)
 
         if len(paths) > 0:
             itrs = [model.get_iter(path) for path in paths]
@@ -429,17 +428,17 @@ class MainAppWindow:
                 dest_index -= 1
                 for ext_row in ext_rows:
                     dest_index += 1
-                    fav_id = ext_row[-2]
-                    channel = self.__services[fav_id]
-                    model.insert(dest_index, (0, channel.coded, channel.service, channel.locked, channel.hide,
-                                              channel.service_type, channel.pos, channel.fav_id))
-                    fav_bouquet.insert(dest_index, channel.fav_id)
+                    fav_id = ext_row[18]
+                    ch = self.__services[fav_id]
+                    model.insert(dest_index, (0, ch.coded, ch.service, ch.locked, ch.hide,
+                                              ch.service_type, ch.pos, ch.fav_id, self.__picons.get(ch.picon_id, None)))
+                    fav_bouquet.insert(dest_index, ch.fav_id)
             elif source == self._FAV_LIST_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
                 in_rows = [model[in_itr][:] for in_itr in in_itrs]
                 for row in in_rows:
                     model.insert(dest_index, row)
-                    fav_bouquet.insert(dest_index, row[4])
+                    fav_bouquet.insert(dest_index, row[7])
                 for in_itr in in_itrs:
                     del fav_bouquet[int(model.get_path(in_itr)[0])]
                     model.remove(in_itr)
