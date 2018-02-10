@@ -589,7 +589,7 @@ class MainAppWindow:
         services = [Service(*row[:]) for row in services_model]
         write_services(path, services, profile)
         # removing bouquet files
-        if profile is profile.ENIGMA_2:
+        if profile is Profile.ENIGMA_2:
             # blacklist
             write_blacklist(path, self.__blacklist)
 
