@@ -53,8 +53,8 @@ def write_services(path, services):
 
             for srv in transponers.get(tr):
                 srv_elem = doc.createElement("S")
-                srv_elem.setAttribute("i", srv[8])
-                srv_elem.setAttribute("n", srv[3])
+                srv_elem.setAttribute("i", srv.ssid)
+                srv_elem.setAttribute("n", srv.service)
 
                 srv_attrs = srv.data_id.split(":")
                 api = srv_attrs.pop(0)
