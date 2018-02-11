@@ -1,5 +1,4 @@
 import os
-from contextlib import suppress
 from enum import Enum
 from xml.dom.minidom import parse, Document
 
@@ -8,16 +7,21 @@ from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDE
 
 _FILE = "bouquets.xml"
 _U_FILE = "ubouquets.xml"
+_W_FILE = "webtv.xml"
+
+_COMMENT = " File was created in DemonEditor. Enjoy watching! "
 
 
 class BqType(Enum):
     BOUQUET = "bouquet"
     TV = "tv"
+    WEBTV = "webtv"
 
 
 def get_bouquets(path):
     return (parse_bouquets(path + _FILE, "Providers", BqType.BOUQUET.value),
-            parse_bouquets(path + _U_FILE, "FAV", BqType.TV.value))
+            parse_bouquets(path + _U_FILE, "FAV", BqType.TV.value),
+            parse_webtv(path + _W_FILE, "WEBTV", BqType.WEBTV.value))
 
 
 def parse_bouquets(file, name, bq_type):
@@ -61,22 +65,61 @@ def parse_bouquets(file, name, bq_type):
     return bouquets
 
 
-def write_bouquets(path, bouquets):
-    if len(bouquets) < 2:
-        for f in path + _FILE, path + _U_FILE:
-            with suppress(FileNotFoundError):
-                os.remove(f)
+def parse_webtv(path, name, bq_type):
+    bouquets = Bouquets(name=name, type=bq_type, bouquets=[])
+    if not os.path.exists(path):
+        return bouquets
 
+    dom = parse(path)
+    services = []
+    for elem in dom.getElementsByTagName("webtv"):
+        if elem.hasAttributes():
+            title = elem.attributes["title"].value
+            url = elem.attributes["url"].value
+            description = elem.attributes["description"].value
+            urlkey = elem.attributes.get("urlkey", None)
+            urlkey = urlkey.value if urlkey else urlkey
+            account = elem.attributes.get("account", None)
+            account = account.value if account else account
+            usrname = elem.attributes.get("usrname", None)
+            usrname = usrname.value if usrname else usrname
+            psw = elem.attributes.get("psw", None)
+            psw = psw.value if psw else psw
+            s_type = elem.attributes.get("type", None)
+            s_type = s_type.value if s_type else s_type
+            iconsrc = elem.attributes.get("iconsrc", None)
+            iconsrc = iconsrc.value if iconsrc else iconsrc
+            iconsrc_b = elem.attributes.get("iconsrc_b", None)
+            iconsrc_b = iconsrc_b.value if iconsrc_b else iconsrc_b
+            group = elem.attributes.get("group", None)
+            group = group.value if group else group
+            fav_id = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}".format(url, description, urlkey, account, usrname,
+                                                                     psw, s_type, iconsrc, iconsrc_b, group)
+            srv = BouquetService(name=title,
+                                 type=BqServiceType.IPTV,
+                                 data=fav_id,
+                                 num=0)
+            services.append(srv)
+    bouquet = Bouquet(name="default", type=bq_type, services=services, locked=None, hidden=None)
+    bouquets[2].append(bouquet)
+
+    return bouquets
+
+
+def write_bouquets(path, bouquets):
     for bq in bouquets:
         bq_type = BqType(bq.type)
-        write_bouquet(path + (_FILE if bq_type is BqType.BOUQUET else _U_FILE), bq)
+        if bq_type is BqType.WEBTV:
+            write_webtv(path + _W_FILE, bq)
+        else:
+            write_bouquet(path + (_FILE if bq_type is BqType.BOUQUET else _U_FILE), bq)
 
 
 def write_bouquet(file, bouquet):
     doc = Document()
     root = doc.createElement("zapit")
     doc.appendChild(root)
-    comment = doc.createComment(" File was created in DemonEditor. Enjoy watching! ")
+    comment = doc.createComment(_COMMENT)
     doc.appendChild(comment)
 
     for bq in bouquet.bouquets:
@@ -98,6 +141,44 @@ def write_bouquet(file, bouquet):
             srv_elem.setAttribute("frq", srv.freq[:-3])
             srv_elem.setAttribute("l", "0")  # temporary !!!
             bq_elem.appendChild(srv_elem)
+
+    doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+
+
+def write_webtv(file, bouquet):
+    doc = Document()
+    root = doc.createElement("webtvs")
+    doc.appendChild(root)
+    comment = doc.createComment(_COMMENT)
+    doc.appendChild(comment)
+
+    for bq in bouquet.bouquets:
+        for srv in bq.services:
+            url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group = srv.fav_id.split("::")
+            srv_elem = doc.createElement("webtv")
+            srv_elem.setAttribute("title", srv.service)
+            srv_elem.setAttribute("url", url)
+
+            if description != "None":
+                srv_elem.setAttribute("description", description)
+            if urlkey != "None":
+                srv_elem.setAttribute("urlkey", urlkey)
+            if account != "None":
+                srv_elem.setAttribute("account", account)
+            if usrname != "None":
+                srv_elem.setAttribute("usrname", usrname)
+            if psw != "None":
+                srv_elem.setAttribute("psw", psw)
+            if s_type != "None":
+                srv_elem.setAttribute("type", s_type)
+            if iconsrc != "None":
+                srv_elem.setAttribute("iconsrc", iconsrc)
+            if iconsrc_b != "None":
+                srv_elem.setAttribute("iconsrc_b", iconsrc_b)
+            if group != "None":
+                srv_elem.setAttribute("group", group)
+
+            root.appendChild(srv_elem)
 
     doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
 
