@@ -9,6 +9,7 @@ from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
+from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
@@ -39,8 +40,9 @@ class MainAppWindow:
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
                      "fav_locate_popup_item", "fav_picon_popup_item")
 
-    _FAV_ONLY_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                          "fav_edit_marker_popup_item")
+    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
+
+    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
@@ -714,7 +716,6 @@ class MainAppWindow:
                              open_data=self.open_data,
                              profile=Profile(self.__profile))
 
-    @run_idle
     def on_view_focus(self, view, focus_event):
         profile = Profile(self.__profile)
         model = get_base_model(view.get_model())
@@ -731,12 +732,21 @@ class MainAppWindow:
                     self.__tool_elements[elem].set_sensitive(not_empty)
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
+            bq_selected = False
+            if model_name == self._FAV_LIST_NAME:
+                bq_selected = self.is_bouquet_selected()
+                if profile is Profile.NEUTRINO_MP and bq_selected:
+                    name, bq_type = bq_selected.split(":")
+                    bq_selected = BqType(bq_type) is BqType.WEBTV
+
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
                     self.__tool_elements[elem].set_sensitive(not is_service and self.__rows_buffer)
-                elif elem in self._FAV_ONLY_ELEMENTS:
+                elif elem in self._FAV_ENIGMA_ELEMENTS:
                     if profile is Profile.ENIGMA_2:
-                        self.__tool_elements[elem].set_sensitive(self.is_bouquet_selected() and not is_service)
+                        self.__tool_elements[elem].set_sensitive(bq_selected and not is_service)
+                elif elem in self._FAV_M3U_ELEMENTS:
+                    self.__tool_elements[elem].set_sensitive(bq_selected and not is_service)
                 else:
                     self.__tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:
