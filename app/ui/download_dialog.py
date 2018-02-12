@@ -35,16 +35,19 @@ class DownloadDialog:
         self._all_radio_button = builder.get_object("all_radio_button")
         self._bouquets_radio_button = builder.get_object("bouquets_radio_button")
         self._satellites_radio_button = builder.get_object("satellites_radio_button")
+        self._webtv_radio_button = builder.get_object("webtv_radio_button")
+        if profile is Profile.NEUTRINO_MP:
+            self._webtv_radio_button.set_visible(True)
         # self._dialog.get_content_area().set_border_width(0)
 
     @run_idle
     def on_receive(self, item):
-        self.download(True, d_type=self.get_download_type())
+        self.download(True, self.get_download_type())
 
     @run_idle
     def on_send(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.CANCEL:
-            self.download(d_type=self.get_download_type())
+            self.download(False, self.get_download_type())
 
     def get_download_type(self):
         download_type = DownloadDataType.ALL
@@ -52,6 +55,8 @@ class DownloadDialog:
             download_type = DownloadDataType.BOUQUETS
         elif self._satellites_radio_button.get_active():
             download_type = DownloadDataType.SATELLITES
+        elif self._webtv_radio_button.get_active():
+            download_type = DownloadDataType.WEBTV
         return download_type
 
     def run(self):
@@ -65,7 +70,7 @@ class DownloadDialog:
 
     @run_idle
     @run_task
-    def download(self, download=False, d_type=DownloadDataType.ALL):
+    def download(self, download, d_type):
         """ Download/upload data from/to receiver """
         try:
             if download:

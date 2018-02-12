@@ -2,6 +2,7 @@ import os
 from enum import Enum
 from xml.dom.minidom import parse, Document
 
+from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
 from app.ui import LOCKED_ICON, HIDE_ICON
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER
 
@@ -76,7 +77,8 @@ def parse_webtv(path, name, bq_type):
         if elem.hasAttributes():
             title = elem.attributes["title"].value
             url = elem.attributes["url"].value
-            description = elem.attributes["description"].value
+            description = elem.attributes.get("description")
+            description = description.value if description else description
             urlkey = elem.attributes.get("urlkey", None)
             urlkey = urlkey.value if urlkey else urlkey
             account = elem.attributes.get("account", None)
@@ -93,8 +95,8 @@ def parse_webtv(path, name, bq_type):
             iconsrc_b = iconsrc_b.value if iconsrc_b else iconsrc_b
             group = elem.attributes.get("group", None)
             group = group.value if group else group
-            fav_id = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}".format(url, description, urlkey, account, usrname,
-                                                                     psw, s_type, iconsrc, iconsrc_b, group)
+            fav_id = NEUTRINO_FAV_ID_FORMAT.format(url, description, urlkey, account, usrname, psw, s_type, iconsrc,
+                                                   iconsrc_b, group)
             srv = BouquetService(name=title,
                                  type=BqServiceType.IPTV,
                                  data=fav_id,

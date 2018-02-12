@@ -220,7 +220,21 @@ dmitry.v.yefremov@gmail.com
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkRadioButton" id="webtv_radio_button">
+                    <property name="label" translatable="yes">WebTV</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0.52999997138977051</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">all_radio_button</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
                 </child>
               </object>
               <packing>

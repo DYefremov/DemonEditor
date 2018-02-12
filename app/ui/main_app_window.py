@@ -821,7 +821,7 @@ class MainAppWindow:
             show_dialog(DialogType.ERROR, self.__main_window, text="No m3u file is selected!")
             return
 
-        channels = parse_m3u(response)
+        channels = parse_m3u(response, Profile(self.__profile))
         bq_selected = self.is_bouquet_selected()
         if channels and bq_selected:
             bq_services = self.__bouquets.get(bq_selected)
