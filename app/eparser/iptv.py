@@ -1,5 +1,6 @@
 """ Module for m3u import """
 from app.properties import Profile
+from app.ui import IPTV_ICON
 from .ecommons import BqServiceType, Service
 
 # url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group
@@ -24,7 +25,7 @@ def parse_m3u(path, profile):
                     fav_id = ENIGMA2_FAV_ID_FORMAT.format(line.strip().replace(":", "%3a"), name, name, None)
                 elif profile is Profile.NEUTRINO_MP:
                     fav_id = NEUTRINO_FAV_ID_FORMAT.format(line.strip(), "", 0, None, None, None, None, "", "", 1)
-                srv = Service(*aggr[0:3], name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
+                srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
                 channels.append(srv)
 
     return channels

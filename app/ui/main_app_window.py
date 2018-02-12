@@ -11,7 +11,7 @@ from app.eparser.ecommons import CAS, FLAG
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
-from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
+from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
@@ -526,7 +526,8 @@ class MainAppWindow:
                     # IPTV and MARKER services
                     s_type = srv.type
                     if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
-                        srv = Service(*agr[0:3], srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
+                        icon = IPTV_ICON if s_type is BqServiceType.IPTV else None
+                        srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
                         self.__services[fav_id] = srv
                     services.append(fav_id)
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
