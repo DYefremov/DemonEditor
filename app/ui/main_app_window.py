@@ -19,6 +19,7 @@ from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarge
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
+from .service_details_dialog import ServiceDetailsDialog
 
 
 class MainAppWindow:
@@ -101,7 +102,8 @@ class MainAppWindow:
                     "on_reference_picon": self.on_reference_picon,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_search_toggled": self.on_search_toggled,
-                    "on_search": self.on_search}
+                    "on_search": self.on_search,
+                    "on_services_data_edit": self.on_services_data_edit}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -886,6 +888,10 @@ class MainAppWindow:
                self.__bouquets_view,
                self.__services,
                self.__bouquets)
+
+    def on_services_data_edit(self, item):
+        dialog = ServiceDetailsDialog(self.__main_window)
+        dialog.show()
 
     @run_idle
     def update_picons(self):

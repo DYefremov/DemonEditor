@@ -117,6 +117,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-copy</property>
   </object>
+  <object class="GtkImage" id="image17">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-properties</property>
+  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -365,6 +370,22 @@
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem7">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_data_edit_popup_item">
+        <property name="label" translatable="yes">Edit data/new service</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">image17</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_services_data_edit" swapped="no"/>
       </object>
     </child>
     <child>
