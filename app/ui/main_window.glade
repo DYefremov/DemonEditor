@@ -1158,18 +1158,12 @@
           <object class="GtkInfoBar" id="search_info_bar">
             <property name="app_paintable">True</property>
             <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
             <child internal-child="action_area">
               <object class="GtkButtonBox" id="search_infobar_action_area">
                 <property name="can_focus">False</property>
-                <property name="spacing">6</property>
+                <property name="spacing">5</property>
+                <property name="homogeneous">True</property>
                 <property name="layout_style">end</property>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
                 <child>
                   <placeholder/>
                 </child>
@@ -1177,16 +1171,16 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child internal-child="content_area">
               <object class="GtkBox" id="search_infobar_content_area">
                 <property name="can_focus">False</property>
-                <property name="spacing">16</property>
+                <property name="spacing">2</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkAlignment" id="alignment1">
+                  <object class="GtkAlignment" id="alignment2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -1216,7 +1210,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkAlignment" id="alignment2">
+                  <object class="GtkAlignment" id="alignment1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -1233,11 +1227,8 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -2232,7 +2223,7 @@
               <object class="GtkLabel" id="ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Ver. 0.2.3 Pre-alpha</property>
+                <property name="label" translatable="yes">Ver. 0.2.4 Pre-alpha</property>
                 <property name="xalign">0.94999998807907104</property>
               </object>
               <packing>
