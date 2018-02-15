@@ -6,7 +6,7 @@ from app.ui.main_helper import get_base_model, is_only_one_item_selected
 from . import Gtk, UI_RESOURCES_PATH
 
 
-class Pisd(Enum):
+class Pids(Enum):
     VIDEO = "c:00"
     AUDIO = "c:01"
     TELETEXT = "c:02"
@@ -92,26 +92,26 @@ class ServiceDetailsDialog:
         pids = list(filter(lambda x: x.startswith("c:"), flags))
         if pids:
             for pid in pids:
-                if pid.startswith(Pisd.VIDEO.value):
-                    self._video_pid_entry.set_text(pid.strip(Pisd.VIDEO.value))
-                elif pid.startswith(Pisd.AUDIO.value):
+                if pid.startswith(Pids.VIDEO.value):
+                    self._video_pid_entry.set_text(pid.strip(Pids.VIDEO.value))
+                elif pid.startswith(Pids.AUDIO.value):
                     pass
-                elif pid.startswith(Pisd.TELETEXT.value):
-                    self._teletext_pid_entry.set_text(pid.strip(Pisd.TELETEXT.value))
-                elif pid.startswith(Pisd.PCR.value):
-                    self._pcr_pid_entry.set_text(pid.strip(Pisd.PCR.value))
-                elif pid.startswith(Pisd.AC3.value):
-                    self._ac3_pid_entry.set_text(pid.strip(Pisd.AC3.value))
-                elif pid.startswith(Pisd.VIDEO_TYPE.value):
+                elif pid.startswith(Pids.TELETEXT.value):
+                    self._teletext_pid_entry.set_text(pid.strip(Pids.TELETEXT.value))
+                elif pid.startswith(Pids.PCR.value):
+                    self._pcr_pid_entry.set_text(pid.strip(Pids.PCR.value))
+                elif pid.startswith(Pids.AC3.value):
+                    self._ac3_pid_entry.set_text(pid.strip(Pids.AC3.value))
+                elif pid.startswith(Pids.VIDEO_TYPE.value):
                     # self._type_entry.set_text(pid.strip(Pisd.VIDEO_TYPE.value))
                     pass
-                elif pid.startswith(Pisd.AUDIO_CHANNEL.value):
+                elif pid.startswith(Pids.AUDIO_CHANNEL.value):
                     pass
-                elif pid.startswith(Pisd.BIT_STREAM_DELAY.value):
-                    self._bitstream_entry.set_text(pid.strip(Pisd.BIT_STREAM_DELAY.value))
-                elif pid.startswith(Pisd.PCM_DELAY.value):
-                    self._pcm_entry.set_text(pid.strip(Pisd.PCM_DELAY.value))
-                elif pid.startswith(Pisd.SUBTITLE.value):
+                elif pid.startswith(Pids.BIT_STREAM_DELAY.value):
+                    self._bitstream_entry.set_text(pid.strip(Pids.BIT_STREAM_DELAY.value))
+                elif pid.startswith(Pids.PCM_DELAY.value):
+                    self._pcm_entry.set_text(pid.strip(Pids.PCM_DELAY.value))
+                elif pid.startswith(Pids.SUBTITLE.value):
                     pass
 
         self._reference_entry.set_text(srv.picon_id.replace("_", ":").rstrip(".png"))
