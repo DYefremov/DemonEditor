@@ -2,6 +2,142 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkListStore" id="fec_list_store">
+    <columns>
+      <!-- column-name fec -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1/2</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2/3</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">3/4</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">5/6</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">7/8</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">8/9</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">3/5</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">4/5</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">9/10</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="invertion_list_store">
+    <columns>
+      <!-- column-name invertion -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="mod_list_store">
+    <columns>
+      <!-- column-name mod -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">QPSK</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">8PSK</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">16APSK</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">32APSK</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="pilot_list_store">
+    <columns>
+      <!-- column-name pilot -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="pls_mode_list_store">
+    <columns>
+      <!-- column-name pls_mode -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Root</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Gold</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Combo</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="pol_list_store">
+    <columns>
+      <!-- column-name pol -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">H</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">V</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">R</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">L</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="rolloff_list_store">
+    <columns>
+      <!-- column-name rolloff -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="sat_pos_list_store">
+    <columns>
+      <!-- column-name sat_pos -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="sys_list_store">
+    <columns>
+      <!-- column-name sys -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">DVB-S</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">DVB-S2</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkDialog" id="service_details_dialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Service details</property>
@@ -154,7 +290,7 @@
                       <object class="GtkLabel" id="label6">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">ID:</property>
+                        <property name="label" translatable="yes">SSID:</property>
                         <property name="xalign">1</property>
                       </object>
                       <packing>
@@ -251,6 +387,7 @@
                         <property name="width_chars">10</property>
                         <property name="max_width_chars">10</property>
                         <property name="xalign">0</property>
+                        <property name="yalign">0.75</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -328,7 +465,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="acc_entry">
+                      <object class="GtkEntry" id="acc_pid_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
@@ -340,7 +477,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="ac3+_pid_entry">
+                      <object class="GtkEntry" id="ac3plus_pid_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
@@ -585,13 +722,34 @@
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="label7">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="label9">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">0</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="label10">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">0</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -731,18 +889,6 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="sat_position_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkEntry" id="transponder_id_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -854,6 +1000,13 @@
                       <object class="GtkComboBox" id="pol_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">pol_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pol_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -864,6 +1017,13 @@
                       <object class="GtkComboBox" id="fec_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">fec_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="fec_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -874,6 +1034,13 @@
                       <object class="GtkComboBox" id="sys_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">sys_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="sys_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -896,7 +1063,7 @@
                       <object class="GtkEntry" id="flags_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
+                        <property name="width_chars">5</property>
                         <property name="max_width_chars">10</property>
                       </object>
                       <packing>
@@ -920,7 +1087,7 @@
                       <object class="GtkEntry" id="stream_id_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
+                        <property name="width_chars">5</property>
                         <property name="max_width_chars">10</property>
                       </object>
                       <packing>
@@ -932,7 +1099,7 @@
                       <object class="GtkLabel" id="label27">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">PLS mode:</property>
+                        <property name="label" translatable="yes">PLS code:</property>
                         <property name="xalign">1</property>
                       </object>
                       <packing>
@@ -941,10 +1108,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="pls_mode_entry">
+                      <object class="GtkEntry" id="pls_code_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
+                        <property name="width_chars">5</property>
                         <property name="max_width_chars">10</property>
                       </object>
                       <packing>
@@ -956,7 +1123,7 @@
                       <object class="GtkLabel" id="label26">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">PLS code:</property>
+                        <property name="label" translatable="yes">PLS mode:</property>
                         <property name="xalign">1</property>
                       </object>
                       <packing>
@@ -980,6 +1147,13 @@
                       <object class="GtkComboBox" id="pilot_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">pilot_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pilot_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1002,6 +1176,13 @@
                       <object class="GtkComboBox" id="rolloff_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">rolloff_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="rolloff_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1024,6 +1205,13 @@
                       <object class="GtkComboBox" id="invertion_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">invertion_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="inv_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1046,6 +1234,13 @@
                       <object class="GtkComboBox" id="mod_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="model">mod_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="mod_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1053,11 +1248,33 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="pls_code_entry">
+                      <object class="GtkComboBox" id="sat_pos_combo_box">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">sat_pos_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="sat_pos_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="pls_mode_combo_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">pls_mode_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pls_mode_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>

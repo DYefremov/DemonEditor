@@ -889,8 +889,9 @@ class MainAppWindow:
                self.__services,
                self.__bouquets)
 
+    @run_idle
     def on_services_data_edit(self, item):
-        dialog = ServiceDetailsDialog(self.__main_window)
+        dialog = ServiceDetailsDialog(self.__main_window, Profile(self.__profile), self.__services_view)
         dialog.show()
 
     @run_idle
