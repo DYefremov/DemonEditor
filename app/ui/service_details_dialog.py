@@ -1,7 +1,22 @@
+from enum import Enum
+
 from app.commons import run_idle
 from app.eparser import Service
 from app.ui.main_helper import get_base_model, is_only_one_item_selected
 from . import Gtk, UI_RESOURCES_PATH
+
+
+class Pisd(Enum):
+    VIDEO = "c:00"
+    AUDIO = "c:01"
+    TELETEXT = "c:02"
+    PCR = "c:03"
+    AC3 = "c:04"
+    VIDEO_TYPE = "c:05"
+    AUDIO_CHANNEL = "c:06"
+    BIT_STREAM_DELAY = "c:07"  # in ms
+    PCM_DELAY = "c:08"  # in ms
+    SUBTITLE = "c:09"
 
 
 class ServiceDetailsDialog:
@@ -18,7 +33,7 @@ class ServiceDetailsDialog:
         self._package_entry = builder.get_object("package_entry")
         self._id_entry = builder.get_object("id_entry")
         self._type_entry = builder.get_object("type_entry")
-        self._extra_entry = builder.get_object("extra_entry")
+        self._cas_entry = builder.get_object("cas_entry")
         self._bitstream_entry = builder.get_object("bitstream_entry")
         self._pcm_entry = builder.get_object("pcm_entry")
         self._reference_entry = builder.get_object("reference_entry")
@@ -60,17 +75,54 @@ class ServiceDetailsDialog:
         model = get_base_model(model)
         if is_only_one_item_selected(paths, self._dialog):
             srv = Service(*model[paths][:])
-            self._name_entry.set_text(srv.service)
-            self._package_entry.set_text(srv.package)
-            self._type_entry.set_text("")
-            self._id_entry.set_text(str(int(srv.ssid, 16)))
-            self._reference_entry.set_text(srv.picon_id.replace("_", ":").rstrip(".png"))
-            # transponder
-            self._freq_entry.set_text(srv.freq)
-            self._rate_entry.set_text(srv.rate)
-            self.select_active_text(self._pol_combo_box, srv.pol)
-            self.select_active_text(self._fec_combo_box, srv.fec)
-            self.select_active_text(self._sys_combo_box, srv.system)
+            self.init_service_data(srv)
+            self.init_transponder_data(srv)
+
+    def init_service_data(self, srv):
+        """ Service data initialisation """
+        self._name_entry.set_text(srv.service)
+        self._package_entry.set_text(srv.package)
+        self._type_entry.set_text(srv.service_type)
+        self._id_entry.set_text(str(int(srv.ssid, 16)))
+        flags = srv.flags_cas.split(",")
+        cas = list(filter(lambda x: x.startswith("C:"), flags))
+        if cas:
+            self._cas_entry.set_text(",".join(cas))
+
+        pids = list(filter(lambda x: x.startswith("c:"), flags))
+        if pids:
+            for pid in pids:
+                if pid.startswith(Pisd.VIDEO.value):
+                    self._video_pid_entry.set_text(pid.strip(Pisd.VIDEO.value))
+                elif pid.startswith(Pisd.AUDIO.value):
+                    pass
+                elif pid.startswith(Pisd.TELETEXT.value):
+                    self._teletext_pid_entry.set_text(pid.strip(Pisd.TELETEXT.value))
+                elif pid.startswith(Pisd.PCR.value):
+                    self._pcr_pid_entry.set_text(pid.strip(Pisd.PCR.value))
+                elif pid.startswith(Pisd.AC3.value):
+                    self._ac3_pid_entry.set_text(pid.strip(Pisd.AC3.value))
+                elif pid.startswith(Pisd.VIDEO_TYPE.value):
+                    # self._type_entry.set_text(pid.strip(Pisd.VIDEO_TYPE.value))
+                    pass
+                elif pid.startswith(Pisd.AUDIO_CHANNEL.value):
+                    pass
+                elif pid.startswith(Pisd.BIT_STREAM_DELAY.value):
+                    self._bitstream_entry.set_text(pid.strip(Pisd.BIT_STREAM_DELAY.value))
+                elif pid.startswith(Pisd.PCM_DELAY.value):
+                    self._pcm_entry.set_text(pid.strip(Pisd.PCM_DELAY.value))
+                elif pid.startswith(Pisd.SUBTITLE.value):
+                    pass
+
+        self._reference_entry.set_text(srv.picon_id.replace("_", ":").rstrip(".png"))
+
+    def init_transponder_data(self, srv):
+        """ Transponder data initialisation """
+        self._freq_entry.set_text(srv.freq)
+        self._rate_entry.set_text(srv.rate)
+        self.select_active_text(self._pol_combo_box, srv.pol)
+        self.select_active_text(self._fec_combo_box, srv.fec)
+        self.select_active_text(self._sys_combo_box, srv.system)
 
     def select_active_text(self, box: Gtk.ComboBox, text):
         model = box.get_model()
