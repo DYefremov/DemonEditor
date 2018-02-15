@@ -26,6 +26,7 @@ To create a simple debian package, you can use the build-deb.sh
 
 Tests only in image based on OpenPLi or last BPanther(neutrino) images with GM 990 Spark Reloaded receiver
 in my preferred linux distro (Last Linux Mint 18.* - MATE 64-bit)!
-##### Terrestrial and cable channels at the moment are not supported!
+
+#### Terrestrial and cable channels at the moment are not supported!
 
 
