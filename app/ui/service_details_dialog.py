@@ -32,14 +32,14 @@ class ServiceDetailsDialog:
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
         self._id_entry = builder.get_object("id_entry")
-        self._type_entry = builder.get_object("type_entry")
+        self._service_type_combo_box = builder.get_object("service_type_combo_box")
         self._cas_entry = builder.get_object("cas_entry")
         self._bitstream_entry = builder.get_object("bitstream_entry")
         self._pcm_entry = builder.get_object("pcm_entry")
         self._reference_entry = builder.get_object("reference_entry")
         self._video_pid_entry = builder.get_object("video_pid_entry")
         self._pcr_pid_entry = builder.get_object("pcr_pid_entry")
-        self._mpeg_pid_entry = builder.get_object("mpeg_pid_entry")
+        self._audio_pid_entry = builder.get_object("audio_pid_entry")
         self._ac3_pid_entry = builder.get_object("ac3_pid_entry")
         self._ac3plus_pid_entry = builder.get_object("ac3plus_pid_entry")
         self._acc_pid_entry = builder.get_object("acc_pid_entry")
@@ -72,7 +72,6 @@ class ServiceDetailsDialog:
     @run_idle
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
-        model = get_base_model(model)
         if is_only_one_item_selected(paths, self._dialog):
             srv = Service(*model[paths][:])
             self.init_service_data(srv)
@@ -82,7 +81,7 @@ class ServiceDetailsDialog:
         """ Service data initialisation """
         self._name_entry.set_text(srv.service)
         self._package_entry.set_text(srv.package)
-        self._type_entry.set_text(srv.service_type)
+        self.select_active_text(self._service_type_combo_box, srv.service_type)
         self._id_entry.set_text(str(int(srv.ssid, 16)))
         flags = srv.flags_cas.split(",")
         cas = list(filter(lambda x: x.startswith("C:"), flags))
@@ -93,24 +92,24 @@ class ServiceDetailsDialog:
         if pids:
             for pid in pids:
                 if pid.startswith(Pids.VIDEO.value):
-                    self._video_pid_entry.set_text(pid.strip(Pids.VIDEO.value))
+                    self._video_pid_entry.set_text(str(int(pid.lstrip(Pids.VIDEO.value), 16)))
                 elif pid.startswith(Pids.AUDIO.value):
-                    pass
+                    self._audio_pid_entry.set_text(str(int(pid.lstrip(Pids.AUDIO.value), 16)))
                 elif pid.startswith(Pids.TELETEXT.value):
-                    self._teletext_pid_entry.set_text(pid.strip(Pids.TELETEXT.value))
+                    self._teletext_pid_entry.set_text(str(int(pid.lstrip(Pids.TELETEXT.value), 16)))
                 elif pid.startswith(Pids.PCR.value):
-                    self._pcr_pid_entry.set_text(pid.strip(Pids.PCR.value))
+                    self._pcr_pid_entry.set_text(str(int(pid.lstrip(Pids.PCR.value), 16)))
                 elif pid.startswith(Pids.AC3.value):
-                    self._ac3_pid_entry.set_text(pid.strip(Pids.AC3.value))
+                    self._ac3_pid_entry.set_text(str(int(pid.lstrip(Pids.AC3.value), 16)))
                 elif pid.startswith(Pids.VIDEO_TYPE.value):
                     # self._type_entry.set_text(pid.strip(Pisd.VIDEO_TYPE.value))
                     pass
                 elif pid.startswith(Pids.AUDIO_CHANNEL.value):
                     pass
                 elif pid.startswith(Pids.BIT_STREAM_DELAY.value):
-                    self._bitstream_entry.set_text(pid.strip(Pids.BIT_STREAM_DELAY.value))
+                    self._bitstream_entry.set_text(str(int(pid.lstrip(Pids.BIT_STREAM_DELAY.value), 16)))
                 elif pid.startswith(Pids.PCM_DELAY.value):
-                    self._pcm_entry.set_text(pid.strip(Pids.PCM_DELAY.value))
+                    self._pcm_entry.set_text(str(int(pid.lstrip(Pids.PCM_DELAY.value), 16)))
                 elif pid.startswith(Pids.SUBTITLE.value):
                     pass
 
