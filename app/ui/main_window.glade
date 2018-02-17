@@ -380,12 +380,12 @@
     </child>
     <child>
       <object class="GtkImageMenuItem" id="services_data_edit_popup_item">
-        <property name="label" translatable="yes">Edit data/new service</property>
+        <property name="label" translatable="yes">Show details/edit</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="image">image17</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_services_data_edit" swapped="no"/>
+        <signal name="activate" handler="on_services_data_edit" object="services_tree_view" swapped="no"/>
       </object>
     </child>
     <child>

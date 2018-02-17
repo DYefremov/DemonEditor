@@ -7,7 +7,7 @@ import shutil
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, FLAG
+from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
@@ -708,8 +708,15 @@ class MainAppWindow:
             self.on_locked(None)
         elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
             self.on_hide(None)
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
+        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r:
             self.on_edit(view)
+        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
+            if model_name == self._BOUQUETS_LIST_NAME:
+                self.on_edit(view)
+                return
+            elif model_name == self._FAV_LIST_NAME:
+                self.on_locate_in_services(view)
+            self.on_services_data_edit(view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
 
@@ -763,10 +770,10 @@ class MainAppWindow:
             self.__tool_elements[elem].set_sensitive(not_empty)
 
     def on_hide(self, item):
-        self.set_service_flags(FLAG.HIDE)
+        self.set_service_flags(Flag.HIDE)
 
     def on_locked(self, item):
-        self.set_service_flags(FLAG.LOCK)
+        self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
         profile = Profile(self.__profile)
@@ -779,9 +786,9 @@ class MainAppWindow:
         elif profile is Profile.NEUTRINO_MP:
             if bq_selected:
                 model, path = self.__bouquets_view.get_selection().get_selected()
-                value = model.get_value(path, 1 if flag is FLAG.LOCK else 2)
-                value = None if value else LOCKED_ICON if flag is FLAG.LOCK else HIDE_ICON
-                model.set_value(path, 1 if flag is FLAG.LOCK else 2, value)
+                value = model.get_value(path, 1 if flag is Flag.LOCK else 2)
+                value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
+                model.set_value(path, 1 if flag is Flag.LOCK else 2, value)
 
     @run_idle
     def on_model_changed(self, model, path, itr=None):
@@ -891,7 +898,7 @@ class MainAppWindow:
 
     @run_idle
     def on_services_data_edit(self, item):
-        dialog = ServiceDetailsDialog(self.__main_window, Profile(self.__profile), self.__services_view)
+        dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
         dialog.show()
 
     @run_idle

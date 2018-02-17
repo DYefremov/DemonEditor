@@ -45,6 +45,17 @@
       <!-- column-name invertion -->
       <column type="gchararray"/>
     </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Off</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">On</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="mod_list_store">
     <columns>
@@ -74,6 +85,17 @@
       <!-- column-name pilot -->
       <column type="gchararray"/>
     </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Off</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">On</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="pls_mode_list_store">
     <columns>
@@ -117,6 +139,20 @@
       <!-- column-name rolloff -->
       <column type="gchararray"/>
     </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">35%</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">25%</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">20%</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="sat_pos_list_store">
     <columns>
@@ -730,6 +766,7 @@
                   <object class="GtkEntry" id="reference_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                     <property name="width_chars">30</property>
                   </object>
                   <packing>
@@ -963,6 +1000,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">sys_list_store</property>
+                    <signal name="changed" handler="on_system_changed" swapped="no"/>
                     <child>
                       <object class="GtkCellRendererText" id="sys_cellrenderertext"/>
                       <attributes>
@@ -989,7 +1027,9 @@
                 <child>
                   <object class="GtkComboBox" id="mod_combo_box">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
+                    <property name="opacity">0.98999999999999999</property>
                     <property name="model">mod_list_store</property>
                     <child>
                       <object class="GtkCellRendererText" id="mod_cellrenderertext"/>
@@ -1041,116 +1081,6 @@
                     <property name="can_focus">False</property>
                     <property name="column_spacing">2</property>
                     <child>
-                      <object class="GtkLabel" id="label29">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Flags</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">6</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="flags_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">10</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">6</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label24">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Pilot</property>
-                        <property name="xalign">1</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">5</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="pilot_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="model">pilot_list_store</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="pilot_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">5</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label23">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">R.off</property>
-                        <property name="xalign">1</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label25">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Inv.</property>
-                        <property name="xalign">1</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="rolloff_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="model">rolloff_list_store</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="rolloff_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="invertion_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="model">invertion_list_store</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="inv_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkLabel" id="label4">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -1197,10 +1127,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label28">
+                      <object class="GtkLabel" id="label25">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Stream ID</property>
+                        <property name="label" translatable="yes">Inversion</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -1208,14 +1138,179 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="stream_id_entry">
+                      <object class="GtkLabel" id="label23">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Rolloff</property>
+                        <property name="angle">0.02</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label24">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Pilot</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="invertion_combo_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">invertion_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="inv_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="rolloff_combo_box">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">rolloff_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="rolloff_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="pilot_combo_box">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">pilot_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pilot_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label10">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">PLS mode</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">5</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="pls_mode_combo_box">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">pls_mode_list_store</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="pls_mode_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">5</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label29">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Flags</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">8</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="flags_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">10</property>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
+                        <property name="left_attach">8</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label9">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">PLS code</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">6</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="pls_code_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">7</property>
+                        <property name="max_width_chars">10</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">6</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label28">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Stream ID</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">7</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="stream_id_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">10</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">7</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
