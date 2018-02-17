@@ -34,7 +34,7 @@ class Type(Enum):
     Cable = "c"
 
 
-class FLAG(Enum):
+class Flag(Enum):
     """ Service flags """
     KEEP = 1  # Do not automatically update the services parameters.
     HIDE = 2
@@ -46,6 +46,20 @@ class FLAG(Enum):
     def hide_values():
         return 2, 3, 6, 7, 10, 42, 43, 46, 47
 
+
+class Inversion(Enum):
+    Off = "0"
+    On = "1"
+    Auto = "2"
+
+
+class Pilot(Enum):
+    Off = "0"
+    On = "1"
+    Auto = "2"
+
+
+ROLL_OFF = {"0": "35%", "1": "25%", "2": "20%", "3": "Auto"}
 
 POLARIZATION = {"0": "H", "1": "V", "2": "L", "3": "R"}
 

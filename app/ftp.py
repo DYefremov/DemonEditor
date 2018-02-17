@@ -11,12 +11,16 @@ from app.properties import Profile
 __DATA_FILES_LIST = ("tv", "radio", "lamedb", "blacklist", "whitelist",  # enigma 2
                      "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
+_SATELLITES_XML_FILE = "satellites.xml"
+_WEBTV_XML_FILE = "webtv.xml"
+
 
 class DownloadDataType(Enum):
     ALL = 0
     BOUQUETS = 1
     SATELLITES = 2
     PICONS = 3
+    WEBTV = 4
 
 
 def download_data(*, properties, download_type=DownloadDataType.ALL, callback=None):
@@ -35,20 +39,21 @@ def download_data(*, properties, download_type=DownloadDataType.ALL, callback=No
                 name = str(file).strip()
                 if name.endswith(__DATA_FILES_LIST):
                     name = name.split()[-1]
-                    with open(save_path + name, "wb") as f:
-                        ftp.retrbinary("RETR " + name, f.write)
-        # satellites.xml section
-        if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
+                    download_file(ftp, name, save_path)
+        # satellites.xml and webtv section
+        if download_type in (DownloadDataType.ALL, DownloadDataType.SATELLITES, DownloadDataType.WEBTV):
             ftp.cwd(properties["satellites_xml_path"])
             files.clear()
             ftp.dir(files.append)
 
             for file in files:
                 name = str(file).strip()
-                xml_file = "satellites.xml"
-                if name.endswith(xml_file):
-                    with open(save_path + xml_file, 'wb') as f:
-                        ftp.retrbinary("RETR " + xml_file, f.write)
+                if download_type in (DownloadDataType.ALL, DownloadDataType.SATELLITES):
+                    if name.endswith(_SATELLITES_XML_FILE):
+                        download_file(ftp, _SATELLITES_XML_FILE, save_path)
+                elif download_type in (DownloadDataType.ALL, DownloadDataType.WEBTV):
+                    if name.endswith(_WEBTV_XML_FILE):
+                        download_file(ftp, _WEBTV_XML_FILE, save_path)
 
         if callback is not None:
             callback()
@@ -71,9 +76,20 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
 
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])
-            file_name = "satellites.xml"
-            send = send_file(file_name, data_path, ftp)
-            if download_type == DownloadDataType.SATELLITES:
+            send = send_file(_SATELLITES_XML_FILE, data_path, ftp)
+            if download_type is DownloadDataType.SATELLITES:
+                tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
+                if callback is not None:
+                    callback()
+                return send
+
+        if profile is Profile.NEUTRINO_MP and download_type in (DownloadDataType.ALL, DownloadDataType.WEBTV):
+            ftp.cwd(properties["satellites_xml_path"])
+            send = send_file(_WEBTV_XML_FILE, data_path, ftp)
+            if download_type is DownloadDataType.WEBTV:
+                tn.send("init 6")
+                if callback is not None:
+                    callback()
                 return send
 
         if download_type is DownloadDataType.ALL or download_type is DownloadDataType.BOUQUETS:
@@ -88,7 +104,7 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
                         ftp.delete(name)
 
             for file_name in os.listdir(data_path):
-                if file_name == "satellites.xml":
+                if file_name == _SATELLITES_XML_FILE or file_name == _WEBTV_XML_FILE:
                     continue
                 if file_name.endswith(__DATA_FILES_LIST):
                     send_file(file_name, data_path, ftp)
@@ -122,6 +138,11 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
         if callback is not None:
             callback()
 
+
+def download_file(ftp, name, save_path):
+    with open(save_path + name, "wb") as f:
+        ftp.retrbinary("RETR " + name, f.write)
+        
 
 def send_file(file_name, path, ftp):
     """ Opens the file in binary mode and transfers into receiver """

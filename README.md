@@ -9,7 +9,8 @@ Ctrl + X, C, V, Up, Down, PageUp, PageDown, S, T, E, L, H, Space; Insert, Delete
 Insert - copies the selected channels from the main list to the bouquet or inserts (creates) a new bouquet.                        
 Ctrl + X - only in bouquet list. Ctrl + C - only in services list.                                                                 
 Clipboard is "rubber". There is an accumulation before the insertion!                                                              
-Ctrl + E, F2 - edit/rename.                                                                                                                                                                                                                                                                                                                    
+Ctrl + E, F2 - edit.                                                                                                    
+Ctrl + R - rename.                                                                                                                                                                                                                   
 Ctrl + S, T, E in Satellites edit tool for create and edit satellite or transponder.                                               
 Ctrl + L - parental lock.                                                                                                          
 Ctrl + H - hide/skip.                                                                                                              

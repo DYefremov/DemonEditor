@@ -6,7 +6,7 @@
 from app.commons import log
 from app.ui import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
-from ..ecommons import Service, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, FLAG
+from ..ecommons import Service, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, Flag
 
 _HEADER = "eDVB services /4/"
 _SEP = ":"  # separator
@@ -101,7 +101,7 @@ def parse_services(services, transponders, path):
         all_flags = ch[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
-        hide = HIDE_ICON if flags and int(flags[0][2:]) in FLAG.hide_values() else None
+        hide = HIDE_ICON if flags and int(flags[0][2:]) in Flag.hide_values() else None
         locked = LOCKED_ICON if fav_id in blacklist else None
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))
@@ -128,7 +128,7 @@ def parse_services(services, transponders, path):
                                     rate=tr[1],
                                     pol=POLARIZATION[tr[2]],
                                     fec=FEC[tr[3]],
-                                    system=SYSTEM[tr[6]],
+                                    system="DVB-S2" if len(tr) > 7 else "DVB-S",
                                     pos="{}.{}".format(tr[4][:-1], tr[4][-1:]),
                                     data_id=ch[0],
                                     fav_id=fav_id,

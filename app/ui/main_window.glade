@@ -117,6 +117,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-copy</property>
   </object>
+  <object class="GtkImage" id="image17">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-properties</property>
+  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -365,6 +370,22 @@
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem7">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_data_edit_popup_item">
+        <property name="label" translatable="yes">Show details/edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">image17</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_services_data_edit" object="services_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
@@ -1158,18 +1179,12 @@
           <object class="GtkInfoBar" id="search_info_bar">
             <property name="app_paintable">True</property>
             <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
             <child internal-child="action_area">
               <object class="GtkButtonBox" id="search_infobar_action_area">
                 <property name="can_focus">False</property>
-                <property name="spacing">6</property>
+                <property name="spacing">5</property>
+                <property name="homogeneous">True</property>
                 <property name="layout_style">end</property>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
                 <child>
                   <placeholder/>
                 </child>
@@ -1177,16 +1192,16 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child internal-child="content_area">
               <object class="GtkBox" id="search_infobar_content_area">
                 <property name="can_focus">False</property>
-                <property name="spacing">16</property>
+                <property name="spacing">2</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkAlignment" id="alignment1">
+                  <object class="GtkAlignment" id="alignment2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -1216,7 +1231,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkAlignment" id="alignment2">
+                  <object class="GtkAlignment" id="alignment1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -1233,11 +1248,8 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -2232,7 +2244,7 @@
               <object class="GtkLabel" id="ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Ver. 0.2.3 Pre-alpha</property>
+                <property name="label" translatable="yes">Ver. 0.2.4 Pre-alpha</property>
                 <property name="xalign">0.94999998807907104</property>
               </object>
               <packing>

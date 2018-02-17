@@ -7,10 +7,11 @@ import shutil
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, FLAG
+from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
+from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
-from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON
+from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
@@ -18,6 +19,7 @@ from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarge
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
+from .service_details_dialog import ServiceDetailsDialog
 
 
 class MainAppWindow:
@@ -39,8 +41,9 @@ class MainAppWindow:
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
                      "fav_locate_popup_item", "fav_picon_popup_item")
 
-    _FAV_ONLY_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                          "fav_edit_marker_popup_item")
+    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
+
+    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
@@ -99,7 +102,8 @@ class MainAppWindow:
                     "on_reference_picon": self.on_reference_picon,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_search_toggled": self.on_search_toggled,
-                    "on_search": self.on_search}
+                    "on_search": self.on_search,
+                    "on_services_data_edit": self.on_services_data_edit}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -524,7 +528,8 @@ class MainAppWindow:
                     # IPTV and MARKER services
                     s_type = srv.type
                     if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
-                        srv = Service(*agr[0:3], srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
+                        icon = IPTV_ICON if s_type is BqServiceType.IPTV else None
+                        srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
                         self.__services[fav_id] = srv
                     services.append(fav_id)
                 self.__bouquets["{}:{}".format(name, bt_type)] = services
@@ -703,8 +708,15 @@ class MainAppWindow:
             self.on_locked(None)
         elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
             self.on_hide(None)
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
+        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r:
             self.on_edit(view)
+        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
+            if model_name == self._BOUQUETS_LIST_NAME:
+                self.on_edit(view)
+                return
+            elif model_name == self._FAV_LIST_NAME:
+                self.on_locate_in_services(view)
+            self.on_services_data_edit(view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
 
@@ -714,7 +726,6 @@ class MainAppWindow:
                              open_data=self.open_data,
                              profile=Profile(self.__profile))
 
-    @run_idle
     def on_view_focus(self, view, focus_event):
         profile = Profile(self.__profile)
         model = get_base_model(view.get_model())
@@ -731,12 +742,21 @@ class MainAppWindow:
                     self.__tool_elements[elem].set_sensitive(not_empty)
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
+            bq_selected = False
+            if model_name == self._FAV_LIST_NAME:
+                bq_selected = self.is_bouquet_selected()
+                if profile is Profile.NEUTRINO_MP and bq_selected:
+                    name, bq_type = bq_selected.split(":")
+                    bq_selected = BqType(bq_type) is BqType.WEBTV
+
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
                     self.__tool_elements[elem].set_sensitive(not is_service and self.__rows_buffer)
-                elif elem in self._FAV_ONLY_ELEMENTS:
+                elif elem in self._FAV_ENIGMA_ELEMENTS:
                     if profile is Profile.ENIGMA_2:
-                        self.__tool_elements[elem].set_sensitive(self.is_bouquet_selected() and not is_service)
+                        self.__tool_elements[elem].set_sensitive(bq_selected and not is_service)
+                elif elem in self._FAV_M3U_ELEMENTS:
+                    self.__tool_elements[elem].set_sensitive(bq_selected and not is_service)
                 else:
                     self.__tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:
@@ -750,10 +770,10 @@ class MainAppWindow:
             self.__tool_elements[elem].set_sensitive(not_empty)
 
     def on_hide(self, item):
-        self.set_service_flags(FLAG.HIDE)
+        self.set_service_flags(Flag.HIDE)
 
     def on_locked(self, item):
-        self.set_service_flags(FLAG.LOCK)
+        self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
         profile = Profile(self.__profile)
@@ -766,9 +786,9 @@ class MainAppWindow:
         elif profile is Profile.NEUTRINO_MP:
             if bq_selected:
                 model, path = self.__bouquets_view.get_selection().get_selected()
-                value = model.get_value(path, 1 if flag is FLAG.LOCK else 2)
-                value = None if value else LOCKED_ICON if flag is FLAG.LOCK else HIDE_ICON
-                model.set_value(path, 1 if flag is FLAG.LOCK else 2, value)
+                value = model.get_value(path, 1 if flag is Flag.LOCK else 2)
+                value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
+                model.set_value(path, 1 if flag is Flag.LOCK else 2, value)
 
     @run_idle
     def on_model_changed(self, model, path, itr=None):
@@ -811,7 +831,7 @@ class MainAppWindow:
             show_dialog(DialogType.ERROR, self.__main_window, text="No m3u file is selected!")
             return
 
-        channels = parse_m3u(response)
+        channels = parse_m3u(response, Profile(self.__profile))
         bq_selected = self.is_bouquet_selected()
         if channels and bq_selected:
             bq_services = self.__bouquets.get(bq_selected)
@@ -875,6 +895,11 @@ class MainAppWindow:
                self.__bouquets_view,
                self.__services,
                self.__bouquets)
+
+    @run_idle
+    def on_services_data_edit(self, item):
+        dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
+        dialog.show()
 
     @run_idle
     def update_picons(self):

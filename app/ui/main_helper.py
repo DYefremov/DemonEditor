@@ -7,7 +7,7 @@ import shutil
 from gi.repository import GdkPixbuf
 
 from app.eparser import Service
-from app.eparser.ecommons import FLAG
+from app.eparser.ecommons import Flag
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
@@ -166,7 +166,7 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
 
     model = get_base_model(model)
 
-    if flag is FLAG.HIDE:
+    if flag is Flag.HIDE:
         if target is ViewTarget.SERVICES:
             set_hide(channels, model, paths)
         else:
@@ -174,7 +174,7 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
             srv_model = get_base_model(services_view.get_model())
             srv_paths = [row.path for row in srv_model if row[18] in fav_ids]
             set_hide(channels, srv_model, srv_paths)
-    elif flag is FLAG.LOCK:
+    elif flag is Flag.LOCK:
         set_lock(blacklist, channels, model, paths, target, services_model=get_base_model(services_view.get_model()))
 
     return True
@@ -223,13 +223,13 @@ def set_hide(channels, model, paths):
         value = int(flag[2:]) if flag else 0
 
         if not hide:
-            if value in FLAG.hide_values():
+            if value in Flag.hide_values():
                 continue  # skip if already hidden
-            value += FLAG.HIDE.value
+            value += Flag.HIDE.value
         else:
-            if value not in FLAG.hide_values():
+            if value not in Flag.hide_values():
                 continue  # skip if already allowed to show
-            value -= FLAG.HIDE.value
+            value -= Flag.HIDE.value
 
         if value == 0 and index is not None:
             del flags[index]
