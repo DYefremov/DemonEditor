@@ -12,7 +12,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
-from .dialogs import show_dialog, DialogType, get_chooser_dialog
+from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search
@@ -156,6 +156,8 @@ class MainAppWindow:
         self.__fav_view.connect("key-press-event", self.force_ctrl)
         # Clipboard
         self.__clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        # Wait dialog
+        self.__wait_dialog = WaitDialog(self.__main_window)
         self.__main_window.show()
 
     def init_drag_and_drop(self):
@@ -495,6 +497,7 @@ class MainAppWindow:
     @run_idle
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
+        self.__wait_dialog.show()
         self.clear_current_data()
 
         data_path = self.__options.get(self.__profile).get("data_dir_path") if data_path is None else data_path
@@ -510,6 +513,8 @@ class MainAppWindow:
                         "\n\nPlease, download files from receiver or setup your path for read data!")
         except SyntaxError as e:
             show_dialog(DialogType.ERROR, self.__main_window, str(e))
+        finally:
+            self.__wait_dialog.hide()
 
     def append_blacklist(self, data_path):
         black_list = get_blacklist(data_path)

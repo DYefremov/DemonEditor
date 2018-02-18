@@ -4,7 +4,7 @@ from math import fabs
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from . import Gtk, Gdk, UI_RESOURCES_PATH
-from .dialogs import show_dialog, DialogType
+from .dialogs import show_dialog, DialogType, WaitDialog
 from .main_helper import move_items, scroll_to
 
 
@@ -15,7 +15,7 @@ def show_satellites_dialog(transient, options):
 
 
 class SatellitesDialog:
-    __slots__ = ["_dialog", "_data_path", "_stores", "_options", "_sat_view"]
+    __slots__ = ["_dialog", "_data_path", "_stores", "_options", "_sat_view", "_wait_dialog"]
 
     _aggr = [None for x in range(9)]  # aggregate
 
@@ -50,6 +50,7 @@ class SatellitesDialog:
         self._dialog.set_transient_for(transient)
         self._dialog.get_content_area().set_border_width(0)  # The width of the border around the app dialog area!
         self._sat_view = builder.get_object("satellites_editor_tree_view")
+        self._wait_dialog = WaitDialog(self._dialog)
         # Setting the last size of the dialog window if it was saved
         window_size = self._options.get("sat_editor_window_size", None)
         if window_size:
@@ -132,6 +133,7 @@ class SatellitesDialog:
     def on_satellites_list_load(self, model):
         """ Load satellites data into model """
         try:
+            self._wait_dialog.show()
             satellites = get_satellites(self._data_path)
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self._dialog, getattr(e, "message", str(e)) +
@@ -139,6 +141,8 @@ class SatellitesDialog:
         else:
             model.clear()
             self.append_data(model, satellites)
+        finally:
+            self._wait_dialog.hide()
 
     @run_idle
     def append_data(self, model, satellites):

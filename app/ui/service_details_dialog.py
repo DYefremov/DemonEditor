@@ -5,6 +5,7 @@ from app.commons import run_idle
 from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot
 from app.properties import Profile
+from app.ui.dialogs import show_dialog, DialogType
 from . import Gtk, UI_RESOURCES_PATH
 from .main_helper import is_only_one_item_selected
 
@@ -29,7 +30,9 @@ def get_sat_positions(path):
 
 class ServiceDetailsDialog:
     def __init__(self, transient, options, view):
-        handlers = {"on_system_changed": self.on_system_changed}
+        handlers = {"on_system_changed": self.on_system_changed,
+                    "on_save": self.on_save,
+                    "on_create_new": self.on_create_new}
 
         builder = Gtk.Builder()
         builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
@@ -183,6 +186,16 @@ class ServiceDetailsDialog:
         self._dialog.destroy()
 
         return response
+
+    def on_save(self, item):
+        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+        # if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        #     return
+
+    def on_create_new(self, item):
+        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+        # if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        #     return
 
 
 if __name__ == "__main__":
