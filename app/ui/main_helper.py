@@ -96,9 +96,9 @@ def move_items(key, view):
                     model.move_after(itr, down_itr)
 
 
-# ***************** Edit *******************#
+# ***************** Rename *******************#
 
-def edit(view, parent_window, target, fav_view=None, service_view=None, channels=None):
+def rename(view, parent_window, target, fav_view=None, service_view=None, channels=None):
     model, paths = view.get_selection().get_selected_rows()
     model = get_base_model(model)
 

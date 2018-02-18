@@ -14,7 +14,7 @@ from app.properties import get_config, write_config, Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .download_dialog import show_download_dialog
-from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
+from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
@@ -76,7 +76,7 @@ class MainAppWindow:
                     "on_cut": self.on_cut,
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
-                    "on_edit": self.on_edit,
+                    "on_edit": self.on_rename,
                     "on_delete": self.on_delete,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
@@ -103,7 +103,7 @@ class MainAppWindow:
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_search_toggled": self.on_search_toggled,
                     "on_search": self.on_search,
-                    "on_services_data_edit": self.on_services_data_edit}
+                    "on_service_edit": self.on_service_edit}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -239,16 +239,17 @@ class MainAppWindow:
         self.__rows_buffer.clear()
         self.on_view_focus(view, None)
 
-    def on_edit(self, view):
+    def on_rename(self, view):
         model = get_base_model(view.get_model())
         name = model.get_name()
         if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
             # edit(view, self.__main_window, ViewTarget.BOUQUET)
         elif name == self._FAV_LIST_NAME:
-            edit(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view, channels=self.__services)
+            rename(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view,
+                   channels=self.__services)
         elif name == self._SERVICE_LIST_NAME:
-            edit(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__services)
+            rename(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__services)
 
     def on_delete(self, item):
         """ Delete selected items from views
@@ -361,11 +362,11 @@ class MainAppWindow:
     def on_tool_edit(self, item):
         """ Edit tool bar button """
         if self.__services_view.is_focus():
-            self.on_edit(self.__services_view)
+            self.on_rename(self.__services_view)
         elif self.__fav_view.is_focus():
-            self.on_edit(self.__fav_view)
+            self.on_rename(self.__fav_view)
         elif self.__bouquets_view.is_focus():
-            self.on_edit(self.__bouquets_view)
+            self.on_rename(self.__bouquets_view)
 
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
@@ -708,15 +709,13 @@ class MainAppWindow:
             self.on_locked(None)
         elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
             self.on_hide(None)
-        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r:
-            self.on_edit(view)
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
+        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r or key == Gdk.KEY_F2:
+            self.on_rename(view)
+        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
             if model_name == self._BOUQUETS_LIST_NAME:
-                self.on_edit(view)
+                self.on_rename(view)
                 return
-            elif model_name == self._FAV_LIST_NAME:
-                self.on_locate_in_services(view)
-            self.on_services_data_edit(view)
+            self.on_service_edit(view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
 
@@ -897,7 +896,11 @@ class MainAppWindow:
                self.__bouquets)
 
     @run_idle
-    def on_services_data_edit(self, item):
+    def on_service_edit(self, view):
+        model_name = get_base_model(view.get_model()).get_name()
+        if model_name == self._FAV_LIST_NAME:
+            self.on_locate_in_services(view)
+
         dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
         dialog.show()
 
