@@ -43,6 +43,7 @@ class ServiceDetailsDialog:
         self._profile = Profile(options["profile"])
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
         self._services_view = view
+        self._old_service = None
         # Service elements
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
@@ -89,24 +90,24 @@ class ServiceDetailsDialog:
     @run_idle
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
-        if is_only_one_item_selected(paths, self._dialog):
-            srv = Service(*model[paths][:])
-            # Service
-            self._name_entry.set_text(srv.service)
-            self._package_entry.set_text(srv.package)
-            self.select_active_text(self._service_type_combo_box, srv.service_type)
-            self._id_entry.set_text(str(int(srv.ssid, 16)))
-            # Transponder
-            self._freq_entry.set_text(srv.freq)
-            self._rate_entry.set_text(srv.rate)
-            self.select_active_text(self._pol_combo_box, srv.pol)
-            self.select_active_text(self._fec_combo_box, srv.fec)
-            self.select_active_text(self._sys_combo_box, srv.system)
-            self.set_sat_positions(srv.pos)
+        srv = Service(*model[paths][:])
+        self._old_service = srv
+        # Service
+        self._name_entry.set_text(srv.service)
+        self._package_entry.set_text(srv.package)
+        self.select_active_text(self._service_type_combo_box, srv.service_type)
+        self._id_entry.set_text(str(int(srv.ssid, 16)))
+        # Transponder
+        self._freq_entry.set_text(srv.freq)
+        self._rate_entry.set_text(srv.rate)
+        self.select_active_text(self._pol_combo_box, srv.pol)
+        self.select_active_text(self._fec_combo_box, srv.fec)
+        self.select_active_text(self._sys_combo_box, srv.system)
+        self.set_sat_positions(srv.pos)
 
-            if self._profile is Profile.ENIGMA_2:
-                self.init_enigma2_service_data(srv)
-                self.init_enigma2_transponder_data(srv)
+        if self._profile is Profile.ENIGMA_2:
+            self.init_enigma2_service_data(srv)
+            self.init_enigma2_transponder_data(srv)
 
     @run_idle
     def init_enigma2_service_data(self, srv):
@@ -196,16 +197,62 @@ class ServiceDetailsDialog:
         return response
 
     def on_save(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        srv = Service(flags_cas=self.get_flags(),
+                      transponder_type="s",
+                      coded=None,
+                      service=self._name_entry.get_text(),
+                      locked=self._old_service.locked,
+                      hide=None,
+                      package=self._package_entry.get_text(),
+                      service_type=self._service_type_combo_box.get_active_id(),
+                      picon=self._old_service.picon,
+                      picon_id=self._old_service.picon_id,
+                      ssid=self._id_entry.get_text(),
+                      freq=self._freq_entry.get_text(),
+                      rate=self._rate_entry.get_text(),
+                      pol=self._pol_combo_box.get_active_id(),
+                      fec=self._fec_combo_box.get_active_id(),
+                      system=self._sys_combo_box.get_active_id(),
+                      pos=self._pol_combo_box.get_active_id(),
+                      data_id=self.get_data_id(),
+                      fav_id=self.get_fav_id(),
+                      transponder=self.get_transponder_data())
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
-        # if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-        #     return
 
     def on_create_new(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
-        # if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-        #     return
+
+    def get_flags(self):
+        if self._profile is Profile.ENIGMA_2:
+            pass
+        elif self._profile is Profile.NEUTRINO_MP:
+            pass
+
+    def get_data_id(self):
+        if self._profile is Profile.ENIGMA_2:
+            pass
+        elif self._profile is Profile.NEUTRINO_MP:
+            pass
+
+    def get_fav_id(self):
+        if self._profile is Profile.ENIGMA_2:
+            pass
+        elif self._profile is Profile.NEUTRINO_MP:
+            pass
+
+    def get_transponder_data(self):
+        if self._profile is Profile.ENIGMA_2:
+            if self._sys_combo_box.get_active_id() == "DVB-S2":
+                pass
+        elif self._profile is Profile.NEUTRINO_MP:
+            pass
 
 
 if __name__ == "__main__":
-    dialog = ServiceDetailsDialog()
-    dialog.show()
+    pass

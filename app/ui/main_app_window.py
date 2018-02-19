@@ -15,7 +15,8 @@ from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search
+    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search, \
+    is_only_one_item_selected
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -902,12 +903,13 @@ class MainAppWindow:
 
     @run_idle
     def on_service_edit(self, view):
-        model_name = get_base_model(view.get_model()).get_name()
-        if model_name == self._FAV_LIST_NAME:
-            self.on_locate_in_services(view)
-
-        dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
-        dialog.show()
+        model, paths = view.get_selection().get_selected_rows()
+        if is_only_one_item_selected(paths, self.__main_window):
+            model_name = get_base_model(model).get_name()
+            if model_name == self._FAV_LIST_NAME:
+                self.on_locate_in_services(view)
+            dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
+            dialog.show()
 
     @run_idle
     def update_picons(self):

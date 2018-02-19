@@ -39,8 +39,8 @@ class Flag(Enum):
 
         K - last bit (1)
         H - second from end (10)
-        P -  third (100)
-        N - seventh (1000000)
+        P - third (100)
+        N - sixth (100000)
     """
     KEEP = 1  # Do not automatically update the services parameters.
     HIDE = 2

@@ -403,6 +403,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">srv_type_liststore</property>
+                    <property name="id_column">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="srv_type_cellrenderertext"/>
                       <attributes>
@@ -892,6 +893,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">sat_pos_list_store</property>
+                    <property name="id_column">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="sat_pos_cellrenderertext"/>
                       <attributes>
@@ -966,6 +968,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">pol_list_store</property>
+                    <property name="id_column">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="pol_cellrenderertext"/>
                       <attributes>
@@ -994,6 +997,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">fec_list_store</property>
+                    <property name="id_column">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="fec_cellrenderertext"/>
                       <attributes>
@@ -1022,6 +1026,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">sys_list_store</property>
+                    <property name="id_column">0</property>
                     <signal name="changed" handler="on_system_changed" swapped="no"/>
                     <child>
                       <object class="GtkCellRendererText" id="sys_cellrenderertext"/>
@@ -1053,6 +1058,7 @@
                     <property name="can_focus">False</property>
                     <property name="opacity">0.98999999999999999</property>
                     <property name="model">mod_list_store</property>
+                    <property name="id_column">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="mod_cellrenderertext"/>
                       <attributes>
@@ -1187,6 +1193,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="model">invertion_list_store</property>
+                        <property name="id_column">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="inv_cellrenderertext"/>
                           <attributes>
@@ -1205,6 +1212,7 @@
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="model">rolloff_list_store</property>
+                        <property name="id_column">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="rolloff_cellrenderertext"/>
                           <attributes>
@@ -1223,6 +1231,7 @@
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="model">pilot_list_store</property>
+                        <property name="id_column">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="pilot_cellrenderertext"/>
                           <attributes>
@@ -1252,6 +1261,7 @@
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="model">pls_mode_list_store</property>
+                        <property name="id_column">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="pls_mode_cellrenderertext"/>
                           <attributes>
