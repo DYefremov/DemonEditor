@@ -3,7 +3,7 @@ from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
-from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot
+from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from . import Gtk, UI_RESOURCES_PATH
@@ -116,6 +116,14 @@ class ServiceDetailsDialog:
         cas = list(filter(lambda x: x.startswith("C:"), flags))
         if cas:
             self._cas_entry.set_text(",".join(cas))
+
+        flags = list(filter(lambda x: x.startswith("f:"), flags))
+        if flags:
+            value = int(flags[0][2:])
+            self._keep_check_button.set_active(Flag.is_keep(value))
+            self._hide_check_button.set_active(Flag.is_hide(value))
+            self._use_pids_check_button.set_active(Flag.is_pids(value))
+            self._new_check_button.set_active(Flag.is_new(value))
 
         pids = list(filter(lambda x: x.startswith("c:"), flags))
         if pids:

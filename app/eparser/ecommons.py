@@ -35,7 +35,13 @@ class Type(Enum):
 
 
 class Flag(Enum):
-    """ Service flags """
+    """ Service flags
+
+        K - last bit (1)
+        H - second from end (10)
+        P -  third (100)
+        N - seventh (1000000)
+    """
     KEEP = 1  # Do not automatically update the services parameters.
     HIDE = 2
     PIDS = 4  # Always use the cached instead of current pids.
@@ -43,8 +49,20 @@ class Flag(Enum):
     NEW = 40  # Marked as new at the last scan
 
     @staticmethod
-    def hide_values():
-        return 2, 3, 6, 7, 10, 42, 43, 46, 47
+    def is_hide(value: int):
+        return value & 1 << 1
+
+    @staticmethod
+    def is_keep(value: int):
+        return value & 1 << 0
+
+    @staticmethod
+    def is_pids(value: int):
+        return value & 1 << 2
+
+    @staticmethod
+    def is_new(value: int):
+        return value & 1 << 5
 
 
 class Inversion(Enum):

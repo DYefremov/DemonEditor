@@ -223,11 +223,11 @@ def set_hide(channels, model, paths):
         value = int(flag[2:]) if flag else 0
 
         if not hide:
-            if value in Flag.hide_values():
+            if Flag.is_hide(value):
                 continue  # skip if already hidden
             value += Flag.HIDE.value
         else:
-            if value not in Flag.hide_values():
+            if not Flag.is_hide(value):
                 continue  # skip if already allowed to show
             value -= Flag.HIDE.value
 
