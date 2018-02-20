@@ -65,6 +65,19 @@ class Flag(Enum):
         return value & 1 << 5
 
 
+class Pids(Enum):
+    VIDEO = "c:00"
+    AUDIO = "c:01"
+    TELETEXT = "c:02"
+    PCR = "c:03"
+    AC3 = "c:04"
+    VIDEO_TYPE = "c:05"
+    AUDIO_CHANNEL = "c:06"
+    BIT_STREAM_DELAY = "c:07"  # in ms
+    PCM_DELAY = "c:08"  # in ms
+    SUBTITLE = "c:09"
+
+
 class Inversion(Enum):
     Off = "0"
     On = "1"

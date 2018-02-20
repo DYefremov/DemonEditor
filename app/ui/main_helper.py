@@ -234,7 +234,7 @@ def set_hide(channels, model, paths):
         if value == 0 and index is not None:
             del flags[index]
         else:
-            value = "f:{}".format(value) if value > 10 else "f:0{}".format(value)
+            value = "f:{:02d}".format(value)
             if index is not None:
                 flags[index] = value
             else:

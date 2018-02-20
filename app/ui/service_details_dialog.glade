@@ -357,9 +357,9 @@
                   <object class="GtkEntry" id="id_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">10</property>
-                    <property name="max_width_chars">10</property>
-                    <property name="primary_icon_stock">gtk-edit</property>
+                    <property name="width_chars">8</property>
+                    <property name="max_width_chars">8</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -392,6 +392,8 @@
                   <object class="GtkEntry" id="cas_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="width_chars">19</property>
+                    <property name="max_width_chars">19</property>
                   </object>
                   <packing>
                     <property name="left_attach">4</property>
@@ -446,6 +448,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">5</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">8</property>
@@ -455,9 +458,11 @@
                 <child>
                   <object class="GtkEntry" id="he_acc_pid_entry">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">7</property>
@@ -467,9 +472,11 @@
                 <child>
                   <object class="GtkEntry" id="acc_pid_entry">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">6</property>
@@ -479,9 +486,11 @@
                 <child>
                   <object class="GtkEntry" id="ac3plus_pid_entry">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">5</property>
@@ -494,6 +503,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">4</property>
@@ -561,6 +571,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -598,8 +609,8 @@
                     <property name="can_focus">False</property>
                     <property name="margin_left">25</property>
                     <property name="label" translatable="yes">Delays (ms):</property>
-                    <property name="width_chars">10</property>
-                    <property name="max_width_chars">10</property>
+                    <property name="width_chars">11</property>
+                    <property name="max_width_chars">11</property>
                     <property name="xalign">0</property>
                   </object>
                   <packing>
@@ -633,8 +644,9 @@
                   <object class="GtkEntry" id="bitstream_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">5</property>
-                    <property name="max_width_chars">5</property>
+                    <property name="width_chars">6</property>
+                    <property name="max_width_chars">6</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">10</property>
@@ -647,6 +659,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">3</property>
                     <property name="max_width_chars">6</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">11</property>
@@ -681,6 +694,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -693,6 +707,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
                     <property name="max_width_chars">4</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -790,7 +805,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="width_chars">30</property>
+                    <property name="width_chars">26</property>
+                    <property name="max_width_chars">26</property>
                   </object>
                   <packing>
                     <property name="left_attach">7</property>
@@ -889,24 +905,6 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="sat_pos_combo_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="model">sat_pos_list_store</property>
-                    <property name="id_column">0</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="sat_pos_cellrenderertext"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -923,6 +921,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
                     <property name="max_width_chars">10</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -946,6 +945,7 @@
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
                     <property name="max_width_chars">10</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -1075,6 +1075,9 @@
                   <object class="GtkEntry" id="namespace_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="width_chars">15</property>
+                    <property name="max_width_chars">15</property>
+                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">7</property>
@@ -1090,6 +1093,24 @@
                   <packing>
                     <property name="left_attach">7</property>
                     <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="sat_pos_combo_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">sat_pos_list_store</property>
+                    <property name="id_column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="sat_pos_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
               </object>
@@ -1123,8 +1144,9 @@
                       <object class="GtkEntry" id="transponder_id_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">8</property>
+                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -1146,8 +1168,9 @@
                       <object class="GtkEntry" id="network_id_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">7</property>
+                        <property name="max_width_chars">8</property>
+                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1290,8 +1313,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">7</property>
+                        <property name="max_width_chars">7</property>
+                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">8</property>
@@ -1315,7 +1339,8 @@
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">7</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="max_width_chars">8</property>
+                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">6</property>
@@ -1338,8 +1363,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">7</property>
+                        <property name="max_width_chars">8</property>
+                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">7</property>

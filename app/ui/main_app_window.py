@@ -907,7 +907,12 @@ class MainAppWindow:
         if is_only_one_item_selected(paths, self.__main_window):
             model_name = get_base_model(model).get_name()
             if model_name == self._FAV_LIST_NAME:
+                srv_type = model.get_value(model.get_iter(paths), 5)
+                if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
+                    self.on_rename(view)
+                    return
                 self.on_locate_in_services(view)
+
             dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
             dialog.show()
 
