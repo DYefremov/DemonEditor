@@ -316,7 +316,7 @@ class ServiceDetailsDialog:
         f_flags = f_flags + Flag.PIDS.value if self._use_pids_check_button.get_active() else f_flags
         f_flags = f_flags + Flag.NEW.value if self._new_check_button.get_active() else f_flags
         if f_flags:
-            flags.append("f:{:02x}".format(f_flags))
+            flags.append("f:{:02d}".format(f_flags))
 
         return ",".join(flags)
 
