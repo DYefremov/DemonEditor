@@ -3,7 +3,8 @@ from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
-from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids
+from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, SERVICE_TYPE, POLARIZATION, FEC, \
+    SYSTEM, get_key_by_value, get_value_by_name
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
@@ -16,13 +17,18 @@ def get_sat_positions(path):
 
 
 class ServiceDetailsDialog:
+    _DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
+
+    _FAV_ID = "{:X}:{:X}:{:X}:{:X}"
+
+    _TRANSPONDER_DATA = " {}:{}:{}:{}:{}:{}:{}:{}"
 
     _DIGIT_ENTRY_ELEMENTS = ("id_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
                              "audio_pid_entry", "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "freq_entry",
                              "he_acc_pid_entry", "teletext_pid_entry", "transponder_id_entry", "network_id_entry",
                              "rate_entry", "pls_code_entry", "stream_id_entry", "flags_entry", "namespace_entry")
 
-    def __init__(self, transient, options, view):
+    def __init__(self, transient, options, view, services, bouquets):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
@@ -38,6 +44,8 @@ class ServiceDetailsDialog:
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
         self._services_view = view
         self._old_service = None
+        self._services = services
+        self._bouquets = bouquets
         self._current_model = None
         self._pattern = re.compile("\D")
         # style
@@ -174,9 +182,10 @@ class ServiceDetailsDialog:
         tr_data = srv.transponder.split(":")
 
         if srv.system == "DVB-S2":
-            self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
-            self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
-            self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
+            pass
+            # self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
+            # self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
+            # self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
 
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
@@ -218,27 +227,41 @@ class ServiceDetailsDialog:
     def on_save(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
+        fav_id, data_id = self.get_srv_data()
+        service = Service(flags_cas=self.get_flags(),
+                          transponder_type="s",
+                          coded=self._old_service.coded,
+                          service=self._name_entry.get_text(),
+                          locked=self._old_service.locked,
+                          hide=None,
+                          package=self._package_entry.get_text(),
+                          service_type=self._service_type_combo_box.get_active_id(),
+                          picon=self._old_service.picon,
+                          picon_id=self._old_service.picon_id,
+                          ssid="{:x}".format(int(self._id_entry.get_text())),
+                          freq=self._freq_entry.get_text(),
+                          rate=self._rate_entry.get_text(),
+                          pol=self._pol_combo_box.get_active_id(),
+                          fec=self._fec_combo_box.get_active_id(),
+                          system=self._sys_combo_box.get_active_id(),
+                          pos=self._sat_pos_combo_box.get_active_id(),
+                          data_id=data_id,
+                          fav_id=fav_id,
+                          transponder=self._old_service.transponder)
 
-        self.update_data_in_model(Service(flags_cas=self.get_flags(),
-                                          transponder_type="s",
-                                          coded=None,
-                                          service=self._name_entry.get_text(),
-                                          locked=self._old_service.locked,
-                                          hide=None,
-                                          package=self._package_entry.get_text(),
-                                          service_type=self._service_type_combo_box.get_active_id(),
-                                          picon=self._old_service.picon,
-                                          picon_id=self._old_service.picon_id,
-                                          ssid=self._id_entry.get_text(),
-                                          freq=self._freq_entry.get_text(),
-                                          rate=self._rate_entry.get_text(),
-                                          pol=self._pol_combo_box.get_active_id(),
-                                          fec=self._fec_combo_box.get_active_id(),
-                                          system=self._sys_combo_box.get_active_id(),
-                                          pos=self._sat_pos_combo_box.get_active_id(),
-                                          data_id=self.get_data_id(),
-                                          fav_id=self.get_fav_id(),
-                                          transponder=self.get_transponder_data()))
+        old_fav_id = self._old_service.fav_id
+        if old_fav_id != fav_id:
+            self._services.pop(old_fav_id, None)
+            for bq in self._bouquets.values():
+                indexes = []
+                for i, f_id in enumerate(bq):
+                    if old_fav_id == f_id:
+                        indexes.append(i)
+                for i in indexes:
+                    bq[i] = fav_id
+
+        self._services[fav_id] = service
+        self.update_data_in_model(service)
 
     def update_data_in_model(self, srv: Service):
         fav_id = self._old_service.fav_id
@@ -297,11 +320,19 @@ class ServiceDetailsDialog:
 
         return ",".join(flags)
 
-    def get_data_id(self):
+    def get_srv_data(self):
+        ssid = int(self._id_entry.get_text())
+        namespace = int(self._namespace_entry.get_text())
+        transponder_id = int(self._transponder_id_entry.get_text())
+        network_id = int(self._network_id_entry.get_text())
+        service_type = self.get_value_from_combobox_id(self._service_type_combo_box, SERVICE_TYPE)
+
         if self._profile is Profile.ENIGMA_2:
-            return self._old_service.data_id
+            data_id = self._DATA_ID.format(ssid, namespace, transponder_id, network_id, service_type, 0)
+            fav_id = self._FAV_ID.format(ssid, transponder_id, network_id, namespace)
+            return fav_id, data_id
         elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.data_id
+            return self._old_service.fav_id, self._old_service.data_id
 
     def get_fav_id(self):
         if self._profile is Profile.ENIGMA_2:
@@ -310,14 +341,34 @@ class ServiceDetailsDialog:
             return self._old_service.fav_id
 
     def get_transponder_data(self):
+        sys = self._sys_combo_box.get_active_id()
+        freq = self._freq_entry.get_text()
+        rate = self._rate_entry.get_text()
+        pol = self.get_value_from_combobox_id(self._pol_combo_box, POLARIZATION)
+        fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC)
+        sat_pos = self._sat_pos_combo_box.get_active_id().replace(".", "")
+        inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
+        srv_sys = get_key_by_value(SYSTEM, sys)
+
         if self._profile is Profile.ENIGMA_2:
-            if self._sys_combo_box.get_active_id() == "DVB-S2":
-                return self._old_service.transponder
+            dvb_s_tr = self._TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
+            if sys == "DVB-S":
+                return dvb_s_tr
+            if sys == "DVB-S2":
+                flag = self._flags_entry.get_text()
+                mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION)
+                roll_off = self.get_value_from_combobox_id(self._rolloff_combo_box, ROLL_OFF)
+                pilot = get_value_by_name(Pilot, self._pilot_combo_box.get_active_id())
+                return "{}:{}:{}:{}:{}:-1:1:0".format(dvb_s_tr, flag, mod, roll_off, pilot)
         elif self._profile is Profile.NEUTRINO_MP:
             return self._old_service.transponder
 
     def on_digit_entry_changed(self, entry):
         entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
+
+    def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
+        cb_id = box.get_active_id()
+        return get_key_by_value(dc, cb_id)
 
 
 if __name__ == "__main__":

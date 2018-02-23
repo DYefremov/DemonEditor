@@ -365,9 +365,9 @@ class MainAppWindow:
     def on_tool_edit(self, item):
         """ Edit tool bar button """
         if self.__services_view.is_focus():
-            self.on_rename(self.__services_view)
+            self.on_service_edit(self.__services_view)
         elif self.__fav_view.is_focus():
-            self.on_rename(self.__fav_view)
+            self.on_service_edit(self.__fav_view)
         elif self.__bouquets_view.is_focus():
             self.on_rename(self.__bouquets_view)
 
@@ -815,7 +815,7 @@ class MainAppWindow:
 
         for ch in self.__services.values():
             ch_type = ch.service_type
-            if ch_type in ("TV", "TV (HD)"):
+            if ch_type in ("TV", "TV (HD)", "TV (UHD)"):
                 tv_count += 1
             elif ch_type == "Radio":
                 radio_count += 1
@@ -913,7 +913,11 @@ class MainAppWindow:
                     return
                 self.on_locate_in_services(view)
 
-            dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
+            dialog = ServiceDetailsDialog(self.__main_window,
+                                          self.__options,
+                                          self.__services_view,
+                                          self.__services,
+                                          self.__bouquets)
             dialog.show()
 
     @run_idle

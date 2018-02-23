@@ -918,6 +918,7 @@
                 <child>
                   <object class="GtkEntry" id="freq_entry">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
                     <property name="max_width_chars">10</property>
@@ -942,6 +943,7 @@
                 <child>
                   <object class="GtkEntry" id="rate_entry">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
                     <property name="max_width_chars">10</property>
@@ -966,6 +968,7 @@
                 <child>
                   <object class="GtkComboBox" id="pol_combo_box">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="model">pol_list_store</property>
                     <property name="id_column">0</property>
@@ -995,6 +998,7 @@
                 <child>
                   <object class="GtkComboBox" id="fec_combo_box">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="model">fec_list_store</property>
                     <property name="id_column">0</property>
@@ -1024,6 +1028,7 @@
                 <child>
                   <object class="GtkComboBox" id="sys_combo_box">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="model">sys_list_store</property>
                     <property name="id_column">0</property>
@@ -1074,6 +1079,7 @@
                 <child>
                   <object class="GtkEntry" id="namespace_entry">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">15</property>
                     <property name="max_width_chars">15</property>
@@ -1098,6 +1104,7 @@
                 <child>
                   <object class="GtkComboBox" id="sat_pos_combo_box">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="model">sat_pos_list_store</property>
                     <property name="id_column">0</property>
@@ -1143,6 +1150,7 @@
                     <child>
                       <object class="GtkEntry" id="transponder_id_entry">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">8</property>
@@ -1167,6 +1175,7 @@
                     <child>
                       <object class="GtkEntry" id="network_id_entry">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">7</property>
                         <property name="max_width_chars">8</property>
@@ -1214,6 +1223,7 @@
                     <child>
                       <object class="GtkComboBox" id="invertion_combo_box">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="model">invertion_list_store</property>
                         <property name="id_column">0</property>

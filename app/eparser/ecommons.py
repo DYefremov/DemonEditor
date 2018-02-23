@@ -116,3 +116,19 @@ CAS = {"C:2600": "BISS", "C:0b00": "Conax", "C:0b01": "Conax", "C:0b02": "Conax"
 
 # 'on' attribute  0070(hex) = 112(int) =  ONID(ONID-TID on www.lyngsat.com)
 PROVIDER = {112: "HTB+", 253: "Tricolor TV"}
+
+
+# ************* subsidiary functions ****************
+
+def get_key_by_value(dc: dict, value):
+    """ Returns key from dict by value """
+    for k, v in dc.items():
+        if v == value:
+            return k
+
+
+def get_value_by_name(en, name):
+    """ Returns value by name from enums """
+    for n in en:
+        if n.name == name:
+            return n.value

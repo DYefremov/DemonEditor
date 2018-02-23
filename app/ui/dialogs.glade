@@ -802,6 +802,9 @@ dmitry.v.yefremov@gmail.com
                     <property name="top_attach">3</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="primary-toolbar"/>
+                </style>
               </object>
             </child>
             <child type="tab">
@@ -914,6 +917,9 @@ dmitry.v.yefremov@gmail.com
                     <property name="top_attach">1</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="primary-toolbar"/>
+                </style>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -982,6 +988,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">/etc/enigma2/</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1005,6 +1012,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">/etc/enigma2/</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1028,6 +1036,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">/etc/tuxbox/</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1051,6 +1060,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">/usr/share/enigma2/picon</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1089,7 +1099,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Active profile:</property>
-                    <property name="xalign">0</property>
+                    <property name="xalign">0.20000000298023224</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1199,6 +1209,7 @@ dmitry.v.yefremov@gmail.com
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="text" translatable="yes">/data</property>
+                <property name="primary_icon_stock">gtk-edit</property>
                 <property name="secondary_icon_name">folder-open-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1218,18 +1229,6 @@ dmitry.v.yefremov@gmail.com
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="separator3">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="padding">2</property>
-            <property name="position">6</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel" id="label18">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -1239,7 +1238,7 @@ dmitry.v.yefremov@gmail.com
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">8</property>
+            <property name="position">7</property>
           </packing>
         </child>
         <child>
@@ -1247,12 +1246,25 @@ dmitry.v.yefremov@gmail.com
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="text" translatable="yes">/data/picons</property>
+            <property name="primary_icon_stock">gtk-edit</property>
             <property name="secondary_icon_name">folder-open-symbolic</property>
             <signal name="icon-press" handler="on_picons_dir_field_icon_press" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="separator3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">2</property>
             <property name="position">9</property>
           </packing>
         </child>
@@ -1275,6 +1287,7 @@ dmitry.v.yefremov@gmail.com
     <property name="decorated">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox4">
+        <property name="width_request">118</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child internal-child="action_area">
@@ -1282,12 +1295,6 @@ dmitry.v.yefremov@gmail.com
             <property name="can_focus">False</property>
             <property name="opacity">0</property>
             <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1333,6 +1340,9 @@ dmitry.v.yefremov@gmail.com
             <property name="position">1</property>
           </packing>
         </child>
+        <style>
+          <class name="primary-toolbar"/>
+        </style>
       </object>
     </child>
   </object>

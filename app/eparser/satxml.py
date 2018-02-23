@@ -4,7 +4,7 @@
 """
 from xml.dom.minidom import parse, Document
 
-from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE, Transponder, Satellite
+from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE, Transponder, Satellite, get_key_by_value
 
 __COMMENT = ("   File was created in DemonEditor\n\n"
              "usable flags are\n"
@@ -108,12 +108,6 @@ def parse_satellites(path):
             satellites.append(parse_sat(elem))
 
     return satellites
-
-
-def get_key_by_value(dictionary, value):
-    for k, v in dictionary.items():
-        if v == value:
-            return k
 
 
 if __name__ == "__main__":
