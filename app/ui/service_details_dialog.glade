@@ -160,6 +160,186 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="srv_list_dialog_liststore">
+    <columns>
+      <!-- column-name Service -->
+      <column type="gchararray"/>
+      <!-- column-name package -->
+      <column type="gchararray"/>
+      <!-- column-name ssid -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkDialog" id="services_list_dialog">
+    <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="gravity">center</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="srv_list_dialog_vbox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area2">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="srv_list_cancel_button">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="srv_list_ok_button">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="srv_list_dialog_hdr_label">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="label" translatable="yes">Changes will be applied to all services of this transponder! 
+Are you sure?</property>
+            <property name="use_markup">True</property>
+            <property name="justify">center</property>
+            <property name="lines">2</property>
+            <style>
+              <class name="primary-toolbar"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkScrolledWindow" id="tr_srv_scrolled_window">
+                <property name="height_request">120</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="tr_services_list_treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">srv_list_dialog_liststore</property>
+                    <property name="enable_search">False</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="treeview-selection1"/>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="tr_srv_treeviewcolumn">
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Services:</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="srv_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="package_treeview_column">
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Package</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="package_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="ssid_treeviewcolumn">
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Ssid</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="ssid_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator" id="tr_srv_dialog_separator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">2</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">srv_list_cancel_button</action-widget>
+      <action-widget response="-5">srv_list_ok_button</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkListStore" id="srv_type_liststore">
     <columns>
       <!-- column-name type -->
@@ -202,9 +382,11 @@
     <property name="title" translatable="yes">Service details</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">document-properties-symbolic</property>
     <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox">
         <property name="can_focus">False</property>
@@ -873,11 +1055,42 @@
             <property name="orientation">vertical</property>
             <property name="spacing">2</property>
             <child>
-              <object class="GtkLabel" id="transponder_label">
+              <object class="GtkBox" id="tr_header_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Transponder data:</property>
-                <property name="xalign">0.0099999997764825821</property>
+                <child>
+                  <object class="GtkLabel" id="transponder_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Transponder data:</property>
+                    <property name="xalign">0.0099999997764825821</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="edit_check_button">
+                    <property name="label">gtk-edit</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="margin_right">5</property>
+                    <property name="use_stock">True</property>
+                    <property name="xalign">0</property>
+                    <property name="always_show_image">True</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="on_tr_edit_toggled" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
                 <style>
                   <class name="primary-toolbar"/>
                 </style>

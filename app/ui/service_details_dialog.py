@@ -32,7 +32,8 @@ class ServiceDetailsDialog:
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
-                    "on_digit_entry_changed": self.on_digit_entry_changed}
+                    "on_digit_entry_changed": self.on_digit_entry_changed,
+                    "on_tr_edit_toggled": self.on_tr_edit_toggled}
 
         builder = Gtk.Builder()
         builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
@@ -98,6 +99,10 @@ class ServiceDetailsDialog:
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
+        self._TRANSPONDER_ELEMENTS = (self._sat_pos_combo_box, self._pol_combo_box, self._invertion_combo_box,
+                                      self._sys_combo_box, self._freq_entry, self._transponder_id_entry,
+                                      self._network_id_entry, self._namespace_entry, self._fec_combo_box,
+                                      self._rate_entry)
 
         self.update_data_elements()
 
@@ -182,10 +187,9 @@ class ServiceDetailsDialog:
         tr_data = srv.transponder.split(":")
 
         if srv.system == "DVB-S2":
-            pass
-            # self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
-            # self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
-            # self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
+            self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
+            self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
+            self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
 
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
@@ -369,6 +373,39 @@ class ServiceDetailsDialog:
     def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
         cb_id = box.get_active_id()
         return get_key_by_value(dc, cb_id)
+
+    @run_idle
+    def on_tr_edit_toggled(self, button: Gtk.CheckButton):
+        active = button.get_active()
+        if active:
+            response = ServicesListDialog(self._dialog, self._services_view, self._old_service.transponder).show()
+            if response == Gtk.ResponseType.CANCEL or response == -4:
+                button.set_active(False)
+                return
+
+        for elem in self._TRANSPONDER_ELEMENTS:
+            elem.set_sensitive(active)
+
+
+class ServicesListDialog:
+    def __init__(self, transient, view, transponder):
+        builder = Gtk.Builder()
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
+                                      ("services_list_dialog", "srv_list_dialog_liststore"))
+        self._dialog = builder.get_object("services_list_dialog")
+        self._dialog.set_transient_for(transient)
+        self._srv_model = builder.get_object("srv_list_dialog_liststore")
+        self.append_services(view, transponder)
+
+    def append_services(self, view, transponder):
+        for row in view.get_model():
+            if row[-1] == transponder:
+                self._srv_model.append((row[3], row[6], row[10]))
+
+    def show(self):
+        response = self._dialog.run()
+        self._dialog.destroy()
+        return response
 
 
 if __name__ == "__main__":
