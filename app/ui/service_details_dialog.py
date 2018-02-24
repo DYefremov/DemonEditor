@@ -8,7 +8,7 @@ from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, P
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
-from . import Gtk, Gdk, UI_RESOURCES_PATH
+from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON
 
 
 @lru_cache(maxsize=1)
@@ -96,6 +96,8 @@ class ServiceDetailsDialog:
         self._rolloff_combo_box = builder.get_object("rolloff_combo_box")
         self._pilot_combo_box = builder.get_object("pilot_combo_box")
         self._pls_mode_combo_box = builder.get_object("pls_mode_combo_box")
+        self._infor_box = builder.get_object("infor_box")
+        self._tr_services_liststore = builder.get_object("transponder_services_liststore")
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
@@ -237,7 +239,7 @@ class ServiceDetailsDialog:
                           coded=self._old_service.coded,
                           service=self._name_entry.get_text(),
                           locked=self._old_service.locked,
-                          hide=None,
+                          hide=HIDE_ICON if self._hide_check_button.get_active() else None,
                           package=self._package_entry.get_text(),
                           service_type=self._service_type_combo_box.get_active_id(),
                           picon=self._old_service.picon,
@@ -377,35 +379,17 @@ class ServiceDetailsDialog:
     @run_idle
     def on_tr_edit_toggled(self, button: Gtk.CheckButton):
         active = button.get_active()
+        self._infor_box.set_visible(active)
+
         if active:
-            response = ServicesListDialog(self._dialog, self._services_view, self._old_service.transponder).show()
-            if response == Gtk.ResponseType.CANCEL or response == -4:
-                button.set_active(False)
-                return
+            transponder = self._old_service.transponder
+            for row in get_base_model(self._services_view.get_model()):
+                if row[-1] == transponder:
+                    self._tr_services_liststore.append((row[3], row[6], row[10]))
 
-        for elem in self._TRANSPONDER_ELEMENTS:
-            elem.set_sensitive(active)
-
-
-class ServicesListDialog:
-    def __init__(self, transient, view, transponder):
-        builder = Gtk.Builder()
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
-                                      ("services_list_dialog", "srv_list_dialog_liststore"))
-        self._dialog = builder.get_object("services_list_dialog")
-        self._dialog.set_transient_for(transient)
-        self._srv_model = builder.get_object("srv_list_dialog_liststore")
-        self.append_services(view, transponder)
-
-    def append_services(self, view, transponder):
-        for row in view.get_model():
-            if row[-1] == transponder:
-                self._srv_model.append((row[3], row[6], row[10]))
-
-    def show(self):
-        response = self._dialog.run()
-        self._dialog.destroy()
-        return response
+        if not active:
+            for elem in self._TRANSPONDER_ELEMENTS:
+                elem.set_sensitive(False)
 
 
 if __name__ == "__main__":
