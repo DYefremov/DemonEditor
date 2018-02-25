@@ -96,8 +96,6 @@ class ServiceDetailsDialog:
         self._rolloff_combo_box = builder.get_object("rolloff_combo_box")
         self._pilot_combo_box = builder.get_object("pilot_combo_box")
         self._pls_mode_combo_box = builder.get_object("pls_mode_combo_box")
-        self._infor_box = builder.get_object("infor_box")
-        self._tr_services_liststore = builder.get_object("transponder_services_liststore")
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
@@ -377,19 +375,37 @@ class ServiceDetailsDialog:
         return get_key_by_value(dc, cb_id)
 
     @run_idle
-    def on_tr_edit_toggled(self, button: Gtk.CheckButton):
-        active = button.get_active()
-        self._infor_box.set_visible(active)
-
+    def on_tr_edit_toggled(self, switch: Gtk.Switch, active):
         if active:
-            transponder = self._old_service.transponder
-            for row in get_base_model(self._services_view.get_model()):
-                if row[-1] == transponder:
-                    self._tr_services_liststore.append((row[3], row[6], row[10]))
+            response = TransponderServicesDialog(self._dialog, self._services_view,
+                                                 self._old_service.transponder).show()
+            if response == Gtk.ResponseType.CANCEL or response == -4:
+                switch.set_active(False)
+                return
 
-        if not active:
-            for elem in self._TRANSPONDER_ELEMENTS:
-                elem.set_sensitive(False)
+        for elem in self._TRANSPONDER_ELEMENTS:
+            elem.set_sensitive(active)
+
+
+class TransponderServicesDialog:
+    def __init__(self, transient, view, transponder):
+        builder = Gtk.Builder()
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
+                                      ("tr_services_dialog", "transponder_services_liststore"))
+        self._dialog = builder.get_object("tr_services_dialog")
+        self._dialog.set_transient_for(transient)
+        self._srv_model = builder.get_object("transponder_services_liststore")
+        self.append_services(view, transponder)
+
+    def append_services(self, view, transponder):
+        for row in view.get_model():
+            if row[-1] == transponder:
+                self._srv_model.append((row[3], row[6], row[10]))
+
+    def show(self):
+        response = self._dialog.run()
+        self._dialog.destroy()
+        return response
 
 
 if __name__ == "__main__":
