@@ -3,8 +3,8 @@ from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
-from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, SERVICE_TYPE, POLARIZATION, FEC, \
-    SYSTEM, get_key_by_value, get_value_by_name
+from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, SERVICE_TYPE, POLARIZATION, \
+    SYSTEM, get_key_by_value, get_value_by_name, FEC_DEFAULT
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
@@ -47,6 +47,7 @@ class ServiceDetailsDialog:
         self._old_service = None
         self._services = services
         self._bouquets = bouquets
+        self._transponder_services_iters = None
         self._current_model = None
         self._pattern = re.compile("\D")
         # style
@@ -96,6 +97,7 @@ class ServiceDetailsDialog:
         self._rolloff_combo_box = builder.get_object("rolloff_combo_box")
         self._pilot_combo_box = builder.get_object("pilot_combo_box")
         self._pls_mode_combo_box = builder.get_object("pls_mode_combo_box")
+        self._tr_edit_switch = builder.get_object("tr_edit_switch")
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
@@ -231,7 +233,33 @@ class ServiceDetailsDialog:
     def on_save(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
+
         fav_id, data_id = self.get_srv_data()
+        # transponder
+        transponder = self._old_service.transponder
+        freq = self._freq_entry.get_text()
+        rate = self._rate_entry.get_text()
+        pol = self._pol_combo_box.get_active_id()
+        fec = self._fec_combo_box.get_active_id()
+        system = self._sys_combo_box.get_active_id()
+        pos = self._sat_pos_combo_box.get_active_id()
+
+        if self._tr_edit_switch.get_active():
+            transponder = self.get_transponder_data()
+            if self._transponder_services_iters:
+                for itr in self._transponder_services_iters:
+                    srv = self._current_model[itr][:]
+                    srv[-9] = freq
+                    srv[-8] = rate
+                    srv[-7] = pol
+                    srv[-6] = fec
+                    srv[-5] = system
+                    srv[-4] = pos
+                    srv[-1] = transponder
+                    srv = Service(*srv)
+                    self._services[srv.fav_id] = srv
+                    self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
+
         service = Service(flags_cas=self.get_flags(),
                           transponder_type="s",
                           coded=self._old_service.coded,
@@ -243,15 +271,15 @@ class ServiceDetailsDialog:
                           picon=self._old_service.picon,
                           picon_id=self._old_service.picon_id,
                           ssid="{:x}".format(int(self._id_entry.get_text())),
-                          freq=self._freq_entry.get_text(),
-                          rate=self._rate_entry.get_text(),
-                          pol=self._pol_combo_box.get_active_id(),
-                          fec=self._fec_combo_box.get_active_id(),
-                          system=self._sys_combo_box.get_active_id(),
-                          pos=self._sat_pos_combo_box.get_active_id(),
+                          freq=freq,
+                          rate=rate,
+                          pol=pol,
+                          fec=fec,
+                          system=system,
+                          pos=pos,
                           data_id=data_id,
                           fav_id=fav_id,
-                          transponder=self._old_service.transponder)
+                          transponder=transponder)
 
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
@@ -349,7 +377,7 @@ class ServiceDetailsDialog:
         freq = self._freq_entry.get_text()
         rate = self._rate_entry.get_text()
         pol = self.get_value_from_combobox_id(self._pol_combo_box, POLARIZATION)
-        fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC)
+        fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
         sat_pos = self._sat_pos_combo_box.get_active_id().replace(".", "")
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         srv_sys = get_key_by_value(SYSTEM, sys)
@@ -376,11 +404,16 @@ class ServiceDetailsDialog:
 
     @run_idle
     def on_tr_edit_toggled(self, switch: Gtk.Switch, active):
+
         if active:
-            response = TransponderServicesDialog(self._dialog, self._services_view,
-                                                 self._old_service.transponder).show()
+            self._transponder_services_iters = []
+            response = TransponderServicesDialog(self._dialog,
+                                                 self._services_view,
+                                                 self._old_service.transponder,
+                                                 self._transponder_services_iters).show()
             if response == Gtk.ResponseType.CANCEL or response == -4:
                 switch.set_active(False)
+                self._transponder_services_iters = None
                 return
 
         for elem in self._TRANSPONDER_ELEMENTS:
@@ -388,19 +421,21 @@ class ServiceDetailsDialog:
 
 
 class TransponderServicesDialog:
-    def __init__(self, transient, view, transponder):
+    def __init__(self, transient, view, transponder, tr_iters):
         builder = Gtk.Builder()
         builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
                                       ("tr_services_dialog", "transponder_services_liststore"))
         self._dialog = builder.get_object("tr_services_dialog")
         self._dialog.set_transient_for(transient)
         self._srv_model = builder.get_object("transponder_services_liststore")
-        self.append_services(view, transponder)
+        self.append_services(view, transponder, tr_iters)
 
-    def append_services(self, view, transponder):
-        for row in view.get_model():
+    def append_services(self, view, transponder, tr_iters):
+        model = get_base_model(view.get_model())
+        for row in model:
             if row[-1] == transponder:
-                self._srv_model.append((row[3], row[6], row[10]))
+                self._srv_model.append((row[3], row[6], row[7], row[10], row[11], row[16]))
+                tr_iters.append(model.get_iter(row.path))
 
     def show(self):
         response = self._dialog.run()
