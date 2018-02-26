@@ -4,16 +4,11 @@ from functools import lru_cache
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, SERVICE_TYPE, POLARIZATION, \
-    SYSTEM, get_key_by_value, get_value_by_name, FEC_DEFAULT
+    SYSTEM, get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
 from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON
-
-
-@lru_cache(maxsize=1)
-def get_sat_positions(path):
-    return ["{:.1f}".format(float(x.position) / 10) for x in get_satellites(path)]
 
 
 class ServiceDetailsDialog:
@@ -21,12 +16,12 @@ class ServiceDetailsDialog:
 
     _FAV_ID = "{:X}:{:X}:{:X}:{:X}"
 
-    _TRANSPONDER_DATA = " {}:{}:{}:{}:{}:{}:{}:{}"
+    _TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
 
     _DIGIT_ENTRY_ELEMENTS = ("id_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
                              "audio_pid_entry", "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "freq_entry",
                              "he_acc_pid_entry", "teletext_pid_entry", "transponder_id_entry", "network_id_entry",
-                             "rate_entry", "pls_code_entry", "stream_id_entry", "flags_entry", "namespace_entry")
+                             "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry")
 
     def __init__(self, transient, options, view, services, bouquets):
         handlers = {"on_system_changed": self.on_system_changed,
@@ -49,6 +44,7 @@ class ServiceDetailsDialog:
         self._bouquets = bouquets
         self._transponder_services_iters = None
         self._current_model = None
+        self._current_itr = None
         self._pattern = re.compile("\D")
         # style
         self._style_provider = Gtk.CssProvider()
@@ -75,7 +71,7 @@ class ServiceDetailsDialog:
         self._rate_entry = self._digit_elements.get("rate_entry")
         self._pls_code_entry = self._digit_elements.get("pls_code_entry")
         self._stream_id_entry = self._digit_elements.get("stream_id_entry")
-        self._flags_entry = self._digit_elements.get("flags_entry")
+        self._tr_flag_entry = self._digit_elements.get("tr_flag_entry")
         self._namespace_entry = self._digit_elements.get("namespace_entry")
         # Service elements
         self._name_entry = builder.get_object("name_entry")
@@ -111,9 +107,14 @@ class ServiceDetailsDialog:
     @run_idle
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
-        srv = Service(*model[paths][:])
-        self._old_service = srv
+        itr = model.get_iter(paths)
+        # Unpacking to search for an iterator for the base model
+        filter_model = model.get_model()
+        itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
         self._current_model = get_base_model(model)
+        srv = Service(*self._current_model[itr][:])
+        self._old_service = srv
+        self._current_itr = itr
         # Service
         self._name_entry.set_text(srv.service)
         self._package_entry.set_text(srv.package)
@@ -192,12 +193,15 @@ class ServiceDetailsDialog:
             self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
             self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
             self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
+            self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[-1]))
+            self._stream_id_entry.set_text(tr_data[11])
+            self._pls_code_entry.set_text(tr_data[12])
+            self._tr_flag_entry.set_text(tr_data[7])
 
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
         self._network_id_entry.set_text(str(int(data[3], 16)))
         self.select_active_text(self._invertion_combo_box, Inversion(tr_data[5]).name)
-        self._flags_entry.set_text(tr_data[6])
 
     def select_active_text(self, box: Gtk.ComboBox, text):
         model = box.get_model()
@@ -209,18 +213,29 @@ class ServiceDetailsDialog:
     @run_idle
     def set_sat_positions(self, sat_pos):
         model = self._sat_pos_combo_box.get_model()
-        positions = get_sat_positions(self._satellites_xml_path)
+        positions = self.get_sat_positions(self._satellites_xml_path)
         for pos in positions:
             model.append((pos,))
         self.select_active_text(self._sat_pos_combo_box, sat_pos)
 
+    @lru_cache(maxsize=1)
+    def get_sat_positions(self, path):
+        try:
+            return ["{:.1f}".format(float(x.position) / 10) for x in get_satellites(path)]
+        except FileNotFoundError:
+            return {r[-4] for r in self._current_model}
+
     def on_system_changed(self, box):
+        if not self._tr_edit_switch.get_active():
+            return
+        active = box.get_active()
+        self.update_dvb_s2_elements(active)
+
+    def update_dvb_s2_elements(self, active):
         for elem in self._DVB_S2_ELEMENTS:
-            elem.set_sensitive(box.get_active())
+            elem.set_sensitive(active)
         self._pls_code_entry.set_name("GtkEntry")
-        self._pls_code_entry.set_text("")
         self._stream_id_entry.set_name("GtkEntry")
-        self._stream_id_entry.set_text("")
 
     def show(self):
         response = self._dialog.run()
@@ -293,14 +308,8 @@ class ServiceDetailsDialog:
                     bq[i] = fav_id
 
         self._services[fav_id] = service
-        self.update_data_in_model(service)
-
-    def update_data_in_model(self, srv: Service):
-        fav_id = self._old_service.fav_id
-        for row in get_base_model(self._current_model):
-            if row[18] == fav_id:
-                self._current_model.set(self._current_model.get_iter(row.path), {i: v for i, v in enumerate(srv)})
-                break
+        self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
+        self._old_service = service
 
     def on_create_new(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
@@ -315,7 +324,7 @@ class ServiceDetailsDialog:
             return self._old_service.flags_cas
 
     def get_enigma2_flags(self):
-        flags = []
+        flags = ["p:{}".format(self._package_entry.get_text())]
         # cas
         cas = self._cas_entry.get_text()
         if cas:
@@ -380,18 +389,21 @@ class ServiceDetailsDialog:
         fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
         sat_pos = self._sat_pos_combo_box.get_active_id().replace(".", "")
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
-        srv_sys = get_key_by_value(SYSTEM, sys)
+        srv_sys = "0"  # !!!
 
         if self._profile is Profile.ENIGMA_2:
             dvb_s_tr = self._TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
             if sys == "DVB-S":
                 return dvb_s_tr
             if sys == "DVB-S2":
-                flag = self._flags_entry.get_text()
+                flag = self._tr_flag_entry.get_text()
                 mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION)
                 roll_off = self.get_value_from_combobox_id(self._rolloff_combo_box, ROLL_OFF)
                 pilot = get_value_by_name(Pilot, self._pilot_combo_box.get_active_id())
-                return "{}:{}:{}:{}:{}:-1:1:0".format(dvb_s_tr, flag, mod, roll_off, pilot)
+                pls_mode = self.get_value_from_combobox_id(self._pls_mode_combo_box, PLS_MODE)
+                pls_code = self._pls_code_entry.get_text()
+                st_id = self._stream_id_entry.get_text()
+                return "{}:{}:{}:{}:{}:{}:{}:{}".format(dvb_s_tr, flag, mod, roll_off, pilot, st_id, pls_code, pls_mode)
         elif self._profile is Profile.NEUTRINO_MP:
             return self._old_service.transponder
 
@@ -408,7 +420,7 @@ class ServiceDetailsDialog:
         if active:
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
-                                                 self._services_view,
+                                                 self._current_model,
                                                  self._old_service.transponder,
                                                  self._transponder_services_iters).show()
             if response == Gtk.ResponseType.CANCEL or response == -4:
@@ -416,22 +428,23 @@ class ServiceDetailsDialog:
                 self._transponder_services_iters = None
                 return
 
+        self.update_dvb_s2_elements(active and self._sys_combo_box.get_active_id() == "DVB-S2")
+
         for elem in self._TRANSPONDER_ELEMENTS:
             elem.set_sensitive(active)
 
 
 class TransponderServicesDialog:
-    def __init__(self, transient, view, transponder, tr_iters):
+    def __init__(self, transient, model, transponder, tr_iters):
         builder = Gtk.Builder()
         builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
                                       ("tr_services_dialog", "transponder_services_liststore"))
         self._dialog = builder.get_object("tr_services_dialog")
         self._dialog.set_transient_for(transient)
         self._srv_model = builder.get_object("transponder_services_liststore")
-        self.append_services(view, transponder, tr_iters)
+        self.append_services(model, transponder, tr_iters)
 
-    def append_services(self, view, transponder, tr_iters):
-        model = get_base_model(view.get_model())
+    def append_services(self, model, transponder, tr_iters):
         for row in model:
             if row[-1] == transponder:
                 self._srv_model.append((row[3], row[6], row[7], row[10], row[11], row[16]))
