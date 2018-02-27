@@ -118,6 +118,7 @@ class MainAppWindow:
         self.__blacklist = set()
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
         builder.connect_signals(handlers)
         self.__main_window = builder.get_object("main_window")

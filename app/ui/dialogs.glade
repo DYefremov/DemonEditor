@@ -111,7 +111,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
                     <property name="max_width_chars">10</property>
-                    <property name="text" translatable="yes">127.0.0.1</property>
+                    <property name="text">127.0.0.1</property>
                     <property name="caps_lock_warning">False</property>
                     <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
@@ -137,7 +137,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="text" translatable="yes">data/</property>
+                    <property name="text">data/</property>
                     <property name="caps_lock_warning">False</property>
                   </object>
                   <packing>
@@ -720,7 +720,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="host_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">127.0.0.1</property>
+                    <property name="text">127.0.0.1</property>
                     <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
                   <packing>
@@ -754,7 +754,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="port_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">21</property>
+                    <property name="text">21</property>
                     <property name="primary_icon_name">network-workgroup-symbolic</property>
                   </object>
                   <packing>
@@ -777,7 +777,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="login_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">root</property>
+                    <property name="text">root</property>
                     <property name="primary_icon_name">avatar-default-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                   </object>
@@ -792,7 +792,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="can_focus">True</property>
                     <property name="visibility">False</property>
                     <property name="invisible_char">●</property>
-                    <property name="text" translatable="yes">root</property>
+                    <property name="text">root</property>
                     <property name="primary_icon_name">emblem-readonly</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="input_purpose">password</property>
@@ -860,7 +860,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Loggin:</property>
+                    <property name="label" translatable="yes">Login:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -987,7 +987,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="services_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/etc/enigma2/</property>
+                    <property name="text">/etc/enigma2/</property>
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
@@ -1011,7 +1011,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="user_bouquet_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/etc/enigma2/</property>
+                    <property name="text">/etc/enigma2/</property>
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
@@ -1035,7 +1035,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="satellites_xml_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/etc/tuxbox/</property>
+                    <property name="text">/etc/tuxbox/</property>
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
@@ -1059,7 +1059,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="picons_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/usr/share/enigma2/picon</property>
+                    <property name="text">/usr/share/enigma2/picon</property>
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
@@ -1109,7 +1109,7 @@ dmitry.v.yefremov@gmail.com
                 </child>
                 <child>
                   <object class="GtkRadioButton" id="enigma_radio_button">
-                    <property name="label" translatable="yes">Enigma2 </property>
+                    <property name="label">Enigma2 </property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -1127,7 +1127,7 @@ dmitry.v.yefremov@gmail.com
                 </child>
                 <child>
                   <object class="GtkRadioButton" id="neutrino_radio_button">
-                    <property name="label" translatable="yes">Neutrino-MP
+                    <property name="label">Neutrino-MP
 (experimental)</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1208,7 +1208,7 @@ dmitry.v.yefremov@gmail.com
               <object class="GtkEntry" id="data_dir_field">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">/data</property>
+                <property name="text">/data</property>
                 <property name="primary_icon_stock">gtk-edit</property>
                 <property name="secondary_icon_name">folder-open-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
@@ -1245,7 +1245,7 @@ dmitry.v.yefremov@gmail.com
           <object class="GtkEntry" id="picons_dir_field">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="text" translatable="yes">/data/picons</property>
+            <property name="text">/data/picons</property>
             <property name="primary_icon_stock">gtk-edit</property>
             <property name="secondary_icon_name">folder-open-symbolic</property>
             <signal name="icon-press" handler="on_picons_dir_field_icon_press" swapped="no"/>
