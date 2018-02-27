@@ -1,12 +1,8 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>, 2018.
-#
-#, fuzzy
+# Copyright (C) 2018 Dmitriy Yefremov
+# This file is distributed under the MIT license.
+# Dmitriy Yefremov , 2018.
 msgid ""
 msgstr ""
-"Language-Team: RUSSIAN\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,22 +10,26 @@ msgstr ""
 
 #: main_window.glade:261
 msgid "Assign"
-msgstr "Связать"
+msgstr "Привязать"
 
 #: main_window.glade:1826
 msgid "Bouquet details"
-msgstr ""
+msgstr "Сервисы букета"
 
-#: main_window.glade:2021 main_window.glade:2055
+#: main_window.glade:2021
 msgid "Bouquets"
 msgstr "Букеты"
+
+#: main_window.glade:916
+msgid "Copy"
+msgstr "Копировать"
 
 #: main_window.glade:287 main_window.glade:416
 msgid "Copy reference"
 msgstr "Копировать ссылку"
 
-#: main_window.glade:875 main_window.glade:876
-msgid "Down"
+#: main_window.glade:1777
+msgid "Data"
 msgstr ""
 
 #: main_window.glade:744
@@ -38,11 +38,11 @@ msgstr "Загрузить"
 
 #: main_window.glade:1014
 msgid "Edit"
-msgstr "Редактировать"
+msgstr "Изменить"
 
 #: main_window.glade:1015
 msgid "Edit "
-msgstr "Редактировать"
+msgstr "Изменить"
 
 #: main_window.glade:213
 msgid "Edit mаrker text"
@@ -50,7 +50,7 @@ msgstr "Изменить текст маркера"
 
 #: main_window.glade:543 main_window.glade:743
 msgid "FTP-transfer"
-msgstr ""
+msgstr "Передача установок по FTP"
 
 #: main_window.glade:808
 msgid "Global search"
@@ -58,19 +58,23 @@ msgstr "Глобальный поиск"
 
 #: main_window.glade:973
 msgid "Hide"
-msgstr ""
+msgstr "Пропустить"
 
 #: main_window.glade:972
 msgid "Hide/Skip On/Off     Ctrl + H"
-msgstr "Спрятать/Пропусить Вкл/Выкл   Ctrl + H"
+msgstr "Скрыть/Пропустить Вкл/Выкл     Ctrl + H"
+
+#: main_window.glade:1113
+msgid "IPTV"
+msgstr ""
 
 #: main_window.glade:231
 msgid "Import m3u"
-msgstr "Импорт m3u"
+msgstr "Импортировать m3u"
 
 #: main_window.glade:1111
 msgid "Import m3u file"
-msgstr "Импортировать m3u файл"
+msgstr "Импортировать файл m3u"
 
 #: main_window.glade:201
 msgid "Insert marker"
@@ -80,21 +84,37 @@ msgstr "Вставить маркер"
 msgid "Locate in services"
 msgstr "Найти в списке сервисов"
 
+#: main_window.glade:957
+msgid "Locked"
+msgstr "Заблокирован"
+
+#: main_window.glade:834
+msgid "Move"
+msgstr "Переместить"
+
+#: main_window.glade:999
+msgid "New"
+msgstr "Новый"
+
 #: main_window.glade:998
 msgid "New bouquet"
 msgstr "Новый букет"
 
+#: main_window.glade:718 main_window.glade:719
+msgid "Open"
+msgstr "Открыть"
+
 #: main_window.glade:956
 msgid "Parent lock On/Off     Ctrl + L"
-msgstr "Родителский замок Вкл/Выкл     Ctrl + L"
+msgstr "Родительский замок Вкл/Выкл     Ctrl + L"
 
-#: main_window.glade:249 main_window.glade:378 main_window.glade:1397
+#: main_window.glade:931
+msgid "Paste"
+msgstr ""
+
+#: main_window.glade:249 main_window.glade:378
 msgid "Picon"
 msgstr "Пикон"
-
-#: main_window.glade:1412
-msgid "Picon ID"
-msgstr ""
 
 #: main_window.glade:1095
 msgid "Picons"
@@ -112,13 +132,29 @@ msgstr "Настройки"
 msgid "Profile:"
 msgstr "Профиль:"
 
+#: main_window.glade:1751
+msgid "Radio"
+msgstr ""
+
+#: main_window.glade:271 main_window.glade:1030
+msgid "Remove"
+msgstr "Удалить"
+
 #: main_window.glade:640 main_window.glade:1079 main_window.glade:1080
 msgid "Satellites editor"
 msgstr "Редактор спутников"
 
+#: main_window.glade:768 main_window.glade:769
+msgid "Save"
+msgstr "Сохранить"
+
 #: main_window.glade:809
 msgid "Search"
 msgstr "Поиск"
+
+#: main_window.glade:1269
+msgid "Services"
+msgstr "Сервисы"
 
 #: main_window.glade:793 main_window.glade:794
 msgid "Services filter"
@@ -127,6 +163,17 @@ msgstr "Фильтр сервисов"
 #: main_window.glade:1054
 msgid "Settings"
 msgstr "Настройки"
+
+#: main_window.glade:1725
+msgid "TV"
+msgstr ""
+
+#: main_window.glade:859 main_window.glade:860
+msgid "Up"
+msgstr "Переместить вверх"
+
+msgid "Down"
+msgstr "Переместить вниз"
 
 #: dialogs.glade:1101
 msgid "Active profile:"
@@ -154,7 +201,7 @@ msgstr "Данные:"
 
 #: dialogs.glade:16
 msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Редактор каналов и спутников для GNU/Linux"
+msgstr "Редактор списков каналов и спутников Enigma2\n для GNU/Linux"
 
 #: dialogs.glade:814
 msgid "FTP"
@@ -162,7 +209,7 @@ msgstr ""
 
 #: dialogs.glade:712
 msgid "Host:"
-msgstr ""
+msgstr "Адрес ресивера:"
 
 #: dialogs.glade:362
 msgid "Info"
@@ -170,17 +217,17 @@ msgstr ""
 
 #: dialogs.glade:1328
 msgid "Loading data..."
-msgstr "Згрузка данных..."
+msgstr "Загрузка данных..."
 
-#: dialogs.glade:863
+#: dialogs.glade:735 dialogs.glade:863
 msgid "Login:"
 msgstr "Логин:"
 
 #: dialogs.glade:625
 msgid "Options"
-msgstr "Опции"
+msgstr "Настройки"
 
-#: dialogs.glade:746 app/ui/dialogs.glade:874
+#: dialogs.glade:746 dialogs.glade:874
 msgid "Password:"
 msgstr "Пароль:"
 
@@ -192,25 +239,25 @@ msgstr "Директория пиконов:"
 msgid "Picons:"
 msgstr "Пиконы:"
 
-#: dialogs.glade:769 app/ui/dialogs.glade:830
+#: dialogs.glade:769 dialogs.glade:830
 msgid "Port:"
 msgstr "Порт:"
 
-#: dialogs.glade:94 app/ui/dialogs.glade:256
+#: dialogs.glade:94 dialogs.glade:256
 msgid "Receive"
-msgstr "Получить"
+msgstr "Получить:"
 
 #: dialogs.glade:254
 msgid "Receive files from receiver"
-msgstr "Получить данные из ресивера"
+msgstr "Получить файлы из ресивера"
 
 #: dialogs.glade:100
 msgid "Receiver IP:"
-msgstr "IP адрес ресивера"
+msgstr "IP адрес ресивера:"
 
 #: dialogs.glade:297
 msgid "Remove unused bouquets"
-msgstr "Удалить не исползуемые букеты"
+msgstr "Удалить не испрльзуемые букеты"
 
 #: dialogs.glade:1148
 msgid "Reset profile"
@@ -224,17 +271,29 @@ msgstr "Спутники"
 msgid "Satellites.xml file:"
 msgstr "Файл satellites.xml:"
 
+#: dialogs.glade:1215 dialogs.glade:1216
+msgid "Select"
+msgstr ""
+
+#: dialogs.glade:271
+msgid "Send"
+msgstr "Отправить"
+
 #: dialogs.glade:269
 msgid "Send files to receiver"
-msgstr "Загрузить файлы в ресивер"
+msgstr "Отправить вайлы в ресивер"
 
 #: dialogs.glade:978
 msgid "Services and Bouquets files:"
-msgstr "Файлы букетов и сервисов"
+msgstr "Файлы сервисов и букетов:"
+
+#: dialogs.glade:932
+msgid "Telnet"
+msgstr ""
 
 #: dialogs.glade:908
 msgid "Timeout between commands in seconds"
-msgstr "Тайм-аут между коммандами в сек."
+msgstr "Пауза между коммандами в сек."
 
 #: dialogs.glade:897
 msgid "Timeout:"
@@ -242,9 +301,30 @@ msgstr "Тайм-аут:"
 
 #: dialogs.glade:1002
 msgid "User bouquet files:"
-msgstr "Файлы пользовательских букетов:"
+msgstr "Файлы букетов:"
 
+#: dialogs.glade:224
+msgid "WebTV"
+msgstr ""
 
+# Picons dialog
+msgid "Load providers"
+msgstr "Загрузить провайдеров"
 
+msgid "Receive picons"
+msgstr "Загрузить пиконы"
 
+msgid "Picons name format:"
+msgstr "Формат имени пиконов:"
 
+msgid "Resize:"
+msgstr "Обрезать:"
+
+msgid "Current picons path:"
+msgstr "Текущий путь к пиконам:"
+
+msgid "Receiver picons path:"
+msgstr "Путь к пиконам ресивера:"
+
+msgid "Picons download tool"
+msgstr "Загрузчик пиконов"

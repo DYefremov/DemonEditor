@@ -437,6 +437,7 @@ class ServiceDetailsDialog:
 class TransponderServicesDialog:
     def __init__(self, transient, model, transponder, tr_iters):
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
                                       ("tr_services_dialog", "transponder_services_liststore"))
         self._dialog = builder.get_object("tr_services_dialog")

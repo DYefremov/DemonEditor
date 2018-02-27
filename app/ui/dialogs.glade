@@ -10,7 +10,7 @@
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
     <property name="version">0.3.0 Pre-alpha</property>
-    <property name="copyright" translatable="yes">2018 Dmitriy Yefremov
+    <property name="copyright">2018 Dmitriy Yefremov
 dmitry.v.yefremov@gmail.com
 </property>
     <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>

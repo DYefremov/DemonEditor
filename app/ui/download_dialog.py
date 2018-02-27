@@ -22,6 +22,7 @@ class DownloadDialog:
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("download_dialog",))
         builder.connect_signals(handlers)
 

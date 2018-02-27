@@ -38,6 +38,7 @@ class SatellitesDialog:
                     "on_quit": self.on_quit}
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_editor_dialog", "satellites_tree_store",
                                        "popup_menu", "add_popup_menu", "add_menu_icon"))

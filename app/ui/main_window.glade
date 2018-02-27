@@ -387,7 +387,7 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkImageMenuItem" id="services_assign_picon_popup_item">
-                <property name="label">Assign</property>
+                <property name="label" translatable="yes">Assign</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="image">image11</property>
@@ -397,7 +397,7 @@
             </child>
             <child>
               <object class="GtkImageMenuItem" id="services_remove_picon_popup_item">
-                <property name="label">Remove</property>
+                <property name="label" translatable="yes">Remove</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="image">image12</property>
@@ -537,7 +537,7 @@
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="download_menu_item">
-                        <property name="label">Download</property>
+                        <property name="label" translatable="yes">Download</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">FTP-transfer</property>

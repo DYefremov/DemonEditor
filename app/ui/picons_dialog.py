@@ -36,6 +36,7 @@ class PiconsDialog:
                     "on_position_edited": self.on_position_edited}
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_dialog.glade",
                                       ("picons_dialog", "receive_image", "providers_list_store"))
         builder.connect_signals(handlers)
