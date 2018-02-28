@@ -8,6 +8,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+
+# Main
+msgid "Service"
+msgstr "Сервис"
+
+msgid "Package"
+msgstr "Пакет"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Picon"
+msgstr "Пикон"
+
+msgid "Freq"
+msgstr "Частота"
+
+msgid "Rate"
+msgstr "Сим. скорость"
+
+msgid "Pol"
+msgstr "Пол."
+
+msgid "System"
+msgstr "Система"
+
+msgid "Pos"
+msgstr "Поз."
+
+msgid "Num"
+msgstr "№"
+
 #: main_window.glade:261
 msgid "Assign"
 msgstr "Привязать"
@@ -112,10 +144,6 @@ msgstr "Родительский замок Вкл/Выкл     Ctrl + L"
 msgid "Paste"
 msgstr ""
 
-#: main_window.glade:249 main_window.glade:378
-msgid "Picon"
-msgstr "Пикон"
-
 #: main_window.glade:1095
 msgid "Picons"
 msgstr "Пиконы"
@@ -201,7 +229,7 @@ msgstr "Данные:"
 
 #: dialogs.glade:16
 msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Редактор списков каналов и спутников Enigma2\n для GNU/Linux"
+msgstr "Редактор списка каналов и спутников Enigma2\n для GNU/Linux"
 
 #: dialogs.glade:814
 msgid "FTP"
@@ -210,10 +238,6 @@ msgstr ""
 #: dialogs.glade:712
 msgid "Host:"
 msgstr "Адрес ресивера:"
-
-#: dialogs.glade:362
-msgid "Info"
-msgstr ""
 
 #: dialogs.glade:1328
 msgid "Loading data..."
@@ -245,7 +269,7 @@ msgstr "Порт:"
 
 #: dialogs.glade:94 dialogs.glade:256
 msgid "Receive"
-msgstr "Получить:"
+msgstr "Получить"
 
 #: dialogs.glade:254
 msgid "Receive files from receiver"
@@ -307,6 +331,9 @@ msgstr "Файлы букетов:"
 msgid "WebTV"
 msgstr ""
 
+msgid "Extra:"
+msgstr "Дополнительно:"
+
 # Picons dialog
 msgid "Load providers"
 msgstr "Загрузить провайдеров"
@@ -328,3 +355,48 @@ msgstr "Путь к пиконам ресивера:"
 
 msgid "Picons download tool"
 msgstr "Загрузчик пиконов"
+
+msgid "Transfer to receiver"
+msgstr "Загрузить в ресивер"
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "Редактор спутников"
+
+msgid "Add"
+msgstr "Добавить"
+
+msgid "Satellite"
+msgstr "Спутник"
+
+msgid "Transponder"
+msgstr "Транспондер"
+
+msgid "Satellite properties:"
+msgstr "Параметры спутника:"
+
+msgid "Transponder properties:"
+msgstr "Параметры транспондера:"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Position"
+msgstr "Позиция"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "Данные сервиса:"
+
+msgid "Transponder data:"
+msgstr "Данные транспондера:"
+
+msgid "Service data"
+msgstr "Данные сервиса"
+
+msgid "Transponder details"
+msgstr "Данные транспондера"
+
+msgid "Changes will be applied to all services of this transponder!\nContinue?"
+msgstr "Изменения будут применены ко всем сервисам данного транспондера!\nПродолжить?"
+

@@ -4,7 +4,7 @@ from functools import lru_cache
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, SERVICE_TYPE, POLARIZATION, \
-    SYSTEM, get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
+    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
@@ -31,6 +31,7 @@ class ServiceDetailsDialog:
                     "on_tr_edit_toggled": self.on_tr_edit_toggled}
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
         builder.connect_signals(handlers)
 
@@ -193,10 +194,11 @@ class ServiceDetailsDialog:
             self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
             self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
             self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
-            self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[-1]))
-            self._stream_id_entry.set_text(tr_data[11])
-            self._pls_code_entry.set_text(tr_data[12])
             self._tr_flag_entry.set_text(tr_data[7])
+            if len(tr_data) > 12:
+                self._stream_id_entry.set_text(tr_data[11])
+                self._pls_code_entry.set_text(tr_data[12])
+                self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[13]))
 
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
@@ -403,7 +405,8 @@ class ServiceDetailsDialog:
                 pls_mode = self.get_value_from_combobox_id(self._pls_mode_combo_box, PLS_MODE)
                 pls_code = self._pls_code_entry.get_text()
                 st_id = self._stream_id_entry.get_text()
-                return "{}:{}:{}:{}:{}:{}:{}:{}".format(dvb_s_tr, flag, mod, roll_off, pilot, st_id, pls_code, pls_mode)
+                pls = ":{}:{}:{}".format(st_id, pls_code, pls_mode) if pls_mode and pls_code and st_id else ""
+                return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
         elif self._profile is Profile.NEUTRINO_MP:
             return self._old_service.transponder
 

@@ -1267,6 +1267,9 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Services</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1328,7 +1331,7 @@
                             <property name="resizable">True</property>
                             <property name="spacing">2</property>
                             <property name="min_width">50</property>
-                            <property name="title">Service</property>
+                            <property name="title" translatable="yes">Service</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">3</property>
@@ -1362,7 +1365,7 @@
                           <object class="GtkTreeViewColumn" id="package_column">
                             <property name="resizable">True</property>
                             <property name="min_width">50</property>
-                            <property name="title">Package</property>
+                            <property name="title" translatable="yes">Package</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">6</property>
@@ -1378,7 +1381,7 @@
                           <object class="GtkTreeViewColumn" id="service_type_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">Type</property>
+                            <property name="title" translatable="yes">Type</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">7</property>
@@ -1394,7 +1397,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="picon_column">
-                            <property name="title">Picon</property>
+                            <property name="title" translatable="yes">Picon</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">9</property>
                             <child>
@@ -1422,7 +1425,7 @@
                           <object class="GtkTreeViewColumn" id="ssid_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">Ssid</property>
+                            <property name="title">SID</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">10</property>
@@ -1440,7 +1443,7 @@
                           <object class="GtkTreeViewColumn" id="freq_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">Freq</property>
+                            <property name="title" translatable="yes">Freq</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">11</property>
@@ -1458,7 +1461,7 @@
                           <object class="GtkTreeViewColumn" id="rate_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">Rate</property>
+                            <property name="title" translatable="yes">Rate</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">12</property>
@@ -1476,7 +1479,7 @@
                           <object class="GtkTreeViewColumn" id="pol_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">Pol</property>
+                            <property name="title" translatable="yes">Pol</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">13</property>
@@ -1512,7 +1515,7 @@
                           <object class="GtkTreeViewColumn" id="system_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">System</property>
+                            <property name="title" translatable="yes">System</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">15</property>
@@ -1530,7 +1533,7 @@
                           <object class="GtkTreeViewColumn" id="pos_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title">Pos</property>
+                            <property name="title" translatable="yes">Pos</property>
                             <property name="expand">True</property>
                             <property name="sort_column_id">16</property>
                             <child>
@@ -1824,6 +1827,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Bouquet details</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1861,7 +1867,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="num_column">
-                                <property name="title">Num</property>
+                                <property name="title" translatable="yes">Num</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="num_cellrenderertext">
                                     <property name="xalign">0.20000000298023224</property>
@@ -1877,7 +1883,7 @@
                                 <property name="resizable">True</property>
                                 <property name="spacing">2</property>
                                 <property name="sizing">autosize</property>
-                                <property name="title">Service</property>
+                                <property name="title" translatable="yes">Service</property>
                                 <property name="expand">True</property>
                                 <child>
                                   <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf"/>
@@ -1913,7 +1919,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="fav_type_column">
-                                <property name="title">Type</property>
+                                <property name="title" translatable="yes">Type</property>
                                 <property name="expand">True</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="type_cellrenderertext">
@@ -1927,7 +1933,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="fav_pos_column">
-                                <property name="title">Pos</property>
+                                <property name="title" translatable="yes">Pos</property>
                                 <property name="expand">True</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="pos_cellrenderertext">
@@ -2019,6 +2025,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Bouquets</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2052,7 +2061,7 @@
                                 <property name="resizable">True</property>
                                 <property name="spacing">2</property>
                                 <property name="sizing">autosize</property>
-                                <property name="title">Bouquets</property>
+                                <property name="title" translatable="yes">Bouquets</property>
                                 <property name="expand">True</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="bouquets_cellrenderertext"/>
@@ -2216,7 +2225,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -2229,7 +2238,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>

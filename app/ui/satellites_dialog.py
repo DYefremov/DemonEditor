@@ -309,6 +309,7 @@ class TransponderDialog:
         handlers = {"on_entry_changed": self.on_entry_changed}
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("transponder_dialog",
                                        "pol_store", "fec_store",
@@ -392,6 +393,7 @@ class SatelliteDialog:
 
     def __init__(self, transient, satellite: Satellite = None):
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellite_dialog", "side_store", "pos_adjustment"))
 

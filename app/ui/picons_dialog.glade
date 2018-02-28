@@ -613,7 +613,7 @@
                   <object class="GtkLabel" id="expander_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Info</property>
+                    <property name="label" translatable="yes">Extra:</property>
                   </object>
                 </child>
               </object>
