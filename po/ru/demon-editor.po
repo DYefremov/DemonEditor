@@ -40,6 +40,9 @@ msgstr "Поз."
 msgid "Num"
 msgstr "№"
 
+msgid "Current IP:"
+msgstr "Текущий IP:"
+
 #: main_window.glade:261
 msgid "Assign"
 msgstr "Привязать"

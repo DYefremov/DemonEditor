@@ -134,7 +134,8 @@ class MainAppWindow:
         self.__bouquets_model = builder.get_object("bouquets_tree_store")
         self.__status_bar = builder.get_object("status_bar")
         self.__profile_label = builder.get_object("profile_label")
-        self.__status_bar.push(0, "Current IP: " + self.__options.get(self.__profile).get("host"))
+        self.__ip_label = builder.get_object("ip_label")
+        self.__ip_label.set_text(self.__options.get(self.__profile).get("host"))
         self.__profile_label.set_text("Enigma2 v.4" if Profile(self.__profile) is Profile.ENIGMA_2 else "Neutrino-MP")
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
@@ -672,7 +673,7 @@ class MainAppWindow:
         response = show_settings_dialog(self.__main_window, self.__options)
         if response != Gtk.ResponseType.CANCEL:
             profile = self.__options.get("profile")
-            self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
+            self.__ip_label.set_text(self.__options.get(profile).get("host"))
             if profile != self.__profile:
                 self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
                 self.__profile = profile
