@@ -18,10 +18,11 @@ class ServiceDetailsDialog:
 
     _TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
 
-    _DIGIT_ENTRY_ELEMENTS = ("id_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
+    _DIGIT_ENTRY_ELEMENTS = ("sid_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
                              "audio_pid_entry", "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "freq_entry",
                              "he_acc_pid_entry", "teletext_pid_entry", "transponder_id_entry", "network_id_entry",
-                             "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry")
+                             "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry",
+                             "srv_type_entry")
 
     def __init__(self, transient, options, view, services, bouquets):
         handlers = {"on_system_changed": self.on_system_changed,
@@ -55,7 +56,7 @@ class ServiceDetailsDialog:
         for elem in self._digit_elements.values():
             elem.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self._id_entry = self._digit_elements.get("id_entry")
+        self._sid_entry = self._digit_elements.get("sid_entry")
         self._bitstream_entry = self._digit_elements.get("bitstream_entry")
         self._pcm_entry = self._digit_elements.get("pcm_entry")
         self._video_pid_entry = self._digit_elements.get("video_pid_entry")
@@ -77,6 +78,7 @@ class ServiceDetailsDialog:
         # Service elements
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
+        self._srv_type_entry = builder.get_object("srv_type_entry")
         self._service_type_combo_box = builder.get_object("service_type_combo_box")
         self._cas_entry = builder.get_object("cas_entry")
         self._reference_entry = builder.get_object("reference_entry")
@@ -120,13 +122,12 @@ class ServiceDetailsDialog:
         self._name_entry.set_text(srv.service)
         self._package_entry.set_text(srv.package)
         self.select_active_text(self._service_type_combo_box, srv.service_type)
-        self._id_entry.set_text(str(int(srv.ssid, 16)))
+        self._sid_entry.set_text(str(int(srv.ssid, 16)))
         # Transponder
         self._freq_entry.set_text(srv.freq)
         self._rate_entry.set_text(srv.rate)
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
-        self.select_active_text(self._sys_combo_box, srv.system)
         self.set_sat_positions(srv.pos)
 
         if self._profile is Profile.ENIGMA_2:
@@ -200,6 +201,7 @@ class ServiceDetailsDialog:
                 self._pls_code_entry.set_text(tr_data[12])
                 self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[13]))
 
+        self._srv_type_entry.set_text(data[4])
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
         self._network_id_entry.set_text(str(int(data[3], 16)))
@@ -287,7 +289,7 @@ class ServiceDetailsDialog:
                           service_type=self._service_type_combo_box.get_active_id(),
                           picon=self._old_service.picon,
                           picon_id=self._old_service.picon_id,
-                          ssid="{:x}".format(int(self._id_entry.get_text())),
+                          ssid="{:x}".format(int(self._sid_entry.get_text())),
                           freq=freq,
                           rate=rate,
                           pol=pol,
@@ -364,11 +366,11 @@ class ServiceDetailsDialog:
         return ",".join(flags)
 
     def get_srv_data(self):
-        ssid = int(self._id_entry.get_text())
+        ssid = int(self._sid_entry.get_text())
         namespace = int(self._namespace_entry.get_text())
         transponder_id = int(self._transponder_id_entry.get_text())
         network_id = int(self._network_id_entry.get_text())
-        service_type = self.get_value_from_combobox_id(self._service_type_combo_box, SERVICE_TYPE)
+        service_type = self._srv_type_entry.get_text()
 
         if self._profile is Profile.ENIGMA_2:
             data_id = self._DATA_ID.format(ssid, namespace, transponder_id, network_id, service_type, 0)

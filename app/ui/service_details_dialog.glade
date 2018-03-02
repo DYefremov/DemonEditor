@@ -164,22 +164,33 @@
     <columns>
       <!-- column-name type -->
       <column type="gchararray"/>
+      <!-- column-name value -->
+      <column type="gchararray"/>
     </columns>
     <data>
       <row>
         <col id="0" translatable="yes">TV</col>
+        <col id="1">1</col>
+      </row>
+      <row>
+        <col id="0">TV (H264)</col>
+        <col id="1">22</col>
       </row>
       <row>
         <col id="0" translatable="yes">TV (HD)</col>
+        <col id="1">25</col>
       </row>
       <row>
         <col id="0" translatable="yes">TV (UHD)</col>
+        <col id="1">31</col>
       </row>
       <row>
         <col id="0" translatable="yes">Radio</col>
+        <col id="1">2</col>
       </row>
       <row>
         <col id="0" translatable="yes">Data</col>
+        <col id="1">3</col>
       </row>
     </data>
   </object>
@@ -356,11 +367,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="id_entry">
+                  <object class="GtkEntry" id="sid_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">8</property>
-                    <property name="max_width_chars">8</property>
+                    <property name="width_chars">10</property>
+                    <property name="max_width_chars">10</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -394,8 +406,9 @@
                   <object class="GtkEntry" id="cas_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">19</property>
-                    <property name="max_width_chars">19</property>
+                    <property name="width_chars">15</property>
+                    <property name="max_width_chars">22</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">4</property>
@@ -407,12 +420,27 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="model">srv_type_liststore</property>
+                    <property name="row_span_column">1</property>
+                    <property name="has_entry">True</property>
+                    <property name="entry_text_column">1</property>
                     <property name="id_column">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="srv_type_cellrenderertext"/>
                       <attributes>
                         <attribute name="text">0</attribute>
                       </attributes>
+                    </child>
+                    <child>
+                      <object class="GtkCellRendererText" id="srv_type_entry_cellrenderertext"/>
+                    </child>
+                    <child internal-child="entry">
+                      <object class="GtkEntry" id="srv_type_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">7</property>
+                        <property name="max_width_chars">7</property>
+                        <property name="primary_icon_stock">gtk-edit</property>
+                      </object>
                     </child>
                   </object>
                   <packing>
@@ -463,7 +491,7 @@
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -477,7 +505,7 @@
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -491,7 +519,7 @@
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -504,7 +532,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -572,7 +600,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -611,8 +639,8 @@
                     <property name="can_focus">False</property>
                     <property name="margin_left">25</property>
                     <property name="label" translatable="yes">Delays (ms):</property>
-                    <property name="width_chars">11</property>
-                    <property name="max_width_chars">11</property>
+                    <property name="width_chars">10</property>
+                    <property name="max_width_chars">10</property>
                     <property name="xalign">0</property>
                   </object>
                   <packing>
@@ -659,7 +687,7 @@
                   <object class="GtkEntry" id="pcm_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">3</property>
+                    <property name="width_chars">6</property>
                     <property name="max_width_chars">6</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
@@ -695,7 +723,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -708,7 +736,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">4</property>
-                    <property name="max_width_chars">4</property>
+                    <property name="max_width_chars">5</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -817,13 +845,13 @@
                   <object class="GtkGrid" id="ref_grid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="column_spacing">2</property>
                     <child>
                       <object class="GtkEntry" id="reference_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
-                        <property name="width_chars">26</property>
-                        <property name="max_width_chars">26</property>
+                        <property name="width_chars">24</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -967,8 +995,9 @@
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">10</property>
-                    <property name="max_width_chars">10</property>
+                    <property name="width_chars">12</property>
+                    <property name="max_width_chars">12</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -992,8 +1021,9 @@
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">10</property>
-                    <property name="max_width_chars">10</property>
+                    <property name="width_chars">12</property>
+                    <property name="max_width_chars">12</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -1065,7 +1095,7 @@
                   <object class="GtkLabel" id="label21">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Sys</property>
+                    <property name="label" translatable="yes">System</property>
                   </object>
                   <packing>
                     <property name="left_attach">5</property>
@@ -1128,8 +1158,9 @@
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">15</property>
-                    <property name="max_width_chars">15</property>
+                    <property name="width_chars">17</property>
+                    <property name="max_width_chars">17</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                     <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                   </object>
                   <packing>
@@ -1199,8 +1230,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">8</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1224,8 +1256,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">7</property>
-                        <property name="max_width_chars">8</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1370,8 +1403,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">7</property>
-                        <property name="max_width_chars">7</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1395,8 +1429,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">7</property>
-                        <property name="max_width_chars">8</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1420,8 +1455,9 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">7</property>
-                        <property name="max_width_chars">8</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1562,7 +1598,7 @@ Continue?</property>
                 </style>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
@@ -1581,11 +1617,9 @@ Continue?</property>
             </child>
             <child>
               <object class="GtkScrolledWindow" id="tr_srv_scrolled_window">
-                <property name="width_request">480</property>
-                <property name="height_request">100</property>
+                <property name="height_request">120</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">never</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkTreeView" id="tr_services_list_treeview">
@@ -1704,7 +1738,7 @@ Continue?</property>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>
