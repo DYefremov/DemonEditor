@@ -3,12 +3,12 @@ from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
-from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, SERVICE_TYPE, POLARIZATION, \
+from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
-from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON
+from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN
 
 
 class ServiceDetailsDialog:
@@ -32,7 +32,7 @@ class ServiceDetailsDialog:
                     "on_tr_edit_toggled": self.on_tr_edit_toggled}
 
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
         builder.connect_signals(handlers)
 
@@ -442,7 +442,7 @@ class ServiceDetailsDialog:
 class TransponderServicesDialog:
     def __init__(self, transient, model, transponder, tr_iters):
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
                                       ("tr_services_dialog", "transponder_services_liststore"))
         self._dialog = builder.get_object("tr_services_dialog")

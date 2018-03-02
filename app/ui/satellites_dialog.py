@@ -3,7 +3,7 @@ from math import fabs
 
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
-from . import Gtk, Gdk, UI_RESOURCES_PATH
+from . import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, WaitDialog
 from .main_helper import move_items, scroll_to
 
@@ -38,7 +38,7 @@ class SatellitesDialog:
                     "on_quit": self.on_quit}
 
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_editor_dialog", "satellites_tree_store",
                                        "popup_menu", "add_popup_menu", "add_menu_icon"))
@@ -309,7 +309,7 @@ class TransponderDialog:
         handlers = {"on_entry_changed": self.on_entry_changed}
 
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("transponder_dialog",
                                        "pol_store", "fec_store",
@@ -393,7 +393,7 @@ class SatelliteDialog:
 
     def __init__(self, transient, satellite: Satellite = None):
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellite_dialog", "side_store", "pos_adjustment"))
 

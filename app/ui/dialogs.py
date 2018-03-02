@@ -2,7 +2,7 @@
 from enum import Enum
 
 from app.commons import run_idle
-from . import Gtk, UI_RESOURCES_PATH
+from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
 class DialogType(Enum):
@@ -72,7 +72,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
 
 def get_dialog_from_xml(dialog_type, transient):
     builder = Gtk.Builder()
-    builder.set_translation_domain("demon-editor")
+    builder.set_translation_domain(TEXT_DOMAIN)
     builder.add_from_file(UI_RESOURCES_PATH + "dialogs.glade")
     dialog = builder.get_object(dialog_type.value)
     dialog.set_transient_for(transient)

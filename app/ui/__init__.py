@@ -1,3 +1,5 @@
+import locale
+
 import gi
 import os
 
@@ -6,6 +8,11 @@ from gi.repository import Gtk, Gdk
 
 # path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/demoneditor/app/ui/"
+
+# translation
+TEXT_DOMAIN = "demon-editor"
+LANG_DIR = UI_RESOURCES_PATH + "lang"
+locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
 
 theme = Gtk.IconTheme.get_default()
 _IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None

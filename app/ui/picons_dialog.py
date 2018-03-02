@@ -9,7 +9,7 @@ from app.commons import run_idle, run_task
 from app.ftp import upload_data, DownloadDataType
 from app.picons.picons import PiconsParser, parse_providers, Provider
 from app.properties import Profile
-from . import Gtk, Gdk, UI_RESOURCES_PATH
+from . import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType
 from .main_helper import update_entry_data
 
@@ -36,7 +36,7 @@ class PiconsDialog:
                     "on_position_edited": self.on_position_edited}
 
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_dialog.glade",
                                       ("picons_dialog", "receive_image", "providers_list_store"))
         builder.connect_signals(handlers)
