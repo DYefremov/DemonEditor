@@ -86,6 +86,7 @@ class ServiceDetailsDialog:
         self._hide_check_button = builder.get_object("hide_check_button")
         self._use_pids_check_button = builder.get_object("use_pids_check_button")
         self._new_check_button = builder.get_object("new_check_button")
+        self._pids_grid = builder.get_object("pids_grid")
         # Transponder elements
         self._sat_pos_combo_box = builder.get_object("sat_pos_combo_box")
         self._pol_combo_box = builder.get_object("pol_combo_box")
@@ -106,6 +107,14 @@ class ServiceDetailsDialog:
                                       self._rate_entry)
 
         self.update_data_elements()
+
+    def show(self):
+        response = self._dialog.run()
+        if response == Gtk.ResponseType.OK:
+            pass
+        self._dialog.destroy()
+
+        return response
 
     @run_idle
     def update_data_elements(self):
@@ -128,11 +137,17 @@ class ServiceDetailsDialog:
         self._rate_entry.set_text(srv.rate)
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
+        self.select_active_text(self._sys_combo_box, srv.system)
         self.set_sat_positions(srv.pos)
 
         if self._profile is Profile.ENIGMA_2:
             self.init_enigma2_service_data(srv)
             self.init_enigma2_transponder_data(srv)
+        elif self._profile is Profile.NEUTRINO_MP:
+            self.init_neutrino_data(srv)
+            self.init_enigma_ui_elements()
+
+    # ***************** Init Enigma2 data *********************#
 
     @run_idle
     def init_enigma2_service_data(self, srv):
@@ -207,15 +222,28 @@ class ServiceDetailsDialog:
         self._network_id_entry.set_text(str(int(data[3], 16)))
         self.select_active_text(self._invertion_combo_box, Inversion(tr_data[5]).name)
 
-    def select_active_text(self, box: Gtk.ComboBox, text):
-        model = box.get_model()
-        for index, row in enumerate(model):
-            if row[0] == text:
-                box.set_active(index)
-                break
+    # ***************** Init Neutrino data *********************#
+
+    def init_neutrino_data(self, srv):
+        srv_data = srv.data_id.split(":")
+        tr_data = srv.transponder.split(":")
+        self._reference_entry.set_text(srv.picon_id.rstrip(".png"))
+        self._transponder_id_entry.set_text(str(int(tr_data[0], 16)))
+        self._network_id_entry.set_text(str(int(tr_data[1], 16)))
+
+    def init_enigma_ui_elements(self):
+        self._pids_grid.set_sensitive(False)
+        self._cas_entry.set_sensitive(False)
+        self._keep_check_button.set_sensitive(False)
+        self._hide_check_button.set_sensitive(False)
+        self._use_pids_check_button.set_sensitive(False)
+        self._new_check_button.set_sensitive(False)
+
+    # ***************** Init Sat positions *********************#
 
     @run_idle
     def set_sat_positions(self, sat_pos):
+        """ Sat positions initialisation """
         model = self._sat_pos_combo_box.get_model()
         positions = self.get_sat_positions(self._satellites_xml_path)
         for pos in positions:
@@ -241,13 +269,7 @@ class ServiceDetailsDialog:
         self._pls_code_entry.set_name("GtkEntry")
         self._stream_id_entry.set_name("GtkEntry")
 
-    def show(self):
-        response = self._dialog.run()
-        if response == Gtk.ResponseType.OK:
-            pass
-        self._dialog.destroy()
-
-        return response
+    # ***************** Save data *********************#
 
     def on_save(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
@@ -411,6 +433,15 @@ class ServiceDetailsDialog:
                 return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
         elif self._profile is Profile.NEUTRINO_MP:
             return self._old_service.transponder
+
+    # ***************** Others *********************#
+
+    def select_active_text(self, box: Gtk.ComboBox, text):
+        model = box.get_model()
+        for index, row in enumerate(model):
+            if row[0] == text:
+                box.set_active(index)
+                break
 
     def on_digit_entry_changed(self, entry):
         entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
