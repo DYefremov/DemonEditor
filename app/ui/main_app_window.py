@@ -510,7 +510,6 @@ class MainAppWindow:
             self.append_services(data_path)
             self.update_services_counts(len(self.__services_model))
             self.update_picons()
-            self.__picons_download_tool_button.set_sensitive(len(self.__services_model))
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
@@ -679,7 +678,6 @@ class MainAppWindow:
                 self.__profile = profile
                 self.clear_current_data()
                 self.update_services_counts()
-                self.__picons_download_tool_button.set_sensitive(len(self.__services_model))
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -873,7 +871,7 @@ class MainAppWindow:
                 data = r[9].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
 
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), ids, Profile(self.__profile))
+        dialog = PiconsDialog(self.__main_window, self.__options, ids, Profile(self.__profile))
         dialog.show()
         self.update_picons()
 

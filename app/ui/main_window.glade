@@ -1090,7 +1090,6 @@
             <child>
               <object class="GtkToolButton" id="picons_download_tool_button">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Picons</property>
                 <property name="label" translatable="yes">Picons loader</property>

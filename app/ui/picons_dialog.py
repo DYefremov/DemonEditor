@@ -21,7 +21,6 @@ class PiconsDialog:
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
         self._current_process = None
-        self._picons_path = options.get("picons_dir_path", "")
         self._terminate = False
 
         handlers = {"on_receive": self.on_receive,
@@ -33,7 +32,9 @@ class PiconsDialog:
                     "on_picons_dir_open": self.on_picons_dir_open,
                     "on_selected_toggled": self.on_selected_toggled,
                     "on_url_changed": self.on_url_changed,
-                    "on_position_edited": self.on_position_edited}
+                    "on_position_edited": self.on_position_edited,
+                    "on_notebook_switch_page": self.on_notebook_switch_page,
+                    "on_convert": self.on_convert}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -55,6 +56,10 @@ class PiconsDialog:
         self._message_label = builder.get_object("info_bar_message_label")
         self._load_providers_tool_button = builder.get_object("load_providers_tool_button")
         self._receive_tool_button = builder.get_object("receive_tool_button")
+        self._convert_tool_button = builder.get_object("convert_tool_button")
+        self._enigma2_path_button = builder.get_object("enigma2_path_button")
+        self._save_to_button = builder.get_object("save_to_button")
+        self._send_tool_button = builder.get_object("send_tool_button")
         self._enigma2_radio_button = builder.get_object("enigma2_radio_button")
         self._neutrino_mp_radio_button = builder.get_object("neutrino_mp_radio_button")
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
@@ -65,13 +70,15 @@ class PiconsDialog:
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
-
-        self._properties = options
+        self._properties = options.get(profile.value)
         self._profile = profile
-        self._ip_entry.set_text(options.get("host", ""))
-        self._picons_entry.set_text(options.get("picons_path", ""))
-        self._picons_path = options.get("picons_dir_path", "")
+        self._ip_entry.set_text(self._properties.get("host", ""))
+        self._picons_entry.set_text(self._properties.get("picons_path", ""))
+        self._picons_path = self._properties.get("picons_dir_path", "")
         self._picons_dir_entry.set_text(self._picons_path)
+        self._enigma2_picons_path = self._picons_path
+        if profile is Profile.NEUTRINO_MP:
+            self._enigma2_picons_path = options.get(Profile.ENIGMA_2.value).get("picons_dir_path", "")
 
     def show(self):
         self._dialog.run()
@@ -221,6 +228,22 @@ class PiconsDialog:
     def on_position_edited(self, render, path, value):
         model = self._providers_tree_view.get_model()
         model.set_value(model.get_iter(path), 2, value)
+
+    @run_idle
+    def on_notebook_switch_page(self, nb, box, tab_num):
+        self._load_providers_tool_button.set_visible(not tab_num)
+        self._receive_tool_button.set_visible(not tab_num)
+        self._convert_tool_button.set_visible(tab_num)
+        self._send_tool_button.set_sensitive(not tab_num)
+
+        if self._enigma2_path_button.get_filename() is None:
+            self._enigma2_path_button.set_current_folder(self._enigma2_picons_path)
+
+    def on_convert(self, item):
+        picons_path = self._enigma2_path_button.get_filename()
+        save_path = self._save_to_button.get_filename()
+        if not picons_path or not save_path:
+            show_dialog(DialogType.ERROR, transient=self._dialog, text="Select paths!")
 
     @run_idle
     def update_receive_button_state(self):
