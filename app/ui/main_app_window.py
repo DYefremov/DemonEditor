@@ -24,9 +24,14 @@ from .service_details_dialog import ServiceDetailsDialog
 
 
 class MainAppWindow:
+    _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
+
     _SERVICE_LIST_NAME = "services_list_store"
+
     _FAV_LIST_NAME = "fav_list_store"
+
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
+
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
                          "services_edit_popup_item", "services_copy_popup_item", "services_picon_popup_item")
@@ -815,7 +820,7 @@ class MainAppWindow:
 
         for ch in self.__services.values():
             ch_type = ch.service_type
-            if ch_type in ("TV", "TV (HD)", "TV (UHD)"):
+            if ch_type in self._TV_TYPES:
                 tv_count += 1
             elif ch_type == "Radio":
                 radio_count += 1
