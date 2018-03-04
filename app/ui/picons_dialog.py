@@ -7,7 +7,7 @@ from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task
 from app.ftp import upload_data, DownloadDataType
-from app.picons.picons import PiconsParser, parse_providers, Provider
+from app.picons.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType
@@ -239,11 +239,19 @@ class PiconsDialog:
         if self._enigma2_path_button.get_filename() is None:
             self._enigma2_path_button.set_current_folder(self._enigma2_picons_path)
 
+    @run_idle
     def on_convert(self, item):
         picons_path = self._enigma2_path_button.get_filename()
         save_path = self._save_to_button.get_filename()
         if not picons_path or not save_path:
             show_dialog(DialogType.ERROR, transient=self._dialog, text="Select paths!")
+
+        self._expander.set_expanded(True)
+        convert_to(src_path=picons_path,
+                   dest_path=save_path,
+                   profile=Profile.ENIGMA_2,
+                   callback=self.append_output,
+                   done_callback=lambda: self.show_info_message("Done!", Gtk.MessageType.INFO))
 
     @run_idle
     def update_receive_button_state(self):

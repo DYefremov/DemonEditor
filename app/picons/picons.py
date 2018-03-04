@@ -1,9 +1,10 @@
+import glob
 import os
 import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
-from app.commons import log
+from app.commons import log, run_task
 from app.properties import Profile
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{:X}0000"
@@ -182,6 +183,24 @@ def parse_providers(open_path):
 
         if rows:
             return [Provider(logo=r[2], name=r[5], pos=r[0], url=r[6], on_id=r[-2], selected=True) for r in rows]
+
+
+@run_task
+def convert_to(src_path, dest_path, profile, callback, done_callback):
+    """ Converts names format of picons.
+
+        Copies resulting files from src to dest and writes state to callback.
+    """
+    pattern = "/*_0_0_0.png" if profile is Profile.ENIGMA_2 else "/*.png"
+    for file in glob.glob(src_path + pattern):
+        base_name = os.path.basename(file)
+        pic_data = base_name.rstrip(".png").split("_")
+        dest_file = _NEUTRINO_PICON_KEY.format(int(pic_data[4], 16), int(pic_data[5], 16), int(pic_data[3], 16))
+        dest = "{}/{}".format(dest_path, dest_file)
+        callback('Converting "{}" to "{}"\n'.format(base_name, dest_file))
+        shutil.copyfile(file, dest)
+
+    done_callback()
 
 
 if __name__ == "__main__":
