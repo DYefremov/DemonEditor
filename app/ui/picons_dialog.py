@@ -245,6 +245,7 @@ class PiconsDialog:
         save_path = self._save_to_button.get_filename()
         if not picons_path or not save_path:
             show_dialog(DialogType.ERROR, transient=self._dialog, text="Select paths!")
+            return
 
         self._expander.set_expanded(True)
         convert_to(src_path=picons_path,

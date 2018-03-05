@@ -108,6 +108,8 @@ class MainAppWindow:
                     "on_reference_picon": self.on_reference_picon,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_search_toggled": self.on_search_toggled,
+                    "on_search_down": self.on_search_down,
+                    "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
                     "on_service_edit": self.on_service_edit}
 
@@ -896,6 +898,12 @@ class MainAppWindow:
 
     def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
         self.__search_info_bar.set_visible(toggle_button.get_active())
+
+    def on_search_down(self, item):
+        show_dialog(DialogType.ERROR, transient=self.__main_window, text="Not implemented yet!")
+
+    def on_search_up(self, item):
+        show_dialog(DialogType.ERROR, transient=self.__main_window, text="Not implemented yet!")
 
     @run_idle
     def on_search(self, entry, event):
