@@ -362,6 +362,21 @@ msgstr "Загрузчик пиконов"
 msgid "Transfer to receiver"
 msgstr "Загрузить в ресивер"
 
+msgid "Downloader"
+msgstr "Загрузчик"
+
+msgid "Converter"
+msgstr "Конвертер"
+
+msgid "Convert"
+msgstr "Конвертировать"
+
+msgid "Path to save:"
+msgstr "Путь для сохранения:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Путь к пиконам формата Enigma2:"
+
 # Satellites editor
 msgid "Satellites edit tool"
 msgstr "Редактор спутников"
@@ -402,4 +417,80 @@ msgstr "Данные транспондера"
 
 msgid "Changes will be applied to all services of this transponder!\nContinue?"
 msgstr "Изменения будут применены ко всем сервисам данного транспондера!\nПродолжить?"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "Ошибка. Не выбран букет!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "Этот элемент не разрешен к удалению!"
+
+msgid "This item is not allowed to edit!"
+msgstr "Элемент не предназначен для редактирования!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "Пожалуйста, загрузите файлы из приемника или настройте путь для чтения данных!"
+
+msgid "Reading data error!"
+msgstr "Ошибка чтения данных!"
+
+msgid "No m3u file is selected!"
+msgstr "Не выбран m3u файл!"
+
+msgid "Not implemented yet!"
+msgstr "Пока не реализовано!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "Текст маркера пуст, попробуйте еще!"
+
+msgid "Please, select only one item!"
+msgstr "Пожалуйста, выберите только один элемент!"
+
+msgid "No png file is selected!"
+msgstr "Не выбран png файл!"
+
+msgid "No reference is present!"
+msgstr "Ссылка не найдена!"
+
+msgid "No selected item!"
+msgstr "Не выбран элемент!"
+
+msgid "The task is already running!"
+msgstr "Задача уже запущена!"
+
+msgid "Done!"
+msgstr "Готово!"
+
+msgid "Please, wait..."
+msgstr "Пожалуйста, подождите..."
+
+msgid "Resizing..."
+msgstr "Изменение размера..."
+
+msgid "Select paths!"
+msgstr "Укажите пути!"
+
+msgid "No satellite is selected!"
+msgstr "Не выбран спутник!"
+
+msgid "Please, select only one satellite!"
+msgstr "Пожалуйста, выберите только один спутник!"
+
+msgid "Please check your parameters and try again."
+msgstr "Пожалуйста, проверте параметры и попробуйте снова!"
+
+msgid "No satellites.xml file is selected!"
+msgstr "Не выбран файл satellites.xml!"
+
+
+
+
+
+
+
+
+
+
+
+
 

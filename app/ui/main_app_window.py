@@ -11,11 +11,12 @@ from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
+from .search import search
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search, \
+    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
@@ -555,7 +556,7 @@ class MainAppWindow:
         except Exception as e:
             print(e)
             log("Append services error: " + str(e))
-            show_dialog(DialogType.ERROR, self.__main_window, "Error opening data!")
+            show_dialog(DialogType.ERROR, self.__main_window, "Reading data error!")
         else:
             if services:
                 for srv in services:

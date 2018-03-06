@@ -10,7 +10,7 @@ from app.ftp import upload_data, DownloadDataType
 from app.picons.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
-from .dialogs import show_dialog, DialogType
+from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data
 
 
@@ -130,7 +130,7 @@ class PiconsDialog:
 
     def process_provider(self, prv):
         url = prv.url
-        self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
+        self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
                                                  stdout=subprocess.PIPE,
                                                  stderr=subprocess.PIPE,
@@ -166,7 +166,7 @@ class PiconsDialog:
         if self._resize_no_radio_button.get_active():
             return
 
-        self.show_info_message("Resizing...", Gtk.MessageType.INFO)
+        self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
         command = "mogrify -resize {}! *.png".format(
             "320x240" if self._resize_220_132_radio_button.get_active() else "100x60").split()
         self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
@@ -188,7 +188,7 @@ class PiconsDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
-        self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
+        self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.upload_picons()
 
     @run_task
@@ -200,7 +200,7 @@ class PiconsDialog:
         upload_data(properties=self._properties,
                     download_type=DownloadDataType.PICONS,
                     profile=self._profile,
-                    callback=lambda: self.show_info_message("Done!", Gtk.MessageType.INFO))
+                    callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -241,6 +241,9 @@ class PiconsDialog:
 
     @run_idle
     def on_convert(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
         picons_path = self._enigma2_path_button.get_filename()
         save_path = self._save_to_button.get_filename()
         if not picons_path or not save_path:
@@ -252,7 +255,7 @@ class PiconsDialog:
                    dest_path=save_path,
                    profile=Profile.ENIGMA_2,
                    callback=self.append_output,
-                   done_callback=lambda: self.show_info_message("Done!", Gtk.MessageType.INFO))
+                   done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
 
     @run_idle
     def update_receive_button_state(self):

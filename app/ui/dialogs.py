@@ -1,4 +1,5 @@
 """ Common module for showing dialogs """
+import locale
 from enum import Enum
 
 from app.commons import run_idle
@@ -63,7 +64,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
         return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
 
     if text:
-        dialog.set_markup(text)
+        dialog.set_markup(get_message(text))
     response = dialog.run()
     dialog.destroy()
 
@@ -88,6 +89,11 @@ def get_chooser_dialog(transient, options, pattern, name):
                        options=options,
                        action_type=Gtk.FileChooserAction.OPEN,
                        file_filter=file_filter)
+
+
+def get_message(message):
+    """ returns translated message """
+    return locale.dgettext(TEXT_DOMAIN, message)
 
 
 if __name__ == "__main__":
