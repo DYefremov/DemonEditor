@@ -1,5 +1,5 @@
 from app.properties import write_config, Profile, get_default_settings
-from . import Gtk, UI_RESOURCES_PATH
+from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .main_helper import update_entry_data
 
 
@@ -16,6 +16,7 @@ class SettingsDialog:
                     "apply_settings": self.apply_settings}
 
         builder = Gtk.Builder()
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade",
                                       ("settings_dialog", "telnet_timeout_adjustment"))
         builder.connect_signals(handlers)

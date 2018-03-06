@@ -117,11 +117,6 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-copy</property>
   </object>
-  <object class="GtkImage" id="image17">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-properties</property>
-  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -175,7 +170,7 @@
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" object="fav_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_service_edit" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
@@ -369,23 +364,7 @@
         <property name="resize_mode">immediate</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" object="services_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="separatormenuitem7">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_data_edit_popup_item">
-        <property name="label" translatable="yes">Show details/edit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">image17</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_services_data_edit" object="services_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_service_edit" object="services_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
@@ -408,7 +387,7 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkImageMenuItem" id="services_assign_picon_popup_item">
-                <property name="label">Assign</property>
+                <property name="label" translatable="yes">Assign</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="image">image11</property>
@@ -418,7 +397,7 @@
             </child>
             <child>
               <object class="GtkImageMenuItem" id="services_remove_picon_popup_item">
-                <property name="label">Remove</property>
+                <property name="label" translatable="yes">Remove</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="image">image12</property>
@@ -558,7 +537,7 @@
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="download_menu_item">
-                        <property name="label">Download</property>
+                        <property name="label" translatable="yes">Download</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">FTP-transfer</property>
@@ -1111,7 +1090,6 @@
             <child>
               <object class="GtkToolButton" id="picons_download_tool_button">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Picons</property>
                 <property name="label" translatable="yes">Picons loader</property>
@@ -1215,14 +1193,65 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSearchEntry" id="search_entry">
-                    <property name="width_request">200</property>
+                  <object class="GtkBox" id="search_bar_box">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="primary_icon_name">edit-find-symbolic</property>
-                    <property name="primary_icon_activatable">False</property>
-                    <property name="primary_icon_sensitive">False</property>
-                    <signal name="key-release-event" handler="on_search" swapped="no"/>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkSearchEntry" id="search_entry">
+                        <property name="width_request">200</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="primary_icon_name">edit-find-symbolic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">False</property>
+                        <signal name="search-changed" handler="on_search" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="search_down_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_search_down" swapped="no"/>
+                        <child>
+                          <object class="GtkArrow" id="arrow1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="arrow_type">down</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="search_up_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_search_up" swapped="no"/>
+                        <child>
+                          <object class="GtkArrow" id="arrow2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="arrow_type">up</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1288,6 +1317,9 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Services</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1323,7 +1355,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="cas_column">
                             <property name="visible">False</property>
-                            <property name="title" translatable="yes">CAS</property>
+                            <property name="title">CAS</property>
                             <child>
                               <object class="GtkCellRendererText" id="cas_cellrenderertext1"/>
                               <attributes>
@@ -1335,7 +1367,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="type_column">
                             <property name="visible">False</property>
-                            <property name="title" translatable="yes">Type</property>
+                            <property name="title">Type</property>
                             <child>
                               <object class="GtkCellRendererText" id="type_cellrenderertext2"/>
                               <attributes>
@@ -1430,7 +1462,7 @@
                           <object class="GtkTreeViewColumn" id="picon_id_column">
                             <property name="visible">False</property>
                             <property name="sizing">fixed</property>
-                            <property name="title" translatable="yes">Picon ID</property>
+                            <property name="title">Picon ID</property>
                             <child>
                               <object class="GtkCellRendererText" id="picon_id_cellrenderertext"/>
                               <attributes>
@@ -1443,7 +1475,7 @@
                           <object class="GtkTreeViewColumn" id="ssid_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title" translatable="yes">Ssid</property>
+                            <property name="title">SID</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">10</property>
@@ -1515,7 +1547,7 @@
                           <object class="GtkTreeViewColumn" id="fec_column">
                             <property name="resizable">True</property>
                             <property name="min_width">25</property>
-                            <property name="title" translatable="yes">FEC</property>
+                            <property name="title">FEC</property>
                             <property name="expand">True</property>
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">14</property>
@@ -1567,7 +1599,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="data_id_column">
                             <property name="visible">False</property>
-                            <property name="title" translatable="yes">data_id</property>
+                            <property name="title">data_id</property>
                             <child>
                               <object class="GtkCellRendererText" id="data_id_cellrenderertext"/>
                               <attributes>
@@ -1579,7 +1611,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="service_fav_id_column">
                             <property name="visible">False</property>
-                            <property name="title" translatable="yes">fav_id</property>
+                            <property name="title">fav_id</property>
                             <child>
                               <object class="GtkCellRendererText" id="fav_id_cellrenderertext"/>
                               <attributes>
@@ -1591,7 +1623,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="transponder_column">
                             <property name="visible">False</property>
-                            <property name="title" translatable="yes">transponder</property>
+                            <property name="title">transponder</property>
                             <child>
                               <object class="GtkCellRendererText" id="transponder_cellrenderertext"/>
                               <attributes>
@@ -1845,6 +1877,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Bouquet details</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1963,7 +1998,7 @@
                             <child>
                               <object class="GtkTreeViewColumn" id="fav_id_column">
                                 <property name="visible">False</property>
-                                <property name="title" translatable="yes">fav_id</property>
+                                <property name="title">fav_id</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="fav_id_cellrenderertext4"/>
                                   <attributes>
@@ -2040,6 +2075,9 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Bouquets</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2102,7 +2140,7 @@
                                 <property name="visible">False</property>
                                 <property name="resizable">True</property>
                                 <property name="sizing">autosize</property>
-                                <property name="title" translatable="yes">Type</property>
+                                <property name="title">Type</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="bouquet_type_cellrenderertext"/>
                                   <attributes>
@@ -2184,7 +2222,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="separator4">
+          <object class="GtkSeparator" id="bottom_separator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_bottom">2</property>
@@ -2192,25 +2230,59 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="padding">2</property>
             <property name="position">5</property>
           </packing>
         </child>
         <child>
-          <object class="GtkStatusbar" id="status_bar">
+          <object class="GtkBox" id="status_bar_box">
+            <property name="height_request">24</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_start">10</property>
-            <property name="margin_end">10</property>
-            <property name="spacing">2</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkBox" id="box1">
+              <object class="GtkBox" id="ip_status_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">2</property>
                 <child>
-                  <object class="GtkLabel" id="label1">
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Current IP:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="ip_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">127.0.0.1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">5</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="prifile_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">2</property>
+                <child>
+                  <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Profile:</property>
@@ -2225,7 +2297,7 @@
                   <object class="GtkLabel" id="profile_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Enigma 2 v.4</property>
+                    <property name="label">Enigma 2 v.4</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2244,20 +2316,24 @@
               <object class="GtkLabel" id="ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Ver. 0.2.4 Pre-alpha</property>
+                <property name="label">Ver. 0.3.0 Pre-alpha</property>
                 <property name="xalign">0.94999998807907104</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">2</property>
               </packing>
             </child>
+            <style>
+              <class name="primary-toolbar"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">7</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </object>

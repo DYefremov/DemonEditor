@@ -66,6 +66,9 @@
       <row>
         <col id="0" translatable="yes">9/10</col>
       </row>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
     </data>
   </object>
   <object class="GtkListStore" id="mod_store">
@@ -587,7 +590,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="freq_column">
                         <property name="resizable">True</property>
-                        <property name="title" translatable="yes">Freq.</property>
+                        <property name="title" translatable="yes">Freq</property>
                         <property name="expand">True</property>
                         <child>
                           <object class="GtkCellRendererText" id="frequency_cellrenderertext"/>
@@ -613,7 +616,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="pol_column">
                         <property name="resizable">True</property>
-                        <property name="title" translatable="yes">Pol.</property>
+                        <property name="title" translatable="yes">Pol</property>
                         <property name="expand">True</property>
                         <child>
                           <object class="GtkCellRendererText" id="sat_pol_cellrenderertext"/>
@@ -626,7 +629,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="fec_column">
                         <property name="resizable">True</property>
-                        <property name="title" translatable="yes">Fec.</property>
+                        <property name="title" translatable="yes">FEC</property>
                         <property name="expand">True</property>
                         <child>
                           <object class="GtkCellRendererText" id="set_fec_cellrenderertext"/>
@@ -652,7 +655,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="mod_column">
                         <property name="resizable">True</property>
-                        <property name="title" translatable="yes">Mod.</property>
+                        <property name="title" translatable="yes">Mod</property>
                         <property name="expand">True</property>
                         <child>
                           <object class="GtkCellRendererText" id="mod_cellrenderertext"/>
@@ -1073,7 +1076,7 @@
                   <object class="GtkLabel" id="label1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Freq.</property>
+                    <property name="label" translatable="yes">Freq</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1095,7 +1098,7 @@
                   <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Pol.</property>
+                    <property name="label" translatable="yes">Pol</property>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -1106,7 +1109,7 @@
                   <object class="GtkLabel" id="label4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Fec.</property>
+                    <property name="label" translatable="yes">FEC</property>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -1117,7 +1120,7 @@
                   <object class="GtkLabel" id="label5">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Sys.</property>
+                    <property name="label" translatable="yes">System</property>
                   </object>
                   <packing>
                     <property name="left_attach">4</property>
@@ -1128,7 +1131,7 @@
                   <object class="GtkLabel" id="label6">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Mod.</property>
+                    <property name="label" translatable="yes">Mod</property>
                   </object>
                   <packing>
                     <property name="left_attach">5</property>
@@ -1361,7 +1364,7 @@
                   <object class="GtkLabel" id="expander_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Extra</property>
+                    <property name="label" translatable="yes">Extra:</property>
                   </object>
                 </child>
               </object>

@@ -101,7 +101,7 @@ def parse_services(services, transponders, path):
         all_flags = ch[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
-        hide = HIDE_ICON if flags and int(flags[0][2:]) in Flag.hide_values() else None
+        hide = HIDE_ICON if flags and Flag.is_hide(int(flags[0][2:])) else None
         locked = LOCKED_ICON if fav_id in blacklist else None
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))

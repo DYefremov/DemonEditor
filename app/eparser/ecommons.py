@@ -35,7 +35,13 @@ class Type(Enum):
 
 
 class Flag(Enum):
-    """ Service flags """
+    """ Service flags
+
+        K - last bit (1)
+        H - second from end (10)
+        P - third (100)
+        N - sixth (100000)
+    """
     KEEP = 1  # Do not automatically update the services parameters.
     HIDE = 2
     PIDS = 4  # Always use the cached instead of current pids.
@@ -43,8 +49,33 @@ class Flag(Enum):
     NEW = 40  # Marked as new at the last scan
 
     @staticmethod
-    def hide_values():
-        return 2, 3, 6, 7, 10, 42, 43, 46, 47
+    def is_hide(value: int):
+        return value & 1 << 1
+
+    @staticmethod
+    def is_keep(value: int):
+        return value & 1 << 0
+
+    @staticmethod
+    def is_pids(value: int):
+        return value & 1 << 2
+
+    @staticmethod
+    def is_new(value: int):
+        return value & 1 << 5
+
+
+class Pids(Enum):
+    VIDEO = "c:00"
+    AUDIO = "c:01"
+    TELETEXT = "c:02"
+    PCR = "c:03"
+    AC3 = "c:04"
+    VIDEO_TYPE = "c:05"
+    AUDIO_CHANNEL = "c:06"
+    BIT_STREAM_DELAY = "c:07"  # in ms
+    PCM_DELAY = "c:08"  # in ms
+    SUBTITLE = "c:09"
 
 
 class Inversion(Enum):
@@ -70,13 +101,15 @@ FEC = {"0": "Auto", "1": "1/2", "2": "2/3", "3": "3/4", "4": "5/6", "5": "7/8", 
        "17": "4/5", "18": "9/10", "19": "1/2", "20": "2/3", "21": "3/4", "22": "5/6", "23": "7/8", "24": "8/9",
        "25": "3/5", "26": "4/5", "27": "9/10", "28": "Auto"}
 
+FEC_DEFAULT = {"0": "Auto", "1": "1/2", "2": "2/3", "3": "3/4", "4": "5/6", "5": "7/8", "6": "8/9", "7": "3/5",
+               "8": "4/5", "9": "9/10"}
+
 SYSTEM = {"0": "DVB-S", "1": "DVB-S2"}
 
 MODULATION = {"0": "Auto", "1": "QPSK", "2": "8PSK", "3": "16APSK", "5": "32APSK"}
 
-SERVICE_TYPE = {"-2": "Unknown", "1": "TV", "2": "Radio", "3": "Data",
-                "10": "Radio", "12": "Data", "22": "TV", "25": "TV (HD)", "31": "TV (UHD)",
-                "136": "Data", "139": "Data"}
+SERVICE_TYPE = {"-2": "Data", "1": "TV", "2": "Radio", "3": "Data", "10": "Radio", "22": "TV (H264)",
+                "25": "TV (HD)", "31": "TV (UHD)"}
 
 CAS = {"C:2600": "BISS", "C:0b00": "Conax", "C:0b01": "Conax", "C:0b02": "Conax", "C:0baa": "Conax", "C:0602": "Irdeto",
        "C:0604": "Irdeto", "C:0606": "Irdeto", "C:0608": "Irdeto", "C:0622": "Irdeto", "C:0626": "Irdeto",
@@ -85,3 +118,19 @@ CAS = {"C:2600": "BISS", "C:0b00": "Conax", "C:0b01": "Conax", "C:0b02": "Conax"
 
 # 'on' attribute  0070(hex) = 112(int) =  ONID(ONID-TID on www.lyngsat.com)
 PROVIDER = {112: "HTB+", 253: "Tricolor TV"}
+
+
+# ************* subsidiary functions ****************
+
+def get_key_by_value(dc: dict, value):
+    """ Returns key from dict by value """
+    for k, v in dc.items():
+        if v == value:
+            return k
+
+
+def get_value_by_name(en, name):
+    """ Returns value by name from enums """
+    for n in en:
+        if n.name == name:
+            return n.value

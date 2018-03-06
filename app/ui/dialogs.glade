@@ -9,8 +9,8 @@
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">0.2.4 Pre-alpha</property>
-    <property name="copyright" translatable="yes">2018 Dmitriy Yefremov
+    <property name="version">0.3.0 Pre-alpha</property>
+    <property name="copyright">2018 Dmitriy Yefremov
 dmitry.v.yefremov@gmail.com
 </property>
     <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>
@@ -111,7 +111,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
                     <property name="max_width_chars">10</property>
-                    <property name="text" translatable="yes">127.0.0.1</property>
+                    <property name="text">127.0.0.1</property>
                     <property name="caps_lock_warning">False</property>
                     <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
@@ -137,7 +137,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="text" translatable="yes">data/</property>
+                    <property name="text">data/</property>
                     <property name="caps_lock_warning">False</property>
                   </object>
                   <packing>
@@ -720,7 +720,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="host_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">127.0.0.1</property>
+                    <property name="text">127.0.0.1</property>
                     <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                   </object>
                   <packing>
@@ -754,7 +754,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="port_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">21</property>
+                    <property name="text">21</property>
                     <property name="primary_icon_name">network-workgroup-symbolic</property>
                   </object>
                   <packing>
@@ -777,7 +777,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="login_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">root</property>
+                    <property name="text">root</property>
                     <property name="primary_icon_name">avatar-default-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                   </object>
@@ -792,7 +792,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="can_focus">True</property>
                     <property name="visibility">False</property>
                     <property name="invisible_char">●</property>
-                    <property name="text" translatable="yes">root</property>
+                    <property name="text">root</property>
                     <property name="primary_icon_name">emblem-readonly</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="input_purpose">password</property>
@@ -802,6 +802,9 @@ dmitry.v.yefremov@gmail.com
                     <property name="top_attach">3</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="primary-toolbar"/>
+                </style>
               </object>
             </child>
             <child type="tab">
@@ -857,7 +860,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Loggin:</property>
+                    <property name="label" translatable="yes">Login:</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -914,6 +917,9 @@ dmitry.v.yefremov@gmail.com
                     <property name="top_attach">1</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="primary-toolbar"/>
+                </style>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -981,7 +987,8 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="services_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/etc/enigma2/</property>
+                    <property name="text">/etc/enigma2/</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1004,7 +1011,8 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="user_bouquet_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/etc/enigma2/</property>
+                    <property name="text">/etc/enigma2/</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1027,7 +1035,8 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="satellites_xml_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/etc/tuxbox/</property>
+                    <property name="text">/etc/tuxbox/</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1050,7 +1059,8 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="picons_field">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="text" translatable="yes">/usr/share/enigma2/picon</property>
+                    <property name="text">/usr/share/enigma2/picon</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -1089,7 +1099,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Active profile:</property>
-                    <property name="xalign">0</property>
+                    <property name="xalign">0.20000000298023224</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1099,7 +1109,7 @@ dmitry.v.yefremov@gmail.com
                 </child>
                 <child>
                   <object class="GtkRadioButton" id="enigma_radio_button">
-                    <property name="label" translatable="yes">Enigma2 </property>
+                    <property name="label">Enigma2 </property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -1117,7 +1127,7 @@ dmitry.v.yefremov@gmail.com
                 </child>
                 <child>
                   <object class="GtkRadioButton" id="neutrino_radio_button">
-                    <property name="label" translatable="yes">Neutrino-MP
+                    <property name="label">Neutrino-MP
 (experimental)</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1198,7 +1208,8 @@ dmitry.v.yefremov@gmail.com
               <object class="GtkEntry" id="data_dir_field">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">/data</property>
+                <property name="text">/data</property>
+                <property name="primary_icon_stock">gtk-edit</property>
                 <property name="secondary_icon_name">folder-open-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1218,18 +1229,6 @@ dmitry.v.yefremov@gmail.com
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="separator3">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="padding">2</property>
-            <property name="position">6</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel" id="label18">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -1239,20 +1238,33 @@ dmitry.v.yefremov@gmail.com
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">8</property>
+            <property name="position">7</property>
           </packing>
         </child>
         <child>
           <object class="GtkEntry" id="picons_dir_field">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="text" translatable="yes">/data/picons</property>
+            <property name="text">/data/picons</property>
+            <property name="primary_icon_stock">gtk-edit</property>
             <property name="secondary_icon_name">folder-open-symbolic</property>
             <signal name="icon-press" handler="on_picons_dir_field_icon_press" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="separator3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">2</property>
             <property name="position">9</property>
           </packing>
         </child>
@@ -1262,5 +1274,76 @@ dmitry.v.yefremov@gmail.com
       <action-widget response="-6">cancel_button</action-widget>
       <action-widget response="-5">ok_button</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkDialog" id="wait_dialog">
+    <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">splashscreen</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="decorated">False</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox4">
+        <property name="width_request">118</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area4">
+            <property name="can_focus">False</property>
+            <property name="opacity">0</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="box4">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkSpinner" id="spinner">
+                <property name="width_request">150</property>
+                <property name="height_request">45</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="active">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label21">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Loading data...</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <style>
+          <class name="primary-toolbar"/>
+        </style>
+      </object>
+    </child>
   </object>
 </interface>

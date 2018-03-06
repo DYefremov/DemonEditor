@@ -11,11 +11,13 @@ from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
+from .search import SearchProvider
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
-from .dialogs import show_dialog, DialogType, get_chooser_dialog
+from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import show_download_dialog
-from .main_helper import edit_marker, insert_marker, move_items, edit, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, search
+from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
+    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
+    is_only_one_item_selected
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -23,9 +25,14 @@ from .service_details_dialog import ServiceDetailsDialog
 
 
 class MainAppWindow:
+    _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
+
     _SERVICE_LIST_NAME = "services_list_store"
+
     _FAV_LIST_NAME = "fav_list_store"
+
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
+
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
                          "services_edit_popup_item", "services_copy_popup_item", "services_picon_popup_item")
@@ -76,7 +83,7 @@ class MainAppWindow:
                     "on_cut": self.on_cut,
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
-                    "on_edit": self.on_edit,
+                    "on_edit": self.on_rename,
                     "on_delete": self.on_delete,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
@@ -102,8 +109,10 @@ class MainAppWindow:
                     "on_reference_picon": self.on_reference_picon,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_search_toggled": self.on_search_toggled,
+                    "on_search_down": self.on_search_down,
+                    "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
-                    "on_services_data_edit": self.on_services_data_edit}
+                    "on_service_edit": self.on_service_edit}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -117,6 +126,7 @@ class MainAppWindow:
         self.__blacklist = set()
 
         builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
         builder.connect_signals(handlers)
         self.__main_window = builder.get_object("main_window")
@@ -132,7 +142,8 @@ class MainAppWindow:
         self.__bouquets_model = builder.get_object("bouquets_tree_store")
         self.__status_bar = builder.get_object("status_bar")
         self.__profile_label = builder.get_object("profile_label")
-        self.__status_bar.push(0, "Current IP: " + self.__options.get(self.__profile).get("host"))
+        self.__ip_label = builder.get_object("ip_label")
+        self.__ip_label.set_text(self.__options.get(self.__profile).get("host"))
         self.__profile_label.set_text("Enigma2 v.4" if Profile(self.__profile) is Profile.ENIGMA_2 else "Neutrino-MP")
         # dynamically active elements depending on the selected view
         self.__tool_elements = {k: builder.get_object(k) for k in self.__DYNAMIC_ELEMENTS}
@@ -144,18 +155,23 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
-        self.__search_info_bar = builder.get_object("search_info_bar")
-        # Filter
-        self.__services_model_filter = builder.get_object("services_model_filter")
-        self.__services_model_filter.set_visible_func(self.services_filter_function)
-        self.__filter_entry = builder.get_object("filter_entry")
-        self.__filter_info_bar = builder.get_object("filter_info_bar")
         self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self.__services_view.connect("key-press-event", self.force_ctrl)
         self.__fav_view.connect("key-press-event", self.force_ctrl)
         # Clipboard
         self.__clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        # Wait dialog
+        self.__wait_dialog = WaitDialog(self.__main_window)
+        # Filter
+        self.__services_model_filter = builder.get_object("services_model_filter")
+        self.__services_model_filter.set_visible_func(self.services_filter_function)
+        self.__filter_entry = builder.get_object("filter_entry")
+        self.__filter_info_bar = builder.get_object("filter_info_bar")
+        # Search
+        self.__search_info_bar = builder.get_object("search_info_bar")
+        self.__search_provider = SearchProvider(self.__services_view, self.__fav_view, self.__bouquets_view,
+                                                self.__services, self.__bouquets)
         self.__main_window.show()
 
     def init_drag_and_drop(self):
@@ -239,16 +255,17 @@ class MainAppWindow:
         self.__rows_buffer.clear()
         self.on_view_focus(view, None)
 
-    def on_edit(self, view):
+    def on_rename(self, view):
         model = get_base_model(view.get_model())
         name = model.get_name()
         if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
             # edit(view, self.__main_window, ViewTarget.BOUQUET)
         elif name == self._FAV_LIST_NAME:
-            edit(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view, channels=self.__services)
+            rename(view, self.__main_window, ViewTarget.FAV, service_view=self.__services_view,
+                   channels=self.__services)
         elif name == self._SERVICE_LIST_NAME:
-            edit(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__services)
+            rename(view, self.__main_window, ViewTarget.SERVICES, fav_view=self.__fav_view, channels=self.__services)
 
     def on_delete(self, item):
         """ Delete selected items from views
@@ -361,11 +378,11 @@ class MainAppWindow:
     def on_tool_edit(self, item):
         """ Edit tool bar button """
         if self.__services_view.is_focus():
-            self.on_edit(self.__services_view)
+            self.on_service_edit(self.__services_view)
         elif self.__fav_view.is_focus():
-            self.on_edit(self.__fav_view)
+            self.on_service_edit(self.__fav_view)
         elif self.__bouquets_view.is_focus():
-            self.on_edit(self.__bouquets_view)
+            self.on_rename(self.__bouquets_view)
 
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
@@ -494,6 +511,7 @@ class MainAppWindow:
     @run_idle
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
+        self.__wait_dialog.show()
         self.clear_current_data()
 
         data_path = self.__options.get(self.__profile).get("data_dir_path") if data_path is None else data_path
@@ -503,12 +521,13 @@ class MainAppWindow:
             self.append_services(data_path)
             self.update_services_counts(len(self.__services_model))
             self.update_picons()
-            self.__picons_download_tool_button.set_sensitive(len(self.__services_model))
         except FileNotFoundError as e:
-            show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
-                        "\n\nPlease, download files from receiver or setup your path for read data!")
+            show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) + "\n\n" +
+                        get_message("Please, download files from receiver or setup your path for read data!"))
         except SyntaxError as e:
             show_dialog(DialogType.ERROR, self.__main_window, str(e))
+        finally:
+            self.__wait_dialog.hide()
 
     def append_blacklist(self, data_path):
         black_list = get_blacklist(data_path)
@@ -540,7 +559,7 @@ class MainAppWindow:
         except Exception as e:
             print(e)
             log("Append services error: " + str(e))
-            show_dialog(DialogType.ERROR, self.__main_window, "Error opening data!")
+            show_dialog(DialogType.ERROR, self.__main_window, "Reading data error!")
         else:
             if services:
                 for srv in services:
@@ -664,13 +683,12 @@ class MainAppWindow:
         response = show_settings_dialog(self.__main_window, self.__options)
         if response != Gtk.ResponseType.CANCEL:
             profile = self.__options.get("profile")
-            self.__status_bar.push(0, "Current IP: " + self.__options.get(profile).get("host"))
+            self.__ip_label.set_text(self.__options.get(profile).get("host"))
             if profile != self.__profile:
                 self.__profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
                 self.__profile = profile
                 self.clear_current_data()
                 self.update_services_counts()
-                self.__picons_download_tool_button.set_sensitive(len(self.__services_model))
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -708,15 +726,13 @@ class MainAppWindow:
             self.on_locked(None)
         elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
             self.on_hide(None)
-        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r:
-            self.on_edit(view)
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e or key == Gdk.KEY_F2:
+        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r or key == Gdk.KEY_F2:
+            self.on_rename(view)
+        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
             if model_name == self._BOUQUETS_LIST_NAME:
-                self.on_edit(view)
+                self.on_rename(view)
                 return
-            elif model_name == self._FAV_LIST_NAME:
-                self.on_locate_in_services(view)
-            self.on_services_data_edit(view)
+            self.on_service_edit(view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
 
@@ -810,7 +826,7 @@ class MainAppWindow:
 
         for ch in self.__services.values():
             ch_type = ch.service_type
-            if ch_type in ("TV", "TV (HD)"):
+            if ch_type in self._TV_TYPES:
                 tv_count += 1
             elif ch_type == "Radio":
                 radio_count += 1
@@ -866,7 +882,7 @@ class MainAppWindow:
                 data = r[9].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
 
-        dialog = PiconsDialog(self.__main_window, self.__options.get(self.__profile), ids, Profile(self.__profile))
+        dialog = PiconsDialog(self.__main_window, self.__options, ids, Profile(self.__profile))
         dialog.show()
         self.update_picons()
 
@@ -887,19 +903,34 @@ class MainAppWindow:
     def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
         self.__search_info_bar.set_visible(toggle_button.get_active())
 
-    @run_idle
-    def on_search(self, entry, event):
-        search(entry.get_text(),
-               self.__services_view,
-               self.__fav_view,
-               self.__bouquets_view,
-               self.__services,
-               self.__bouquets)
+    def on_search_down(self, item):
+        self.__search_provider.on_search_down()
+
+    def on_search_up(self, item):
+        self.__search_provider.on_search_up()
 
     @run_idle
-    def on_services_data_edit(self, item):
-        dialog = ServiceDetailsDialog(self.__main_window, self.__options, self.__services_view)
-        dialog.show()
+    def on_search(self, entry):
+        self.__search_provider.search(entry.get_text())
+
+    @run_idle
+    def on_service_edit(self, view):
+        model, paths = view.get_selection().get_selected_rows()
+        if is_only_one_item_selected(paths, self.__main_window):
+            model_name = get_base_model(model).get_name()
+            if model_name == self._FAV_LIST_NAME:
+                srv_type = model.get_value(model.get_iter(paths), 5)
+                if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
+                    self.on_rename(view)
+                    return
+                self.on_locate_in_services(view)
+
+            dialog = ServiceDetailsDialog(self.__main_window,
+                                          self.__options,
+                                          self.__services_view,
+                                          self.__services,
+                                          self.__bouquets)
+            dialog.show()
 
     @run_idle
     def update_picons(self):
