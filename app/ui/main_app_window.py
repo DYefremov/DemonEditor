@@ -11,9 +11,9 @@ from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
-from .search import search
+from .search import SearchProvider
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
-from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
+from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
@@ -155,12 +155,6 @@ class MainAppWindow:
         self.__radio_count_label = builder.get_object("radio_count_label")
         self.__data_count_label = builder.get_object("data_count_label")
         self.__fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
-        self.__search_info_bar = builder.get_object("search_info_bar")
-        # Filter
-        self.__services_model_filter = builder.get_object("services_model_filter")
-        self.__services_model_filter.set_visible_func(self.services_filter_function)
-        self.__filter_entry = builder.get_object("filter_entry")
-        self.__filter_info_bar = builder.get_object("filter_info_bar")
         self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self.__services_view.connect("key-press-event", self.force_ctrl)
@@ -169,6 +163,15 @@ class MainAppWindow:
         self.__clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         # Wait dialog
         self.__wait_dialog = WaitDialog(self.__main_window)
+        # Filter
+        self.__services_model_filter = builder.get_object("services_model_filter")
+        self.__services_model_filter.set_visible_func(self.services_filter_function)
+        self.__filter_entry = builder.get_object("filter_entry")
+        self.__filter_info_bar = builder.get_object("filter_info_bar")
+        # Search
+        self.__search_info_bar = builder.get_object("search_info_bar")
+        self.__search_provider = SearchProvider(self.__services_view, self.__fav_view, self.__bouquets_view,
+                                                self.__services, self.__bouquets)
         self.__main_window.show()
 
     def init_drag_and_drop(self):
@@ -519,8 +522,8 @@ class MainAppWindow:
             self.update_services_counts(len(self.__services_model))
             self.update_picons()
         except FileNotFoundError as e:
-            show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) +
-                        "\n\nPlease, download files from receiver or setup your path for read data!")
+            show_dialog(DialogType.ERROR, self.__main_window, getattr(e, "message", str(e)) + "\n\n" +
+                        get_message("Please, download files from receiver or setup your path for read data!"))
         except SyntaxError as e:
             show_dialog(DialogType.ERROR, self.__main_window, str(e))
         finally:
@@ -901,19 +904,14 @@ class MainAppWindow:
         self.__search_info_bar.set_visible(toggle_button.get_active())
 
     def on_search_down(self, item):
-        show_dialog(DialogType.ERROR, transient=self.__main_window, text="Not implemented yet!")
+        self.__search_provider.on_search_down()
 
     def on_search_up(self, item):
-        show_dialog(DialogType.ERROR, transient=self.__main_window, text="Not implemented yet!")
+        self.__search_provider.on_search_up()
 
     @run_idle
-    def on_search(self, entry, event):
-        search(entry.get_text(),
-               self.__services_view,
-               self.__fav_view,
-               self.__bouquets_view,
-               self.__services,
-               self.__bouquets)
+    def on_search(self, entry):
+        self.__search_provider.search(entry.get_text())
 
     @run_idle
     def on_service_edit(self, view):

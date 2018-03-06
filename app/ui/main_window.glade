@@ -1204,7 +1204,7 @@
                         <property name="primary_icon_name">edit-find-symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <signal name="key-release-event" handler="on_search" swapped="no"/>
+                        <signal name="search-changed" handler="on_search" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
