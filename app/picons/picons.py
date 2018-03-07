@@ -4,6 +4,8 @@ import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
+import re
+
 from app.commons import log, run_task
 from app.properties import Profile
 
@@ -103,6 +105,8 @@ class PiconsParser(HTMLParser):
 class ProviderParser(HTMLParser):
     """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
 
+    _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
+
     def __init__(self, entities=False, separator=' '):
 
         HTMLParser.__init__(self)
@@ -117,7 +121,6 @@ class ProviderParser(HTMLParser):
         self._current_cell = []
         self.rows = []
         self._ids = set()
-        self._counter = 0
         self._positon = None
 
     def handle_starttag(self, tag, attrs):
@@ -150,11 +153,10 @@ class ProviderParser(HTMLParser):
         elif tag == 'tr':
             row = self._current_row
             # Satellite position
-            self._counter = self._counter + 1
-            if self._counter == 12:
-                pos = str(row)
-                pos = pos[pos.rfind("at") + 2:]
-                self._positon = "".join(c for c in pos if c.isalnum() or c == ".")
+            if not self._positon:
+                pos = re.findall(self._POSITION_PATTERN, str(row))
+                if pos:
+                    self._positon = "".join(c for c in str(pos) if c.isdigit() or c in ".EW")
 
             if len(row) == 12:
                 on_id, sep, tid = str(row[-2]).partition("-")

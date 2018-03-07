@@ -126,7 +126,7 @@ class PiconsDialog:
 
         providers = self.get_selected_providers()
         for prv in providers:
-            if not prv[2].isdigit():
+            if not prv[2] and prv[2][:-2].isdigit():
                 self.show_info_message(
                     get_message("Specify the correct position value for the provider!"), Gtk.MessageType.ERROR)
                 return
