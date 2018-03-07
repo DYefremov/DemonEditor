@@ -93,12 +93,13 @@ class PiconsDialog:
                                                  stderr=subprocess.PIPE,
                                                  universal_newlines=True)
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
-        self.append_providers(url)
-
-    @run_task
-    def append_providers(self, url):
         model = self._providers_tree_view.get_model()
         model.clear()
+        self.update_receive_button_state()
+        self.append_providers(url, model)
+
+    @run_task
+    def append_providers(self, url, model):
         self._current_process.wait()
         providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
         if providers:
@@ -123,7 +124,14 @@ class PiconsDialog:
         self._terminate = False
         self._expander.set_expanded(True)
 
-        for prv in self.get_selected_providers():
+        providers = self.get_selected_providers()
+        for prv in providers:
+            if not prv[2].isdigit():
+                self.show_info_message(
+                    get_message("Specify the correct position value for the provider!"), Gtk.MessageType.ERROR)
+                return
+
+        for prv in providers:
             if self._terminate:
                 break
             self.process_provider(Provider(*prv))
@@ -142,7 +150,7 @@ class PiconsDialog:
         PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv.on_id, pos,
                            self._picon_ids, self.get_picons_format())
         self.resize(self._picons_path)
-        self.show_info_message("Done", Gtk.MessageType.INFO)
+        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def write_to_buffer(self, fd, condition):
         if condition == GLib.IO_IN:

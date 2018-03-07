@@ -1,5 +1,4 @@
 """ This is helper module for search features """
-from app.ui.main_helper import get_base_model
 
 
 class SearchProvider:
@@ -17,7 +16,7 @@ class SearchProvider:
         self._current_index = -1
         self._paths.clear()
         for view in self._srv_view, self._fav_view:
-            model = get_base_model(view.get_model())
+            model = view.get_model()
             selection = view.get_selection()
             selection.unselect_all()
             if not text:
