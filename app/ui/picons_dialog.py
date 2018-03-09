@@ -79,6 +79,10 @@ class PiconsDialog:
         self._enigma2_picons_path = self._picons_path
         if profile is Profile.NEUTRINO_MP:
             self._enigma2_picons_path = options.get(Profile.ENIGMA_2.value).get("picons_dir_path", "")
+        if not len(self._picon_ids) and self._profile is Profile.ENIGMA_2:
+            message = get_message("To automatically set the identifiers for picons,\n"
+                                  "first load the required services list into the main application window.")
+            self.show_info_message(message, Gtk.MessageType.WARNING)
 
     def show(self):
         self._dialog.run()

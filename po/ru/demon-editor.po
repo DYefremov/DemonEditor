@@ -389,6 +389,9 @@ msgstr "Получение пиконов для провайдеров"
 msgid "Load satellite providers."
 msgstr "Загрузка провайдеров"
 
+msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
+msgstr "Для автоматического именования пиконов,\nзагрузите список необходимых сервисов в главное окно программы."
+
 # Satellites editor
 msgid "Satellites edit tool"
 msgstr "Редактор спутников"

@@ -172,7 +172,6 @@ class ProviderParser(HTMLParser):
 
     def reset(self):
         super().reset()
-        self._counter = 0
 
 
 def parse_providers(open_path):
