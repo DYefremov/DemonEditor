@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 from functools import lru_cache
 
 from app.commons import run_idle
@@ -9,6 +10,11 @@ from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import get_base_model
 from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN
+
+
+class Action(Enum):
+    EDIT = 0
+    ADD = 1
 
 
 class ServiceDetailsDialog:
@@ -24,7 +30,7 @@ class ServiceDetailsDialog:
                              "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry",
                              "srv_type_entry")
 
-    def __init__(self, transient, options, view, services, bouquets):
+    def __init__(self, transient, options, view, services, bouquets, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
@@ -41,6 +47,7 @@ class ServiceDetailsDialog:
         self._profile = Profile(options["profile"])
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
         self._services_view = view
+        self._action = action
         self._old_service = None
         self._services = services
         self._bouquets = bouquets
@@ -48,6 +55,8 @@ class ServiceDetailsDialog:
         self._current_model = None
         self._current_itr = None
         self._pattern = re.compile("\D")
+        self._apply_button = builder.get_object("apply_button")
+        self._create_button = builder.get_object("create_button")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -106,7 +115,13 @@ class ServiceDetailsDialog:
                                       self._network_id_entry, self._namespace_entry, self._fec_combo_box,
                                       self._rate_entry)
 
-        self.update_data_elements()
+        if self._action is Action.EDIT:
+            self.update_data_elements()
+        elif self._action is Action.ADD:
+            self._apply_button.set_visible(False)
+            self._create_button.set_visible(True)
+            self._tr_edit_switch.set_sensitive(False)
+            self.on_tr_edit_toggled(self._tr_edit_switch.set_active(True), True)
 
     def show(self):
         response = self._dialog.run()
@@ -453,7 +468,7 @@ class ServiceDetailsDialog:
     @run_idle
     def on_tr_edit_toggled(self, switch: Gtk.Switch, active):
 
-        if active:
+        if active and self._action is Action.EDIT:
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
                                                  self._current_model,

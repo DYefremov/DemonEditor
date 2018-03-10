@@ -21,7 +21,7 @@ from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTar
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
-from .service_details_dialog import ServiceDetailsDialog
+from .service_details_dialog import ServiceDetailsDialog, Action
 
 
 class MainAppWindow:
@@ -63,7 +63,8 @@ class MainAppWindow:
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                          "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item")
+                          "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
+                          "services_add_new_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -112,7 +113,8 @@ class MainAppWindow:
                     "on_search_down": self.on_search_down,
                     "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
-                    "on_service_edit": self.on_service_edit}
+                    "on_service_edit": self.on_service_edit,
+                    "on_services_add_new": self.on_services_add_new}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -785,6 +787,8 @@ class MainAppWindow:
         for elem in self._COMMONS_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
 
+        self.__tool_elements["services_add_new_popup_item"].set_sensitive(len(self.__bouquets_model))
+
     def on_hide(self, item):
         self.set_service_flags(Flag.HIDE)
 
@@ -931,6 +935,15 @@ class MainAppWindow:
                                           self.__services,
                                           self.__bouquets)
             dialog.show()
+
+    def on_services_add_new(self, item):
+        dialog = ServiceDetailsDialog(self.__main_window,
+                                      self.__options,
+                                      self.__services_view,
+                                      self.__services,
+                                      self.__bouquets,
+                                      action=Action.ADD)
+        dialog.show()
 
     @run_idle
     def update_picons(self):

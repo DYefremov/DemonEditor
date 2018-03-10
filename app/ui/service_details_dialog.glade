@@ -261,9 +261,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="save_as_button">
+              <object class="GtkButton" id="create_button">
                 <property name="label">gtk-new</property>
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Create and save as new service</property>
