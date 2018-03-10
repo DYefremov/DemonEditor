@@ -46,11 +46,11 @@ class MainAppWindow:
     _FAV_ELEMENTS = ("cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
-                     "fav_locate_popup_item", "fav_picon_popup_item")
+                     "fav_locate_popup_item", "fav_picon_popup_item", "fav_add_iptv_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
 
-    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item")
+    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_add_iptv_popup_item")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
@@ -64,7 +64,7 @@ class MainAppWindow:
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
                           "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
-                          "services_add_new_popup_item")
+                          "services_add_new_popup_item", "fav_add_iptv_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,

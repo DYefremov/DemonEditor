@@ -117,6 +117,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-copy</property>
   </object>
+  <object class="GtkImage" id="image17">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-transmit-receive</property>
+  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -236,6 +241,16 @@
         <property name="image">image1</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_import_m3u" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
+        <property name="label" translatable="yes">Add IPTV or stream</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">image17</property>
+        <property name="use_stock">False</property>
       </object>
     </child>
     <child>
