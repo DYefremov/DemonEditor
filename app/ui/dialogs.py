@@ -6,6 +6,11 @@ from app.commons import run_idle
 from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
+class Action(Enum):
+    EDIT = 0
+    ADD = 1
+
+
 class DialogType(Enum):
     INPUT = "input_dialog"
     CHOOSER = "path_chooser_dialog"
@@ -13,6 +18,7 @@ class DialogType(Enum):
     QUESTION = "question_dialog"
     ABOUT = "about_dialog"
     WAIT = "wait_dialog"
+    IPTV = "iptv_dialog"
 
 
 class WaitDialog:

@@ -1,5 +1,4 @@
 import re
-from enum import Enum
 from functools import lru_cache
 
 from app.commons import run_idle
@@ -7,14 +6,9 @@ from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
 from app.properties import Profile
-from app.ui.dialogs import show_dialog, DialogType
-from app.ui.main_helper import get_base_model
+from .dialogs import show_dialog, DialogType, Action
+from .main_helper import get_base_model
 from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN
-
-
-class Action(Enum):
-    EDIT = 0
-    ADD = 1
 
 
 class ServiceDetailsDialog:

@@ -251,6 +251,7 @@
         <property name="can_focus">False</property>
         <property name="image">image17</property>
         <property name="use_stock">False</property>
+        <signal name="activate" handler="on_iptv" swapped="no"/>
       </object>
     </child>
     <child>

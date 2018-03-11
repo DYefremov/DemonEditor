@@ -11,6 +11,7 @@ from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
+from .iptv import IptvDialog
 from .search import SearchProvider
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
@@ -114,7 +115,8 @@ class MainAppWindow:
                     "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
                     "on_service_edit": self.on_service_edit,
-                    "on_services_add_new": self.on_services_add_new}
+                    "on_services_add_new": self.on_services_add_new,
+                    "on_iptv": self.on_iptv}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -861,6 +863,9 @@ class MainAppWindow:
                 bq_services.append(ch.fav_id)
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
+    def on_iptv(self, item):
+        IptvDialog(self.__main_window).show()
+
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
         insert_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__services, self.__main_window)
@@ -924,9 +929,15 @@ class MainAppWindow:
             model_name = get_base_model(model).get_name()
             if model_name == self._FAV_LIST_NAME:
                 srv_type = model.get_value(model.get_iter(paths), 5)
-                if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
-                    self.on_rename(view)
-                    return
+                if srv_type == BqServiceType.MARKER.name:
+                    return self.on_rename(view)
+                elif srv_type == BqServiceType.IPTV.name:
+                    return IptvDialog(self.__main_window,
+                                      self.__fav_view,
+                                      self.__services,
+                                      self.__bouquets,
+                                      Profile(self.__profile),
+                                      Action.EDIT).show()
                 self.on_locate_in_services(view)
 
             dialog = ServiceDetailsDialog(self.__main_window,
