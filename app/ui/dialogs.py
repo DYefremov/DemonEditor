@@ -1,6 +1,7 @@
 """ Common module for showing dialogs """
 import locale
 from enum import Enum
+from functools import lru_cache
 
 from app.commons import run_idle
 from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
@@ -56,7 +57,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
                     path = path + "/"
 
             response = path
-        dialog.destroy()
+        dialog.hide()
 
         return response
 
@@ -65,18 +66,19 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
         entry.set_text(text if text else "")
         response = dialog.run()
         txt = entry.get_text()
-        dialog.destroy()
+        dialog.hide()
 
         return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
 
     if text:
         dialog.set_markup(get_message(text))
     response = dialog.run()
-    dialog.destroy()
+    dialog.hide()
 
     return response
 
 
+@lru_cache(maxsize=10)
 def get_dialog_from_xml(dialog_type, transient):
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)

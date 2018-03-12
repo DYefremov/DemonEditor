@@ -723,6 +723,7 @@ dmitry.v.yefremov@gmail.com
               <object class="GtkGrid" id="iptv_dialog_main_grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="row_spacing">2</property>
                 <property name="column_spacing">2</property>
                 <child>
                   <object class="GtkLabel" id="label23">
@@ -731,7 +732,6 @@ dmitry.v.yefremov@gmail.com
                     <property name="label" translatable="yes">Name:</property>
                     <property name="width_chars">7</property>
                     <property name="max_width_chars">7</property>
-                    <property name="xalign">1</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -745,8 +745,30 @@ dmitry.v.yefremov@gmail.com
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label33">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Description:</property>
+                  </object>
+                  <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="description_entry">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="primary_icon_stock">gtk-edit</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
                 <child>
@@ -769,15 +791,15 @@ dmitry.v.yefremov@gmail.com
                     <property name="active">0</property>
                     <property name="id_column">0</property>
                     <child>
-                      <object class="GtkCellRendererText" id="stream_type_cellrenderertext"/>
+                      <object class="GtkCellRendererText" id="iptv_sream_type_cellrenderertext"/>
                       <attributes>
                         <attribute name="text">0</attribute>
                       </attributes>
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">3</property>
-                    <property name="top_attach">0</property>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
                 <child>
@@ -787,7 +809,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="label" translatable="yes">Reference:</property>
                   </object>
                   <packing>
-                    <property name="left_attach">4</property>
+                    <property name="left_attach">3</property>
                     <property name="top_attach">0</property>
                   </packing>
                 </child>
@@ -795,10 +817,12 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="reference_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="width_chars">15</property>
+                    <property name="max_width_chars">15</property>
                   </object>
                   <packing>
-                    <property name="left_attach">5</property>
-                    <property name="top_attach">0</property>
+                    <property name="left_attach">3</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
               </object>
@@ -809,22 +833,25 @@ dmitry.v.yefremov@gmail.com
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="url_iptv_box">
+              <object class="GtkGrid" id="iptv_url_grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="column_homogeneous">True</property>
                 <child>
-                  <object class="GtkLabel" id="label24">
+                  <object class="GtkLabel" id="url_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Url:</property>
                     <property name="width_chars">7</property>
                     <property name="max_width_chars">7</property>
-                    <property name="xalign">1</property>
+                    <property name="xalign">0</property>
+                    <style>
+                      <class name="primary-toolbar"/>
+                    </style>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
                   </packing>
                 </child>
                 <child>
@@ -834,14 +861,13 @@ dmitry.v.yefremov@gmail.com
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
@@ -859,7 +885,7 @@ dmitry.v.yefremov@gmail.com
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label27">
+              <object class="GtkLabel" id="ts_data_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">DVB/TS data:</property>
@@ -875,7 +901,7 @@ dmitry.v.yefremov@gmail.com
               </packing>
             </child>
             <child>
-              <object class="GtkGrid" id="grid4">
+              <object class="GtkGrid" id="ts_data_grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="row_spacing">2</property>
