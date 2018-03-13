@@ -1,7 +1,6 @@
 """ Common module for showing dialogs """
 import locale
 from enum import Enum
-from functools import lru_cache
 
 from app.commons import run_idle
 from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
@@ -57,7 +56,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
                     path = path + "/"
 
             response = path
-        dialog.hide()
+        dialog.destroy()
 
         return response
 
@@ -66,25 +65,25 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
         entry.set_text(text if text else "")
         response = dialog.run()
         txt = entry.get_text()
-        dialog.hide()
+        dialog.destroy()
 
         return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
 
     if text:
         dialog.set_markup(get_message(text))
     response = dialog.run()
-    dialog.hide()
+    dialog.destroy()
 
     return response
 
 
-@lru_cache(maxsize=10)
 def get_dialog_from_xml(dialog_type, transient):
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_from_file(UI_RESOURCES_PATH + "dialogs.glade")
+    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_type.value,))
     dialog = builder.get_object(dialog_type.value)
     dialog.set_transient_for(transient)
+
     return builder, dialog
 
 
@@ -92,6 +91,7 @@ def get_chooser_dialog(transient, options, pattern, name):
     file_filter = Gtk.FileFilter()
     file_filter.add_pattern(pattern)
     file_filter.set_name(name)
+
     return show_dialog(dialog_type=DialogType.CHOOSER,
                        transient=transient,
                        options=options,
