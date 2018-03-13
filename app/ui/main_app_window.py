@@ -864,7 +864,8 @@ class MainAppWindow:
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     def on_iptv(self, item):
-        IptvDialog(self.__main_window).show()
+        pass
+        # IptvDialog(self.__main_window).show()
 
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """

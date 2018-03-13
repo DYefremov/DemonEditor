@@ -1,14 +1,21 @@
-from .main_helper import get_base_model
-from . import Gtk
+import re
 
+from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
 from app.properties import Profile
-from .dialogs import get_dialog_from_xml, DialogType, Action
+from . import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH
+from .dialogs import Action, show_dialog, DialogType
+from .main_helper import get_base_model
 
 
 class IptvDialog:
     def __init__(self, transient, view=None, services=None, bouquets=None, profile=Profile.ENIGMA_2, action=Action.ADD):
-        builder, dialog = get_dialog_from_xml(DialogType.IPTV, transient)
-        self._dialog = dialog
+        handlers = {"on_entry_changed": self.on_entry_changed, "on_save": self.on_save}
+        builder = Gtk.Builder()
+        builder.set_translation_domain(TEXT_DOMAIN)
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("iptv_dialog", "stream_type_liststore"))
+        builder.connect_signals(handlers)
+
+        self._dialog = builder.get_object("iptv_dialog")
         self._dialog.set_transient_for(transient)
         self._name_entry = builder.get_object("name_entry")
         self._description_entry = builder.get_object("description_entry")
@@ -25,39 +32,61 @@ class IptvDialog:
         self._stream_type_combobox = builder.get_object("stream_type_combobox")
         self._action = action
         self._profile = profile
+        self._model, self._paths = view.get_selection().get_selected_rows()
+        self._current_srv = get_base_model(self._model)[self._paths][:]
+
+        self._pattern = re.compile("(?:^[\s]*$|\D)")
+        # style
+        self._style_provider = Gtk.CssProvider()
+        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        for el in (self._srv_type_entry, self._sid_entry, self._tr_id_entry, self._net_id_entry, self._namespace_entry):
+            el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                           Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        if profile is Profile.NEUTRINO_MP:
+            builder.get_object("iptv_data_box").set_visible(False)
+            builder.get_object("iptv_type_label").set_visible(False)
+            self._stream_type_combobox.set_visible(False)
 
         if self._action is Action.ADD:
             self._save_button.set_visible(False)
             self._add_button.set_visible(True)
         elif self._action is Action.EDIT:
-            model, paths = view.get_selection().get_selected_rows()
-            self.init_data(get_base_model(model)[paths][:])
+            self.init_data(self._current_srv)
 
     def show(self):
-        response = self._dialog.run()
-        if response == Gtk.ResponseType.OK:
-            self.save()
-        self._dialog.hide()
+        self._dialog.run()
+        self._dialog.destroy()
 
-    def save(self):
-        print(self._action)
+    def on_save(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        self.save_enigma2_data()if self._profile is Profile.ENIGMA_2 else self.save_neutrino_data()
+        self._dialog.destroy()
 
     def init_data(self, srv):
         name, fav_id = srv[2], srv[7]
         self._name_entry.set_text(name)
-        if self._profile is Profile.ENIGMA_2:
-            data, sep, desc = fav_id.partition("#DESCRIPTION:")
-            self._description_entry.set_text(desc.strip())
-            data = data.split(":")
-            if len(data) < 12:
-                return
-            self._srv_type_entry.set_text(data[2])
-            self._sid_entry.set_text(data[3])
-            self._tr_id_entry.set_text(data[4])
-            self._net_id_entry.set_text(data[5])
-            self._namespace_entry.set_text(data[6])
-            self._url_entry.set_text(data[10].replace("%3a", ":"))
-            self._update_reference_entry()
+        self.init_enigma2_data(fav_id) if self._profile is Profile.ENIGMA_2 else self.init_neutrino_data(fav_id)
+
+    def init_enigma2_data(self, fav_id):
+        data, sep, desc = fav_id.partition("#DESCRIPTION:")
+        self._description_entry.set_text(desc.strip())
+        data = data.split(":")
+        if len(data) < 12:
+            return
+        self._srv_type_entry.set_text(data[2])
+        self._sid_entry.set_text(data[3])
+        self._tr_id_entry.set_text(data[4])
+        self._net_id_entry.set_text(data[5])
+        self._namespace_entry.set_text(data[6])
+        self._url_entry.set_text(data[10].replace("%3a", ":"))
+        self._update_reference_entry()
+
+    def init_neutrino_data(self, fav_id):
+        data = fav_id.split("::")
+        self._url_entry.set_text(data[0])
+        self._description_entry.set_text(data[1])
 
     def _update_reference_entry(self):
         if self._profile is Profile.ENIGMA_2:
@@ -70,6 +99,25 @@ class IptvDialog:
 
     def get_type(self):
         return 1
+
+    def on_entry_changed(self, entry):
+        if self._pattern.search(entry.get_text()):
+            entry.set_name("digit-entry")
+        else:
+            entry.set_name("GtkEntry")
+            self._update_reference_entry()
+
+    def save_enigma2_data(self):
+        pass
+
+    def save_neutrino_data(self):
+        name = self._name_entry.get_text()
+        if self._action is Action.EDIT:
+            id_data = self._current_srv[7].split("::")
+            id_data[0] = self._url_entry.get_text()
+            id_data[1] = self._description_entry.get_text()
+            fav_id = NEUTRINO_FAV_ID_FORMAT.format(*id_data)
+            self._model.set_value(self._model.get_iter(self._paths), 2, name)
 
 
 if __name__ == "__main__":

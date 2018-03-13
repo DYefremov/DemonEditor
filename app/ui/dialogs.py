@@ -18,7 +18,6 @@ class DialogType(Enum):
     QUESTION = "question_dialog"
     ABOUT = "about_dialog"
     WAIT = "wait_dialog"
-    IPTV = "iptv_dialog"
 
 
 class WaitDialog:
