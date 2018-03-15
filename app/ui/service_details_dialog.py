@@ -409,6 +409,7 @@ class ServiceDetailsDialog:
             return self._old_service.fav_id, self._old_service.data_id
 
     def get_fav_id(self):
+        """ TODO Needs implementation!!! """
         if self._profile is Profile.ENIGMA_2:
             return self._old_service.fav_id
         elif self._profile is Profile.NEUTRINO_MP:

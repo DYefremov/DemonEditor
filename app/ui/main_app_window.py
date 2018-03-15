@@ -936,7 +936,7 @@ class MainAppWindow:
                     return IptvDialog(self.__main_window,
                                       self.__fav_view,
                                       self.__services,
-                                      self.__bouquets,
+                                      self.__bouquets.get(self.is_bouquet_selected(), None),
                                       Profile(self.__profile),
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)

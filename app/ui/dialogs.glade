@@ -731,7 +731,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkLabel" id="label23">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Name:</property>
+                    <property name="label" translatable="yes">Name</property>
                     <property name="width_chars">7</property>
                     <property name="max_width_chars">7</property>
                   </object>
@@ -742,8 +742,10 @@ dmitry.v.yefremov@gmail.com
                 </child>
                 <child>
                   <object class="GtkEntry" id="name_entry">
+                    <property name="width_request">-1</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
@@ -752,10 +754,10 @@ dmitry.v.yefremov@gmail.com
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label33">
+                  <object class="GtkLabel" id="iptv_description_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Description:</property>
+                    <property name="label" translatable="yes">Description</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -766,6 +768,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="description_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
                     <property name="primary_icon_stock">gtk-edit</property>
                   </object>
                   <packing>
@@ -777,7 +780,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkLabel" id="iptv_type_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Type:</property>
+                    <property name="label" translatable="yes">Stream type</property>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -791,6 +794,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="model">stream_type_liststore</property>
                     <property name="active">0</property>
                     <property name="id_column">0</property>
+                    <signal name="changed" handler="on_stream_type_changed" swapped="no"/>
                     <child>
                       <object class="GtkCellRendererText" id="iptv_sream_type_cellrenderertext"/>
                       <attributes>
@@ -804,10 +808,10 @@ dmitry.v.yefremov@gmail.com
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label26">
+                  <object class="GtkLabel" id="iptv_reference_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Reference:</property>
+                    <property name="label" translatable="yes">Reference</property>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -818,6 +822,7 @@ dmitry.v.yefremov@gmail.com
                   <object class="GtkEntry" id="reference_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
                     <property name="editable">False</property>
                   </object>
                   <packing>
@@ -827,7 +832,7 @@ dmitry.v.yefremov@gmail.com
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
@@ -917,7 +922,7 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkLabel" id="label28">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Service type</property>
+                        <property name="label" translatable="yes">Type</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -972,8 +977,8 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkEntry" id="srv_type_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
@@ -986,8 +991,8 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkEntry" id="sid_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
@@ -1000,8 +1005,8 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkEntry" id="tr_id_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
@@ -1014,8 +1019,8 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkEntry" id="net_id_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
@@ -1028,8 +1033,8 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkEntry" id="namespace_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="width_chars">10</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
                       </object>
