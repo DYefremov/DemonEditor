@@ -864,8 +864,14 @@ class MainAppWindow:
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
     def on_iptv(self, item):
-        pass
-        # IptvDialog(self.__main_window).show()
+        response = IptvDialog(self.__main_window,
+                              self.__fav_view,
+                              self.__services,
+                              self.__bouquets.get(self.is_bouquet_selected(), None),
+                              Profile(self.__profile),
+                              Action.ADD).show()
+        if response != Gtk.ResponseType.CANCEL:
+            self.update_fav_num_column(self.__fav_model)
 
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
