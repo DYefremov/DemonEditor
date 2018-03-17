@@ -144,13 +144,14 @@ class IptvDialog:
         id_data[0] = self._url_entry.get_text()
         id_data[1] = self._description_entry.get_text()
         self.update_bouquet_data(self._name_entry.get_text(), NEUTRINO_FAV_ID_FORMAT.format(*id_data))
+        self._dialog.destroy()
 
     def update_bouquet_data(self, name, fav_id):
         if self._action is Action.EDIT:
             old_srv = self._services.pop(self._current_srv[7])
             self._services[fav_id] = old_srv._replace(service=name, fav_id=fav_id)
             self._bouquet[self._paths[0][0]] = fav_id
-            self._model.set_value(self._model.get_iter(self._paths), 2, name)
+            self._model.set(self._model.get_iter(self._paths), {2: name, 7: fav_id})
         else:
             aggr = [None] * 10
             s_type = BqServiceType.IPTV.name

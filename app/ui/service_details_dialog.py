@@ -11,11 +11,15 @@ from .main_helper import get_base_model
 
 
 class ServiceDetailsDialog:
-    _DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
+    _ENIGMA2_DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
 
-    _FAV_ID = "{:X}:{:X}:{:X}:{:X}"
+    _ENIGMA2_FAV_ID = "{:X}:{:X}:{:X}:{:X}"
 
-    _TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
+    _ENIGMA2_TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
+
+    _NEUTRINO_FAV_ID = "{:x}:{:x}:{:x}"
+
+    _NEUTRINO_TRANSPONDER_DATA = "{:04x}:{:04x}:{}:{}:{}:{}:{}:{}:{}"
 
     _DIGIT_ENTRY_ELEMENTS = ("sid_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
                              "audio_pid_entry", "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "freq_entry",
@@ -238,6 +242,7 @@ class ServiceDetailsDialog:
         self._reference_entry.set_text(srv.picon_id.rstrip(".png"))
         self._transponder_id_entry.set_text(str(int(tr_data[0], 16)))
         self._network_id_entry.set_text(str(int(tr_data[1], 16)))
+        self.select_active_text(self._invertion_combo_box, Inversion(tr_data[3]).name)
 
     def init_enigma_ui_elements(self):
         self._pids_grid.set_sensitive(False)
@@ -396,24 +401,17 @@ class ServiceDetailsDialog:
 
     def get_srv_data(self):
         ssid = int(self._sid_entry.get_text())
-        namespace = int(self._namespace_entry.get_text())
-        transponder_id = int(self._transponder_id_entry.get_text())
-        network_id = int(self._network_id_entry.get_text())
+        net_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
         service_type = self._srv_type_entry.get_text()
 
         if self._profile is Profile.ENIGMA_2:
-            data_id = self._DATA_ID.format(ssid, namespace, transponder_id, network_id, service_type, 0)
-            fav_id = self._FAV_ID.format(ssid, transponder_id, network_id, namespace)
+            namespace = int(self._namespace_entry.get_text())
+            data_id = self._ENIGMA2_DATA_ID.format(ssid, namespace, tr_id, net_id, service_type, 0)
+            fav_id = self._ENIGMA2_FAV_ID.format(ssid, tr_id, net_id, namespace)
             return fav_id, data_id
         elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.fav_id, self._old_service.data_id
-
-    def get_fav_id(self):
-        """ TODO Needs implementation!!! """
-        if self._profile is Profile.ENIGMA_2:
-            return self._old_service.fav_id
-        elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.fav_id
+            fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
+            return fav_id, self._old_service.data_id
 
     def get_transponder_data(self):
         sys = self._sys_combo_box.get_active_id()
@@ -426,7 +424,7 @@ class ServiceDetailsDialog:
         srv_sys = "0"  # !!!
 
         if self._profile is Profile.ENIGMA_2:
-            dvb_s_tr = self._TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
+            dvb_s_tr = self._ENIGMA2_TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
             if sys == "DVB-S":
                 return dvb_s_tr
             if sys == "DVB-S2":
@@ -440,7 +438,10 @@ class ServiceDetailsDialog:
                 pls = ":{}:{}:{}".format(st_id, pls_code, pls_mode) if pls_mode and pls_code and st_id else ""
                 return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
         elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.transponder
+            on_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
+            mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION) if sys == "DVB-S2" else None
+            srv_sys = None
+            return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
 
     # ***************** Others *********************#
 
