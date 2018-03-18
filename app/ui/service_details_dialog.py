@@ -27,6 +27,8 @@ class ServiceDetailsDialog:
                              "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry",
                              "srv_type_entry")
 
+    _DIGIT_ENTRY_NAME = "digit-entry"
+
     def __init__(self, transient, options, view, services, bouquets, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
@@ -284,55 +286,22 @@ class ServiceDetailsDialog:
     # ***************** Save data *********************#
 
     def on_save(self, item):
+        if not self.is_data_correct():
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
         fav_id, data_id = self.get_srv_data()
         # transponder
         transponder = self._old_service.transponder
-        freq = self._freq_entry.get_text()
-        rate = self._rate_entry.get_text()
-        pol = self._pol_combo_box.get_active_id()
-        fec = self._fec_combo_box.get_active_id()
-        system = self._sys_combo_box.get_active_id()
-        pos = self._sat_pos_combo_box.get_active_id()
-
         if self._tr_edit_switch.get_active():
             transponder = self.get_transponder_data()
             if self._transponder_services_iters:
-                for itr in self._transponder_services_iters:
-                    srv = self._current_model[itr][:]
-                    srv[-9] = freq
-                    srv[-8] = rate
-                    srv[-7] = pol
-                    srv[-6] = fec
-                    srv[-5] = system
-                    srv[-4] = pos
-                    srv[-1] = transponder
-                    srv = Service(*srv)
-                    self._services[srv.fav_id] = srv
-                    self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
+                self.update_transponder_services(transponder)
 
-        service = Service(flags_cas=self.get_flags(),
-                          transponder_type="s",
-                          coded=self._old_service.coded,
-                          service=self._name_entry.get_text(),
-                          locked=self._old_service.locked,
-                          hide=HIDE_ICON if self._hide_check_button.get_active() else None,
-                          package=self._package_entry.get_text(),
-                          service_type=self._service_type_combo_box.get_active_id(),
-                          picon=self._old_service.picon,
-                          picon_id=self._old_service.picon_id,
-                          ssid="{:x}".format(int(self._sid_entry.get_text())),
-                          freq=freq,
-                          rate=rate,
-                          pol=pol,
-                          fec=fec,
-                          system=system,
-                          pos=pos,
-                          data_id=data_id,
-                          fav_id=fav_id,
-                          transponder=transponder)
+        service = self.get_service(fav_id, data_id, transponder)
 
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
@@ -349,11 +318,43 @@ class ServiceDetailsDialog:
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
         self._old_service = service
 
+    def update_transponder_services(self, transponder):
+        for itr in self._transponder_services_iters:
+            srv = self._current_model[itr][:]
+            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values()
+            srv[-1] = transponder
+            srv = Service(*srv)
+            self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
+            self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
+
     def on_create_new(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+
+    def get_service(self, fav_id, data_id, transponder):
+        freq, rate, pol, fec, system, pos = self.get_transponder_values()
+        return Service(flags_cas=self.get_flags(),
+                       transponder_type="s",
+                       coded=self._old_service.coded,
+                       service=self._name_entry.get_text(),
+                       locked=self._old_service.locked,
+                       hide=HIDE_ICON if self._hide_check_button.get_active() else None,
+                       package=self._package_entry.get_text(),
+                       service_type=self._service_type_combo_box.get_active_id(),
+                       picon=self._old_service.picon,
+                       picon_id=self._old_service.picon_id,
+                       ssid="{:x}".format(int(self._sid_entry.get_text())),
+                       freq=freq,
+                       rate=rate,
+                       pol=pol,
+                       fec=fec,
+                       system=system,
+                       pos=pos,
+                       data_id=data_id,
+                       fav_id=fav_id,
+                       transponder=transponder)
 
     def get_flags(self):
         if self._profile is Profile.ENIGMA_2:
@@ -413,6 +414,16 @@ class ServiceDetailsDialog:
             fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
             return fav_id, self._old_service.data_id
 
+    def get_transponder_values(self):
+        freq = self._freq_entry.get_text()
+        rate = self._rate_entry.get_text()
+        pol = self._pol_combo_box.get_active_id()
+        fec = self._fec_combo_box.get_active_id()
+        system = self._sys_combo_box.get_active_id()
+        pos = self._sat_pos_combo_box.get_active_id()
+
+        return freq, rate, pol, fec, system, pos
+
     def get_transponder_data(self):
         sys = self._sys_combo_box.get_active_id()
         freq = self._freq_entry.get_text()
@@ -453,7 +464,7 @@ class ServiceDetailsDialog:
                 break
 
     def on_digit_entry_changed(self, entry):
-        entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
+        entry.set_name(self._DIGIT_ENTRY_NAME if self._pattern.search(entry.get_text()) else "GtkEntry")
 
     def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
         cb_id = box.get_active_id()
@@ -477,6 +488,12 @@ class ServiceDetailsDialog:
 
         for elem in self._TRANSPONDER_ELEMENTS:
             elem.set_sensitive(active)
+
+    def is_data_correct(self):
+        for elem in self._digit_elements.values():
+            if elem.get_name() == self._DIGIT_ENTRY_NAME:
+                return False
+        return True
 
 
 class TransponderServicesDialog:
