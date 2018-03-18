@@ -21,11 +21,11 @@ class ServiceDetailsDialog:
 
     _NEUTRINO_TRANSPONDER_DATA = "{:04x}:{:04x}:{}:{}:{}:{}:{}:{}:{}"
 
-    _DIGIT_ENTRY_ELEMENTS = ("sid_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
-                             "audio_pid_entry", "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "freq_entry",
-                             "he_acc_pid_entry", "teletext_pid_entry", "transponder_id_entry", "network_id_entry",
-                             "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry",
-                             "srv_type_entry")
+    _DIGIT_ENTRY_ELEMENTS = ("bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry", "srv_type_entry",
+                             "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "he_acc_pid_entry",
+                             "teletext_pid_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry",
+                             "audio_pid_entry", "namespace_entry")
+    _NOT_EMPTY_DIGIT_ELEMENTS = ("sid_entry", "freq_entry", "rate_entry", "transponder_id_entry", "network_id_entry")
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
@@ -34,7 +34,8 @@ class ServiceDetailsDialog:
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
-                    "on_tr_edit_toggled": self.on_tr_edit_toggled}
+                    "on_tr_edit_toggled": self.on_tr_edit_toggled,
+                    "on_non_empty_entry_changed": self.on_non_empty_entry_changed}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -53,18 +54,24 @@ class ServiceDetailsDialog:
         self._transponder_services_iters = None
         self._current_model = None
         self._current_itr = None
-        self._pattern = re.compile("\D")
+        self._DIGIT_PATTERN = re.compile("\D")
+        self._NON_EMPTY_PATTERN = re.compile("(?:^[\s]*$|\D)")
         self._apply_button = builder.get_object("apply_button")
         self._create_button = builder.get_object("create_button")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        # initialize only digit elements
+        # initialization only digit elements
         self._digit_elements = {k: builder.get_object(k) for k in self._DIGIT_ENTRY_ELEMENTS}
         for elem in self._digit_elements.values():
             elem.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self._sid_entry = self._digit_elements.get("sid_entry")
+        # initialization of non empty elements
+        self._non_empty_elements = {k: builder.get_object(k) for k in self._NOT_EMPTY_DIGIT_ELEMENTS}
+        for elem in self._non_empty_elements.values():
+            elem.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                             Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self._sid_entry = self._non_empty_elements.get("sid_entry")
         self._bitstream_entry = self._digit_elements.get("bitstream_entry")
         self._pcm_entry = self._digit_elements.get("pcm_entry")
         self._video_pid_entry = self._digit_elements.get("video_pid_entry")
@@ -75,10 +82,10 @@ class ServiceDetailsDialog:
         self._acc_pid_entry = self._digit_elements.get("acc_pid_entry")
         self._he_acc_pid_entry = self._digit_elements.get("he_acc_pid_entry")
         self._teletext_pid_entry = self._digit_elements.get("teletext_pid_entry")
-        self._transponder_id_entry = self._digit_elements.get("transponder_id_entry")
-        self._network_id_entry = self._digit_elements.get("network_id_entry")
-        self._freq_entry = self._digit_elements.get("freq_entry")
-        self._rate_entry = self._digit_elements.get("rate_entry")
+        self._transponder_id_entry = self._non_empty_elements.get("transponder_id_entry")
+        self._network_id_entry = self._non_empty_elements.get("network_id_entry")
+        self._freq_entry = self._non_empty_elements.get("freq_entry")
+        self._rate_entry = self._non_empty_elements.get("rate_entry")
         self._pls_code_entry = self._digit_elements.get("pls_code_entry")
         self._stream_id_entry = self._digit_elements.get("stream_id_entry")
         self._tr_flag_entry = self._digit_elements.get("tr_flag_entry")
@@ -286,6 +293,12 @@ class ServiceDetailsDialog:
     # ***************** Save data *********************#
 
     def on_save(self, item):
+        self.save_data()
+
+    def on_create_new(self, item):
+        self.save_data()
+
+    def save_data(self):
         if not self.is_data_correct():
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
@@ -293,6 +306,10 @@ class ServiceDetailsDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
+        self.on_edit() if self._action is Action.EDIT else self.on_new()
+        self._dialog.destroy()
+
+    def on_edit(self):
         fav_id, data_id = self.get_srv_data()
         # transponder
         transponder = self._old_service.transponder
@@ -300,9 +317,7 @@ class ServiceDetailsDialog:
             transponder = self.get_transponder_data()
             if self._transponder_services_iters:
                 self.update_transponder_services(transponder)
-
         service = self.get_service(fav_id, data_id, transponder)
-
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
             self._services.pop(old_fav_id, None)
@@ -313,24 +328,13 @@ class ServiceDetailsDialog:
                         indexes.append(i)
                 for i in indexes:
                     bq[i] = fav_id
-
         self._services[fav_id] = service
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
         self._old_service = service
 
-    def update_transponder_services(self, transponder):
-        for itr in self._transponder_services_iters:
-            srv = self._current_model[itr][:]
-            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values()
-            srv[-1] = transponder
-            srv = Service(*srv)
-            self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
-            self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
-
-    def on_create_new(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
+    def on_new(self):
+        service = self.get_service(*self.get_srv_data(), self.get_transponder_data())
+        print(service)
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
 
     def get_service(self, fav_id, data_id, transponder):
@@ -454,6 +458,15 @@ class ServiceDetailsDialog:
             srv_sys = None
             return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
 
+    def update_transponder_services(self, transponder):
+        for itr in self._transponder_services_iters:
+            srv = self._current_model[itr][:]
+            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values()
+            srv[-1] = transponder
+            srv = Service(*srv)
+            self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
+            self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
+
     # ***************** Others *********************#
 
     def select_active_text(self, box: Gtk.ComboBox, text):
@@ -464,7 +477,10 @@ class ServiceDetailsDialog:
                 break
 
     def on_digit_entry_changed(self, entry):
-        entry.set_name(self._DIGIT_ENTRY_NAME if self._pattern.search(entry.get_text()) else "GtkEntry")
+        entry.set_name(self._DIGIT_ENTRY_NAME if self._DIGIT_PATTERN.search(entry.get_text()) else "GtkEntry")
+
+    def on_non_empty_entry_changed(self, entry):
+        entry.set_name(self._DIGIT_ENTRY_NAME if self._NON_EMPTY_PATTERN.search(entry.get_text()) else "GtkEntry")
 
     def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
         cb_id = box.get_active_id()
@@ -491,6 +507,9 @@ class ServiceDetailsDialog:
 
     def is_data_correct(self):
         for elem in self._digit_elements.values():
+            if elem.get_name() == self._DIGIT_ENTRY_NAME:
+                return False
+        for elem in self._non_empty_elements.values():
             if elem.get_name() == self._DIGIT_ENTRY_NAME:
                 return False
         return True
