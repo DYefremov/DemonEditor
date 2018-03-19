@@ -1,4 +1,5 @@
 import re
+from math import fabs
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
@@ -103,7 +104,7 @@ class ServiceDetailsDialog:
         self._new_check_button = builder.get_object("new_check_button")
         self._pids_grid = builder.get_object("pids_grid")
         # Transponder elements
-        self._sat_pos_combo_box = builder.get_object("sat_pos_combo_box")
+        self._sat_pos_button = builder.get_object("sat_pos_button")
         self._pol_combo_box = builder.get_object("pol_combo_box")
         self._fec_combo_box = builder.get_object("fec_combo_box")
         self._sys_combo_box = builder.get_object("sys_combo_box")
@@ -113,10 +114,11 @@ class ServiceDetailsDialog:
         self._pilot_combo_box = builder.get_object("pilot_combo_box")
         self._pls_mode_combo_box = builder.get_object("pls_mode_combo_box")
         self._tr_edit_switch = builder.get_object("tr_edit_switch")
+        self._tr_extra_expander = builder.get_object("tr_extra_expander")
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
-        self._TRANSPONDER_ELEMENTS = (self._sat_pos_combo_box, self._pol_combo_box, self._invertion_combo_box,
+        self._TRANSPONDER_ELEMENTS = (self._sat_pos_button, self._pol_combo_box, self._invertion_combo_box,
                                       self._sys_combo_box, self._freq_entry, self._transponder_id_entry,
                                       self._network_id_entry, self._namespace_entry, self._fec_combo_box,
                                       self._rate_entry)
@@ -124,10 +126,7 @@ class ServiceDetailsDialog:
         if self._action is Action.EDIT:
             self.update_data_elements()
         elif self._action is Action.ADD:
-            self._apply_button.set_visible(False)
-            self._create_button.set_visible(True)
-            self._tr_edit_switch.set_sensitive(False)
-            self.on_tr_edit_toggled(self._tr_edit_switch.set_active(True), True)
+            self.init_default_data_elements()
 
     def show(self):
         response = self._dialog.run()
@@ -136,6 +135,23 @@ class ServiceDetailsDialog:
         self._dialog.destroy()
 
         return response
+
+    @run_idle
+    def init_default_data_elements(self):
+        self._apply_button.set_visible(False)
+        self._create_button.set_visible(True)
+        self._tr_edit_switch.set_sensitive(False)
+        self.on_tr_edit_toggled(self._tr_edit_switch.set_active(True), True)
+        for elem in self._non_empty_elements.values():
+            elem.set_text(" ")
+            elem.set_text("")
+        self._new_check_button.set_active(True)
+        self._tr_extra_expander.activate()
+        self._service_type_combo_box.set_active(0)
+        self._pol_combo_box.set_active(0)
+        self._fec_combo_box.set_active(0)
+        self._sys_combo_box.set_active(0)
+        self._invertion_combo_box.set_active(2)
 
     @run_idle
     def update_data_elements(self):
@@ -266,11 +282,8 @@ class ServiceDetailsDialog:
     @run_idle
     def set_sat_positions(self, sat_pos):
         """ Sat positions initialisation """
-        model = self._sat_pos_combo_box.get_model()
-        positions = self.get_sat_positions(self._satellites_xml_path)
-        for pos in positions:
-            model.append((pos,))
-        self.select_active_text(self._sat_pos_combo_box, sat_pos)
+        pos = float(sat_pos)
+        self._sat_pos_button.set_value(fabs(pos))
 
     def get_sat_positions(self, path):
         try:
@@ -424,8 +437,7 @@ class ServiceDetailsDialog:
         pol = self._pol_combo_box.get_active_id()
         fec = self._fec_combo_box.get_active_id()
         system = self._sys_combo_box.get_active_id()
-        pos = self._sat_pos_combo_box.get_active_id()
-
+        pos = str(round(self._sat_pos_button.get_value(), 1))
         return freq, rate, pol, fec, system, pos
 
     def get_transponder_data(self):
@@ -434,7 +446,7 @@ class ServiceDetailsDialog:
         rate = self._rate_entry.get_text()
         pol = self.get_value_from_combobox_id(self._pol_combo_box, POLARIZATION)
         fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
-        sat_pos = self._sat_pos_combo_box.get_active_id().replace(".", "")
+        sat_pos = str(round(self._sat_pos_button.get_value(), 1)).replace(".", "")
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         srv_sys = "0"  # !!!
 
