@@ -1,5 +1,4 @@
 import re
-from math import fabs
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
@@ -25,8 +24,9 @@ class ServiceDetailsDialog:
     _DIGIT_ENTRY_ELEMENTS = ("bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry", "srv_type_entry",
                              "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "he_acc_pid_entry",
                              "teletext_pid_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry",
-                             "audio_pid_entry", "namespace_entry")
-    _NOT_EMPTY_DIGIT_ELEMENTS = ("sid_entry", "freq_entry", "rate_entry", "transponder_id_entry", "network_id_entry")
+                             "audio_pid_entry")
+    _NOT_EMPTY_DIGIT_ELEMENTS = ("sid_entry", "freq_entry", "rate_entry", "transponder_id_entry", "network_id_entry",
+                                 "namespace_entry")
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
@@ -90,7 +90,7 @@ class ServiceDetailsDialog:
         self._pls_code_entry = self._digit_elements.get("pls_code_entry")
         self._stream_id_entry = self._digit_elements.get("stream_id_entry")
         self._tr_flag_entry = self._digit_elements.get("tr_flag_entry")
-        self._namespace_entry = self._digit_elements.get("namespace_entry")
+        self._namespace_entry = self._non_empty_elements.get("namespace_entry")
         # Service elements
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
@@ -282,8 +282,7 @@ class ServiceDetailsDialog:
     @run_idle
     def set_sat_positions(self, sat_pos):
         """ Sat positions initialisation """
-        pos = float(sat_pos)
-        self._sat_pos_button.set_value(fabs(pos))
+        self._sat_pos_button.set_value(float(sat_pos))
 
     def get_sat_positions(self, path):
         try:

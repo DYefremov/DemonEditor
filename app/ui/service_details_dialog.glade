@@ -1167,7 +1167,7 @@
                     <property name="width_chars">14</property>
                     <property name="max_width_chars">14</property>
                     <property name="primary_icon_stock">gtk-edit</property>
-                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
+                    <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">7</property>

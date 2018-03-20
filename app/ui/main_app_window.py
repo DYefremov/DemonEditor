@@ -175,7 +175,9 @@ class MainAppWindow:
         # Search
         self.__search_info_bar = builder.get_object("search_info_bar")
         self.__search_provider = SearchProvider(self.__services_view, self.__fav_view, self.__bouquets_view,
-                                                self.__services, self.__bouquets)
+                                                self.__services, self.__bouquets,
+                                                builder.get_object("search_down_button"),
+                                                builder.get_object("search_up_button"))
         self.__main_window.show()
 
     def init_drag_and_drop(self):

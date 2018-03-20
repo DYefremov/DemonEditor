@@ -1247,6 +1247,7 @@
                     <child>
                       <object class="GtkButton" id="search_down_button">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal name="clicked" handler="on_search_down" swapped="no"/>
@@ -1267,6 +1268,7 @@
                     <child>
                       <object class="GtkButton" id="search_up_button">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal name="clicked" handler="on_search_up" swapped="no"/>
