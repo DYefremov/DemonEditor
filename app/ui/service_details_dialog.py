@@ -42,6 +42,7 @@ class ServiceDetailsDialog:
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
         builder.connect_signals(handlers)
+        self._builder = builder
 
         self._dialog = builder.get_object("service_details_dialog")
         self._dialog.set_transient_for(transient)
@@ -182,7 +183,7 @@ class ServiceDetailsDialog:
             self.init_enigma2_transponder_data(srv)
         elif self._profile is Profile.NEUTRINO_MP:
             self.init_neutrino_data(srv)
-            self.init_enigma_ui_elements()
+            self.init_neutrino_ui_elements()
 
     # ***************** Init Enigma2 data *********************#
 
@@ -269,13 +270,12 @@ class ServiceDetailsDialog:
         self._network_id_entry.set_text(str(int(tr_data[1], 16)))
         self.select_active_text(self._invertion_combo_box, Inversion(tr_data[3]).name)
 
-    def init_enigma_ui_elements(self):
-        self._pids_grid.set_sensitive(False)
-        self._cas_entry.set_sensitive(False)
-        self._keep_check_button.set_sensitive(False)
-        self._hide_check_button.set_sensitive(False)
-        self._use_pids_check_button.set_sensitive(False)
-        self._new_check_button.set_sensitive(False)
+    def init_neutrino_ui_elements(self):
+        self._builder.get_object("flags_box").set_visible(False)
+        self._builder.get_object("pids_grid").set_visible(False)
+        self._builder.get_object("tr_grid").remove_column(7)
+        self._builder.get_object("extra_transponder_grid").remove_column(8)
+        self._builder.get_object("srv_separator").set_visible(False)
 
     # ***************** Init Sat positions *********************#
 
