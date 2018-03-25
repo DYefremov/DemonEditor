@@ -154,7 +154,6 @@ class ServiceDetailsDialog:
         self._sys_combo_box.set_active(0)
         self._invertion_combo_box.set_active(2)
 
-    @run_idle
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
         itr = model.get_iter(paths)
@@ -274,12 +273,11 @@ class ServiceDetailsDialog:
         self._builder.get_object("flags_box").set_visible(False)
         self._builder.get_object("pids_grid").set_visible(False)
         self._builder.get_object("tr_grid").remove_column(7)
-        self._builder.get_object("extra_transponder_grid").remove_column(8)
+        self._builder.get_object("tr_extra_expander").set_visible(False)
         self._builder.get_object("srv_separator").set_visible(False)
 
     # ***************** Init Sat positions *********************#
 
-    @run_idle
     def set_sat_positions(self, sat_pos):
         """ Sat positions initialisation """
         self._sat_pos_button.set_value(float(sat_pos))
