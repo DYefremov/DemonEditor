@@ -1,9 +1,8 @@
 """ This is helper module for search features """
-from app.ui.main_helper import get_base_model
 
 
 class SearchProvider:
-    def __init__(self, srv_view, fav_view, bqs_view, services, bouquets):
+    def __init__(self, srv_view, fav_view, bqs_view, services, bouquets, down_button, up_button):
         self._paths = []
         self._current_index = -1
         self._max_indexes = 0
@@ -12,12 +11,14 @@ class SearchProvider:
         self._bqs_view = bqs_view
         self._services = services
         self._bouquets = bouquets
+        self._up_button = up_button
+        self._down_button = down_button
 
     def search(self, text, ):
         self._current_index = -1
         self._paths.clear()
         for view in self._srv_view, self._fav_view:
-            model = get_base_model(view.get_model())
+            model = view.get_model()
             selection = view.get_selection()
             selection.unselect_all()
             if not text:
@@ -37,6 +38,7 @@ class SearchProvider:
     def scroll_to(self, index):
         view, path = self._paths[index]
         view.scroll_to_cell(path, None)
+        self.update_navigation_buttons()
 
     def on_search_down(self):
         if self._current_index < self._max_indexes:
@@ -47,6 +49,10 @@ class SearchProvider:
         if self._current_index > -1:
             self._current_index -= 1
             self.scroll_to(self._current_index)
+
+    def update_navigation_buttons(self):
+        self._up_button.set_sensitive(self._current_index > 0)
+        self._down_button.set_sensitive(self._current_index < self._max_indexes)
 
 
 if __name__ == "__main__":

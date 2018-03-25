@@ -1,62 +1,79 @@
 import re
-from functools import lru_cache
 
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
 from app.properties import Profile
-from app.ui.dialogs import show_dialog, DialogType
-from app.ui.main_helper import get_base_model
 from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN
+from .dialogs import show_dialog, DialogType, Action
+from .main_helper import get_base_model
 
 
 class ServiceDetailsDialog:
-    _DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
+    _ENIGMA2_DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
 
-    _FAV_ID = "{:X}:{:X}:{:X}:{:X}"
+    _ENIGMA2_FAV_ID = "{:X}:{:X}:{:X}:{:X}"
 
-    _TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
+    _ENIGMA2_TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
 
-    _DIGIT_ENTRY_ELEMENTS = ("sid_entry", "bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry",
-                             "audio_pid_entry", "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "freq_entry",
-                             "he_acc_pid_entry", "teletext_pid_entry", "transponder_id_entry", "network_id_entry",
-                             "rate_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry", "namespace_entry",
-                             "srv_type_entry")
+    _NEUTRINO_FAV_ID = "{:x}:{:x}:{:x}"
 
-    def __init__(self, transient, options, view, services, bouquets):
+    _NEUTRINO_TRANSPONDER_DATA = "{:04x}:{:04x}:{}:{}:{}:{}:{}:{}:{}"
+
+    _DIGIT_ENTRY_ELEMENTS = ("bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry", "srv_type_entry",
+                             "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "he_acc_pid_entry",
+                             "teletext_pid_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry",
+                             "audio_pid_entry")
+    _NOT_EMPTY_DIGIT_ELEMENTS = ("sid_entry", "freq_entry", "rate_entry", "transponder_id_entry", "network_id_entry",
+                                 "namespace_entry")
+
+    _DIGIT_ENTRY_NAME = "digit-entry"
+
+    def __init__(self, transient, options, view, services, bouquets, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
-                    "on_tr_edit_toggled": self.on_tr_edit_toggled}
+                    "on_tr_edit_toggled": self.on_tr_edit_toggled,
+                    "on_non_empty_entry_changed": self.on_non_empty_entry_changed}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
         builder.connect_signals(handlers)
+        self._builder = builder
 
         self._dialog = builder.get_object("service_details_dialog")
         self._dialog.set_transient_for(transient)
         self._profile = Profile(options["profile"])
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
         self._services_view = view
+        self._action = action
         self._old_service = None
         self._services = services
         self._bouquets = bouquets
         self._transponder_services_iters = None
         self._current_model = None
         self._current_itr = None
-        self._pattern = re.compile("\D")
+        self._DIGIT_PATTERN = re.compile("\D")
+        self._NON_EMPTY_PATTERN = re.compile("(?:^[\s]*$|\D)")
+        self._apply_button = builder.get_object("apply_button")
+        self._create_button = builder.get_object("create_button")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        # initialize only digit elements
+        # initialization only digit elements
         self._digit_elements = {k: builder.get_object(k) for k in self._DIGIT_ENTRY_ELEMENTS}
         for elem in self._digit_elements.values():
             elem.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self._sid_entry = self._digit_elements.get("sid_entry")
+        # initialization of non empty elements
+        self._non_empty_elements = {k: builder.get_object(k) for k in self._NOT_EMPTY_DIGIT_ELEMENTS}
+        for elem in self._non_empty_elements.values():
+            elem.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                             Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self._sid_entry = self._non_empty_elements.get("sid_entry")
         self._bitstream_entry = self._digit_elements.get("bitstream_entry")
         self._pcm_entry = self._digit_elements.get("pcm_entry")
         self._video_pid_entry = self._digit_elements.get("video_pid_entry")
@@ -67,14 +84,14 @@ class ServiceDetailsDialog:
         self._acc_pid_entry = self._digit_elements.get("acc_pid_entry")
         self._he_acc_pid_entry = self._digit_elements.get("he_acc_pid_entry")
         self._teletext_pid_entry = self._digit_elements.get("teletext_pid_entry")
-        self._transponder_id_entry = self._digit_elements.get("transponder_id_entry")
-        self._network_id_entry = self._digit_elements.get("network_id_entry")
-        self._freq_entry = self._digit_elements.get("freq_entry")
-        self._rate_entry = self._digit_elements.get("rate_entry")
+        self._transponder_id_entry = self._non_empty_elements.get("transponder_id_entry")
+        self._network_id_entry = self._non_empty_elements.get("network_id_entry")
+        self._freq_entry = self._non_empty_elements.get("freq_entry")
+        self._rate_entry = self._non_empty_elements.get("rate_entry")
         self._pls_code_entry = self._digit_elements.get("pls_code_entry")
         self._stream_id_entry = self._digit_elements.get("stream_id_entry")
         self._tr_flag_entry = self._digit_elements.get("tr_flag_entry")
-        self._namespace_entry = self._digit_elements.get("namespace_entry")
+        self._namespace_entry = self._non_empty_elements.get("namespace_entry")
         # Service elements
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
@@ -88,7 +105,7 @@ class ServiceDetailsDialog:
         self._new_check_button = builder.get_object("new_check_button")
         self._pids_grid = builder.get_object("pids_grid")
         # Transponder elements
-        self._sat_pos_combo_box = builder.get_object("sat_pos_combo_box")
+        self._sat_pos_button = builder.get_object("sat_pos_button")
         self._pol_combo_box = builder.get_object("pol_combo_box")
         self._fec_combo_box = builder.get_object("fec_combo_box")
         self._sys_combo_box = builder.get_object("sys_combo_box")
@@ -98,15 +115,19 @@ class ServiceDetailsDialog:
         self._pilot_combo_box = builder.get_object("pilot_combo_box")
         self._pls_mode_combo_box = builder.get_object("pls_mode_combo_box")
         self._tr_edit_switch = builder.get_object("tr_edit_switch")
+        self._tr_extra_expander = builder.get_object("tr_extra_expander")
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
-        self._TRANSPONDER_ELEMENTS = (self._sat_pos_combo_box, self._pol_combo_box, self._invertion_combo_box,
+        self._TRANSPONDER_ELEMENTS = (self._sat_pos_button, self._pol_combo_box, self._invertion_combo_box,
                                       self._sys_combo_box, self._freq_entry, self._transponder_id_entry,
                                       self._network_id_entry, self._namespace_entry, self._fec_combo_box,
                                       self._rate_entry)
 
-        self.update_data_elements()
+        if self._action is Action.EDIT:
+            self.update_data_elements()
+        elif self._action is Action.ADD:
+            self.init_default_data_elements()
 
     def show(self):
         response = self._dialog.run()
@@ -117,6 +138,22 @@ class ServiceDetailsDialog:
         return response
 
     @run_idle
+    def init_default_data_elements(self):
+        self._apply_button.set_visible(False)
+        self._create_button.set_visible(True)
+        self._tr_edit_switch.set_sensitive(False)
+        self.on_tr_edit_toggled(self._tr_edit_switch.set_active(True), True)
+        for elem in self._non_empty_elements.values():
+            elem.set_text(" ")
+            elem.set_text("")
+        self._new_check_button.set_active(True)
+        self._tr_extra_expander.activate()
+        self._service_type_combo_box.set_active(0)
+        self._pol_combo_box.set_active(0)
+        self._fec_combo_box.set_active(0)
+        self._sys_combo_box.set_active(0)
+        self._invertion_combo_box.set_active(2)
+
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
         itr = model.get_iter(paths)
@@ -145,7 +182,7 @@ class ServiceDetailsDialog:
             self.init_enigma2_transponder_data(srv)
         elif self._profile is Profile.NEUTRINO_MP:
             self.init_neutrino_data(srv)
-            self.init_enigma_ui_elements()
+            self.init_neutrino_ui_elements()
 
     # ***************** Init Enigma2 data *********************#
 
@@ -230,27 +267,21 @@ class ServiceDetailsDialog:
         self._reference_entry.set_text(srv.picon_id.rstrip(".png"))
         self._transponder_id_entry.set_text(str(int(tr_data[0], 16)))
         self._network_id_entry.set_text(str(int(tr_data[1], 16)))
+        self.select_active_text(self._invertion_combo_box, Inversion(tr_data[3]).name)
 
-    def init_enigma_ui_elements(self):
-        self._pids_grid.set_sensitive(False)
-        self._cas_entry.set_sensitive(False)
-        self._keep_check_button.set_sensitive(False)
-        self._hide_check_button.set_sensitive(False)
-        self._use_pids_check_button.set_sensitive(False)
-        self._new_check_button.set_sensitive(False)
+    def init_neutrino_ui_elements(self):
+        self._builder.get_object("flags_box").set_visible(False)
+        self._builder.get_object("pids_grid").set_visible(False)
+        self._builder.get_object("tr_grid").remove_column(7)
+        self._builder.get_object("tr_extra_expander").set_visible(False)
+        self._builder.get_object("srv_separator").set_visible(False)
 
     # ***************** Init Sat positions *********************#
 
-    @run_idle
     def set_sat_positions(self, sat_pos):
         """ Sat positions initialisation """
-        model = self._sat_pos_combo_box.get_model()
-        positions = self.get_sat_positions(self._satellites_xml_path)
-        for pos in positions:
-            model.append((pos,))
-        self.select_active_text(self._sat_pos_combo_box, sat_pos)
+        self._sat_pos_button.set_value(float(sat_pos))
 
-    @lru_cache(maxsize=1)
     def get_sat_positions(self, path):
         try:
             return ["{:.1f}".format(float(x.position) / 10) for x in get_satellites(path)]
@@ -272,56 +303,31 @@ class ServiceDetailsDialog:
     # ***************** Save data *********************#
 
     def on_save(self, item):
+        self.save_data()
+
+    def on_create_new(self, item):
+        self.save_data()
+
+    def save_data(self):
+        if not self.is_data_correct():
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
+        self.on_edit() if self._action is Action.EDIT else self.on_new()
+        self._dialog.destroy()
+
+    def on_edit(self):
         fav_id, data_id = self.get_srv_data()
         # transponder
         transponder = self._old_service.transponder
-        freq = self._freq_entry.get_text()
-        rate = self._rate_entry.get_text()
-        pol = self._pol_combo_box.get_active_id()
-        fec = self._fec_combo_box.get_active_id()
-        system = self._sys_combo_box.get_active_id()
-        pos = self._sat_pos_combo_box.get_active_id()
-
         if self._tr_edit_switch.get_active():
             transponder = self.get_transponder_data()
             if self._transponder_services_iters:
-                for itr in self._transponder_services_iters:
-                    srv = self._current_model[itr][:]
-                    srv[-9] = freq
-                    srv[-8] = rate
-                    srv[-7] = pol
-                    srv[-6] = fec
-                    srv[-5] = system
-                    srv[-4] = pos
-                    srv[-1] = transponder
-                    srv = Service(*srv)
-                    self._services[srv.fav_id] = srv
-                    self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
-
-        service = Service(flags_cas=self.get_flags(),
-                          transponder_type="s",
-                          coded=self._old_service.coded,
-                          service=self._name_entry.get_text(),
-                          locked=self._old_service.locked,
-                          hide=HIDE_ICON if self._hide_check_button.get_active() else None,
-                          package=self._package_entry.get_text(),
-                          service_type=self._service_type_combo_box.get_active_id(),
-                          picon=self._old_service.picon,
-                          picon_id=self._old_service.picon_id,
-                          ssid="{:x}".format(int(self._sid_entry.get_text())),
-                          freq=freq,
-                          rate=rate,
-                          pol=pol,
-                          fec=fec,
-                          system=system,
-                          pos=pos,
-                          data_id=data_id,
-                          fav_id=fav_id,
-                          transponder=transponder)
-
+                self.update_transponder_services(transponder)
+        service = self.get_service(fav_id, data_id, transponder)
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
             self._services.pop(old_fav_id, None)
@@ -332,16 +338,37 @@ class ServiceDetailsDialog:
                         indexes.append(i)
                 for i in indexes:
                     bq[i] = fav_id
-
         self._services[fav_id] = service
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
         self._old_service = service
 
-    def on_create_new(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
+    def on_new(self):
+        service = self.get_service(*self.get_srv_data(), self.get_transponder_data())
+        print(service)
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+
+    def get_service(self, fav_id, data_id, transponder):
+        freq, rate, pol, fec, system, pos = self.get_transponder_values()
+        return Service(flags_cas=self.get_flags(),
+                       transponder_type="s",
+                       coded=self._old_service.coded,
+                       service=self._name_entry.get_text(),
+                       locked=self._old_service.locked,
+                       hide=HIDE_ICON if self._hide_check_button.get_active() else None,
+                       package=self._package_entry.get_text(),
+                       service_type=self._service_type_combo_box.get_active_id(),
+                       picon=self._old_service.picon,
+                       picon_id=self._old_service.picon_id,
+                       ssid="{:x}".format(int(self._sid_entry.get_text())),
+                       freq=freq,
+                       rate=rate,
+                       pol=pol,
+                       fec=fec,
+                       system=system,
+                       pos=pos,
+                       data_id=data_id,
+                       fav_id=fav_id,
+                       transponder=transponder)
 
     def get_flags(self):
         if self._profile is Profile.ENIGMA_2:
@@ -389,23 +416,26 @@ class ServiceDetailsDialog:
 
     def get_srv_data(self):
         ssid = int(self._sid_entry.get_text())
-        namespace = int(self._namespace_entry.get_text())
-        transponder_id = int(self._transponder_id_entry.get_text())
-        network_id = int(self._network_id_entry.get_text())
+        net_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
         service_type = self._srv_type_entry.get_text()
 
         if self._profile is Profile.ENIGMA_2:
-            data_id = self._DATA_ID.format(ssid, namespace, transponder_id, network_id, service_type, 0)
-            fav_id = self._FAV_ID.format(ssid, transponder_id, network_id, namespace)
+            namespace = int(self._namespace_entry.get_text())
+            data_id = self._ENIGMA2_DATA_ID.format(ssid, namespace, tr_id, net_id, service_type, 0)
+            fav_id = self._ENIGMA2_FAV_ID.format(ssid, tr_id, net_id, namespace)
             return fav_id, data_id
         elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.fav_id, self._old_service.data_id
+            fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
+            return fav_id, self._old_service.data_id
 
-    def get_fav_id(self):
-        if self._profile is Profile.ENIGMA_2:
-            return self._old_service.fav_id
-        elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.fav_id
+    def get_transponder_values(self):
+        freq = self._freq_entry.get_text()
+        rate = self._rate_entry.get_text()
+        pol = self._pol_combo_box.get_active_id()
+        fec = self._fec_combo_box.get_active_id()
+        system = self._sys_combo_box.get_active_id()
+        pos = str(round(self._sat_pos_button.get_value(), 1))
+        return freq, rate, pol, fec, system, pos
 
     def get_transponder_data(self):
         sys = self._sys_combo_box.get_active_id()
@@ -413,12 +443,12 @@ class ServiceDetailsDialog:
         rate = self._rate_entry.get_text()
         pol = self.get_value_from_combobox_id(self._pol_combo_box, POLARIZATION)
         fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
-        sat_pos = self._sat_pos_combo_box.get_active_id().replace(".", "")
+        sat_pos = str(round(self._sat_pos_button.get_value(), 1)).replace(".", "")
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         srv_sys = "0"  # !!!
 
         if self._profile is Profile.ENIGMA_2:
-            dvb_s_tr = self._TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
+            dvb_s_tr = self._ENIGMA2_TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
             if sys == "DVB-S":
                 return dvb_s_tr
             if sys == "DVB-S2":
@@ -432,7 +462,19 @@ class ServiceDetailsDialog:
                 pls = ":{}:{}:{}".format(st_id, pls_code, pls_mode) if pls_mode and pls_code and st_id else ""
                 return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
         elif self._profile is Profile.NEUTRINO_MP:
-            return self._old_service.transponder
+            on_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
+            mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION) if sys == "DVB-S2" else None
+            srv_sys = None
+            return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
+
+    def update_transponder_services(self, transponder):
+        for itr in self._transponder_services_iters:
+            srv = self._current_model[itr][:]
+            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values()
+            srv[-1] = transponder
+            srv = Service(*srv)
+            self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
+            self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
 
     # ***************** Others *********************#
 
@@ -444,7 +486,10 @@ class ServiceDetailsDialog:
                 break
 
     def on_digit_entry_changed(self, entry):
-        entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
+        entry.set_name(self._DIGIT_ENTRY_NAME if self._DIGIT_PATTERN.search(entry.get_text()) else "GtkEntry")
+
+    def on_non_empty_entry_changed(self, entry):
+        entry.set_name(self._DIGIT_ENTRY_NAME if self._NON_EMPTY_PATTERN.search(entry.get_text()) else "GtkEntry")
 
     def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
         cb_id = box.get_active_id()
@@ -453,7 +498,7 @@ class ServiceDetailsDialog:
     @run_idle
     def on_tr_edit_toggled(self, switch: Gtk.Switch, active):
 
-        if active:
+        if active and self._action is Action.EDIT:
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
                                                  self._current_model,
@@ -468,6 +513,15 @@ class ServiceDetailsDialog:
 
         for elem in self._TRANSPONDER_ELEMENTS:
             elem.set_sensitive(active)
+
+    def is_data_correct(self):
+        for elem in self._digit_elements.values():
+            if elem.get_name() == self._DIGIT_ENTRY_NAME:
+                return False
+        for elem in self._non_empty_elements.values():
+            if elem.get_name() == self._DIGIT_ENTRY_NAME:
+                return False
+        return True
 
 
 class TransponderServicesDialog:

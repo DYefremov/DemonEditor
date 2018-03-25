@@ -5,7 +5,7 @@ DEB_PATH="$B_PATH/usr/share/demoneditor"
 
 mkdir -p $B_PATH
 cp -TRv deb $B_PATH
-cp -Rv app $DEB_PATH
+rsync --exclude=app/ui/lang  -arv app $DEB_PATH
 cp -Rv start.py $DEB_PATH
 
 cd dist
