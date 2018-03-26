@@ -443,6 +443,9 @@ msgstr "Пожалуйста, проверте параметры и попро�
 msgid "No satellites.xml file is selected!"
 msgstr "Не выбран файл satellites.xml!"
 
+msgid "Error. Verify the data!"
+msgstr "Ошибка. Проверьте данные!"
+
 
 
 

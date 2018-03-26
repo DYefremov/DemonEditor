@@ -3,7 +3,7 @@ import re
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
-    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE
+    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE
 from app.properties import Profile
 from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, Action
@@ -26,7 +26,7 @@ class ServiceDetailsDialog:
                              "teletext_pid_entry", "pls_code_entry", "stream_id_entry", "tr_flag_entry",
                              "audio_pid_entry")
     _NOT_EMPTY_DIGIT_ELEMENTS = ("sid_entry", "freq_entry", "rate_entry", "transponder_id_entry", "network_id_entry",
-                                 "namespace_entry")
+                                 "namespace_entry", "srv_type_entry")
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
@@ -36,7 +36,8 @@ class ServiceDetailsDialog:
                     "on_create_new": self.on_create_new,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
                     "on_tr_edit_toggled": self.on_tr_edit_toggled,
-                    "on_non_empty_entry_changed": self.on_non_empty_entry_changed}
+                    "on_non_empty_entry_changed": self.on_non_empty_entry_changed,
+                    "update_reference": self.update_reference}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -48,6 +49,7 @@ class ServiceDetailsDialog:
         self._dialog.set_transient_for(transient)
         self._profile = Profile(options["profile"])
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
+        self._picons_dir_path = options.get(self._profile.value)["picons_dir_path"]
         self._services_view = view
         self._action = action
         self._old_service = None
@@ -95,7 +97,7 @@ class ServiceDetailsDialog:
         # Service elements
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
-        self._srv_type_entry = builder.get_object("srv_type_entry")
+        self._srv_type_entry = self._non_empty_elements.get("srv_type_entry")
         self._service_type_combo_box = builder.get_object("service_type_combo_box")
         self._cas_entry = builder.get_object("cas_entry")
         self._reference_entry = builder.get_object("reference_entry")
@@ -167,7 +169,6 @@ class ServiceDetailsDialog:
         # Service
         self._name_entry.set_text(srv.service)
         self._package_entry.set_text(srv.package)
-        self.select_active_text(self._service_type_combo_box, srv.service_type)
         self._sid_entry.set_text(str(int(srv.ssid, 16)))
         # Transponder
         self._freq_entry.set_text(srv.freq)
@@ -195,8 +196,6 @@ class ServiceDetailsDialog:
             self.init_enigma2_flags(flags)
             self.init_enigma2_pids(flags)
             self.init_enigma2_cas(flags)
-
-        self._reference_entry.set_text(srv.picon_id.replace("_", ":").rstrip(".png"))
 
     def init_enigma2_flags(self, flags):
         f_flags = list(filter(lambda x: x.startswith("f:"), flags))
@@ -237,7 +236,6 @@ class ServiceDetailsDialog:
                 elif pid.startswith(Pids.SUBTITLE.value):
                     pass
 
-    @run_idle
     def init_enigma2_transponder_data(self, srv):
         """ Transponder data initialisation """
         data = srv.data_id.split(":")
@@ -253,21 +251,23 @@ class ServiceDetailsDialog:
                 self._pls_code_entry.set_text(tr_data[12])
                 self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[13]))
 
-        self._srv_type_entry.set_text(data[4])
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
         self._network_id_entry.set_text(str(int(data[3], 16)))
         self.select_active_text(self._invertion_combo_box, Inversion(tr_data[5]).name)
+        # Should be called last to properly initialize the reference
+        self._srv_type_entry.set_text(data[4])
 
     # ***************** Init Neutrino data *********************#
 
     def init_neutrino_data(self, srv):
         srv_data = srv.data_id.split(":")
         tr_data = srv.transponder.split(":")
-        self._reference_entry.set_text(srv.picon_id.rstrip(".png"))
         self._transponder_id_entry.set_text(str(int(tr_data[0], 16)))
         self._network_id_entry.set_text(str(int(tr_data[1], 16)))
         self.select_active_text(self._invertion_combo_box, Inversion(tr_data[3]).name)
+        self.select_active_text(self._service_type_combo_box, srv.service_type)
+        self.update_reference_entry()
 
     def init_neutrino_ui_elements(self):
         self._builder.get_object("flags_box").set_visible(False)
@@ -330,17 +330,27 @@ class ServiceDetailsDialog:
         service = self.get_service(fav_id, data_id, transponder)
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
-            self._services.pop(old_fav_id, None)
-            for bq in self._bouquets.values():
-                indexes = []
-                for i, f_id in enumerate(bq):
-                    if old_fav_id == f_id:
-                        indexes.append(i)
-                for i in indexes:
-                    bq[i] = fav_id
+            self.update_bouquets(fav_id, old_fav_id)
         self._services[fav_id] = service
+        if self._old_service.picon_id != service.picon_id:
+            self.update_picon_name(self._old_service.picon_id, service.picon_id)
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
         self._old_service = service
+
+    def update_bouquets(self, fav_id, old_fav_id):
+        self._services.pop(old_fav_id, None)
+        for bq in self._bouquets.values():
+            indexes = []
+            for i, f_id in enumerate(bq):
+                if old_fav_id == f_id:
+                    indexes.append(i)
+            for i in indexes:
+                bq[i] = fav_id
+
+    def update_picon_name(self, old_name, new_name):
+        pass
+        # for file in os.listdir(self._picons_dir_path):
+        #     os.rename(old_name, file.replace(old_name, new_name))
 
     def on_new(self):
         service = self.get_service(*self.get_srv_data(), self.get_transponder_data())
@@ -356,10 +366,10 @@ class ServiceDetailsDialog:
                        locked=self._old_service.locked,
                        hide=HIDE_ICON if self._hide_check_button.get_active() else None,
                        package=self._package_entry.get_text(),
-                       service_type=self._service_type_combo_box.get_active_id(),
+                       service_type=SERVICE_TYPE.get(self._srv_type_entry.get_text(), SERVICE_TYPE["3"]),
                        picon=self._old_service.picon,
-                       picon_id=self._old_service.picon_id,
-                       ssid="{:x}".format(int(self._sid_entry.get_text())),
+                       picon_id=self._reference_entry.get_text().replace(":", "_") + ".png",
+                       ssid="{:04x}".format(int(self._sid_entry.get_text())),
                        freq=freq,
                        rate=rate,
                        pol=pol,
@@ -522,6 +532,23 @@ class ServiceDetailsDialog:
             if elem.get_name() == self._DIGIT_ENTRY_NAME:
                 return False
         return True
+
+    def update_reference(self, entry, event=None):
+        if not self.is_data_correct() or (event is None and self._profile is Profile.NEUTRINO_MP):
+            return
+        self.update_reference_entry()
+
+    def update_reference_entry(self):
+        srv_type = 0 if self._srv_type_entry.get_text() == "2" else 1
+        ssid = int(self._sid_entry.get_text())
+        tid = int(self._transponder_id_entry.get_text())
+        nid = int(self._network_id_entry.get_text())
+        if self._profile is Profile.ENIGMA_2:
+            on_id = int(self._namespace_entry.get_text())
+            ref = "1:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0".format(srv_type, ssid, tid, nid, on_id)
+            self._reference_entry.set_text(ref)
+        else:
+            self._reference_entry.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
 
 
 class TransponderServicesDialog:
