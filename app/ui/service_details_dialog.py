@@ -1,5 +1,4 @@
 import re
-
 import os
 
 from app.commons import run_idle
