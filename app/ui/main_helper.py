@@ -59,7 +59,7 @@ def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
     old_ch = channels.pop(fav_id, None)
     new_fav_id = "{}::{}\n#DESCRIPTION {}\n".format(fav_id.split("::")[0], response, response)
     model.set(itr, {2: response, 7: new_fav_id})
-    channels[new_fav_id] = Service(*old_ch[0:3], response, *old_ch[4:17], old_ch.data_id, new_fav_id, None)
+    channels[new_fav_id] = old_ch._replace(service=response, fav_id=new_fav_id)
     bq_services.pop(index)
     bq_services.insert(index, new_fav_id)
 
@@ -143,7 +143,7 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, channe
 
     old_ch = channels.get(f_id, None)
     if old_ch:
-        channels[f_id] = Service(*old_ch[0:3], channel_name, *old_ch[4:])
+        channels[f_id] = old_ch._replace(service=channel_name)
 
 
 # ***************** Flags *******************#
@@ -196,7 +196,7 @@ def set_lock(blacklist, channels, model, paths, target, services_model):
                 continue
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
             model.set_value(itr, col_num, None if locked else LOCKED_ICON)
-            channels[fav_id] = Service(*channel[:4], None if locked else LOCKED_ICON, *channel[5:])
+            channels[fav_id] = channel._replace(locked=None if locked else LOCKED_ICON)
             ids.append(fav_id)
 
     if target is ViewTarget.FAV and ids:
@@ -244,7 +244,7 @@ def set_hide(channels, model, paths):
         fav_id = model.get_value(itr, 18)
         channel = channels.get(fav_id, None)
         if channel:
-            channels[fav_id] = Service(*channel[:5], None if hide else HIDE_ICON, *channel[6:])
+            channels[fav_id] = channel._replace(hide=None if hide else HIDE_ICON)
 
 
 def has_locked_hide(model, paths, col_num):

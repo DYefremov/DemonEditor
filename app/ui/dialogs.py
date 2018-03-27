@@ -6,6 +6,11 @@ from app.commons import run_idle
 from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
+class Action(Enum):
+    EDIT = 0
+    ADD = 1
+
+
 class DialogType(Enum):
     INPUT = "input_dialog"
     CHOOSER = "path_chooser_dialog"
@@ -74,9 +79,10 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
 def get_dialog_from_xml(dialog_type, transient):
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_from_file(UI_RESOURCES_PATH + "dialogs.glade")
+    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_type.value,))
     dialog = builder.get_object(dialog_type.value)
     dialog.set_transient_for(transient)
+
     return builder, dialog
 
 
@@ -84,6 +90,7 @@ def get_chooser_dialog(transient, options, pattern, name):
     file_filter = Gtk.FileFilter()
     file_filter.add_pattern(pattern)
     file_filter.set_name(name)
+
     return show_dialog(dialog_type=DialogType.CHOOSER,
                        transient=transient,
                        options=options,

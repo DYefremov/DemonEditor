@@ -11,6 +11,7 @@ from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
+from .iptv import IptvDialog
 from .search import SearchProvider
 from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
@@ -21,7 +22,7 @@ from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTar
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
-from .service_details_dialog import ServiceDetailsDialog
+from .service_details_dialog import ServiceDetailsDialog, Action
 
 
 class MainAppWindow:
@@ -46,11 +47,11 @@ class MainAppWindow:
     _FAV_ELEMENTS = ("cut_tool_button", "paste_tool_button", "cut_menu_item",
                      "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
-                     "fav_locate_popup_item", "fav_picon_popup_item")
+                     "fav_locate_popup_item", "fav_picon_popup_item", "fav_add_iptv_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
 
-    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item")
+    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_add_iptv_popup_item")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
@@ -63,7 +64,8 @@ class MainAppWindow:
                           "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                          "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item")
+                          "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
+                          "services_add_new_popup_item", "fav_add_iptv_popup_item")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -112,7 +114,9 @@ class MainAppWindow:
                     "on_search_down": self.on_search_down,
                     "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
-                    "on_service_edit": self.on_service_edit}
+                    "on_service_edit": self.on_service_edit,
+                    "on_services_add_new": self.on_services_add_new,
+                    "on_iptv": self.on_iptv}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -171,7 +175,9 @@ class MainAppWindow:
         # Search
         self.__search_info_bar = builder.get_object("search_info_bar")
         self.__search_provider = SearchProvider(self.__services_view, self.__fav_view, self.__bouquets_view,
-                                                self.__services, self.__bouquets)
+                                                self.__services, self.__bouquets,
+                                                builder.get_object("search_down_button"),
+                                                builder.get_object("search_up_button"))
         self.__main_window.show()
 
     def init_drag_and_drop(self):
@@ -785,6 +791,8 @@ class MainAppWindow:
         for elem in self._COMMONS_ELEMENTS:
             self.__tool_elements[elem].set_sensitive(not_empty)
 
+        self.__tool_elements["services_add_new_popup_item"].set_sensitive(len(self.__bouquets_model))
+
     def on_hide(self, item):
         self.set_service_flags(Flag.HIDE)
 
@@ -857,6 +865,16 @@ class MainAppWindow:
                 bq_services.append(ch.fav_id)
             self.update_bouquet_channels(self.__fav_model, None, bq_selected)
 
+    def on_iptv(self, item):
+        response = IptvDialog(self.__main_window,
+                              self.__fav_view,
+                              self.__services,
+                              self.__bouquets.get(self.is_bouquet_selected(), None),
+                              Profile(self.__profile),
+                              Action.ADD).show()
+        if response != Gtk.ResponseType.CANCEL:
+            self.update_fav_num_column(self.__fav_model)
+
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
         insert_marker(view, self.__bouquets, self.is_bouquet_selected(), self.__services, self.__main_window)
@@ -920,9 +938,15 @@ class MainAppWindow:
             model_name = get_base_model(model).get_name()
             if model_name == self._FAV_LIST_NAME:
                 srv_type = model.get_value(model.get_iter(paths), 5)
-                if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
-                    self.on_rename(view)
-                    return
+                if srv_type == BqServiceType.MARKER.name:
+                    return self.on_rename(view)
+                elif srv_type == BqServiceType.IPTV.name:
+                    return IptvDialog(self.__main_window,
+                                      self.__fav_view,
+                                      self.__services,
+                                      self.__bouquets.get(self.is_bouquet_selected(), None),
+                                      Profile(self.__profile),
+                                      Action.EDIT).show()
                 self.on_locate_in_services(view)
 
             dialog = ServiceDetailsDialog(self.__main_window,
@@ -931,6 +955,15 @@ class MainAppWindow:
                                           self.__services,
                                           self.__bouquets)
             dialog.show()
+
+    def on_services_add_new(self, item):
+        dialog = ServiceDetailsDialog(self.__main_window,
+                                      self.__options,
+                                      self.__services_view,
+                                      self.__services,
+                                      self.__bouquets,
+                                      action=Action.ADD)
+        dialog.show()
 
     @run_idle
     def update_picons(self):

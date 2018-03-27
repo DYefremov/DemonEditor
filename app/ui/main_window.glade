@@ -117,6 +117,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-copy</property>
   </object>
+  <object class="GtkImage" id="image17">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-transmit-receive</property>
+  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -239,6 +244,17 @@
       </object>
     </child>
     <child>
+      <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
+        <property name="label" translatable="yes">Add IPTV or stream</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">image17</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_iptv" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -356,6 +372,12 @@
       </object>
     </child>
     <child>
+      <object class="GtkSeparatorMenuItem" id="separatormenuitem7">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="services_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
@@ -365,6 +387,15 @@
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_service_edit" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_add_new_popup_item">
+        <property name="label">gtk-new</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_services_add_new" swapped="no"/>
       </object>
     </child>
     <child>
@@ -1215,6 +1246,7 @@
                     <child>
                       <object class="GtkButton" id="search_down_button">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal name="clicked" handler="on_search_down" swapped="no"/>
@@ -1235,6 +1267,7 @@
                     <child>
                       <object class="GtkButton" id="search_up_button">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal name="clicked" handler="on_search_up" swapped="no"/>
