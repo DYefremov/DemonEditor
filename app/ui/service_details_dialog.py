@@ -1,5 +1,7 @@
 import re
 
+import os
+
 from app.commons import run_idle
 from app.eparser import Service, get_satellites
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
@@ -348,9 +350,12 @@ class ServiceDetailsDialog:
                 bq[i] = fav_id
 
     def update_picon_name(self, old_name, new_name):
-        pass
-        # for file in os.listdir(self._picons_dir_path):
-        #     os.rename(old_name, file.replace(old_name, new_name))
+        for file_name in os.listdir(self._picons_dir_path):
+            if file_name == old_name:
+                old_file = os.path.join(self._picons_dir_path, old_name)
+                new_file = os.path.join(self._picons_dir_path, new_name)
+                os.rename(old_file, new_file)
+                break
 
     def on_new(self):
         service = self.get_service(*self.get_srv_data(), self.get_transponder_data())

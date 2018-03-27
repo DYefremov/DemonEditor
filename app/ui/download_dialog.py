@@ -77,7 +77,7 @@ class DownloadDialog:
             if download:
                 download_data(properties=self._properties, download_type=d_type)
             else:
-                self.show_info_message("Please, wait...", Gtk.MessageType.INFO)
+                self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
                 upload_data(properties=self._properties,
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active(),
