@@ -301,6 +301,16 @@ class ServiceDetailsDialog:
         self._pls_code_entry.set_name("GtkEntry")
         self._stream_id_entry.set_name("GtkEntry")
 
+        if active:
+            if not self._mod_combo_box.get_active_id():
+                self._mod_combo_box.set_active_id(MODULATION["2"])
+            if not self._rolloff_combo_box.get_active_id():
+                self._rolloff_combo_box.set_active_id(ROLL_OFF["0"])
+            if not self._pilot_combo_box.get_active_id():
+                self._pilot_combo_box.set_active_id(Pilot.Auto.name)
+            if not self._pls_mode_combo_box.get_active_id():
+                self._pls_mode_combo_box.set_active_id(PLS_MODE["0"])
+
     # ***************** Save data *********************#
 
     def on_save(self, item):
