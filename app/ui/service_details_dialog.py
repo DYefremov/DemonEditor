@@ -35,10 +35,11 @@ class ServiceDetailsDialog:
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
-                    "on_digit_entry_changed": self.on_digit_entry_changed,
                     "on_tr_edit_toggled": self.on_tr_edit_toggled,
-                    "on_non_empty_entry_changed": self.on_non_empty_entry_changed,
-                    "update_reference": self.update_reference}
+                    "update_reference": self.update_reference,
+                    "on_cas_entry_changed": self.on_cas_entry_changed,
+                    "on_digit_entry_changed": self.on_digit_entry_changed,
+                    "on_non_empty_entry_changed": self.on_non_empty_entry_changed}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -59,8 +60,11 @@ class ServiceDetailsDialog:
         self._transponder_services_iters = None
         self._current_model = None
         self._current_itr = None
+        # Patterns
         self._DIGIT_PATTERN = re.compile("\D")
         self._NON_EMPTY_PATTERN = re.compile("(?:^[\s]*$|\D)")
+        self._CAID_PATTERN = re.compile("(?:^[\s]*$)|(C:[0-9a-z]{4})(,C:[0-9a-z]{4})*")
+        # Buttons
         self._apply_button = builder.get_object("apply_button")
         self._create_button = builder.get_object("create_button")
         # style
@@ -282,12 +286,6 @@ class ServiceDetailsDialog:
     def set_sat_positions(self, sat_pos):
         """ Sat positions initialisation """
         self._sat_pos_button.set_value(float(sat_pos))
-
-    def get_sat_positions(self, path):
-        try:
-            return ["{:.1f}".format(float(x.position) / 10) for x in get_satellites(path)]
-        except FileNotFoundError:
-            return {r[-4] for r in self._current_model}
 
     def on_system_changed(self, box):
         if not self._tr_edit_switch.get_active():
@@ -515,6 +513,9 @@ class ServiceDetailsDialog:
     def on_non_empty_entry_changed(self, entry):
         entry.set_name(self._DIGIT_ENTRY_NAME if self._NON_EMPTY_PATTERN.search(entry.get_text()) else "GtkEntry")
 
+    def on_cas_entry_changed(self, entry):
+        entry.set_name("GtkEntry" if self._CAID_PATTERN.fullmatch(entry.get_text()) else self._DIGIT_ENTRY_NAME)
+
     def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
         cb_id = box.get_active_id()
         return get_key_by_value(dc, cb_id)
@@ -545,6 +546,8 @@ class ServiceDetailsDialog:
         for elem in self._non_empty_elements.values():
             if elem.get_name() == self._DIGIT_ENTRY_NAME:
                 return False
+        if self._cas_entry.get_name() == self._DIGIT_ENTRY_NAME:
+            return False
         return True
 
     def update_reference(self, entry, event=None):

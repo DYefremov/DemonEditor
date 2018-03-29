@@ -1,5 +1,4 @@
 import locale
-
 import gi
 import os
 

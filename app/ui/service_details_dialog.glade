@@ -861,9 +861,12 @@
                       <object class="GtkEntry" id="cas_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text">C:0000,C:a1b2,etc.</property>
                         <property name="width_chars">15</property>
                         <property name="max_width_chars">26</property>
                         <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="placeholder_text" translatable="yes">C:0000,C:a1b2,etc.</property>
+                        <signal name="changed" handler="on_cas_entry_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
