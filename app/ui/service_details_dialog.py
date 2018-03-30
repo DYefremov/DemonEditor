@@ -2,7 +2,7 @@ import re
 import os
 
 from app.commons import run_idle
-from app.eparser import Service, get_satellites
+from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE
 from app.properties import Profile
@@ -266,7 +266,6 @@ class ServiceDetailsDialog:
     # ***************** Init Neutrino data *********************#
 
     def init_neutrino_data(self, srv):
-        srv_data = srv.data_id.split(":")
         tr_data = srv.transponder.split(":")
         self._transponder_id_entry.set_text(str(int(tr_data[0], 16)))
         self._network_id_entry.set_text(str(int(tr_data[1], 16)))
