@@ -13,8 +13,9 @@ Ctrl + E - edit.
 Ctrl + R, F2 - rename.                                                                                                                                                                                                                                                                                                                     
 Ctrl + S, T in Satellites edit tool for create satellite or transponder.                                                                 
 Ctrl + L - parental lock.                                                                                                          
-Ctrl + H - hide/skip.                                                                                                              
-Left/Right - remove selection.                                                                                                     
+Ctrl + H - hide/skip.
+Space - Space - select/deselect.
+Left/Right - remove selection.                                                                                                                                                                                               
 
 ### Extra:
 Multiple selections in lists only with Space key (as in file managers).                                                                                                                                                                                                                                                                                                                                                          
