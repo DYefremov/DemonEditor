@@ -245,7 +245,7 @@
     </child>
     <child>
       <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
-        <property name="label" translatable="yes">Add IPTV or stream</property>
+        <property name="label" translatable="yes">Add IPTV or stream service</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
         <property name="can_focus">False</property>
