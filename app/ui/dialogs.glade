@@ -864,6 +864,7 @@ dmitry.v.yefremov@gmail.com
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="primary_icon_stock">gtk-edit</property>
+                    <signal name="changed" handler="on_url_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -944,7 +945,7 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkLabel" id="label30">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Tr. ID</property>
+                        <property name="label" translatable="yes">TID</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -955,7 +956,7 @@ dmitry.v.yefremov@gmail.com
                       <object class="GtkLabel" id="label31">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Net. ID</property>
+                        <property name="label" translatable="yes">NID</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>

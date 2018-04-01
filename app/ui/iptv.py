@@ -1,5 +1,6 @@
 import re
 
+from urllib.parse import urlparse
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT
 from app.properties import Profile
@@ -9,8 +10,11 @@ from .main_helper import get_base_model
 
 
 class IptvDialog:
+    _DIGIT_ENTRY_NAME = "digit-entry"
+
     def __init__(self, transient, view, services, bouquet, profile=Profile.ENIGMA_2, action=Action.ADD):
         handlers = {"on_entry_changed": self.on_entry_changed,
+                    "on_url_changed": self.on_url_changed,
                     "on_save": self.on_save,
                     "on_stream_type_changed": self.on_stream_type_changed}
 
@@ -39,7 +43,6 @@ class IptvDialog:
         self._bouquet = bouquet
         self._services = services
         self._model, self._paths = view.get_selection().get_selected_rows()
-
         self._PATTERN = re.compile("(?:^[\s]*$|\D)")
         # style
         self._style_provider = Gtk.CssProvider()
@@ -71,6 +74,10 @@ class IptvDialog:
         self._dialog.destroy()
 
     def on_save(self, item):
+        if not self.is_data_correct():
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
@@ -116,10 +123,14 @@ class IptvDialog:
 
     def on_entry_changed(self, entry):
         if self._PATTERN.search(entry.get_text()):
-            entry.set_name("digit-entry")
+            entry.set_name(self._DIGIT_ENTRY_NAME)
         else:
             entry.set_name("GtkEntry")
             self._update_reference_entry()
+
+    def on_url_changed(self, entry):
+        url = urlparse(entry.get_text())
+        entry.set_name("GtkEntry" if all([url.scheme, url.netloc, url.path]) else self._DIGIT_ENTRY_NAME)
 
     def on_stream_type_changed(self, item):
         self._update_reference_entry()
@@ -161,6 +172,13 @@ class IptvDialog:
             self._model.set_value(itr, 1, IPTV_ICON)
             self._bouquet.insert(self._model.get_path(itr)[0], fav_id)
             self._services[fav_id] = Service(None, None, IPTV_ICON, name, *aggr[0:3], s_type, *aggr, fav_id, None)
+
+    def is_data_correct(self):
+        for elem in (self._srv_type_entry, self._sid_entry, self._tr_id_entry, self._net_id_entry,
+                     self._namespace_entry, self._url_entry):
+            if elem.get_name() == self._DIGIT_ENTRY_NAME:
+                return False
+        return True
 
 
 if __name__ == "__main__":
