@@ -7,7 +7,7 @@ import shutil
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, Flag
+from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
@@ -18,7 +18,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected
+    is_only_one_item_selected, get_bouquets_names
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -36,7 +36,8 @@ class MainAppWindow:
 
     # dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item", "services_picon_popup_item")
+                         "services_edit_popup_item", "services_copy_popup_item", "services_picon_popup_item",
+                         "services_create_bouquet_popup_item")
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item")
@@ -55,7 +56,7 @@ class MainAppWindow:
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
-    __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "copy_tool_button",
+    __DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "services_create_bouquet_popup_item",
                           "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
                           "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
                           "services_to_fav_move_popup_item", "services_edit_popup_item", "locked_tool_button",
@@ -65,7 +66,7 @@ class MainAppWindow:
                           "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                           "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
                           "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
-                          "services_add_new_popup_item", "fav_add_iptv_popup_item")
+                          "services_add_new_popup_item", "fav_add_iptv_popup_item", "copy_tool_button")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -87,8 +88,6 @@ class MainAppWindow:
                     "on_paste": self.on_paste,
                     "on_edit": self.on_rename,
                     "on_delete": self.on_delete,
-                    "on_new_bouquet": self.on_new_bouquet,
-                    "on_bouquets_edit": self.on_bouquets_edit,
                     "on_tool_edit": self.on_tool_edit,
                     "on_to_fav_move": self.on_to_fav_move,
                     "on_services_tree_view_drag_data_get": self.on_services_tree_view_drag_data_get,
@@ -116,7 +115,13 @@ class MainAppWindow:
                     "on_search": self.on_search,
                     "on_service_edit": self.on_service_edit,
                     "on_services_add_new": self.on_services_add_new,
-                    "on_iptv": self.on_iptv}
+                    "on_iptv": self.on_iptv,
+                    "on_new_bouquet": self.on_new_bouquet,
+                    "on_bouquets_edit": self.on_bouquets_edit,
+                    "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
+                    "on_create_bouquet_for_each_satellite": self.on_create_bouquet_for_each_satellite,
+                    "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
+                    "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package}
 
         self.__options = get_config()
         self.__profile = self.__options.get("profile")
@@ -543,21 +548,24 @@ class MainAppWindow:
     def append_bouquets(self, data_path):
         for bouquet in get_bouquets(data_path, Profile(self.__profile)):
             parent = self.__bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
-            for bt in bouquet.bouquets:
-                name, bt_type, locked, hidden = bt.name, bt.type, bt.locked, bt.hidden
-                self.__bouquets_model.append(parent, [name, locked, hidden, bt_type])
-                services = []
-                agr = [None] * 9
-                for srv in bt.services:
-                    fav_id = srv.data
-                    # IPTV and MARKER services
-                    s_type = srv.type
-                    if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
-                        icon = IPTV_ICON if s_type is BqServiceType.IPTV else None
-                        srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
-                        self.__services[fav_id] = srv
-                    services.append(fav_id)
-                self.__bouquets["{}:{}".format(name, bt_type)] = services
+            for bq in bouquet.bouquets:
+                self.append_bouquet(bq, parent)
+
+    def append_bouquet(self, bq, parent):
+        name, bt_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
+        self.__bouquets_model.append(parent, [name, locked, hidden, bt_type])
+        services = []
+        agr = [None] * 9
+        for srv in bq.services:
+            fav_id = srv.data
+            # IPTV and MARKER services
+            s_type = srv.type
+            if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
+                icon = IPTV_ICON if s_type is BqServiceType.IPTV else None
+                srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
+                self.__services[fav_id] = srv
+            services.append(fav_id)
+        self.__bouquets["{}:{}".format(name, bt_type)] = services
 
     def append_services(self, data_path):
         try:
@@ -990,6 +998,28 @@ class MainAppWindow:
 
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
+
+    def on_create_bouquet_for_current_satellite(self, item):
+        model, paths = self.__services_view.get_selection().get_selected_rows()
+        if is_only_one_item_selected(paths, self.__main_window):
+            name = model[paths][16]
+            bouquets_names = get_bouquets_names(self.__bouquets_model)
+            
+            if name not in bouquets_names:
+                services = [BouquetService(None, BqServiceType.DEFAULT, row[18], 0)
+                            for row in self.__services_model if row[16] == name]
+                bq = Bouquet(name=name, type="tv", services=services, locked=None, hidden=None)
+                self.append_bouquet(bq, self.__bouquets_model.get_iter(0))
+                self.__bouquets_view.expand_row(Gtk.TreePath(0), 0)
+
+    def on_create_bouquet_for_each_satellite(self, item):
+        pass
+
+    def on_create_bouquet_for_current_package(self, item):
+        pass
+
+    def on_create_bouquet_for_each_package(self, item):
+        pass
 
 
 def start_app():

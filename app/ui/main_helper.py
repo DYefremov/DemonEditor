@@ -429,5 +429,18 @@ def get_base_model(model):
     return model
 
 
+def get_bouquets_names(model):
+    """ Returns all current bouquets names """
+    bouquets_names = []
+    for row in model:
+        itr = row.iter
+        if model.iter_has_child(itr):
+            num_of_children = model.iter_n_children(itr)
+            for num in range(num_of_children):
+                child_itr = model.iter_nth_child(itr, num)
+                bouquets_names.append(model[child_itr][0])
+    return bouquets_names
+
+
 if __name__ == "__main__":
     pass

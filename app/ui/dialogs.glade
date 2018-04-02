@@ -9,7 +9,7 @@
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">0.3.0 Pre-alpha</property>
+    <property name="version">0.3.1 Pre-alpha</property>
     <property name="copyright">2018 Dmitriy Yefremov
 dmitry.v.yefremov@gmail.com
 </property>
@@ -22,12 +22,12 @@ dmitry.v.yefremov@gmail.com
     <property name="wrap_license">True</property>
     <property name="license_type">mit-x11</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="aboutdialog-vbox3">
+      <object class="GtkBox" id="aboutdialog_vbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="aboutdialog-action_area3">
+          <object class="GtkButtonBox" id="aboutdialog_action_area">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
