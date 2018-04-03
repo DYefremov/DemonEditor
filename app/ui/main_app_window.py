@@ -7,7 +7,7 @@ import shutil
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, Flag, BouquetService
+from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
@@ -18,7 +18,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, get_bouquets_names
+    is_only_one_item_selected, get_gen_bouquets, BqGenType
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -1000,26 +1000,23 @@ class MainAppWindow:
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
 
     def on_create_bouquet_for_current_satellite(self, item):
-        model, paths = self.__services_view.get_selection().get_selected_rows()
-        if is_only_one_item_selected(paths, self.__main_window):
-            name = model[paths][16]
-            bouquets_names = get_bouquets_names(self.__bouquets_model)
-            
-            if name not in bouquets_names:
-                services = [BouquetService(None, BqServiceType.DEFAULT, row[18], 0)
-                            for row in self.__services_model if row[16] == name]
-                bq = Bouquet(name=name, type="tv", services=services, locked=None, hidden=None)
-                self.append_bouquet(bq, self.__bouquets_model.get_iter(0))
-                self.__bouquets_view.expand_row(Gtk.TreePath(0), 0)
+        self.create_bouquets(BqGenType.SAT)
 
     def on_create_bouquet_for_each_satellite(self, item):
-        pass
+        self.create_bouquets(BqGenType.EACH_SAT)
 
     def on_create_bouquet_for_current_package(self, item):
-        pass
+        self.create_bouquets(BqGenType.PACKAGE)
 
     def on_create_bouquet_for_each_package(self, item):
-        pass
+        self.create_bouquets(BqGenType.EACH_PACKAGE)
+
+    def create_bouquets(self, g_type):
+        bqs = get_gen_bouquets(self.__services_view, self.__bouquets_model, self.__main_window, g_type, self._TV_TYPES)
+        for bq in bqs:
+            self.append_bouquet(bq, self.__bouquets_model.get_iter(0))
+        if bqs:
+            self.__bouquets_view.expand_row(Gtk.TreePath(0), 0)
 
 
 def start_app():

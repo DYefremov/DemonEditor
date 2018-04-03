@@ -7,7 +7,7 @@ import shutil
 from gi.repository import GdkPixbuf
 
 from app.eparser import Service
-from app.eparser.ecommons import Flag
+from app.eparser.ecommons import Flag, BouquetService, Bouquet
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
@@ -18,6 +18,14 @@ class ViewTarget(Enum):
     BOUQUET = 0
     FAV = 1
     SERVICES = 2
+
+
+class BqGenType(Enum):
+    """  Bouquet generation type """
+    SAT = 0
+    EACH_SAT = 1
+    PACKAGE = 2
+    EACH_PACKAGE = 3
 
 
 # ***************** Markers *******************#
@@ -411,6 +419,48 @@ def get_picon_pixbuf(path):
     return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=path, width=32, height=32, preserve_aspect_ratio=True)
 
 
+# ***************** Bouquets *********************#
+
+def get_gen_bouquets(view, bqs_model, transient, gen_type, tv_types):
+    """ Auto-generates and returns list of bouquets """
+    bqs = []
+    model, paths = view.get_selection().get_selected_rows()
+    if is_only_one_item_selected(paths, transient):
+        model = get_base_model(model)
+        service = Service(*model[paths][:])
+        fav_id_index = service.index(service.fav_id)
+        name = service.package
+        index = service.index(service.package)
+        if gen_type is BqGenType.EACH_PACKAGE:
+            pass
+        elif gen_type is BqGenType.SAT:
+            name = service.pos
+            index = service.index(service.pos)
+        elif gen_type is BqGenType.EACH_SAT:
+            pass
+        bouquets_names = get_bouquets_names(bqs_model)
+
+        if name not in bouquets_names:
+            services = [BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0)
+                        for row in model if row[index] == name]
+            bqs.append(Bouquet(name=name, type="tv", services=services, locked=None, hidden=None))
+
+    return bqs
+
+
+def get_bouquets_names(model):
+    """ Returns all current bouquets names """
+    bouquets_names = []
+    for row in model:
+        itr = row.iter
+        if model.iter_has_child(itr):
+            num_of_children = model.iter_n_children(itr)
+            for num in range(num_of_children):
+                child_itr = model.iter_nth_child(itr, num)
+                bouquets_names.append(model[child_itr][0])
+    return bouquets_names
+
+
 # ***************** Others *********************#
 
 def update_entry_data(entry, dialog, options):
@@ -427,19 +477,6 @@ def get_base_model(model):
     if type(model) is Gtk.TreeModelSort:
         return model.get_model().get_model()
     return model
-
-
-def get_bouquets_names(model):
-    """ Returns all current bouquets names """
-    bouquets_names = []
-    for row in model:
-        itr = row.iter
-        if model.iter_has_child(itr):
-            num_of_children = model.iter_n_children(itr)
-            for num in range(num_of_children):
-                child_itr = model.iter_nth_child(itr, num)
-                bouquets_names.append(model[child_itr][0])
-    return bouquets_names
 
 
 if __name__ == "__main__":
