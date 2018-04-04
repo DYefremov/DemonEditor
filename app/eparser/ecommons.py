@@ -27,11 +27,19 @@ Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarizati
                                          "system", "modulation", "pls_mode", "pls_code", "is_id"])
 
 
-class Type(Enum):
-    """ Types of DVB transponders """
+class TrType(Enum):
+    """ Transponders type """
     Satellite = "s"
     Terestrial = "t"
     Cable = "c"
+
+
+class BqType(Enum):
+    """ Bouquet type"""
+    BOUQUET = "bouquet"
+    TV = "tv"
+    RADIO = "radio"
+    WEBTV = "webtv"
 
 
 class Flag(Enum):

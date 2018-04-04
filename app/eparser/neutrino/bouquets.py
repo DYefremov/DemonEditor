@@ -1,22 +1,15 @@
 import os
-from enum import Enum
 from xml.dom.minidom import parse, Document
 
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
 from app.ui import LOCKED_ICON, HIDE_ICON
-from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER
+from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER, BqType
 
 _FILE = "bouquets.xml"
 _U_FILE = "ubouquets.xml"
 _W_FILE = "webtv.xml"
 
 _COMMENT = " File was created in DemonEditor. Enjoy watching! "
-
-
-class BqType(Enum):
-    BOUQUET = "bouquet"
-    TV = "tv"
-    WEBTV = "webtv"
 
 
 def get_bouquets(path):

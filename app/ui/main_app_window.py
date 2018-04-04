@@ -4,7 +4,7 @@ from functools import lru_cache
 
 import shutil
 
-from app.commons import run_idle, log
+from app.commons import run_idle, log, run_task
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
@@ -18,7 +18,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, get_gen_bouquets, BqGenType
+    is_only_one_item_selected, gen_bouquets, BqGenType
 from .picons_dialog import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -1011,12 +1011,10 @@ class MainAppWindow:
     def on_create_bouquet_for_each_package(self, item):
         self.create_bouquets(BqGenType.EACH_PACKAGE)
 
+    @run_task
     def create_bouquets(self, g_type):
-        bqs = get_gen_bouquets(self.__services_view, self.__bouquets_model, self.__main_window, g_type, self._TV_TYPES)
-        for bq in bqs:
-            self.append_bouquet(bq, self.__bouquets_model.get_iter(0))
-        if bqs:
-            self.__bouquets_view.expand_row(Gtk.TreePath(0), 0)
+        gen_bouquets(self.__services_view, self.__bouquets_view, self.__main_window, g_type, self._TV_TYPES,
+                     Profile(self.__profile), self.append_bouquet)
 
 
 def start_app():

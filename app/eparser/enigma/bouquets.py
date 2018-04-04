@@ -1,12 +1,13 @@
 """ Module for parsing bouquets """
-from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet
+from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet, BqType
 
 _TV_ROOT_FILE_NAME = "bouquets.tv"
 _RADIO_ROOT_FILE_NAME = "bouquets.radio"
 
 
 def get_bouquets(path):
-    return parse_bouquets(path, "bouquets.tv", "tv"), parse_bouquets(path, "bouquets.radio", "radio")
+    return parse_bouquets(path, "bouquets.tv", BqType.TV.value), parse_bouquets(path, "bouquets.radio",
+                                                                                BqType.RADIO.value)
 
 
 def write_bouquets(path, bouquets):

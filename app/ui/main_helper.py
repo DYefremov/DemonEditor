@@ -1,14 +1,13 @@
 """ This is helper module for ui """
-from enum import Enum
-
 import os
-
 import shutil
+from enum import Enum
 from gi.repository import GdkPixbuf
 
 from app.eparser import Service
-from app.eparser.ecommons import Flag, BouquetService, Bouquet
+from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
+from app.properties import Profile
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 
@@ -421,31 +420,37 @@ def get_picon_pixbuf(path):
 
 # ***************** Bouquets *********************#
 
-def get_gen_bouquets(view, bqs_model, transient, gen_type, tv_types):
-    """ Auto-generates and returns list of bouquets """
-    bqs = []
+def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback):
+    """ Auto-generate and append list of bouquets """
+    fav_id_index = 18
+    index = 6 if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE) else 16
     model, paths = view.get_selection().get_selected_rows()
-    if is_only_one_item_selected(paths, transient):
-        model = get_base_model(model)
+    model = get_base_model(model)
+    bq_type = BqType.BOUQUET.value if profile is Profile.NEUTRINO_MP else BqType.TV.value
+    if gen_type is BqGenType.SAT or gen_type is BqGenType.PACKAGE:
+        if not is_only_one_item_selected(paths, transient):
+            return
         service = Service(*model[paths][:])
-        fav_id_index = service.index(service.fav_id)
-        name = service.package
-        index = service.index(service.package)
-        if gen_type is BqGenType.EACH_PACKAGE:
-            pass
-        elif gen_type is BqGenType.SAT:
-            name = service.pos
-            index = service.index(service.pos)
-        elif gen_type is BqGenType.EACH_SAT:
-            pass
-        bouquets_names = get_bouquets_names(bqs_model)
+        if service.service_type not in tv_types:
+            bq_type = BqType.RADIO.value
+        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
+                        [service.package if gen_type is BqGenType.PACKAGE else service.pos])
+    if gen_type is BqGenType.EACH_PACKAGE:
+        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, {row[index] for row in model})
+    elif gen_type is BqGenType.EACH_SAT:
+        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, {row[index] for row in model})
 
+
+def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names):
+    bq_view.expand_row(Gtk.TreePath(0), 0)
+    bqs_model = bq_view.get_model()
+    bouquets_names = get_bouquets_names(bqs_model)
+    for pos, name in enumerate(sorted(names)):
         if name not in bouquets_names:
             services = [BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0)
                         for row in model if row[index] == name]
-            bqs.append(Bouquet(name=name, type="tv", services=services, locked=None, hidden=None))
-
-    return bqs
+            callback(Bouquet(name=name, type=bq_type, services=services, locked=None, hidden=None),
+                     bqs_model.get_iter(0))
 
 
 def get_bouquets_names(model):

@@ -142,6 +142,16 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-select-all</property>
   </object>
+  <object class="GtkImage" id="image8">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-save</property>
+  </object>
+  <object class="GtkImage" id="image9">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-select-all</property>
+  </object>
   <object class="GtkImage" id="insert_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -238,6 +248,27 @@
                 <property name="image">image7</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_create_bouquet_for_each_package" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_bouquet_separator_2">
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_type_popup_item">
+                <property name="label" translatable="yes">For current type</property>
+                <property name="can_focus">False</property>
+                <property name="image">image8</property>
+                <property name="use_stock">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_type_popup_item">
+                <property name="label" translatable="yes">For each type</property>
+                <property name="can_focus">False</property>
+                <property name="image">image9</property>
+                <property name="use_stock">False</property>
               </object>
             </child>
           </object>
