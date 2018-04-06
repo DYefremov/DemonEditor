@@ -315,6 +315,7 @@ class MainAppWindow:
                 self._fav_model.remove(itr)
         self.update_fav_num_column(model)
 
+    @run_idle
     def delete_services(self, bq_selected, itrs, model, rows):
         """ Deleting services """
         srv_itrs = [self._services_model_filter.convert_iter_to_child_iter(
@@ -322,6 +323,7 @@ class MainAppWindow:
         for s_itr in srv_itrs:
             self._services_model.remove(s_itr)
 
+        srv_ids_to_delete = set()
         for row in rows:
             # There are channels with the same parameters except for the name.
             # None because it can have duplicates! Need fix
@@ -331,11 +333,12 @@ class MainAppWindow:
                 if services:
                     with suppress(ValueError):
                         services.remove(fav_id)
+                        srv_ids_to_delete.add(fav_id)
             self._services.pop(fav_id, None)
-        self._fav_model.clear()
 
-        if bq_selected:
-            self.update_bouquet_services(self._fav_model, None, bq_selected)
+        for f_itr in filter(lambda r: r[7] in srv_ids_to_delete, self._fav_model):
+            self._fav_model.remove(f_itr.iter)
+        self.update_fav_num_column(self._fav_model)
 
     def delete_bouquets(self, itrs, model, bouquet):
         """ Deleting bouquets """
