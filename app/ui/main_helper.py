@@ -4,6 +4,7 @@ import shutil
 from enum import Enum
 from gi.repository import GdkPixbuf
 
+from app.commons import run_idle, run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
@@ -25,6 +26,8 @@ class BqGenType(Enum):
     EACH_SAT = 1
     PACKAGE = 2
     EACH_PACKAGE = 3
+    TYPE = 4
+    EACH_TYPE = 5
 
 
 # ***************** Markers *******************#
@@ -423,24 +426,25 @@ def get_picon_pixbuf(path):
 def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback):
     """ Auto-generate and append list of bouquets """
     fav_id_index = 18
-    index = 6 if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE) else 16
+    index = 6 if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE) else 16 if gen_type in (
+        BqGenType.SAT, BqGenType.EACH_SAT) else 7
     model, paths = view.get_selection().get_selected_rows()
     model = get_base_model(model)
     bq_type = BqType.BOUQUET.value if profile is Profile.NEUTRINO_MP else BqType.TV.value
-    if gen_type is BqGenType.SAT or gen_type is BqGenType.PACKAGE:
+    if gen_type in (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE):
         if not is_only_one_item_selected(paths, transient):
             return
         service = Service(*model[paths][:])
         if service.service_type not in tv_types:
             bq_type = BqType.RADIO.value
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
-                        [service.package if gen_type is BqGenType.PACKAGE else service.pos])
-    if gen_type is BqGenType.EACH_PACKAGE:
-        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, {row[index] for row in model})
-    elif gen_type is BqGenType.EACH_SAT:
+                        [service.package if gen_type is BqGenType.PACKAGE else
+                         service.pos if gen_type is BqGenType.SAT else service.service_type])
+    else:
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, {row[index] for row in model})
 
 
+@run_task
 def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names):
     bq_view.expand_row(Gtk.TreePath(0), 0)
     bqs_model = bq_view.get_model()

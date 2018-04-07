@@ -4,7 +4,7 @@ from functools import lru_cache
 
 import shutil
 
-from app.commons import run_idle, log, run_task
+from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
@@ -121,7 +121,9 @@ class MainAppWindow:
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
                     "on_create_bouquet_for_each_satellite": self.on_create_bouquet_for_each_satellite,
                     "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
-                    "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package}
+                    "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package,
+                    "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
+                    "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
 
         self._options = get_config()
         self._profile = self._options.get("profile")
@@ -1021,7 +1023,12 @@ class MainAppWindow:
     def on_create_bouquet_for_each_package(self, item):
         self.create_bouquets(BqGenType.EACH_PACKAGE)
 
-    @run_task
+    def on_create_bouquet_for_current_type(self, item):
+        self.create_bouquets(BqGenType.TYPE)
+
+    def on_create_bouquet_for_each_type(self, item):
+        self.create_bouquets(BqGenType.EACH_TYPE)
+
     def create_bouquets(self, g_type):
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
                      Profile(self._profile), self.append_bouquet)

@@ -120,7 +120,7 @@
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-save</property>
+    <property name="stock">gtk-save-as</property>
   </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
@@ -135,7 +135,7 @@
   <object class="GtkImage" id="image6">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-save</property>
+    <property name="stock">gtk-save-as</property>
   </object>
   <object class="GtkImage" id="image7">
     <property name="visible">True</property>
@@ -145,7 +145,7 @@
   <object class="GtkImage" id="image8">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-save</property>
+    <property name="stock">gtk-save-as</property>
   </object>
   <object class="GtkImage" id="image9">
     <property name="visible">True</property>
@@ -215,13 +215,23 @@
               </object>
             </child>
             <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_sat_popup_item">
-                <property name="label" translatable="yes">For each satellite</property>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_package_popup_item">
+                <property name="label" translatable="yes">For current package</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="image">image4</property>
+                <property name="image">image6</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_satellite" swapped="no"/>
+                <signal name="activate" handler="on_create_bouquet_for_current_package" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_type_popup_item">
+                <property name="label" translatable="yes">For current type</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">image8</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_type" swapped="no"/>
               </object>
             </child>
             <child>
@@ -231,13 +241,13 @@
               </object>
             </child>
             <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_package_popup_item">
-                <property name="label" translatable="yes">For current package</property>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_sat_popup_item">
+                <property name="label" translatable="yes">For each satellite</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="image">image6</property>
+                <property name="image">image4</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_package" swapped="no"/>
+                <signal name="activate" handler="on_create_bouquet_for_each_satellite" swapped="no"/>
               </object>
             </child>
             <child>
@@ -251,27 +261,13 @@
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="services_bouquet_separator_2">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_type_popup_item">
-                <property name="label" translatable="yes">For current type</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">image8</property>
-                <property name="use_stock">False</property>
-              </object>
-            </child>
-            <child>
               <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_type_popup_item">
                 <property name="label" translatable="yes">For each type</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="image">image9</property>
                 <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_type" swapped="no"/>
               </object>
             </child>
           </object>
