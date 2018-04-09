@@ -194,7 +194,7 @@
     </child>
     <child>
       <object class="GtkImageMenuItem" id="services_create_bouquet_popup_item">
-        <property name="label">Create bouquet</property>
+        <property name="label" translatable="yes">Create bouquet</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
         <property name="can_focus">False</property>

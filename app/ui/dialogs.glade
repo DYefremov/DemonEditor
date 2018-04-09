@@ -1797,7 +1797,7 @@ dmitry.v.yefremov@gmail.com
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label21">
+              <object class="GtkLabel" id="wait_dialog_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Loading data...</property>

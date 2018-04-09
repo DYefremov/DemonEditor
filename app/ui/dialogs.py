@@ -21,10 +21,12 @@ class DialogType(Enum):
 
 
 class WaitDialog:
-    def __init__(self, transient):
+    def __init__(self, transient, text=None):
         builder, dialog = get_dialog_from_xml(DialogType.WAIT, transient)
         self._dialog = dialog
         self._dialog.set_transient_for(transient)
+        if text is not None:
+            builder.get_object("wait_dialog_label").set_text(text)
 
     def show(self):
         self._dialog.show()
@@ -32,6 +34,10 @@ class WaitDialog:
     @run_idle
     def hide(self):
         self._dialog.hide()
+
+    @run_idle
+    def destroy(self):
+        self._dialog.destroy()
 
 
 def show_dialog(dialog_type: DialogType, transient, text=None, options=None, action_type=None, file_filter=None):

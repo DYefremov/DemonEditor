@@ -85,9 +85,6 @@ msgstr "Пропустить"
 msgid "Hide/Skip On/Off     Ctrl + H"
 msgstr "Скрыть/Пропустить Вкл/Выкл     Ctrl + H"
 
-msgid "IPTV"
-msgstr ""
-
 msgid "Add IPTV or stream service"
 msgstr "Добавить IPTV или поток"
 
@@ -115,14 +112,32 @@ msgstr "Новый"
 msgid "New bouquet"
 msgstr "Новый букет"
 
+msgid "Create bouquet"
+msgstr "Создать букет"
+
+msgid "For current satellite"
+msgstr "Для текущего спутника"
+
+msgid "For current package"
+msgstr "Для текущего пакета"
+
+msgid "For current type"
+msgstr "Для текущего типа"
+
+msgid "For each satellite"
+msgstr "Для каждого спутника"
+
+msgid "For each package"
+msgstr "Для каждого пакета"
+
+msgid "For each type"
+msgstr "Для каждого типа"
+
 msgid "Open"
 msgstr "Открыть"
 
 msgid "Parent lock On/Off     Ctrl + L"
 msgstr "Родительский замок Вкл/Выкл     Ctrl + L"
-
-msgid "Paste"
-msgstr ""
 
 msgid "Picons"
 msgstr "Пиконы"
@@ -159,9 +174,6 @@ msgstr "Фильтр сервисов"
 
 msgid "Settings"
 msgstr "Настройки"
-
-msgid "TV"
-msgstr ""
 
 msgid "Up"
 msgstr "Переместить вверх"
