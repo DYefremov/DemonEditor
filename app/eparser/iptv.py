@@ -7,7 +7,7 @@ from .ecommons import BqServiceType, Service
 
 # url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group
 NEUTRINO_FAV_ID_FORMAT = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}"
-ENIGMA2_FAV_ID_FORMAT = " {}:0:{}:{}:{}:{}:{}:0:0:0:{}:{}\n#DESCRIPTION: {}\n"
+ENIGMA2_FAV_ID_FORMAT = " {}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION: {}\n"
 
 
 class StreamType(Enum):

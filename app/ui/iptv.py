@@ -11,6 +11,7 @@ from .main_helper import get_base_model
 
 class IptvDialog:
     _DIGIT_ENTRY_NAME = "digit-entry"
+    _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 
     def __init__(self, transient, view, services, bouquet, profile=Profile.ENIGMA_2, action=Action.ADD):
         handlers = {"on_entry_changed": self.on_entry_changed,
@@ -97,10 +98,10 @@ class IptvDialog:
             return
         self._stream_type_combobox.set_active(0 if StreamType(data[0].strip()) is StreamType.DVB_TS else 1)
         self._srv_type_entry.set_text(data[2])
-        self._sid_entry.set_text(data[3])
-        self._tr_id_entry.set_text(data[4])
-        self._net_id_entry.set_text(data[5])
-        self._namespace_entry.set_text(data[6])
+        self._sid_entry.set_text(str(int(data[3], 16)))
+        self._tr_id_entry.set_text(str(int(data[4], 16)))
+        self._net_id_entry.set_text(str(int(data[5], 16)))
+        self._namespace_entry.set_text(str(int(data[6], 16)))
         self._url_entry.set_text(data[10].replace("%3a", ":"))
         self._update_reference_entry()
 
@@ -111,12 +112,12 @@ class IptvDialog:
 
     def _update_reference_entry(self):
         if self._profile is Profile.ENIGMA_2:
-            self._reference_entry.set_text("{}:0:{}:{}:{}:{}:{}:0:0:0".format(self.get_type(),
-                                                                              self._srv_type_entry.get_text(),
-                                                                              self._sid_entry.get_text(),
-                                                                              self._tr_id_entry.get_text(),
-                                                                              self._net_id_entry.get_text(),
-                                                                              self._namespace_entry.get_text()))
+            self._reference_entry.set_text(self._ENIGMA2_REFERENCE.format(self.get_type(),
+                                                                          self._srv_type_entry.get_text(),
+                                                                          int(self._sid_entry.get_text()),
+                                                                          int(self._tr_id_entry.get_text()),
+                                                                          int(self._net_id_entry.get_text()),
+                                                                          int(self._namespace_entry.get_text())))
 
     def get_type(self):
         return 1 if self._stream_type_combobox.get_active() == 0 else 4097
@@ -139,10 +140,10 @@ class IptvDialog:
         name = self._name_entry.get_text().strip()
         fav_id = ENIGMA2_FAV_ID_FORMAT.format(self.get_type(),
                                               self._srv_type_entry.get_text(),
-                                              self._sid_entry.get_text(),
-                                              self._tr_id_entry.get_text(),
-                                              self._net_id_entry.get_text(),
-                                              self._namespace_entry.get_text(),
+                                              int(self._sid_entry.get_text()),
+                                              int(self._tr_id_entry.get_text()),
+                                              int(self._net_id_entry.get_text()),
+                                              int(self._namespace_entry.get_text()),
                                               self._url_entry.get_text().replace(":", "%3a"),
                                               name, name)
         self.update_bouquet_data(name, fav_id)
