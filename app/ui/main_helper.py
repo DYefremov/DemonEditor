@@ -449,7 +449,8 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback
 
 @run_task
 def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names, profile, wait_dialog=None):
-    bq_view.expand_row(Gtk.TreePath(0), 0)
+    bq_index = 0 if profile is Profile.ENIGMA_2 else 1
+    bq_view.expand_row(Gtk.TreePath(bq_index), 0)
     bqs_model = bq_view.get_model()
     bouquets_names = get_bouquets_names(bqs_model)
 
@@ -458,7 +459,7 @@ def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, name
             services = [BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0)
                         for row in model if row[index] == name]
             callback(Bouquet(name=name, type=bq_type, services=services, locked=None, hidden=None),
-                     bqs_model.get_iter(0))
+                     bqs_model.get_iter(bq_index))
 
     if wait_dialog is not None:
         wait_dialog.destroy()
