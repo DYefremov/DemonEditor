@@ -246,10 +246,8 @@ class MainAppWindow:
     def on_paste(self, view):
         selection = view.get_selection()
         dest_index = 0
-        bq_selected = self.get_selected_bouquet()
-
+        bq_selected = self.check_bouquet_selection()
         if not bq_selected:
-            show_dialog(DialogType.ERROR, self._main_window, "Error. No bouquet is selected!")
             return
 
         fav_bouquet = self._bouquets[bq_selected]
@@ -440,10 +438,8 @@ class MainAppWindow:
 
     def receive_selection(self, *, view, drop_info, data):
         """  Update fav view  after data received  """
-        bq_selected = self.get_selected_bouquet()
-
+        bq_selected = self.check_bouquet_selection()
         if not bq_selected:
-            show_dialog(DialogType.ERROR, self._main_window, "Error. No bouquet is selected!")
             return
 
         model = get_base_model(view.get_model())
@@ -685,6 +681,20 @@ class MainAppWindow:
                 self._fav_model.append((num + 1, service.coded, service.service, service.locked,
                                         service.hide, service.service_type, service.pos, service.fav_id,
                                         self._picons.get(service.picon_id, None)))
+
+    def check_bouquet_selection(self):
+        """ checks and returns bouquet if selected """
+        bq_selected = self.get_selected_bouquet()
+
+        if not bq_selected:
+            show_dialog(DialogType.ERROR, self._main_window, "Error. No bouquet is selected!")
+            return
+
+        if Profile(self._profile) is Profile.NEUTRINO_MP and bq_selected.endswith(BqType.WEBTV.value):
+            show_dialog(DialogType.ERROR, self._main_window, "Operation not allowed in this context!")
+            return
+
+        return bq_selected
 
     def get_selected_bouquet(self):
         """  returns 'name:type' of last selected bouquet or False  """

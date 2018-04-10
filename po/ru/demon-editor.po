@@ -465,6 +465,9 @@ msgstr "Не выбран файл satellites.xml!"
 msgid "Error. Verify the data!"
 msgstr "Ошибка. Проверьте данные!"
 
+msgid "Operation not allowed in this context!"
+msgstr "Недопустимая операция в данном контексте!"
+
 
 
 
