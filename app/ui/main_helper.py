@@ -10,7 +10,7 @@ from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.properties import Profile
 from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
-from .dialogs import show_dialog, DialogType, get_chooser_dialog
+from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
 
 class ViewTarget(Enum):
@@ -439,22 +439,29 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback
             bq_type = BqType.RADIO.value
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
                         [service.package if gen_type is BqGenType.PACKAGE else
-                         service.pos if gen_type is BqGenType.SAT else service.service_type])
+                         service.pos if gen_type is BqGenType.SAT else service.service_type], profile)
     else:
-        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, {row[index] for row in model})
+        wait_dialog = WaitDialog(transient)
+        wait_dialog.show()
+        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
+                        {row[index] for row in model}, profile, wait_dialog)
 
 
 @run_task
-def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names):
+def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names, profile, wait_dialog=None):
     bq_view.expand_row(Gtk.TreePath(0), 0)
     bqs_model = bq_view.get_model()
     bouquets_names = get_bouquets_names(bqs_model)
+
     for pos, name in enumerate(sorted(names)):
         if name not in bouquets_names:
             services = [BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0)
                         for row in model if row[index] == name]
             callback(Bouquet(name=name, type=bq_type, services=services, locked=None, hidden=None),
                      bqs_model.get_iter(0))
+
+    if wait_dialog is not None:
+        wait_dialog.destroy()
 
 
 def get_bouquets_names(model):

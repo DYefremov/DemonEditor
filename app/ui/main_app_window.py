@@ -982,6 +982,7 @@ class MainAppWindow:
             dialog = ServiceDetailsDialog(self._main_window,
                                           self._options,
                                           self._services_view,
+                                          self._fav_view,
                                           self._services,
                                           self._bouquets)
             dialog.show()
@@ -990,6 +991,7 @@ class MainAppWindow:
         dialog = ServiceDetailsDialog(self._main_window,
                                       self._options,
                                       self._services_view,
+                                      self._fav_view,
                                       self._services,
                                       self._bouquets,
                                       action=Action.ADD)

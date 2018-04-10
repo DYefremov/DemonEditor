@@ -6,7 +6,7 @@ from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE
 from app.properties import Profile
-from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN
+from . import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON
 from .dialogs import show_dialog, DialogType, Action
 from .main_helper import get_base_model
 
@@ -31,7 +31,7 @@ class ServiceDetailsDialog:
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
-    def __init__(self, transient, options, view, services, bouquets, action=Action.EDIT):
+    def __init__(self, transient, options, srv_view, fav_view, services, bouquets, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
@@ -52,7 +52,8 @@ class ServiceDetailsDialog:
         self._profile = Profile(options["profile"])
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
         self._picons_dir_path = options.get(self._profile.value)["picons_dir_path"]
-        self._services_view = view
+        self._services_view = srv_view
+        self._fav_view = fav_view
         self._action = action
         self._old_service = None
         self._services = services
@@ -343,6 +344,7 @@ class ServiceDetailsDialog:
         if self._old_service.picon_id != service.picon_id:
             self.update_picon_name(self._old_service.picon_id, service.picon_id)
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
+        self.update_fav_view(self._old_service, service)
         self._old_service = service
 
     def update_bouquets(self, fav_id, old_fav_id):
@@ -354,6 +356,19 @@ class ServiceDetailsDialog:
                     indexes.append(i)
             for i in indexes:
                 bq[i] = fav_id
+
+    @run_idle
+    def update_fav_view(self, old_service, new_service):
+        model = self._fav_view.get_model()
+        for row in filter(lambda r: old_service.fav_id == r[7], model):
+            model.set(row.iter, {1: new_service.coded,
+                                 2: new_service.service,
+                                 3: new_service.locked,
+                                 4: new_service.hide,
+                                 5: new_service.service_type,
+                                 6: new_service.pos,
+                                 7: new_service.fav_id,
+                                 8: new_service.picon})
 
     def update_picon_name(self, old_name, new_name):
         for file_name in os.listdir(self._picons_dir_path):
@@ -372,7 +387,7 @@ class ServiceDetailsDialog:
         freq, rate, pol, fec, system, pos = self.get_transponder_values()
         return Service(flags_cas=self.get_flags(),
                        transponder_type="s",
-                       coded=self._old_service.coded,
+                       coded=CODED_ICON if self._cas_entry.get_text() else None,
                        service=self._name_entry.get_text(),
                        locked=self._old_service.locked,
                        hide=HIDE_ICON if self._hide_check_button.get_active() else None,
