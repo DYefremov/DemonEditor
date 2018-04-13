@@ -129,6 +129,8 @@ class SatellitesDialog:
             move_items(key, self._sat_view)
         elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
             move_items(key, self._sat_view)
+        elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
+            view.do_unselect_all(view)
 
     @run_idle
     def on_satellites_list_load(self, model):

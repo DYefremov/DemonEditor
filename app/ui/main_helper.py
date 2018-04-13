@@ -4,7 +4,7 @@ import shutil
 from enum import Enum
 from gi.repository import GdkPixbuf
 
-from app.commons import run_idle, run_task
+from app.commons import run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
@@ -82,6 +82,15 @@ def move_items(key, view):
     model, paths = selection.get_selected_rows()
 
     if paths:
+        # grouping the scattered rows
+        if len(paths) > 1:
+            top_iter = model.get_iter(paths[0])
+            for i in range(1, len(paths)):
+                itr = model.get_iter(paths[i])
+                model.move_after(itr, top_iter)
+                top_iter = itr
+
+            model, paths = selection.get_selected_rows()
         # for correct down move!
         if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
             paths = reversed(paths)
@@ -89,21 +98,13 @@ def move_items(key, view):
         for path in paths:
             itr = model.get_iter(path)
             if key == Gdk.KEY_Down:
-                next_itr = model.iter_next(itr)
-                if next_itr:
-                    model.move_after(itr, next_itr)
+                model.move_after(itr, model.iter_next(itr))
             elif key == Gdk.KEY_Up:
-                prev_itr = model.iter_previous(itr)
-                if prev_itr:
-                    model.move_before(itr, prev_itr)
+                model.move_before(itr, model.iter_previous(itr))
             elif key == Gdk.KEY_Page_Up or key == Gdk.KEY_KP_Page_Up:
-                up_itr = model.get_iter(view.get_cursor()[0])
-                if up_itr:
-                    model.move_before(itr, up_itr)
+                model.move_before(itr, model.get_iter(view.get_cursor()[0]))
             elif key == Gdk.KEY_Page_Down or key == Gdk.KEY_KP_Page_Down:
-                down_itr = model.get_iter(view.get_cursor()[0])
-                if down_itr:
-                    model.move_after(itr, down_itr)
+                model.move_after(itr, model.get_iter(view.get_cursor()[0]))
 
 
 # ***************** Rename *******************#
