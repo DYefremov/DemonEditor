@@ -75,6 +75,9 @@ def move_items(key, view: Gtk.TreeView):
             if parent_paths:
                 paths = parent_paths
                 min_path = model.get_path(model.get_iter_first())
+                view.collapse_all()
+                if mod_length == len(paths):
+                    return
             else:
                 if not is_some_level(paths):
                     return
@@ -86,9 +89,6 @@ def move_items(key, view: Gtk.TreeView):
                 min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
                 max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
                 is_tree_store = True
-
-        if mod_length == len(paths):
-            return
 
         if key == Gdk.KEY_Up:
             top_path = Gtk.TreePath(paths[0])
