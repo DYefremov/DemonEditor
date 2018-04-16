@@ -3,7 +3,7 @@ import locale
 from enum import Enum
 
 from app.commons import run_idle
-from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
 class Action(Enum):

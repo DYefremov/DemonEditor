@@ -3,7 +3,7 @@ from math import fabs
 
 from app.commons import run_idle
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
-from . import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, WaitDialog
 from .main_helper import move_items, scroll_to
 
@@ -125,9 +125,7 @@ class SatellitesDialog:
             self.on_transponder()
         elif key == Gdk.KEY_space:
             pass
-        elif ctrl and key in (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up):  # KEY_KP_Page_Up for laptop!
-            move_items(key, self._sat_view)
-        elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
+        elif ctrl and key in _MOVE_KEYS:
             move_items(key, self._sat_view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)

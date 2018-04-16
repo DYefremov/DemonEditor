@@ -9,7 +9,7 @@ from app.commons import run_idle, run_task
 from app.ftp import upload_data, DownloadDataType
 from app.picons.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
-from . import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data
 

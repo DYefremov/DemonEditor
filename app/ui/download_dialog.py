@@ -1,7 +1,7 @@
 from app.commons import run_idle, run_task
 from app.ftp import download_data, DownloadDataType, upload_data
 from app.properties import Profile
-from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, get_message
 
 

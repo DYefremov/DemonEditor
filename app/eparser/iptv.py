@@ -2,7 +2,7 @@
 from enum import Enum
 
 from app.properties import Profile
-from app.ui import IPTV_ICON
+from app.ui.uicommons import IPTV_ICON
 from .ecommons import BqServiceType, Service
 
 # url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group

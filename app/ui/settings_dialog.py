@@ -1,5 +1,5 @@
 from app.properties import write_config, Profile, get_default_settings
-from . import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .main_helper import update_entry_data
 
 

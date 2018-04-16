@@ -1,7 +1,6 @@
 """ This is helper module for ui """
 import os
 import shutil
-from enum import Enum
 from gi.repository import GdkPixbuf
 
 from app.commons import run_task
@@ -9,25 +8,8 @@ from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.properties import Profile
-from . import Gtk, Gdk, HIDE_ICON, LOCKED_ICON
+from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
-
-
-class ViewTarget(Enum):
-    """ Used for set target view """
-    BOUQUET = 0
-    FAV = 1
-    SERVICES = 2
-
-
-class BqGenType(Enum):
-    """  Bouquet generation type """
-    SAT = 0
-    EACH_SAT = 1
-    PACKAGE = 2
-    EACH_PACKAGE = 3
-    TYPE = 4
-    EACH_TYPE = 5
 
 
 # ***************** Markers *******************#
@@ -76,35 +58,81 @@ def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
 
 # ***************** Movement *******************#
 
-def move_items(key, view):
-    """ Move items in  tree view """
+def move_items(key, view: Gtk.TreeView):
+    """ Move items in the tree view """
     selection = view.get_selection()
     model, paths = selection.get_selected_rows()
 
     if paths:
-        # grouping the scattered rows
-        if len(paths) > 1:
-            top_iter = model.get_iter(paths[0])
-            for i in range(1, len(paths)):
-                itr = model.get_iter(paths[i])
-                model.move_after(itr, top_iter)
-                top_iter = itr
+        mod_length = len(model)
+        cursor_path = view.get_cursor()[0]
+        max_path = Gtk.TreePath.new_from_indices((mod_length,))
+        min_path = Gtk.TreePath.new_from_indices((0,))
+        is_tree_store = False
 
-            model, paths = selection.get_selected_rows()
-        # for correct down move!
-        if key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
-            paths = reversed(paths)
+        if type(model) is Gtk.TreeStore:
+            parent_paths = list(filter(lambda p: p.get_depth() == 1, paths))
+            if parent_paths:
+                paths = parent_paths
+                min_path = model.get_path(model.get_iter_first())
+            else:
+                if not is_some_level(paths):
+                    return
+                parent_itr = model.iter_parent(model.get_iter(paths[0]))
+                parent_index = model.get_path(parent_itr)
+                children_num = model.iter_n_children(parent_itr)
+                if key in (Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down, Gdk.KEY_End):
+                    children_num -= 1
+                min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
+                max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
+                is_tree_store = True
 
-        for path in paths:
-            itr = model.get_iter(path)
-            if key == Gdk.KEY_Down:
-                model.move_after(itr, model.iter_next(itr))
-            elif key == Gdk.KEY_Up:
-                model.move_before(itr, model.iter_previous(itr))
-            elif key == Gdk.KEY_Page_Up or key == Gdk.KEY_KP_Page_Up:
-                model.move_before(itr, model.get_iter(view.get_cursor()[0]))
-            elif key == Gdk.KEY_Page_Down or key == Gdk.KEY_KP_Page_Down:
-                model.move_after(itr, model.get_iter(view.get_cursor()[0]))
+        if mod_length == len(paths):
+            return
+
+        if key == Gdk.KEY_Up:
+            top_path = Gtk.TreePath(paths[0])
+            top_path.prev()
+            move_up(top_path, model, paths)
+        elif key == Gdk.KEY_Down:
+            down_path = Gtk.TreePath(paths[-1])
+            down_path.next()
+            if down_path < max_path:
+                move_down(down_path, model, paths)
+            else:
+                max_path.prev()
+                move_down(max_path, model, paths)
+        elif key in (Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up, Gdk.KEY_Home):
+            move_up(min_path if is_tree_store else cursor_path, model, paths)
+        elif key in (Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down, Gdk.KEY_End):
+            move_down(max_path if is_tree_store else cursor_path, model, paths)
+
+
+def move_up(top_path, model, paths):
+    top_iter = model.get_iter(top_path)
+    for path in paths:
+        itr = model.get_iter(path)
+        model.move_before(itr, top_iter)
+        top_path.next()
+        top_iter = model.get_iter(top_path)
+
+
+def move_down(down_path, model, paths):
+    top_iter = model.get_iter(down_path)
+    for path in reversed(paths):
+        itr = model.get_iter(path)
+        model.move_after(itr, top_iter)
+        down_path.prev()
+        top_iter = model.get_iter(down_path)
+
+
+def is_some_level(paths):
+    for i in range(1, len(paths)):
+        prev = paths[i - 1]
+        current = paths[i]
+        if len(prev) != len(current) or (len(prev) == 2 and len(current) == 2 and prev[0] != current[0]):
+            return
+    return True
 
 
 # ***************** Rename *******************#

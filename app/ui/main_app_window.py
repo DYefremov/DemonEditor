@@ -1,8 +1,8 @@
 import os
+import shutil
+
 from contextlib import suppress
 from functools import lru_cache
-
-import shutil
 
 from app.commons import run_idle, log
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
@@ -13,7 +13,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from .iptv import IptvDialog
 from .search import SearchProvider
-from . import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
@@ -228,10 +228,7 @@ class MainAppWindow:
         """ Move items in fav or bouquets tree view """
         if self._services_view.is_focus():
             return
-        elif self._fav_view.is_focus():
-            move_items(key, self._fav_view)
-        elif self._bouquets_view and key not in (Gdk.KEY_Page_Up, Gdk.KEY_Page_Down):
-            move_items(key, self._bouquets_view)
+        move_items(key, self._fav_view if self._fav_view.is_focus() else self._bouquets_view)
 
     def on_cut(self, view):
         for row in tuple(self.on_delete(view)):
@@ -736,9 +733,7 @@ class MainAppWindow:
 
         if key == Gdk.KEY_Delete:
             self.on_delete(view)
-        elif ctrl and key in (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up):  # KEY_KP_Page_Up for laptop!
-            self.move_items(key)
-        elif ctrl and key in (Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down):
+        elif ctrl and key in MOVE_KEYS:
             self.move_items(key)
         elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
             self.update_fav_num_column(model)

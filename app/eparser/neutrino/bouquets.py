@@ -2,7 +2,7 @@ import os
 from xml.dom.minidom import parse, Document
 
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
-from app.ui import LOCKED_ICON, HIDE_ICON
+from app.ui.uicommons import LOCKED_ICON, HIDE_ICON
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER, BqType
 
 _FILE = "bouquets.xml"

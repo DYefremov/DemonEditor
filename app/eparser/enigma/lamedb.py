@@ -4,7 +4,7 @@
      Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
 from app.commons import log
-from app.ui import CODED_ICON, LOCKED_ICON, HIDE_ICON
+from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
 from ..ecommons import Service, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, Flag
 
