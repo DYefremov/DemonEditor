@@ -61,11 +61,9 @@ class SatellitesParser(HTMLParser):
         request = requests.get(url=self._url, headers=self._HEADERS)
         reason = request.reason
         if reason == "OK":
-            print(reason)
             self.feed(request.text)
             if self._rows:
-                for num, sat in enumerate(filter(lambda x: all(x) and len(x) == 5, self._rows)):
-                    print(num + 1, sat)
+                return list(filter(lambda x: all(x) and len(x) == 5, self._rows))
         else:
             print(reason)
 
