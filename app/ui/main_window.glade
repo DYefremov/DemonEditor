@@ -122,6 +122,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-save-as</property>
   </object>
+  <object class="GtkImage" id="image10">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-goto-bottom</property>
+  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -794,8 +799,24 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="Picons loader">
-                        <property name="label" translatable="yes">Picons loader</property>
+                      <object class="GtkImageMenuItem" id="satellites_downloader_menu_item">
+                        <property name="label" translatable="yes">Satellites downloader</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="image">image10</property>
+                        <property name="use_stock">False</property>
+                        <signal name="activate" handler="on_satellites_downloader_show" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem" id="tools_separatormenuitem1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="picons_downloader_menu_item">
+                        <property name="label" translatable="yes">Picons downloader</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
@@ -805,7 +826,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkSeparatorMenuItem" id="menuitem5">
+                      <object class="GtkSeparatorMenuItem" id="tools_separatormenuitem2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                       </object>
@@ -2469,7 +2490,7 @@
               <object class="GtkLabel" id="ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label">Ver. 0.3.1 Pre-alpha</property>
+                <property name="label">Ver. 0.3.2 Pre-alpha</property>
                 <property name="xalign">0.94999998807907104</property>
               </object>
               <packing>

@@ -1,10 +1,10 @@
 import glob
 import os
+import re
 import shutil
+
 from collections import namedtuple
 from html.parser import HTMLParser
-
-import re
 
 from app.commons import log, run_task
 from app.properties import Profile

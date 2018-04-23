@@ -19,7 +19,8 @@ from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected, gen_bouquets, BqGenType
-from .picons_dialog import PiconsDialog
+from .tools.picons_downloader import PiconsDialog
+from .tools.satellites_downloader import SatellitesDownloaderDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
 from .service_details_dialog import ServiceDetailsDialog, Action
@@ -104,6 +105,7 @@ class MainAppWindow:
                     "on_fav_popup": self.on_fav_popup,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_picons_loader_show": self.on_picons_loader_show,
+                    "on_satellites_downloader_show": self.on_satellites_downloader_show,
                     "on_filter_changed": self.on_filter_changed,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
@@ -928,6 +930,10 @@ class MainAppWindow:
         dialog = PiconsDialog(self._main_window, self._options, ids, Profile(self._profile))
         dialog.show()
         self.update_picons()
+
+    @run_idle
+    def on_satellites_downloader_show(self, item):
+        SatellitesDownloaderDialog(self._main_window, self._options).show()
 
     @run_idle
     def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):

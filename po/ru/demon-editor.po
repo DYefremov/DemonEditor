@@ -142,8 +142,11 @@ msgstr "Родительский замок Вкл/Выкл     Ctrl + L"
 msgid "Picons"
 msgstr "Пиконы"
 
-msgid "Picons loader"
+msgid "Picons downloader"
 msgstr "Загрузчик пиконов"
+
+msgid "Satellites downloader"
+msgstr "Загрузчик спутников"
 
 msgid "Preferences"
 msgstr "Настройки"
