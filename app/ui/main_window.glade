@@ -122,11 +122,6 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-save-as</property>
   </object>
-  <object class="GtkImage" id="image10">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-goto-bottom</property>
-  </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -796,22 +791,6 @@
                         <property name="image">edit_select_all_image</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="on_satellite_editor_show" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="satellites_downloader_menu_item">
-                        <property name="label" translatable="yes">Satellites downloader</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="image">image10</property>
-                        <property name="use_stock">False</property>
-                        <signal name="activate" handler="on_satellites_downloader_show" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorMenuItem" id="tools_separatormenuitem1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                       </object>
                     </child>
                     <child>

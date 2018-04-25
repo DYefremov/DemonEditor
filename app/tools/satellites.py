@@ -5,9 +5,12 @@ import requests
 
 from html.parser import HTMLParser
 
+from app.commons import run_task
+from app.eparser import Satellite, Transponder
+
 
 class SatellitesParser(HTMLParser):
-    """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
+    """ Parser for satellite html page. """
 
     _HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/59.02"}
 
@@ -56,18 +59,65 @@ class SatellitesParser(HTMLParser):
     def error(self, message):
         pass
 
-    def get_satellites(self):
+    @run_task
+    def get_satellites(self, callback):
         self.reset()
         request = requests.get(url=self._url, headers=self._HEADERS)
         reason = request.reason
+        satellites = []
         if reason == "OK":
             self.feed(request.text)
             if self._rows:
-                return list(filter(lambda x: all(x) and len(x) == 5, self._rows))
+                for sat in list(filter(lambda x: all(x) and len(x) == 5, self._rows)):
+                    if callback(self.get_satellite(sat)):
+                        break
         else:
             print(reason)
 
+        return satellites
+
+    def get_satellite(self, sat):
+        pos = "".join(c for c in sat[2] if c.isdigit() or c.isalpha() or c == ".")
+        return Satellite(name=sat[1] + " ({})".format(pos),
+                         flags="0",
+                         position=self.get_position(pos.replace(".", "")),
+                         transponders=self.get_transponders(sat[0]))
+
+    def get_position(self, pos):
+        return "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
+
+    def get_transponders(self, sat_url):
+        self._rows.clear()
+        url = "https://www.flysat.com/" + sat_url
+        request = requests.get(url=url, headers=self._HEADERS)
+        reason = request.reason
+        trs = []
+        if reason == "OK":
+            self.feed(request.text)
+            if self._rows:
+                zeros = "000"
+                for r in self._rows:
+                    if len(r) < 3:
+                        continue
+                    data = r[2].split(" ")
+                    if len(data) != 2:
+                        continue
+                    sr, fec = data
+                    data = r[1].split(" ")
+                    if len(data) < 3:
+                        continue
+                    freq, pol, tr_type = data[0], data[1], data[2]
+                    tr_type = tr_type.split("/")
+                    if len(tr_type) != 2:
+                        continue
+                    tr_type, mod = tr_type
+                    mod = "QPSK" if tr_type == "DVB-S" else mod
+                    trs.append(Transponder(freq + zeros, sr + zeros, pol, fec, tr_type, mod, None, None, None))
+
+        return trs
+
 
 if __name__ == "__main__":
-    parser = SatellitesParser(url="https://www.flysat.com/satlist.php")
-    parser.get_satellites()
+    pass
+
+
