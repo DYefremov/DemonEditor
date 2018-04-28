@@ -50,7 +50,7 @@ class MainAppWindow:
                      "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
                      "fav_locate_popup_item", "fav_picon_popup_item", "fav_add_iptv_popup_item")
 
-    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_edit_marker_popup_item")
+    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
     _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_add_iptv_popup_item")
 
@@ -64,9 +64,9 @@ class MainAppWindow:
                          "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
                          "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                          "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                         "fav_edit_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
-                         "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
-                         "services_add_new_popup_item", "fav_add_iptv_popup_item", "copy_tool_button")
+                         "fav_edit_popup_item", "fav_locate_popup_item", "services_copy_popup_item",
+                         "services_picon_popup_item", "fav_picon_popup_item", "services_add_new_popup_item",
+                         "fav_add_iptv_popup_item", "copy_tool_button")
 
     def __init__(self):
         handlers = {"on_close_main_window": self.on_quit,
@@ -101,7 +101,7 @@ class MainAppWindow:
                     "on_import_m3u": self.on_import_m3u,
                     "on_insert_marker": self.on_insert_marker,
                     "on_edit_marker": self.on_edit_marker,
-                    "on_fav_popup": self.on_fav_popup,
+                    "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_picons_loader_show": self.on_picons_loader_show,
                     "on_filter_changed": self.on_filter_changed,
@@ -116,6 +116,7 @@ class MainAppWindow:
                     "on_service_edit": self.on_service_edit,
                     "on_services_add_new": self.on_services_add_new,
                     "on_iptv": self.on_iptv,
+                    "on_fav_iptv_mode": self.on_fav_iptv_mode,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
@@ -136,6 +137,7 @@ class MainAppWindow:
         self._picons = {}
         self._blacklist = set()
         self._current_bq_name = None
+        self._iptv_preview_mode = False
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -153,6 +155,7 @@ class MainAppWindow:
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._status_bar = builder.get_object("status_bar")
+        self._player_frame = builder.get_object("player_frame")
         self._profile_label = builder.get_object("profile_label")
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
@@ -166,7 +169,6 @@ class MainAppWindow:
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
-        self._fav_edit_marker_popup_item = builder.get_object("fav_edit_marker_popup_item")
         self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
@@ -900,6 +902,11 @@ class MainAppWindow:
         if response != Gtk.ResponseType.CANCEL:
             self.update_fav_num_column(self._fav_model)
 
+    @run_idle
+    def on_fav_iptv_mode(self, item):
+        self._iptv_preview_mode = item.get_active()
+        self._player_frame.set_visible(self._iptv_preview_mode)
+
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
         insert_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
@@ -908,11 +915,19 @@ class MainAppWindow:
     def on_edit_marker(self, view):
         edit_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
 
-    @run_idle
-    def on_fav_popup(self, view, event):
-        model, paths = view.get_selection().get_selected_rows()
-        self._fav_edit_marker_popup_item.set_sensitive(
-            len(paths) == 1 and model.get_value(model.get_iter(paths[0]), 5) == BqServiceType.MARKER.name)
+    def on_fav_press(self, menu, event):
+        event_type = event.get_event_type()
+        if event_type == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+            self.on_view_popup_menu(menu, event)
+        elif self._iptv_preview_mode and event_type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            path, column = self._fav_view.get_cursor()
+            if path:
+                row = self._fav_model[path][:]
+                if row[5] == BqServiceType.IPTV.value:
+                    self.test_iptv(row[7])
+
+    def test_iptv(self, fav_id):
+        print(fav_id)
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)

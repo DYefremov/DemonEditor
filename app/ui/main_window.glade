@@ -78,11 +78,6 @@
     <property name="can_focus">False</property>
     <property name="icon_name">emblem-downloads</property>
   </object>
-  <object class="GtkImage" id="edit_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-edit</property>
-  </object>
   <object class="GtkImage" id="edit_select_all_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -121,6 +116,11 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-save-as</property>
+  </object>
+  <object class="GtkImage" id="image10">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-transmit-receive</property>
   </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
@@ -475,44 +475,55 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="fav_edit_marker_popup_item">
-        <property name="label" translatable="yes">Edit mаrker text</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="image">edit_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_edit_marker" object="fav_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
       <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_2">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="fav_import_m3u_popup_item">
-        <property name="label" translatable="yes">Import m3u</property>
+      <object class="GtkImageMenuItem" id="fav_iptv_popup_item">
+        <property name="label" translatable="yes">IPTV</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="image">downloads_image</property>
+        <property name="image">image10</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_import_m3u" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
-        <property name="label" translatable="yes">Add IPTV or stream service</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="image">network_transmit_receive_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_iptv" swapped="no"/>
+        <child type="submenu">
+          <object class="GtkMenu" id="fav_iptv_popoup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkCheckMenuItem" id="fav_iptv_mode_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Preview mode</property>
+                <signal name="toggled" handler="on_fav_iptv_mode" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_import_m3u_popup_item">
+                <property name="label" translatable="yes">Import m3u</property>
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="use_underline">True</property>
+                <property name="image">downloads_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_import_m3u" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
+                <property name="label" translatable="yes">Add IPTV or stream service</property>
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="image">network_transmit_receive_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_iptv" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
     <child>
@@ -2038,6 +2049,27 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkFrame" id="player_frame">
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkDrawingArea" id="player_drawing_area">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -2052,8 +2084,7 @@
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <property name="activate_on_single_click">True</property>
-                            <signal name="button-press-event" handler="on_fav_popup" swapped="no"/>
-                            <signal name="button-press-event" handler="on_view_popup_menu" object="fav_popup_menu" swapped="no"/>
+                            <signal name="button-press-event" handler="on_fav_press" object="fav_popup_menu" swapped="no"/>
                             <signal name="drag-data-get" handler="on_fav_tree_view_drag_data_get" swapped="no"/>
                             <signal name="drag-data-received" handler="on_fav_tree_view_drag_data_received" swapped="no"/>
                             <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
@@ -2162,7 +2193,7 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -2205,7 +2236,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
