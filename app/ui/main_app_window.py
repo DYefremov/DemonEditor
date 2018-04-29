@@ -11,6 +11,7 @@ from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
+from app.tools.media import Player
 from .iptv import IptvDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
@@ -117,6 +118,7 @@ class MainAppWindow:
                     "on_services_add_new": self.on_services_add_new,
                     "on_iptv": self.on_iptv,
                     "on_fav_iptv_mode": self.on_fav_iptv_mode,
+                    "on_drawing_area_realize": self.on_drawing_area_realize,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
@@ -137,7 +139,10 @@ class MainAppWindow:
         self._picons = {}
         self._blacklist = set()
         self._current_bq_name = None
+        # Player
         self._iptv_preview_mode = False
+        self._player = None
+        self._is_played = False
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -156,6 +161,8 @@ class MainAppWindow:
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._status_bar = builder.get_object("status_bar")
         self._player_frame = builder.get_object("player_frame")
+        self._drawing_area_xid = None
+        self._fav_iptv_mode_popup_item = builder.get_object("fav_iptv_mode_popup_item")
         self._profile_label = builder.get_object("profile_label")
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
@@ -208,9 +215,13 @@ class MainAppWindow:
         """ Function for force ctrl press event for view """
         event.state |= Gdk.ModifierType.CONTROL_MASK
 
+    @run_idle
     def on_quit(self, *args):
         """  Called before app quit """
         write_config(self._options)  # storing current config
+        if self._player:
+            self._player.stop()
+            self._player.release()
         Gtk.main_quit()
 
     def on_resize(self, window):
@@ -768,6 +779,13 @@ class MainAppWindow:
             self.on_service_edit(view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
+        elif (key == Gdk.KEY_P or key == Gdk.KEY_p) and model_name == self._FAV_LIST_NAME:
+            self._iptv_preview_mode = not self._iptv_preview_mode
+            self._fav_iptv_mode_popup_item.set_active(self._iptv_preview_mode)
+            self.on_fav_iptv_mode(self._fav_iptv_mode_popup_item)
+        elif (key == Gdk.KEY_Return or key == Gdk.KEY_KP_Enter) and model_name == self._FAV_LIST_NAME:
+            if self._iptv_preview_mode:
+                self.test_iptv()
 
     def on_download(self, item):
         show_download_dialog(transient=self._main_window,
@@ -902,11 +920,6 @@ class MainAppWindow:
         if response != Gtk.ResponseType.CANCEL:
             self.update_fav_num_column(self._fav_model)
 
-    @run_idle
-    def on_fav_iptv_mode(self, item):
-        self._iptv_preview_mode = item.get_active()
-        self._player_frame.set_visible(self._iptv_preview_mode)
-
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
         insert_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
@@ -915,19 +928,48 @@ class MainAppWindow:
     def on_edit_marker(self, view):
         edit_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
 
-    def on_fav_press(self, menu, event):
-        event_type = event.get_event_type()
-        if event_type == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
-            self.on_view_popup_menu(menu, event)
-        elif self._iptv_preview_mode and event_type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            path, column = self._fav_view.get_cursor()
-            if path:
-                row = self._fav_model[path][:]
-                if row[5] == BqServiceType.IPTV.value:
-                    self.test_iptv(row[7])
+    def on_fav_iptv_mode(self, item):
+        self._iptv_preview_mode = item.get_active()
+        self._player_frame.set_visible(self._iptv_preview_mode)
+        if not self._iptv_preview_mode:
+            self.on_player_stop(None)
 
-    def test_iptv(self, fav_id):
-        print(fav_id)
+    def on_fav_press(self, menu, event):
+        self.on_view_popup_menu(menu, event)
+
+        if self._iptv_preview_mode and event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            self.test_iptv()
+
+    def test_iptv(self):
+        path, column = self._fav_view.get_cursor()
+        if path:
+            row = self._fav_model[path][:]
+            if row[5] == BqServiceType.IPTV.value:
+                profile = Profile(self._profile)
+                data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
+                url = data[-3 if profile is Profile.ENIGMA_2 else 0]
+                url = url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
+                if not url:
+                    return
+
+                self.on_player_stop(None)
+
+                if not self._player:
+                    self._player = Player.get_vlc_instance().media_player_new()
+                    self._player.set_xwindow(self._drawing_area_xid)
+
+                if self._player:
+                    self._player.set_mrl(url)
+                    self._is_played = True
+                    self._player.play()
+
+    def on_player_stop(self, item):
+        if self._player:
+            self._player.stop()
+            self._is_played = False
+
+    def on_drawing_area_realize(self, widget):
+        self._drawing_area_xid = widget.get_window().get_xid()
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)

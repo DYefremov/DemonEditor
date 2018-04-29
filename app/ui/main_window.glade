@@ -2057,6 +2057,7 @@
                           <object class="GtkDrawingArea" id="player_drawing_area">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
                           </object>
                         </child>
                         <child type="label_item">
