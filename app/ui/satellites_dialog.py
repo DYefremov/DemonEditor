@@ -42,7 +42,7 @@ class SatellitesDialog:
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_editor_dialog", "satellites_tree_store", "popup_menu",
-                                       "add_popup_menu", "add_menu_icon", "receive_menu_icon", "update_source_store"))
+                                       "add_popup_menu", "add_menu_icon", "receive_menu_icon"))
         builder.connect_signals(handlers)
         # Adding custom image for add_menu_tool_button
         add_menu_tool_button = builder.get_object("add_menu_tool_button")
@@ -52,7 +52,6 @@ class SatellitesDialog:
         self._dialog.set_transient_for(transient)
         self._dialog.get_content_area().set_border_width(0)  # The width of the border around the app dialog area!
         self._sat_view = builder.get_object("satellites_editor_tree_view")
-        self._download_bar = builder.get_object("download_bar")
         self._wait_dialog = WaitDialog(self._dialog)
         # Setting the last size of the dialog window if it was saved
         window_size = self._options.get("sat_editor_window_size", None)

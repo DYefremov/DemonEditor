@@ -38,7 +38,7 @@ class PiconsDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_downloader.glade",
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_dialog.glade",
                                       ("picons_dialog", "receive_image", "providers_list_store"))
         builder.connect_signals(handlers)
         self._dialog = builder.get_object("picons_dialog")
