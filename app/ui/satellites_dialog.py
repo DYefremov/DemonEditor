@@ -1,7 +1,7 @@
 import re
 from math import fabs
 
-from app.commons import run_idle
+from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.tools.satellites import SatellitesParser
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
@@ -19,14 +19,11 @@ class SatellitesDialog:
     def __init__(self, transient, options):
         self._data_path = options.get("data_dir_path") + "satellites.xml"
         self._options = options
-        self._download_task = False
 
         handlers = {"on_open": self.on_open,
                     "on_remove": self.on_remove,
                     "on_save": self.on_save,
                     "on_update": self.on_update,
-                    "on_receive": self.on_receive,
-                    "on_cancel_receive": self.on_cancel_receive,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
                     "on_popup_menu": self.on_popup_menu,
@@ -67,7 +64,6 @@ class SatellitesDialog:
     @run_idle
     def show(self):
         self._dialog.run()
-        self.on_cancel_receive()
         self._dialog.destroy()
 
     def on_resize(self, window):
@@ -76,7 +72,6 @@ class SatellitesDialog:
             self._options["sat_editor_window_size"] = window.get_size()
 
     def on_quit(self, item):
-        self.on_cancel_receive()
         self._dialog.destroy()
 
     def on_open(self, model):
@@ -285,32 +280,10 @@ class SatellitesDialog:
         model.foreach(self.parse_data, satellites)
         write_satellites(satellites, self._data_path)
 
-    def on_update(self, button: Gtk.ToggleToolButton):
-        self._download_bar.set_visible(button.get_active())
-
-    @run_idle
-    def on_receive(self, item):
-        if self._download_task:
-            show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
-            return
-
-        model = self._sat_view.get_model()
-        model.clear()
-        self._download_task = True
-
-        def callback(sat):
-            if self._download_task:
-                self.append_satellite(model, sat)
-                return False
-            else:
-                print("Canceled!")
-                return True
-
-        SatellitesParser(url="https://www.flysat.com/satlist.php").get_satellites(callback)
-
-    @run_idle
-    def on_cancel_receive(self, item=None):
-        self._download_task = False
+    def on_update(self, item):
+        dialog = SatellitesUpdateDialog(self._dialog, self._sat_view.get_model())
+        sats = dialog.run()
+        dialog.destroy()
 
     @staticmethod
     def parse_data(model, path, itr, sats):
@@ -334,6 +307,8 @@ class SatellitesDialog:
             menu.popup(None, None, None, None, event.button, event.time)
 
 
+# ***************** Transponder dialog *******************#
+
 class TransponderDialog:
     """ Shows dialog for adding or edit transponder """
 
@@ -344,9 +319,7 @@ class TransponderDialog:
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("transponder_dialog",
-                                       "pol_store", "fec_store",
-                                       "mod_store", "system_store",
+                                      ("transponder_dialog", "pol_store", "fec_store", "mod_store", "system_store",
                                        "pls_mode_store"))
         builder.connect_signals(handlers)
 
@@ -421,6 +394,8 @@ class TransponderDialog:
         return True
 
 
+# ***************** Satellite dialog *******************#
+
 class SatelliteDialog:
     """ Shows dialog for adding or edit satellite """
 
@@ -460,6 +435,99 @@ class SatelliteDialog:
         pos = "{}{}{}".format("-" if side == 1 else "", *str(pos).split("."))
 
         return Satellite(name=name, flags="0", position=pos, transponders=None)
+
+
+# ***************** Satellite update dialog *******************#
+
+class SatellitesUpdateDialog:
+    def __init__(self, transient, main_model):
+        handlers = {"on_update_satellites_list": self.on_update_satellites_list,
+                    "on_receive_satellites_list": self.on_receive_satellites_list,
+                    "on_cancel_receive": self.on_cancel_receive,
+                    "on_selected_toggled": self.on_selected_toggled,
+                    "on_quit": self.on_quit}
+        builder = Gtk.Builder()
+        builder.set_translation_domain(TEXT_DOMAIN)
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
+                                      ("satellites_update_dialog", "update_source_store", "update_sat_list_store"))
+        builder.connect_signals(handlers)
+
+        self._dialog = builder.get_object("satellites_update_dialog")
+        self._dialog.set_transient_for(transient)
+        self._main_model = main_model
+        # self._dialog.get_content_area().set_border_width(0)
+        self._sat_view = builder.get_object("sat_update_tree_view")
+        self._receive_sat_list_tool_button = builder.get_object("receive_sat_list_tool_button")
+        self._download_task = False
+        self._parser = None
+
+    def run(self):
+        if self._dialog.run() == Gtk.ResponseType.CANCEL:
+            self._download_task = False
+            return
+
+    def destroy(self):
+        self._dialog.destroy()
+
+    @run_idle
+    def on_update_satellites_list(self, item):
+        if self._download_task:
+            show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
+            return
+
+        model = self._sat_view.get_model()
+        model.clear()
+        self._download_task = True
+        if not self._parser:
+            self._parser = SatellitesParser(url="https://www.flysat.com/satlist.php")
+        sats = self._parser.get_satellites_list()
+        if sats:
+            for sat in sats:
+                model = self._sat_view.get_model()
+                model.append((sat[1], sat[2], sat[3], sat[0], False))
+        self._download_task = False
+
+    @run_idle
+    def on_receive_satellites_list(self, item):
+        if self._download_task:
+            show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
+            return
+        self.receive_satellites()
+
+    @run_task
+    def receive_satellites(self):
+        self._download_task = True
+        model = self._sat_view.get_model()
+        sats = []
+        for sat in [r for r in model if r[4]]:
+            if not self._download_task:
+                return
+            print("Process:", sat[0])
+            sats.append(self._parser.get_satellite(sat[:-1]))
+
+        sats = {s[2]: s for s in sats}  # key = position, v = satellite
+        for row in self._main_model:
+            pos = row[-1]
+            if pos in sats:
+                sat = sats.pop(pos)
+        print("The remaining satellites:", sats)
+        self._download_task = False
+
+    @run_idle
+    def on_cancel_receive(self, item=None):
+        self._download_task = False
+
+    def on_selected_toggled(self, toggle, path):
+        model = self._sat_view.get_model()
+        model.set_value(model.get_iter(path), 4, not toggle.get_active())
+        self.update_receive_button_state(model)
+
+    @run_idle
+    def update_receive_button_state(self, model):
+        self._receive_sat_list_tool_button.set_sensitive((any(r[4] for r in model)))
+
+    def on_quit(self):
+        self._download_task = False
 
 
 if __name__ == "__main__":

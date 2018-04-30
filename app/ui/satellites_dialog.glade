@@ -459,6 +459,7 @@
                     <property name="label" translatable="yes">Receive from internet</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-refresh</property>
+                    <signal name="clicked" handler="on_update" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1412,14 +1413,42 @@
       <action-widget response="-5">button2</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkListStore" id="update_sat_list_store"/>
+  <object class="GtkListStore" id="update_sat_list_store">
+    <columns>
+      <!-- column-name satellite -->
+      <column type="gchararray"/>
+      <!-- column-name position -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+      <!-- column-name url -->
+      <column type="gchararray"/>
+      <!-- column-name selected -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="update_source_store">
+    <columns>
+      <!-- column-name source -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">FlySat</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkDialog" id="satellites_update_dialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Satellites update</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
+    <property name="skip_pager_hint">True</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="sat_update_dialog_vbox">
         <property name="width_request">480</property>
+        <property name="height_request">320</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
@@ -1560,11 +1589,62 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="upd_satellite_column">
                         <property name="title" translatable="yes">Satellite</property>
+                        <property name="expand">True</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="upd_satellite_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
                       </object>
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="upd_position_column">
                         <property name="title" translatable="yes">Position</property>
+                        <property name="expand">True</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="upd_position_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="upd_type_column">
+                        <property name="title" translatable="yes">Type</property>
+                        <property name="expand">True</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="upd_type_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="upd_url_column">
+                        <property name="visible">False</property>
+                        <property name="title" translatable="yes">Url</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="upd_url_cellrenderertext"/>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="upd_selected_treeviewcolumn">
+                        <property name="title" translatable="yes">Selected</property>
+                        <child>
+                          <object class="GtkCellRendererToggle" id="upd_selected_cellrenderertoggle">
+                            <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
+                          </object>
+                          <attributes>
+                            <attribute name="active">4</attribute>
+                          </attributes>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1593,14 +1673,14 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkToolButton" id="receive_tool_button">
+                  <object class="GtkToolButton" id="update_sat_list_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Recieve</property>
+                    <property name="label" translatable="yes">Update</property>
                     <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-goto-bottom</property>
-                    <signal name="clicked" handler="on_receive" swapped="no"/>
+                    <property name="stock_id">gtk-refresh</property>
+                    <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1616,6 +1696,21 @@
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-cancel</property>
                     <signal name="clicked" handler="on_cancel_receive" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="receive_sat_list_tool_button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Receive</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-goto-bottom</property>
+                    <signal name="clicked" handler="on_receive_satellites_list" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1638,6 +1733,7 @@
                 <property name="can_focus">True</property>
                 <child>
                   <object class="GtkTextView" id="text_view">
+                    <property name="height_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
@@ -1732,16 +1828,8 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="update_source_store">
-    <columns>
-      <!-- column-name source -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">FlySat</col>
-      </row>
-    </data>
+    <action-widgets>
+      <action-widget response="-6">sat_update_close_button</action-widget>
+    </action-widgets>
   </object>
 </interface>

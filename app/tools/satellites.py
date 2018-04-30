@@ -14,7 +14,7 @@ class SatellitesParser(HTMLParser):
 
     _HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:45.0) Gecko/20100101 Firefox/59.02"}
 
-    def __init__(self, url, entities=False, separator=' '):
+    def __init__(self, url="https://www.flysat.com/satlist.php", entities=False, separator=' '):
 
         HTMLParser.__init__(self)
 
@@ -59,29 +59,23 @@ class SatellitesParser(HTMLParser):
     def error(self, message):
         pass
 
-    @run_task
-    def get_satellites(self, callback):
+    def get_satellites_list(self):
         self.reset()
         request = requests.get(url=self._url, headers=self._HEADERS)
         reason = request.reason
-        satellites = []
         if reason == "OK":
             self.feed(request.text)
             if self._rows:
-                for sat in list(filter(lambda x: all(x) and len(x) == 5, self._rows)):
-                    if callback(self.get_satellite(sat)):
-                        break
+                return list(filter(lambda x: all(x) and len(x) == 5, self._rows))
         else:
             print(reason)
 
-        return satellites
-
     def get_satellite(self, sat):
-        pos = "".join(c for c in sat[2] if c.isdigit() or c.isalpha() or c == ".")
-        return Satellite(name=sat[1] + " ({})".format(pos),
+        pos = "".join(c for c in sat[1] if c.isdigit() or c.isalpha() or c == ".")
+        return Satellite(name=sat[0] + " ({})".format(pos),
                          flags="0",
                          position=self.get_position(pos.replace(".", "")),
-                         transponders=self.get_transponders(sat[0]))
+                         transponders=self.get_transponders(sat[3]))
 
     def get_position(self, pos):
         return "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
