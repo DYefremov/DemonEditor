@@ -9,9 +9,9 @@ from app.commons import run_idle, run_task
 from app.ftp import upload_data, DownloadDataType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
-from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
-from app.ui.dialogs import show_dialog, DialogType, get_message
-from app.ui.main_helper import update_entry_data
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .dialogs import show_dialog, DialogType, get_message
+from .main_helper import update_entry_data, append_text_to_tview
 
 
 class PiconsDialog:
@@ -166,13 +166,7 @@ class PiconsDialog:
 
     @run_idle
     def append_output(self, char):
-        buf = self._text_view.get_buffer()
-        buf.insert_at_cursor(char)
-        self.scroll_to_end(buf)
-
-    def scroll_to_end(self, buf):
-        insert = buf.get_insert()
-        self._text_view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
+        append_text_to_tview(char, self._text_view)
 
     def resize(self, path):
         if self._resize_no_radio_button.get_active():

@@ -525,5 +525,13 @@ def get_base_model(model):
     return model
 
 
+def append_text_to_tview(char, view):
+    """ Appending text and scrolling  to a given line in the text view. """
+    buf = view.get_buffer()
+    buf.insert_at_cursor(char)
+    insert = buf.get_insert()
+    view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
+
+
 if __name__ == "__main__":
     pass

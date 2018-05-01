@@ -1575,6 +1575,7 @@
             </child>
             <child>
               <object class="GtkScrolledWindow" id="sat_update_scrolled_window">
+                <property name="height_request">150</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -1673,21 +1674,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkToolButton" id="update_sat_list_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Update</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-refresh</property>
-                    <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkToolButton" id="cancel_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -1703,10 +1689,26 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkToolButton" id="update_sat_list_tool_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="is_important">True</property>
+                    <property name="label" translatable="yes">Update</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-refresh</property>
+                    <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkToolButton" id="receive_sat_list_tool_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
+                    <property name="is_important">True</property>
                     <property name="label" translatable="yes">Receive</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-goto-bottom</property>
@@ -1732,18 +1734,25 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child>
-                  <object class="GtkTextView" id="text_view">
-                    <property name="height_request">100</property>
+                  <object class="GtkScrolledWindow" id="text_view_scrolled_window">
+                    <property name="height_request">120</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="editable">False</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="text_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child type="label">
                   <object class="GtkLabel" id="Extra:">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">expander</property>
+                    <property name="label" translatable="yes">Extra:</property>
                   </object>
                 </child>
               </object>

@@ -67,7 +67,7 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
     tn = telnet(host=host, user=properties.get("telnet_user", "root"), password=properties.get("telnet_password", ""),
                 timeout=properties.get("telnet_timeout", 5))
     next(tn)
-    # terminate enigma or enigma
+    # terminate enigma or neutrino
     tn.send("init 4")
 
     with FTP(host=host) as ftp:

@@ -6,7 +6,7 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.tools.satellites import SatellitesParser
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, WaitDialog
-from .main_helper import move_items, scroll_to
+from .main_helper import move_items, scroll_to, append_text_to_tview
 
 
 def show_satellites_dialog(transient, options):
@@ -457,6 +457,8 @@ class SatellitesUpdateDialog:
         self._main_model = main_model
         # self._dialog.get_content_area().set_border_width(0)
         self._sat_view = builder.get_object("sat_update_tree_view")
+        self._sat_update_expander = builder.get_object("sat_update_expander")
+        self._text_view = builder.get_object("text_view")
         self._receive_sat_list_tool_button = builder.get_object("receive_sat_list_tool_button")
         self._download_task = False
         self._parser = None
@@ -502,16 +504,23 @@ class SatellitesUpdateDialog:
         for sat in [r for r in model if r[4]]:
             if not self._download_task:
                 return
-            print("Process:", sat[0])
+            self._sat_update_expander.set_expanded(True)
+            text = "Process: {}\n"
+            self.append_output(text.format(sat[0]))
             sats.append(self._parser.get_satellite(sat[:-1]))
 
         sats = {s[2]: s for s in sats}  # key = position, v = satellite
+
         for row in self._main_model:
             pos = row[-1]
             if pos in sats:
                 sat = sats.pop(pos)
         print("The remaining satellites:", sats)
         self._download_task = False
+
+    @run_idle
+    def append_output(self, text):
+        append_text_to_tview(text, self._text_view)
 
     @run_idle
     def on_cancel_receive(self, item=None):
