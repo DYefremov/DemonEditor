@@ -145,13 +145,7 @@ class SatellitesDialog:
     @run_idle
     def append_data(self, model, satellites):
         for sat in satellites:
-            self.append_satellite(model, sat)
-
-    def append_satellite(self, model, sat):
-        name, flags, pos, transponders = sat
-        parent = model.append(None, [name, *self._aggr, flags, pos])
-        for transponder in transponders:
-            model.append(parent, ["Transponder:", *transponder, None, None])
+            append_satellite(model, sat)
 
     def on_add(self, view):
         """ Common adding """
@@ -282,7 +276,7 @@ class SatellitesDialog:
 
     def on_update(self, item):
         dialog = SatellitesUpdateDialog(self._dialog, self._sat_view.get_model())
-        sats = dialog.run()
+        dialog.run()
         dialog.destroy()
 
     @staticmethod
@@ -515,8 +509,22 @@ class SatellitesUpdateDialog:
             pos = row[-1]
             if pos in sats:
                 sat = sats.pop(pos)
-        print("The remaining satellites:", sats)
+                itr = row.iter
+                self.update_satellite(itr, row, sat)
+
+        for sat in sats.values():
+            append_satellite(self._main_model, sat)
+
         self._download_task = False
+
+    @run_idle
+    def update_satellite(self, itr, row, sat):
+        if self._main_model.iter_has_child(itr):
+            children = row.iterchildren()
+            for ch in children:
+                self._main_model.remove(ch.iter)
+        for tr in sat[3]:
+            self._main_model.append(itr, ["Transponder:", *tr, None, None])
 
     @run_idle
     def append_output(self, text):
@@ -537,6 +545,17 @@ class SatellitesUpdateDialog:
 
     def on_quit(self):
         self._download_task = False
+
+
+# ***************** Commons *******************#
+
+@run_idle
+def append_satellite(model, sat):
+    """ Common function for append satellite to the model """
+    name, flags, pos, transponders = sat
+    parent = model.append(None, [name, *(None,) * 9, flags, pos])
+    for transponder in transponders:
+        model.append(parent, ["Transponder:", *transponder, None, None])
 
 
 if __name__ == "__main__":
