@@ -1483,19 +1483,17 @@
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkBox" id="source_box">
+              <object class="GtkBox" id="header_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">2</property>
-                <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkAlignment" id="source_alignment_left">
+                  <object class="GtkLabel" id="source_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">1</property>
-                    <child>
-                      <placeholder/>
-                    </child>
+                    <property name="halign">start</property>
+                    <property name="margin_left">5</property>
+                    <property name="label" translatable="yes">Source: </property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1504,23 +1502,9 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="source_label">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Source: </property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkComboBox" id="source_combobox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">start</property>
                     <property name="model">update_source_store</property>
                     <property name="active">0</property>
                     <child>
@@ -1533,22 +1517,103 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkAlignment" id="source_alignment_right">
+                  <object class="GtkGrid" id="source_header_grid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">1</property>
+                    <property name="margin_bottom">2</property>
+                    <property name="column_spacing">2</property>
+                    <child>
+                      <object class="GtkLabel" id="filter_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Filter:</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label14">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">From:</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinbutton1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="combobox2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinbutton2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label13">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">To:</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="combobox1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <placeholder/>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <style>
@@ -1570,7 +1635,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -1654,7 +1719,7 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -1666,7 +1731,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -1726,7 +1791,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -1759,7 +1824,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -1813,7 +1878,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="position">7</property>
               </packing>
             </child>
             <child>
@@ -1825,7 +1890,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">7</property>
+                <property name="position">8</property>
               </packing>
             </child>
           </object>

@@ -436,6 +436,7 @@ class SatelliteDialog:
 # ***************** Satellite update dialog *******************#
 
 class SatellitesUpdateDialog:
+    """ Dialog for update satellites over internet """
     def __init__(self, transient, main_model):
         handlers = {"on_update_satellites_list": self.on_update_satellites_list,
                     "on_receive_satellites_list": self.on_receive_satellites_list,
@@ -499,15 +500,14 @@ class SatellitesUpdateDialog:
     def receive_satellites(self):
         self._download_task = True
         self._sat_update_expander.set_expanded(True)
-        self._text_view.get_buffer().text = ""
-
+        self._text_view.get_buffer().set_text("", 0)
         model = self._sat_view.get_model()
         start = time.time()
 
         with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
             text = "Processing: {}\n"
             sats = []
-            futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model]}
+            futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model if r[4]]}
             for future in concurrent.futures.as_completed(futures):
                 if not self._download_task:
                     executor.shutdown()
@@ -516,8 +516,9 @@ class SatellitesUpdateDialog:
                 self.append_output(text.format(data[0]))
                 sats.append(data)
 
-            message = "Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats))
-            self.show_info_message(message, Gtk.MessageType.INFO)
+            self.append_output("-" * 75 + "\n")
+            self.append_output("Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats)))
+            # self.show_info_message(message, Gtk.MessageType.INFO)
             sats = {s[2]: s for s in sats}  # key = position, v = satellite
 
             for row in self._main_model:
