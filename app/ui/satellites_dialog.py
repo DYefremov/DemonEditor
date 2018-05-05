@@ -1,4 +1,6 @@
 import re
+import time
+import concurrent.futures
 from math import fabs
 
 from app.commons import run_idle, run_task
@@ -439,6 +441,7 @@ class SatellitesUpdateDialog:
                     "on_receive_satellites_list": self.on_receive_satellites_list,
                     "on_cancel_receive": self.on_cancel_receive,
                     "on_selected_toggled": self.on_selected_toggled,
+                    "on_info_bar_close": self.on_info_bar_close,
                     "on_quit": self.on_quit}
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -454,6 +457,8 @@ class SatellitesUpdateDialog:
         self._sat_update_expander = builder.get_object("sat_update_expander")
         self._text_view = builder.get_object("text_view")
         self._receive_sat_list_tool_button = builder.get_object("receive_sat_list_tool_button")
+        self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
+        self._info_bar_message_label = builder.get_object("info_bar_message_label")
         self._download_task = False
         self._parser = None
 
@@ -483,7 +488,7 @@ class SatellitesUpdateDialog:
                 model.append((sat[1], sat[2], sat[3], sat[0], False))
         self._download_task = False
 
-    @run_idle
+    @run_task
     def on_receive_satellites_list(self, item):
         if self._download_task:
             show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
@@ -493,29 +498,39 @@ class SatellitesUpdateDialog:
     @run_task
     def receive_satellites(self):
         self._download_task = True
+        self._sat_update_expander.set_expanded(True)
+        self._text_view.get_buffer().text = ""
+
         model = self._sat_view.get_model()
-        sats = []
-        for sat in [r for r in model if r[4]]:
-            if not self._download_task:
-                return
-            self._sat_update_expander.set_expanded(True)
-            text = "Process: {}\n"
-            self.append_output(text.format(sat[0]))
-            sats.append(self._parser.get_satellite(sat[:-1]))
+        start = time.time()
 
-        sats = {s[2]: s for s in sats}  # key = position, v = satellite
+        with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+            text = "Processing: {}\n"
+            sats = []
+            futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model]}
+            for future in concurrent.futures.as_completed(futures):
+                if not self._download_task:
+                    executor.shutdown()
+                    return
+                data = future.result()
+                self.append_output(text.format(data[0]))
+                sats.append(data)
 
-        for row in self._main_model:
-            pos = row[-1]
-            if pos in sats:
-                sat = sats.pop(pos)
-                itr = row.iter
-                self.update_satellite(itr, row, sat)
+            message = "Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats))
+            self.show_info_message(message, Gtk.MessageType.INFO)
+            sats = {s[2]: s for s in sats}  # key = position, v = satellite
 
-        for sat in sats.values():
-            append_satellite(self._main_model, sat)
+            for row in self._main_model:
+                pos = row[-1]
+                if pos in sats:
+                    sat = sats.pop(pos)
+                    itr = row.iter
+                    self.update_satellite(itr, row, sat)
 
-        self._download_task = False
+            for sat in sats.values():
+                append_satellite(self._main_model, sat)
+
+            self._download_task = False
 
     @run_idle
     def update_satellite(self, itr, row, sat):
@@ -542,6 +557,15 @@ class SatellitesUpdateDialog:
     @run_idle
     def update_receive_button_state(self, model):
         self._receive_sat_list_tool_button.set_sensitive((any(r[4] for r in model)))
+
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._sat_update_info_bar.set_visible(True)
+        self._sat_update_info_bar.set_message_type(message_type)
+        self._info_bar_message_label.set_text(text)
+
+    def on_info_bar_close(self, bar=None, resp=None):
+        self._sat_update_info_bar.set_visible(False)
 
     def on_quit(self):
         self._download_task = False
