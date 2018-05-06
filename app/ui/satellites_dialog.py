@@ -437,17 +437,22 @@ class SatelliteDialog:
 
 class SatellitesUpdateDialog:
     """ Dialog for update satellites over internet """
+
     def __init__(self, transient, main_model):
         handlers = {"on_update_satellites_list": self.on_update_satellites_list,
                     "on_receive_satellites_list": self.on_receive_satellites_list,
                     "on_cancel_receive": self.on_cancel_receive,
                     "on_selected_toggled": self.on_selected_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
+                    "on_filter_toggled": self.on_filter_toggled,
+                    "on_find_toggled": self.on_find_toggled,
                     "on_quit": self.on_quit}
+
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("satellites_update_dialog", "update_source_store", "update_sat_list_store"))
+                                      ("satellites_update_dialog", "update_source_store", "update_sat_list_store",
+                                       "side_store", "pos_adjustment", "pos_adjustment2"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("satellites_update_dialog")
@@ -460,6 +465,8 @@ class SatellitesUpdateDialog:
         self._receive_sat_list_tool_button = builder.get_object("receive_sat_list_tool_button")
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
+        self._search_info_bar = builder.get_object("sat_update_search_info_bar")
+        self._filter_info_bar = builder.get_object("sat_update_filter_info_bar")
         self._download_task = False
         self._parser = None
 
@@ -567,6 +574,12 @@ class SatellitesUpdateDialog:
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._sat_update_info_bar.set_visible(False)
+
+    def on_find_toggled(self, button: Gtk.ToggleToolButton):
+        self._search_info_bar.set_visible(button.get_active())
+
+    def on_filter_toggled(self, button: Gtk.ToggleToolButton):
+        self._filter_info_bar.set_visible(button.get_active())
 
     def on_quit(self):
         self._download_task = False
