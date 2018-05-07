@@ -2,10 +2,8 @@
     for  replace or update current satellites.xml file.
 """
 import requests
-
 from html.parser import HTMLParser
 
-from app.commons import run_task
 from app.eparser import Satellite, Transponder
 
 
@@ -66,18 +64,21 @@ class SatellitesParser(HTMLParser):
         if reason == "OK":
             self.feed(request.text)
             if self._rows:
-                return list(filter(lambda x: all(x) and len(x) == 5, self._rows))
+                def get_sat(r):
+                    return r[1], "".join(c for c in r[2] if c.isdigit() or c.isalpha() or c == "."), r[3], r[0], False
+                return list(map(get_sat, filter(lambda x: all(x) and len(x) == 5, self._rows)))
         else:
             print(reason)
 
     def get_satellite(self, sat):
-        pos = "".join(c for c in sat[1] if c.isdigit() or c.isalpha() or c == ".")
+        pos = sat[1]
         return Satellite(name=sat[0] + " ({})".format(pos),
                          flags="0",
                          position=self.get_position(pos.replace(".", "")),
                          transponders=self.get_transponders(sat[3]))
 
-    def get_position(self, pos):
+    @staticmethod
+    def get_position(pos):
         return "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
 
     def get_transponders(self, sat_url):

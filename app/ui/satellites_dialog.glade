@@ -1432,6 +1432,12 @@
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkTreeModelFilter" id="update_sat_list_model_filter">
+    <property name="child_model">update_sat_list_store</property>
+  </object>
+  <object class="GtkTreeModelSort" id="update_sat_list_model_sort">
+    <property name="model">update_sat_list_model_filter</property>
+  </object>
   <object class="GtkListStore" id="update_source_store">
     <columns>
       <!-- column-name source -->
@@ -1681,7 +1687,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinButton" id="from_pos_spin_button">
+                          <object class="GtkSpinButton" id="from_pos_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="input_purpose">number</property>
@@ -1699,6 +1705,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="model">side_store</property>
+                            <property name="active">0</property>
                             <child>
                               <object class="GtkCellRendererText" id="from_filter_cellrenderertext"/>
                               <attributes>
@@ -1723,7 +1730,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSpinButton" id="to_pos_spin_button">
+                          <object class="GtkSpinButton" id="to_pos_button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="input_purpose">number</property>
@@ -1741,6 +1748,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="model">side_store</property>
+                            <property name="active">0</property>
                             <child>
                               <object class="GtkCellRendererText" id="filter_to_cellrenderertext"/>
                               <attributes>
@@ -1760,6 +1768,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="clicked" handler="on_filter" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">6</property>
@@ -1801,7 +1810,7 @@
             </child>
             <child>
               <object class="GtkScrolledWindow" id="sat_update_scrolled_window">
-                <property name="height_request">200</property>
+                <property name="height_request">-1</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -1809,7 +1818,7 @@
                   <object class="GtkTreeView" id="sat_update_tree_view">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">update_sat_list_store</property>
+                    <property name="model">update_sat_list_model_sort</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="treeview-selection2"/>
                     </child>
@@ -1817,6 +1826,8 @@
                       <object class="GtkTreeViewColumn" id="upd_satellite_column">
                         <property name="title" translatable="yes">Satellite</property>
                         <property name="expand">True</property>
+                        <property name="reorderable">True</property>
+                        <property name="sort_column_id">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="upd_satellite_cellrenderertext"/>
                           <attributes>
@@ -1829,6 +1840,8 @@
                       <object class="GtkTreeViewColumn" id="upd_position_column">
                         <property name="title" translatable="yes">Position</property>
                         <property name="expand">True</property>
+                        <property name="reorderable">True</property>
+                        <property name="sort_column_id">1</property>
                         <child>
                           <object class="GtkCellRendererText" id="upd_position_cellrenderertext"/>
                           <attributes>
@@ -1841,6 +1854,8 @@
                       <object class="GtkTreeViewColumn" id="upd_type_column">
                         <property name="title" translatable="yes">Type</property>
                         <property name="expand">True</property>
+                        <property name="reorderable">True</property>
+                        <property name="sort_column_id">2</property>
                         <child>
                           <object class="GtkCellRendererText" id="upd_type_cellrenderertext"/>
                           <attributes>
@@ -1864,6 +1879,8 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="upd_selected_treeviewcolumn">
                         <property name="title" translatable="yes">Selected</property>
+                        <property name="reorderable">True</property>
+                        <property name="sort_column_id">4</property>
                         <child>
                           <object class="GtkCellRendererToggle" id="upd_selected_cellrenderertoggle">
                             <signal name="toggled" handler="on_selected_toggled" swapped="no"/>

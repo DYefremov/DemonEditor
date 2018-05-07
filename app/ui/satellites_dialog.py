@@ -8,7 +8,7 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.tools.satellites import SatellitesParser
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, WaitDialog
-from .main_helper import move_items, scroll_to, append_text_to_tview
+from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model
 
 
 def show_satellites_dialog(transient, options):
@@ -446,13 +446,15 @@ class SatellitesUpdateDialog:
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_find_toggled": self.on_find_toggled,
+                    "on_filter": self.on_filter,
                     "on_quit": self.on_quit}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_update_dialog", "update_source_store", "update_sat_list_store",
-                                       "side_store", "pos_adjustment", "pos_adjustment2"))
+                                       "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
+                                       "pos_adjustment", "pos_adjustment2"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("satellites_update_dialog")
@@ -462,11 +464,18 @@ class SatellitesUpdateDialog:
         self._sat_view = builder.get_object("sat_update_tree_view")
         self._sat_update_expander = builder.get_object("sat_update_expander")
         self._text_view = builder.get_object("text_view")
-        self._receive_sat_list_tool_button = builder.get_object("receive_sat_list_tool_button")
+        self._receive_button = builder.get_object("receive_sat_list_tool_button")
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
         self._search_info_bar = builder.get_object("sat_update_search_info_bar")
         self._filter_info_bar = builder.get_object("sat_update_filter_info_bar")
+        self._from_pos_button = builder.get_object("from_pos_button")
+        self._to_pos_button = builder.get_object("to_pos_button")
+        self._filter_from_combo_box = builder.get_object("filter_from_combo_box")
+        self._filter_to_combo_box = builder.get_object("filter_to_combo_box")
+        self._filter_model = builder.get_object("update_sat_list_model_filter")
+        self._filter_model.set_visible_func(self.filter_function)
+        self._filter_positions = (0, 0)
         self._download_task = False
         self._parser = None
 
@@ -484,16 +493,16 @@ class SatellitesUpdateDialog:
             show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
             return
 
-        model = self._sat_view.get_model()
+        model = get_base_model(self._sat_view.get_model())
         model.clear()
         self._download_task = True
         if not self._parser:
             self._parser = SatellitesParser(url="https://www.flysat.com/satlist.php")
         sats = self._parser.get_satellites_list()
         if sats:
+            model = get_base_model(self._sat_view.get_model())
             for sat in sats:
-                model = self._sat_view.get_model()
-                model.append((sat[1], sat[2], sat[3], sat[0], False))
+                model.append(sat)
         self._download_task = False
 
     @run_task
@@ -558,13 +567,13 @@ class SatellitesUpdateDialog:
         self._download_task = False
 
     def on_selected_toggled(self, toggle, path):
-        model = self._sat_view.get_model()
+        model = get_base_model(self._sat_view.get_model())
         model.set_value(model.get_iter(path), 4, not toggle.get_active())
         self.update_receive_button_state(model)
 
     @run_idle
     def update_receive_button_state(self, model):
-        self._receive_sat_list_tool_button.set_sensitive((any(r[4] for r in model)))
+        self._receive_button.set_sensitive((any(r[4] for r in model)))
 
     @run_idle
     def show_info_message(self, text, message_type):
@@ -580,6 +589,30 @@ class SatellitesUpdateDialog:
 
     def on_filter_toggled(self, button: Gtk.ToggleToolButton):
         self._filter_info_bar.set_visible(button.get_active())
+
+    @run_idle
+    def on_filter(self, item):
+        self._filter_positions = self.get_positions()
+        self._filter_model.refilter()
+        print("Satellites count: ", len(self._sat_view.get_model()))
+
+    def filter_function(self, model, iter, data):
+        if self._filter_model is None or self._filter_model == "None":
+            return True
+
+        from_pos, to_pos = self._filter_positions
+        if from_pos == 0 and to_pos == 0:
+            return True
+
+        if from_pos > to_pos:
+            from_pos, to_pos = to_pos, from_pos
+
+        return from_pos <= float(self._parser.get_position(model.get(iter, 1)[0])) <= to_pos
+
+    def get_positions(self):
+        from_pos = round(self._from_pos_button.get_value(), 1) * (-1 if self._filter_from_combo_box.get_active() else 1)
+        to_pos = round(self._to_pos_button.get_value(), 1) * (-1 if self._filter_to_combo_box.get_active() else 1)
+        return from_pos, to_pos
 
     def on_quit(self):
         self._download_task = False
