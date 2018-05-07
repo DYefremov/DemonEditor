@@ -565,6 +565,7 @@ class SatellitesUpdateDialog:
             children = row.iterchildren()
             for ch in children:
                 self._main_model.remove(ch.iter)
+
         for tr in sat[3]:
             self._main_model.append(itr, ["Transponder:", *tr, None, None])
 
@@ -577,8 +578,9 @@ class SatellitesUpdateDialog:
         self._download_task = False
 
     def on_selected_toggled(self, toggle, path):
-        model = get_base_model(self._sat_view.get_model())
-        model.set_value(model.get_iter(path), 4, not toggle.get_active())
+        model = self._filter_model
+        itr = self._filter_model.convert_iter_to_child_iter(model.get_iter(path))
+        model.get_model().set_value(itr, 4, not toggle.get_active())
         self.update_receive_button_state(model)
 
     @run_idle
