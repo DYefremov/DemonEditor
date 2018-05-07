@@ -6,6 +6,7 @@ from math import fabs
 from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.tools.satellites import SatellitesParser
+from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, WaitDialog
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model
@@ -447,6 +448,9 @@ class SatellitesUpdateDialog:
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_find_toggled": self.on_find_toggled,
                     "on_filter": self.on_filter,
+                    "on_search": self.on_search,
+                    "on_search_down": self.on_search_down,
+                    "on_search_up": self.on_search_up,
                     "on_quit": self.on_quit}
 
         builder = Gtk.Builder()
@@ -467,7 +471,7 @@ class SatellitesUpdateDialog:
         self._receive_button = builder.get_object("receive_sat_list_tool_button")
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
-        self._search_info_bar = builder.get_object("sat_update_search_info_bar")
+        # Filter
         self._filter_info_bar = builder.get_object("sat_update_filter_info_bar")
         self._from_pos_button = builder.get_object("from_pos_button")
         self._to_pos_button = builder.get_object("to_pos_button")
@@ -476,6 +480,12 @@ class SatellitesUpdateDialog:
         self._filter_model = builder.get_object("update_sat_list_model_filter")
         self._filter_model.set_visible_func(self.filter_function)
         self._filter_positions = (0, 0)
+        # Search
+        self._search_info_bar = builder.get_object("sat_update_search_info_bar")
+        self._search_provider = SearchProvider((self._sat_view,),
+                                               builder.get_object("sat_update_search_down_button"),
+                                               builder.get_object("sat_update_search_up_button"))
+
         self._download_task = False
         self._parser = None
 
@@ -594,7 +604,6 @@ class SatellitesUpdateDialog:
     def on_filter(self, item):
         self._filter_positions = self.get_positions()
         self._filter_model.refilter()
-        print("Satellites count: ", len(self._sat_view.get_model()))
 
     def filter_function(self, model, iter, data):
         if self._filter_model is None or self._filter_model == "None":
@@ -613,6 +622,15 @@ class SatellitesUpdateDialog:
         from_pos = round(self._from_pos_button.get_value(), 1) * (-1 if self._filter_from_combo_box.get_active() else 1)
         to_pos = round(self._to_pos_button.get_value(), 1) * (-1 if self._filter_to_combo_box.get_active() else 1)
         return from_pos, to_pos
+
+    def on_search(self, entry):
+        self._search_provider.search(entry.get_text())
+
+    def on_search_down(self, item):
+        self._search_provider.on_search_down()
+
+    def on_search_up(self, item):
+        self._search_provider.on_search_up()
 
     def on_quit(self):
         self._download_task = False

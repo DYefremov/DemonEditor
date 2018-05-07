@@ -2,22 +2,18 @@
 
 
 class SearchProvider:
-    def __init__(self, srv_view, fav_view, bqs_view, services, bouquets, down_button, up_button):
+    def __init__(self, views, down_button, up_button):
         self._paths = []
         self._current_index = -1
         self._max_indexes = 0
-        self._srv_view = srv_view
-        self._fav_view = fav_view
-        self._bqs_view = bqs_view
-        self._services = services
-        self._bouquets = bouquets
+        self._views = views
         self._up_button = up_button
         self._down_button = down_button
 
-    def search(self, text, ):
+    def search(self, text):
         self._current_index = -1
         self._paths.clear()
-        for view in self._srv_view, self._fav_view:
+        for view in self._views:
             model = view.get_model()
             selection = view.get_selection()
             selection.unselect_all()

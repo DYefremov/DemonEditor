@@ -191,8 +191,7 @@ class MainAppWindow:
         self._filter_info_bar = builder.get_object("filter_info_bar")
         # Search
         self._search_info_bar = builder.get_object("search_info_bar")
-        self._search_provider = SearchProvider(self._services_view, self._fav_view, self._bouquets_view,
-                                               self._services, self._bouquets,
+        self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
                                                builder.get_object("search_up_button"))
         self._main_window.show()
