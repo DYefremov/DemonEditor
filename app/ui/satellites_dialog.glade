@@ -1447,6 +1447,9 @@
       <row>
         <col id="0">FlySat</col>
       </row>
+      <row>
+        <col id="0">LyngSat</col>
+      </row>
     </data>
   </object>
   <object class="GtkDialog" id="satellites_update_dialog">
@@ -1522,7 +1525,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkComboBox" id="source_combobox">
+                      <object class="GtkComboBox" id="source_combo_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="model">update_source_store</property>

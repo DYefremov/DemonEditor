@@ -5,7 +5,7 @@ from math import fabs
 
 from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
-from app.tools.satellites import SatellitesParser
+from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, WaitDialog
@@ -466,6 +466,7 @@ class SatellitesUpdateDialog:
         self._main_model = main_model
         # self._dialog.get_content_area().set_border_width(0)
         self._sat_view = builder.get_object("sat_update_tree_view")
+        self._source_box = builder.get_object("source_combo_box")
         self._sat_update_expander = builder.get_object("sat_update_expander")
         self._text_view = builder.get_object("text_view")
         self._receive_button = builder.get_object("receive_sat_list_tool_button")
@@ -506,9 +507,11 @@ class SatellitesUpdateDialog:
         model = get_base_model(self._sat_view.get_model())
         model.clear()
         self._download_task = True
+        src = self._source_box.get_active()
         if not self._parser:
-            self._parser = SatellitesParser(url="https://www.flysat.com/satlist.php")
-        sats = self._parser.get_satellites_list()
+            self._parser = SatellitesParser()
+
+        sats = self._parser.get_satellites_list(SatelliteSource.FLYSAT if src == 0 else SatelliteSource.LYNGSAT)
         if sats:
             model = get_base_model(self._sat_view.get_model())
             for sat in sats:
