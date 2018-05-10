@@ -2,9 +2,8 @@
     for  replace or update current satellites.xml file.
 """
 import re
-from enum import Enum
-
 import requests
+from enum import Enum
 from html.parser import HTMLParser
 
 from app.eparser import Satellite, Transponder
@@ -71,6 +70,7 @@ class SatellitesParser(HTMLParser):
         pass
 
     def get_satellites_list(self, source):
+        """ Getting complete list of satellites. """
         self.reset()
         self._rows.clear()
         self._source = source
@@ -156,25 +156,24 @@ class SatellitesParser(HTMLParser):
     def get_transponders_for_lyng_sat(self, trs):
         """ Parsing transponders for LyngSat """
         frq_pol_pattern = re.compile("(\d{4,5}).*([RLHV])(.*\d$)")
-        sr_fec_pattern = re.compile("(\d{4,5})-(\d/\d) (.*PSK).*$")
-        # sys_pattern = re.compile("(DVB-S|DVB-S2).*")
+        sr_fec_pattern = re.compile("^(\d{4,5})-(\d/\d)(.+PSK)?(.*)?$")
+        sys_pattern = re.compile("(DVB-S[2]?)(.*)?")
         zeros = "000"
         for r in filter(lambda x: len(x) > 8, self._rows):
             freq = re.match(frq_pol_pattern, r[2])
             if not freq:
                 continue
             frq, pol = freq.group(1), freq.group(2)
-
             sr_fec = re.match(sr_fec_pattern, r[-3])
             if not sr_fec:
                 continue
             sr, fec, mod = sr_fec.group(1), sr_fec.group(2), sr_fec.group(3)
-            # if not sys:
-            #     continue
-            sys = ""
+            mod = mod.strip() if mod else "Auto"
+            sys = re.match(sys_pattern, r[-4])
+            if not sys:
+                continue
+            sys = sys.group(1)
             trs.append(Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None))
-
-        return trs
 
 
 if __name__ == "__main__":

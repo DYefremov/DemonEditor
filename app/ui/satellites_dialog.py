@@ -251,9 +251,7 @@ class SatellitesDialog:
         returns selected path or None
         """
         model, paths = view.get_selection().get_selected_rows()
-        paths_count = len(paths)
-
-        if paths_count > 1:
+        if len(paths) > 1:
             show_dialog(DialogType.ERROR, self._dialog, message)
             return
 
@@ -263,9 +261,8 @@ class SatellitesDialog:
     def on_remove(view):
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
-        itrs = [model.get_iter(path) for path in paths]
 
-        for itr in itrs:
+        for itr in [model.get_iter(path) for path in paths]:
             model.remove(itr)
 
     def on_save(self, view):
@@ -581,10 +578,10 @@ class SatellitesUpdateDialog:
         self._download_task = False
 
     def on_selected_toggled(self, toggle, path):
-        model = self._filter_model
-        itr = self._filter_model.convert_iter_to_child_iter(model.get_iter(path))
-        model.get_model().set_value(itr, 4, not toggle.get_active())
-        self.update_receive_button_state(model)
+        s_model = self._sat_view.get_model()
+        itr = self._filter_model.convert_iter_to_child_iter(s_model.convert_iter_to_child_iter(s_model.get_iter(path)))
+        self._filter_model.get_model().set_value(itr, 4, not toggle.get_active())
+        self.update_receive_button_state(self._filter_model)
 
     @run_idle
     def update_receive_button_state(self, model):

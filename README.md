@@ -20,9 +20,9 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **Ctrl + Up, Down, PageUp, PageDown, Home, End** - move selected items in the list.                                                                                                                                                                                                                                                                                                                                        
 ### Extra:
 * Multiple selections in lists only with Space key (as in file managers).                                                                                                                                                                                                                                                                                                                                                                                                         
-* Ability to import IPTV into bouquet (Neutrino WEBTV) from m3u files.                                                                                                                                  
-* Tool for downloading picons from lyngsat.com.                                                                                                                                                  
-* Preview (playing)  IPTV or other streams directly from the bouquet list(should be installed VLC).                                                                                                                                                                                                                                          
+* Ability to import IPTV into bouquet (Neutrino WEBTV) from m3u files.                                                  
+* Ability to download picons and update satellites (transponders) from web.                                                                                                                                                                                                                            
+* Preview (playing)  IPTV or other streams directly from the bouquet list(should be installed VLC).                                         
 ### Minimum requirements:
 Python >= 3.5.2 and GTK+ 3 with PyGObject bindings.
 #### Note.
