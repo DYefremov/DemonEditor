@@ -954,8 +954,12 @@ class MainAppWindow:
                 self.on_player_stop(None)
 
                 if not self._player:
-                    self._player = Player.get_vlc_instance().media_player_new()
-                    self._player.set_xwindow(self._drawing_area_xid)
+                    try:
+                        self._player = Player.get_vlc_instance().media_player_new()
+                    except (NameError, AttributeError):
+                        show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
+                    else:
+                        self._player.set_xwindow(self._drawing_area_xid)
 
                 if self._player:
                     self._player.set_mrl(url)
