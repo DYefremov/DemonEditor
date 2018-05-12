@@ -253,8 +253,8 @@ msgstr "Спутники"
 msgid "Satellites.xml file:"
 msgstr "Файл satellites.xml:"
 
-msgid "Select"
-msgstr ""
+msgid "Selected"
+msgstr "Выбор"
 
 msgid "Send"
 msgstr "Отправить"
@@ -286,6 +286,9 @@ msgstr "Дополнительно:"
 # Picons dialog
 msgid "Load providers"
 msgstr "Загрузить провайдеров"
+
+msgid "Providers"
+msgstr "Провайдеры"
 
 msgid "Receive picons"
 msgstr "Загрузить пиконы"
@@ -397,6 +400,21 @@ msgstr "Поток"
 msgid "Description"
 msgstr "Описание"
 
+msgid "Source:"
+msgstr "Источник:"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Update"
+msgstr "Обновить"
+
+msgid "Filter"
+msgstr "Фильтр"
+
+msgid "Find"
+msgstr "Поиск"
+
 # IPTV dialog
 msgid "Stream data"
 msgstr "Данные потока"
@@ -470,6 +488,9 @@ msgstr "Ошибка. Проверьте данные!"
 
 msgid "Operation not allowed in this context!"
 msgstr "Недопустимая операция в данном контексте!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "VLC не найден. Проверьте, что он установлен!"
 
 
 

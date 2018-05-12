@@ -1511,7 +1511,7 @@
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="margin_left">2</property>
-                        <property name="label" translatable="yes">Source: </property>
+                        <property name="label" translatable="yes">Source:</property>
                         <property name="track_visited_links">False</property>
                       </object>
                     </child>
