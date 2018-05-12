@@ -495,7 +495,6 @@ class SatellitesUpdateDialog:
     def destroy(self):
         self._dialog.destroy()
 
-    @run_idle
     def on_update_satellites_list(self, item):
         if self._download_task:
             show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
@@ -508,12 +507,20 @@ class SatellitesUpdateDialog:
         if not self._parser:
             self._parser = SatellitesParser()
 
+        self.get_sat_list(src, self.append_satellites)
+
+    @run_task
+    def get_sat_list(self, src, callback):
         sats = self._parser.get_satellites_list(SatelliteSource.FLYSAT if src == 0 else SatelliteSource.LYNGSAT)
         if sats:
-            model = get_base_model(self._sat_view.get_model())
-            for sat in sats:
-                model.append(sat)
+            callback(sats)
         self._download_task = False
+
+    @run_idle
+    def append_satellites(self, sats):
+        model = get_base_model(self._sat_view.get_model())
+        for sat in sats:
+            model.append(sat)
 
     @run_task
     def on_receive_satellites_list(self, item):
@@ -533,17 +540,22 @@ class SatellitesUpdateDialog:
         with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
             text = "Processing: {}\n"
             sats = []
+            appender = self.append_output()
+            next(appender)
             futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model if r[4]]}
             for future in concurrent.futures.as_completed(futures):
                 if not self._download_task:
                     executor.shutdown()
+                    appender.send("\nCanceled\n")
+                    appender.close()
                     return
                 data = future.result()
-                self.append_output(text.format(data[0]))
+                appender.send(text.format(data[0]))
                 sats.append(data)
 
-            self.append_output("-" * 75 + "\n")
-            self.append_output("Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats)))
+            appender.send("-" * 75 + "\n")
+            appender.send("Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats)))
+            appender.close()
             # self.show_info_message(message, Gtk.MessageType.INFO)
             sats = {s[2]: s for s in sats}  # key = position, v = satellite
 
@@ -569,9 +581,14 @@ class SatellitesUpdateDialog:
         for tr in sat[3]:
             self._main_model.append(itr, ["Transponder:", *tr, None, None])
 
-    @run_idle
-    def append_output(self, text):
-        append_text_to_tview(text, self._text_view)
+    def append_output(self):
+        @run_idle
+        def append(t):
+            append_text_to_tview(t, self._text_view)
+
+        while True:
+            text = yield
+            append(text)
 
     @run_idle
     def on_cancel_receive(self, item=None):
