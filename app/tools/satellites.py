@@ -6,7 +6,7 @@ import requests
 from enum import Enum
 from html.parser import HTMLParser
 
-from app.eparser import Satellite, Transponder
+from app.eparser import Satellite, Transponder, is_transponder_valid
 
 
 class SatelliteSource(Enum):
@@ -151,7 +151,10 @@ class SatellitesParser(HTMLParser):
                     continue
                 sys, mod = sys
                 mod = "QPSK" if sys == "DVB-S" else mod
-                trs.append(Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None))
+
+                tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None)
+                if is_transponder_valid(tr):
+                    trs.append(tr)
 
     def get_transponders_for_lyng_sat(self, trs):
         """ Parsing transponders for LyngSat """
@@ -173,7 +176,10 @@ class SatellitesParser(HTMLParser):
             if not sys:
                 continue
             sys = sys.group(1)
-            trs.append(Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None))
+
+            tr = Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None)
+            if is_transponder_valid(tr):
+                trs.append(tr)
 
 
 if __name__ == "__main__":

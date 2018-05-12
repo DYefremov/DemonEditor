@@ -1,6 +1,6 @@
 from app.commons import run_task
 from app.properties import Profile
-from .ecommons import Service, Satellite, Transponder, Bouquet, Bouquets
+from .ecommons import Service, Satellite, Transponder, Bouquet, Bouquets, is_transponder_valid
 from .enigma.blacklist import get_blacklist, write_blacklist
 from .enigma.bouquets import get_bouquets as get_enigma_bouquets, write_bouquets as write_enigma_bouquets, to_bouquet_id
 from .enigma.lamedb import get_services as get_enigma_services, write_services as write_enigma_services

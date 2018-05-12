@@ -142,3 +142,26 @@ def get_value_by_name(en, name):
     for n in en:
         if n.name == name:
             return n.value
+
+
+def is_transponder_valid(tr: Transponder):
+    """ Checks  transponder validity """
+    try:
+        int(tr.frequency)
+        int(tr.symbol_rate)
+        tr.pls_mode is None or int(tr.pls_mode)
+        tr.pls_code is None or int(tr.pls_code)
+        tr.is_id is None or int(tr.is_id)
+    except TypeError:
+        return False
+
+    if tr.polarization not in POLARIZATION.values():
+        return False
+    if tr.fec_inner not in FEC.values():
+        return False
+    if tr.system not in SYSTEM.values():
+        return False
+    if tr.modulation not in MODULATION.values():
+        return False
+
+    return True
