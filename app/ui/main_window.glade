@@ -444,6 +444,7 @@
     <property name="icon_name">accessories-text-editor</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
     <signal name="delete-event" handler="on_close_main_window" swapped="no"/>
+    <signal name="window-state-event" handler="on_main_window_state" swapped="no"/>
     <child>
       <object class="GtkBox" id="main_window_box">
         <property name="visible">True</property>
@@ -1842,7 +1843,8 @@
                             <child>
                               <object class="GtkDrawingArea" id="player_drawing_area">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="can_focus">True</property>
+                                <signal name="button-press-event" handler="on_player_press" swapped="no"/>
                                 <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
                               </object>
                             </child>

@@ -119,6 +119,8 @@ class MainAppWindow:
                     "on_iptv": self.on_iptv,
                     "on_fav_iptv_mode": self.on_fav_iptv_mode,
                     "on_drawing_area_realize": self.on_drawing_area_realize,
+                    "on_player_press": self.on_player_press,
+                    "on_main_window_state": self.on_main_window_state,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
@@ -143,6 +145,7 @@ class MainAppWindow:
         self._iptv_preview_mode = False
         self._player = None
         self._is_played = False
+        self._full_screen = False
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -161,7 +164,11 @@ class MainAppWindow:
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._status_bar = builder.get_object("status_bar")
         self._player_frame = builder.get_object("player_frame")
+        self._player_drawing_area = builder.get_object("player_drawing_area")
+        # enabling events for the drawing area
+        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._drawing_area_xid = None
+        self._main_window_box = builder.get_object("main_window_box")
         self._fav_iptv_mode_popup_item = builder.get_object("fav_iptv_mode_popup_item")
         self._profile_label = builder.get_object("profile_label")
         self._ip_label = builder.get_object("ip_label")
@@ -935,7 +942,6 @@ class MainAppWindow:
 
     def on_fav_press(self, menu, event):
         self.on_view_popup_menu(menu, event)
-
         if self._iptv_preview_mode and event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.test_iptv()
 
@@ -970,6 +976,30 @@ class MainAppWindow:
         if self._player:
             self._player.stop()
             self._is_played = False
+
+    def on_player_press(self, area, event):
+        if event.button == Gdk.BUTTON_PRIMARY:
+            if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+                self._full_screen = not self._full_screen
+                self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
+            elif event.type == Gdk.EventType.BUTTON_PRESS:
+                if self._player:
+                    self._player.stop() if self._player.is_playing() else self._player.play()
+
+    def on_main_window_state(self, window, event):
+        if event.new_window_state & Gdk.WindowState.FULLSCREEN:
+            if self._main_window_box in window:
+                window.remove(self._main_window_box)
+                self._player_drawing_area.reparent(window)
+                if self._player:
+                    self._player.set_xwindow(self._player_drawing_area.get_window().get_xid())
+        else:
+            if self._player_drawing_area in window:
+                window.remove(self._player_drawing_area)
+                window.add(self._main_window_box)
+                self._player_frame.add(self._player_drawing_area)
+                if self._player:
+                    self._player.set_xwindow(self._player_drawing_area.get_window().get_xid())
 
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()

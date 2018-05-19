@@ -7,6 +7,7 @@
     <property name="title" translatable="yes">Player</property>
     <property name="icon_name">vlc</property>
     <signal name="delete-event" handler="on_close_window" swapped="no"/>
+    <signal name="window-state-event" handler="on_state_changed" swapped="no"/>
     <child>
       <object class="GtkBox" id="main_box">
         <property name="visible">True</property>
@@ -17,7 +18,10 @@
             <property name="width_request">320</property>
             <property name="height_request">240</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
+            <signal name="button-press-event" handler="on_press" swapped="no"/>
+            <signal name="key-release-event" handler="on_key_release" swapped="no"/>
             <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
           </object>
           <packing>
@@ -28,7 +32,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="separator1">
+          <object class="GtkSeparator" id="separator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
