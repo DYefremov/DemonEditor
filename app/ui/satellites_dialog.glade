@@ -1753,6 +1753,7 @@
                             <property name="adjustment">pos_adjustment</property>
                             <property name="digits">1</property>
                             <property name="numeric">True</property>
+                            <signal name="changed" handler="on_filter" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -1765,6 +1766,7 @@
                             <property name="can_focus">False</property>
                             <property name="model">side_store</property>
                             <property name="active">0</property>
+                            <signal name="changed" handler="on_filter" swapped="no"/>
                             <child>
                               <object class="GtkCellRendererText" id="from_filter_cellrenderertext"/>
                               <attributes>
@@ -1796,6 +1798,7 @@
                             <property name="adjustment">pos_adjustment2</property>
                             <property name="digits">1</property>
                             <property name="numeric">True</property>
+                            <signal name="changed" handler="on_filter" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">4</property>
@@ -1808,6 +1811,7 @@
                             <property name="can_focus">False</property>
                             <property name="model">side_store</property>
                             <property name="active">0</property>
+                            <signal name="changed" handler="on_filter" swapped="no"/>
                             <child>
                               <object class="GtkCellRendererText" id="filter_to_cellrenderertext"/>
                               <attributes>
