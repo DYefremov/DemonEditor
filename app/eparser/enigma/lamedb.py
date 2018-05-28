@@ -1,12 +1,11 @@
 """   This module used for parsing lamedb file
 
       Currently implemented only for satellite channels!!!
-     Description of format taken from here: http://www.satsupreme.com/showthread.php/194074-Lamedb-format-explained
 """
 from app.commons import log
 from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
-from ..ecommons import Service, POLARIZATION, SYSTEM, FEC, SERVICE_TYPE, Flag
+from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag
 
 _HEADER = "eDVB services /4/"
 _SEP = ":"  # separator
@@ -42,8 +41,13 @@ def write_services(path, services):
         file.writelines(lines)
 
 
-def parse(path):
+def parse(path, version=None):
     """ Parsing lamedb """
+    return parse_v4(path)
+
+
+def parse_v4(path):
+    """ Parsing version 4 """
     with open(path + _FILE_NAME, "r", encoding="utf-8", errors="replace") as file:
         try:
             data = str(file.read())
@@ -59,6 +63,25 @@ def parse(path):
             services, sep, _ = services.partition("\nend")  # 3 step
 
             return parse_services(services.split("\n"), transponders.split("/"), path)
+
+
+def parse_v5(path):
+    """ Parsing version 5 """
+    with open(path + "lamedb5", "r", encoding="utf-8", errors="replace") as file:
+        lns = file.readlines()
+
+        if lns and not lns[0].endswith("/5/\n"):
+            raise SyntaxError("lamedb v.5 parsing error: unsupported format.")
+
+        trs, srvs = {}, [""]
+        for l in lns:
+            if l.startswith("s:"):
+                srvs.extend(l.strip("s:").split(",", 2))
+            elif l.startswith("t:"):
+                tr, srv = l.split(",")
+                trs[tr.strip("t:")] = srv.strip()
+
+        return parse_services(srvs, trs, path)
 
 
 def parse_transponders(arg):
@@ -77,7 +100,6 @@ def parse_services(services, transponders, path):
     channels = []
     transponders = parse_transponders(transponders)
     blacklist = str(get_blacklist(path))
-
     srv = split(services, 3)
     if srv[0][0] == "":  # remove first empty element
         srv.remove(srv[0])

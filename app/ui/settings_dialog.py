@@ -8,6 +8,7 @@ def show_settings_dialog(transient, options):
 
 
 class SettingsDialog:
+
     def __init__(self, transient, options):
         handlers = {"on_data_dir_field_icon_press": self.on_data_dir_field_icon_press,
                     "on_picons_dir_field_icon_press": self.on_picons_dir_field_icon_press,
@@ -39,11 +40,14 @@ class SettingsDialog:
         self._picons_dir_field = builder.get_object("picons_dir_field")
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
+        self._support_ver5_check_button = builder.get_object("support_ver5_check_button")
 
         self._options = options
         self._active_profile = options.get("profile")
         self.set_settings()
-        self._neutrino_radio_button.set_active(Profile(self._active_profile) is Profile.NEUTRINO_MP)
+        profile = Profile(self._active_profile)
+        self._neutrino_radio_button.set_active(profile is Profile.NEUTRINO_MP)
+        self._support_ver5_check_button.set_sensitive(profile is not Profile.NEUTRINO_MP)
 
     def show(self):
         response = self._dialog.run()
@@ -61,7 +65,9 @@ class SettingsDialog:
         update_entry_data(entry, self._dialog, self._options.get(self._options.get("profile")))
 
     def on_profile_changed(self, item):
-        self.set_profile(Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP)
+        profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
+        self.set_profile(profile)
+        self._support_ver5_check_button.set_sensitive(profile is Profile.ENIGMA_2)
 
     def set_profile(self, profile):
         self._active_profile = profile.value
@@ -94,11 +100,13 @@ class SettingsDialog:
         self._picons_field.set_text(options.get("picons_path", ""))
         self._data_dir_field.set_text(options.get("data_dir_path", ""))
         self._picons_dir_field.set_text(options.get("picons_dir_path", ""))
+        if Profile(self._active_profile) is Profile.ENIGMA_2:
+            self._support_ver5_check_button.set_active(options.get("v5_support", False))
 
     def apply_settings(self, item=None):
-        profile = Profile.ENIGMA_2.value if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP.value
-        self._active_profile = profile
-        self._options["profile"] = profile
+        profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
+        self._active_profile = profile.value
+        self._options["profile"] = self._active_profile
         options = self._options.get(self._active_profile)
         options["host"] = self._host_field.get_text()
         options["port"] = self._port_field.get_text()
@@ -114,6 +122,8 @@ class SettingsDialog:
         options["picons_path"] = self._picons_field.get_text()
         options["data_dir_path"] = self._data_dir_field.get_text()
         options["picons_dir_path"] = self._picons_dir_field.get_text()
+        if profile is Profile.ENIGMA_2:
+            options["v5_support"] = self._support_ver5_check_button.get_active()
 
 
 if __name__ == "__main__":
