@@ -12,8 +12,8 @@ _SEP = ":"  # separator
 _FILE_NAME = "lamedb"
 
 
-def get_services(path):
-    return parse(path)
+def get_services(path, format_version):
+    return parse(path, format_version)
 
 
 def write_services(path, services):
@@ -41,9 +41,13 @@ def write_services(path, services):
         file.writelines(lines)
 
 
-def parse(path, version=None):
+def parse(path, version=4):
     """ Parsing lamedb """
-    return parse_v4(path)
+    if version == 4:
+        return parse_v4(path)
+    elif version == 5:
+        return parse_v5(path)
+    raise SyntaxError("Unsupported version of the format.")
 
 
 def parse_v4(path):
@@ -62,7 +66,7 @@ def parse_v4(path):
             transponders, sep, services = services.partition("services")  # 2 step
             services, sep, _ = services.partition("\nend")  # 3 step
 
-            return parse_services(services.split("\n"), transponders.split("/"), path)
+            return parse_services(services.split("\n"), parse_transponders(transponders.split("/")), path)
 
 
 def parse_v5(path):
@@ -79,7 +83,7 @@ def parse_v5(path):
                 srvs.extend(l.strip("s:").split(",", 2))
             elif l.startswith("t:"):
                 tr, srv = l.split(",")
-                trs[tr.strip("t:")] = srv.strip()
+                trs[tr.strip("t:")] = srv.strip().replace(":", " ", 1)
 
         return parse_services(srvs, trs, path)
 
@@ -98,7 +102,6 @@ def parse_transponders(arg):
 def parse_services(services, transponders, path):
     """ Parsing channels """
     channels = []
-    transponders = parse_transponders(transponders)
     blacklist = str(get_blacklist(path))
     srv = split(services, 3)
     if srv[0][0] == "":  # remove first empty element

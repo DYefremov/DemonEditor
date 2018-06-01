@@ -10,9 +10,9 @@ from .neutrino.services import get_services as get_neutrino_services, write_serv
 from .satxml import get_satellites, write_satellites
 
 
-def get_services(data_path, profile):
+def get_services(data_path, profile, format_version):
     if profile is Profile.ENIGMA_2:
-        return get_enigma_services(data_path)
+        return get_enigma_services(data_path, format_version)
     elif profile is Profile.NEUTRINO_MP:
         return get_neutrino_services(data_path)
 

@@ -173,7 +173,7 @@ class MainAppWindow:
         self._profile_label = builder.get_object("profile_label")
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
-        self._profile_label.set_text("Enigma2 v.4" if Profile(self._profile) is Profile.ENIGMA_2 else "Neutrino-MP")
+        self.update_profile_label()
         # dynamically active elements depending on the selected view
         self._tool_elements = {k: builder.get_object(k) for k in self._DYNAMIC_ELEMENTS}
         self._picons_download_tool_button = builder.get_object("picons_download_tool_button")
@@ -589,7 +589,8 @@ class MainAppWindow:
 
     def append_services(self, data_path):
         try:
-            services = get_services(data_path, Profile(self._profile))
+            profile = Profile(self._profile)
+            services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
         except Exception as e:
             print(e)
             log("Append services error: " + str(e))
@@ -736,11 +737,13 @@ class MainAppWindow:
         if response != Gtk.ResponseType.CANCEL:
             profile = self._options.get("profile")
             self._ip_label.set_text(self._options.get(profile).get("host"))
+
             if profile != self._profile:
-                self._profile_label.set_text("Enigma 2 v.4" if Profile(profile) is Profile.ENIGMA_2 else "Neutrino-MP")
                 self._profile = profile
                 self.clear_current_data()
                 self.update_services_counts()
+
+            self.update_profile_label()
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -1129,6 +1132,16 @@ class MainAppWindow:
     def create_bouquets(self, g_type):
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
                      Profile(self._profile), self.append_bouquet)
+
+    def update_profile_label(self):
+        profile = Profile(self._profile)
+        if profile is Profile.ENIGMA_2:
+            self._profile_label.set_text("Enigma2 v.{}".format(self.get_format_version()))
+        elif profile is Profile.NEUTRINO_MP:
+            self._profile_label.set_text("Neutrino-MP")
+
+    def get_format_version(self):
+        return 5 if self._options.get(self._profile).get("v5_support", False) else 4
 
 
 def start_app():
