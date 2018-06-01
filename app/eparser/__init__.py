@@ -18,9 +18,9 @@ def get_services(data_path, profile, format_version):
 
 
 @run_task
-def write_services(path, channels, profile):
+def write_services(path, channels, profile, format_version):
     if profile is Profile.ENIGMA_2:
-        write_enigma_services(path, channels)
+        write_enigma_services(path, channels, format_version)
     elif profile is Profile.NEUTRINO_MP:
         write_neutrino_services(path, channels)
 

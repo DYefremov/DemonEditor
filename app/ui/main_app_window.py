@@ -646,7 +646,7 @@ class MainAppWindow:
         write_bouquets(path, bouquets, profile)
         # Getting services
         services = [Service(*row[:]) for row in services_model]
-        write_services(path, services, profile)
+        write_services(path, services, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
         # removing bouquet files
         if profile is Profile.ENIGMA_2:
             # blacklist

@@ -1,4 +1,4 @@
-"""   This module used for parsing lamedb file
+"""   This module used for parsing and write lamedb file
 
       Currently implemented only for satellite channels!!!
 """
@@ -7,17 +7,26 @@ from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
 from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag
 
-_HEADER = "eDVB services /4/"
+_HEADER = "eDVB services /{}/"
 _SEP = ":"  # separator
 _FILE_NAME = "lamedb"
+_END_LINE = "# File was created in DemonEditor.\n# ....Enjoy watching!....\n"
 
 
 def get_services(path, format_version):
     return parse(path, format_version)
 
 
-def write_services(path, services):
-    lines = [_HEADER, "\ntransponders\n"]
+def write_services(path, services, format_version=4):
+    if format_version == 4:
+        write_to_lamedb(path, services)
+    elif format_version == 5:
+        write_to_lamedb5(path, services)
+
+
+def write_to_lamedb(path, services):
+    """ Writing lamedb file ver.4  """
+    lines = [_HEADER.format(4), "\ntransponders\n"]
     tr_lines = []
     services_lines = ["end\nservices\n"]
     tr_set = set()
@@ -35,9 +44,28 @@ def write_services(path, services):
     tr_lines.sort()
     lines.extend(tr_lines)
     lines.extend(services_lines)
-    lines.append("end\nFile was created in DemonEditor.\n....Enjoy watching!....\n")
-
+    lines.append("end\n" + _END_LINE)
     with open(path + _FILE_NAME, "w") as file:
+        file.writelines(lines)
+
+
+def write_to_lamedb5(path, services):
+    """ Writing lamedb5 file """
+    lines = [_HEADER.format(5) + "\n"]
+    services_lines = []
+    tr_set = set()
+
+    for srv in services:
+        data_id = str(srv.data_id).split(_SEP)
+        tr_id = "{}:{}:{}".format(data_id[1], data_id[2], data_id[3])
+        tr_set.add("t:{},{}\n".format(tr_id, srv.transponder.replace(" ", ":", 1)))
+        services_lines.append("s:{},\"{}\",{}".format(srv.data_id, srv.service, srv.flags_cas))
+
+    lines.extend(sorted(tr_set))
+    lines.extend(services_lines)
+    lines.append(_END_LINE)
+
+    with open(path + "lamedb5", "w") as file:
         file.writelines(lines)
 
 
@@ -80,7 +108,9 @@ def parse_v5(path):
         trs, srvs = {}, [""]
         for l in lns:
             if l.startswith("s:"):
-                srvs.extend(l.strip("s:").split(",", 2))
+                srv_data = l.strip("s:").split(",", 2)
+                srv_data[1] = srv_data[1].strip("\"")
+                srvs.extend(srv_data)
             elif l.startswith("t:"):
                 tr, srv = l.split(",")
                 trs[tr.strip("t:")] = srv.strip().replace(":", " ", 1)
