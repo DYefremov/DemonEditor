@@ -59,7 +59,7 @@ def write_to_lamedb5(path, services):
         data_id = str(srv.data_id).split(_SEP)
         tr_id = "{}:{}:{}".format(data_id[1], data_id[2], data_id[3])
         tr_set.add("t:{},{}\n".format(tr_id, srv.transponder.replace(" ", ":", 1)))
-        services_lines.append("s:{},\"{}\",{}".format(srv.data_id, srv.service, srv.flags_cas))
+        services_lines.append("s:{},\"{}\",{}\n".format(srv.data_id, srv.service, srv.flags_cas))
 
     lines.extend(sorted(tr_set))
     lines.extend(services_lines)
@@ -109,7 +109,7 @@ def parse_v5(path):
         for l in lns:
             if l.startswith("s:"):
                 srv_data = l.strip("s:").split(",", 2)
-                srv_data[1] = srv_data[1].strip("\"")
+                srv_data[1], srv_data[2] = srv_data[1].strip("\""), srv_data[2].strip()
                 srvs.extend(srv_data)
             elif l.startswith("t:"):
                 tr, srv = l.split(",")
