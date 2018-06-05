@@ -8,7 +8,7 @@ from telnetlib import Telnet
 from app.commons import log
 from app.properties import Profile
 
-__DATA_FILES_LIST = ("tv", "radio", "lamedb", "blacklist", "whitelist",  # enigma 2
+__DATA_FILES_LIST = ("tv", "radio", "lamedb", "lamedb5", "blacklist", "whitelist",  # enigma 2
                      "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
 _SATELLITES_XML_FILE = "satellites.xml"
