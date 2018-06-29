@@ -117,6 +117,7 @@ class MainAppWindow:
                     "on_service_edit": self.on_service_edit,
                     "on_services_add_new": self.on_services_add_new,
                     "on_iptv": self.on_iptv,
+                    "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_fav_iptv_mode": self.on_fav_iptv_mode,
                     "on_drawing_area_realize": self.on_drawing_area_realize,
                     "on_player_press": self.on_player_press,
@@ -953,10 +954,7 @@ class MainAppWindow:
         if path:
             row = self._fav_model[path][:]
             if row[5] == BqServiceType.IPTV.value:
-                profile = Profile(self._profile)
-                data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
-                url = data[-3 if profile is Profile.ENIGMA_2 else 0]
-                url = url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
+                url = self.get_iptv_url(row)
                 if not url:
                     return
 
@@ -974,6 +972,33 @@ class MainAppWindow:
                     self._player.set_mrl(url)
                     self._is_played = True
                     self._player.play()
+
+    def get_iptv_url(self, row):
+        profile = Profile(self._profile)
+        data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
+        url = data[-3 if profile is Profile.ENIGMA_2 else 0]
+
+        return url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
+
+    @run_idle
+    def on_remove_all_unavailable(self, item):
+        from urllib.request import Request, urlopen
+        from urllib.error import URLError
+
+        to_delete = []
+        for row in self._fav_model:
+            if row[5] == BqServiceType.IPTV.value:
+                url = self.get_iptv_url(row)
+                req = Request(url)
+                try:
+                    urlopen(req)
+                except URLError as e:
+                    to_delete.append(self._fav_model.get_iter(row.path))
+
+        bq_selected = self.get_selected_bouquet()
+        if bq_selected:
+            fav_bouquet = self._bouquets.get(bq_selected, None)
+            self.remove_favs(fav_bouquet, to_delete, self._fav_model)
 
     def on_player_stop(self, item):
         if self._player:

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.19.0 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkMenu" id="bouquets_popup_menu">
@@ -111,6 +111,11 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-find</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-remove</property>
   </object>
   <object class="GtkImage" id="insert_image">
     <property name="visible">True</property>
@@ -269,6 +274,16 @@
                 <property name="image">network_transmit_receive_image</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_iptv" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_remove_all_unavailable_popup_item">
+                <property name="label" translatable="yes">Remove all unavailable</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">image1</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
               </object>
             </child>
           </object>
