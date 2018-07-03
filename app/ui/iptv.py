@@ -1,12 +1,15 @@
 import re
 
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+
+from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT
 from app.properties import Profile
 from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON
 from .dialogs import Action, show_dialog, DialogType
-from .main_helper import get_base_model
+from .main_helper import get_base_model, get_iptv_url
 
 
 class IptvDialog:
@@ -180,6 +183,80 @@ class IptvDialog:
             if elem.get_name() == self._DIGIT_ENTRY_NAME:
                 return False
         return True
+
+
+class SearchUnavailableDialog:
+
+    def __init__(self, transient, model, fav_bouquet, iptv_rows, profile):
+        handlers = {"on_search_unavailable_close": self.on_close}
+
+        builder = Gtk.Builder()
+        builder.set_translation_domain(TEXT_DOMAIN)
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("search_unavailable_streams_dialog",))
+        builder.connect_signals(handlers)
+
+        self._dialog = builder.get_object("search_unavailable_streams_dialog")
+        self._dialog.set_transient_for(transient)
+        self._model = model
+        self._counter_label = builder.get_object("streams_rows_counter_label")
+        self._level_bar = builder.get_object("unavailable_streams_level_bar")
+        self._bouquet = fav_bouquet
+        self._profile = profile
+        self._iptv_rows = iptv_rows
+        self._counter = -1
+        self._max_rows = len(self._iptv_rows)
+        self._level_bar.set_max_value(self._max_rows)
+        self._download_task = True
+        self._to_delete = []
+
+        self.update_process()
+        self.do_search()
+
+    @run_task
+    def do_search(self):
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {executor.submit(self.get_unavailable, row): row for row in self._iptv_rows}
+            for future in concurrent.futures.as_completed(futures):
+                if not self._download_task:
+                    executor.shutdown()
+                    return
+                future.result()
+            self._download_task = False
+        self._dialog.destroy()
+
+    def get_unavailable(self, row):
+        if not self._download_task:
+            return
+        req = Request(get_iptv_url(row, self._profile))
+        try:
+            self.update_bar()
+            urlopen(req, timeout=2)
+        except Exception:
+            self._to_delete.append(self._model.get_iter(row.path))
+            self.update_process()
+
+    @run_idle
+    def update_bar(self):
+        self._max_rows -= 1
+        self._level_bar.set_value(self._max_rows)
+
+    @run_idle
+    def update_process(self):
+        self._counter += 1
+        self._counter_label.set_text(str(self._counter))
+
+    def show(self):
+        response = self._dialog.run()
+        self._dialog.destroy()
+
+        return self._to_delete if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT) else False
+
+    def on_close(self, item, event=None):
+        if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+        self._download_task = False
+        self._dialog.destroy()
 
 
 if __name__ == "__main__":

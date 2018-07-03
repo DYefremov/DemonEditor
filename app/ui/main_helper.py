@@ -533,5 +533,13 @@ def append_text_to_tview(char, view):
     view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
 
 
+def get_iptv_url(row, profile):
+    """ Returns url from iptv type row """
+    data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
+    url = data[-3 if profile is Profile.ENIGMA_2 else 0]
+
+    return url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
+
+
 if __name__ == "__main__":
     pass

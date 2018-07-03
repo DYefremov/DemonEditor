@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.1 
+
+The MIT License (MIT)
+
+Copyright (c) 2018 Dmitriy Yefremov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Dmitriy Yefremov
+
+-->
 <interface>
-  <requires lib="gtk+" version="3.12"/>
+  <requires lib="gtk+" version="3.14"/>
+  <!-- interface-license-type mit -->
+  <!-- interface-name DemonEditor -->
+  <!-- interface-copyright 2018 Dmitriy Yefremov -->
+  <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
     <property name="modal">True</property>
@@ -21,6 +51,9 @@
     <property name="logo_icon_name">accessories-text-editor</property>
     <property name="wrap_license">True</property>
     <property name="license_type">mit-x11</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="aboutdialog_vbox">
         <property name="can_focus">False</property>
@@ -50,6 +83,9 @@
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">mail-send-receive</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="download_dialog_vbox">
         <property name="width_request">320</property>
@@ -92,11 +128,14 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Receive</property>
-                <property name="column_spacing">1</property>
+                <property name="margin_left">2</property>
+                <property name="margin_right">2</property>
+                <property name="column_spacing">2</property>
                 <child>
                   <object class="GtkLabel" id="label9">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
                     <property name="label" translatable="yes">Receiver IP:</property>
                     <property name="xalign">0</property>
                   </object>
@@ -124,6 +163,7 @@
                   <object class="GtkLabel" id="label11">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
                     <property name="label" translatable="yes">Current data path:</property>
                     <property name="xalign">0</property>
                   </object>
@@ -156,6 +196,9 @@
               <object class="GtkBox" id="download_dialogbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">5</property>
+                <property name="margin_top">2</property>
+                <property name="margin_bottom">2</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkLabel" id="label10">
@@ -176,7 +219,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="xalign">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">satellites_radio_button</property>
@@ -193,7 +235,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="xalign">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">satellites_radio_button</property>
                   </object>
@@ -209,7 +250,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="xalign">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">all_radio_button</property>
                   </object>
@@ -224,8 +264,6 @@
                     <property name="label" translatable="yes">WebTV</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="xalign">0</property>
-                    <property name="yalign">0.52999997138977051</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">all_radio_button</property>
@@ -298,7 +336,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="xalign">0</property>
+                    <property name="margin_left">2</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -409,6 +447,9 @@
     <property name="type_hint">dialog</property>
     <property name="message_type">error</property>
     <property name="buttons">ok</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="error_dialog_vbox">
         <property name="can_focus">False</property>
@@ -437,6 +478,9 @@
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">gtk-edit</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="input_dialog_vbox">
         <property name="width_request">320</property>
@@ -529,6 +573,9 @@
     <property name="type_hint">dialog</property>
     <property name="action">select-folder</property>
     <property name="do_overwrite_confirmation">True</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="filechooser_dialog_vbox">
         <property name="can_focus">False</property>
@@ -559,7 +606,6 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <property name="yalign">0.55000001192092896</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -593,6 +639,9 @@
     <property name="message_type">question</property>
     <property name="buttons">ok-cancel</property>
     <property name="text" translatable="yes">Are you sure?</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="question_dialog_vbox">
         <property name="can_focus">False</property>
@@ -612,6 +661,151 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkDialog" id="search_unavailable_streams_dialog">
+    <property name="width_request">320</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes"> </property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="gravity">center</property>
+    <signal name="delete-event" handler="on_search_unavailable_close" swapped="no"/>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_top">5</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button6">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_search_unavailable_close" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Please wait,  streams testing  in progress.</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLevelBar" id="unavailable_streams_level_bar">
+            <property name="height_request">10</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="inverted">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">center</property>
+            <property name="margin_top">10</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Found</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="streams_rows_counter_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">unavailable streams</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">2</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button6</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkListStore" id="stream_type_liststore">
     <columns>
@@ -637,6 +831,9 @@
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="iptv_dialog_vbox">
         <property name="can_focus">False</property>
@@ -1102,6 +1299,9 @@
     <property name="modal">True</property>
     <property name="icon_name">preferences-desktop</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox3">
         <property name="can_focus">False</property>
@@ -1584,7 +1784,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">neutrino_radio_button</property>
@@ -1603,7 +1802,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -1631,7 +1829,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">enigma_radio_button</property>
@@ -1805,6 +2002,9 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox4">
         <property name="width_request">118</property>

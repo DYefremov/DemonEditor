@@ -12,14 +12,14 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
-from .iptv import IptvDialog
+from .iptv import IptvDialog, SearchUnavailableDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, gen_bouquets, BqGenType
+    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -324,6 +324,7 @@ class MainAppWindow:
 
                 return rows
 
+    @run_idle
     def remove_favs(self, fav_bouquet, itrs, model):
         """ Deleting bouquet services """
         if fav_bouquet:
@@ -595,7 +596,7 @@ class MainAppWindow:
         except Exception as e:
             print(e)
             log("Append services error: " + str(e))
-            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!")
+            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + e)
         else:
             if services:
                 for srv in services:
@@ -954,7 +955,7 @@ class MainAppWindow:
         if path:
             row = self._fav_model[path][:]
             if row[5] == BqServiceType.IPTV.value:
-                url = self.get_iptv_url(row)
+                url = get_iptv_url(row, Profile(self._profile))
                 if not url:
                     return
 
@@ -973,32 +974,25 @@ class MainAppWindow:
                     self._is_played = True
                     self._player.play()
 
-    def get_iptv_url(self, row):
-        profile = Profile(self._profile)
-        data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
-        url = data[-3 if profile is Profile.ENIGMA_2 else 0]
-
-        return url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
-
     @run_idle
     def on_remove_all_unavailable(self, item):
-        from urllib.request import Request, urlopen
-        from urllib.error import URLError
-
-        to_delete = []
-        for row in self._fav_model:
-            if row[5] == BqServiceType.IPTV.value:
-                url = self.get_iptv_url(row)
-                req = Request(url)
-                try:
-                    urlopen(req)
-                except URLError as e:
-                    to_delete.append(self._fav_model.get_iter(row.path))
+        iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
+        if not iptv_rows:
+            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains iptv streams!")
+            return
 
         bq_selected = self.get_selected_bouquet()
-        if bq_selected:
-            fav_bouquet = self._bouquets.get(bq_selected, None)
-            self.remove_favs(fav_bouquet, to_delete, self._fav_model)
+        if not bq_selected:
+            return
+
+        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
+            return
+
+        fav_bqt = self._bouquets.get(bq_selected, None)
+        prf = Profile(self._profile)
+        response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
+        if response:
+            self.remove_favs(fav_bqt, response, self._fav_model)
 
     def on_player_stop(self, item):
         if self._player:
