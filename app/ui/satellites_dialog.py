@@ -467,7 +467,7 @@ class SatellitesUpdateDialog:
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
         # Filter
-        self._filter_info_bar = builder.get_object("sat_update_filter_info_bar")
+        self._filter_bar = builder.get_object("sat_update_filter_bar")
         self._from_pos_button = builder.get_object("from_pos_button")
         self._to_pos_button = builder.get_object("to_pos_button")
         self._filter_from_combo_box = builder.get_object("filter_from_combo_box")
@@ -476,7 +476,7 @@ class SatellitesUpdateDialog:
         self._filter_model.set_visible_func(self.filter_function)
         self._filter_positions = (0, 0)
         # Search
-        self._search_info_bar = builder.get_object("sat_update_search_info_bar")
+        self._search_bar = builder.get_object("sat_update_search_bar")
         self._search_provider = SearchProvider((self._sat_view,),
                                                builder.get_object("sat_update_search_down_button"),
                                                builder.get_object("sat_update_search_up_button"))
@@ -611,10 +611,10 @@ class SatellitesUpdateDialog:
         self._sat_update_info_bar.set_visible(False)
 
     def on_find_toggled(self, button: Gtk.ToggleToolButton):
-        self._search_info_bar.set_visible(button.get_active())
+        self._search_bar.set_search_mode(button.get_active())
 
     def on_filter_toggled(self, button: Gtk.ToggleToolButton):
-        self._filter_info_bar.set_visible(button.get_active())
+        self._filter_bar.set_search_mode(button.get_active())
 
     @run_idle
     def on_filter(self, item):
