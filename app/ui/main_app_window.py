@@ -36,41 +36,36 @@ class MainAppWindow:
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
 
     # dynamically active elements depending on the selected view
-    _SERVICE_ELEMENTS = ("copy_tool_button", "to_fav_tool_button", "copy_menu_item", "services_to_fav_move_popup_item",
-                         "services_edit_popup_item", "services_copy_popup_item", "services_picon_popup_item",
-                         "services_create_bouquet_popup_item")
+    _SERVICE_ELEMENTS = ("services_to_fav_move_popup_item", "services_edit_popup_item", "services_copy_popup_item",
+                         "services_picon_popup_item", "services_create_bouquet_popup_item")
 
-    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button",
-                         "bouquets_new_popup_item", "bouquets_edit_popup_item")
+    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouquets_edit_popup_item")
 
-    _COMMONS_ELEMENTS = ("edit_tool_button", "remove_tool_button", "delete_menu_item", "services_remove_popup_item",
-                         "bouquets_remove_popup_item", "fav_remove_popup_item", "up_tool_button", "down_tool_button")
+    _COMMONS_ELEMENTS = ("edit_tool_button", "services_remove_popup_item", "bouquets_remove_popup_item",
+                         "fav_remove_popup_item")
 
-    _FAV_ELEMENTS = ("cut_tool_button", "paste_tool_button", "cut_menu_item",
-                     "paste_menu_item", "fav_cut_popup_item", "fav_paste_popup_item", "import_m3u_tool_button",
-                     "fav_import_m3u_popup_item", "fav_insert_marker_popup_item", "fav_edit_popup_item",
-                     "fav_locate_popup_item", "fav_picon_popup_item", "fav_add_iptv_popup_item")
+    _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_import_m3u_popup_item", "fav_locate_popup_item",
+                     "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_picon_popup_item",
+                     "fav_add_iptv_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
-    _FAV_M3U_ELEMENTS = ("import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_add_iptv_popup_item")
+    _FAV_M3U_ELEMENTS = ("fav_import_m3u_popup_item", "fav_add_iptv_popup_item")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
-    _DYNAMIC_ELEMENTS = ("up_tool_button", "down_tool_button", "cut_tool_button", "services_create_bouquet_popup_item",
-                         "paste_tool_button", "to_fav_tool_button", "new_tool_button", "remove_tool_button",
-                         "cut_menu_item", "copy_menu_item", "paste_menu_item", "delete_menu_item", "edit_tool_button",
-                         "services_to_fav_move_popup_item", "services_edit_popup_item", "locked_tool_button",
-                         "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
-                         "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
-                         "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
-                         "import_m3u_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
+    _DYNAMIC_ELEMENTS = ("services_create_bouquet_popup_item", "new_tool_button",
+                         "edit_tool_button", "services_to_fav_move_popup_item", "services_edit_popup_item",
+                         "locked_tool_button", "services_remove_popup_item", "fav_cut_popup_item",
+                         "fav_paste_popup_item", "bouquets_new_popup_item", "bouquets_edit_popup_item",
+                         "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popup_item",
+                         "hide_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
                          "fav_edit_popup_item", "fav_locate_popup_item", "services_copy_popup_item",
                          "services_picon_popup_item", "fav_picon_popup_item", "services_add_new_popup_item",
-                         "fav_add_iptv_popup_item", "copy_tool_button")
+                         "fav_add_iptv_popup_item")
 
     def __init__(self):
-        handlers = {"on_close_main_window": self.on_quit,
+        handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
                     "on_about_app": self.on_about_app,
                     "on_preferences": self.on_preferences,
@@ -177,7 +172,6 @@ class MainAppWindow:
         self.update_profile_label()
         # dynamically active elements depending on the selected view
         self._tool_elements = {k: builder.get_object(k) for k in self._DYNAMIC_ELEMENTS}
-        self._picons_download_tool_button = builder.get_object("picons_download_tool_button")
         self._cas_label = builder.get_object("cas_label")
         self._fav_count_label = builder.get_object("fav_count_label")
         self._bouquets_count_label = builder.get_object("bouquets_count_label")
@@ -196,9 +190,9 @@ class MainAppWindow:
         self._services_model_filter = builder.get_object("services_model_filter")
         self._services_model_filter.set_visible_func(self.services_filter_function)
         self._filter_entry = builder.get_object("filter_entry")
-        self._filter_info_bar = builder.get_object("filter_info_bar")
+        self._filter_bar = builder.get_object("filter_bar")
         # Search
-        self._search_info_bar = builder.get_object("search_info_bar")
+        self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
                                                builder.get_object("search_up_button"))
@@ -223,7 +217,7 @@ class MainAppWindow:
         event.state |= Gdk.ModifierType.CONTROL_MASK
 
     @run_idle
-    def on_quit(self, *args):
+    def on_close_app(self, *args):
         """  Called before app quit """
         write_config(self._options)  # storing current config
         if self._player:
@@ -828,7 +822,7 @@ class MainAppWindow:
                     bq_selected = BqType(bq_type) is BqType.WEBTV
 
             for elem in self._FAV_ELEMENTS:
-                if elem in ("paste_tool_button", "paste_menu_item", "fav_paste_popup_item"):
+                if elem in ("paste_tool_button", "fav_paste_popup_item"):
                     self._tool_elements[elem].set_sensitive(not is_service and self._rows_buffer)
                 elif elem in self._FAV_ENIGMA_ELEMENTS:
                     if profile is Profile.ENIGMA_2:
@@ -858,17 +852,18 @@ class MainAppWindow:
     def set_service_flags(self, flag):
         profile = Profile(self._profile)
         bq_selected = self.get_selected_bouquet()
+        if not bq_selected:
+            return
+
         if profile is Profile.ENIGMA_2:
             if set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist):
-                if bq_selected:
-                    self._fav_model.clear()
-                    self.update_bouquet_services(self._fav_model, None, bq_selected)
+                self._fav_model.clear()
+                self.update_bouquet_services(self._fav_model, None, bq_selected)
         elif profile is Profile.NEUTRINO_MP:
-            if bq_selected:
-                model, path = self._bouquets_view.get_selection().get_selected()
-                value = model.get_value(path, 1 if flag is Flag.LOCK else 2)
-                value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
-                model.set_value(path, 1 if flag is Flag.LOCK else 2, value)
+            model, path = self._bouquets_view.get_selection().get_selected()
+            value = model.get_value(path, 1 if flag is Flag.LOCK else 2)
+            value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
+            model.set_value(path, 1 if flag is Flag.LOCK else 2, value)
 
     @run_idle
     def on_model_changed(self, model, path, itr=None):
@@ -1043,7 +1038,9 @@ class MainAppWindow:
 
     @run_idle
     def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
-        self._filter_info_bar.set_visible(toggle_button.get_active())
+        active = toggle_button.get_active()
+        self._filter_bar.set_search_mode(active)
+        self._filter_bar.set_visible(active)
 
     @run_idle
     def on_filter_changed(self, entry):
@@ -1056,7 +1053,7 @@ class MainAppWindow:
             return self._filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
 
     def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
-        self._search_info_bar.set_visible(toggle_button.get_active())
+        self._search_bar.set_search_mode(toggle_button.get_active())
 
     def on_search_down(self, item):
         self._search_provider.on_search_down()
