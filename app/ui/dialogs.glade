@@ -27,7 +27,7 @@ Author: Dmitriy Yefremov
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
+  <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-copyright 2018 Dmitriy Yefremov -->
@@ -76,16 +76,65 @@ Author: Dmitriy Yefremov
   <object class="GtkDialog" id="download_dialog">
     <property name="width_request">320</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">FTP-transfer</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="default_width">320</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">mail-send-receive</property>
     <property name="type_hint">dialog</property>
-    <child>
-      <placeholder/>
+    <child type="titlebar">
+      <object class="GtkHeaderBar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Receive</property>
+            <signal name="clicked" handler="on_receive" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="receive_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-goto-bottom</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child type="title">
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">FTP-transfer</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Send</property>
+            <signal name="clicked" handler="on_send" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="send_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-goto-top</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
     </child>
+    <action-widgets>
+      <action-widget response="-6">cancel_download_dialog_button</action-widget>
+    </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox" id="download_dialog_vbox">
         <property name="width_request">320</property>
@@ -122,7 +171,7 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
-            <property name="spacing">1</property>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkGrid" id="download_dialog_grid">
                 <property name="visible">True</property>
@@ -179,6 +228,7 @@ Author: Dmitriy Yefremov
                     <property name="editable">False</property>
                     <property name="text">data/</property>
                     <property name="caps_lock_warning">False</property>
+                    <property name="primary_icon_name">folder-open-symbolic</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -279,51 +329,6 @@ Author: Dmitriy Yefremov
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolbar" id="toolbar1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkToolButton" id="receive_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Receive files from receiver</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Receive</property>
-                    <property name="stock_id">gtk-goto-bottom</property>
-                    <signal name="clicked" handler="on_receive" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="send_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Send files to receiver</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Send</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-goto-top</property>
-                    <signal name="clicked" handler="on_send" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="primary-toolbar"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -478,7 +483,7 @@ Author: Dmitriy Yefremov
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">gtk-edit</property>
     <property name="type_hint">dialog</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
@@ -666,6 +671,7 @@ Author: Dmitriy Yefremov
     <property name="width_request">320</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes"> </property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
@@ -741,7 +747,6 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">center</property>
-            <property name="margin_top">10</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkLabel">

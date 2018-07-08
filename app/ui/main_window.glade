@@ -171,7 +171,7 @@ Author: Dmitriy Yefremov
   <object class="GtkPopoverMenu" id="left_header_popover_menu">
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkFrame">
+      <object class="GtkFrame" id="left_popover_munu_frame">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_left">5</property>
@@ -206,7 +206,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="save_left_popover_munu_button">
                 <property name="label">gtk-save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -222,16 +222,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">2</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -504,7 +495,7 @@ Author: Dmitriy Yefremov
   <object class="GtkPopoverMenu" id="right_header_popover_menu">
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkFrame">
+      <object class="GtkFrame" id="right_popover_munu_frame">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_left">5</property>
@@ -895,7 +886,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Profile:</property>
                     <attributes>
-                      <attribute name="foreground" value="#88888a8a8585"/>
                       <attribute name="size" value="8000"/>
                     </attributes>
                   </object>
@@ -911,7 +901,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="label">Enigma 2 v.4</property>
                     <attributes>
-                      <attribute name="foreground" value="#88888a8a8585"/>
                       <attribute name="size" value="8000"/>
                     </attributes>
                   </object>
@@ -977,12 +966,6 @@ Author: Dmitriy Yefremov
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
             <child>
               <object class="GtkSeparator">
@@ -1515,6 +1498,7 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkSearchEntry" id="filter_entry">
+                        <property name="height_request">32</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="primary_icon_name">tools-check-spelling</property>
@@ -2109,7 +2093,6 @@ Author: Dmitriy Yefremov
                     <property name="halign">center</property>
                     <property name="label" translatable="yes">Current IP:</property>
                     <attributes>
-                      <attribute name="foreground" value="#88888a8a8585"/>
                       <attribute name="size" value="8000"/>
                     </attributes>
                   </object>
@@ -2125,7 +2108,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">127.0.0.1</property>
                     <attributes>
-                      <attribute name="foreground" value="#88888a8a8585"/>
                       <attribute name="size" value="8000"/>
                     </attributes>
                   </object>
