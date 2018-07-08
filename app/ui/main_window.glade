@@ -27,7 +27,7 @@ Author: Dmitriy Yefremov
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.18"/>
+  <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
@@ -683,7 +683,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkMenuButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="popover">left_header_popover_menu</property>
                 <child>
@@ -715,7 +715,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">FTP-transfer</property>
                 <signal name="clicked" handler="on_download" swapped="no"/>
@@ -736,7 +736,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Save</property>
                 <signal name="clicked" handler="on_data_save" swapped="no"/>
@@ -769,7 +769,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkToggleButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
                 <child>
@@ -789,7 +789,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkToggleButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <signal name="toggled" handler="on_search_toggled" swapped="no"/>
                 <child>
@@ -821,7 +821,8 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton" id="locked_tool_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
                 <signal name="clicked" handler="on_locked" swapped="no"/>
@@ -829,7 +830,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">dialog-password-symbolic</property>
+                    <property name="icon_name">changes-prevent-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -842,7 +843,8 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton" id="hide_tool_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
                 <signal name="clicked" handler="on_hide" swapped="no"/>
@@ -933,38 +935,54 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkToolButton" id="new_tool_button">
+              <object class="GtkButton" id="new_tool_button">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">New bouquet</property>
-                <property name="label" translatable="yes">New</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-new</property>
                 <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-new</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="edit_tool_button">
+              <object class="GtkButton" id="edit_tool_button">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Edit</property>
-                <property name="label" translatable="yes">Edit </property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-edit</property>
                 <signal name="clicked" handler="on_tool_edit" swapped="no"/>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-edit</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">1</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <object class="GtkSeparator">
@@ -981,7 +999,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Satellites editor</property>
                 <signal name="clicked" handler="on_satellite_editor_show" swapped="no"/>
@@ -1002,7 +1020,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Picons downloader</property>
                 <signal name="clicked" handler="on_picons_loader_show" swapped="no"/>
@@ -1023,7 +1041,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Import m3u file</property>
                 <signal name="clicked" handler="on_import_m3u" swapped="no"/>
@@ -1044,7 +1062,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkMenuButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="direction">none</property>
                 <property name="use_popover">False</property>
@@ -1100,7 +1118,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkButton" id="search_down_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="relief">half</property>
                     <signal name="clicked" handler="on_search_down" swapped="no"/>
@@ -1123,7 +1141,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkButton" id="search_up_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="relief">half</property>
                     <signal name="clicked" handler="on_search_up" swapped="no"/>

@@ -852,18 +852,16 @@ class MainAppWindow:
     def set_service_flags(self, flag):
         profile = Profile(self._profile)
         bq_selected = self.get_selected_bouquet()
-        if not bq_selected:
-            return
-
         if profile is Profile.ENIGMA_2:
-            if set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist):
+            if set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist) and bq_selected:
                 self._fav_model.clear()
                 self.update_bouquet_services(self._fav_model, None, bq_selected)
-        elif profile is Profile.NEUTRINO_MP:
-            model, path = self._bouquets_view.get_selection().get_selected()
-            value = model.get_value(path, 1 if flag is Flag.LOCK else 2)
+        elif profile is Profile.NEUTRINO_MP and bq_selected:
+            model, paths = self._bouquets_view.get_selection().get_selected_rows()
+            itr = model.get_iter(paths[0])
+            value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
             value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
-            model.set_value(path, 1 if flag is Flag.LOCK else 2, value)
+            model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
 
     @run_idle
     def on_model_changed(self, model, path, itr=None):
