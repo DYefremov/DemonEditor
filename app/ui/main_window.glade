@@ -214,6 +214,7 @@ Author: Dmitriy Yefremov
                 <property name="relief">none</property>
                 <property name="use_stock">True</property>
                 <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_data_save" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -359,6 +360,7 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="fav_iptv_popup_item">
         <property name="label" translatable="yes">IPTV</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="image">networktransmit_receive_image</property>
         <property name="use_stock">False</property>
@@ -378,7 +380,6 @@ Author: Dmitriy Yefremov
               <object class="GtkImageMenuItem" id="fav_import_m3u_popup_item">
                 <property name="label" translatable="yes">Import m3u</property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="use_underline">True</property>
                 <property name="image">downloads_image</property>
@@ -390,7 +391,6 @@ Author: Dmitriy Yefremov
               <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
                 <property name="label" translatable="yes">Add IPTV or stream service</property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="image">network_transmit_receive_image</property>
                 <property name="use_stock">False</property>
@@ -1876,8 +1876,8 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">0</property>
-                            <property name="width_chars">15</property>
-                            <property name="max_width_chars">15</property>
+                            <property name="width_chars">4</property>
+                            <property name="max_width_chars">4</property>
                             <property name="xalign">0</property>
                           </object>
                           <packing>
@@ -1887,7 +1887,37 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkSeparator">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkAlignment">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">center</property>
+                            <child>
+                              <object class="GtkLabel" id="bq_name_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="use_underline">True</property>
+                                <property name="ellipsize">end</property>
+                                <property name="width_chars">12</property>
+                                <property name="max_width_chars">20</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>

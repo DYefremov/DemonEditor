@@ -44,25 +44,23 @@ class MainAppWindow:
     _COMMONS_ELEMENTS = ("edit_tool_button", "services_remove_popup_item", "bouquets_remove_popup_item",
                          "fav_remove_popup_item")
 
-    _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_import_m3u_popup_item", "fav_locate_popup_item",
-                     "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_picon_popup_item",
-                     "fav_add_iptv_popup_item")
+    _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
+                     "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_picon_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
-    _FAV_M3U_ELEMENTS = ("fav_import_m3u_popup_item", "fav_add_iptv_popup_item")
+    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
-    _DYNAMIC_ELEMENTS = ("services_create_bouquet_popup_item", "new_tool_button",
-                         "edit_tool_button", "services_to_fav_move_popup_item", "services_edit_popup_item",
-                         "locked_tool_button", "services_remove_popup_item", "fav_cut_popup_item",
-                         "fav_paste_popup_item", "bouquets_new_popup_item", "bouquets_edit_popup_item",
-                         "services_remove_popup_item", "bouquets_remove_popup_item", "fav_remove_popup_item",
-                         "hide_tool_button", "fav_import_m3u_popup_item", "fav_insert_marker_popup_item",
-                         "fav_edit_popup_item", "fav_locate_popup_item", "services_copy_popup_item",
-                         "services_picon_popup_item", "fav_picon_popup_item", "services_add_new_popup_item",
-                         "fav_add_iptv_popup_item")
+    _DYNAMIC_ELEMENTS = ("services_create_bouquet_popup_item", "new_tool_button", "edit_tool_button",
+                         "services_to_fav_move_popup_item", "services_edit_popup_item", "locked_tool_button",
+                         "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
+                         "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
+                         "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
+                         "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
+                         "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
+                         "services_add_new_popup_item", "fav_iptv_popup_item")
 
     def __init__(self):
         handlers = {"on_close_app": self.on_close_app,
@@ -167,6 +165,7 @@ class MainAppWindow:
         self._main_window_box = builder.get_object("main_window_box")
         self._fav_iptv_mode_popup_item = builder.get_object("fav_iptv_mode_popup_item")
         self._profile_label = builder.get_object("profile_label")
+        self._bq_name_label = builder.get_object("bq_name_label")
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
         self.update_profile_label()
@@ -551,6 +550,8 @@ class MainAppWindow:
         """ Opening data and fill views. """
         self._wait_dialog.show()
         self.clear_current_data()
+        self._current_bq_name = None
+        self._bq_name_label.set_text("")
 
         data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
         try:
@@ -676,6 +677,7 @@ class MainAppWindow:
 
     def on_bouquets_selection(self, model, path, column):
         self._current_bq_name = model[path][0] if len(path) > 1 else None
+        self._bq_name_label.set_text(self._current_bq_name if self._current_bq_name else "")
         self._fav_model.clear()
 
         if self._bouquets_view.row_expanded(path):
@@ -838,7 +840,7 @@ class MainAppWindow:
                 elif elem in self._FAV_ENIGMA_ELEMENTS:
                     if profile is Profile.ENIGMA_2:
                         self._tool_elements[elem].set_sensitive(bq_selected and not is_service)
-                elif elem in self._FAV_M3U_ELEMENTS:
+                elif elem in self._FAV_IPTV_ELEMENTS:
                     self._tool_elements[elem].set_sensitive(bq_selected and not is_service)
                 else:
                     self._tool_elements[elem].set_sensitive(not_empty and not is_service)
