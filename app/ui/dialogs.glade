@@ -170,6 +170,8 @@ Author: Dmitriy Yefremov
           <object class="GtkBox" id="download_dialog_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_left">2</property>
+            <property name="margin_right">2</property>
             <property name="orientation">vertical</property>
             <property name="spacing">2</property>
             <child>
@@ -180,6 +182,7 @@ Author: Dmitriy Yefremov
                 <property name="margin_left">2</property>
                 <property name="margin_right">2</property>
                 <property name="column_spacing">2</property>
+                <property name="column_homogeneous">True</property>
                 <child>
                   <object class="GtkLabel" id="label9">
                     <property name="visible">True</property>
@@ -237,7 +240,7 @@ Author: Dmitriy Yefremov
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
@@ -429,7 +432,7 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>

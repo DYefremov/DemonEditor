@@ -223,7 +223,7 @@ class SearchUnavailableDialog:
                     return
                 future.result()
             self._download_task = False
-        self._dialog.destroy()
+        self.on_close()
 
     def get_unavailable(self, row):
         if not self._download_task:
@@ -252,7 +252,8 @@ class SearchUnavailableDialog:
 
         return self._to_delete if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT) else False
 
-    def on_close(self, item, event=None):
+    @run_idle
+    def on_close(self, item=None, event=None):
         if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
         self._download_task = False

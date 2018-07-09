@@ -522,6 +522,17 @@ class MainAppWindow:
     def on_view_popup_menu(self, menu, event):
         """ Shows popup menu for any view """
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+            name = Gtk.Buildable.get_name(menu)
+            if name == "services_popup_menu":
+                self.delete_selection(self._fav_view, self._bouquets_view)
+                self.on_view_focus(self._services_view, None)
+            elif name == "fav_popup_menu":
+                self.delete_selection(self._services_view, self._bouquets_view)
+                self.on_view_focus(self._fav_view, None)
+            elif name == "bouquets_popup_menu":
+                self.delete_selection(self._services_view, self._fav_view)
+                self.on_view_focus(self._bouquets_view, None)
+
             menu.popup(None, None, None, None, event.button, event.time)
 
     @run_idle
@@ -590,7 +601,7 @@ class MainAppWindow:
         except Exception as e:
             print(e)
             log("Append services error: " + str(e))
-            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + e)
+            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + str(e))
         else:
             if services:
                 for srv in services:
