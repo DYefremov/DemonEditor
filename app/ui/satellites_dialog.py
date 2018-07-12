@@ -440,6 +440,9 @@ class SatellitesUpdateDialog:
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_find_toggled": self.on_find_toggled,
+                    "on_popup_menu": self.on_popup_menu,
+                    "on_select_all": self.on_select_all,
+                    "on_unselect_all": self.on_unselect_all,
                     "on_filter": self.on_filter,
                     "on_search": self.on_search,
                     "on_search_down": self.on_search_down,
@@ -451,7 +454,8 @@ class SatellitesUpdateDialog:
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_update_dialog", "update_source_store", "update_sat_list_store",
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
-                                       "pos_adjustment", "pos_adjustment2"))
+                                       "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",
+                                       "remove_selection_image"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("satellites_update_dialog")
@@ -646,6 +650,22 @@ class SatellitesUpdateDialog:
 
     def on_search_up(self, item):
         self._search_provider.on_search_up()
+
+    def on_select_all(self, view):
+        self.update_selection(view, True)
+
+    def on_unselect_all(self, view):
+        self.update_selection(view, False)
+
+    def update_selection(self, view, select):
+        model = get_base_model(view.get_model())
+        view.get_model().foreach(lambda mod, path, itr: model.set_value(model.get_iter(path), 4, select))
+        self.update_receive_button_state(self._filter_model)
+
+    def on_popup_menu(self, menu, event):
+        """ Shows popup menu for the view """
+        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+            menu.popup(None, None, None, None, event.button, event.time)
 
     def on_quit(self):
         self._download_task = False
