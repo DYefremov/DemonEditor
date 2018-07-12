@@ -170,6 +170,7 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkPopoverMenu" id="left_header_popover_menu">
     <property name="can_focus">False</property>
+    <signal name="button-release-event" handler="on_popover_release" swapped="no"/>
     <child>
       <object class="GtkFrame" id="left_popover_munu_frame">
         <property name="visible">True</property>
@@ -494,6 +495,7 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkPopoverMenu" id="right_header_popover_menu">
     <property name="can_focus">False</property>
+    <signal name="button-release-event" handler="on_popover_release" swapped="no"/>
     <child>
       <object class="GtkFrame" id="right_popover_munu_frame">
         <property name="visible">True</property>
@@ -980,14 +982,14 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="sat_editor_header_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Satellites editor</property>
                 <signal name="clicked" handler="on_satellite_editor_show" swapped="no"/>
                 <child>
-                  <object class="GtkImage">
+                  <object class="GtkImage" id="sat_editor_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="stock">gtk-select-all</property>
@@ -1001,14 +1003,14 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="picons_downloader_header_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Picons downloader</property>
                 <signal name="clicked" handler="on_picons_loader_show" swapped="no"/>
                 <child>
-                  <object class="GtkImage">
+                  <object class="GtkImage" id="picons_downloader_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="icon_name">insert-image</property>
@@ -1022,14 +1024,14 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="import_m3u_header_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Import m3u file</property>
                 <signal name="clicked" handler="on_import_m3u" swapped="no"/>
                 <child>
-                  <object class="GtkImage">
+                  <object class="GtkImage" id="import_m3u_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="icon_name">insert-link</property>
@@ -1043,7 +1045,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton">
+              <object class="GtkMenuButton" id="right_menu_header_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>

@@ -88,6 +88,7 @@ class MainAppWindow:
                     "on_fav_tree_view_drag_data_get": self.on_fav_tree_view_drag_data_get,
                     "on_fav_tree_view_drag_data_received": self.on_fav_tree_view_drag_data_received,
                     "on_view_popup_menu": self.on_view_popup_menu,
+                    "on_popover_release": self.on_popover_release,
                     "on_view_focus": self.on_view_focus,
                     "on_hide": self.on_hide,
                     "on_locked": self.on_locked,
@@ -234,6 +235,7 @@ class MainAppWindow:
     def on_down(self, item):
         self.move_items(Gdk.KEY_Down)
 
+    @run_idle
     def on_about_app(self, item):
         show_dialog(DialogType.ABOUT, self._main_window)
 
@@ -534,24 +536,26 @@ class MainAppWindow:
 
             menu.popup(None, None, None, None, event.button, event.time)
 
+    def on_popover_release(self, menu, event):
+        """ Hides popover after mouse click. Used if element of Popover menu is Gtk.Button! """
+        menu.popdown()
+
     @run_idle
     def on_satellite_editor_show(self, model):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self._main_window, self._options.get(self._profile))
 
+    @run_idle
     def on_data_open(self, model):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self.open_data(response)
 
-    @run_idle
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
         self._wait_dialog.show()
         self.clear_current_data()
-        self._current_bq_name = None
-        self._bq_name_label.set_text("")
 
         data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
         try:
@@ -619,7 +623,10 @@ class MainAppWindow:
         self._services.clear()
         self._rows_buffer.clear()
         self._bouquets.clear()
+        self._current_bq_name = None
+        self._bq_name_label.set_text("")
 
+    @run_idle
     def on_data_save(self, *args):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return

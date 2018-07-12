@@ -61,7 +61,6 @@ class SatellitesDialog:
                         6: builder.get_object("mod_store")}
         self.on_satellites_list_load(self._sat_view.get_model())
 
-    @run_idle
     def show(self):
         self._dialog.run()
         self._dialog.destroy()
