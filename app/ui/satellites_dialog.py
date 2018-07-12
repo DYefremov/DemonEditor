@@ -595,9 +595,8 @@ class SatellitesUpdateDialog:
         self._download_task = False
 
     def on_selected_toggled(self, toggle, path):
-        s_model = self._sat_view.get_model()
-        itr = self._filter_model.convert_iter_to_child_iter(s_model.convert_iter_to_child_iter(s_model.get_iter(path)))
-        self._filter_model.get_model().set_value(itr, 4, not toggle.get_active())
+        model = self._sat_view.get_model()
+        self.update_state(model, path, not toggle.get_active())
         self.update_receive_button_state(self._filter_model)
 
     @run_idle
@@ -658,9 +657,14 @@ class SatellitesUpdateDialog:
         self.update_selection(view, False)
 
     def update_selection(self, view, select):
-        model = get_base_model(view.get_model())
-        view.get_model().foreach(lambda mod, path, itr: model.set_value(model.get_iter(path), 4, select))
+        model = view.get_model()
+        view.get_model().foreach(lambda mod, path, itr: self.update_state(model, path, select))
         self.update_receive_button_state(self._filter_model)
+
+    def update_state(self, model, path, select):
+        """ Updates checkbox state by given path in the list """
+        itr = self._filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(model.get_iter(path)))
+        self._filter_model.get_model().set_value(itr, 4, select)
 
     def on_popup_menu(self, menu, event):
         """ Shows popup menu for the view """
