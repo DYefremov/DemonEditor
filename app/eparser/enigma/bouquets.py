@@ -1,4 +1,6 @@
 """ Module for parsing bouquets """
+import re
+
 from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet, BqType
 
 _TV_ROOT_FILE_NAME = "bouquets.tv"
@@ -13,32 +15,33 @@ def get_bouquets(path):
 def write_bouquets(path, bouquets):
     srv_line = '#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     line = []
+    pattern = re.compile("[^\w_()]+")
 
     for bqs in bouquets:
         line.clear()
         line.append("#NAME {}\n".format(bqs.name))
 
         for bq in bqs.bouquets:
-            line.append(srv_line.format(bq.name.replace(" ", "_"), bq.type))
-            write_bouquet(path, bq.name, bq.type, bq.services)
+            bq_name = re.sub(pattern, "_", bq.name)
+            line.append(srv_line.format(bq_name, bq.type))
+            write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
 
         with open(path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
             file.writelines(line)
 
 
-def write_bouquet(path, name, bq_type, channels):
+def write_bouquet(path, name, channels):
     bouquet = ["#NAME {}\n".format(name)]
 
     for ch in channels:
         if not ch:  # if was duplicate
             continue
-
         if ch.service_type == BqServiceType.IPTV.name or ch.service_type == BqServiceType.MARKER.name:
             bouquet.append("#SERVICE {}\n".format(ch.fav_id.strip()))
         else:
             bouquet.append("#SERVICE {}\n".format(to_bouquet_id(ch)))
 
-    with open(path + "userbouquet.{}.{}".format(name.replace(" ", "_"), bq_type), "w", encoding="utf-8") as file:
+    with open(path, "w", encoding="utf-8") as file:
         file.writelines(bouquet)
 
 
