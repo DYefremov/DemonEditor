@@ -26,6 +26,7 @@ class SatellitesDialog:
         handlers = {"on_open": self.on_open,
                     "on_remove": self.on_remove,
                     "on_save": self.on_save,
+                    "on_save_as": self.on_save_as,
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
@@ -34,6 +35,7 @@ class SatellitesDialog:
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
+                    "on_popover_release": self.on_popover_release,
                     "on_row_activated": self.on_row_activated,
                     "on_resize": self.on_resize,
                     "on_quit": self.on_quit}
@@ -70,18 +72,13 @@ class SatellitesDialog:
         if self._options:
             self._options["sat_editor_window_size"] = window.get_size()
 
+    @run_idle
     def on_quit(self, *args):
         self._dialog.destroy()
 
+    @run_idle
     def on_open(self, model):
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("satellites.xml")
-        file_filter.set_name("satellites.xml")
-        response = show_dialog(dialog_type=DialogType.CHOOSER,
-                               transient=self._dialog,
-                               options=self._options,
-                               action_type=Gtk.FileChooserAction.OPEN,
-                               file_filter=file_filter)
+        response = self.get_file_dialog_response(Gtk.FileChooserAction.OPEN)
         if response == Gtk.ResponseType.CANCEL:
             return
 
@@ -90,6 +87,17 @@ class SatellitesDialog:
             return
         self._data_path = response
         self.on_satellites_list_load(model)
+
+    def get_file_dialog_response(self, action: Gtk.FileChooserAction):
+        file_filter = Gtk.FileFilter()
+        file_filter.add_pattern("satellites.xml")
+        file_filter.set_name("satellites.xml")
+        response = show_dialog(dialog_type=DialogType.CHOOSER,
+                               transient=self._dialog,
+                               options=self._options,
+                               action_type=action,
+                               file_filter=file_filter)
+        return response
 
     @staticmethod
     def on_row_activated(view, path, column):
@@ -125,6 +133,9 @@ class SatellitesDialog:
             move_items(key, self._sat_view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
+
+    def on_popover_release(self, menu, event):
+        menu.popdown()
 
     @run_idle
     def on_satellites_list_load(self, model):
@@ -261,6 +272,7 @@ class SatellitesDialog:
         for itr in [model.get_iter(path) for path in paths]:
             model.remove(itr)
 
+    @run_idle
     def on_save(self, view):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
@@ -270,6 +282,13 @@ class SatellitesDialog:
         model.foreach(self.parse_data, satellites)
         write_satellites(satellites, self._data_path)
 
+    def on_save_as(self, item):
+        response = self.get_file_dialog_response(Gtk.FileChooserAction.SAVE)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+
+    @run_idle
     def on_update(self, item):
         dialog = SatellitesUpdateDialog(self._dialog, self._sat_view.get_model())
         dialog.run()
