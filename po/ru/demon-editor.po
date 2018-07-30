@@ -88,6 +88,9 @@ msgstr "Скрыть/Пропустить Вкл/Выкл     Ctrl + H"
 msgid "Add IPTV or stream service"
 msgstr "Добавить IPTV или поток"
 
+msgid "Preview mode"
+msgstr "Режим предпросмотра"
+
 msgid "Import m3u"
 msgstr "Импортировать m3u"
 
@@ -159,6 +162,9 @@ msgstr ""
 
 msgid "Remove"
 msgstr "Удалить"
+
+msgid "Remove all unavailable"
+msgstr "Удалить все недоступные"
 
 msgid "Satellites editor"
 msgstr "Редактор спутников"
@@ -491,6 +497,16 @@ msgstr "Недопустимая операция в данном контекс
 
 msgid "No VLC is found. Check that it is installed!"
 msgstr "VLC не найден. Проверьте, что он установлен!"
+
+# Search unavailable streams dialog
+msgid "Please wait,  streams testing  in progress..."
+msgstr "Подождите, идет тестирование потоков ..."
+
+msgid "Found"
+msgstr "Найдено"
+
+msgid "unavailable streams."
+msgstr "недоступных потоков."
 
 
 
