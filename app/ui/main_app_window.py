@@ -111,11 +111,8 @@ class MainAppWindow:
                     "on_service_edit": self.on_service_edit,
                     "on_services_add_new": self.on_services_add_new,
                     "on_iptv": self.on_iptv,
+                    "on_play_stream": self.on_play_stream,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
-                    "on_fav_iptv_mode": self.on_fav_iptv_mode,
-                    "on_drawing_area_realize": self.on_drawing_area_realize,
-                    "on_player_press": self.on_player_press,
-                    "on_main_window_state": self.on_main_window_state,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
@@ -158,13 +155,13 @@ class MainAppWindow:
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._status_bar = builder.get_object("status_bar")
-        self._player_frame = builder.get_object("player_frame")
-        self._player_drawing_area = builder.get_object("player_drawing_area")
-        # enabling events for the drawing area
-        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        self._drawing_area_xid = None
+        # self._player_frame = builder.get_object("player_frame")
+        # self._player_drawing_area = builder.get_object("player_drawing_area")
+        # # enabling events for the drawing area
+        # self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
+        # self._drawing_area_xid = None
         self._main_window_box = builder.get_object("main_window_box")
-        self._fav_iptv_mode_popup_item = builder.get_object("fav_iptv_mode_popup_item")
+        # self._fav_iptv_mode_popup_item = builder.get_object("fav_iptv_mode_popup_item")
         self._profile_label = builder.get_object("profile_label")
         self._bq_name_label = builder.get_object("bq_name_label")
         self._ip_label = builder.get_object("ip_label")
@@ -804,13 +801,8 @@ class MainAppWindow:
             self.on_service_edit(view)
         elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
             view.do_unselect_all(view)
-        elif (key == Gdk.KEY_P or key == Gdk.KEY_p) and model_name == self._FAV_LIST_NAME:
-            self._iptv_preview_mode = not self._iptv_preview_mode
-            self._fav_iptv_mode_popup_item.set_active(self._iptv_preview_mode)
-            self.on_fav_iptv_mode(self._fav_iptv_mode_popup_item)
-        elif (key == Gdk.KEY_Return or key == Gdk.KEY_KP_Enter) and model_name == self._FAV_LIST_NAME:
-            if self._iptv_preview_mode:
-                self.test_iptv()
+        elif ctrl and model_name == self._FAV_LIST_NAME and key in (Gdk.KEY_P, Gdk.KEY_p):
+            self.on_play_stream()
 
     def on_download(self, item):
         show_download_dialog(transient=self._main_window,
@@ -952,18 +944,12 @@ class MainAppWindow:
     def on_edit_marker(self, view):
         edit_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
 
-    def on_fav_iptv_mode(self, item):
-        self._iptv_preview_mode = item.get_active()
-        self._player_frame.set_visible(self._iptv_preview_mode)
-        if not self._iptv_preview_mode:
-            self.on_player_stop(None)
-
     def on_fav_press(self, menu, event):
         self.on_view_popup_menu(menu, event)
-        if self._iptv_preview_mode and event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.test_iptv()
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            self.on_play_stream()
 
-    def test_iptv(self):
+    def on_play_stream(self, item=None):
         path, column = self._fav_view.get_cursor()
         if path:
             row = self._fav_model[path][:]
@@ -979,8 +965,6 @@ class MainAppWindow:
                         self._player = Player.get_vlc_instance().media_player_new()
                     except (NameError, AttributeError):
                         show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
-                    else:
-                        self._player.set_xwindow(self._drawing_area_xid)
 
                 if self._player:
                     self._player.set_mrl(url)
@@ -1020,24 +1004,6 @@ class MainAppWindow:
             elif event.type == Gdk.EventType.BUTTON_PRESS:
                 if self._player:
                     self._player.stop() if self._player.is_playing() else self._player.play()
-
-    def on_main_window_state(self, window, event):
-        if event.new_window_state & Gdk.WindowState.FULLSCREEN:
-            if self._main_window_box in window:
-                window.remove(self._main_window_box)
-                self._player_drawing_area.reparent(window)
-                if self._player:
-                    self._player.set_xwindow(self._player_drawing_area.get_window().get_xid())
-        else:
-            if self._player_drawing_area in window:
-                window.remove(self._player_drawing_area)
-                window.add(self._main_window_box)
-                self._player_frame.add(self._player_drawing_area)
-                if self._player:
-                    self._player.set_xwindow(self._player_drawing_area.get_window().get_xid())
-
-    def on_drawing_area_realize(self, widget):
-        self._drawing_area_xid = widget.get_window().get_xid()
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)

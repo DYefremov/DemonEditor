@@ -88,9 +88,6 @@ msgstr "Скрыть/Пропустить Вкл/Выкл     Ctrl + H"
 msgid "Add IPTV or stream service"
 msgstr "Добавить IPTV или поток"
 
-msgid "Preview mode"
-msgstr "Режим предпросмотра"
-
 msgid "Import m3u"
 msgstr "Импортировать m3u"
 
