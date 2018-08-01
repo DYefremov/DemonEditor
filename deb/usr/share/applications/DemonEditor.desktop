@@ -8,4 +8,4 @@ Exec=/usr/bin/demoneditor.sh
 Terminal=false
 Type=Application
 Categories=Utility;Application;
-StartupNotify=true
+StartupNotify=false

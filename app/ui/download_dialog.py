@@ -70,7 +70,6 @@ class DownloadDialog:
         self._info_bar.set_visible(False)
 
     @run_idle
-    @run_task
     def download(self, download, d_type):
         """ Download/upload data from/to receiver """
         try:

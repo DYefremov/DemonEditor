@@ -8,4 +8,4 @@ Exec=bash -c 'cd $(dirname %k) && ./start.py'
 Terminal=false
 Type=Application
 Categories=Utility;Application;
-StartupNotify=true
+StartupNotify=false
