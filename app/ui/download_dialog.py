@@ -1,4 +1,4 @@
-from app.commons import run_idle, run_task
+from app.commons import run_idle
 from app.ftp import download_data, DownloadDataType, upload_data
 from app.properties import Profile
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
@@ -39,7 +39,6 @@ class DownloadDialog:
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
         if profile is Profile.NEUTRINO_MP:
             self._webtv_radio_button.set_visible(True)
-        # self._dialog.get_content_area().set_border_width(0)
 
     @run_idle
     def on_receive(self, item):
