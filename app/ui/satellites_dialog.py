@@ -43,19 +43,19 @@ class SatellitesDialog:
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("satellites_editor_dialog", "satellites_tree_store", "popup_menu",
+                                      ("satellites_editor_window", "satellites_tree_store", "popup_menu",
                                        "left_header_menu", "add_header_popover_menu"))
         builder.connect_signals(handlers)
 
-        self._dialog = builder.get_object("satellites_editor_dialog")
-        self._dialog.set_transient_for(transient)
+        self._window = builder.get_object("satellites_editor_window")
+        self._window.set_transient_for(transient)
         # self._dialog.get_content_area().set_border_width(0)  # The width of the border around the app dialog area!
         self._sat_view = builder.get_object("satellites_editor_tree_view")
-        self._wait_dialog = WaitDialog(self._dialog)
+        self._wait_dialog = WaitDialog(self._window)
         # Setting the last size of the dialog window if it was saved
         window_size = self._options.get("sat_editor_window_size", None)
         if window_size:
-            self._dialog.resize(*window_size)
+            self._window.resize(*window_size)
 
         self._stores = {3: builder.get_object("pol_store"),
                         4: builder.get_object("fec_store"),
@@ -64,8 +64,7 @@ class SatellitesDialog:
         self.on_satellites_list_load(self._sat_view.get_model())
 
     def show(self):
-        self._dialog.run()
-        self._dialog.destroy()
+        self._window.show()
 
     def on_resize(self, window):
         """ Stores new size properties for dialog window after resize """
@@ -74,7 +73,7 @@ class SatellitesDialog:
 
     @run_idle
     def on_quit(self, *args):
-        self._dialog.destroy()
+        self._window.destroy()
 
     @run_idle
     def on_open(self, model):
@@ -83,7 +82,7 @@ class SatellitesDialog:
             return
 
         if not str(response).endswith("satellites.xml"):
-            show_dialog(DialogType.ERROR, self._dialog, text="No satellites.xml file is selected!")
+            show_dialog(DialogType.ERROR, self._window, text="No satellites.xml file is selected!")
             return
         self._data_path = response
         self.on_satellites_list_load(model)
@@ -93,7 +92,7 @@ class SatellitesDialog:
         file_filter.add_pattern("satellites.xml")
         file_filter.set_name("satellites.xml")
         response = show_dialog(dialog_type=DialogType.CHOOSER,
-                               transient=self._dialog,
+                               transient=self._window,
                                options=self._options,
                                action_type=action,
                                file_filter=file_filter)
@@ -144,7 +143,7 @@ class SatellitesDialog:
             self._wait_dialog.show()
             satellites = get_satellites(self._data_path)
         except FileNotFoundError as e:
-            show_dialog(DialogType.ERROR, self._dialog, getattr(e, "message", str(e)) +
+            show_dialog(DialogType.ERROR, self._window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
         else:
             model.clear()
@@ -184,7 +183,7 @@ class SatellitesDialog:
 
     def on_satellite(self, satellite=None, edited_itr=None):
         """ Create or edit satellite"""
-        sat_dialog = SatelliteDialog(self._dialog, satellite)
+        sat_dialog = SatelliteDialog(self._window, satellite)
         sat = sat_dialog.run()
         sat_dialog.destroy()
 
@@ -205,10 +204,10 @@ class SatellitesDialog:
         if paths is None:
             return
         elif len(paths) == 0:
-            show_dialog(DialogType.ERROR, self._dialog, "No satellite is selected!")
+            show_dialog(DialogType.ERROR, self._window, "No satellite is selected!")
             return
 
-        dialog = TransponderDialog(self._dialog, transponder)
+        dialog = TransponderDialog(self._window, transponder)
         tr = dialog.run()
         dialog.destroy()
 
@@ -259,7 +258,7 @@ class SatellitesDialog:
         """
         model, paths = view.get_selection().get_selected_rows()
         if len(paths) > 1:
-            show_dialog(DialogType.ERROR, self._dialog, message)
+            show_dialog(DialogType.ERROR, self._window, message)
             return
 
         return paths
@@ -274,7 +273,7 @@ class SatellitesDialog:
 
     @run_idle
     def on_save(self, view):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._window) == Gtk.ResponseType.CANCEL:
             return
 
         model = view.get_model()
@@ -286,11 +285,11 @@ class SatellitesDialog:
         response = self.get_file_dialog_response(Gtk.FileChooserAction.SAVE)
         if response == Gtk.ResponseType.CANCEL:
             return
-        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+        show_dialog(DialogType.ERROR, transient=self._window, text="Not implemented yet!")
 
     @run_idle
     def on_update(self, item):
-        dialog = SatellitesUpdateDialog(self._dialog, self._sat_view.get_model())
+        dialog = SatellitesUpdateDialog(self._window, self._sat_view.get_model())
         dialog.run()
         dialog.destroy()
 
