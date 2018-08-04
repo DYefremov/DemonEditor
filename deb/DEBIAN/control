@@ -6,4 +6,4 @@ Architecture: all
 Essential: no
 Depends: python3 (>= 3.5)
 Maintainer: Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>
-Description: Enigma2 channels and satellites list editor
+Description: Enigma2 channel and satellites list editor

@@ -11,11 +11,11 @@ from app.properties import Profile
 __DATA_FILES_LIST = ("tv", "radio", "lamedb", "lamedb5", "blacklist", "whitelist",  # enigma 2
                      "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
-_SATELLITES_XML_FILE = "satellites.xml"
+_SAT_XML_FILE = "satellites.xml"
 _WEBTV_XML_FILE = "webtv.xml"
 
 
-class DownloadDataType(Enum):
+class DownloadType(Enum):
     ALL = 0
     BOUQUETS = 1
     SATELLITES = 2
@@ -23,7 +23,7 @@ class DownloadDataType(Enum):
     WEBTV = 4
 
 
-def download_data(*, properties, download_type=DownloadDataType.ALL, callback=None):
+def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
     with FTP(host=properties["host"]) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
         ftp.encoding = "utf-8"
@@ -31,7 +31,7 @@ def download_data(*, properties, download_type=DownloadDataType.ALL, callback=No
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
         # bouquets section
-        if download_type is DownloadDataType.ALL or download_type is DownloadDataType.BOUQUETS:
+        if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(properties["services_path"])
             ftp.dir(files.append)
 
@@ -41,25 +41,23 @@ def download_data(*, properties, download_type=DownloadDataType.ALL, callback=No
                     name = name.split()[-1]
                     download_file(ftp, name, save_path)
         # satellites.xml and webtv section
-        if download_type in (DownloadDataType.ALL, DownloadDataType.SATELLITES, DownloadDataType.WEBTV):
+        if download_type in (DownloadType.ALL, DownloadType.SATELLITES, DownloadType.WEBTV):
             ftp.cwd(properties["satellites_xml_path"])
             files.clear()
             ftp.dir(files.append)
 
             for file in files:
                 name = str(file).strip()
-                if download_type in (DownloadDataType.ALL, DownloadDataType.SATELLITES):
-                    if name.endswith(_SATELLITES_XML_FILE):
-                        download_file(ftp, _SATELLITES_XML_FILE, save_path)
-                elif download_type in (DownloadDataType.ALL, DownloadDataType.WEBTV):
-                    if name.endswith(_WEBTV_XML_FILE):
-                        download_file(ftp, _WEBTV_XML_FILE, save_path)
+                if download_type in (DownloadType.ALL, DownloadType.SATELLITES) and name.endswith(_SAT_XML_FILE):
+                    download_file(ftp, _SAT_XML_FILE, save_path)
+                if download_type in (DownloadType.ALL, DownloadType.WEBTV) and name.endswith(_WEBTV_XML_FILE):
+                    download_file(ftp, _WEBTV_XML_FILE, save_path)
 
         if callback is not None:
             callback()
 
 
-def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
+def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
                 callback=None):
     data_path = properties["data_dir_path"]
     host = properties["host"]
@@ -74,25 +72,25 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
         ftp.login(user=properties["user"], passwd=properties["password"])
         ftp.encoding = "utf-8"
 
-        if download_type is DownloadDataType.ALL or download_type is DownloadDataType.SATELLITES:
+        if download_type is DownloadType.ALL or download_type is DownloadType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])
-            send = send_file(_SATELLITES_XML_FILE, data_path, ftp)
-            if download_type is DownloadDataType.SATELLITES:
+            send = send_file(_SAT_XML_FILE, data_path, ftp)
+            if download_type is DownloadType.SATELLITES:
                 tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
                 if callback is not None:
                     callback()
                 return send
 
-        if profile is Profile.NEUTRINO_MP and download_type in (DownloadDataType.ALL, DownloadDataType.WEBTV):
+        if profile is Profile.NEUTRINO_MP and download_type in (DownloadType.ALL, DownloadType.WEBTV):
             ftp.cwd(properties["satellites_xml_path"])
             send = send_file(_WEBTV_XML_FILE, data_path, ftp)
-            if download_type is DownloadDataType.WEBTV:
+            if download_type is DownloadType.WEBTV:
                 tn.send("init 6")
                 if callback is not None:
                     callback()
                 return send
 
-        if download_type is DownloadDataType.ALL or download_type is DownloadDataType.BOUQUETS:
+        if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(properties["services_path"])
             if remove_unused:
                 files = []
@@ -104,12 +102,12 @@ def upload_data(*, properties, download_type=DownloadDataType.ALL, remove_unused
                         ftp.delete(name)
 
             for file_name in os.listdir(data_path):
-                if file_name == _SATELLITES_XML_FILE or file_name == _WEBTV_XML_FILE:
+                if file_name == _SAT_XML_FILE or file_name == _WEBTV_XML_FILE:
                     continue
                 if file_name.endswith(__DATA_FILES_LIST):
                     send_file(file_name, data_path, ftp)
 
-        if download_type is DownloadDataType.PICONS:
+        if download_type is DownloadType.PICONS:
             picons_dir_path = properties.get("picons_dir_path")
             picons_path = properties.get("picons_path")
             try:

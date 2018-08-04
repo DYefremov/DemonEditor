@@ -6,7 +6,7 @@ import time
 from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task
-from app.ftp import upload_data, DownloadDataType
+from app.ftp import upload_data, DownloadType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
@@ -204,7 +204,7 @@ class PiconsDialog:
             return
 
         upload_data(properties=self._properties,
-                    download_type=DownloadDataType.PICONS,
+                    download_type=DownloadType.PICONS,
                     profile=self._profile,
                     callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
 

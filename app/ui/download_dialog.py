@@ -1,5 +1,5 @@
 from app.commons import run_idle
-from app.ftp import download_data, DownloadDataType, upload_data
+from app.ftp import download_data, DownloadType, upload_data
 from app.properties import Profile
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, get_message
@@ -50,13 +50,13 @@ class DownloadDialog:
             self.download(False, self.get_download_type())
 
     def get_download_type(self):
-        download_type = DownloadDataType.ALL
+        download_type = DownloadType.ALL
         if self._bouquets_radio_button.get_active():
-            download_type = DownloadDataType.BOUQUETS
+            download_type = DownloadType.BOUQUETS
         elif self._satellites_radio_button.get_active():
-            download_type = DownloadDataType.SATELLITES
+            download_type = DownloadType.SATELLITES
         elif self._webtv_radio_button.get_active():
-            download_type = DownloadDataType.WEBTV
+            download_type = DownloadType.WEBTV
         return download_type
 
     def run(self):
@@ -85,7 +85,7 @@ class DownloadDialog:
             message = str(getattr(e, "message", str(e)))
             self.show_info_message(message, Gtk.MessageType.ERROR)
         else:
-            if download and d_type is not DownloadDataType.SATELLITES:
+            if download and d_type is not DownloadType.SATELLITES:
                 self._open_data()
 
     @run_idle
