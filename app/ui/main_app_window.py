@@ -155,14 +155,8 @@ class MainAppWindow:
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._status_bar = builder.get_object("status_bar")
-        # self._player_frame = builder.get_object("player_frame")
-        # self._player_drawing_area = builder.get_object("player_drawing_area")
-        # # enabling events for the drawing area
-        # self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        # self._drawing_area_xid = None
         self._main_window_box = builder.get_object("main_window_box")
-        # self._fav_iptv_mode_popup_item = builder.get_object("fav_iptv_mode_popup_item")
-        self._profile_label = builder.get_object("profile_label")
+        self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
@@ -1136,9 +1130,9 @@ class MainAppWindow:
     def update_profile_label(self):
         profile = Profile(self._profile)
         if profile is Profile.ENIGMA_2:
-            self._profile_label.set_text("Enigma2 v.{}".format(self.get_format_version()))
+            self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
         elif profile is Profile.NEUTRINO_MP:
-            self._profile_label.set_text("Neutrino-MP")
+            self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
 
     def get_format_version(self):
         return 5 if self._options.get(self._profile).get("v5_support", False) else 4

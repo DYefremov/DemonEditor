@@ -317,7 +317,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="separatormenuitem3">
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_8">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -334,7 +334,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_1">
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_9">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -380,6 +380,12 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_6">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
               <object class="GtkImageMenuItem" id="fav_import_m3u_popup_item">
                 <property name="label" translatable="yes">Import m3u</property>
                 <property name="visible">True</property>
@@ -398,6 +404,12 @@ Author: Dmitriy Yefremov
                 <property name="image">network_transmit_receive_image</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_iptv" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_7">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
               </object>
             </child>
             <child>
@@ -668,6 +680,8 @@ Author: Dmitriy Yefremov
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="title" translatable="yes">DemonEditor</property>
+        <property name="subtitle" translatable="yes">Profile:</property>
         <property name="spacing">1</property>
         <property name="show_close_button">True</property>
         <child>
@@ -858,70 +872,6 @@ Author: Dmitriy Yefremov
             </child>
           </object>
         </child>
-        <child type="title">
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DemonEditor</property>
-                <attributes>
-                  <attribute name="size" value="10000"/>
-                </attributes>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="prifile_box">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="spacing">2</property>
-                <child>
-                  <object class="GtkLabel" id="label3">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Profile:</property>
-                    <attributes>
-                      <attribute name="size" value="8000"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="profile_label">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label">Enigma 2 v.4</property>
-                    <attributes>
-                      <attribute name="size" value="8000"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-        </child>
         <child>
           <object class="GtkBox" id="right_header_box">
             <property name="visible">True</property>
@@ -1087,6 +1037,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkSearchEntry" id="search_entry">
+                    <property name="height_request">32</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="primary_icon_name">edit-find-symbolic</property>
