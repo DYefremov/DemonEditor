@@ -4,7 +4,9 @@ import shutil
 from contextlib import suppress
 from functools import lru_cache
 
-from app.commons import run_idle, log
+from gi.repository import GLib
+
+from app.commons import run_idle, log, run_task
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
@@ -18,8 +20,8 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url
+    scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
+    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -547,27 +549,31 @@ class MainAppWindow:
         """ Opening data and fill views. """
         self._wait_dialog.show()
         self.clear_current_data()
+        self.append_data(data_path)
 
+    @run_task
+    def append_data(self, data_path):
         data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
         try:
             self.append_blacklist(data_path)
             self.append_bouquets(data_path)
             self.append_services(data_path)
             self.update_services_counts(len(self._services_model))
-            self.update_picons()
+            update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
         except FileNotFoundError as e:
+            self._wait_dialog.hide()
             show_dialog(DialogType.ERROR, self._main_window, getattr(e, "message", str(e)) + "\n\n" +
                         get_message("Please, download files from receiver or setup your path for read data!"))
         except SyntaxError as e:
-            show_dialog(DialogType.ERROR, self._main_window, str(e))
-        finally:
             self._wait_dialog.hide()
+            show_dialog(DialogType.ERROR, self._main_window, str(e))
 
     def append_blacklist(self, data_path):
         black_list = get_blacklist(data_path)
         if black_list:
             self._blacklist.update(black_list)
 
+    @run_idle
     def append_bouquets(self, data_path):
         for bouquet in get_bouquets(data_path, Profile(self._profile)):
             parent = self._bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
@@ -595,7 +601,7 @@ class MainAppWindow:
             profile = Profile(self._profile)
             services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
         except Exception as e:
-            print(e)
+            self._wait_dialog.hide()
             log("Append services error: " + str(e))
             show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + str(e))
         else:
@@ -603,7 +609,15 @@ class MainAppWindow:
                 for srv in services:
                     #  adding channels to dict with fav_id as keys
                     self._services[srv.fav_id] = srv
-                    self._services_model.append(srv)
+                gen = self.append_services_data(services)
+                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def append_services_data(self, services):
+        for srv in services:
+            self._services_model.append(srv)
+            yield True
+        # append_picons(self._picons, self._services_model)
+        self._wait_dialog.hide()
 
     def clear_current_data(self):
         """ Clearing current data from lists """
@@ -1079,9 +1093,10 @@ class MainAppWindow:
                                       action=Action.ADD)
         dialog.show()
 
-    @run_idle
+    @run_task
     def update_picons(self):
-        update_picons(self._options.get(self._profile).get("picons_dir_path"), self._picons, self._services_model)
+        update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
+        append_picons(self._picons, self._services_model)
 
     def on_assign_picon(self, view):
         assign_picon(self.get_target_view(view),

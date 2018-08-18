@@ -1,7 +1,7 @@
 """ This is helper module for ui """
 import os
 import shutil
-from gi.repository import GdkPixbuf
+from gi.repository import GdkPixbuf, GLib
 
 from app.commons import run_task
 from app.eparser import Service
@@ -324,15 +324,22 @@ def scroll_to(index, view, paths=None):
 
 # ***************** Picons *********************#
 
-def update_picons(path, picons, model):
+def update_picons_data(path, picons):
     if not os.path.exists(path):
         return
 
     for file in os.listdir(path):
         picons[file] = get_picon_pixbuf(path + file)
 
-    for r in model:
-        model.set_value(model.get_iter(r.path), 8, picons.get(r[9], None))
+
+def append_picons(picons, model):
+    def append_picons_data(pcs, mod):
+        for r in mod:
+            mod.set_value(mod.get_iter(r.path), 8, pcs.get(r[9], None))
+            yield True
+
+    app = append_picons_data(picons, model)
+    GLib.idle_add(lambda: next(app, False), priority=GLib.PRIORITY_LOW)
 
 
 def assign_picon(target, srv_view, fav_view, transient, picons, options, services):
