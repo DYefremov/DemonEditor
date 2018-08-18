@@ -14,7 +14,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
-from .iptv import IptvDialog, SearchUnavailableDialog
+from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
@@ -113,6 +113,7 @@ class MainAppWindow:
                     "on_service_edit": self.on_service_edit,
                     "on_services_add_new": self.on_services_add_new,
                     "on_iptv": self.on_iptv,
+                    "on_iptv_list_configuration": self.on_iptv_list_configuration,
                     "on_play_stream": self.on_play_stream,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
@@ -977,6 +978,9 @@ class MainAppWindow:
                     self._player.set_mrl(url)
                     self._is_played = True
                     self._player.play()
+
+    def on_iptv_list_configuration(self, item):
+        IptvListConfigurationDialog(self._main_window).show()
 
     @run_idle
     def on_remove_all_unavailable(self, item):

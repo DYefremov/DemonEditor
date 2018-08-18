@@ -260,5 +260,23 @@ class SearchUnavailableDialog:
         self._dialog.destroy()
 
 
+class IptvListConfigurationDialog:
+
+    def __init__(self, transient):
+        handlers = {}
+
+        builder = Gtk.Builder()
+        builder.set_translation_domain(TEXT_DOMAIN)
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("iptv_list_configuration_dialog",))
+        builder.connect_signals(handlers)
+
+        self._dialog = builder.get_object("iptv_list_configuration_dialog")
+        self._dialog.set_transient_for(transient)
+
+    def show(self):
+        response = self._dialog.run()
+        self._dialog.destroy()
+
+
 if __name__ == "__main__":
     pass
