@@ -559,6 +559,7 @@ class MainAppWindow:
             black_list = get_blacklist(data_path)
             bouquets = get_bouquets(data_path, Profile(self._profile))
             services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
+            update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
         except FileNotFoundError as e:
             self._wait_dialog.hide()
             show_dialog(DialogType.ERROR, self._main_window, getattr(e, "message", str(e)) + "\n\n" +
@@ -575,7 +576,6 @@ class MainAppWindow:
             self.append_bouquets(bouquets)
             self.append_services(services)
             self.update_services_counts(len(self._services.values()))
-            update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
 
     def append_blacklist(self, black_list):
         if black_list:
@@ -613,9 +613,9 @@ class MainAppWindow:
 
     def append_services_data(self, services):
         for srv in services:
-            self._services_model.append(srv)
+            itr = self._services_model.append(srv)
+            self._services_model.set_value(itr, 8, self._picons.get(srv.picon_id, None))
             yield True
-        append_picons(self._picons, self._services_model)
         self._wait_dialog.hide()
 
     def clear_current_data(self):
