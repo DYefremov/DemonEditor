@@ -549,17 +549,16 @@ class MainAppWindow:
         """ Opening data and fill views. """
         self._wait_dialog.show()
         self.clear_current_data()
-        self.append_data(data_path)
+        GLib.idle_add(self.append_data, data_path, priority=GLib.PRIORITY_LOW)
 
-    @run_task
     def append_data(self, data_path):
+        profile = Profile(self._profile)
         data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
+
         try:
-            self.append_blacklist(data_path)
-            self.append_bouquets(data_path)
-            self.append_services(data_path)
-            self.update_services_counts(len(self._services_model))
-            update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
+            black_list = get_blacklist(data_path)
+            bouquets = get_bouquets(data_path, Profile(self._profile))
+            services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
         except FileNotFoundError as e:
             self._wait_dialog.hide()
             show_dialog(DialogType.ERROR, self._main_window, getattr(e, "message", str(e)) + "\n\n" +
@@ -567,15 +566,23 @@ class MainAppWindow:
         except SyntaxError as e:
             self._wait_dialog.hide()
             show_dialog(DialogType.ERROR, self._main_window, str(e))
+        except Exception as e:
+            self._wait_dialog.hide()
+            log("Append services error: " + str(e))
+            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + str(e))
+        else:
+            self.append_blacklist(black_list)
+            self.append_bouquets(bouquets)
+            self.append_services(services)
+            self.update_services_counts(len(self._services.values()))
+            update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
 
-    def append_blacklist(self, data_path):
-        black_list = get_blacklist(data_path)
+    def append_blacklist(self, black_list):
         if black_list:
             self._blacklist.update(black_list)
 
-    @run_idle
-    def append_bouquets(self, data_path):
-        for bouquet in get_bouquets(data_path, Profile(self._profile)):
+    def append_bouquets(self, bqs):
+        for bouquet in bqs:
             parent = self._bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
             for bq in bouquet.bouquets:
                 self.append_bouquet(bq, parent)
@@ -596,27 +603,19 @@ class MainAppWindow:
             services.append(fav_id)
         self._bouquets["{}:{}".format(name, bt_type)] = services
 
-    def append_services(self, data_path):
-        try:
-            profile = Profile(self._profile)
-            services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
-        except Exception as e:
-            self._wait_dialog.hide()
-            log("Append services error: " + str(e))
-            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + str(e))
-        else:
-            if services:
-                for srv in services:
-                    #  adding channels to dict with fav_id as keys
-                    self._services[srv.fav_id] = srv
-                gen = self.append_services_data(services)
-                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+    def append_services(self, services):
+        if services:
+            for srv in services:
+                #  adding channels to dict with fav_id as keys
+                self._services[srv.fav_id] = srv
+            gen = self.append_services_data(services)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_services_data(self, services):
         for srv in services:
             self._services_model.append(srv)
             yield True
-        # append_picons(self._picons, self._services_model)
+        append_picons(self._picons, self._services_model)
         self._wait_dialog.hide()
 
     def clear_current_data(self):
