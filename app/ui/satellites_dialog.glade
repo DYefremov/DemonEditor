@@ -194,7 +194,6 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton" id="save_as_left_popover_munu_button">
                 <property name="label">gtk-save-as</property>
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="relief">none</property>
@@ -433,6 +432,34 @@ Author: Dmitriy Yefremov
         <signal name="activate" handler="on_unselect_all" object="sat_update_tree_view" swapped="no"/>
       </object>
     </child>
+  </object>
+  <object class="GtkTreeStore" id="satellites_tree_store">
+    <columns>
+      <!-- column-name satelitte -->
+      <column type="gchararray"/>
+      <!-- column-name freq -->
+      <column type="gchararray"/>
+      <!-- column-name rate -->
+      <column type="gchararray"/>
+      <!-- column-name pol -->
+      <column type="gchararray"/>
+      <!-- column-name fec -->
+      <column type="gchararray"/>
+      <!-- column-name system -->
+      <column type="gchararray"/>
+      <!-- column-name mod -->
+      <column type="gchararray"/>
+      <!-- column-name pls_mode -->
+      <column type="gchararray"/>
+      <!-- column-name pls_code -->
+      <column type="gchararray"/>
+      <!-- column-name is_id -->
+      <column type="gchararray"/>
+      <!-- column-name flags -->
+      <column type="gchararray"/>
+      <!-- column-name pos -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkWindow" id="satellites_editor_window">
     <property name="can_focus">False</property>
@@ -800,34 +827,6 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkTreeStore" id="satellites_tree_store">
-    <columns>
-      <!-- column-name satelitte -->
-      <column type="gchararray"/>
-      <!-- column-name freq -->
-      <column type="gchararray"/>
-      <!-- column-name rate -->
-      <column type="gchararray"/>
-      <!-- column-name pol -->
-      <column type="gchararray"/>
-      <!-- column-name fec -->
-      <column type="gchararray"/>
-      <!-- column-name system -->
-      <column type="gchararray"/>
-      <!-- column-name mod -->
-      <column type="gchararray"/>
-      <!-- column-name pls_mode -->
-      <column type="gchararray"/>
-      <!-- column-name pls_code -->
-      <column type="gchararray"/>
-      <!-- column-name is_id -->
-      <column type="gchararray"/>
-      <!-- column-name flags -->
-      <column type="gchararray"/>
-      <!-- column-name pos -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkListStore" id="side_store">
     <columns>

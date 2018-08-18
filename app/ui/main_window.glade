@@ -33,6 +33,11 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
   <!-- interface-copyright 2018 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-properties</property>
+  </object>
   <object class="GtkMenu" id="bouquets_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -108,6 +113,11 @@ Author: Dmitriy Yefremov
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">insert-link</property>
+  </object>
+  <object class="GtkImage" id="fav_iptv_list_config_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-properties</property>
   </object>
   <object class="GtkListStore" id="fav_list_store">
     <columns>
@@ -404,6 +414,22 @@ Author: Dmitriy Yefremov
                 <property name="image">network_transmit_receive_image</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_iptv" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_iptv_list_configuration_popup_item">
+                <property name="label" translatable="yes">List configuration</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">fav_iptv_list_config_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
               </object>
             </child>
             <child>
@@ -1198,7 +1224,10 @@ Author: Dmitriy Yefremov
                               </attributes>
                             </child>
                             <child>
-                              <object class="GtkCellRendererText" id="service_cellrenderertext"/>
+                              <object class="GtkCellRendererText" id="service_cellrenderertext">
+                                <property name="ellipsize">end</property>
+                                <property name="width_chars">25</property>
+                              </object>
                               <attributes>
                                 <attribute name="text">3</attribute>
                               </attributes>
@@ -1226,7 +1255,10 @@ Author: Dmitriy Yefremov
                             <property name="reorderable">True</property>
                             <property name="sort_column_id">6</property>
                             <child>
-                              <object class="GtkCellRendererText" id="package_cellrenderertext"/>
+                              <object class="GtkCellRendererText" id="package_cellrenderertext">
+                                <property name="ellipsize">end</property>
+                                <property name="width_chars">15</property>
+                              </object>
                               <attributes>
                                 <attribute name="text">6</attribute>
                               </attributes>
@@ -1673,10 +1705,14 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="num_column">
+                                <property name="resizable">True</property>
+                                <property name="min_width">25</property>
                                 <property name="title" translatable="yes">Num</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="num_cellrenderertext">
                                     <property name="xalign">0.20000000298023224</property>
+                                    <property name="width_chars">5</property>
+                                    <property name="max_width_chars">5</property>
                                   </object>
                                   <attributes>
                                     <attribute name="text">0</attribute>
@@ -1688,7 +1724,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkTreeViewColumn" id="fav_service_column">
                                 <property name="resizable">True</property>
                                 <property name="spacing">2</property>
-                                <property name="sizing">autosize</property>
+                                <property name="min_width">50</property>
                                 <property name="title" translatable="yes">Service</property>
                                 <property name="expand">True</property>
                                 <child>
@@ -1704,7 +1740,10 @@ Author: Dmitriy Yefremov
                                   </attributes>
                                 </child>
                                 <child>
-                                  <object class="GtkCellRendererText" id="fav_service_cellrenderertext"/>
+                                  <object class="GtkCellRendererText" id="fav_service_cellrenderertext">
+                                    <property name="ellipsize">end</property>
+                                    <property name="width_chars">25</property>
+                                  </object>
                                   <attributes>
                                     <attribute name="text">2</attribute>
                                   </attributes>
@@ -1725,6 +1764,8 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="fav_type_column">
+                                <property name="resizable">True</property>
+                                <property name="min_width">25</property>
                                 <property name="title" translatable="yes">Type</property>
                                 <property name="expand">True</property>
                                 <child>
@@ -1739,6 +1780,7 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="fav_pos_column">
+                                <property name="min_width">25</property>
                                 <property name="title" translatable="yes">Pos</property>
                                 <property name="expand">True</property>
                                 <child>
