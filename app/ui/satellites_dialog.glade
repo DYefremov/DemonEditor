@@ -467,6 +467,8 @@ Author: Dmitriy Yefremov
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">applications-utilities</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
     <child type="titlebar">

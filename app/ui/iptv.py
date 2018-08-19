@@ -262,20 +262,37 @@ class SearchUnavailableDialog:
 
 class IptvListConfigurationDialog:
 
-    def __init__(self, transient):
-        handlers = {}
+    def __init__(self, transient, services, iptv_rows, model, bouquet, profile):
+        handlers = {"on_apply": self.on_apply}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("iptv_list_configuration_dialog",))
         builder.connect_signals(handlers)
 
+        self._rows = iptv_rows
+        self._services = services
+        self._bouquet = bouquet
+        self._profile = profile
+
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
         self._dialog.set_transient_for(transient)
+        self._sid_auto_check_button = builder.get_object("sid_auto_check_button")
+        self._namespace_auto_check_button = builder.get_object("namespace_auto_check_button")
+        self._nid_auto_check_button = builder.get_object("nid_auto_check_button")
+        self._list_srv_type_entry = builder.get_object("list_srv_type_entry")
+        self._list_sid_entry = builder.get_object("list_sid_entry")
+        self._list_net_id_entry = builder.get_object("list_net_id_entry")
+        self._list_namespace_entry = builder.get_object("list_namespace_entry")
+        self._apply_all_lists_switch = builder.get_object("apply_all_lists_switch")
 
     def show(self):
         response = self._dialog.run()
         self._dialog.destroy()
+
+    def on_apply(self, item):
+        for fav_id in self._bouquet:
+            print(self._services[fav_id])
 
 
 if __name__ == "__main__":

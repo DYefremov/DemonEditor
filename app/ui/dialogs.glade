@@ -585,7 +585,7 @@ Author: Dmitriy Yefremov
     </action-widgets>
   </object>
   <object class="GtkDialog" id="iptv_list_configuration_dialog">
-    <property name="width_request">320</property>
+    <property name="width_request">400</property>
     <property name="can_focus">False</property>
     <property name="title"> </property>
     <property name="resizable">False</property>
@@ -597,8 +597,23 @@ Author: Dmitriy Yefremov
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
     <child type="titlebar">
-      <placeholder/>
+      <object class="GtkHeaderBar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">2</property>
+        <property name="show_close_button">True</property>
+        <child type="title">
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">IPTV streams list configuration</property>
+          </object>
+        </child>
+      </object>
     </child>
+    <action-widgets>
+      <action-widget response="-7">button7</action-widget>
+    </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can_focus">False</property>
@@ -609,7 +624,20 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <placeholder/>
+              <object class="GtkButton" id="list_configuration_apply_button">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_apply" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="button7">
@@ -618,6 +646,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
+                <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -637,23 +666,12 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">IPTV streams list configuration</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_right">5</property>
+                <property name="margin_top">5</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkLabel">
@@ -669,7 +687,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSwitch">
+                  <object class="GtkSwitch" id="apply_all_lists_switch">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
@@ -691,10 +709,12 @@ Author: Dmitriy Yefremov
               <object class="GtkFrame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
                 <property name="label_xalign">0.019999999552965164</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkGrid" id="ts_data_grid1">
+                  <object class="GtkGrid" id="start_values_grid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
@@ -704,7 +724,7 @@ Author: Dmitriy Yefremov
                     <property name="column_spacing">2</property>
                     <property name="column_homogeneous">True</property>
                     <child>
-                      <object class="GtkEntry" id="srv_type_entry1">
+                      <object class="GtkEntry" id="list_srv_type_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
@@ -718,8 +738,9 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="sid_entry1">
+                      <object class="GtkEntry" id="list_sid_entry">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
@@ -732,8 +753,9 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="net_id_entry1">
+                      <object class="GtkEntry" id="list_net_id_entry">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
@@ -746,8 +768,9 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="namespace_entry1">
+                      <object class="GtkEntry" id="list_namespace_entry">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
@@ -760,7 +783,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label27">
+                      <object class="GtkLabel" id="list_namespace_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Namespace</property>
@@ -771,7 +794,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label26">
+                      <object class="GtkLabel" id="list_nid_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">NID</property>
@@ -782,7 +805,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label24">
+                      <object class="GtkLabel" id="list_sid_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">SID</property>
@@ -793,7 +816,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label21">
+                      <object class="GtkLabel" id="list_type_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Type</property>
@@ -804,11 +827,12 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton">
+                      <object class="GtkCheckButton" id="namespace_auto_check_button">
                         <property name="label" translatable="yes">Auto</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">center</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -818,11 +842,12 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton">
+                      <object class="GtkCheckButton" id="nid_auto_check_button">
                         <property name="label" translatable="yes">Auto</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">center</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -832,11 +857,12 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton">
+                      <object class="GtkCheckButton" id="sid_auto_check_button">
                         <property name="label" translatable="yes">Auto</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">center</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -868,7 +894,57 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkInfoBar" id="list_configuration_info_bar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="show_close_button">True</property>
+            <child internal-child="action_area">
+              <object class="GtkButtonBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">6</property>
+                <property name="layout_style">end</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child internal-child="content_area">
+              <object class="GtkBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">16</property>
+                <child>
+                  <object class="GtkLabel" id="list_configuration_message_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Done!</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

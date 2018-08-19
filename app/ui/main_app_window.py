@@ -979,8 +979,23 @@ class MainAppWindow:
                     self._is_played = True
                     self._player.play()
 
+    @run_idle
     def on_iptv_list_configuration(self, item):
-        IptvListConfigurationDialog(self._main_window).show()
+        iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
+        if not iptv_rows:
+            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains iptv streams!")
+            return
+
+        bq_selected = self.get_selected_bouquet()
+        if not bq_selected:
+            return
+
+        IptvListConfigurationDialog(self._main_window,
+                                    self._services,
+                                    iptv_rows,
+                                    self._fav_model,
+                                    self._bouquets.get(bq_selected, []),
+                                    Profile(self._profile)).show()
 
     @run_idle
     def on_remove_all_unavailable(self, item):
