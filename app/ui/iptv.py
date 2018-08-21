@@ -266,6 +266,7 @@ class IptvListConfigurationDialog:
         handlers = {"on_apply": self.on_apply,
                     "on_default_type_toggled": self.on_default_type_toggled,
                     "on_auto_sid_toggled": self.on_auto_sid_toggled,
+                    "on_default_tid_toggled": self.on_default_tid_toggled,
                     "on_default_nid_toggled": self.on_default_nid_toggled,
                     "on_default_namespace_toggled": self.on_default_namespace_toggled,
                     "on_reset_to_default": self.on_reset_to_default,
@@ -286,16 +287,18 @@ class IptvListConfigurationDialog:
         self._info_bar = builder.get_object("list_configuration_info_bar")
         self._type_default_check_button = builder.get_object("type_default_check_button")
         self._sid_auto_check_button = builder.get_object("sid_auto_check_button")
-        self._namespace_default_check_button = builder.get_object("namespace_default_check_button")
+        self._tid_default_check_button = builder.get_object("tid_default_check_button")
         self._nid_default_check_button = builder.get_object("nid_default_check_button")
+        self._namespace_default_check_button = builder.get_object("namespace_default_check_button")
         self._list_srv_type_entry = builder.get_object("list_srv_type_entry")
         self._list_sid_entry = builder.get_object("list_sid_entry")
-        self._list_net_id_entry = builder.get_object("list_net_id_entry")
+        self._list_tid_entry = builder.get_object("list_tid_entry")
+        self._list_nid_entry = builder.get_object("list_nid_entry")
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
         self._reset_to_default_switch = builder.get_object("reset_to_default_lists_switch")
 
     def show(self):
-        response = self._dialog.run()
+        self._dialog.run()
         self._dialog.destroy()
 
     def on_default_type_toggled(self, button):
@@ -304,8 +307,11 @@ class IptvListConfigurationDialog:
     def on_auto_sid_toggled(self, button):
         self._list_sid_entry.set_sensitive(not button.get_active())
 
+    def on_default_tid_toggled(self, button):
+        self._list_tid_entry.set_sensitive(not button.get_active())
+
     def on_default_nid_toggled(self, button):
-        self._list_net_id_entry.set_sensitive(not button.get_active())
+        self._list_nid_entry.set_sensitive(not button.get_active())
 
     def on_default_namespace_toggled(self, button):
         self._list_namespace_entry.set_sensitive(not button.get_active())
@@ -315,7 +321,7 @@ class IptvListConfigurationDialog:
         item.set_sensitive(not active)
         self._list_srv_type_entry.set_text("1")
         self._list_sid_entry.set_text("0")
-        self._list_net_id_entry.set_text("0")
+        self._list_nid_entry.set_text("0")
         self._list_namespace_entry.set_text("0")
 
     def on_info_bar_close(self, bar=None, resp=None):
@@ -329,6 +335,7 @@ class IptvListConfigurationDialog:
         if self._profile is Profile.ENIGMA_2:
             reset = self._reset_to_default_switch.get_active()
             type_default = self._type_default_check_button.get_active()
+            tid_default = self._tid_default_check_button.get_active()
             sid_auto = self._sid_auto_check_button.get_active()
             nid_default = self._nid_default_check_button.get_active()
             namespace_default = self._namespace_default_check_button.get_active()
@@ -339,11 +346,12 @@ class IptvListConfigurationDialog:
                 data = data.split(":")
 
                 if reset:
-                    data[2], data[3], data[5], data[6] = "1000"
+                    data[2], data[3], data[4], data[5], data[6] = "10000"
                 else:
                     data[2] = "1" if type_default else self._list_srv_type_entry.get_text()
                     data[3] = "{:X}".format(index) if sid_auto else "0"
-                    data[5] = "0" if nid_default else "{:X}".format(int(self._list_net_id_entry.get_text()))
+                    data[4] = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
+                    data[5] = "0" if nid_default else "{:X}".format(int(self._list_nid_entry.get_text()))
                     data[6] = "0" if namespace_default else "{:X}".format(int(self._list_namespace_entry.get_text()))
 
                 data = ":".join(data)
