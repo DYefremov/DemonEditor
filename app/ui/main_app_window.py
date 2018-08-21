@@ -981,6 +981,11 @@ class MainAppWindow:
 
     @run_idle
     def on_iptv_list_configuration(self, item):
+        profile = Profile(self._profile)
+        if profile is not Profile.ENIGMA_2:
+            show_dialog(DialogType.ERROR, transient=self._main_window, text="Not implemented yet!")
+            return
+
         iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
             show_dialog(DialogType.ERROR, self._main_window, "This list does not contains iptv streams!")
@@ -990,12 +995,8 @@ class MainAppWindow:
         if not bq_selected:
             return
 
-        IptvListConfigurationDialog(self._main_window,
-                                    self._services,
-                                    iptv_rows,
-                                    self._fav_model,
-                                    self._bouquets.get(bq_selected, []),
-                                    Profile(self._profile)).show()
+        bouquet = self._bouquets.get(bq_selected, [])
+        IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bouquet, profile).show()
 
     @run_idle
     def on_remove_all_unavailable(self, item):

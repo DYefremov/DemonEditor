@@ -677,7 +677,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Apply for all lists</property>
+                    <property name="label" translatable="yes">Reset to default</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -687,9 +687,10 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSwitch" id="apply_all_lists_switch">
+                  <object class="GtkSwitch" id="reset_to_default_lists_switch">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <signal name="state-set" handler="on_reset_to_default" object="start_values_frame" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -706,7 +707,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkFrame" id="start_values_frame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
@@ -726,6 +727,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkEntry" id="list_srv_type_entry">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
@@ -827,14 +829,15 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="namespace_auto_check_button">
-                        <property name="label" translatable="yes">Auto</property>
+                      <object class="GtkCheckButton" id="nid_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="halign">center</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_nid_toggled" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -842,14 +845,15 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="nid_auto_check_button">
-                        <property name="label" translatable="yes">Auto</property>
+                      <object class="GtkCheckButton" id="namespace_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="halign">center</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_namespace_toggled" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -865,6 +869,7 @@ Author: Dmitriy Yefremov
                         <property name="halign">center</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_auto_sid_toggled" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -872,7 +877,20 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkCheckButton" id="type_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_type_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
                     </child>
                   </object>
                 </child>

@@ -262,8 +262,14 @@ class SearchUnavailableDialog:
 
 class IptvListConfigurationDialog:
 
-    def __init__(self, transient, services, iptv_rows, model, bouquet, profile):
-        handlers = {"on_apply": self.on_apply}
+    def __init__(self, transient, services, iptv_rows, bouquet, profile):
+        handlers = {"on_apply": self.on_apply,
+                    "on_default_type_toggled": self.on_default_type_toggled,
+                    "on_auto_sid_toggled": self.on_auto_sid_toggled,
+                    "on_default_nid_toggled": self.on_default_nid_toggled,
+                    "on_default_namespace_toggled": self.on_default_namespace_toggled,
+                    "on_reset_to_default": self.on_reset_to_default,
+                    "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -277,22 +283,77 @@ class IptvListConfigurationDialog:
 
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
         self._dialog.set_transient_for(transient)
+        self._info_bar = builder.get_object("list_configuration_info_bar")
+        self._type_default_check_button = builder.get_object("type_default_check_button")
         self._sid_auto_check_button = builder.get_object("sid_auto_check_button")
-        self._namespace_auto_check_button = builder.get_object("namespace_auto_check_button")
-        self._nid_auto_check_button = builder.get_object("nid_auto_check_button")
+        self._namespace_default_check_button = builder.get_object("namespace_default_check_button")
+        self._nid_default_check_button = builder.get_object("nid_default_check_button")
         self._list_srv_type_entry = builder.get_object("list_srv_type_entry")
         self._list_sid_entry = builder.get_object("list_sid_entry")
         self._list_net_id_entry = builder.get_object("list_net_id_entry")
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
-        self._apply_all_lists_switch = builder.get_object("apply_all_lists_switch")
+        self._reset_to_default_switch = builder.get_object("reset_to_default_lists_switch")
 
     def show(self):
         response = self._dialog.run()
         self._dialog.destroy()
 
+    def on_default_type_toggled(self, button):
+        self._list_srv_type_entry.set_sensitive(not button.get_active())
+
+    def on_auto_sid_toggled(self, button):
+        self._list_sid_entry.set_sensitive(not button.get_active())
+
+    def on_default_nid_toggled(self, button):
+        self._list_net_id_entry.set_sensitive(not button.get_active())
+
+    def on_default_namespace_toggled(self, button):
+        self._list_namespace_entry.set_sensitive(not button.get_active())
+
+    @run_idle
+    def on_reset_to_default(self, item, active):
+        item.set_sensitive(not active)
+        self._list_srv_type_entry.set_text("1")
+        self._list_sid_entry.set_text("0")
+        self._list_net_id_entry.set_text("0")
+        self._list_namespace_entry.set_text("0")
+
+    def on_info_bar_close(self, bar=None, resp=None):
+        self._info_bar.set_visible(False)
+
+    @run_idle
     def on_apply(self, item):
-        for fav_id in self._bouquet:
-            print(self._services[fav_id])
+        if len(self._bouquet) != len(self._rows):
+            return
+
+        if self._profile is Profile.ENIGMA_2:
+            reset = self._reset_to_default_switch.get_active()
+            type_default = self._type_default_check_button.get_active()
+            sid_auto = self._sid_auto_check_button.get_active()
+            nid_default = self._nid_default_check_button.get_active()
+            namespace_default = self._namespace_default_check_button.get_active()
+
+            for index, row in enumerate(self._rows):
+                fav_id = row[7]
+                data, sep, desc = fav_id.partition("http")
+                data = data.split(":")
+
+                if reset:
+                    data[2], data[3], data[5], data[6] = "1000"
+                else:
+                    data[2] = "1" if type_default else self._list_srv_type_entry.get_text()
+                    data[3] = "{:X}".format(index) if sid_auto else "0"
+                    data[5] = "0" if nid_default else "{:X}".format(int(self._list_net_id_entry.get_text()))
+                    data[6] = "0" if namespace_default else "{:X}".format(int(self._list_namespace_entry.get_text()))
+
+                data = ":".join(data)
+                new_fav_id = "{}{}{}".format(data, sep, desc)
+                row[7] = new_fav_id
+                self._bouquet[index] = new_fav_id
+                srv = self._services.pop(fav_id, None)
+                self._services[new_fav_id] = srv._replace(fav_id=new_fav_id)
+
+            self._info_bar.set_visible(True)
 
 
 if __name__ == "__main__":
