@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from threading import Thread
+from threading import Thread, Timer
 
 from gi.repository import GLib
 
@@ -41,6 +41,32 @@ def run_task(func):
         task.start()
 
     return wrapper
+
+
+def run_with_delay(timeout=5):
+    """  Starts the function with a delay.
+
+         If the previous timer still works, it will canceled!
+     """
+
+    def run_with(func):
+        timer = None
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal timer
+            if timer and timer.is_alive():
+                timer.cancel()
+
+            def run():
+                GLib.idle_add(func, *args, **kwargs, priority=GLib.PRIORITY_LOW)
+
+            timer = Timer(interval=timeout, function=run)
+            timer.start()
+
+        return wrapper
+
+    return run_with
 
 
 if __name__ == "__main__":

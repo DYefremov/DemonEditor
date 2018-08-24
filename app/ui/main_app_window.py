@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from gi.repository import GLib
 
-from app.commons import run_idle, log, run_task
+from app.commons import run_idle, log, run_task, run_with_delay
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
@@ -1053,7 +1053,7 @@ class MainAppWindow:
         self._filter_bar.set_search_mode(active)
         self._filter_bar.set_visible(active)
 
-    @run_idle
+    @run_with_delay(1)
     def on_filter_changed(self, entry):
         self._services_model_filter.refilter()
 
@@ -1072,7 +1072,7 @@ class MainAppWindow:
     def on_search_up(self, item):
         self._search_provider.on_search_up()
 
-    @run_idle
+    @run_with_delay(1)
     def on_search(self, entry):
         self._search_provider.search(entry.get_text())
 
