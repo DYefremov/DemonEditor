@@ -115,6 +115,11 @@ class MainAppWindow:
                     "on_iptv": self.on_iptv,
                     "on_iptv_list_configuration": self.on_iptv_list_configuration,
                     "on_play_stream": self.on_play_stream,
+                    "on_player_play": self.on_player_play,
+                    "on_player_stop": self.on_player_stop,
+                    "on_player_close": self.on_player_close,
+                    "on_player_size_allocate": self.on_player_size_allocate,
+                    "on_drawing_area_realize": self.on_drawing_area_realize,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
@@ -159,6 +164,11 @@ class MainAppWindow:
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._status_bar = builder.get_object("status_bar")
         self._main_window_box = builder.get_object("main_window_box")
+        self._player_drawing_area = builder.get_object("player_drawing_area")
+        self._player_box = builder.get_object("player_box")
+        # enabling events for the drawing area
+        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
+        self._drawing_area_xid = None
         self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
         self._ip_label = builder.get_object("ip_label")
@@ -214,9 +224,7 @@ class MainAppWindow:
     def on_close_app(self, *args):
         """  Called before app quit """
         write_config(self._options)  # storing current config
-        if self._player:
-            self._player.stop()
-            self._player.release()
+        self.on_player_close()
         Gtk.main_quit()
 
     def on_resize(self, window):
@@ -957,28 +965,6 @@ class MainAppWindow:
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.on_play_stream()
 
-    def on_play_stream(self, item=None):
-        path, column = self._fav_view.get_cursor()
-        if path:
-            row = self._fav_model[path][:]
-            if row[5] == BqServiceType.IPTV.value:
-                url = get_iptv_url(row, Profile(self._profile))
-                if not url:
-                    return
-
-                self.on_player_stop(None)
-
-                if not self._player:
-                    try:
-                        self._player = Player.get_vlc_instance().media_player_new()
-                    except (NameError, AttributeError):
-                        show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
-
-                if self._player:
-                    self._player.set_mrl(url)
-                    self._is_played = True
-                    self._player.play()
-
     @run_idle
     def on_iptv_list_configuration(self, item):
         profile = Profile(self._profile)
@@ -1018,19 +1004,56 @@ class MainAppWindow:
         if response:
             self.remove_favs(fav_bqt, response, self._fav_model)
 
-    def on_player_stop(self, item):
+    # ***************** Player *********************#
+    @run_idle
+    def on_play_stream(self, item=None):
+        self._player_box.set_visible(True)
+        self.on_player_play()
+
+    @run_task
+    def on_player_play(self, item=None):
+        self.on_player_stop(None)
+        path, column = self._fav_view.get_cursor()
+        if path:
+            row = self._fav_model[path][:]
+            if row[5] == BqServiceType.IPTV.value:
+                url = get_iptv_url(row, Profile(self._profile))
+                if not url:
+                    return
+
+                if not self._player:
+                    try:
+                        self._player = Player.get_vlc_instance().media_player_new()
+                    except (NameError, AttributeError):
+                        show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
+                    else:
+                        if self._player:
+                            self._player.set_mrl(url)
+                            self._is_played = True
+                            self._player.play()
+                            self._player.set_xwindow(self._drawing_area_xid)
+
+    def on_player_stop(self, item=None):
         if self._player:
             self._player.stop()
             self._is_played = False
 
-    def on_player_press(self, area, event):
-        if event.button == Gdk.BUTTON_PRIMARY:
-            if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-                self._full_screen = not self._full_screen
-                self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
-            elif event.type == Gdk.EventType.BUTTON_PRESS:
-                if self._player:
-                    self._player.stop() if self._player.is_playing() else self._player.play()
+    @run_idle
+    def on_player_close(self, item=None):
+        if self._player:
+            self._player.stop()
+            self._is_played = False
+            self._player.release()
+        GLib.idle_add(self._player_box.set_visible, False, property=GLib.PRIORITY_LOW)
+
+    def on_player_size_allocate(self, area, rectangle=None):
+        area.hide()
+        GLib.idle_add(area.show, priority=GLib.PRIORITY_LOW)
+
+    def on_drawing_area_realize(self, widget):
+        self._drawing_area_xid = widget.get_window().get_xid()
+
+    # ***************** Player end *********************#
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)
