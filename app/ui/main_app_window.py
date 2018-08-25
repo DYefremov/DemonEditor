@@ -1010,7 +1010,7 @@ class MainAppWindow:
         self._player_box.set_visible(True)
         self.on_player_play()
 
-    @run_task
+    @run_with_delay(1)
     def on_player_play(self, item=None):
         self.on_player_stop(None)
         path, column = self._fav_view.get_cursor()
@@ -1026,17 +1026,18 @@ class MainAppWindow:
                         self._player = Player.get_vlc_instance().media_player_new()
                     except (NameError, AttributeError):
                         show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
-                    else:
-                        if self._player:
-                            self._player.set_mrl(url)
-                            self._is_played = True
-                            self._player.play()
-                            self._player.set_xwindow(self._drawing_area_xid)
+
+                if self._player:
+                    self._player.set_mrl(url)
+                    self._is_played = True
+                    self._player.play()
+                    self._player.set_xwindow(self._drawing_area_xid)
 
     def on_player_stop(self, item=None):
         if self._player:
             self._player.stop()
             self._is_played = False
+            self.on_player_size_allocate(self._player_drawing_area)
 
     @run_idle
     def on_player_close(self, item=None):
@@ -1044,6 +1045,7 @@ class MainAppWindow:
             self._player.stop()
             self._is_played = False
             self._player.release()
+            self._player = None
         GLib.idle_add(self._player_box.set_visible, False, property=GLib.PRIORITY_LOW)
 
     def on_player_size_allocate(self, area, rectangle=None):
