@@ -544,7 +544,7 @@ class MainAppWindow:
 
     def on_popover_release(self, menu, event):
         """ Hides popover after mouse click. Used if element of Popover menu is Gtk.Button! """
-        menu.popdown()
+        menu.hide()
 
     @run_idle
     def on_satellite_editor_show(self, model):

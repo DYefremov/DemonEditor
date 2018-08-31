@@ -134,7 +134,7 @@ class SatellitesDialog:
             view.do_unselect_all(view)
 
     def on_popover_release(self, menu, event):
-        menu.popdown()
+        menu.hide()
 
     @run_idle
     def on_satellites_list_load(self, model):
