@@ -118,8 +118,11 @@ class MainAppWindow:
                     "on_player_play": self.on_player_play,
                     "on_player_stop": self.on_player_stop,
                     "on_player_close": self.on_player_close,
+                    "on_player_press": self.on_player_press,
+                    "on_full_screen": self.on_full_screen,
                     "on_player_size_allocate": self.on_player_size_allocate,
                     "on_drawing_area_realize": self.on_drawing_area_realize,
+                    "on_main_window_state": self.on_main_window_state,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_bouquets_edit": self.on_bouquets_edit,
@@ -146,6 +149,7 @@ class MainAppWindow:
         self._player = None
         self._is_played = False
         self._full_screen = False
+        self._drawing_area_xid = None
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -168,7 +172,7 @@ class MainAppWindow:
         self._player_box = builder.get_object("player_box")
         # enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        self._drawing_area_xid = None
+        self._player_frame = builder.get_object("player_frame")
         self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
         self._ip_label = builder.get_object("ip_label")
@@ -1005,14 +1009,20 @@ class MainAppWindow:
             self.remove_favs(fav_bqt, response, self._fav_model)
 
     # ***************** Player *********************#
+
     @run_idle
     def on_play_stream(self, item=None):
         self._player_box.set_visible(True)
         self.on_player_play()
 
-    @run_with_delay(1)
+    @run_idle
     def on_player_play(self, item=None):
         self.on_player_stop(None)
+        if self._player:
+            self.play()
+
+    @run_task
+    def play(self):
         path, column = self._fav_view.get_cursor()
         if path:
             row = self._fav_model[path][:]
@@ -1021,17 +1031,10 @@ class MainAppWindow:
                 if not url:
                     return
 
-                if not self._player:
-                    try:
-                        self._player = Player.get_vlc_instance().media_player_new()
-                    except (NameError, AttributeError):
-                        show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
-
-                if self._player:
-                    self._player.set_mrl(url)
-                    self._is_played = True
-                    self._player.play()
-                    self._player.set_xwindow(self._drawing_area_xid)
+                self._player.set_mrl(url)
+                self._is_played = True
+                self._player.play()
+                GLib.idle_add(self.on_player_size_allocate, self._player_drawing_area, priority=GLib.PRIORITY_LOW)
 
     def on_player_stop(self, item=None):
         if self._player:
@@ -1046,7 +1049,7 @@ class MainAppWindow:
             self._is_played = False
             self._player.release()
             self._player = None
-        GLib.idle_add(self._player_box.set_visible, False, property=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
 
     def on_player_size_allocate(self, area, rectangle=None):
         area.hide()
@@ -1054,6 +1057,41 @@ class MainAppWindow:
 
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
+        if not self._player:
+            try:
+                self._player = Player.get_vlc_instance().media_player_new()
+            except (NameError, AttributeError):
+                show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
+            else:
+                self._player.set_xwindow(self._drawing_area_xid)
+                GLib.idle_add(self.play, priority=GLib.PRIORITY_LOW)
+
+    def on_player_press(self, area, event):
+        if event.button == Gdk.BUTTON_PRIMARY:
+            if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+                self.on_full_screen()
+            elif event.type == Gdk.EventType.BUTTON_PRESS:
+                if self._player:
+                    self._player.stop() if self._player.is_playing() else self._player.play()
+
+    def on_full_screen(self, item=None):
+        self._full_screen = not self._full_screen
+        self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
+        self.on_player_size_allocate(self._player_drawing_area)
+
+    def on_main_window_state(self, window, event):
+        if event.new_window_state & Gdk.WindowState.FULLSCREEN:
+            if self._main_window_box in window:
+                window.remove(self._main_window_box)
+                self._player_drawing_area.reparent(window)
+        elif self._player_drawing_area in window:
+            window.remove(self._player_drawing_area)
+            window.add(self._main_window_box)
+            self._player_frame.add(self._player_drawing_area)
+
+        if self._player:
+            self.on_player_size_allocate(self._player_drawing_area)
+            self._player.set_xwindow(self._drawing_area_xid)
 
     # ***************** Player end *********************#
 
