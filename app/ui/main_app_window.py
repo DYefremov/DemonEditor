@@ -604,14 +604,20 @@ class MainAppWindow:
         name, bt_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
         self._bouquets_model.append(parent, [name, locked, hidden, bt_type])
         services = []
-        agr = [None] * 9
+        agr = [None] * 7
         for srv in bq.services:
             fav_id = srv.data
             # IPTV and MARKER services
             s_type = srv.type
             if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
-                icon = IPTV_ICON if s_type is BqServiceType.IPTV else None
-                srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, *agr, srv.num, fav_id, None)
+                icon = None
+                picon_id = None
+                if s_type is BqServiceType.IPTV:
+                    icon = IPTV_ICON
+                    id_data = fav_id.lstrip().split(":")
+                    picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*id_data[0:10])
+                srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, self._picons.get(picon_id, None),
+                              picon_id, *agr, srv.num, fav_id, None)
                 self._services[fav_id] = srv
             services.append(fav_id)
         self._bouquets["{}:{}".format(name, bt_type)] = services
@@ -926,36 +932,6 @@ class MainAppWindow:
         self._radio_count_label.set_text(str(radio_count))
         self._data_count_label.set_text(str(data_count))
 
-    def on_import_m3u(self, item):
-        """ Imports iptv from m3u files. """
-        response = get_chooser_dialog(self._main_window, self._options.get(self._profile), "*.m3u", "m3u files")
-        if response == Gtk.ResponseType.CANCEL:
-            return
-
-        if not str(response).endswith("m3u"):
-            show_dialog(DialogType.ERROR, self._main_window, text="No m3u file is selected!")
-            return
-
-        channels = parse_m3u(response, Profile(self._profile))
-        bq_selected = self.get_selected_bouquet()
-        if channels and bq_selected:
-            bq_services = self._bouquets.get(bq_selected)
-            self._fav_model.clear()
-            for ch in channels:
-                self._services[ch.fav_id] = ch
-                bq_services.append(ch.fav_id)
-            self.update_bouquet_services(self._fav_model, None, bq_selected)
-
-    def on_iptv(self, item):
-        response = IptvDialog(self._main_window,
-                              self._fav_view,
-                              self._services,
-                              self._bouquets.get(self.get_selected_bouquet(), None),
-                              Profile(self._profile),
-                              Action.ADD).show()
-        if response != Gtk.ResponseType.CANCEL:
-            self.update_fav_num_column(self._fav_model)
-
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
         insert_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
@@ -968,6 +944,18 @@ class MainAppWindow:
         self.on_view_popup_menu(menu, event)
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.on_play_stream()
+
+    # ***************** IPTV *********************#
+
+    def on_iptv(self, item):
+        response = IptvDialog(self._main_window,
+                              self._fav_view,
+                              self._services,
+                              self._bouquets.get(self.get_selected_bouquet(), None),
+                              Profile(self._profile),
+                              Action.ADD).show()
+        if response != Gtk.ResponseType.CANCEL:
+            self.update_fav_num_column(self._fav_model)
 
     @run_idle
     def on_iptv_list_configuration(self, item):
@@ -1007,6 +995,26 @@ class MainAppWindow:
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
         if response:
             self.remove_favs(fav_bqt, response, self._fav_model)
+
+    def on_import_m3u(self, item):
+        """ Imports iptv from m3u files. """
+        response = get_chooser_dialog(self._main_window, self._options.get(self._profile), "*.m3u", "m3u files")
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        if not str(response).endswith("m3u"):
+            show_dialog(DialogType.ERROR, self._main_window, text="No m3u file is selected!")
+            return
+
+        channels = parse_m3u(response, Profile(self._profile))
+        bq_selected = self.get_selected_bouquet()
+        if channels and bq_selected:
+            bq_services = self._bouquets.get(bq_selected)
+            self._fav_model.clear()
+            for ch in channels:
+                self._services[ch.fav_id] = ch
+                bq_services.append(ch.fav_id)
+            self.update_bouquet_services(self._fav_model, None, bq_selected)
 
     # ***************** Player *********************#
 
@@ -1093,22 +1101,7 @@ class MainAppWindow:
             self.on_player_size_allocate(self._player_drawing_area)
             self._player.set_xwindow(self._drawing_area_xid)
 
-    # ***************** Player end *********************#
-
-    def on_locate_in_services(self, view):
-        locate_in_services(view, self._services_view, self._main_window)
-
-    @run_idle
-    def on_picons_loader_show(self, item):
-        ids = {}
-        if Profile(self._profile) is Profile.ENIGMA_2:
-            for r in self._services_model:
-                data = r[9].split("_")
-                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
-
-        dialog = PiconsDialog(self._main_window, self._options, ids, Profile(self._profile))
-        dialog.show()
-        self.update_picons()
+    # ***************** Filter and search *********************#
 
     @run_idle
     def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
@@ -1138,6 +1131,8 @@ class MainAppWindow:
     @run_with_delay(1)
     def on_search(self, entry):
         self._search_provider.search(entry.get_text())
+
+    # ***************** Editing *********************#
 
     @run_idle
     def on_service_edit(self, view):
@@ -1175,6 +1170,23 @@ class MainAppWindow:
                                       action=Action.ADD)
         dialog.show()
 
+    def on_locate_in_services(self, view):
+        locate_in_services(view, self._services_view, self._main_window)
+
+    # ***************** Picons *********************#
+
+    @run_idle
+    def on_picons_loader_show(self, item):
+        ids = {}
+        if Profile(self._profile) is Profile.ENIGMA_2:
+            for r in self._services_model:
+                data = r[9].split("_")
+                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
+
+        dialog = PiconsDialog(self._main_window, self._options, ids, Profile(self._profile))
+        dialog.show()
+        self.update_picons()
+
     @run_task
     def update_picons(self):
         update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
@@ -1202,6 +1214,8 @@ class MainAppWindow:
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
 
+    # ***************** Bouquets *********************#
+
     def on_create_bouquet_for_current_satellite(self, item):
         self.create_bouquets(BqGenType.SAT)
 
@@ -1223,6 +1237,8 @@ class MainAppWindow:
     def create_bouquets(self, g_type):
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
                      Profile(self._profile), self.append_bouquet)
+
+    # ***************** Profile label *********************#
 
     def update_profile_label(self):
         profile = Profile(self._profile)

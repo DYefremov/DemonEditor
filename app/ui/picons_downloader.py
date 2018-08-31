@@ -154,7 +154,8 @@ class PiconsDialog:
         PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv.on_id, pos,
                            self._picon_ids, self.get_picons_format())
         self.resize(self._picons_path)
-        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+        if not self._terminate:
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def write_to_buffer(self, fd, condition):
         if condition == GLib.IO_IN:
@@ -175,11 +176,15 @@ class PiconsDialog:
         self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
         command = "mogrify -resize {}! *.png".format(
             "320x240" if self._resize_220_132_radio_button.get_active() else "100x60").split()
-        self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
-        self._current_process.wait()
+        try:
+            self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
+            self._current_process.wait()
+        except FileNotFoundError as e:
+            self.show_info_message("Conversion error. " + str(e), Gtk.MessageType.ERROR)
+            self.on_cancel()
 
     @run_task
-    def on_cancel(self, item):
+    def on_cancel(self, item=None):
         if self._current_process:
             self._terminate = True
             self._current_process.terminate()
