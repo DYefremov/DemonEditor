@@ -794,7 +794,7 @@ class MainAppWindow:
             self.on_fav_iptv_mode(self._fav_iptv_mode_popup_item)
         elif (key == Gdk.KEY_Return or key == Gdk.KEY_KP_Enter) and model_name == self._FAV_LIST_NAME:
             if self._iptv_preview_mode:
-                self.test_iptv()
+                self.on_play_stream()
 
     def on_download(self, item):
         show_download_dialog(transient=self._main_window,
@@ -946,17 +946,22 @@ class MainAppWindow:
     def on_fav_press(self, menu, event):
         self.on_view_popup_menu(menu, event)
         if self._iptv_preview_mode and event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.test_iptv()
+            self.on_play_stream()
 
-    def test_iptv(self):
+    @run_idle
+    def on_play_stream(self):
         path, column = self._fav_view.get_cursor()
         if path:
             row = self._fav_model[path][:]
             if row[5] == BqServiceType.IPTV.value:
+                url = None
                 profile = Profile(self._profile)
                 data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
-                url = data[-3 if profile is Profile.ENIGMA_2 else 0]
-                url = url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
+                if profile is Profile.ENIGMA_2:
+                    data = list(filter(lambda x: "http" in x, data))
+                if data:
+                    url = data[0]
+                    url = url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
                 if not url:
                     return
 
