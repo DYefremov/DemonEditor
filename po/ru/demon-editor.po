@@ -94,6 +94,9 @@ msgstr "Импортировать m3u"
 msgid "Import m3u file"
 msgstr "Импортировать файл m3u"
 
+msgid "List configuration"
+msgstr "Конфигурация списка"
+
 msgid "Insert marker"
 msgstr "Вставить маркер"
 
@@ -154,9 +157,6 @@ msgstr "Настройки"
 msgid "Profile:"
 msgstr "Профиль:"
 
-msgid "Radio"
-msgstr ""
-
 msgid "Remove"
 msgstr "Удалить"
 
@@ -208,9 +208,6 @@ msgstr "Данные:"
 msgid "Enigma2 channel and satellites list editor for GNU/Linux"
 msgstr "Редактор списка каналов и спутников Enigma2\n для GNU/Linux"
 
-msgid "FTP"
-msgstr ""
-
 msgid "Host:"
 msgstr "Адрес ресивера:"
 
@@ -245,7 +242,7 @@ msgid "Receiver IP:"
 msgstr "IP адрес ресивера:"
 
 msgid "Remove unused bouquets"
-msgstr "Удалить не испрльзуемые букеты"
+msgstr "Удалить не используемые букеты"
 
 msgid "Reset profile"
 msgstr "Сброс профиля"
@@ -268,9 +265,6 @@ msgstr "Отправить файлы в ресивер"
 msgid "Services and Bouquets files:"
 msgstr "Файлы сервисов и букетов:"
 
-msgid "Telnet"
-msgstr ""
-
 msgid "Timeout between commands in seconds"
 msgstr "Пауза между коммандами в сек."
 
@@ -279,9 +273,6 @@ msgstr "Тайм-аут:"
 
 msgid "User bouquet files:"
 msgstr "Файлы букетов:"
-
-msgid "WebTV"
-msgstr ""
 
 msgid "Extra:"
 msgstr "Дополнительно:"
@@ -421,6 +412,16 @@ msgstr "Поиск"
 # IPTV dialog
 msgid "Stream data"
 msgstr "Данные потока"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "Стартовые значения"
+
+msgid "Reset to default"
+msgstr "Сбросить по умолчанию"
+
+msgid "IPTV streams list configuration"
+msgstr "Конфигурация списка IPTV потоков"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
