@@ -38,9 +38,9 @@ class PiconsDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "picons_dialog.glade",
-                                      ("picons_dialog", "receive_image", "providers_list_store"))
+        builder.add_from_file(UI_RESOURCES_PATH + "picons_dialog.glade")
         builder.connect_signals(handlers)
+
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)
         self._providers_tree_view = builder.get_object("providers_tree_view")
@@ -54,12 +54,12 @@ class PiconsDialog:
         self._info_bar = builder.get_object("info_bar")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
-        self._load_providers_tool_button = builder.get_object("load_providers_tool_button")
-        self._receive_tool_button = builder.get_object("receive_tool_button")
-        self._convert_tool_button = builder.get_object("convert_tool_button")
+        self._load_providers_button = builder.get_object("load_providers_button")
+        self._receive_button = builder.get_object("receive_button")
+        self._convert_button = builder.get_object("convert_button")
         self._enigma2_path_button = builder.get_object("enigma2_path_button")
         self._save_to_button = builder.get_object("save_to_button")
-        self._send_tool_button = builder.get_object("send_tool_button")
+        self._send_button = builder.get_object("send_button")
         self._enigma2_radio_button = builder.get_object("enigma2_radio_button")
         self._neutrino_mp_radio_button = builder.get_object("neutrino_mp_radio_button")
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
@@ -234,7 +234,7 @@ class PiconsDialog:
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())
         entry.set_name("GtkEntry" if suit else "digit-entry")
-        self._load_providers_tool_button.set_sensitive(suit if suit else False)
+        self._load_providers_button.set_sensitive(suit if suit else False)
 
     def on_position_edited(self, render, path, value):
         model = self._providers_tree_view.get_model()
@@ -242,10 +242,10 @@ class PiconsDialog:
 
     @run_idle
     def on_notebook_switch_page(self, nb, box, tab_num):
-        self._load_providers_tool_button.set_visible(not tab_num)
-        self._receive_tool_button.set_visible(not tab_num)
-        self._convert_tool_button.set_visible(tab_num)
-        self._send_tool_button.set_sensitive(not tab_num)
+        self._load_providers_button.set_visible(not tab_num)
+        self._receive_button.set_visible(not tab_num)
+        self._convert_button.set_visible(tab_num)
+        self._send_button.set_visible(not tab_num)
 
         if self._enigma2_path_button.get_filename() is None:
             self._enigma2_path_button.set_current_folder(self._enigma2_picons_path)
@@ -270,7 +270,7 @@ class PiconsDialog:
 
     @run_idle
     def update_receive_button_state(self):
-        self._receive_tool_button.set_sensitive(len(self.get_selected_providers()) > 0)
+        self._receive_button.set_sensitive(len(self.get_selected_providers()) > 0)
 
     def get_selected_providers(self):
         """ returns selected providers """

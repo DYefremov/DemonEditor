@@ -145,9 +145,7 @@ class MainAppWindow:
         self._blacklist = set()
         self._current_bq_name = None
         # Player
-        self._iptv_preview_mode = False
         self._player = None
-        self._is_played = False
         self._full_screen = False
         self._drawing_area_xid = None
 
@@ -1040,21 +1038,18 @@ class MainAppWindow:
                     return
 
                 self._player.set_mrl(url)
-                self._is_played = True
                 self._player.play()
                 GLib.idle_add(self.on_player_size_allocate, self._player_drawing_area, priority=GLib.PRIORITY_LOW)
 
     def on_player_stop(self, item=None):
         if self._player:
             self._player.stop()
-            self._is_played = False
             self.on_player_size_allocate(self._player_drawing_area)
 
     @run_idle
     def on_player_close(self, item=None):
         if self._player:
             self._player.stop()
-            self._is_played = False
             self._player.release()
             self._player = None
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
