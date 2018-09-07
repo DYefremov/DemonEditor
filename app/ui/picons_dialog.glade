@@ -139,25 +139,6 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="load_providers_button">
-                    <property name="label" translatable="yes">Load providers</property>
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Load satellite providers.</property>
-                    <property name="halign">center</property>
-                    <property name="image">image2</property>
-                    <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="on_load_providers" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkButton" id="receive_button">
                     <property name="label" translatable="yes">Receive picons</property>
                     <property name="visible">True</property>
@@ -173,7 +154,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -190,6 +171,25 @@ Author: Dmitriy Yefremov
                     <property name="fill">True</property>
                     <property name="pack_type">end</property>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="load_providers_button">
+                    <property name="label" translatable="yes">Load providers</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Load satellite providers.</property>
+                    <property name="halign">center</property>
+                    <property name="image">image2</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_load_providers" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>

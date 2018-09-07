@@ -20,6 +20,7 @@ class IptvDialog:
         handlers = {"on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
                     "on_save": self.on_save,
+                    "on_cancel": self.on_cancel,
                     "on_stream_type_changed": self.on_stream_type_changed}
 
         builder = Gtk.Builder()
@@ -75,6 +76,8 @@ class IptvDialog:
 
     def show(self):
         self._dialog.run()
+
+    def on_cancel(self, item):
         self._dialog.destroy()
 
     def on_save(self, item):
