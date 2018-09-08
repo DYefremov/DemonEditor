@@ -710,8 +710,8 @@ Author: Dmitriy Yefremov
               <object class="GtkFrame" id="start_values_frame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
+                <property name="margin_left">2</property>
+                <property name="margin_right">2</property>
                 <property name="label_xalign">0.019999999552965164</property>
                 <property name="shadow_type">in</property>
                 <child>
@@ -1353,6 +1353,16 @@ Author: Dmitriy Yefremov
       <object class="GtkBox" id="iptv_dialog_vbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkBox" id="iptv_dialog_main_box">
             <property name="visible">True</property>
@@ -1364,16 +1374,16 @@ Author: Dmitriy Yefremov
               <object class="GtkFrame" id="iptv_dialog_service_data_frame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_bottom">5</property>
+                <property name="margin_bottom">2</property>
                 <property name="label_xalign">0.019999999552965164</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkGrid" id="iptv_dialog_main_grid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_left">2</property>
-                    <property name="margin_right">2</property>
-                    <property name="margin_bottom">2</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_bottom">5</property>
                     <property name="row_spacing">2</property>
                     <property name="column_spacing">2</property>
                     <child>
@@ -1504,16 +1514,18 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="iptv_dialog_url_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_bottom">5</property>
+                    <property name="margin_left">2</property>
+                    <property name="margin_right">2</property>
+                    <property name="margin_bottom">2</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkEntry" id="url_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="margin_left">2</property>
-                        <property name="margin_right">2</property>
-                        <property name="margin_bottom">2</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
                         <signal name="changed" handler="on_url_changed" swapped="no"/>
                       </object>
@@ -1535,15 +1547,17 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="iptv_dialog_ts_data_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">2</property>
+                    <property name="margin_right">2</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
                       <object class="GtkGrid" id="ts_data_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">2</property>
-                        <property name="margin_right">2</property>
-                        <property name="margin_bottom">2</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
                         <property name="row_spacing">2</property>
                         <property name="column_spacing">2</property>
                         <property name="column_homogeneous">True</property>
