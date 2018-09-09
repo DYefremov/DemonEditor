@@ -141,6 +141,7 @@ class MainAppWindow:
         self._rows_buffer = []
         self._services = {}
         self._bouquets = {}
+        self._extra_bouquets = {}  # for bouquets with different names of services in bouquet and main list
         self._picons = {}
         self._blacklist = set()
         self._current_bq_name = None
@@ -601,7 +602,9 @@ class MainAppWindow:
     def append_bouquet(self, bq, parent):
         name, bt_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
         self._bouquets_model.append(parent, [name, locked, hidden, bt_type])
+        bq_id = "{}:{}".format(name, bt_type)
         services = []
+        extra_services = {}  # for services with different names in bouquet and main list
         agr = [None] * 7
         for srv in bq.services:
             fav_id = srv.data
@@ -617,8 +620,13 @@ class MainAppWindow:
                 srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, self._picons.get(picon_id, None),
                               picon_id, *agr, srv.num, fav_id, None)
                 self._services[fav_id] = srv
+            elif srv.name:
+                extra_services[fav_id] = srv.name
             services.append(fav_id)
-        self._bouquets["{}:{}".format(name, bt_type)] = services
+
+        self._bouquets[bq_id] = services
+        if extra_services:
+            self._extra_bouquets[bq_id] = extra_services
 
     def append_services(self, services):
         if services:
@@ -644,6 +652,7 @@ class MainAppWindow:
         self._services.clear()
         self._rows_buffer.clear()
         self._bouquets.clear()
+        self._extra_bouquets.clear()
         self._current_bq_name = None
         self._bq_name_label.set_text("")
 
@@ -726,15 +735,19 @@ class MainAppWindow:
 
         key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, 0, 3))
         services = self._bouquets.get(key, None)
+        ex_services = self._extra_bouquets.get(key, None)
         if not services:
             return
 
         for num, srv_id in enumerate(services):
-            service = self._services.get(srv_id, None)
-            if service:
-                self._fav_model.append((num + 1, service.coded, service.service, service.locked,
-                                        service.hide, service.service_type, service.pos, service.fav_id,
-                                        self._picons.get(service.picon_id, None)))
+            srv = self._services.get(srv_id, None)
+            ex_srv_name = None
+            if ex_services:
+                ex_srv_name = ex_services.get(srv_id)
+            if srv:
+                self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
+                                        srv.hide, srv.service_type, srv.pos, srv.fav_id,
+                                        self._picons.get(srv.picon_id, None)))
 
     def check_bouquet_selection(self):
         """ checks and returns bouquet if selected """

@@ -68,7 +68,10 @@ def get_bouquet(path, name, bq_type):
                 services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.IPTV, ch, 0))
             else:
                 fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
-                services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
+                name = None
+                if len(ch_data) == 12:
+                    name, desc = str(ch_data[-1]).split("\n#DESCRIPTION")
+                services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id, 0))
 
     return srvs[0].strip("#NAME").strip(), services
 
