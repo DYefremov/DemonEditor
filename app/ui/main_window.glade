@@ -114,6 +114,16 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="icon_name">insert-link</property>
   </object>
+  <object class="GtkImage" id="edit_image_1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-edit</property>
+  </object>
+  <object class="GtkImage" id="edit_image_2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-edit</property>
+  </object>
   <object class="GtkImage" id="fav_iptv_list_config_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -316,6 +326,12 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="fav_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
@@ -327,7 +343,27 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_8">
+      <object class="GtkImageMenuItem" id="fav_rename_popup_item">
+        <property name="label" translatable="yes">Rename for this bouquet</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">edit_image_1</property>
+        <property name="use_stock">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_set_default_name_popup_item">
+        <property name="label" translatable="yes">Set default name</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">edit_image_2</property>
+        <property name="use_stock">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_5">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -344,7 +380,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_9">
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -362,7 +398,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_2">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_2">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -453,7 +489,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -511,7 +547,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_4">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_4">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
