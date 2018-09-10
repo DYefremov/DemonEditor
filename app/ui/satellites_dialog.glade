@@ -1478,17 +1478,18 @@ Author: Dmitriy Yefremov
       </row>
     </data>
   </object>
-  <object class="GtkDialog" id="satellites_update_dialog">
+  <object class="GtkWindow" id="satellites_update_window">
     <property name="can_focus">False</property>
     <property name="modal">True</property>
-    <property name="default_height">480</property>
     <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <signal name="delete-event" handler="on_quit" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="title" translatable="yes">Satellites update</property>
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
@@ -1508,7 +1509,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -1527,22 +1528,92 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
-          </object>
-        </child>
-        <child type="title">
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Satellites update</property>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Update</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="update_sat_list_tool_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-refresh</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
           </object>
         </child>
         <child>
           <object class="GtkBox" id="satellites_update_right_header_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Cancel</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_cancel_receive" swapped="no"/>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-cancel</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="receive_sat_list_tool_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Receive</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_receive_satellites_list" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="receive_sat_list_tool_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-goto-bottom</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkToggleButton" id="sat_update_filter_button">
                 <property name="visible">True</property>
@@ -1562,7 +1633,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -1584,7 +1655,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>
@@ -1595,415 +1666,328 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="-6">sat_update_close_button</action-widget>
-    </action-widgets>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="sat_update_dialog_vbox">
-        <property name="width_request">480</property>
-        <property name="height_request">320</property>
+    <child>
+      <object class="GtkBox" id="satellites_update_main_box">
+        <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin_left">1</property>
+        <property name="margin_right">1</property>
+        <property name="margin_top">1</property>
+        <property name="margin_bottom">2</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="sat_update_dialog_action_area">
+        <child>
+          <object class="GtkSearchBar" id="sat_update_search_bar">
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="layout_style">center</property>
             <child>
-              <object class="GtkButton" id="sat_update_close_button">
-                <property name="label">gtk-close</property>
+              <object class="GtkBox" id="search_bar_box">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkSearchEntry" id="sat_update_search_entry">
+                    <property name="width_request">200</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="primary_icon_name">edit-find-symbolic</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">False</property>
+                    <signal name="search-changed" handler="on_search" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="sat_update_search_down_button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_search_down" swapped="no"/>
+                    <child>
+                      <object class="GtkArrow" id="arrow1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="arrow_type">down</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="sat_update_search_up_button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_search_up" swapped="no"/>
+                    <child>
+                      <object class="GtkArrow" id="arrow2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="arrow_type">up</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="satellites_update_main_box">
+          <object class="GtkSearchBar" id="sat_update_filter_bar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkSearchBar" id="sat_update_search_bar">
+              <object class="GtkGrid" id="source_header_grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_bottom">2</property>
+                <property name="column_spacing">2</property>
                 <child>
-                  <object class="GtkBox" id="search_bar_box">
+                  <object class="GtkLabel" id="from_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkSearchEntry" id="sat_update_search_entry">
-                        <property name="width_request">200</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="primary_icon_name">edit-find-symbolic</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">False</property>
-                        <signal name="search-changed" handler="on_search" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="sat_update_search_down_button">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <signal name="clicked" handler="on_search_down" swapped="no"/>
-                        <child>
-                          <object class="GtkArrow" id="arrow1">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="arrow_type">down</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="sat_update_search_up_button">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <signal name="clicked" handler="on_search_up" swapped="no"/>
-                        <child>
-                          <object class="GtkArrow" id="arrow2">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="arrow_type">up</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
+                    <property name="label" translatable="yes">From:</property>
                   </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
                 </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSearchBar" id="sat_update_filter_bar">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkGrid" id="source_header_grid">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_bottom">2</property>
-                    <property name="column_spacing">2</property>
-                    <child>
-                      <object class="GtkLabel" id="from_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">From:</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="from_pos_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="input_purpose">number</property>
-                        <property name="adjustment">pos_adjustment</property>
-                        <property name="digits">1</property>
-                        <property name="numeric">True</property>
-                        <signal name="changed" handler="on_filter" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="filter_from_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="model">side_store</property>
-                        <property name="active">0</property>
-                        <signal name="changed" handler="on_filter" swapped="no"/>
-                        <child>
-                          <object class="GtkCellRendererText" id="from_filter_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="to_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">To:</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="to_pos_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="input_purpose">number</property>
-                        <property name="adjustment">pos_adjustment2</property>
-                        <property name="digits">1</property>
-                        <property name="numeric">True</property>
-                        <signal name="changed" handler="on_filter" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="filter_to_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="model">side_store</property>
-                        <property name="active">0</property>
-                        <signal name="changed" handler="on_filter" swapped="no"/>
-                        <child>
-                          <object class="GtkCellRendererText" id="filter_to_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">5</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="filter_apply_button">
-                        <property name="label">gtk-apply</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_stock">True</property>
-                        <signal name="clicked" handler="on_filter" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">6</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScrolledWindow" id="sat_update_scrolled_window">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <object class="GtkTreeView" id="sat_update_tree_view">
+                  <object class="GtkSpinButton" id="from_pos_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">update_sat_list_model_sort</property>
-                    <signal name="button-press-event" handler="on_popup_menu" object="satellites_update_popup_menu" swapped="no"/>
-                    <signal name="select-all" handler="on_select_all" swapped="no"/>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="sat_update_treeview_selection">
-                        <property name="mode">multiple</property>
-                      </object>
-                    </child>
+                    <property name="input_purpose">number</property>
+                    <property name="adjustment">pos_adjustment</property>
+                    <property name="digits">1</property>
+                    <property name="numeric">True</property>
+                    <signal name="changed" handler="on_filter" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="filter_from_combo_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">side_store</property>
+                    <property name="active">0</property>
+                    <signal name="changed" handler="on_filter" swapped="no"/>
                     <child>
-                      <object class="GtkTreeViewColumn" id="upd_satellite_column">
-                        <property name="title" translatable="yes">Satellite</property>
-                        <property name="expand">True</property>
-                        <property name="reorderable">True</property>
-                        <property name="sort_column_id">0</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="upd_satellite_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="upd_position_column">
-                        <property name="title" translatable="yes">Position</property>
-                        <property name="expand">True</property>
-                        <property name="reorderable">True</property>
-                        <property name="sort_column_id">1</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="upd_position_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="upd_type_column">
-                        <property name="title" translatable="yes">Type</property>
-                        <property name="expand">True</property>
-                        <property name="reorderable">True</property>
-                        <property name="sort_column_id">2</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="upd_type_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">2</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="upd_url_column">
-                        <property name="visible">False</property>
-                        <property name="title" translatable="yes">Url</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="upd_url_cellrenderertext"/>
-                          <attributes>
-                            <attribute name="text">3</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="upd_selected_treeviewcolumn">
-                        <property name="title" translatable="yes">Selected</property>
-                        <property name="reorderable">True</property>
-                        <property name="sort_column_id">4</property>
-                        <child>
-                          <object class="GtkCellRendererToggle" id="upd_selected_cellrenderertoggle">
-                            <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
-                          </object>
-                          <attributes>
-                            <attribute name="active">4</attribute>
-                          </attributes>
-                        </child>
-                      </object>
+                      <object class="GtkCellRendererText" id="from_filter_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
                     </child>
                   </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="to_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">To:</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="to_pos_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="input_purpose">number</property>
+                    <property name="adjustment">pos_adjustment2</property>
+                    <property name="digits">1</property>
+                    <property name="numeric">True</property>
+                    <signal name="changed" handler="on_filter" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="filter_to_combo_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">side_store</property>
+                    <property name="active">0</property>
+                    <signal name="changed" handler="on_filter" swapped="no"/>
+                    <child>
+                      <object class="GtkCellRendererText" id="filter_to_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="filter_apply_button">
+                    <property name="label">gtk-apply</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_filter" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="top_attach">0</property>
+                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
             </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="sat_update_scrolled_window">
+            <property name="width_request">480</property>
+            <property name="height_request">320</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_top">2</property>
+            <property name="shadow_type">in</property>
             <child>
-              <object class="GtkSeparator" id="separator7">
+              <object class="GtkTreeView" id="sat_update_tree_view">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
+                <property name="model">update_sat_list_model_sort</property>
+                <signal name="button-press-event" handler="on_popup_menu" object="satellites_update_popup_menu" swapped="no"/>
+                <signal name="select-all" handler="on_select_all" swapped="no"/>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="sat_update_treeview_selection">
+                    <property name="mode">multiple</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="upd_satellite_column">
+                    <property name="title" translatable="yes">Satellite</property>
+                    <property name="expand">True</property>
+                    <property name="reorderable">True</property>
+                    <property name="sort_column_id">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="upd_satellite_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="upd_position_column">
+                    <property name="title" translatable="yes">Position</property>
+                    <property name="reorderable">True</property>
+                    <property name="sort_column_id">1</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="upd_position_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="upd_type_column">
+                    <property name="title" translatable="yes">Type</property>
+                    <property name="reorderable">True</property>
+                    <property name="sort_column_id">2</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="upd_type_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">2</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="upd_url_column">
+                    <property name="visible">False</property>
+                    <property name="title" translatable="yes">Url</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="upd_url_cellrenderertext"/>
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="upd_selected_treeviewcolumn">
+                    <property name="title" translatable="yes">Selected</property>
+                    <property name="reorderable">True</property>
+                    <property name="sort_column_id">4</property>
+                    <child>
+                      <object class="GtkCellRendererToggle" id="upd_selected_cellrenderertoggle">
+                        <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
+                      </object>
+                      <attributes>
+                        <attribute name="active">4</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">6</property>
-              </packing>
             </child>
-            <child>
-              <object class="GtkToolbar" id="sat_update_toolbar">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkToolButton" id="cancel_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Cancel</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-cancel</property>
-                    <signal name="clicked" handler="on_cancel_receive" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="update_sat_list_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Update</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-refresh</property>
-                    <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="receive_sat_list_tool_button">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="is_important">True</property>
-                    <property name="label" translatable="yes">Receive</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-goto-bottom</property>
-                    <signal name="clicked" handler="on_receive_satellites_list" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="primary-toolbar"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">7</property>
-              </packing>
-            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="sat_update_expander_frame">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
+            <property name="margin_top">2</property>
+            <property name="margin_bottom">2</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">in</property>
             <child>
               <object class="GtkExpander" id="sat_update_expander">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="margin_left">1</property>
+                <property name="margin_right">1</property>
+                <property name="margin_top">1</property>
+                <property name="margin_bottom">1</property>
+                <property name="resize_toplevel">True</property>
                 <child>
                   <object class="GtkScrolledWindow" id="text_view_scrolled_window">
                     <property name="height_request">120</property>
@@ -2027,89 +2011,72 @@ Author: Dmitriy Yefremov
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">8</property>
-              </packing>
             </child>
-            <child>
-              <object class="GtkInfoBar" id="sat_update_info_bar">
-                <property name="app_paintable">True</property>
+            <child type="label_item">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkInfoBar" id="sat_update_info_bar">
+            <property name="app_paintable">True</property>
+            <property name="can_focus">False</property>
+            <property name="show_close_button">True</property>
+            <signal name="response" handler="on_info_bar_close" swapped="no"/>
+            <child internal-child="action_area">
+              <object class="GtkButtonBox" id="infobar-action_area2">
                 <property name="can_focus">False</property>
-                <property name="show_close_button">True</property>
-                <signal name="response" handler="on_info_bar_close" swapped="no"/>
-                <child internal-child="action_area">
-                  <object class="GtkButtonBox" id="infobar-action_area2">
-                    <property name="can_focus">False</property>
-                    <property name="spacing">6</property>
-                    <property name="layout_style">end</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child internal-child="content_area">
-                  <object class="GtkBox" id="infobar-content_area2">
-                    <property name="can_focus">False</property>
-                    <property name="spacing">16</property>
-                    <child>
-                      <object class="GtkLabel" id="info_bar_message_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Info</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
+                <property name="spacing">6</property>
+                <property name="layout_style">end</property>
                 <child>
                   <placeholder/>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">9</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkSeparator" id="separator6">
-                <property name="visible">True</property>
+            <child internal-child="content_area">
+              <object class="GtkBox" id="infobar-content_area2">
                 <property name="can_focus">False</property>
+                <property name="spacing">16</property>
+                <child>
+                  <object class="GtkLabel" id="info_bar_message_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Info</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">10</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">9</property>
           </packing>
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="-6">sat_update_close_button</action-widget>
-    </action-widgets>
   </object>
 </interface>

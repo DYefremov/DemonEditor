@@ -289,9 +289,7 @@ class SatellitesDialog:
 
     @run_idle
     def on_update(self, item):
-        dialog = SatellitesUpdateDialog(self._window, self._sat_view.get_model())
-        dialog.run()
-        dialog.destroy()
+        SatellitesUpdateDialog(self._window, self._sat_view.get_model()).show()
 
     @staticmethod
     def parse_data(model, path, itr, sats):
@@ -470,14 +468,14 @@ class SatellitesUpdateDialog:
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("satellites_update_dialog", "update_source_store", "update_sat_list_store",
+                                      ("satellites_update_window", "update_source_store", "update_sat_list_store",
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
                                        "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",
                                        "remove_selection_image"))
         builder.connect_signals(handlers)
 
-        self._dialog = builder.get_object("satellites_update_dialog")
-        self._dialog.set_transient_for(transient)
+        self._window = builder.get_object("satellites_update_window")
+        self._window.set_transient_for(transient)
         self._main_model = main_model
         # self._dialog.get_content_area().set_border_width(0)
         self._sat_view = builder.get_object("sat_update_tree_view")
@@ -505,17 +503,13 @@ class SatellitesUpdateDialog:
         self._download_task = False
         self._parser = None
 
-    def run(self):
-        if self._dialog.run() == Gtk.ResponseType.CANCEL:
-            self._download_task = False
-            return
+    def show(self):
+        self._window.show()
 
-    def destroy(self):
-        self._dialog.destroy()
-
+    @run_idle
     def on_update_satellites_list(self, item):
         if self._download_task:
-            show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
+            show_dialog(DialogType.ERROR, self._window, "The task is already running!")
             return
 
         model = get_base_model(self._sat_view.get_model())
@@ -540,18 +534,17 @@ class SatellitesUpdateDialog:
         for sat in sats:
             model.append(sat)
 
-    @run_task
+    @run_idle
     def on_receive_satellites_list(self, item):
         if self._download_task:
-            show_dialog(DialogType.ERROR, self._dialog, "The task is already running!")
+            show_dialog(DialogType.ERROR, self._window, "The task is already running!")
             return
         self.receive_satellites()
 
     @run_task
     def receive_satellites(self):
         self._download_task = True
-        self._sat_update_expander.set_expanded(True)
-        self._text_view.get_buffer().set_text("", 0)
+        self.update_expander()
         model = self._sat_view.get_model()
         start = time.time()
 
@@ -563,9 +556,11 @@ class SatellitesUpdateDialog:
             futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model if r[4]]}
             for future in concurrent.futures.as_completed(futures):
                 if not self._download_task:
+                    self._download_task = True
                     executor.shutdown()
                     appender.send("\nCanceled\n")
                     appender.close()
+                    self._download_task = False
                     return
                 data = future.result()
                 appender.send(text.format(data[0]))
@@ -574,7 +569,7 @@ class SatellitesUpdateDialog:
             appender.send("-" * 75 + "\n")
             appender.send("Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats)))
             appender.close()
-            # self.show_info_message(message, Gtk.MessageType.INFO)
+
             sats = {s[2]: s for s in sats}  # key = position, v = satellite
 
             for row in self._main_model:
@@ -588,6 +583,11 @@ class SatellitesUpdateDialog:
                 append_satellite(self._main_model, sat)
 
             self._download_task = False
+
+    @run_idle
+    def update_expander(self):
+        self._sat_update_expander.set_expanded(True)
+        self._text_view.get_buffer().set_text("", 0)
 
     @run_idle
     def update_satellite(self, itr, row, sat):
@@ -608,7 +608,6 @@ class SatellitesUpdateDialog:
             text = yield
             append(text)
 
-    @run_idle
     def on_cancel_receive(self, item=None):
         self._download_task = False
 
@@ -689,7 +688,7 @@ class SatellitesUpdateDialog:
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
             menu.popup(None, None, None, None, event.button, event.time)
 
-    def on_quit(self):
+    def on_quit(self, window, event):
         self._download_task = False
 
 
