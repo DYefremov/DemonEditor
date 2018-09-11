@@ -9,7 +9,7 @@ from gi.repository import GLib
 from app.commons import run_idle, log, run_task, run_with_delay
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, Flag
+from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
@@ -21,7 +21,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .download_dialog import show_download_dialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons
+    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -47,7 +47,7 @@ class MainAppWindow:
                          "fav_remove_popup_item")
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
-                     "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_picon_popup_item")
+                     "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_picon_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
@@ -60,7 +60,7 @@ class MainAppWindow:
                          "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
                          "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
-                         "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_locate_popup_item",
+                         "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_locate_popup_item",
                          "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
                          "services_add_new_popup_item", "fav_iptv_popup_item")
 
@@ -83,6 +83,10 @@ class MainAppWindow:
                     "on_copy": self.on_copy,
                     "on_paste": self.on_paste,
                     "on_edit": self.on_rename,
+                    "on_rename_for_bouquet": self.on_rename_for_bouquet,
+                    "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
+                    "on_service_edit": self.on_service_edit,
+                    "on_services_add_new": self.on_services_add_new,
                     "on_delete": self.on_delete,
                     "on_tool_edit": self.on_tool_edit,
                     "on_to_fav_move": self.on_to_fav_move,
@@ -110,8 +114,6 @@ class MainAppWindow:
                     "on_search_down": self.on_search_down,
                     "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
-                    "on_service_edit": self.on_service_edit,
-                    "on_services_add_new": self.on_services_add_new,
                     "on_iptv": self.on_iptv,
                     "on_iptv_list_configuration": self.on_iptv_list_configuration,
                     "on_play_stream": self.on_play_stream,
@@ -284,18 +286,6 @@ class MainAppWindow:
         self._rows_buffer.clear()
         self.on_view_focus(view, None)
 
-    def on_rename(self, view):
-        model = get_base_model(view.get_model())
-        name = model.get_name()
-        if name == self._BOUQUETS_LIST_NAME:
-            self.on_bouquets_edit(view)
-            # edit(view, self.__main_window, ViewTarget.BOUQUET)
-        elif name == self._FAV_LIST_NAME:
-            rename(view, self._main_window, ViewTarget.FAV, service_view=self._services_view,
-                   channels=self._services)
-        elif name == self._SERVICE_LIST_NAME:
-            rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, channels=self._services)
-
     def on_delete(self, item):
         """ Delete selected items from views
 
@@ -418,25 +408,6 @@ class MainAppWindow:
             self.on_service_edit(self._fav_view)
         elif self._bouquets_view.is_focus():
             self.on_rename(self._bouquets_view)
-
-    def on_bouquets_edit(self, view):
-        """ Rename bouquets """
-        bq_selected = self.get_selected_bouquet()
-        if not bq_selected:
-            show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
-            return
-
-        model, paths = view.get_selection().get_selected_rows()
-
-        if paths:
-            itr = model.get_iter(paths[0])
-            bq_name, bq_type = model.get(itr, 0, 3)
-            response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
-            if response == Gtk.ResponseType.CANCEL:
-                return
-
-            model.set_value(itr, 0, response)
-            self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
 
     def on_to_fav_move(self, view):
         """ Move items from app to fav list """
@@ -679,8 +650,13 @@ class MainAppWindow:
                 for num in range(num_of_children):
                     bq_itr = model.iter_nth_child(itr, num)
                     bq_name, locked, hidden, bq_type = model.get(bq_itr, 0, 1, 2, 3)
-                    favs = self._bouquets["{}:{}".format(bq_name, bq_type)]
-                    bq = Bouquet(bq_name, bq_type, [self._services.get(f_id, None) for f_id in favs], locked, hidden)
+                    bq_id = "{}:{}".format(bq_name, bq_type)
+                    favs = self._bouquets[bq_id]
+                    ex_srvs = self._extra_bouquets.get(bq_id)
+                    # Don't repeat so! Please! :)
+                    bq_srvs = list(map(lambda s: s._replace(service=ex_srvs.get(s.fav_id, None) if ex_srvs else None),
+                                       filter(None, [self._services.get(f_id, None) for f_id in favs])))
+                    bq = Bouquet(bq_name, bq_type, bq_srvs, locked, hidden)
                     bqs.append(bq)
             if len(b_path) == 1:
                 bouquets.append(Bouquets(*model.get(itr, 0, 3), bqs if bqs else []))
@@ -1177,6 +1153,67 @@ class MainAppWindow:
                                       self._bouquets,
                                       action=Action.ADD)
         dialog.show()
+
+    def on_bouquets_edit(self, view):
+        """ Rename bouquets """
+        bq_selected = self.get_selected_bouquet()
+        if not bq_selected:
+            show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
+            return
+
+        model, paths = view.get_selection().get_selected_rows()
+
+        if paths:
+            itr = model.get_iter(paths[0])
+            bq_name, bq_type = model.get(itr, 0, 3)
+            response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
+            if response == Gtk.ResponseType.CANCEL:
+                return
+
+            model.set_value(itr, 0, response)
+            self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
+
+    def on_rename(self, view):
+        model = get_base_model(view.get_model())
+        name = model.get_name()
+        if name == self._BOUQUETS_LIST_NAME:
+            self.on_bouquets_edit(view)
+        elif name == self._FAV_LIST_NAME:
+            rename(view, self._main_window, ViewTarget.FAV, service_view=self._services_view,
+                   channels=self._services)
+        elif name == self._SERVICE_LIST_NAME:
+            rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, channels=self._services)
+
+    def on_rename_for_bouquet(self, item):
+        selection = get_selection(self._fav_view, self._main_window)
+        if not selection:
+            return
+
+        model, paths = selection
+        data = model[paths][:]
+        cur_name, fav_id = data[2], data[7]
+        response = show_dialog(DialogType.INPUT, self._main_window, cur_name)
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        srv = self._services.get(fav_id, None)
+        selected_bq = self.get_selected_bouquet()
+        ex_bq = self._extra_bouquets.get(selected_bq, None)
+
+        if srv.service == response and ex_bq:
+            ex_bq.pop(fav_id, None)
+            if not ex_bq:
+                self._extra_bouquets.pop(selected_bq, None)
+        else:
+            if ex_bq:
+                ex_bq[fav_id] = response
+            else:
+                self._extra_bouquets[selected_bq] = {fav_id: response}
+
+        model.set_value(model.get_iter(paths), 2, response)
+
+    def on_set_default_name_for_bouquet(self, item):
+        pass
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)

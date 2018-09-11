@@ -371,6 +371,9 @@ class ServiceDetailsDialog:
                                  8: new_service.picon})
 
     def update_picon_name(self, old_name, new_name):
+        if not os.path.isdir(self._picons_dir_path):
+            return
+
         for file_name in os.listdir(self._picons_dir_path):
             if file_name == old_name:
                 old_file = os.path.join(self._picons_dir_path, old_name)

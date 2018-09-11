@@ -34,12 +34,14 @@ def write_bouquet(path, name, channels):
     bouquet = ["#NAME {}\n".format(name)]
 
     for ch in channels:
-        if not ch:  # if was duplicate
-            continue
         if ch.service_type == BqServiceType.IPTV.name or ch.service_type == BqServiceType.MARKER.name:
             bouquet.append("#SERVICE {}\n".format(ch.fav_id.strip()))
         else:
-            bouquet.append("#SERVICE {}\n".format(to_bouquet_id(ch)))
+            data = to_bouquet_id(ch)
+            if ch.service:
+                bouquet.append("#SERVICE {}:{}\n#DESCRIPTION {}\n".format(data, ch.service, ch.service))
+            else:
+                bouquet.append("#SERVICE {}\n".format(data))
 
     with open(path, "w", encoding="utf-8") as file:
         file.writelines(bouquet)

@@ -138,15 +138,11 @@ def is_some_level(paths):
 # ***************** Rename *******************#
 
 def rename(view, parent_window, target, fav_view=None, service_view=None, channels=None):
-    model, paths = view.get_selection().get_selected_rows()
-    model = get_base_model(model)
-
-    if not paths:
-        return
-    elif len(paths) > 1:
-        show_dialog(DialogType.ERROR, parent_window, "Please, select only one item!")
+    selection = get_selection(view, parent_window)
+    if not selection:
         return
 
+    model, paths = selection
     itr = model.get_iter(paths)
     f_id = None
     channel_name = None
@@ -183,6 +179,20 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, channe
     old_ch = channels.get(f_id, None)
     if old_ch:
         channels[f_id] = old_ch._replace(service=channel_name)
+
+
+def get_selection(view, parent):
+    """ Returns (model, paths) if possible """
+    model, paths = view.get_selection().get_selected_rows()
+    model = get_base_model(model)
+
+    if not paths:
+        return
+    elif len(paths) > 1:
+        show_dialog(DialogType.ERROR, parent, "Please, select only one item!")
+        return
+
+    return model, paths
 
 
 # ***************** Flags *******************#
