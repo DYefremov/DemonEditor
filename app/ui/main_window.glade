@@ -367,7 +367,6 @@ Author: Dmitriy Yefremov
               <object class="GtkImageMenuItem" id="fav_set_default_name_popup_item">
                 <property name="label" translatable="yes">Set default name</property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="image">edit_image_2</property>
                 <property name="use_stock">False</property>

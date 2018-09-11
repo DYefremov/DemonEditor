@@ -1213,7 +1213,27 @@ class MainAppWindow:
         model.set_value(model.get_iter(paths), 2, response)
 
     def on_set_default_name_for_bouquet(self, item):
-        pass
+        selection = get_selection(self._fav_view, self._main_window)
+        if not selection:
+            return
+
+        model, paths = selection
+        fav_id = model[paths][7]
+        srv = self._services.get(fav_id, None)
+        selected_bq = self.get_selected_bouquet()
+        ex_bq = self._extra_bouquets.get(selected_bq, None)
+
+        if not ex_bq:
+            show_dialog(DialogType.ERROR, self._main_window, "No changes required!")
+            return
+        else:
+            if not ex_bq.pop(fav_id, None):
+                show_dialog(DialogType.ERROR, self._main_window, "No changes required!")
+                return
+            if not ex_bq:
+                self._extra_bouquets.pop(selected_bq, None)
+
+        model.set_value(model.get_iter(paths), 2, srv.service)
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)
