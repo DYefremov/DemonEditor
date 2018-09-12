@@ -1093,14 +1093,12 @@ class MainAppWindow:
 
     # ***************** Filter and search *********************#
 
-    @run_idle
     def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
         active = toggle_button.get_active()
         if active:
             self.update_filter_sat_positions()
 
         self._filter_bar.set_search_mode(active)
-        self._filter_bar.set_visible(active)
 
     @run_idle
     def update_filter_sat_positions(self):
