@@ -9,7 +9,7 @@ from gi.repository import GLib
 from app.commons import run_idle, log, run_task, run_with_delay
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, Flag, BouquetService
+from app.eparser.ecommons import CAS, Flag
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
@@ -200,6 +200,10 @@ class MainAppWindow:
         self._services_model_filter.set_visible_func(self.services_filter_function)
         self._filter_entry = builder.get_object("filter_entry")
         self._filter_bar = builder.get_object("filter_bar")
+        self._filter_types_box = builder.get_object("filter_types_box")
+        self._filter_sat_positions_box = builder.get_object("filter_sat_positions_box")
+        self._filter_types_model = builder.get_object("filter_types_list_store")
+        self._filter_sat_positions_model = builder.get_object("filter_sat_positions_list_store")
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
@@ -640,7 +644,7 @@ class MainAppWindow:
             shutil.move(os.path.join(path, file), backup_path + file)
 
         bouquets = []
-        services_model = self._services_view.get_model()
+        services_model = get_base_model(self._services_view.get_model())
 
         def parse_bouquets(model, b_path, itr):
             bqs = None
@@ -1090,18 +1094,40 @@ class MainAppWindow:
     @run_idle
     def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
         active = toggle_button.get_active()
+        if active:
+            self.update_filter_sat_positions()
+
         self._filter_bar.set_search_mode(active)
         self._filter_bar.set_visible(active)
 
+    def update_filter_sat_positions(self):
+        self._filter_sat_positions_model.clear()
+        self._filter_sat_positions_model.append(("All positions",))
+        self._filter_sat_positions_box.set_active(0)
+        sats = {float(x[16]) for x in self._services_model}
+        list(map(self._filter_sat_positions_model.append, map(lambda x: (str(x),), sorted(sats))))
+
     @run_with_delay(1)
-    def on_filter_changed(self, entry):
+    def on_filter_changed(self, item):
         self._services_model_filter.refilter()
 
     def services_filter_function(self, model, iter, data):
         if self._services_model_filter is None or self._services_model_filter == "None":
             return True
         else:
-            return self._filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
+            txt = self._filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
+            type_active = self._filter_types_box.get_active() > 0
+            pos_active = self._filter_sat_positions_box.get_active() > 0
+
+            if type_active and pos_active:
+                return self._filter_types_box.get_active_id() == model.get(iter, 7)[
+                    0] and self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt
+            elif type_active:
+                return self._filter_types_box.get_active_id() == model.get(iter, 7)[0] and txt
+            elif pos_active:
+                return self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt
+
+            return txt
 
     def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
         self._search_bar.set_search_mode(toggle_button.get_active())
