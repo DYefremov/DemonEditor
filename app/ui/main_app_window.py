@@ -204,6 +204,7 @@ class MainAppWindow:
         self._filter_sat_positions_box = builder.get_object("filter_sat_positions_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_positions_model = builder.get_object("filter_sat_positions_list_store")
+        self._filter_only_free_button = builder.get_object("filter_only_free_button")
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
@@ -617,6 +618,7 @@ class MainAppWindow:
             self._services_model.set_value(itr, 8, self._picons.get(srv.picon_id, None))
             yield True
         self._wait_dialog.hide()
+        self.update_filter_sat_positions()
 
     def clear_current_data(self):
         """ Clearing current data from lists """
@@ -1100,6 +1102,7 @@ class MainAppWindow:
         self._filter_bar.set_search_mode(active)
         self._filter_bar.set_visible(active)
 
+    @run_idle
     def update_filter_sat_positions(self):
         self._filter_sat_positions_model.clear()
         self._filter_sat_positions_model.append(("All positions",))
@@ -1109,7 +1112,7 @@ class MainAppWindow:
 
     @run_with_delay(1)
     def on_filter_changed(self, item):
-        self._services_model_filter.refilter()
+        GLib.idle_add(self._services_model_filter.refilter, priority=GLib.PRIORITY_LOW)
 
     def services_filter_function(self, model, iter, data):
         if self._services_model_filter is None or self._services_model_filter == "None":
@@ -1118,16 +1121,17 @@ class MainAppWindow:
             txt = self._filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
             type_active = self._filter_types_box.get_active() > 0
             pos_active = self._filter_sat_positions_box.get_active() > 0
+            free = not model.get(iter, 2)[0] if self._filter_only_free_button.get_active() else True
 
             if type_active and pos_active:
                 return self._filter_types_box.get_active_id() == model.get(iter, 7)[
-                    0] and self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt
+                    0] and self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt and free
             elif type_active:
-                return self._filter_types_box.get_active_id() == model.get(iter, 7)[0] and txt
+                return self._filter_types_box.get_active_id() == model.get(iter, 7)[0] and txt and free
             elif pos_active:
-                return self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt
+                return self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt and free
 
-            return txt
+            return txt and free
 
     def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
         self._search_bar.set_search_mode(toggle_button.get_active())
