@@ -1099,6 +1099,7 @@ class MainAppWindow:
             self.update_filter_sat_positions()
 
         self._filter_bar.set_search_mode(active)
+        self._filter_bar.set_visible(active)
 
     @run_idle
     def update_filter_sat_positions(self):

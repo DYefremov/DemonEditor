@@ -1224,7 +1224,6 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkSearchBar" id="filter_bar">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="filter_box">
