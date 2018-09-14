@@ -18,8 +18,7 @@ class SettingsDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade",
-                                      ("settings_dialog", "telnet_timeout_adjustment"))
+        builder.add_from_file(UI_RESOURCES_PATH + "settings_dialog.glade")
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("settings_dialog")
