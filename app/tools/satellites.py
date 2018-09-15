@@ -90,14 +90,28 @@ class SatellitesParser(HTMLParser):
 
                 return list(map(get_sat, filter(lambda x: all(x) and len(x) == 5, self._rows)))
             elif self._source is SatelliteSource.LYNGSAT:
-                rows = filter(lambda x: len(x) in (5, 7), self._rows)
+                extra_pattern = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html")
                 sats = []
                 current_pos = "0"
-                for row in rows:
+                for row in filter(lambda x: len(x) in (5, 7, 8), self._rows):
                     r_len = len(row)
                     if r_len == 7:
                         current_pos = self.parse_position(row[2])
                         sats.append((row[4], current_pos, row[5], row[1], False))
+                    if r_len == 8:  # for a very limited number of satellites
+                        data = list(filter(None, row))
+                        urls = set()
+                        sat_type = ""
+                        for d in data:
+                            url = re.match(extra_pattern, d)
+                            if url:
+                                urls.add(url.group(0))
+                            if d in ("C", "Ku", "CKu"):
+                                sat_type = d
+                        current_pos = self.parse_position(data[1])
+                        for url in urls:
+                            name = url.rsplit("/")[-1].rstrip(".html").replace("-", " ")
+                            sats.append((name, current_pos, sat_type, url, False))
                     elif r_len == 5:
                         sats.append((row[2], current_pos, row[3], row[1], False))
                 return sats
@@ -183,4 +197,8 @@ class SatellitesParser(HTMLParser):
 
 
 if __name__ == "__main__":
-    pass
+    parser = SatellitesParser(source=SatelliteSource.LYNGSAT)
+    satts = parser.get_satellites_list(SatelliteSource.LYNGSAT)
+    if satts:
+        #     list(map(print, satts))
+        print("Parsed: ", len(satts))
