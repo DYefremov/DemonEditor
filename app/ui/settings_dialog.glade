@@ -701,7 +701,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel" id="label8">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Data files:</property>
+                    <property name="label" translatable="yes">Data path:</property>
                     <property name="lines">0</property>
                     <property name="xalign">0.019999999552965164</property>
                   </object>
@@ -714,7 +714,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel" id="label18">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Picons files:</property>
+                    <property name="label" translatable="yes">Picons path:</property>
                     <property name="xalign">0.019999999552965164</property>
                   </object>
                   <packing>

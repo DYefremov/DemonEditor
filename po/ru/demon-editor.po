@@ -58,9 +58,6 @@ msgstr "Копировать"
 msgid "Copy reference"
 msgstr "Копировать ссылку"
 
-msgid "Data"
-msgstr ""
-
 msgid "Download"
 msgstr "Загрузить"
 
@@ -96,6 +93,12 @@ msgstr "Импортировать файл m3u"
 
 msgid "List configuration"
 msgstr "Конфигурация списка"
+
+msgid "Rename for this bouquet"
+msgstr "Переименовать для букета"
+
+msgid "Set default name"
+msgstr "Имя по умолчанию"
 
 msgid "Insert marker"
 msgstr "Вставить маркер"
@@ -151,12 +154,6 @@ msgstr "Загрузчик пиконов"
 msgid "Satellites downloader"
 msgstr "Загрузчик спутников"
 
-msgid "Preferences"
-msgstr "Настройки"
-
-msgid "Profile:"
-msgstr "Профиль:"
-
 msgid "Remove"
 msgstr "Удалить"
 
@@ -199,9 +196,6 @@ msgstr "Вы уверены?"
 msgid "Current data path:"
 msgstr "Текущий путь к данным:"
 
-msgid "Data dir:"
-msgstr "Путь к данным:"
-
 msgid "Data:"
 msgstr "Данные:"
 
@@ -213,24 +207,6 @@ msgstr "Адрес ресивера:"
 
 msgid "Loading data..."
 msgstr "Загрузка данных..."
-
-msgid "Login:"
-msgstr "Логин:"
-
-msgid "Options"
-msgstr "Настройки"
-
-msgid "Password:"
-msgstr "Пароль:"
-
-msgid "Picons dir:"
-msgstr "Директория пиконов:"
-
-msgid "Picons:"
-msgstr "Пиконы:"
-
-msgid "Port:"
-msgstr "Порт:"
 
 msgid "Receive"
 msgstr "Получить"
@@ -264,12 +240,6 @@ msgstr "Отправить файлы в ресивер"
 
 msgid "Services and Bouquets files:"
 msgstr "Файлы сервисов и букетов:"
-
-msgid "Timeout between commands in seconds"
-msgstr "Пауза между коммандами в сек."
-
-msgid "Timeout:"
-msgstr "Тайм-аут:"
 
 msgid "User bouquet files:"
 msgstr "Файлы букетов:"
@@ -360,6 +330,13 @@ msgstr "Имя"
 msgid "Position"
 msgstr "Позиция"
 
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "Обновление спутников"
+
+msgid "Remove selection"
+msgstr "Снять выделение"
+
 # Service details dialog
 msgid "Service data:"
 msgstr "Данные сервиса:"
@@ -422,6 +399,49 @@ msgstr "Сбросить по умолчанию"
 
 msgid "IPTV streams list configuration"
 msgstr "Конфигурация списка IPTV потоков"
+
+#Settings dialog
+msgid "Preferences"
+msgstr "Настройки"
+
+msgid "Profile:"
+msgstr "Профиль:"
+
+msgid "Timeout between commands in seconds"
+msgstr "Пауза между коммандами в сек."
+
+msgid "Timeout:"
+msgstr "Тайм-аут:"
+
+msgid "Login:"
+msgstr "Логин:"
+
+msgid "Options"
+msgstr "Настройки"
+
+msgid "Password:"
+msgstr "Пароль:"
+
+msgid "Picons:"
+msgstr "Пиконы:"
+
+msgid "Port:"
+msgstr "Порт:"
+
+msgid "Data path:"
+msgstr "Путь к данным:"
+
+msgid "Picons path:"
+msgstr "Путь к пиконам:"
+
+msgid "Network settings:"
+msgstr "Настройки сети:"
+
+msgid "STB file paths:"
+msgstr "Пути к файлам ресивера:"
+
+msgid "Local file paths:"
+msgstr "Пути к локальным файлам:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
@@ -505,6 +525,13 @@ msgstr "Найдено"
 
 msgid "unavailable streams."
 msgstr "недоступных потоков."
+
+msgid "No changes required!"
+msgstr "Изменений не требуется!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "Текущий список не содержит потоков IPTV!"
+
 
 
 

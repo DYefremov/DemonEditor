@@ -959,7 +959,7 @@ class MainAppWindow:
 
         iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
-            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains iptv streams!")
+            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
             return
 
         bq_selected = self.get_selected_bouquet()
@@ -973,7 +973,7 @@ class MainAppWindow:
     def on_remove_all_unavailable(self, item):
         iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
-            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains iptv streams!")
+            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
             return
 
         bq_selected = self.get_selected_bouquet()
