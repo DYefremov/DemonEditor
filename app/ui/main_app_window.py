@@ -1225,7 +1225,7 @@ class MainAppWindow:
 
         if srv_type == BqServiceType.IPTV.name:
             show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
-            return 
+            return
 
         response = show_dialog(DialogType.INPUT, self._main_window, cur_name)
         if response == Gtk.ResponseType.CANCEL:
