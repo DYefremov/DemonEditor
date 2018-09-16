@@ -1221,7 +1221,12 @@ class MainAppWindow:
 
         model, paths = selection
         data = model[paths][:]
-        cur_name, fav_id = data[2], data[7]
+        cur_name, srv_type, fav_id = data[2], data[5], data[7]
+
+        if srv_type == BqServiceType.IPTV.name:
+            show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
+            return 
+
         response = show_dialog(DialogType.INPUT, self._main_window, cur_name)
         if response == Gtk.ResponseType.CANCEL:
             return
