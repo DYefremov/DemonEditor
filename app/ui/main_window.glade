@@ -33,11 +33,6 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
   <!-- interface-copyright 2018 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
-  <object class="GtkImage">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">document-properties</property>
-  </object>
   <object class="GtkMenu" id="bouquets_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -122,7 +117,12 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="edit_image_2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-edit</property>
+    <property name="stock">gtk-revert-to-saved</property>
+  </object>
+  <object class="GtkImage" id="extra_edit_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-find-and-replace</property>
   </object>
   <object class="GtkImage" id="fav_iptv_list_config_image">
     <property name="visible">True</property>
@@ -192,11 +192,6 @@ Author: Dmitriy Yefremov
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-find</property>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-remove</property>
   </object>
   <object class="GtkImage" id="insert_image">
     <property name="visible">True</property>
@@ -335,6 +330,16 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="icon_name">network-transmit-receive</property>
   </object>
+  <object class="GtkImage" id="new_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-new</property>
+  </object>
+  <object class="GtkImage" id="remova_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-remove</property>
+  </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -367,27 +372,27 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="fav_edit_sub_menu_popup_item">
+      <object class="GtkImageMenuItem" id="fav_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="on_service_edit" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_edit_sub_menu_popup_item">
+        <property name="label" translatable="yes">Extra:</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">extra_edit_image</property>
+        <property name="use_stock">False</property>
         <property name="always_show_image">True</property>
         <child type="submenu">
           <object class="GtkMenu" id="fav_edit_popoup_menu">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_edit_popup_item">
-                <property name="label">gtk-edit</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_underline">True</property>
-                <property name="use_stock">True</property>
-                <signal name="activate" handler="on_service_edit" object="fav_tree_view" swapped="no"/>
-              </object>
-            </child>
             <child>
               <object class="GtkImageMenuItem" id="fav_rename_popup_item">
                 <property name="label" translatable="yes">Rename for this bouquet</property>
@@ -529,7 +534,7 @@ Author: Dmitriy Yefremov
                 <property name="label" translatable="yes">Remove all unavailable</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="image">image1</property>
+                <property name="image">remova_image</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
               </object>
@@ -613,11 +618,6 @@ Author: Dmitriy Yefremov
         <signal name="activate" handler="on_delete" swapped="no"/>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="new_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-new</property>
   </object>
   <object class="GtkPopoverMenu" id="right_header_popover_menu">
     <property name="can_focus">False</property>

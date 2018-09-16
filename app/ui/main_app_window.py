@@ -47,7 +47,8 @@ class MainAppWindow:
                          "fav_remove_popup_item")
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
-                     "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_picon_popup_item")
+                     "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
+                     "fav_picon_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
@@ -60,9 +61,9 @@ class MainAppWindow:
                          "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
                          "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
                          "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
-                         "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_locate_popup_item",
-                         "services_copy_popup_item", "services_picon_popup_item", "fav_picon_popup_item",
-                         "services_add_new_popup_item", "fav_iptv_popup_item")
+                         "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
+                         "fav_locate_popup_item", "services_copy_popup_item", "services_picon_popup_item",
+                         "fav_picon_popup_item", "services_add_new_popup_item", "fav_iptv_popup_item")
 
     def __init__(self):
         handlers = {"on_close_app": self.on_close_app,
