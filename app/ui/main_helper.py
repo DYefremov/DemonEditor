@@ -408,13 +408,17 @@ def remove_picon(target, srv_view, fav_view, picons, options):
             fav_ids.append(model.get_value(itr, 18))
             picon_ids.append(model.get_value(itr, 9))
         else:
-            fav_ids.append(model.get_value(itr, 7))
+            srv_type, fav_id = model[itr][5, 7]
+            if srv_type == BqServiceType.IPTV.name:
+                picon_ids.append("{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id.split(":")[0:10]).strip())
+            else:
+                fav_ids.append(fav_id)
 
-    def remove(md, path, itr):
-        if md.get_value(itr, 7 if target is ViewTarget.SERVICES else 18) in fav_ids:
-            md.set_value(itr, picon_pos, None)
+    def remove(md, path, it):
+        if md.get_value(it, 7 if target is ViewTarget.SERVICES else 18) in fav_ids:
+            md.set_value(it, picon_pos, None)
             if target is ViewTarget.FAV:
-                picon_ids.append(md.get_value(itr, 9))
+                picon_ids.append(md.get_value(it, 9))
 
     fav_view.get_model().foreach(remove) if target is ViewTarget.SERVICES else get_base_model(
         srv_view.get_model()).foreach(remove)
