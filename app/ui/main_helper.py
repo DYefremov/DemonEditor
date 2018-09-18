@@ -65,6 +65,8 @@ def move_items(key, view: Gtk.TreeView):
 
     if paths:
         mod_length = len(model)
+        if mod_length == len(paths):
+            return
         cursor_path = view.get_cursor()[0]
         max_path = Gtk.TreePath.new_from_indices((mod_length,))
         min_path = Gtk.TreePath.new_from_indices((0,))

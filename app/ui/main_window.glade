@@ -358,6 +358,7 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="fav_copy_popup_item">
         <property name="label">gtk-copy</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -1366,6 +1367,7 @@ Author: Dmitriy Yefremov
                         <signal name="button-press-event" handler="on_view_popup_menu" object="services_popup_menu" swapped="no"/>
                         <signal name="drag-data-get" handler="on_services_tree_view_drag_data_get" swapped="no"/>
                         <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
+                        <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                         <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
                         <signal name="row-activated" handler="on_services_selection" object="services_list_store" swapped="no"/>
                         <child internal-child="selection">
@@ -1995,6 +1997,7 @@ Author: Dmitriy Yefremov
                                 <signal name="drag-data-get" handler="on_fav_tree_view_drag_data_get" swapped="no"/>
                                 <signal name="drag-data-received" handler="on_fav_tree_view_drag_data_received" swapped="no"/>
                                 <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
+                                <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                 <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
                                 <signal name="row-activated" handler="on_fav_selection" object="fav_list_store" swapped="no"/>
                                 <child internal-child="selection">
@@ -2236,6 +2239,7 @@ Author: Dmitriy Yefremov
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
                             <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
+                            <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                             <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
                             <signal name="row-activated" handler="on_bouquets_selection" object="bouquets_tree_store" swapped="no"/>
                             <child internal-child="selection">

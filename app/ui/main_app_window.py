@@ -48,7 +48,7 @@ class MainAppWindow:
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
-                     "fav_picon_popup_item")
+                     "fav_picon_popup_item", "fav_copy_popup_item")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
@@ -63,7 +63,8 @@ class MainAppWindow:
                          "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
                          "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
                          "fav_locate_popup_item", "services_copy_popup_item", "services_picon_popup_item",
-                         "fav_picon_popup_item", "services_add_new_popup_item", "fav_iptv_popup_item")
+                         "fav_picon_popup_item", "services_add_new_popup_item", "fav_iptv_popup_item",
+                         "fav_copy_popup_item")
 
     def __init__(self):
         handlers = {"on_close_app": self.on_close_app,
@@ -73,6 +74,7 @@ class MainAppWindow:
                     "on_download": self.on_download,
                     "on_data_open": self.on_data_open,
                     "on_data_save": self.on_data_save,
+                    "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_tree_view_key_release": self.on_tree_view_key_release,
                     "on_bouquets_selection": self.on_bouquets_selection,
                     "on_satellite_editor_show": self.on_satellite_editor_show,
@@ -276,6 +278,8 @@ class MainAppWindow:
             rows = [(0, *model[path][2, 3, 4, 5, 7, 16, 18, 8]) for path in paths]
         elif target is ViewTarget.SERVICES:
             rows = [model[path][:] for path in paths]
+        elif target is ViewTarget.BOUQUET:
+            return
 
         self._rows_buffer.extend(rows)
 
@@ -789,28 +793,14 @@ class MainAppWindow:
 
             self.update_profile_label()
 
-    def on_tree_view_key_release(self, view, event):
-        """  Handling  keystrokes  """
+    def on_tree_view_key_press(self, view, event):
+        """  Handling  keystrokes on press """
         key = event.keyval
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        alt = event.state & Gdk.ModifierType.MOD1_MASK
         model = get_base_model(view.get_model())
         model_name = model.get_name()
 
-        if key == Gdk.KEY_Delete:
-            self.on_delete(view)
-        elif ctrl and key in MOVE_KEYS:
-            self.move_items(key)
-        elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
-            self.update_fav_num_column(model)
-            self.update_bouquet_list()
-        elif key == Gdk.KEY_Insert:
-            # Move items from app to fav list
-            if model_name == self._SERVICE_LIST_NAME:
-                self.on_to_fav_move(view)
-            elif model_name == self._BOUQUETS_LIST_NAME:
-                self.on_new_bouquet(view)
-        elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C):
+        if ctrl and key == Gdk.KEY_c or key == Gdk.KEY_C:
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_copy(view, ViewTarget.FAV)
             elif model_name == self._FAV_LIST_NAME:
@@ -821,7 +811,31 @@ class MainAppWindow:
             if model_name == self._FAV_LIST_NAME:
                 self.on_cut(view)
         elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
-            self.on_paste(view)
+            if model_name == self._FAV_LIST_NAME:
+                self.on_paste(view)
+        elif key == Gdk.KEY_Delete:
+            self.on_delete(view)
+
+    def on_tree_view_key_release(self, view, event):
+        """  Handling  keystrokes on release """
+        key = event.keyval
+        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        alt = event.state & Gdk.ModifierType.MOD1_MASK
+        model = get_base_model(view.get_model())
+        model_name = model.get_name()
+
+
+        if ctrl and key in MOVE_KEYS:
+            self.move_items(key)
+        elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
+            self.update_fav_num_column(model)
+            self.update_bouquet_list()
+        elif key == Gdk.KEY_Insert:
+            # Move items from app to fav list
+            if model_name == self._SERVICE_LIST_NAME:
+                self.on_to_fav_move(view)
+            elif model_name == self._BOUQUETS_LIST_NAME:
+                self.on_new_bouquet(view)
         elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
             self.on_data_save()
         elif ctrl and key == Gdk.KEY_l or key == Gdk.KEY_L:
