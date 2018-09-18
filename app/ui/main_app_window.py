@@ -81,7 +81,8 @@ class MainAppWindow:
                     "on_up": self.on_up,
                     "on_down": self.on_down,
                     "on_cut": self.on_cut,
-                    "on_copy": self.on_copy,
+                    "on_services_copy": self.on_services_copy,
+                    "on_fav_copy": self.on_fav_copy,
                     "on_paste": self.on_paste,
                     "on_edit": self.on_rename,
                     "on_rename_for_bouquet": self.on_rename_for_bouquet,
@@ -262,10 +263,20 @@ class MainAppWindow:
         for row in tuple(self.on_delete(view)):
             self._rows_buffer.append(row)
 
-    def on_copy(self, view):
+    def on_services_copy(self, view):
+        self.on_copy(view, target=ViewTarget.FAV)
+
+    def on_fav_copy(self, view):
+        self.on_copy(view, target=ViewTarget.SERVICES)
+
+    def on_copy(self, view, target=ViewTarget.FAV):
         model, paths = view.get_selection().get_selected_rows()
-        itrs = [model.get_iter(path) for path in paths]
-        rows = [(0, *model.get(in_itr, 2, 3, 4, 5, 7, 16, 18, 8)) for in_itr in itrs]
+        rows = None
+        if target is ViewTarget.FAV:
+            rows = [(0, *model[path][2, 3, 4, 5, 7, 16, 18, 8]) for path in paths]
+        elif target is ViewTarget.SERVICES:
+            rows = [model[path][:] for path in paths]
+
         self._rows_buffer.extend(rows)
 
     def on_paste(self, view):
@@ -799,8 +810,13 @@ class MainAppWindow:
                 self.on_to_fav_move(view)
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_new_bouquet(view)
-        elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C) and model_name == self._SERVICE_LIST_NAME:
-            self.on_copy(view)
+        elif ctrl and (key == Gdk.KEY_c or key == Gdk.KEY_C):
+            if model_name == self._SERVICE_LIST_NAME:
+                self.on_copy(view, ViewTarget.FAV)
+            elif model_name == self._FAV_LIST_NAME:
+                self.on_copy(view, ViewTarget.SERVICES)
+            else:
+                self.on_copy(view, ViewTarget.BOUQUET)
         elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
             if model_name == self._FAV_LIST_NAME:
                 self.on_cut(view)

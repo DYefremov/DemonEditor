@@ -355,6 +355,16 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkImageMenuItem" id="fav_copy_popup_item">
+        <property name="label">gtk-copy</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_fav_copy" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="fav_paste_popup_item">
         <property name="label">gtk-paste</property>
         <property name="visible">True</property>
@@ -2545,7 +2555,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_copy" object="services_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
