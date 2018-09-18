@@ -1012,40 +1012,43 @@ class MainAppWindow:
 
     # ***************** Player *********************#
 
-    @run_idle
     def on_play_stream(self, item=None):
-        self._player_box.set_visible(True)
         self.on_player_play()
 
     @run_idle
     def on_player_play(self, item=None):
-        self.on_player_stop(None)
-        if self._player:
-            self.play()
+        self.play()
 
-    @run_task
     def play(self):
         path, column = self._fav_view.get_cursor()
         if path:
             row = self._fav_model[path][:]
-            if row[5] == BqServiceType.IPTV.value:
+            if row[5] == BqServiceType.IPTV.name:
                 url = get_iptv_url(row, Profile(self._profile))
                 if not url:
                     return
 
-                self._player.set_mrl(url)
-                self._player.play()
-                GLib.idle_add(self.on_player_size_allocate, self._player_drawing_area, priority=GLib.PRIORITY_LOW)
+                self._player_box.set_visible(True)
+
+                if not self._player:
+                    try:
+                        self._player = Player()
+                    except (NameError, AttributeError):
+                        show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
+                        return
+
+                if self._player.is_playing():
+                    self.on_player_stop()
+
+                self._player.play(url)
 
     def on_player_stop(self, item=None):
         if self._player:
-            self._player.stop()
             self.on_player_size_allocate(self._player_drawing_area)
+            self._player.stop()
 
-    @run_idle
     def on_player_close(self, item=None):
         if self._player:
-            self._player.stop()
             self._player.release()
             self._player = None
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
@@ -1056,27 +1059,16 @@ class MainAppWindow:
 
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
-        if not self._player:
-            try:
-                self._player = Player.get_vlc_instance().media_player_new()
-            except (NameError, AttributeError):
-                show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
-            else:
-                self._player.set_xwindow(self._drawing_area_xid)
-                GLib.idle_add(self.play, priority=GLib.PRIORITY_LOW)
+        self._player.set_xwindow(self._drawing_area_xid)
 
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
             if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
                 self.on_full_screen()
-            elif event.type == Gdk.EventType.BUTTON_PRESS:
-                if self._player:
-                    self._player.stop() if self._player.is_playing() else self._player.play()
 
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
-        self.on_player_size_allocate(self._player_drawing_area)
 
     def on_main_window_state(self, window, event):
         if event.new_window_state & Gdk.WindowState.FULLSCREEN:
@@ -1087,10 +1079,6 @@ class MainAppWindow:
             window.remove(self._player_drawing_area)
             window.add(self._main_window_box)
             self._player_frame.add(self._player_drawing_area)
-
-        if self._player:
-            self.on_player_size_allocate(self._player_drawing_area)
-            self._player.set_xwindow(self._drawing_area_xid)
 
     # ***************** Filter and search *********************#
 
