@@ -71,7 +71,6 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkDialog" id="picons_dialog">
     <property name="can_focus">False</property>
-    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">emblem-photos</property>
@@ -524,7 +523,7 @@ Author: Dmitriy Yefremov
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
@@ -824,7 +823,7 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">8</property>
           </packing>

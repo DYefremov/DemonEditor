@@ -9,7 +9,7 @@ from app.commons import run_idle, run_task
 from app.ftp import upload_data, DownloadType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, append_text_to_tview
 
@@ -108,7 +108,7 @@ class PiconsDialog:
         providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
         if providers:
             for p in providers:
-                model.append((self.get_pixbuf(p[0]), p.name, p.pos, p.url, p.on_id, p.selected))
+                model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, p.name, p.pos, p.url, p.on_id, p.selected))
         self.update_receive_button_state()
 
     def get_pixbuf(self, img_url):

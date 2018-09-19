@@ -479,11 +479,6 @@ class MainAppWindow:
             top_iter = model.get_iter(path)
             if model.iter_n_children(top_iter):  # parent
                 pass
-                # for index, itr in enumerate(itrs):
-                #     ch_itr = model.insert(top_iter, index, rows[index])
-                # print("PARENT")
-                # ch_itr = model.insert(itr, 0, bq)
-                # scroll_to(model.get_path(ch_itr), view, paths)
             else:
                 list(map(lambda itr: model.move_before(itr, top_iter), itrs))
 

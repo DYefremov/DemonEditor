@@ -106,6 +106,10 @@ class ProviderParser(HTMLParser):
     """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
 
     _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
+    _DOMAIN = "https://www.lyngsat.com"
+    _TV_DOMAIN = _DOMAIN + "/tvchannels/"
+    _RADIO_DOMAIN = _DOMAIN + "/radiochannels/"
+    _PKG_DOMAIN = _DOMAIN + "/packages/"
 
     def __init__(self, entities=False, separator=' '):
 
@@ -121,6 +125,7 @@ class ProviderParser(HTMLParser):
         self._current_cell = []
         self.rows = []
         self._ids = set()
+        self._prv_names = set()
         self._positon = None
 
     def handle_starttag(self, tag, attrs):
@@ -132,8 +137,9 @@ class ProviderParser(HTMLParser):
             if attrs[0][1].startswith("logo/"):
                 self._current_row.append(attrs[0][1])
         if tag == "a":
-            if "https://www.lyngsat.com/packages/" in attrs[0][1]:
-                self._current_row.append(attrs[0][1])
+            url = attrs[0][1]
+            if url.startswith((self._PKG_DOMAIN, self._TV_DOMAIN, self._RADIO_DOMAIN)):
+                self._current_row.append(url)
 
     def handle_data(self, data):
         """ Save content to a cell """
@@ -151,20 +157,33 @@ class ProviderParser(HTMLParser):
             self._current_row.append(final_cell)
             self._current_cell = []
         elif tag == 'tr':
-            row = self._current_row
+            r = self._current_row
             # Satellite position
             if not self._positon:
-                pos = re.findall(self._POSITION_PATTERN, str(row))
+                pos = re.findall(self._POSITION_PATTERN, str(r))
                 if pos:
                     self._positon = "".join(c for c in str(pos) if c.isdigit() or c in ".EW")
 
-            if len(row) == 12:
-                on_id, sep, tid = str(row[-2]).partition("-")
+            len_row = len(r)
+
+            if len_row == 12:
+                name = r[5]
+                self._prv_names.add(name)
+                on_id, sep, tid = str(r[-2]).partition("-")
                 if tid and on_id not in self._ON_ID_BLACK_LIST and on_id not in self._ids:
-                    row[-2] = on_id
-                    self.rows.append(row)
+                    r[-2] = on_id
                     self._ids.add(on_id)
-                row[0] = self._positon
+                    r[0] = self._positon
+                if name + on_id not in self._prv_names:
+                    self._prv_names.add(name + on_id)
+                    self.rows.append(Provider(logo=r[2], name=name, pos=r[0], url=r[6], on_id=r[-2], selected=True))
+            elif len_row == 8 and r[0].startswith(self._DOMAIN):
+                self.rows.append(
+                    Provider(logo=None, name=r[1], pos=self._positon, url=r[0], on_id=None, selected=False))
+            elif len_row == 9 and r[1].startswith(self._DOMAIN):
+                self.rows.append(
+                    Provider(logo=None, name=r[2], pos=self._positon, url=r[1], on_id=None, selected=False))
+
             self._current_row = []
 
     def error(self, message):
@@ -180,10 +199,8 @@ def parse_providers(open_path):
 
     with open(open_path, encoding="utf-8", errors="replace") as f:
         parser.feed(f.read())
-        rows = parser.rows
 
-        if rows:
-            return [Provider(logo=r[2], name=r[5], pos=r[0], url=r[6], on_id=r[-2], selected=True) for r in rows]
+        return parser.rows
 
 
 @run_task
