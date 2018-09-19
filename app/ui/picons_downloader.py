@@ -208,10 +208,13 @@ class PiconsDialog:
             self.show_dialog("The task is already running!", DialogType.ERROR)
             return
 
-        upload_data(properties=self._properties,
-                    download_type=DownloadType.PICONS,
-                    profile=self._profile,
-                    callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+        try:
+            upload_data(properties=self._properties,
+                        download_type=DownloadType.PICONS,
+                        profile=self._profile,
+                        callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+        except OSError as e:
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

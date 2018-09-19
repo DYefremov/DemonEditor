@@ -94,9 +94,9 @@ class MainAppWindow:
                     "on_delete": self.on_delete,
                     "on_tool_edit": self.on_tool_edit,
                     "on_to_fav_move": self.on_to_fav_move,
-                    "on_services_tree_view_drag_data_get": self.on_services_tree_view_drag_data_get,
-                    "on_fav_tree_view_drag_data_get": self.on_fav_tree_view_drag_data_get,
-                    "on_fav_tree_view_drag_data_received": self.on_fav_tree_view_drag_data_received,
+                    "on_view_drag_data_get": self.on_view_drag_data_get,
+                    "on_view_drag_data_received": self.on_view_drag_data_received,
+                    "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
                     "on_view_popup_menu": self.on_view_popup_menu,
                     "on_popover_release": self.on_popover_release,
                     "on_view_focus": self.on_view_focus,
@@ -171,7 +171,6 @@ class MainAppWindow:
         self._fav_model = builder.get_object("fav_list_store")
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
-        self._status_bar = builder.get_object("status_bar")
         self._main_window_box = builder.get_object("main_window_box")
         self._player_drawing_area = builder.get_object("player_drawing_area")
         self._player_box = builder.get_object("player_box")
@@ -217,18 +216,26 @@ class MainAppWindow:
         self._main_window.show()
 
     def init_drag_and_drop(self):
-        """ Enable drag and drop """
+        """ Enable drag-and-drop """
         target = []
+        bq_target = []
         self._services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
         self._fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target,
                                                 Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._fav_view.enable_model_drag_dest(target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._bouquets_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, bq_target,
+                                                     Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._bouquets_view.enable_model_drag_dest(bq_target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._fav_view.drag_dest_set_target_list(None)
         self._fav_view.drag_source_set_target_list(None)
         self._fav_view.drag_dest_add_text_targets()
         self._fav_view.drag_source_add_text_targets()
         self._services_view.drag_source_set_target_list(None)
         self._services_view.drag_source_add_text_targets()
+        self._bouquets_view.drag_dest_set_target_list(None)
+        self._bouquets_view.drag_source_set_target_list(None)
+        self._bouquets_view.drag_dest_add_text_targets()
+        self._bouquets_view.drag_source_add_text_targets()
 
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
@@ -437,6 +444,49 @@ class MainAppWindow:
         if selection:
             self.receive_selection(view=self._fav_view, drop_info=None, data=selection)
 
+    def update_fav_num_column(self, model):
+        """ Iterate through model and updates values for Num column """
+        model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
+
+    def update_bouquet_list(self):
+        """ Update bouquet after move items """
+        bq_selected = self.get_selected_bouquet()
+        if bq_selected:
+            fav_bouquet = self._bouquets[bq_selected]
+            fav_bouquet.clear()
+            for row in self._fav_model:
+                fav_bouquet.append(row[7])
+
+    # ***************** Drag-and-drop *********************#
+
+    def on_view_drag_data_get(self, view, drag_context, data, info, time):
+        data.set_text(self.get_selection(view), -1)
+
+    def on_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+        self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
+
+    def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+        model = get_base_model(view.get_model())
+        drop_info = view.get_dest_row_at_pos(x, y)
+        data = data.get_text()
+        itr_str, sep, source = data.partition("::::")
+        if source != self._BOUQUETS_LIST_NAME:
+            return
+
+        if drop_info:
+            path, position = drop_info
+            itrs = [model.get_iter_from_string(itr) for itr in itr_str.split(",")]
+            top_iter = model.get_iter(path)
+            if model.iter_n_children(top_iter):  # parent
+                pass
+                # for index, itr in enumerate(itrs):
+                #     ch_itr = model.insert(top_iter, index, rows[index])
+                # print("PARENT")
+                # ch_itr = model.insert(itr, 0, bq)
+                # scroll_to(model.get_path(ch_itr), view, paths)
+            else:
+                list(map(lambda itr: model.move_before(itr, top_iter), itrs))
+
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
         model, paths = view.get_selection().get_selected_rows()
@@ -444,28 +494,29 @@ class MainAppWindow:
 
         if len(paths) > 0:
             itrs = [model.get_iter(path) for path in paths]
-            return "{}:{}".format(",".join([model.get_string_from_iter(itr) for itr in itrs]), model.get_name())
+            return "{}::::{}".format(",".join([model.get_string_from_iter(itr) for itr in itrs]), model.get_name())
 
     def receive_selection(self, *, view, drop_info, data):
         """  Update fav view  after data received  """
-        bq_selected = self.check_bouquet_selection()
-        if not bq_selected:
-            return
-
         model = get_base_model(view.get_model())
         dest_index = 0
-
         if drop_info:
             path, position = drop_info
             dest_iter = model.get_iter(path)
             if dest_iter:
                 dest_index = model.get_value(dest_iter, 0)
 
-        itr_str, sep, source = data.partition(":")
-        itrs = itr_str.split(",")
+        itr_str, sep, source = data.partition("::::")
+        if source == self._BOUQUETS_LIST_NAME:
+            return
 
         try:
+            bq_selected = self.check_bouquet_selection()
+            if not bq_selected:
+                return
+
             fav_bouquet = self._bouquets[bq_selected]
+            itrs = itr_str.split(",")
 
             if source == self._SERVICE_LIST_NAME:
                 ext_model = self._services_view.get_model()
@@ -490,32 +541,7 @@ class MainAppWindow:
                     model.remove(in_itr)
             self.update_fav_num_column(model)
         except ValueError as e:
-            self._status_bar.push(1, getattr(e, "message", repr(e)))
-
-    def update_fav_num_column(self, model):
-        """ Iterate through model and updates values for Num column """
-        model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
-
-    def update_bouquet_list(self):
-        """ Update bouquet after move items """
-        bq_selected = self.get_selected_bouquet()
-        if bq_selected:
-            fav_bouquet = self._bouquets[bq_selected]
-            fav_bouquet.clear()
-            for row in self._fav_model:
-                fav_bouquet.append(row[7])
-
-    def on_services_tree_view_drag_data_get(self, view, drag_context, data, info, time):
-        """  DnD  """
-        data.set_text(self.get_selection(view), -1)
-
-    def on_fav_tree_view_drag_data_get(self, view, drag_context, data, info, time):
-        """ DnD """
-        data.set_text(self.get_selection(view), -1)
-
-    def on_fav_tree_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
-        """ DnD """
-        self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
+            show_dialog(DialogType.ERROR, self._main_window, str(e))
 
     def on_view_popup_menu(self, menu, event):
         """ Shows popup menu for any view """
@@ -823,7 +849,6 @@ class MainAppWindow:
         alt = event.state & Gdk.ModifierType.MOD1_MASK
         model = get_base_model(view.get_model())
         model_name = model.get_name()
-
 
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
