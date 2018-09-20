@@ -373,6 +373,7 @@ class MainAppWindow:
             for index, row in enumerate(self._bouquets_buffer):
                 model.insert(p_iter, dest_index + index, row)
         self._bouquets_buffer.clear()
+        self.update_bouquets_type()
 
     # ***************** Deletion *********************#
 
@@ -565,6 +566,7 @@ class MainAppWindow:
                 view.expand_all()
 
             list(map(model.remove, to_del))
+            self.update_bouquets_type()
 
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
@@ -767,7 +769,6 @@ class MainAppWindow:
             shutil.move(os.path.join(path, file), backup_path + file)
 
         bouquets = []
-        services_model = get_base_model(self._services_view.get_model())
 
         def parse_bouquets(model, b_path, itr):
             bqs = None
@@ -793,6 +794,7 @@ class MainAppWindow:
         self._bouquets_view.get_model().foreach(parse_bouquets)
         write_bouquets(path, bouquets, profile)
         # Getting services
+        services_model = get_base_model(self._services_view.get_model())
         services = [Service(*row[:]) for row in services_model]
         write_services(path, services, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
         # removing bouquet files
@@ -878,6 +880,20 @@ class MainAppWindow:
                 if name == self._current_bq_name:
                     return "{}:{}".format(name, ch_row[3])
         return False
+
+    @run_idle
+    def update_bouquets_type(self):
+        """ Update bouquets type in the model and dict """
+        for row in get_base_model(self._bouquets_view.get_model()):
+            bqs_rows = row.iterchildren()
+            if bqs_rows:
+                bq_type = row[-1]
+                for b_row in bqs_rows:
+                    bq_id = "{}:{}".format(b_row[0], b_row[-1])
+                    bq = self._bouquets.get(bq_id, None)
+                    if bq:
+                        b_row[-1] = bq_type
+                        self._bouquets["{}:{}".format(b_row[0], b_row[-1])] = bq
 
     def delete_selection(self, view, *args):
         """ Used for clear selection on given view(s) """
