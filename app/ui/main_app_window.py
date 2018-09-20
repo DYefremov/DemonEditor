@@ -460,7 +460,9 @@ class MainAppWindow:
     # ***************** Drag-and-drop *********************#
 
     def on_view_drag_data_get(self, view, drag_context, data, info, time):
-        data.set_text(self.get_selection(view), -1)
+        selection = self.get_selection(view)
+        if selection:
+            data.set_text(selection, -1)
 
     def on_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
@@ -469,6 +471,8 @@ class MainAppWindow:
         model = get_base_model(view.get_model())
         drop_info = view.get_dest_row_at_pos(x, y)
         data = data.get_text()
+        if not data:
+            return
         itr_str, sep, source = data.partition("::::")
         if source != self._BOUQUETS_LIST_NAME:
             return
@@ -477,10 +481,26 @@ class MainAppWindow:
             path, position = drop_info
             itrs = [model.get_iter_from_string(itr) for itr in itr_str.split(",")]
             top_iter = model.get_iter(path)
-            if model.iter_n_children(top_iter):  # parent
-                pass
-            else:
-                list(map(lambda itr: model.move_before(itr, top_iter), itrs))
+            parent_itr = model.iter_parent(top_iter)  # parent
+            to_del = []
+            if parent_itr:
+                p_path = model.get_path(parent_itr)[0]
+                for itr in itrs:
+                    p_itr = model.iter_parent(itr)
+                    if not p_itr:
+                        break
+                    if p_itr and model.get_path(p_itr)[0] == p_path:
+                        top_iter = model.move_before(itr, top_iter)
+                    else:
+                        model.insert(parent_itr, model.get_path(top_iter)[1], model[itr][:])
+                        to_del.append(itr)
+            elif not model.iter_has_child(top_iter):
+                for itr in itrs:
+                    model.append(top_iter, model[itr][:])
+                    to_del.append(itr)
+                view.expand_all()
+
+            list(map(model.remove, to_del))
 
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
