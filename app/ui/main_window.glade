@@ -48,6 +48,51 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquets_cut_popup_item">
+        <property name="label">gtk-cut</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_bouquets_cut" object="bouquets_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquets_copy_popup_item">
+        <property name="label">gtk-copy</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_bouquets_copy" object="bouquets_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquets_paste_popup_item">
+        <property name="label">gtk-paste</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_bouquets_paste" object="bouquets_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="bouquets_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
@@ -56,6 +101,12 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_bouquets_edit" object="bouquets_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
       </object>
     </child>
     <child>
@@ -122,7 +173,7 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="extra_edit_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-find-and-replace</property>
+    <property name="stock">gtk-edit</property>
   </object>
   <object class="GtkImage" id="fav_iptv_list_config_image">
     <property name="visible">True</property>
@@ -351,7 +402,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_cut" object="fav_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_fav_cut" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>
@@ -373,7 +424,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_paste" object="fav_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_fav_paste" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>

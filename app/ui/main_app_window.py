@@ -41,7 +41,8 @@ class MainAppWindow:
     _SERVICE_ELEMENTS = ("services_to_fav_move_popup_item", "services_edit_popup_item", "services_copy_popup_item",
                          "services_picon_popup_item", "services_create_bouquet_popup_item")
 
-    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouquets_edit_popup_item")
+    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouquets_edit_popup_item",
+                         "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
 
     _COMMONS_ELEMENTS = ("edit_tool_button", "services_remove_popup_item", "bouquets_remove_popup_item",
                          "fav_remove_popup_item")
@@ -64,7 +65,8 @@ class MainAppWindow:
                          "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
                          "fav_locate_popup_item", "services_copy_popup_item", "services_picon_popup_item",
                          "fav_picon_popup_item", "services_add_new_popup_item", "fav_iptv_popup_item",
-                         "fav_copy_popup_item")
+                         "fav_copy_popup_item", "bouquets_cut_popup_item", "bouquets_copy_popup_item",
+                         "bouquets_paste_popup_item")
 
     def __init__(self):
         handlers = {"on_close_app": self.on_close_app,
@@ -82,10 +84,13 @@ class MainAppWindow:
                     "on_fav_selection": self.on_fav_selection,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
-                    "on_cut": self.on_cut,
+                    "on_fav_cut": self.on_fav_cut,
+                    "on_bouquets_cut": self.on_bouquets_cut,
                     "on_services_copy": self.on_services_copy,
                     "on_fav_copy": self.on_fav_copy,
-                    "on_paste": self.on_paste,
+                    "on_bouquets_copy": self.on_bouquets_copy,
+                    "on_fav_paste": self.on_fav_paste,
+                    "on_bouquets_paste": self.on_bouquets_paste,
                     "on_edit": self.on_rename,
                     "on_rename_for_bouquet": self.on_rename_for_bouquet,
                     "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
@@ -145,9 +150,11 @@ class MainAppWindow:
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
+        self._bouquets_buffer = []
         self._services = {}
         self._bouquets = {}
-        self._extra_bouquets = {}  # for bouquets with different names of services in bouquet and main list
+        # For bouquets with different names of services in bouquet and main list
+        self._extra_bouquets = {}
         self._picons = {}
         self._blacklist = set()
         self._current_bq_name = None
@@ -174,7 +181,7 @@ class MainAppWindow:
         self._main_window_box = builder.get_object("main_window_box")
         self._player_drawing_area = builder.get_object("player_drawing_area")
         self._player_box = builder.get_object("player_box")
-        # enabling events for the drawing area
+        # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
         self._header_bar = builder.get_object("header_bar")
@@ -182,7 +189,7 @@ class MainAppWindow:
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
         self.update_profile_label()
-        # dynamically active elements depending on the selected view
+        # Dynamically active elements depending on the selected view
         self._tool_elements = {k: builder.get_object(k) for k in self._DYNAMIC_ELEMENTS}
         self._cas_label = builder.get_object("cas_label")
         self._fav_count_label = builder.get_object("fav_count_label")
@@ -268,30 +275,65 @@ class MainAppWindow:
             return
         move_items(key, self._fav_view if self._fav_view.is_focus() else self._bouquets_view)
 
-    def on_cut(self, view):
-        for row in tuple(self.on_delete(view)):
-            self._rows_buffer.append(row)
-
+    # ***************** Copy - Cut - Paste *********************#
     def on_services_copy(self, view):
         self.on_copy(view, target=ViewTarget.FAV)
 
     def on_fav_copy(self, view):
         self.on_copy(view, target=ViewTarget.SERVICES)
 
-    def on_copy(self, view, target=ViewTarget.FAV):
+    def on_bouquets_copy(self, view):
+        self.on_copy(view, target=ViewTarget.BOUQUET)
+
+    def on_copy(self, view, target):
         model, paths = view.get_selection().get_selected_rows()
         rows = None
+
         if target is ViewTarget.FAV:
             rows = [(0, *model[path][2, 3, 4, 5, 7, 16, 18, 8]) for path in paths]
         elif target is ViewTarget.SERVICES:
             rows = [model[path][:] for path in paths]
         elif target is ViewTarget.BOUQUET:
+            to_copy = list(map(model.get_iter, filter(lambda p: p.get_depth() == 2, paths)))
+            if to_copy:
+                self._bouquets_buffer.extend([model[i][:] for i in to_copy])
             return
 
         self._rows_buffer.extend(rows)
 
-    def on_paste(self, view):
+    def on_fav_cut(self, view):
+        self.on_cut(view, ViewTarget.FAV)
+
+    def on_bouquets_cut(self, view):
+        self.on_cut(view, ViewTarget.BOUQUET)
+
+    def on_cut(self, view, target=None):
+        if target is ViewTarget.FAV:
+            for row in tuple(self.on_delete(view)):
+                self._rows_buffer.append(row)
+        elif target is ViewTarget.BOUQUET:
+            model, paths = view.get_selection().get_selected_rows()
+            to_cut = list(map(model.get_iter, filter(lambda p: p.get_depth() == 2, paths)))
+            if to_cut:
+                self._bouquets_buffer.extend([model[i][:] for i in to_cut])
+                list(map(model.remove, to_cut))
+
+    def on_fav_paste(self, view):
+        self.on_paste(view, ViewTarget.FAV)
+
+    def on_bouquets_paste(self, view):
+        self.on_paste(view, ViewTarget.BOUQUET)
+
+    def on_paste(self, view, target):
         selection = view.get_selection()
+
+        if target is ViewTarget.FAV:
+            self.fav_paste(selection)
+        elif target is ViewTarget.BOUQUET:
+            self.bouquet_paste(selection)
+        self.on_view_focus(view, None)
+
+    def fav_paste(self, selection):
         dest_index = 0
         bq_selected = self.check_bouquet_selection()
         if not bq_selected:
@@ -312,7 +354,27 @@ class MainAppWindow:
             self.update_fav_num_column(model)
 
         self._rows_buffer.clear()
-        self.on_view_focus(view, None)
+
+    def bouquet_paste(self, selection):
+        model, paths = selection.get_selected_rows()
+        if len(paths) > 1:
+            show_dialog(DialogType.ERROR, self._main_window, "Please, select only one item!")
+            return
+
+        path = paths[0]
+        dest_iter = model.get_iter(path)
+
+        if path.get_depth() == 1:
+            list(map(lambda r: model.append(dest_iter, r), self._bouquets_buffer))
+            self._bouquets_view.expand_all()
+        else:
+            p_iter = model.iter_parent(dest_iter)
+            dest_index = path.get_indices()[1] + 1
+            for index, row in enumerate(self._bouquets_buffer):
+                model.insert(p_iter, dest_index + index, row)
+        self._bouquets_buffer.clear()
+
+    # ***************** Deletion *********************#
 
     def on_delete(self, item):
         """ Delete selected items from views
@@ -389,6 +451,8 @@ class MainAppWindow:
             self._bouquets.pop("{}:{}".format(row[0], row[3]))
             self._fav_model.clear()
             self._bouquets_model.remove(itr)
+
+    # ***************** ####### *********************#
 
     def get_bouquet_file_name(self, bouquet):
         bouquet_file_name = "{}userbouquet.{}.{}".format(self._options.get(self._profile).get("data_dir_path"),
@@ -850,10 +914,14 @@ class MainAppWindow:
                 self.on_copy(view, ViewTarget.BOUQUET)
         elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
             if model_name == self._FAV_LIST_NAME:
-                self.on_cut(view)
+                self.on_cut(view, ViewTarget.FAV)
+            elif model_name == self._BOUQUETS_LIST_NAME:
+                self.on_cut(view, ViewTarget.BOUQUET)
         elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
             if model_name == self._FAV_LIST_NAME:
-                self.on_paste(view)
+                self.on_paste(view, ViewTarget.FAV)
+            elif model_name == self._BOUQUETS_LIST_NAME:
+                self.on_paste(view, ViewTarget.BOUQUET)
         elif key == Gdk.KEY_Delete:
             self.on_delete(view)
 
@@ -911,6 +979,8 @@ class MainAppWindow:
                 self._tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(not_empty)
+                if elem == "bouquets_paste_popup_item":
+                    self._tool_elements[elem].set_sensitive(not_empty and self._bouquets_buffer)
             if profile is Profile.NEUTRINO_MP:
                 for elem in self._LOCK_HIDE_ELEMENTS:
                     self._tool_elements[elem].set_sensitive(not_empty)
