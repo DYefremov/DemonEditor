@@ -448,8 +448,7 @@ class MainAppWindow:
         for itr in itrs:
             if len(model.get_path(itr)) < 2:
                 continue
-            row = model[itr][:]
-            self._bouquets.pop("{}:{}".format(row[0], row[3]))
+
             self._fav_model.clear()
             self._bouquets_model.remove(itr)
 
