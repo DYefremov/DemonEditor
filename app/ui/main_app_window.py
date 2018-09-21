@@ -397,7 +397,7 @@ class MainAppWindow:
                 if model_name == self._FAV_LIST_NAME:
                     self.remove_favs(fav_bouquet, itrs, model)
                 elif model_name == self._BOUQUETS_LIST_NAME:
-                    self.delete_bouquets(itrs, model, bq_selected)
+                    self.delete_bouquets(itrs, model)
                 elif model_name == self._SERVICE_LIST_NAME:
                     self.delete_services(bq_selected, itrs, model, rows)
 
@@ -439,7 +439,7 @@ class MainAppWindow:
             self._fav_model.remove(f_itr.iter)
         self.update_fav_num_column(self._fav_model)
 
-    def delete_bouquets(self, itrs, model, bouquet):
+    def delete_bouquets(self, itrs, model):
         """ Deleting bouquets """
         if len(itrs) == 1 and len(model.get_path(itrs[0])) < 2:
             show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to be removed!")
