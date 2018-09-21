@@ -29,7 +29,7 @@ def parse_m3u(path, profile):
             elif count == 1:
                 count = 0
                 if profile is Profile.ENIGMA_2:
-                    fav_id = ENIGMA2_FAV_ID_FORMAT.format(StreamType.DVB_TS.value, 1, 0, 0, 0, 0,
+                    fav_id = ENIGMA2_FAV_ID_FORMAT.format(StreamType.NONE_TS.value, 1, 0, 0, 0, 0,
                                                           line.strip().replace(":", "%3a"), name, name, None)
                 elif profile is Profile.NEUTRINO_MP:
                     fav_id = NEUTRINO_FAV_ID_FORMAT.format(line.strip(), "", 0, None, None, None, None, "", "", 1)

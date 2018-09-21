@@ -177,12 +177,6 @@ class ProviderParser(HTMLParser):
                 if name + on_id not in self._prv_names:
                     self._prv_names.add(name + on_id)
                     self.rows.append(Provider(logo=r[2], name=name, pos=r[0], url=r[6], on_id=r[-2], selected=True))
-            elif len_row == 8 and r[0].startswith(self._DOMAIN):
-                self.rows.append(
-                    Provider(logo=None, name=r[1], pos=self._positon, url=r[0], on_id=None, selected=False))
-            elif len_row == 9 and r[1].startswith(self._DOMAIN):
-                self.rows.append(
-                    Provider(logo=None, name=r[2], pos=self._positon, url=r[1], on_id=None, selected=False))
 
             self._current_row = []
 

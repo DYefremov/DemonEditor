@@ -5,7 +5,7 @@ from enum import Enum
 from ftplib import FTP, error_perm
 from telnetlib import Telnet
 
-from app.commons import log
+from app.commons import log, run_task
 from app.properties import Profile
 
 __DATA_FILES_LIST = ("tv", "radio", "lamedb", "lamedb5", "blacklist", "whitelist",  # enigma 2
@@ -57,6 +57,7 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
             callback()
 
 
+@run_task
 def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
                 callback=None):
     data_path = properties["data_dir_path"]

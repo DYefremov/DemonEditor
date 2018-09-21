@@ -728,12 +728,11 @@ class MainAppWindow:
             self._extra_bouquets[bq_id] = extra_services
 
     def append_services(self, services):
-        if services:
-            for srv in services:
-                #  adding channels to dict with fav_id as keys
-                self._services[srv.fav_id] = srv
-            gen = self.append_services_data(services)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        for srv in services:
+            #  adding channels to dict with fav_id as keys
+            self._services[srv.fav_id] = srv
+        gen = self.append_services_data(services)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_services_data(self, services):
         for srv in services:
