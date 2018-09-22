@@ -164,6 +164,10 @@ def parse_services(services, transponders, path):
 
         if transponder is not None:
             tr_type, sp, tr = str(transponder).partition(" ")
+            # Skipping terrestrial and cable channels
+            if tr_type in "tc":
+                continue
+
             tr = tr.split(_SEP)
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
             # removing all non printable symbols!
