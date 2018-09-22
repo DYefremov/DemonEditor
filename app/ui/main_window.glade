@@ -1416,6 +1416,7 @@ Author: Dmitriy Yefremov
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
                         <signal name="button-press-event" handler="on_view_popup_menu" object="services_popup_menu" swapped="no"/>
+                        <signal name="button-press-event" handler="on_view_press" swapped="no"/>
                         <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                         <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
@@ -2045,12 +2046,12 @@ Author: Dmitriy Yefremov
                                 <property name="enable_grid_lines">both</property>
                                 <property name="activate_on_single_click">True</property>
                                 <signal name="button-press-event" handler="on_fav_press" object="fav_popup_menu" swapped="no"/>
+                                <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
                                 <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                 <signal name="drag-data-received" handler="on_view_drag_data_received" swapped="no"/>
                                 <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                 <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
-                                <signal name="row-activated" handler="on_fav_selection" object="fav_list_store" swapped="no"/>
                                 <child internal-child="selection">
                                   <object class="GtkTreeSelection" id="fav_selection">
                                     <property name="mode">multiple</property>
@@ -2289,6 +2290,7 @@ Author: Dmitriy Yefremov
                             <property name="enable_tree_lines">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
+                            <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
                             <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                             <signal name="drag-data-received" handler="on_bq_view_drag_data_received" swapped="no"/>
                             <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>

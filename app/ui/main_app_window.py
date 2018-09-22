@@ -81,7 +81,6 @@ class MainAppWindow:
                     "on_bouquets_selection": self.on_bouquets_selection,
                     "on_satellite_editor_show": self.on_satellite_editor_show,
                     "on_services_selection": self.on_services_selection,
-                    "on_fav_selection": self.on_fav_selection,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
                     "on_fav_cut": self.on_fav_cut,
@@ -102,6 +101,7 @@ class MainAppWindow:
                     "on_view_drag_data_get": self.on_view_drag_data_get,
                     "on_view_drag_data_received": self.on_view_drag_data_received,
                     "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
+                    "on_view_press": self.on_view_press,
                     "on_view_popup_menu": self.on_view_popup_menu,
                     "on_popover_release": self.on_popover_release,
                     "on_view_focus": self.on_view_focus,
@@ -510,7 +510,13 @@ class MainAppWindow:
 
     def update_fav_num_column(self, model):
         """ Iterate through model and updates values for Num column """
-        model.foreach(lambda store, pth, itr: store.set_value(itr, 0, int(pth[0]) + 1))  # iter , column, value
+        gen = self.update_num_column(model)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def update_num_column(self, model):
+        for index, row in enumerate(model):
+            row[0] = index + 1
+            yield True
 
     def update_bouquet_list(self):
         """ Update bouquet after move items """
@@ -530,9 +536,10 @@ class MainAppWindow:
 
     def on_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
+        return False
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
-        model = get_base_model(view.get_model())
+        model_name, model = self.get_model_data(view)
         drop_info = view.get_dest_row_at_pos(x, y)
         data = data.get_text()
         if not data:
@@ -623,6 +630,19 @@ class MainAppWindow:
         except ValueError as e:
             show_dialog(DialogType.ERROR, self._main_window, str(e))
 
+    def on_view_press(self, view, event):
+        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
+            name, model = self.get_model_data(view)
+            self.delete_views_selection(name)
+
+    def delete_views_selection(self, name):
+        if name == self._SERVICE_LIST_NAME:
+            self.delete_selection(self._fav_view)
+        elif name == self._FAV_LIST_NAME:
+            self.delete_selection(self._services_view)
+        elif name == self._BOUQUETS_LIST_NAME:
+            self.delete_selection(self._services_view, self._fav_view)
+
     def on_view_popup_menu(self, menu, event):
         """ Shows popup menu for any view """
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
@@ -638,6 +658,7 @@ class MainAppWindow:
                 self.on_view_focus(self._bouquets_view, None)
 
             menu.popup(None, None, None, None, event.button, event.time)
+            return True
 
     def on_popover_release(self, menu, event):
         """ Hides popover after mouse click. Used if element of Popover menu is Gtk.Button! """
@@ -801,7 +822,6 @@ class MainAppWindow:
             write_blacklist(path, self._blacklist)
 
     def on_services_selection(self, model, path, column):
-        self.delete_selection(self._fav_view, self._bouquets_view)
         self.update_service_bar(model, path)
 
     def update_service_bar(self, model, path):
@@ -811,9 +831,6 @@ class MainAppWindow:
             return
         cas_values = list(filter(lambda val: val.startswith("C:"), cas.split(",")))
         self._cas_label.set_text(",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values)))))
-
-    def on_fav_selection(self, model, path, column):
-        self.delete_selection(self._services_view, self._bouquets_view)
 
     def on_bouquets_selection(self, model, path, column):
         self._current_bq_name = model[path][0] if len(path) > 1 else None
@@ -826,7 +843,6 @@ class MainAppWindow:
             self._bouquets_view.expand_row(path, column)
 
         if len(path) > 1:
-            self.delete_selection(self._services_view)
             self.update_bouquet_services(model, path)
 
     @run_idle
@@ -916,8 +932,7 @@ class MainAppWindow:
         """  Handling  keystrokes on press """
         key = event.keyval
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        model = get_base_model(view.get_model())
-        model_name = model.get_name()
+        model_name, model = self.get_model_data(view)
 
         if ctrl and key == Gdk.KEY_c or key == Gdk.KEY_C:
             if model_name == self._SERVICE_LIST_NAME:
@@ -939,13 +954,18 @@ class MainAppWindow:
         elif key == Gdk.KEY_Delete:
             self.on_delete(view)
 
+    def get_model_data(self, view):
+        """ Returns model name and base model from the given view """
+        model = get_base_model(view.get_model())
+        model_name = model.get_name()
+        return model_name, model
+
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
         key = event.keyval
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        model = get_base_model(view.get_model())
-        model_name = model.get_name()
+        model_name, model = self.get_model_data(view)
 
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
@@ -984,8 +1004,7 @@ class MainAppWindow:
 
     def on_view_focus(self, view, focus_event):
         profile = Profile(self._profile)
-        model = get_base_model(view.get_model())
-        model_name = model.get_name()
+        model_name, model = self.get_model_data(view)
         not_empty = len(model) > 0  # if  > 0 model has items
 
         if model_name == self._BOUQUETS_LIST_NAME:
@@ -1089,9 +1108,10 @@ class MainAppWindow:
         edit_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
 
     def on_fav_press(self, menu, event):
-        self.on_view_popup_menu(menu, event)
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.on_play_stream()
+        else:
+            return self.on_view_popup_menu(menu, event)
 
     # ***************** IPTV *********************#
 
@@ -1346,8 +1366,7 @@ class MainAppWindow:
             self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
 
     def on_rename(self, view):
-        model = get_base_model(view.get_model())
-        name = model.get_name()
+        name = self.get_model_data(view)
         if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
         elif name == self._FAV_LIST_NAME:
