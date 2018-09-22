@@ -532,7 +532,8 @@ class MainAppWindow:
 
     def on_view_drag_begin(self, view, context):
         """ Selects a row under the cursor in the view at the dragging beginning. """
-        if view.get_selection().selection.count_selected_rows() > 1:
+        selection = view.get_selection()
+        if selection.count_selected_rows() > 1:
             view.do_toggle_cursor_row(view)
 
     def on_view_drag_data_get(self, view, drag_context, data, info, time):
