@@ -25,7 +25,7 @@ class IptvDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("iptv_dialog", "stream_type_liststore"))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade", ("iptv_dialog", "stream_type_liststore"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("iptv_dialog")
@@ -195,7 +195,7 @@ class SearchUnavailableDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("search_unavailable_streams_dialog",))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade", ("search_unavailable_streams_dialog",))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("search_unavailable_streams_dialog")
@@ -277,7 +277,7 @@ class IptvListConfigurationDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("iptv_list_configuration_dialog",))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade", ("iptv_list_configuration_dialog",))
         builder.connect_signals(handlers)
 
         self._rows = iptv_rows
