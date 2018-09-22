@@ -98,6 +98,7 @@ class MainAppWindow:
                     "on_delete": self.on_delete,
                     "on_tool_edit": self.on_tool_edit,
                     "on_to_fav_move": self.on_to_fav_move,
+                    "on_view_drag_begin": self.on_view_drag_begin,
                     "on_view_drag_data_get": self.on_view_drag_data_get,
                     "on_view_drag_data_received": self.on_view_drag_data_received,
                     "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
@@ -528,6 +529,11 @@ class MainAppWindow:
                 fav_bouquet.append(row[7])
 
     # ***************** Drag-and-drop *********************#
+
+    def on_view_drag_begin(self, view, context):
+        """ Selects a row under the cursor in the view at the dragging beginning. """
+        if view.get_selection().selection.count_selected_rows() > 1:
+            view.do_toggle_cursor_row(view)
 
     def on_view_drag_data_get(self, view, drag_context, data, info, time):
         selection = self.get_selection(view)
