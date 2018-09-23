@@ -1135,8 +1135,8 @@ class MainAppWindow:
     @run_idle
     def on_iptv_list_configuration(self, item):
         profile = Profile(self._profile)
-        if profile is not Profile.ENIGMA_2:
-            show_dialog(DialogType.ERROR, transient=self._main_window, text="Not implemented yet!")
+        if profile is Profile.NEUTRINO_MP:
+            show_dialog(DialogType.ERROR, transient=self._main_window, text="Neutrino at the moment not supported!")
             return
 
         iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
