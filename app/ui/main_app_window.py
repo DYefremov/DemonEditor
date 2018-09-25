@@ -713,6 +713,7 @@ class MainAppWindow:
             self.append_blacklist(black_list)
             self.append_bouquets(bouquets)
             self.append_services(services)
+            self.update_filter_sat_positions()
             self.update_services_counts(len(self._services.values()))
 
     def append_blacklist(self, black_list):
@@ -767,7 +768,6 @@ class MainAppWindow:
             self._services_model.set_value(itr, 8, self._picons.get(srv.picon_id, None))
             yield True
         self._wait_dialog.hide()
-        self.update_filter_sat_positions()
 
     def clear_current_data(self):
         """ Clearing current data from lists """
@@ -1276,7 +1276,7 @@ class MainAppWindow:
         self._filter_sat_positions_model.clear()
         self._filter_sat_positions_model.append(("All positions",))
         self._filter_sat_positions_box.set_active(0)
-        sats = {float(x[16]) for x in self._services_model}
+        sats = {float(x.pos) for x in self._services.values() if x.pos}
         list(map(self._filter_sat_positions_model.append, map(lambda x: (str(x),), sorted(sats))))
 
     @run_with_delay(1)
