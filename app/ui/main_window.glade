@@ -209,6 +209,11 @@ Author: Dmitriy Yefremov
       <!-- column-name satellite -->
       <column type="gchararray"/>
     </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">All positions</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="filter_types_list_store">
     <columns>

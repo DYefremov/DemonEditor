@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 
 from contextlib import suppress
 from functools import lru_cache
@@ -159,6 +160,8 @@ class MainAppWindow:
         self._picons = {}
         self._blacklist = set()
         self._current_bq_name = None
+        # Current satellite positions in the services list
+        self._sat_positions = []
         # Player
         self._player = None
         self._full_screen = False
@@ -390,33 +393,32 @@ class MainAppWindow:
                 model_name = get_base_model(model).get_name()
                 itrs = [model.get_iter(path) for path in paths]
                 rows = [model[in_itr][:] for in_itr in itrs]
-                bq_selected = self.get_selected_bouquet()
-                fav_bouquet = None
-                if bq_selected:
-                    fav_bouquet = self._bouquets.get(bq_selected, None)
 
                 if model_name == self._FAV_LIST_NAME:
-                    self.remove_favs(fav_bouquet, itrs, model)
+                    self.remove_favs(itrs, model)
                 elif model_name == self._BOUQUETS_LIST_NAME:
                     self.delete_bouquets(itrs, model)
                 elif model_name == self._SERVICE_LIST_NAME:
-                    self.delete_services(bq_selected, itrs, model, rows)
+                    self.delete_services(itrs, model, rows)
 
                 self.on_view_focus(view, None)
 
                 return rows
 
     @run_idle
-    def remove_favs(self, fav_bouquet, itrs, model):
+    def remove_favs(self, itrs, model):
         """ Deleting bouquet services """
-        if fav_bouquet:
-            for itr in itrs:
-                del fav_bouquet[int(model.get_path(itr)[0])]
-                self._fav_model.remove(itr)
-        self.update_fav_num_column(model)
+        bq_selected = self.get_selected_bouquet()
+        if bq_selected:
+            fav_bouquet = self._bouquets.get(bq_selected, None)
+            if fav_bouquet:
+                for itr in itrs:
+                    del fav_bouquet[int(model.get_path(itr)[0])]
+                    self._fav_model.remove(itr)
+                self.update_fav_num_column(model)
 
     @run_idle
-    def delete_services(self, bq_selected, itrs, model, rows):
+    def delete_services(self, itrs, model, rows):
         """ Deleting services """
         srv_itrs = [self._services_model_filter.convert_iter_to_child_iter(
             model.convert_iter_to_child_iter(itr)) for itr in itrs]
@@ -439,6 +441,7 @@ class MainAppWindow:
         for f_itr in filter(lambda r: r[7] in srv_ids_to_delete, self._fav_model):
             self._fav_model.remove(f_itr.iter)
         self.update_fav_num_column(self._fav_model)
+        self.update_sat_positions()
 
     def delete_bouquets(self, itrs, model):
         """ Deleting bouquets """
@@ -713,7 +716,7 @@ class MainAppWindow:
             self.append_blacklist(black_list)
             self.append_bouquets(bouquets)
             self.append_services(services)
-            self.update_filter_sat_positions()
+            self.update_sat_positions()
             self.update_services_counts(len(self._services.values()))
 
     def append_blacklist(self, black_list):
@@ -781,6 +784,7 @@ class MainAppWindow:
         self._extra_bouquets.clear()
         self._current_bq_name = None
         self._bq_name_label.set_text("")
+        self.init_sat_positions()
 
     @run_idle
     def on_data_save(self, *args):
@@ -1271,13 +1275,32 @@ class MainAppWindow:
         self._filter_bar.set_search_mode(active)
         self._filter_bar.set_visible(active)
 
+    def init_sat_positions(self):
+        self._sat_positions.clear()
+        first = (self._filter_sat_positions_model[0][0],)
+        self._filter_sat_positions_model.clear()
+        self._filter_sat_positions_model.append(first)
+        self._filter_sat_positions_box.set_active(0)
+
+    def update_sat_positions(self):
+        self._sat_positions.clear()
+        self._sat_positions.extend(map(str, sorted({float(x.pos) for x in self._services.values() if x.pos})))
+        if self._filter_bar.is_visible():
+            self.update_filter_sat_positions()
+
     @run_idle
     def update_filter_sat_positions(self):
-        self._filter_sat_positions_model.clear()
-        self._filter_sat_positions_model.append(("All positions",))
-        self._filter_sat_positions_box.set_active(0)
-        sats = {float(x.pos) for x in self._services.values() if x.pos}
-        list(map(self._filter_sat_positions_model.append, map(lambda x: (str(x),), sorted(sats))))
+        model = self._filter_sat_positions_model
+        if len(model) < 2:
+            list(map(self._filter_sat_positions_model.append, map(lambda x: (str(x),), self._sat_positions)))
+        else:
+            selected = self._filter_sat_positions_box.get_active_id()
+            active = self._filter_sat_positions_box.get_active()
+            itrs = list(filter(lambda it: model[it][0] not in self._sat_positions, [row.iter for row in model][1:]))
+            list(map(model.remove, itrs))
+
+            if active != 0 and selected not in self._sat_positions:
+                self._filter_sat_positions_box.set_active(0)
 
     @run_with_delay(1)
     def on_filter_changed(self, item):
