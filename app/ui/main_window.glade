@@ -222,7 +222,7 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0">All types</col>
+        <col id="0" translatable="yes">All types</col>
       </row>
       <row>
         <col id="0">TV</col>

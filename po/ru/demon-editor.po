@@ -247,6 +247,16 @@ msgstr "Файлы букетов:"
 msgid "Extra:"
 msgstr "Дополнительно:"
 
+# Filter bar
+msgid "Only free"
+msgstr "Только открытые"
+
+msgid "All positions"
+msgstr "Все позиции"
+
+msgid "All types"
+msgstr "Все типы"
+
 # Picons dialog
 msgid "Load providers"
 msgstr "Загрузить провайдеров"
