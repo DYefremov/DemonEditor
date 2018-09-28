@@ -164,11 +164,25 @@ class ServiceDetailsDialog:
 
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
-        itr = model.get_iter(paths)
         # Unpacking to search for an iterator for the base model
         filter_model = model.get_model()
-        itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
         self._current_model = get_base_model(model)
+        itr = None
+        if not paths:
+            # If editing from bouquet list and services list in the filter mode
+            fav_model, paths = self._fav_view.get_selection().get_selected_rows()
+            fav_id = fav_model[paths][7]
+            for row in self._current_model:
+                if row[-2] == fav_id:
+                    itr = row.iter
+                    break
+        else:
+            itr = model.get_iter(paths)
+            itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
+
+        if not itr:
+            return
+
         srv = Service(*self._current_model[itr][:])
         self._old_service = srv
         self._current_itr = itr
