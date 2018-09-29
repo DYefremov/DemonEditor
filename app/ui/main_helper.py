@@ -199,7 +199,7 @@ def get_selection(view, parent):
 
 # ***************** Flags *******************#
 
-def set_flags(flag, services_view, fav_view, channels, blacklist):
+def set_flags(flag, services_view, fav_view, services, blacklist):
     """ Updates flags for services. Returns True if any was changed. """
     target = ViewTarget.SERVICES if services_view.is_focus() else ViewTarget.FAV if fav_view.is_focus() else None
     if not target:
@@ -219,19 +219,26 @@ def set_flags(flag, services_view, fav_view, channels, blacklist):
 
     if flag is Flag.HIDE:
         if target is ViewTarget.SERVICES:
-            set_hide(channels, model, paths)
+            set_hide(services, model, paths)
         else:
             fav_ids = [model.get_value(model.get_iter(path), 7) for path in paths]
             srv_model = get_base_model(services_view.get_model())
             srv_paths = [row.path for row in srv_model if row[18] in fav_ids]
-            set_hide(channels, srv_model, srv_paths)
+            set_hide(services, srv_model, srv_paths)
     elif flag is Flag.LOCK:
-        set_lock(blacklist, channels, model, paths, target, services_model=get_base_model(services_view.get_model()))
+        set_lock(blacklist, services, model, paths, target, services_model=get_base_model(services_view.get_model()))
 
-    return True
+    update_fav_model(fav_view, services)
 
 
-def set_lock(blacklist, channels, model, paths, target, services_model):
+def update_fav_model(fav_view, services):
+    for row in get_base_model(fav_view.get_model()):
+        srv = services.get(row[7], None)
+        if srv:
+            row[3], row[4] = srv.locked, srv.hide
+
+
+def set_lock(blacklist, services, model, paths, target, services_model):
     col_num = 4 if target is ViewTarget.SERVICES else 3
     locked = has_locked_hide(model, paths, col_num)
 
@@ -240,23 +247,29 @@ def set_lock(blacklist, channels, model, paths, target, services_model):
     for path in paths:
         itr = model.get_iter(path)
         fav_id = model.get_value(itr, 18 if target is ViewTarget.SERVICES else 7)
-        channel = channels.get(fav_id, None)
-        if channel:
-            bq_id = to_bouquet_id(channel)
+        srv = services.get(fav_id, None)
+        if srv:
+            bq_id = to_bouquet_id(srv)
             if not bq_id:
                 continue
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
             model.set_value(itr, col_num, None if locked else LOCKED_ICON)
-            channels[fav_id] = channel._replace(locked=None if locked else LOCKED_ICON)
+            services[fav_id] = srv._replace(locked=None if locked else LOCKED_ICON)
             ids.append(fav_id)
 
     if target is ViewTarget.FAV and ids:
-        for ch in services_model:
-            if ch[18] in ids:
-                ch[4] = None if locked else LOCKED_ICON
+        gen = update_services_model(ids, locked, services_model)
+        GLib.idle_add(lambda: next(gen, False))
 
 
-def set_hide(channels, model, paths):
+def update_services_model(ids, locked, services_model):
+    for srv in services_model:
+        if srv[18] in ids:
+            srv[4] = None if locked else LOCKED_ICON
+        yield True
+
+
+def set_hide(services, model, paths):
     col_num = 5
     hide = has_locked_hide(model, paths, col_num)
 
@@ -293,9 +306,9 @@ def set_hide(channels, model, paths):
 
         model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
         fav_id = model.get_value(itr, 18)
-        channel = channels.get(fav_id, None)
-        if channel:
-            channels[fav_id] = channel._replace(hide=None if hide else HIDE_ICON)
+        srv = services.get(fav_id, None)
+        if srv:
+            services[fav_id] = srv._replace(hide=None if hide else HIDE_ICON)
 
 
 def has_locked_hide(model, paths, col_num):

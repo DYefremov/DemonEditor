@@ -1069,9 +1069,7 @@ class MainAppWindow:
         profile = Profile(self._profile)
         bq_selected = self.get_selected_bouquet()
         if profile is Profile.ENIGMA_2:
-            if set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist) and bq_selected:
-                self._fav_model.clear()
-                self.update_bouquet_services(self._fav_model, None, bq_selected)
+            set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
         elif profile is Profile.NEUTRINO_MP and bq_selected:
             model, paths = self._bouquets_view.get_selection().get_selected_rows()
             itr = model.get_iter(paths[0])
