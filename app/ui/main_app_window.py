@@ -1,6 +1,5 @@
 import os
 import shutil
-import time
 
 from contextlib import suppress
 from functools import lru_cache
@@ -182,9 +181,12 @@ class MainAppWindow:
         self._fav_model = builder.get_object("fav_list_store")
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
-        self._main_window_box = builder.get_object("main_window_box")
+        self._main_data_box = builder.get_object("main_data_box")
         self._player_drawing_area = builder.get_object("player_drawing_area")
-        self._player_box = builder.get_object("player_box")
+        self._player_tool_bar = builder.get_object("player_tool_bar")
+        self._status_bar_box = builder.get_object("status_bar_box")
+        self._services_main_box = builder.get_object("services_main_box")
+        self._bouquets_main_box = builder.get_object("bouquets_main_box")
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
@@ -1211,7 +1213,7 @@ class MainAppWindow:
                 if not url:
                     return
 
-                self._player_box.set_visible(True)
+                self._player_drawing_area.set_visible(True)
 
                 if not self._player:
                     try:
@@ -1234,7 +1236,9 @@ class MainAppWindow:
         if self._player:
             self._player.release()
             self._player = None
-        GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._player_drawing_area.set_visible, False, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._services_main_box.set_visible, True, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._bouquets_main_box.set_visible, True, priority=GLib.PRIORITY_LOW)
 
     def on_player_size_allocate(self, area, rectangle=None):
         area.hide()
@@ -1243,6 +1247,8 @@ class MainAppWindow:
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
         self._player.set_xwindow(self._drawing_area_xid)
+        self._services_main_box.set_visible(False)
+        self._bouquets_main_box.set_visible(False)
 
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
@@ -1254,14 +1260,10 @@ class MainAppWindow:
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
 
     def on_main_window_state(self, window, event):
-        if event.new_window_state & Gdk.WindowState.FULLSCREEN:
-            if self._main_window_box in window:
-                window.remove(self._main_window_box)
-                self._player_drawing_area.reparent(window)
-        elif self._player_drawing_area in window:
-            window.remove(self._player_drawing_area)
-            window.add(self._main_window_box)
-            self._player_frame.add(self._player_drawing_area)
+        full = not event.new_window_state & Gdk.WindowState.FULLSCREEN
+        self._main_data_box.set_visible(full)
+        self._player_tool_bar.set_visible(full)
+        self._status_bar_box.set_visible(full)
 
     # ***************** Filter and search *********************#
 
