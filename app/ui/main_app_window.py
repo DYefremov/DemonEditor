@@ -132,8 +132,8 @@ class MainAppWindow:
                     "on_player_close": self.on_player_close,
                     "on_player_press": self.on_player_press,
                     "on_full_screen": self.on_full_screen,
-                    "on_player_size_allocate": self.on_player_size_allocate,
                     "on_drawing_area_realize": self.on_drawing_area_realize,
+                    "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
                     "on_main_window_state": self.on_main_window_state,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
@@ -183,6 +183,7 @@ class MainAppWindow:
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._main_data_box = builder.get_object("main_data_box")
         self._player_drawing_area = builder.get_object("player_drawing_area")
+        self._player_box = builder.get_object("player_box")
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._status_bar_box = builder.get_object("status_bar_box")
         self._services_main_box = builder.get_object("services_main_box")
@@ -1213,8 +1214,6 @@ class MainAppWindow:
                 if not url:
                     return
 
-                self._player_drawing_area.set_visible(True)
-
                 if not self._player:
                     try:
                         self._player = Player()
@@ -1222,33 +1221,46 @@ class MainAppWindow:
                         show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
                         return
 
+                self._player_box.set_visible(True)
+
                 if self._player.is_playing():
                     self.on_player_stop()
 
-                self._player.play(url)
+                GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
 
     def on_player_stop(self, item=None):
         if self._player:
-            self.on_player_size_allocate(self._player_drawing_area)
             self._player.stop()
 
     def on_player_close(self, item=None):
         if self._player:
             self._player.release()
             self._player = None
-        GLib.idle_add(self._player_drawing_area.set_visible, False, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self._services_main_box.set_visible, True, priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self._bouquets_main_box.set_visible, True, priority=GLib.PRIORITY_LOW)
-
-    def on_player_size_allocate(self, area, rectangle=None):
-        area.hide()
-        GLib.idle_add(area.show, priority=GLib.PRIORITY_LOW)
 
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
         self._player.set_xwindow(self._drawing_area_xid)
         self._services_main_box.set_visible(False)
         self._bouquets_main_box.set_visible(False)
+
+    def on_player_drawing_area_draw(self, widget, cr):
+        """ Used for black background drawing in the player drawing area.
+
+            Required for Gtk >= 3.20.
+            More info: https://developer.gnome.org/gtk3/stable/ch32s10.html,
+            https://developer.gnome.org/gtk3/stable/GtkStyleContext.html#gtk-render-background
+        """
+        context = widget.get_style_context()
+        width = widget.get_allocated_width()
+        height = widget.get_allocated_height()
+        Gtk.render_background(context, cr, 0, 0, width, height)
+        r, g, b, a = 0, 0, 0, 1  # black color
+        cr.set_source_rgba(r, g, b, a)
+        cr.rectangle(0, 0, width, height)
+        cr.fill()
 
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
@@ -1262,8 +1274,8 @@ class MainAppWindow:
     def on_main_window_state(self, window, event):
         full = not event.new_window_state & Gdk.WindowState.FULLSCREEN
         self._main_data_box.set_visible(full)
-        self._player_tool_bar.set_visible(full)
         self._status_bar_box.set_visible(full)
+        self._player_tool_bar.set_visible(full)
 
     # ***************** Filter and search *********************#
 

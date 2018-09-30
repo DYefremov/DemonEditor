@@ -1213,16 +1213,122 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkDrawingArea" id="player_drawing_area">
+              <object class="GtkBox" id="player_box">
                 <property name="width_request">320</property>
-                <property name="height_request">240</property>
                 <property name="can_focus">False</property>
-                <signal name="button-press-event" handler="on_player_press" swapped="no"/>
-                <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
-                <signal name="size-allocate" handler="on_player_size_allocate" swapped="no"/>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkDrawingArea" id="player_drawing_area">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <signal name="button-press-event" handler="on_player_press" swapped="no"/>
+                    <signal name="draw" handler="on_player_drawing_area_draw" swapped="no"/>
+                    <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolbar" id="player_tool_bar">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkToolItem" id="player_play_tool_item">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="player_play_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="is_important">True</property>
+                        <property name="stock_id">gtk-media-play</property>
+                        <signal name="clicked" handler="on_player_play" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="player_stop_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="is_important">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-media-stop</property>
+                        <signal name="clicked" handler="on_player_stop" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolItem" id="player_play_tool_item_2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="player_full_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="is_important">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-fullscreen</property>
+                        <signal name="clicked" handler="on_full_screen" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="player_close_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Close</property>
+                        <property name="margin_right">15</property>
+                        <property name="is_important">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-close</property>
+                        <signal name="clicked" handler="on_player_close" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="resize">False</property>
+                <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
@@ -2325,7 +2431,7 @@ Author: Dmitriy Yefremov
                 </child>
               </object>
               <packing>
-                <property name="resize">False</property>
+                <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
@@ -2396,106 +2502,6 @@ Author: Dmitriy Yefremov
             <property name="fill">False</property>
             <property name="pack_type">end</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame" id="player_tool_bar_frame">
-            <property name="can_focus">False</property>
-            <property name="margin_top">2</property>
-            <property name="margin_bottom">2</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkToolbar" id="player_tool_bar">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkSeparatorToolItem">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="player_play_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Play</property>
-                    <property name="stock_id">gtk-media-play</property>
-                    <signal name="clicked" handler="on_player_play" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="player_stop_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Stop</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-media-stop</property>
-                    <signal name="clicked" handler="on_player_stop" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="player_full_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Fullscreen</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-fullscreen</property>
-                    <signal name="clicked" handler="on_full_screen" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSeparatorToolItem">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="homogeneous">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="player_close_tool_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Close</property>
-                    <property name="label" translatable="yes">Close</property>
-                    <property name="use_underline">True</property>
-                    <property name="stock_id">gtk-close</property>
-                    <signal name="clicked" handler="on_player_close" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-            <child type="label_item">
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">2</property>
           </packing>
         </child>
       </object>
