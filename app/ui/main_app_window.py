@@ -1220,6 +1220,13 @@ class MainAppWindow:
                     except (NameError, AttributeError):
                         show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
                         return
+                    else:
+                        if self._drawing_area_xid:
+                            self._player.set_xwindow(self._drawing_area_xid)
+                        self._services_main_box.set_visible(False)
+                        self._bouquets_main_box.set_visible(False)
+                        w, h = self._main_window.get_size()
+                        self._player_box.set_size_request(w * 0.6, -1)
 
                 self._player_box.set_visible(True)
 
@@ -1243,8 +1250,6 @@ class MainAppWindow:
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
         self._player.set_xwindow(self._drawing_area_xid)
-        self._services_main_box.set_visible(False)
-        self._bouquets_main_box.set_visible(False)
 
     def on_player_drawing_area_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area.

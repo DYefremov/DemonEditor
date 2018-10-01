@@ -1306,7 +1306,6 @@ Author: Dmitriy Yefremov
                       <object class="GtkToolButton" id="player_close_tool_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Close</property>
                         <property name="margin_right">15</property>
                         <property name="is_important">True</property>
                         <property name="use_underline">True</property>
@@ -1329,7 +1328,7 @@ Author: Dmitriy Yefremov
               </object>
               <packing>
                 <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
             <child>

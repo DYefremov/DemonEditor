@@ -12,7 +12,7 @@ class Player:
     def get_vlc_instance():
         if Player._VLC_INSTANCE:
             return Player._VLC_INSTANCE
-        _VLC_INSTANCE = vlc.Instance("--no-xlib").media_player_new()
+        _VLC_INSTANCE = vlc.Instance("--quiet --no-xlib").media_player_new()
         return _VLC_INSTANCE
 
     def play(self, mrl=None):
