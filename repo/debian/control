@@ -1,0 +1,12 @@
+Source: demon-editor
+Section: utils
+Priority: optional
+Maintainer: Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>
+Build-Depends: python3 (>= 3.5), debhelper (>= 10)
+Standards-Version: 4.1.2
+
+Package: demon-editor
+Architecture: all
+Depends: python3 (>= 3.5)
+Description: Enigma2 channel and satellites list editor
+
