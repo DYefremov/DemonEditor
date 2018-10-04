@@ -1174,7 +1174,7 @@ class MainAppWindow:
         prf = Profile(self._profile)
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
         if response:
-            self.remove_favs(fav_bqt, response, self._fav_model)
+            self.remove_favs(response, self._fav_model)
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
