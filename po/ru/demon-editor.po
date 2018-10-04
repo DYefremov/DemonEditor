@@ -259,7 +259,7 @@ msgstr "Все типы"
 
 # Picons dialog
 msgid "Load providers"
-msgstr "Загрузить провайдеров"
+msgstr "Загрузить провайдеры"
 
 msgid "Providers"
 msgstr "Провайдеры"
