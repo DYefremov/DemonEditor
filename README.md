@@ -4,7 +4,6 @@
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).                                                   
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc)
 ### Keyboard shortcuts:                                                                                                                
-**Ctrl + X, C, V, Up, Down, PageUp, PageDown, Home, End, S, T, E, L, H, Space; Insert, Delete, F2, Enter, P.**                                                    
 * **Insert** - copies the selected channels from the main list to the bouquet or inserts (creates) a new bouquet.                                     
 * **Ctrl + X** - only in bouquet list. **Ctrl + C** - only in services list.                                                                 
 Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                              
@@ -27,8 +26,8 @@ Python >= 3.5.2 and GTK+ 3 with PyGObject bindings.
 #### Note.
 To create a simple debian package, you can use the build-deb.sh                                                         
 
-Tests only in image based on OpenPLi or last BPanther(neutrino) images with GM 990 Spark Reloaded receiver
-in my preferred linux distro (Last Linux Mint 18.* - MATE 64-bit)!
+Tests only with openATV image and Formuler F1 receiver in my preferred Linux distros                                    
+(latest Linux Mint 18.* and 19 MATE 64-bit)!                                                                                                                                                       
 
 **Terrestrial and cable channels at the moment are not supported!**
 
