@@ -257,6 +257,25 @@ msgstr "Все позиции"
 msgid "All types"
 msgstr "Все типы"
 
+# Streams player
+msgid "Play"
+msgstr "Воспроизведение"
+
+msgid "Stop playback"
+msgstr "Останов"
+
+msgid "Previous stream in the list"
+msgstr "Предыдущий поток в списке"
+
+msgid "Next stream in the list"
+msgstr "Следующий поток в списке"
+
+msgid "Toggle in fullscreen"
+msgstr "Показать во весь экран"
+
+msgid "Close"
+msgstr "Закрыть"
+
 # Picons dialog
 msgid "Load providers"
 msgstr "Загрузить провайдеры"

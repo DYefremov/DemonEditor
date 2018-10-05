@@ -1320,7 +1320,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkToolButton" id="player_full_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Toggle the video in fullscreen</property>
+                        <property name="tooltip_text" translatable="yes">Toggle in fullscreen</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-fullscreen</property>
                         <signal name="clicked" handler="on_full_screen" swapped="no"/>
