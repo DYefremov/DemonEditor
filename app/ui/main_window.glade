@@ -1211,7 +1211,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkPaned" id="main_paned">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="player_box">
                 <property name="width_request">320</property>
@@ -1236,7 +1236,7 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkToolItem" id="player_play_tool_item">
+                      <object class="GtkToolItem" id="player_item">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -1249,10 +1249,10 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="player_play_tool_button">
+                      <object class="GtkToolButton" id="player_play_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="is_important">True</property>
+                        <property name="tooltip_text" translatable="yes">Play</property>
                         <property name="stock_id">gtk-media-play</property>
                         <signal name="clicked" handler="on_player_play" swapped="no"/>
                       </object>
@@ -1262,10 +1262,10 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="player_stop_tool_button">
+                      <object class="GtkToolButton" id="player_stop_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="is_important">True</property>
+                        <property name="tooltip_text" translatable="yes">Stop playback</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-media-stop</property>
                         <signal name="clicked" handler="on_player_stop" swapped="no"/>
@@ -1276,7 +1276,35 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolItem" id="player_play_tool_item_2">
+                      <object class="GtkToolButton" id="player_prev_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Previous stream in the list</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-media-previous</property>
+                        <signal name="clicked" handler="on_player_previous" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="player_next_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Next stream in the list</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-media-next</property>
+                        <signal name="clicked" handler="on_player_next" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolItem" id="player_item_2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -1289,10 +1317,10 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="player_full_tool_button">
+                      <object class="GtkToolButton" id="player_full_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="is_important">True</property>
+                        <property name="tooltip_text" translatable="yes">Toggle the video in fullscreen</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-fullscreen</property>
                         <signal name="clicked" handler="on_full_screen" swapped="no"/>
@@ -1303,11 +1331,11 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="player_close_tool_button">
+                      <object class="GtkToolButton" id="player_close_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Close</property>
                         <property name="margin_right">15</property>
-                        <property name="is_important">True</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-close</property>
                         <signal name="clicked" handler="on_player_close" swapped="no"/>
@@ -1537,7 +1565,7 @@ Author: Dmitriy Yefremov
                         <child>
                           <object class="GtkScrolledWindow" id="services_scrolled_window">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
                             <property name="shadow_type">in</property>
                             <child>
                               <object class="GtkTreeView" id="services_tree_view">
@@ -2036,7 +2064,7 @@ Author: Dmitriy Yefremov
                             <child>
                               <object class="GtkScrolledWindow" id="fav_scrolled_window">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="margin_bottom">2</property>
                                 <property name="shadow_type">in</property>
                                 <child>
@@ -2274,7 +2302,7 @@ Author: Dmitriy Yefremov
                             <child>
                               <object class="GtkScrolledWindow" id="scrolledwindow3">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="margin_bottom">2</property>
                                 <property name="shadow_type">in</property>
                                 <child>

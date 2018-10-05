@@ -129,6 +129,8 @@ class MainAppWindow:
                     "on_play_stream": self.on_play_stream,
                     "on_player_play": self.on_player_play,
                     "on_player_stop": self.on_player_stop,
+                    "on_player_previous": self.on_player_previous,
+                    "on_player_next": self.on_player_next,
                     "on_player_close": self.on_player_close,
                     "on_player_press": self.on_player_press,
                     "on_full_screen": self.on_full_screen,
@@ -1203,41 +1205,51 @@ class MainAppWindow:
 
     @run_idle
     def on_player_play(self, item=None):
-        self.play()
+        url = self.get_stream_url()
+        if not url:
+            return
+        self.play(url)
 
-    def play(self):
+    def play(self, url):
+        if not self._player:
+            try:
+                self._player = Player()
+            except (NameError, AttributeError):
+                show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
+                return
+            else:
+                if self._drawing_area_xid:
+                    self._player.set_xwindow(self._drawing_area_xid)
+                self._services_main_box.set_visible(False)
+                self._bouquets_main_box.set_visible(False)
+                w, h = self._main_window.get_size()
+                self._player_box.set_size_request(w * 0.6, -1)
+
+        self._player_box.set_visible(True)
+
+        if self._player.is_playing():
+            self.on_player_stop()
+
+        GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+
+    def get_stream_url(self):
         path, column = self._fav_view.get_cursor()
         if path:
             row = self._fav_model[path][:]
             if row[5] == BqServiceType.IPTV.name:
-                url = get_iptv_url(row, Profile(self._profile))
-                if not url:
-                    return
-
-                if not self._player:
-                    try:
-                        self._player = Player()
-                    except (NameError, AttributeError):
-                        show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
-                        return
-                    else:
-                        if self._drawing_area_xid:
-                            self._player.set_xwindow(self._drawing_area_xid)
-                        self._services_main_box.set_visible(False)
-                        self._bouquets_main_box.set_visible(False)
-                        w, h = self._main_window.get_size()
-                        self._player_box.set_size_request(w * 0.6, -1)
-
-                self._player_box.set_visible(True)
-
-                if self._player.is_playing():
-                    self.on_player_stop()
-
-                GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+                return get_iptv_url(row, Profile(self._profile))
 
     def on_player_stop(self, item=None):
         if self._player:
             self._player.stop()
+
+    def on_player_previous(self, item):
+        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
+            self.on_play_stream()
+
+    def on_player_next(self, item):
+        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
+            self.on_play_stream()
 
     def on_player_close(self, item=None):
         if self._player:
