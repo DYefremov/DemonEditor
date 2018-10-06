@@ -59,7 +59,11 @@ def write_to_lamedb5(path, services):
         data_id = str(srv.data_id).split(_SEP)
         tr_id = "{}:{}:{}".format(data_id[1], data_id[2], data_id[3])
         tr_set.add("t:{},{}\n".format(tr_id, srv.transponder.replace(" ", ":", 1)))
-        services_lines.append("s:{},\"{}\",{}\n".format(srv.data_id, srv.service, srv.flags_cas))
+        # Removing empty packages
+        flags = list(filter(lambda x: x != "p:", srv.flags_cas.split(",")))
+        flags = ",".join(flags)
+        flags = "," + flags if flags else ""
+        services_lines.append("s:{},\"{}\"{}\n".format(srv.data_id, srv.service, flags))
 
     lines.extend(sorted(tr_set))
     lines.extend(services_lines)
@@ -109,7 +113,12 @@ def parse_v5(path):
         for l in lns:
             if l.startswith("s:"):
                 srv_data = l.strip("s:").split(",", 2)
-                srv_data[1], srv_data[2] = srv_data[1].strip("\""), srv_data[2].strip()
+                srv_data[1] = srv_data[1].strip("\"")
+                data_len = len(srv_data)
+                if data_len == 3:
+                    srv_data[2] = srv_data[2].strip()
+                elif data_len == 2:
+                    srv_data.append("p:")
                 srvs.extend(srv_data)
             elif l.startswith("t:"):
                 tr, srv = l.split(",")
@@ -160,7 +169,7 @@ def parse_services(services, transponders, path):
         locked = LOCKED_ICON if fav_id in blacklist else None
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))
-        package = package[0][2:] if package else None
+        package = package[0][2:] if package else ""
 
         if transponder is not None:
             tr_type, sp, tr = str(transponder).partition(" ")
