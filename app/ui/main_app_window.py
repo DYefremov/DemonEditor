@@ -1425,7 +1425,7 @@ class MainAppWindow:
             self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
 
     def on_rename(self, view):
-        name = self.get_model_data(view)
+        name, model = self.get_model_data(view)
         if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
         elif name == self._FAV_LIST_NAME:
