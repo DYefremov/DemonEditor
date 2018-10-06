@@ -187,6 +187,8 @@ class MainAppWindow:
         self._player_drawing_area = builder.get_object("player_drawing_area")
         self._player_box = builder.get_object("player_box")
         self._player_tool_bar = builder.get_object("player_tool_bar")
+        self._player_prev_button = builder.get_object("player_prev_button")
+        self._player_next_button = builder.get_object("player_next_button")
         self._status_bar_box = builder.get_object("status_bar_box")
         self._services_main_box = builder.get_object("services_main_box")
         self._bouquets_main_box = builder.get_object("bouquets_main_box")
@@ -1206,6 +1208,7 @@ class MainAppWindow:
     @run_idle
     def on_player_play(self, item=None):
         url = self.get_stream_url()
+        self.update_player_buttons()
         if not url:
             return
         self.play(url)
@@ -1250,6 +1253,13 @@ class MainAppWindow:
     def on_player_next(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
             self.on_play_stream()
+
+    def update_player_buttons(self):
+        if self._player:
+            path, column = self._fav_view.get_cursor()
+            current_index = path[0]
+            self._player_prev_button.set_sensitive(current_index != 0)
+            self._player_next_button.set_sensitive(len(self._fav_model) != current_index + 1)
 
     def on_player_close(self, item=None):
         if self._player:
