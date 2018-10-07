@@ -301,7 +301,7 @@ class MainAppWindow:
         rows = None
 
         if target is ViewTarget.FAV:
-            rows = [(0, *model[path][2, 3, 4, 5, 7, 16, 18, 8]) for path in paths]
+            rows = [(0, *model.get(model.get_iter(path), 2, 3, 4, 5, 7, 16, 18, 8)) for path in paths]
         elif target is ViewTarget.SERVICES:
             rows = [model[path][:] for path in paths]
         elif target is ViewTarget.BOUQUET:
