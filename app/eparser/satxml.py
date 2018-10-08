@@ -7,6 +7,7 @@ from xml.dom.minidom import parse, Document
 
 import os
 
+from app.commons import log
 from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE, Transponder, Satellite, get_key_by_value
 
 __COMMENT = ("   File was created in DemonEditor\n\n"
@@ -21,7 +22,7 @@ __COMMENT = ("   File was created in DemonEditor\n\n"
              "polarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular\n"
              "fec_inner: 0 - Auto, 1 - 1/2, 2 - 2/3, 3 - 3/4, 4 - 5/6, 5 - 7/8, 6 -  8/9, 7 - 3/5,\n"
              "8 - 4/5, 9 - 9/10, 15 - None\n"
-             "modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 3 - 16APSK, 5 - 32APSK\n"
+             "modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 4 - 16APSK, 5 - 32APSK\n"
              "rolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto\n"
              "pilot: 0 - Off, 1 - On, 2 - Auto\n"
              "inversion: 0 = Off, 1 = On, 2 = Auto (default)\n"
@@ -74,31 +75,38 @@ def write_satellites(satellites, data_path):
     doc.unlink()
 
 
-def parse_transponders(elem):
+def parse_transponders(elem, sat_name):
     """ Parsing satellite transponders """
     transponders = []
     for el in elem.getElementsByTagName("transponder"):
         if el.hasAttributes():
             atr = el.attributes
-            tr = Transponder(atr["frequency"].value,
-                             atr["symbol_rate"].value,
-                             POLARIZATION[atr["polarization"].value],
-                             FEC[atr["fec_inner"].value],
-                             SYSTEM[atr["system"].value],
-                             MODULATION[atr["modulation"].value],
-                             PLS_MODE[atr["pls_mode"].value] if "pls_mode" in atr else None,
-                             atr["pls_code"].value if "pls_code" in atr else None,
-                             atr["is_id"].value if "is_id" in atr else None)
-            transponders.append(tr)
+            try:
+                tr = Transponder(atr["frequency"].value,
+                                 atr["symbol_rate"].value,
+                                 POLARIZATION[atr["polarization"].value],
+                                 FEC[atr["fec_inner"].value],
+                                 SYSTEM[atr["system"].value],
+                                 MODULATION[atr["modulation"].value],
+                                 PLS_MODE[atr["pls_mode"].value] if "pls_mode" in atr else None,
+                                 atr["pls_code"].value if "pls_code" in atr else None,
+                                 atr["is_id"].value if "is_id" in atr else None)
+            except Exception as e:
+                message = "Error: can't parse transponder for '{}' satellite! {}".format(sat_name, repr(e))
+                print(message)
+                log(message)
+            else:
+                transponders.append(tr)
     return transponders
 
 
 def parse_sat(elem):
     """ Parsing satellite """
-    return Satellite(elem.attributes["name"].value,
+    sat_name = elem.attributes["name"].value
+    return Satellite(sat_name,
                      elem.attributes["flags"].value,
                      elem.attributes["position"].value,
-                     parse_transponders(elem))
+                     parse_transponders(elem, sat_name))
 
 
 @lru_cache(maxsize=1)
