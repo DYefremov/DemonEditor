@@ -117,7 +117,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" swapped="no"/>
+        <signal name="activate" handler="on_delete" object="bouquets_tree_view" swapped="no"/>
       </object>
     </child>
   </object>
@@ -682,7 +682,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" swapped="no"/>
+        <signal name="activate" handler="on_delete" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
   </object>
@@ -2751,7 +2751,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" swapped="no"/>
+        <signal name="activate" handler="on_delete" object="services_tree_view" swapped="no"/>
       </object>
     </child>
   </object>

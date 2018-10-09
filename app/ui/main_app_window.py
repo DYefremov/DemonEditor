@@ -298,19 +298,15 @@ class MainAppWindow:
 
     def on_copy(self, view, target):
         model, paths = view.get_selection().get_selected_rows()
-        rows = None
 
         if target is ViewTarget.FAV:
-            rows = [(0, *model.get(model.get_iter(path), 2, 3, 4, 5, 7, 16, 18, 8)) for path in paths]
+            self._rows_buffer.extend((0, *model.get(model.get_iter(path), 2, 3, 4, 5, 7, 16, 18, 8)) for path in paths)
         elif target is ViewTarget.SERVICES:
-            rows = [model[path][:] for path in paths]
+            self._rows_buffer.extend(model[path][:] for path in paths)
         elif target is ViewTarget.BOUQUET:
             to_copy = list(map(model.get_iter, filter(lambda p: p.get_depth() == 2, paths)))
             if to_copy:
                 self._bouquets_buffer.extend([model[i][:] for i in to_copy])
-            return
-
-        self._rows_buffer.extend(rows)
 
     def on_fav_cut(self, view):
         self.on_cut(view, ViewTarget.FAV)
@@ -388,29 +384,27 @@ class MainAppWindow:
 
     # ***************** Deletion *********************#
 
-    def on_delete(self, item):
-        """ Delete selected items from views
+    def on_delete(self, view):
+        """ Delete selected items from view
 
             returns deleted rows list!
         """
-        for view in [self._services_view, self._fav_view, self._bouquets_view]:
-            if view.is_focus():
-                selection = view.get_selection()
-                model, paths = selection.get_selected_rows()
-                model_name = get_base_model(model).get_name()
-                itrs = [model.get_iter(path) for path in paths]
-                rows = [model[in_itr][:] for in_itr in itrs]
+        selection = view.get_selection()
+        model, paths = selection.get_selected_rows()
+        model_name = get_base_model(model).get_name()
+        itrs = [model.get_iter(path) for path in paths]
+        rows = [model[in_itr][:] for in_itr in itrs]
 
-                if model_name == self._FAV_LIST_NAME:
-                    self.remove_favs(itrs, model)
-                elif model_name == self._BOUQUETS_LIST_NAME:
-                    self.delete_bouquets(itrs, model)
-                elif model_name == self._SERVICE_LIST_NAME:
-                    self.delete_services(itrs, model, rows)
+        if model_name == self._FAV_LIST_NAME:
+            self.remove_favs(itrs, model)
+        elif model_name == self._BOUQUETS_LIST_NAME:
+            self.delete_bouquets(itrs, model)
+        elif model_name == self._SERVICE_LIST_NAME:
+            self.delete_services(itrs, model, rows)
 
-                self.on_view_focus(view, None)
+        self.on_view_focus(view, None)
 
-                return rows
+        return rows
 
     @run_idle
     def remove_favs(self, itrs, model):
