@@ -22,7 +22,7 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * Ability to download picons and update satellites (transponders) from web.                                                                                                                                                                                                                            
 * Preview (playing) IPTV or other streams directly from the bouquet list(should be installed VLC).                                         
 ### Minimum requirements:
-Python >= 3.5.2 and GTK+ 3 with PyGObject bindings.
+Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings.
 #### Note.
 To create a simple debian package, you can use the build-deb.sh                                                         
 
