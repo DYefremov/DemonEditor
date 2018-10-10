@@ -91,7 +91,8 @@ class IptvDialog:
         self._dialog.destroy()
 
     def on_save(self, item):
-        if not is_data_correct(self._digit_elems):
+        self.on_url_changed(self._url_entry)
+        if not is_data_correct(self._digit_elems) or self._url_entry.get_name() == _DIGIT_ENTRY_NAME:
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
 
@@ -234,8 +235,8 @@ class SearchUnavailableDialog:
     def get_unavailable(self, row):
         if not self._download_task:
             return
-        req = Request(get_iptv_url(row, self._profile))
         try:
+            req = Request(get_iptv_url(row, self._profile))
             self.update_bar()
             urlopen(req, timeout=2)
         except Exception:
