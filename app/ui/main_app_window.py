@@ -355,7 +355,7 @@ class MainAppWindow:
         for row in self._rows_buffer:
             dest_index += 1
             model.insert(dest_index, row)
-            fav_bouquet.insert(dest_index, row[-1])
+            fav_bouquet.insert(dest_index, row[7])
 
         if model.get_name() == self._FAV_LIST_NAME:
             self.update_fav_num_column(model)
