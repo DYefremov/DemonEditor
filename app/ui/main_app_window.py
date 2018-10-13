@@ -396,17 +396,16 @@ class MainAppWindow:
         rows = [model[in_itr][:] for in_itr in itrs]
 
         if model_name == self._FAV_LIST_NAME:
-            self.remove_favs(itrs, model)
+            next(self.remove_favs(itrs, model), False)
         elif model_name == self._BOUQUETS_LIST_NAME:
             self.delete_bouquets(itrs, model)
         elif model_name == self._SERVICE_LIST_NAME:
-            self.delete_services(itrs, model, rows)
+            next(self.delete_services(itrs, model, rows), False)
 
         self.on_view_focus(view, None)
 
         return rows
 
-    @run_idle
     def remove_favs(self, itrs, model):
         """ Deleting bouquet services """
         bq_selected = self.get_selected_bouquet()
@@ -417,8 +416,8 @@ class MainAppWindow:
                     del fav_bouquet[int(model.get_path(itr)[0])]
                     self._fav_model.remove(itr)
                 self.update_fav_num_column(model)
+        yield True
 
-    @run_idle
     def delete_services(self, itrs, model, rows):
         """ Deleting services """
         srv_itrs = [self._services_model_filter.convert_iter_to_child_iter(
@@ -443,6 +442,7 @@ class MainAppWindow:
             self._fav_model.remove(f_itr.iter)
         self.update_fav_num_column(self._fav_model)
         self.update_sat_positions()
+        yield True
 
     def delete_bouquets(self, itrs, model):
         """ Deleting bouquets """
@@ -513,6 +513,7 @@ class MainAppWindow:
         if selection:
             self.receive_selection(view=self._fav_view, drop_info=None, data=selection)
 
+    @run_with_delay(1)
     def update_fav_num_column(self, model):
         """ Iterate through model and updates values for Num column """
         gen = self.update_num_column(model)
@@ -521,7 +522,7 @@ class MainAppWindow:
     def update_num_column(self, model):
         for index, row in enumerate(model):
             row[0] = index + 1
-            yield True
+        yield True
 
     def update_bouquet_list(self):
         """ Update bouquet after move items """
@@ -855,9 +856,8 @@ class MainAppWindow:
             self._bouquets_view.expand_row(path, column)
 
         if len(path) > 1:
-            self.update_bouquet_services(model, path)
+            next(self.update_bouquet_services(model, path), False)
 
-    @run_idle
     def update_bouquet_services(self, model, path, bq_key=None):
         """ Updates list of bouquet services """
         tree_iter = None
@@ -879,6 +879,7 @@ class MainAppWindow:
                 self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
                                         srv.hide, srv.service_type, srv.pos, srv.fav_id,
                                         self._picons.get(srv.picon_id, None)))
+        yield True
 
     def check_bouquet_selection(self):
         """ checks and returns bouquet if selected """
