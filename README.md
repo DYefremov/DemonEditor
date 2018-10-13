@@ -4,7 +4,9 @@
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).                                                   
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc)
 ### Keyboard shortcuts:                                                                                                                
-* **Insert** - copies the selected channels from the main list to the bouquet or inserts (creates) a new bouquet.                                     
+* **Ctrl + Insert** - copies the selected channels from the main list to the the bouquet beginning                                                           
+ or inserts (creates) a new bouquet.                                                                                    
+* **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.                                                                                
 * **Ctrl + X** - only in bouquet list. **Ctrl + C** - only in services list.                                                                 
 Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                              
 * **Ctrl + E** - edit.                                                                                                                                                                                                                                                                                                                    
