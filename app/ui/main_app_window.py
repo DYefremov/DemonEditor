@@ -97,7 +97,8 @@ class MainAppWindow:
                     "on_services_add_new": self.on_services_add_new,
                     "on_delete": self.on_delete,
                     "on_tool_edit": self.on_tool_edit,
-                    "on_to_fav_move": self.on_to_fav_move,
+                    "on_to_fav_copy": self.on_to_fav_copy,
+                    "on_to_fav_end_copy": self.on_to_fav_end_copy,
                     "on_view_drag_begin": self.on_view_drag_begin,
                     "on_view_drag_data_get": self.on_view_drag_data_get,
                     "on_view_drag_data_received": self.on_view_drag_data_received,
@@ -506,12 +507,24 @@ class MainAppWindow:
         elif self._bouquets_view.is_focus():
             self.on_rename(self._bouquets_view)
 
-    def on_to_fav_move(self, view):
-        """ Move items from app to fav list """
+    def on_to_fav_copy(self, view):
+        """ Copy items from main to beginning of fav list """
         selection = self.get_selection(view)
-
         if selection:
             self.receive_selection(view=self._fav_view, drop_info=None, data=selection)
+
+    def on_to_fav_end_copy(self, view):
+        """  Copy items from main to end of fav list """
+        selection = self.get_selection(view)
+        if selection:
+            pos = Gtk.TreeViewDropPosition.AFTER
+            path = Gtk.TreePath.new()
+            mod_len = len(self._fav_model)
+            path.append_index(mod_len - 1 if mod_len > 0 else 1)
+            self.receive_selection(view=self._fav_view, drop_info=(path, pos), data=selection)
+            if mod_len > 0:
+
+                scroll_to(mod_len, self._fav_view)
 
     @run_with_delay(1)
     def update_fav_num_column(self, model):
@@ -597,23 +610,22 @@ class MainAppWindow:
 
     def receive_selection(self, *, view, drop_info, data):
         """  Update fav view  after data received  """
-        model = get_base_model(view.get_model())
-        dest_index = 0
-        if drop_info:
-            path, position = drop_info
-            dest_iter = model.get_iter(path)
-            if dest_iter:
-                dest_index = model.get_value(dest_iter, 0)
-
-        itr_str, sep, source = data.partition("::::")
-        if source == self._BOUQUETS_LIST_NAME:
-            return
-
         try:
+            itr_str, sep, source = data.partition("::::")
+            if source == self._BOUQUETS_LIST_NAME:
+                return
+
             bq_selected = self.check_bouquet_selection()
             if not bq_selected:
                 return
 
+            model = get_base_model(view.get_model())
+            dest_index = 0
+            if drop_info:
+                path, position = drop_info
+                dest_iter = model.get_iter(path)
+                if dest_iter:
+                    dest_index = model.get_value(dest_iter, 0)
             fav_bouquet = self._bouquets[bq_selected]
             itrs = itr_str.split(",")
 
@@ -985,12 +997,14 @@ class MainAppWindow:
         elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
             self.update_fav_num_column(model)
             self.update_bouquet_list()
-        elif key == Gdk.KEY_Insert:
+        elif ctrl and key == Gdk.KEY_Insert:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
-                self.on_to_fav_move(view)
+                self.on_to_fav_copy(view)
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_new_bouquet(view)
+        elif ctrl and key == Gdk.KEY_BackSpace and model_name == self._SERVICE_LIST_NAME:
+                self.on_to_fav_end_copy(view)
         elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
             self.on_data_save()
         elif ctrl and key == Gdk.KEY_l or key == Gdk.KEY_L:
