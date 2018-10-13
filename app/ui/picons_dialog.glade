@@ -94,6 +94,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="margin_top">5</property>
                 <property name="label" translatable="yes">Picons download tool</property>
+                <property name="xalign">0.55000001192092896</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -105,6 +106,9 @@ Author: Dmitriy Yefremov
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_bottom">5</property>
                 <property name="spacing">2</property>
                 <child>
                   <object class="GtkButton">
@@ -255,9 +259,6 @@ Author: Dmitriy Yefremov
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
         <child>
           <object class="GtkSeparator" id="separator1">
