@@ -4,6 +4,8 @@ import time
 from enum import Enum
 from ftplib import FTP, error_perm
 from telnetlib import Telnet
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 from app.commons import log, run_task
 from app.properties import Profile
@@ -66,8 +68,22 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
     tn = telnet(host=host, user=properties.get("telnet_user", "root"), password=properties.get("telnet_password", ""),
                 timeout=properties.get("telnet_timeout", 5))
     next(tn)
-    # terminate enigma or neutrino
-    tn.send("init 4")
+    web_reachable = False
+    try:
+        # Checking if OpenWebif is reachable
+        urlopen(Request("http://{}/#".format(host)), timeout=1)
+    except HTTPError as er:
+        web_reachable = er.code == 401
+    except Exception:
+        pass  # NOP
+    else:
+        web_reachable = True
+
+    if profile is Profile.ENIGMA_2 and download_type is DownloadType.BOUQUETS and web_reachable:
+        tn.send('wget -qO - "http://localhost/web/message?text=User+bouquets+will+be+updated&type=2&timeout=10"')
+    else:
+        # terminate enigma or neutrino
+        tn.send("init 4")
 
     with FTP(host=host) as ftp:
         ftp.login(user=properties["user"], passwd=properties["password"])
@@ -131,8 +147,11 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                 if file_name.endswith(picons_suf):
                     send_file(file_name, picons_dir_path, ftp)
 
-        # resume enigma or restart neutrino
-        tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
+        if profile is Profile.ENIGMA_2 and download_type is DownloadType.BOUQUETS and web_reachable:
+            tn.send("wget -qO - http://127.0.0.1/web/servicelistreload?mode=2")
+        else:
+            # resume enigma or restart neutrino
+            tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
 
         if callback is not None:
             callback()
@@ -141,7 +160,7 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
 def download_file(ftp, name, save_path):
     with open(save_path + name, "wb") as f:
         ftp.retrbinary("RETR " + name, f.write)
-        
+
 
 def send_file(file_name, path, ftp):
     """ Opens the file in binary mode and transfers into receiver """
