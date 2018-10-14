@@ -1,3 +1,5 @@
+from gi.repository import GLib
+
 from app.commons import run_idle, run_task
 from app.ftp import download_data, DownloadType, upload_data
 from app.properties import Profile
@@ -5,16 +7,10 @@ from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, get_message
 
 
-def show_download_dialog(transient, options, open_data, profile=Profile.ENIGMA_2):
-    dialog = DownloadDialog(transient, options, open_data, profile)
-    dialog.run()
-    dialog.destroy()
-
-
 class DownloadDialog:
-    def __init__(self, transient, properties, open_data, profile):
+    def __init__(self, transient, properties, open_data_callback, profile=Profile.ENIGMA_2):
         self._properties = properties
-        self._open_data = open_data
+        self._open_data_callback = open_data_callback
         self._profile = profile
 
         handlers = {"on_receive": self.on_receive,
@@ -39,6 +35,10 @@ class DownloadDialog:
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
         if profile is Profile.NEUTRINO_MP:
             self._webtv_radio_button.set_visible(True)
+
+    def show(self):
+        self._dialog.run()
+        self._dialog.destroy()
 
     @run_idle
     def on_receive(self, item):
@@ -68,7 +68,7 @@ class DownloadDialog:
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
 
-    @run_idle
+    @run_task
     def download(self, download, d_type):
         """ Download/upload data from/to receiver """
         try:
@@ -86,7 +86,7 @@ class DownloadDialog:
             self.show_info_message(message, Gtk.MessageType.ERROR)
         else:
             if download and d_type is not DownloadType.SATELLITES:
-                self._open_data()
+                GLib.idle_add(self._open_data_callback)
 
     @run_idle
     def show_info_message(self, text, message_type):

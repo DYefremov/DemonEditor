@@ -18,7 +18,7 @@ from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDial
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
-from .download_dialog import show_download_dialog
+from .download_dialog import DownloadDialog
 from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection
@@ -1017,10 +1017,10 @@ class MainAppWindow:
             self.on_play_stream()
 
     def on_download(self, item):
-        show_download_dialog(transient=self._main_window,
-                             options=self._options.get(self._profile),
-                             open_data=self.open_data,
-                             profile=Profile(self._profile))
+        DownloadDialog(transient=self._main_window,
+                       properties=self._options.get(self._profile),
+                       open_data_callback=self.open_data,
+                       profile=Profile(self._profile)).show()
 
     def on_view_focus(self, view, focus_event):
         profile = Profile(self._profile)

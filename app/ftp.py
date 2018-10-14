@@ -59,7 +59,6 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
             callback()
 
 
-@run_task
 def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
                 callback=None):
     data_path = properties["data_dir_path"]
