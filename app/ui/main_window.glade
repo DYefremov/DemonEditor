@@ -2541,6 +2541,7 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkMenu" id="services_popup_menu">
     <property name="visible">True</property>
+    <property name="sensitive">False</property>
     <property name="can_focus">False</property>
     <child>
       <object class="GtkImageMenuItem" id="services_to_fav_end_move_popup_item">
@@ -2556,7 +2557,6 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="services_to_fav_move_popup_item">
         <property name="label">gtk-goto-first</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -2573,7 +2573,6 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="services_create_bouquet_popup_item">
         <property name="label" translatable="yes">Create bouquet</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="image">new_image</property>
         <property name="use_stock">False</property>
@@ -2661,7 +2660,6 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="services_copy_popup_item">
         <property name="label">gtk-copy</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
@@ -2672,7 +2670,6 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="services_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="resize_mode">immediate</property>
         <property name="use_underline">True</property>
@@ -2699,7 +2696,6 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="services_picon_popup_item">
         <property name="label" translatable="yes">Picon</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="image">insert_image_2</property>
         <property name="use_stock">False</property>
@@ -2757,7 +2753,6 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="services_remove_popup_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
-        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>

@@ -38,14 +38,12 @@ class MainAppWindow:
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
 
     # dynamically active elements depending on the selected view
-    _SERVICE_ELEMENTS = ("services_to_fav_move_popup_item", "services_edit_popup_item", "services_copy_popup_item",
-                         "services_picon_popup_item", "services_create_bouquet_popup_item")
+    _SERVICE_ELEMENTS = ("services_popup_menu",)
 
     _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouquets_edit_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
 
-    _COMMONS_ELEMENTS = ("edit_tool_button", "services_remove_popup_item", "bouquets_remove_popup_item",
-                         "fav_remove_popup_item")
+    _COMMONS_ELEMENTS = ("edit_tool_button", "bouquets_remove_popup_item", "fav_remove_popup_item")
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
@@ -57,16 +55,12 @@ class MainAppWindow:
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
-    _DYNAMIC_ELEMENTS = ("services_create_bouquet_popup_item", "new_tool_button", "edit_tool_button",
-                         "services_to_fav_move_popup_item", "services_edit_popup_item", "locked_tool_button",
-                         "services_remove_popup_item", "fav_cut_popup_item", "fav_paste_popup_item",
-                         "bouquets_new_popup_item", "bouquets_edit_popup_item", "services_remove_popup_item",
-                         "bouquets_remove_popup_item", "fav_remove_popup_item", "hide_tool_button",
+    _DYNAMIC_ELEMENTS = ("services_popup_menu", "new_tool_button", "edit_tool_button", "locked_tool_button",
+                         "fav_cut_popup_item", "fav_paste_popup_item", "bouquets_new_popup_item", "hide_tool_button",
+                         "bouquets_remove_popup_item", "fav_remove_popup_item", "bouquets_edit_popup_item",
                          "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
-                         "fav_locate_popup_item", "services_copy_popup_item", "services_picon_popup_item",
-                         "fav_picon_popup_item", "services_add_new_popup_item", "fav_iptv_popup_item",
-                         "fav_copy_popup_item", "bouquets_cut_popup_item", "bouquets_copy_popup_item",
-                         "bouquets_paste_popup_item")
+                         "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
+                         "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
 
     def __init__(self):
         handlers = {"on_close_app": self.on_close_app,
@@ -523,7 +517,6 @@ class MainAppWindow:
             path.append_index(mod_len - 1 if mod_len > 0 else 1)
             self.receive_selection(view=self._fav_view, drop_info=(path, pos), data=selection)
             if mod_len > 0:
-
                 scroll_to(mod_len, self._fav_view)
 
     @run_with_delay(1)
@@ -1004,7 +997,7 @@ class MainAppWindow:
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_new_bouquet(view)
         elif ctrl and key == Gdk.KEY_BackSpace and model_name == self._SERVICE_LIST_NAME:
-                self.on_to_fav_end_copy(view)
+            self.on_to_fav_end_copy(view)
         elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
             self.on_data_save()
         elif ctrl and key == Gdk.KEY_l or key == Gdk.KEY_L:
@@ -1073,7 +1066,7 @@ class MainAppWindow:
         for elem in self._COMMONS_ELEMENTS:
             self._tool_elements[elem].set_sensitive(not_empty)
 
-        self._tool_elements["services_add_new_popup_item"].set_sensitive(len(self._bouquets_model))
+        # self._tool_elements["services_add_new_popup_item"].set_sensitive(len(self._bouquets_model))
 
     def on_hide(self, item):
         self.set_service_flags(Flag.HIDE)
