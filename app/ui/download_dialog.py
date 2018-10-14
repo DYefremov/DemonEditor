@@ -19,7 +19,7 @@ class DownloadDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("download_dialog",))
+        builder.add_from_file(UI_RESOURCES_PATH + "download_dialog.glade")
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("download_dialog")

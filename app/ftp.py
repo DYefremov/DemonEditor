@@ -7,7 +7,7 @@ from telnetlib import Telnet
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from app.commons import log, run_task
+from app.commons import log
 from app.properties import Profile
 
 __DATA_FILES_LIST = ("tv", "radio", "lamedb", "lamedb5", "blacklist", "whitelist",  # enigma 2
