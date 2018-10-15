@@ -1324,8 +1324,18 @@ class MainAppWindow:
         self._filter_sat_positions_box.set_active(0)
 
     def update_sat_positions(self):
+        """ Updates positions values for the filtering function """
         self._sat_positions.clear()
-        self._sat_positions.extend(map(str, sorted({float(x.pos) for x in self._services.values() if x.pos})))
+        sat_positions = set()
+        terrestrial = False
+        for srv in self._services.values():
+            if srv.transponder_type == "s" and srv.pos:
+                sat_positions.add(float(srv.pos))
+            elif srv.transponder_type == "t":
+                terrestrial = True
+        if terrestrial:
+            self._sat_positions.append("T")
+        self._sat_positions.extend(map(str, sorted(sat_positions)))
         if self._filter_bar.is_visible():
             self.update_filter_sat_positions()
 

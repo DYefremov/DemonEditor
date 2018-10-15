@@ -191,12 +191,16 @@ class ServiceDetailsDialog:
         self._package_entry.set_text(srv.package)
         self._sid_entry.set_text(str(int(srv.ssid, 16)))
         # Transponder
+        tr_type = srv.transponder_type
         self._freq_entry.set_text(srv.freq)
         self._rate_entry.set_text(srv.rate)
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
         self.select_active_text(self._sys_combo_box, srv.system)
-        self.set_sat_positions(srv.pos)
+        if tr_type == "t" and self._profile is Profile.ENIGMA_2:
+            self.update_ui_for_terrestrial()
+        else:
+            self.set_sat_positions(srv.pos)
 
         if self._profile is Profile.ENIGMA_2:
             self.init_enigma2_service_data(srv)
@@ -343,6 +347,10 @@ class ServiceDetailsDialog:
         self._dialog.destroy()
 
     def on_edit(self):
+        if self._old_service.transponder_type == "t":
+            show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+            return
+
         fav_id, data_id = self.get_srv_data()
         # transponder
         transponder = self._old_service.transponder
@@ -597,6 +605,16 @@ class ServiceDetailsDialog:
             self._reference_entry.set_text(ref)
         else:
             self._reference_entry.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
+
+    def update_ui_for_terrestrial(self):
+        self._pids_grid.set_visible(False)
+        tr_grid = self._builder.get_object("tr_grid")
+        tr_grid.remove_column(0)
+        tr_grid.remove_column(1)
+        tr_grid.remove_column(1)
+        self._builder.get_object("tr_extra_expander").set_visible(False)
+        self._builder.get_object("srv_separator").set_visible(False)
+        self._namespace_entry.set_hexpand(True)
 
 
 class TransponderServicesDialog:
