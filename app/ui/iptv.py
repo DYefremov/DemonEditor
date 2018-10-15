@@ -66,7 +66,7 @@ class IptvDialog:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
         if profile is Profile.NEUTRINO_MP:
-            builder.get_object("iptv_data_box").set_visible(False)
+            builder.get_object("iptv_dialog_ts_data_frame").set_visible(False)
             builder.get_object("iptv_type_label").set_visible(False)
             builder.get_object("reference_entry").set_visible(False)
             builder.get_object("iptv_reference_label").set_visible(False)
