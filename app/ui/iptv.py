@@ -1,4 +1,5 @@
 import re
+from urllib.error import HTTPError
 
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -216,7 +217,7 @@ class SearchUnavailableDialog:
         self._download_task = True
         self._to_delete = []
 
-        self.update_process()
+        self.update_counter()
         self.do_search()
 
     @run_task
@@ -239,9 +240,15 @@ class SearchUnavailableDialog:
             req = Request(get_iptv_url(row, self._profile))
             self.update_bar()
             urlopen(req, timeout=2)
+        except HTTPError as e:
+            if e.code != 403:
+                self.append_data(row)
         except Exception:
-            self._to_delete.append(self._model.get_iter(row.path))
-            self.update_process()
+            self.append_data(row)
+
+    def append_data(self, row):
+        self._to_delete.append(self._model.get_iter(row.path))
+        self.update_counter()
 
     @run_idle
     def update_bar(self):
@@ -249,7 +256,7 @@ class SearchUnavailableDialog:
         self._level_bar.set_value(self._max_rows)
 
     @run_idle
-    def update_process(self):
+    def update_counter(self):
         self._counter += 1
         self._counter_label.set_text(str(self._counter))
 
