@@ -798,6 +798,7 @@ class MainAppWindow:
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
+        profile = Profile(self._profile)
         path = self._options.get(self._profile).get("data_dir_path")
         backup_path = path + "backup/"
         os.makedirs(os.path.dirname(backup_path), exist_ok=True)
@@ -817,11 +818,11 @@ class MainAppWindow:
                     bq_name, locked, hidden, bq_type = model.get(bq_itr, 0, 1, 2, 3)
                     bq_id = "{}:{}".format(bq_name, bq_type)
                     favs = self._bouquets[bq_id]
-                    ex_srvs = self._extra_bouquets.get(bq_id)
-                    # Don't repeat so! Please! :)
-                    bq_srvs = list(map(lambda s: s._replace(service=ex_srvs.get(s.fav_id, None) if ex_srvs else None),
-                                       filter(None, [self._services.get(f_id, None) for f_id in favs])))
-                    bq = Bouquet(bq_name, bq_type, bq_srvs, locked, hidden)
+                    ex_s = self._extra_bouquets.get(bq_id)
+                    bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
+                    if profile is Profile.ENIGMA_2:
+                        bq_s = list(map(lambda s: s._replace(service=ex_s.get(s.fav_id, None) if ex_s else None), bq_s))
+                    bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden)
                     bqs.append(bq)
             if len(b_path) == 1:
                 bouquets.append(Bouquets(*model.get(itr, 0, 3), bqs if bqs else []))
@@ -1180,7 +1181,7 @@ class MainAppWindow:
         prf = Profile(self._profile)
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
         if response:
-            self.remove_favs(response, self._fav_model)
+            next(self.remove_favs(response, self._fav_model), False)
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
@@ -1200,7 +1201,7 @@ class MainAppWindow:
             for ch in channels:
                 self._services[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
-            self.update_bouquet_services(self._fav_model, None, bq_selected)
+            next(self.update_bouquet_services(self._fav_model, None, bq_selected), False)
 
     # ***************** Player *********************#
 
