@@ -9,6 +9,7 @@ from app.commons import run_idle, run_task
 from app.ftp import upload_data, DownloadType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
+from app.tools.satellites import SatellitesParser, SatelliteSource
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, append_text_to_tview
@@ -34,7 +35,9 @@ class PiconsDialog:
                     "on_url_changed": self.on_url_changed,
                     "on_position_edited": self.on_position_edited,
                     "on_notebook_switch_page": self.on_notebook_switch_page,
-                    "on_convert": self.on_convert}
+                    "on_convert": self.on_convert,
+                    "on_satellites_view_realize": self.on_satellites_view_realize,
+                    "on_satellite_selection": self.on_satellite_selection}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -44,6 +47,7 @@ class PiconsDialog:
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)
         self._providers_tree_view = builder.get_object("providers_tree_view")
+        self._satellites_tree_view = builder.get_object("satellites_tree_view")
         self._expander = builder.get_object("expander")
         self._text_view = builder.get_object("text_view")
         self._info_bar = builder.get_object("info_bar")
@@ -87,6 +91,23 @@ class PiconsDialog:
     def show(self):
         self._dialog.run()
         self._dialog.destroy()
+
+    def on_satellites_view_realize(self, view):
+        gen = self.append_satellites(view)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def append_satellites(self, view):
+        model = view.get_model()
+        yield True
+        sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
+        for sat in sats:
+            s = "{} ({})".format(sat[0], sat[1])
+            model.append((s, sat[3]))
+            yield True
+
+    def on_satellite_selection(self, view, path, column):
+        model = view.get_model()
+        self._url_entry.set_text(model.get(model.get_iter(path), 1)[0])
 
     @run_idle
     def on_load_providers(self, item):
