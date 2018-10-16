@@ -514,8 +514,11 @@ class MainAppWindow:
             pos = Gtk.TreeViewDropPosition.AFTER
             path = Gtk.TreePath.new()
             mod_len = len(self._fav_model)
-            path.append_index(mod_len - 1 if mod_len > 0 else 1)
-            self.receive_selection(view=self._fav_view, drop_info=(path, pos), data=selection)
+            info = None
+            if mod_len > 0:
+                path.append_index(mod_len - 1)
+                info = (path, pos)
+            self.receive_selection(view=self._fav_view, drop_info=info, data=selection)
             if mod_len > 0:
                 scroll_to(mod_len, self._fav_view)
 
