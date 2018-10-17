@@ -12,7 +12,7 @@ from app.properties import Profile
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 from .dialogs import show_dialog, DialogType, get_message
-from .main_helper import update_entry_data, append_text_to_tview
+from .main_helper import update_entry_data, append_text_to_tview, scroll_to
 
 
 class PiconsDialog:
@@ -21,6 +21,7 @@ class PiconsDialog:
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
+        self._POS_PATTERN = re.compile("^\d+\.\d+[EW]?$")
         self._current_process = None
         self._terminate = False
 
@@ -149,11 +150,17 @@ class PiconsDialog:
         self._terminate = False
         self._expander.set_expanded(True)
 
-        providers = self.get_selected_providers()
+        prvs = self.get_selected_providers()
+        providers = list(filter(lambda p: p[2] is not None, prvs))
+        services = list(filter(lambda s: s[2] is None, prvs))
+        if services:
+            self.show_info_message(get_message("Not implemented yet for the single channels!"), Gtk.MessageType.ERROR)
+            return
         for prv in providers:
-            if not prv[2] and prv[2][:-2].isdigit():
+            if not self._POS_PATTERN.match(prv[2]):
                 self.show_info_message(
                     get_message("Specify the correct position value for the provider!"), Gtk.MessageType.ERROR)
+                scroll_to(prv.path, self._providers_tree_view)
                 return
 
         for prv in providers:

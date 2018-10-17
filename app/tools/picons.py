@@ -114,6 +114,7 @@ class ProviderParser(HTMLParser):
     def __init__(self, entities=False, separator=' '):
 
         HTMLParser.__init__(self)
+        self.convert_charrefs = False
 
         self._ON_ID_BLACK_LIST = ("65535", "?", "0", "1")
         self._parse_html_entities = entities
@@ -177,6 +178,11 @@ class ProviderParser(HTMLParser):
                 if name + on_id not in self._prv_names:
                     self._prv_names.add(name + on_id)
                     self.rows.append(Provider(logo=r[2], name=name, pos=r[0], url=r[6], on_id=r[-2], selected=True))
+            elif 6 < len_row < 10:
+                if r[0].startswith("http"):
+                    self.rows.append(Provider(logo=None, name=r[1], pos=None, url=r[0], on_id=None, selected=False))
+                elif r[1].startswith("http"):
+                    self.rows.append(Provider(logo=None, name=r[2], pos=None, url=r[1], on_id=None, selected=False))
 
             self._current_row = []
 
