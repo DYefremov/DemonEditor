@@ -12,19 +12,20 @@ from app.properties import Profile
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{:X}0000"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
 
-Provider = namedtuple("Provider", ["logo", "name", "pos", "url", "on_id", "selected"])
+Provider = namedtuple("Provider", ["logo", "name", "pos", "url", "on_id", "ssid", "single", "selected"])
 Picon = namedtuple("Picon", ["ref", "ssid", "v_pid"])
 
 
 class PiconsParser(HTMLParser):
     """ Parser for package html page. (https://www.lyngsat.com/packages/*provider-name*.html) """
 
-    def __init__(self, entities=False, separator=' '):
+    def __init__(self, entities=False, separator=' ', single=None):
 
         HTMLParser.__init__(self)
 
         self._parse_html_entities = entities
         self._separator = separator
+        self._single = single
         self._is_td = False
         self._is_th = False
         self._current_row = []
@@ -57,16 +58,20 @@ class PiconsParser(HTMLParser):
         elif tag == 'tr':
             row = self._current_row
             ln = len(row)
-            if 9 < ln < 13:
-                url = None
-                if row[0].startswith("../logo/"):
-                    url = row[0]
-                elif row[1].startswith("../logo/"):
-                    url = row[1]
 
-                ssid = row[-4]
-                if url and len(ssid) > 2:
-                    self.picons.append(Picon(url, ssid, row[-3]))
+            if self._single and ln == 4 and row[0].startswith("../../logo/"):
+                self.picons.append(Picon(row[0].strip("../"), "0", "0"))
+            else:
+                if 9 < ln < 13:
+                    url = None
+                    if row[0].startswith("../logo/"):
+                        url = row[0]
+                    elif row[1].startswith("../logo/"):
+                        url = row[1]
+
+                    ssid = row[-4]
+                    if url and len(ssid) > 2:
+                        self.picons.append(Picon(url, ssid, row[-3]))
 
             self._current_row = []
 
@@ -74,9 +79,11 @@ class PiconsParser(HTMLParser):
         pass
 
     @staticmethod
-    def parse(open_path, picons_path, tmp_path, on_id, pos, picon_ids, profile=Profile.ENIGMA_2):
+    def parse(open_path, picons_path, tmp_path, provider, picon_ids, profile=Profile.ENIGMA_2):
         with open(open_path, encoding="utf-8", errors="replace") as f:
-            parser = PiconsParser()
+            on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
+            pos = "".join(c for c in pos if c.isdigit())
+            parser = PiconsParser(single=single)
             parser.reset()
             parser.feed(f.read())
             picons = parser.picons
@@ -84,15 +91,18 @@ class PiconsParser(HTMLParser):
                 os.makedirs(picons_path, exist_ok=True)
                 for p in picons:
                     try:
-                        name = PiconsParser.format(p.ssid, on_id, p.v_pid, pos, picon_ids, profile)
+                        name = None
+                        if not single:
+                            name = PiconsParser.format(p.ssid, on_id, pos, picon_ids, profile)
                         p_name = picons_path + (name if name else os.path.basename(p.ref))
                         shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
                     except (TypeError, ValueError) as e:
-                        log("Picons format parse error: {}".format(p) + "\n" + str(e))
-                        print(e)
+                        msg = "Picons format parse error: {}".format(p) + "\n" + str(e)
+                        # log(msg)
+                        print(msg)
 
     @staticmethod
-    def format(ssid, on_id, v_pid, pos, picon_ids, profile: Profile):
+    def format(ssid, on_id, pos, picon_ids, profile: Profile):
         tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
         if profile is Profile.ENIGMA_2:
             return picon_ids.get(_ENIGMA2_PICON_KEY.format(int(ssid), int(on_id), int(pos)), None)
@@ -168,6 +178,7 @@ class ProviderParser(HTMLParser):
             len_row = len(r)
 
             if len_row == 12:
+                # Providers
                 name = r[5]
                 self._prv_names.add(name)
                 on_id, sep, tid = str(r[-2]).partition("-")
@@ -177,12 +188,18 @@ class ProviderParser(HTMLParser):
                     r[0] = self._positon
                 if name + on_id not in self._prv_names:
                     self._prv_names.add(name + on_id)
-                    self.rows.append(Provider(logo=r[2], name=name, pos=r[0], url=r[6], on_id=r[-2], selected=True))
+                    self.rows.append(Provider(logo=r[2], name=name, pos=self._positon, url=r[6], on_id=r[-2], ssid=None,
+                                              single=False, selected=True))
             elif 6 < len_row < 10:
+                # Single services
+                name, url, ssid = None, None, None
                 if r[0].startswith("http"):
-                    self.rows.append(Provider(logo=None, name=r[1], pos=None, url=r[0], on_id=None, selected=False))
+                    name, url, ssid = r[1], r[0], r[4]
                 elif r[1].startswith("http"):
-                    self.rows.append(Provider(logo=None, name=r[2], pos=None, url=r[1], on_id=None, selected=False))
+                    name, url, ssid = r[2], r[1], r[5]
+                if name and url:
+                    self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=None, ssid=ssid,
+                                              single=True, selected=False))
 
             self._current_row = []
 

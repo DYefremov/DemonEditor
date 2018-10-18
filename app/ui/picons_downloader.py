@@ -130,7 +130,7 @@ class PiconsDialog:
         providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
         if providers:
             for p in providers:
-                model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, p.name, p.pos, p.url, p.on_id, p.selected))
+                model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
         self.update_receive_button_state()
 
     def get_pixbuf(self, img_url):
@@ -150,12 +150,7 @@ class PiconsDialog:
         self._terminate = False
         self._expander.set_expanded(True)
 
-        prvs = self.get_selected_providers()
-        providers = list(filter(lambda p: p[2] is not None, prvs))
-        services = list(filter(lambda s: s[2] is None, prvs))
-        if services:
-            self.show_info_message(get_message("Not implemented yet for the single channels!"), Gtk.MessageType.ERROR)
-            return
+        providers = self.get_selected_providers()
         for prv in providers:
             if not self._POS_PATTERN.match(prv[2]):
                 self.show_info_message(
@@ -177,10 +172,8 @@ class PiconsDialog:
                                                  universal_newlines=True)
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
         self._current_process.wait()
-        path = self._TMP_DIR + self._BASE_URL + url[url.rfind("/") + 1:]
-        pos = "".join(c for c in prv.pos if c.isdigit())
-        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv.on_id, pos,
-                           self._picon_ids, self.get_picons_format())
+        path = self._TMP_DIR + (url[url.find("//") + 2:] if prv.single else self._BASE_URL + url[url.rfind("/") + 1:])
+        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv, self._picon_ids, self.get_picons_format())
         self.resize(self._picons_path)
         if not self._terminate:
             self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
@@ -259,7 +252,7 @@ class PiconsDialog:
     @run_idle
     def on_selected_toggled(self, toggle, path):
         model = self._providers_tree_view.get_model()
-        model.set_value(model.get_iter(path), 5, not toggle.get_active())
+        model.set_value(model.get_iter(path), 7, not toggle.get_active())
         self.update_receive_button_state()
 
     def on_url_changed(self, entry):
@@ -305,7 +298,7 @@ class PiconsDialog:
 
     def get_selected_providers(self):
         """ returns selected providers """
-        return [r for r in self._providers_tree_view.get_model() if r[5]]
+        return [r for r in self._providers_tree_view.get_model() if r[7]]
 
     @run_idle
     def show_dialog(self, message, dialog_type):
