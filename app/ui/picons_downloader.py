@@ -1,4 +1,6 @@
+import os
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -94,16 +96,19 @@ class PiconsDialog:
         self._dialog.destroy()
 
     def on_satellites_view_realize(self, view):
-        gen = self.append_satellites(view)
+        self.get_satellites(view)
+
+    @run_task
+    def get_satellites(self, view):
+        sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
+        gen = self.append_satellites(view.get_model(), sats)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def append_satellites(self, view):
-        model = view.get_model()
-        yield True
-        sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
+    def append_satellites(self, model, sats):
         for sat in sats:
             s = "{} ({})".format(sat[0], sat[1])
-            model.append((s, sat[3]))
+            if not self._terminate and model:
+                model.append((s, sat[3]))
             yield True
 
     def on_satellite_selection(self, view, path, column):
@@ -214,7 +219,9 @@ class PiconsDialog:
     @run_idle
     def on_close(self, item):
         self.on_cancel(item)
-        self._dialog.destroy()
+        path = self._TMP_DIR + "www.lyngsat.com"
+        if os.path.exists(path):
+            shutil.rmtree(path)
 
     def on_send(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:

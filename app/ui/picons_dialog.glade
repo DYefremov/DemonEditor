@@ -93,7 +93,7 @@ Author: Dmitriy Yefremov
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">emblem-photos</property>
     <property name="type_hint">dialog</property>
-    <signal name="close" handler="on_close" swapped="no"/>
+    <signal name="destroy" handler="on_close" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
         <property name="visible">True</property>
@@ -498,6 +498,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="single_column">
+                                        <property name="visible">False</property>
                                         <property name="title" translatable="yes">Single</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="single_cellrenderertext"/>
