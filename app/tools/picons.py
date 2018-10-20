@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from app.commons import run_task
 from app.properties import Profile
 
-_ENIGMA2_PICON_KEY = "{:X}:{:X}:{:X}0000"
+_ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
 
 Provider = namedtuple("Provider", ["logo", "name", "pos", "url", "on_id", "ssid", "single", "selected"])
@@ -82,7 +82,11 @@ class PiconsParser(HTMLParser):
     def parse(open_path, picons_path, tmp_path, provider, picon_ids, profile=Profile.ENIGMA_2):
         with open(open_path, encoding="utf-8", errors="replace") as f:
             on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
-            pos = "".join(c for c in pos if c.isdigit())
+            neg_pos = pos.endswith("W")
+            pos = int("".join(c for c in pos if c.isdigit()))
+            # For negative (West) positions 3600 - numeric position value!!!
+            if neg_pos:
+                pos = 3600 - pos
             parser = PiconsParser(single=single)
             parser.reset()
             parser.feed(f.read())
@@ -91,7 +95,12 @@ class PiconsParser(HTMLParser):
                 os.makedirs(picons_path, exist_ok=True)
                 for p in picons:
                     try:
-                        name = PiconsParser.format(ssid if single else p.ssid, on_id, pos, picon_ids, profile)
+                        if single:
+                            on_id, freq = on_id.strip().split("::")
+                            namespace = "{:X}{:X}".format(int(pos), int(freq))
+                        else:
+                            namespace = "{:X}0000".format(int(pos))
+                        name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, profile)
                         p_name = picons_path + (name if name else os.path.basename(p.ref))
                         shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
                     except (TypeError, ValueError) as e:
@@ -100,9 +109,9 @@ class PiconsParser(HTMLParser):
                         print(msg)
 
     @staticmethod
-    def format(ssid, on_id, pos, picon_ids, profile: Profile):
+    def format(ssid, on_id, namespace, picon_ids, profile: Profile):
         if profile is Profile.ENIGMA_2:
-            return picon_ids.get(_ENIGMA2_PICON_KEY.format(int(ssid), int(on_id), int(pos)), None)
+            return picon_ids.get(_ENIGMA2_PICON_KEY.format(int(ssid), int(on_id), namespace), None)
         elif profile is Profile.NEUTRINO_MP:
             tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
             return _NEUTRINO_PICON_KEY.format(tr_id, int(on_id), int(ssid))
@@ -114,7 +123,8 @@ class ProviderParser(HTMLParser):
     """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
 
     _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
-    _ONID_TID_PATTERN = re.compile("^\d+-\d+$")
+    _ONID_TID_PATTERN = re.compile("^\d+-\d+.*")
+    _TRANSPONDER_FREQUENCY_PATTERN = re.compile("^\d+ [HVLR]+")
     _DOMAIN = "https://www.lyngsat.com"
     _TV_DOMAIN = _DOMAIN + "/tvchannels/"
     _RADIO_DOMAIN = _DOMAIN + "/radiochannels/"
@@ -125,7 +135,6 @@ class ProviderParser(HTMLParser):
         HTMLParser.__init__(self)
         self.convert_charrefs = False
 
-        self._ON_ID_BLACK_LIST = ("65535", "?", "0", "1")
         self._parse_html_entities = entities
         self._separator = separator
         self._is_td = False
@@ -139,6 +148,7 @@ class ProviderParser(HTMLParser):
         self._prv_names = set()
         self._positon = None
         self._on_id = None
+        self._freq = None
 
     def handle_starttag(self, tag, attrs):
         if tag == 'td':
@@ -162,8 +172,9 @@ class ProviderParser(HTMLParser):
         if self._is_td or self._is_th:
             self._current_cell.append(data.strip())
         if self._is_onid_tid:
-            if self._ONID_TID_PATTERN.match(data):
-                self._on_id, sep, tid = data.partition("-")
+            m = self._ONID_TID_PATTERN.match(data)
+            if m:
+                self._on_id, tid = m.group().split("-")
             self._is_onid_tid = False
 
     def handle_endtag(self, tag):
@@ -185,20 +196,26 @@ class ProviderParser(HTMLParser):
                     self._positon = "".join(c for c in str(pos) if c.isdigit() or c in ".EW")
 
             len_row = len(r)
+            if len_row > 2:
+                m = self._TRANSPONDER_FREQUENCY_PATTERN.match(r[1])
+                if m:
+                    self._freq = m.group().split()[0]
 
             if len_row == 12:
                 # Providers
                 name = r[5]
                 self._prv_names.add(name)
-                on_id, sep, tid = str(r[-2]).partition("-")
-                if tid and on_id not in self._ON_ID_BLACK_LIST and on_id not in self._ids:
-                    r[-2] = on_id
-                    self._ids.add(on_id)
-                    r[0] = self._positon
-                if name + on_id not in self._prv_names:
-                    self._prv_names.add(name + on_id)
-                    self.rows.append(Provider(logo=r[2], name=name, pos=self._positon, url=r[6], on_id=r[-2], ssid=None,
-                                              single=False, selected=True))
+                m = self._ONID_TID_PATTERN.match(str(r[-2]))
+                if m:
+                    on_id, tid = m.group().split("-")
+                    if on_id not in self._ids:
+                        r[-2] = on_id
+                        self._ids.add(on_id)
+                        r[0] = self._positon
+                    if name + on_id not in self._prv_names:
+                        self._prv_names.add(name + on_id)
+                        self.rows.append(Provider(logo=r[2], name=name, pos=self._positon, url=r[6], on_id=on_id,
+                                                  ssid=None, single=False, selected=True))
             elif 6 < len_row < 10:
                 # Single services
                 name, url, ssid = None, None, None
@@ -206,8 +223,10 @@ class ProviderParser(HTMLParser):
                     name, url, ssid = r[1], r[0], r[4]
                 elif r[1].startswith("http"):
                     name, url, ssid = r[2], r[1], r[5]
+
                 if name and url:
-                    self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=self._on_id,
+                    on_id = "{}::{}".format(self._on_id if self._on_id else "1", self._freq)
+                    self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=on_id,
                                               ssid=ssid, single=True, selected=False))
 
             self._current_row = []
