@@ -6,7 +6,7 @@ import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
-from app.commons import log, run_task
+from app.commons import run_task
 from app.properties import Profile
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{:X}0000"
@@ -91,9 +91,7 @@ class PiconsParser(HTMLParser):
                 os.makedirs(picons_path, exist_ok=True)
                 for p in picons:
                     try:
-                        name = None
-                        if not single:
-                            name = PiconsParser.format(p.ssid, on_id, pos, picon_ids, profile)
+                        name = PiconsParser.format(ssid if single else p.ssid, on_id, pos, picon_ids, profile)
                         p_name = picons_path + (name if name else os.path.basename(p.ref))
                         shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
                     except (TypeError, ValueError) as e:
@@ -103,10 +101,10 @@ class PiconsParser(HTMLParser):
 
     @staticmethod
     def format(ssid, on_id, pos, picon_ids, profile: Profile):
-        tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
         if profile is Profile.ENIGMA_2:
             return picon_ids.get(_ENIGMA2_PICON_KEY.format(int(ssid), int(on_id), int(pos)), None)
         elif profile is Profile.NEUTRINO_MP:
+            tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
             return _NEUTRINO_PICON_KEY.format(tr_id, int(on_id), int(ssid))
         else:
             return "{}.png".format(ssid)
@@ -116,6 +114,7 @@ class ProviderParser(HTMLParser):
     """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
 
     _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
+    _ONID_TID_PATTERN = re.compile("^\d+-\d+$")
     _DOMAIN = "https://www.lyngsat.com"
     _TV_DOMAIN = _DOMAIN + "/tvchannels/"
     _RADIO_DOMAIN = _DOMAIN + "/radiochannels/"
@@ -131,6 +130,7 @@ class ProviderParser(HTMLParser):
         self._separator = separator
         self._is_td = False
         self._is_th = False
+        self._is_onid_tid = False
         self._is_provider = False
         self._current_row = []
         self._current_cell = []
@@ -138,6 +138,7 @@ class ProviderParser(HTMLParser):
         self._ids = set()
         self._prv_names = set()
         self._positon = None
+        self._on_id = None
 
     def handle_starttag(self, tag, attrs):
         if tag == 'td':
@@ -151,11 +152,19 @@ class ProviderParser(HTMLParser):
             url = attrs[0][1]
             if url.startswith((self._PKG_DOMAIN, self._TV_DOMAIN, self._RADIO_DOMAIN)):
                 self._current_row.append(url)
+        if tag == "font" and len(attrs) == 1:
+            atr = attrs[0]
+            if len(atr) == 2 and atr[1] == "darkgreen":
+                self._is_onid_tid = True
 
     def handle_data(self, data):
         """ Save content to a cell """
         if self._is_td or self._is_th:
             self._current_cell.append(data.strip())
+        if self._is_onid_tid:
+            if self._ONID_TID_PATTERN.match(data):
+                self._on_id, sep, tid = data.partition("-")
+            self._is_onid_tid = False
 
     def handle_endtag(self, tag):
         if tag == 'td':
@@ -198,8 +207,8 @@ class ProviderParser(HTMLParser):
                 elif r[1].startswith("http"):
                     name, url, ssid = r[2], r[1], r[5]
                 if name and url:
-                    self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=None, ssid=ssid,
-                                              single=True, selected=False))
+                    self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=self._on_id,
+                                              ssid=ssid, single=True, selected=False))
 
             self._current_row = []
 
