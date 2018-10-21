@@ -174,6 +174,9 @@ class PiconsDialog:
             if self._terminate:
                 break
             self.process_provider(Provider(*prv))
+        self.resize(self._picons_path)
+        if not self._terminate:
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def process_provider(self, prv):
         url = prv.url
@@ -186,9 +189,6 @@ class PiconsDialog:
         self._current_process.wait()
         path = self._TMP_DIR + (url[url.find("//") + 2:] if prv.single else self._BASE_URL + url[url.rfind("/") + 1:])
         PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv, self._picon_ids, self.get_picons_format())
-        self.resize(self._picons_path)
-        if not self._terminate:
-            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def write_to_buffer(self, fd, condition):
         if condition == GLib.IO_IN:
