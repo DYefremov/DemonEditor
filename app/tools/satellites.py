@@ -76,12 +76,17 @@ class SatellitesParser(HTMLParser):
         self._source = source
 
         for src in SatelliteSource.get_sources(self._source):
-            request = requests.get(url=src, headers=self._HEADERS)
-            reason = request.reason
-            if reason == "OK":
-                self.feed(request.text)
+            try:
+                request = requests.get(url=src, headers=self._HEADERS)
+            except requests.exceptions.ConnectionError as e:
+                print(repr(e))
+                return []
             else:
-                print(reason)
+                reason = request.reason
+                if reason == "OK":
+                    self.feed(request.text)
+                else:
+                    print(reason)
 
         if self._rows:
             if self._source is SatelliteSource.FLYSAT:
@@ -197,8 +202,4 @@ class SatellitesParser(HTMLParser):
 
 
 if __name__ == "__main__":
-    parser = SatellitesParser(source=SatelliteSource.LYNGSAT)
-    satts = parser.get_satellites_list(SatelliteSource.LYNGSAT)
-    if satts:
-        #     list(map(print, satts))
-        print("Parsed: ", len(satts))
+    pass
