@@ -1529,7 +1529,7 @@ class MainAppWindow:
                 data = r[9].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
 
-        dialog = PiconsDialog(self._main_window, self._options, ids, Profile(self._profile))
+        dialog = PiconsDialog(self._main_window, self._options, ids, self._sat_positions, Profile(self._profile))
         dialog.show()
         self.update_picons()
 

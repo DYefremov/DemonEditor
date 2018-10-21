@@ -73,17 +73,42 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="sat_position_list_store">
-    <columns>
-      <!-- column-name pos -->
-      <column type="gchararray"/>
-    </columns>
+  <object class="GtkImage" id="remove_selection_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo</property>
   </object>
-  <object class="GtkListStore" id="satellites_liststore">
+  <object class="GtkMenu" id="providers_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="select_all_popup_item">
+        <property name="label">gtk-select-all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_select_all" object="providers_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="unselect_all_popup_item">
+        <property name="label" translatable="yes">Remove selection</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">remove_selection_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_unselect_all" object="providers_tree_view" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="satellites_list_store">
     <columns>
       <!-- column-name satellite -->
       <column type="gchararray"/>
       <!-- column-name url -->
+      <column type="gchararray"/>
+      <!-- column-name pos -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -328,7 +353,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkTreeView" id="satellites_tree_view">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="model">satellites_liststore</property>
+                                <property name="model">satellites_list_store</property>
                                 <property name="headers_visible">False</property>
                                 <property name="search_column">0</property>
                                 <property name="activate_on_single_click">True</property>
@@ -351,9 +376,25 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="sat_url_column">
+                                    <property name="visible">False</property>
                                     <property name="title" translatable="yes">Url</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="url_cell_renderer"/>
+                                      <attributes>
+                                        <attribute name="text">1</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="sat_pos_columnt">
+                                    <property name="visible">False</property>
+                                    <property name="title" translatable="yes">Pos</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="pos_cell_renderer"/>
+                                      <attributes>
+                                        <attribute name="text">2</attribute>
+                                      </attributes>
                                     </child>
                                   </object>
                                 </child>
@@ -423,6 +464,8 @@ Author: Dmitriy Yefremov
                                     <property name="can_focus">True</property>
                                     <property name="has_focus">True</property>
                                     <property name="model">providers_list_store</property>
+                                    <signal name="button-press-event" handler="on_popup_menu" object="providers_popup_menu" swapped="no"/>
+                                    <signal name="select-all" handler="on_select_all" swapped="no"/>
                                     <child internal-child="selection">
                                       <object class="GtkTreeSelection" id="treeview_selection"/>
                                     </child>
@@ -476,6 +519,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="on_id_column">
+                                        <property name="visible">False</property>
                                         <property name="title" translatable="yes">ONID</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="onid_cellrenderertext"/>
@@ -487,6 +531,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="ssid_column">
+                                        <property name="visible">False</property>
                                         <property name="title" translatable="yes">SSID</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="ssid_cellrenderertext"/>
