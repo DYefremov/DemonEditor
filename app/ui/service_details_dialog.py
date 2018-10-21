@@ -347,24 +347,24 @@ class ServiceDetailsDialog:
         self._dialog.destroy()
 
     def on_edit(self):
-        if self._old_service.transponder_type == "t":
-            show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
-            return
-
         fav_id, data_id = self.get_srv_data()
         # transponder
         transponder = self._old_service.transponder
+        tr_type = self._old_service.transponder_type
         if self._tr_edit_switch.get_active():
-            transponder = self.get_transponder_data()
+            transponder = self.get_transponder_data(tr_type)
             if self._transponder_services_iters:
-                self.update_transponder_services(transponder)
-        service = self.get_service(fav_id, data_id, transponder)
+                self.update_transponder_services(transponder, tr_type)
+        # service
+        service = self.get_service(fav_id, data_id, transponder, tr_type)
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
             self.update_bouquets(fav_id, old_fav_id)
         self._services[fav_id] = service
+
         if self._old_service.picon_id != service.picon_id:
             self.update_picon_name(self._old_service.picon_id, service.picon_id)
+
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
         self.update_fav_view(self._old_service, service)
         self._old_service = service
@@ -405,13 +405,12 @@ class ServiceDetailsDialog:
 
     def on_new(self):
         service = self.get_service(*self.get_srv_data(), self.get_transponder_data())
-        print(service)
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
 
-    def get_service(self, fav_id, data_id, transponder):
-        freq, rate, pol, fec, system, pos = self.get_transponder_values()
+    def get_service(self, fav_id, data_id, transponder, tr_type):
+        freq, rate, pol, fec, system, pos = self.get_transponder_values(tr_type)
         return Service(flags_cas=self.get_flags(),
-                       transponder_type="s",
+                       transponder_type=tr_type,
                        coded=CODED_ICON if self._cas_entry.get_text() else None,
                        service=self._name_entry.get_text(),
                        locked=self._old_service.locked,
@@ -489,16 +488,20 @@ class ServiceDetailsDialog:
             fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
             return fav_id, self._old_service.data_id
 
-    def get_transponder_values(self):
-        freq = self._freq_entry.get_text()
-        rate = self._rate_entry.get_text()
-        pol = self._pol_combo_box.get_active_id()
-        fec = self._fec_combo_box.get_active_id()
-        system = self._sys_combo_box.get_active_id()
-        pos = str(round(self._sat_pos_button.get_value(), 1))
-        return freq, rate, pol, fec, system, pos
+    def get_transponder_values(self, tr_type):
+        if tr_type == "s":
+            freq = self._freq_entry.get_text()
+            rate = self._rate_entry.get_text()
+            pol = self._pol_combo_box.get_active_id()
+            fec = self._fec_combo_box.get_active_id()
+            system = self._sys_combo_box.get_active_id()
+            pos = str(round(self._sat_pos_button.get_value(), 1))
+            return freq, rate, pol, fec, system, pos
+        elif tr_type == "t":
+            o_srv = self._old_service
+            return o_srv.freq, o_srv.rate, o_srv.pol, o_srv.fec, o_srv.system, o_srv.pos
 
-    def get_transponder_data(self):
+    def get_transponder_data(self, tr_type):
         sys = self._sys_combo_box.get_active_id()
         freq = self._freq_entry.get_text()
         rate = self._rate_entry.get_text()
@@ -528,10 +531,10 @@ class ServiceDetailsDialog:
             srv_sys = None
             return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
 
-    def update_transponder_services(self, transponder):
+    def update_transponder_services(self, transponder, tr_type):
         for itr in self._transponder_services_iters:
             srv = self._current_model[itr][:]
-            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values()
+            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values(tr_type)
             srv[-1] = transponder
             srv = Service(*srv)
             self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
@@ -561,8 +564,12 @@ class ServiceDetailsDialog:
 
     @run_idle
     def on_tr_edit_toggled(self, switch: Gtk.Switch, active):
-
         if active and self._action is Action.EDIT:
+            if self._old_service.transponder_type == "t":
+                show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+                switch.set_active(False)
+                return
+
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
                                                  self._current_model,
@@ -615,6 +622,7 @@ class ServiceDetailsDialog:
         self._builder.get_object("tr_extra_expander").set_visible(False)
         self._builder.get_object("srv_separator").set_visible(False)
         self._namespace_entry.set_hexpand(True)
+        self._reference_entry.set_max_width_chars(22)
 
 
 class TransponderServicesDialog:
