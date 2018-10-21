@@ -9,7 +9,7 @@ from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, WaitDialog
-from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model
+from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 
 
 def show_satellites_dialog(transient, options):
@@ -30,7 +30,7 @@ class SatellitesDialog:
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
-                    "on_popup_menu": self.on_popup_menu,
+                    "on_popup_menu": on_popup_menu,
                     "on_satellite_add": self.on_satellite_add,
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
@@ -307,12 +307,6 @@ class SatellitesDialog:
             satellite = Satellite(sat[0], sat[-2], sat[-1], transponders)
             sats.append(satellite)
 
-    @staticmethod
-    def on_popup_menu(menu, event):
-        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
-            menu.popup(None, None, None, None, event.button, event.time)
-
-
 # ***************** Transponder dialog *******************#
 
 class TransponderDialog:
@@ -456,7 +450,7 @@ class SatellitesUpdateDialog:
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_find_toggled": self.on_find_toggled,
-                    "on_popup_menu": self.on_popup_menu,
+                    "on_popup_menu": on_popup_menu,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
                     "on_filter": self.on_filter,
@@ -682,11 +676,6 @@ class SatellitesUpdateDialog:
         """ Updates checkbox state by given path in the list """
         itr = self._filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(model.get_iter(path)))
         self._filter_model.get_model().set_value(itr, 4, select)
-
-    def on_popup_menu(self, menu, event):
-        """ Shows popup menu for the view """
-        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
-            menu.popup(None, None, None, None, event.button, event.time)
 
     def on_quit(self, window, event):
         self._download_task = False

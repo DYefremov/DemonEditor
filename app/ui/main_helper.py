@@ -579,5 +579,11 @@ def get_iptv_url(row, profile):
         return url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
 
 
+def on_popup_menu(menu, event):
+    """ Shows popup menu for the view """
+    if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+        menu.popup(None, None, None, None, event.button, event.time)
+
+
 if __name__ == "__main__":
     pass
