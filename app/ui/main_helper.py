@@ -494,7 +494,6 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback
     index = 6 if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE) else 16 if gen_type in (
         BqGenType.SAT, BqGenType.EACH_SAT) else 7
     model, paths = view.get_selection().get_selected_rows()
-    model = get_base_model(model)
     bq_type = BqType.BOUQUET.value if profile is Profile.NEUTRINO_MP else BqType.TV.value
     if gen_type in (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE):
         if not is_only_one_item_selected(paths, transient):
