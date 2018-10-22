@@ -615,13 +615,9 @@ class ServiceDetailsDialog:
 
     def update_ui_for_terrestrial(self):
         self._pids_grid.set_visible(False)
-        tr_grid = self._builder.get_object("tr_grid")
-        tr_grid.remove_column(0)
-        tr_grid.remove_column(1)
-        tr_grid.remove_column(1)
-        self._builder.get_object("tr_extra_expander").set_visible(False)
+        tr_frame = self._builder.get_object("transponder_data_frame")
+        tr_frame.set_visible(False)
         self._builder.get_object("srv_separator").set_visible(False)
-        self._namespace_entry.set_hexpand(True)
         self._reference_entry.set_max_width_chars(22)
 
 
