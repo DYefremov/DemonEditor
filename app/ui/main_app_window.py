@@ -19,7 +19,7 @@ from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import DownloadDialog
-from .main_helper import edit_marker, insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
+from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection
 from .picons_downloader import PiconsDialog
@@ -106,7 +106,6 @@ class MainAppWindow:
                     "on_model_changed": self.on_model_changed,
                     "on_import_m3u": self.on_import_m3u,
                     "on_insert_marker": self.on_insert_marker,
-                    "on_edit_marker": self.on_edit_marker,
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_picons_loader_show": self.on_picons_loader_show,
@@ -1126,9 +1125,6 @@ class MainAppWindow:
         insert_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
         self.update_fav_num_column(self._fav_model)
 
-    def on_edit_marker(self, view):
-        edit_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
-
     def on_fav_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.on_play_stream()
@@ -1456,9 +1452,9 @@ class MainAppWindow:
             self.on_bouquets_edit(view)
         elif name == self._FAV_LIST_NAME:
             rename(view, self._main_window, ViewTarget.FAV, service_view=self._services_view,
-                   channels=self._services)
+                   services=self._services)
         elif name == self._SERVICE_LIST_NAME:
-            rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, channels=self._services)
+            rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, services=self._services)
 
     def on_rename_for_bouquet(self, item):
         selection = get_selection(self._fav_view, self._main_window)

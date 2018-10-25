@@ -37,25 +37,6 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
     channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
 
 
-def edit_marker(view, bouquets, selected_bouquet, channels, parent_window):
-    """ Edits marker text """
-    model, paths = view.get_selection().get_selected_rows()
-    itr = model.get_iter(paths[0])
-    name, fav_id = model.get(itr, 2, 7)
-    response = show_dialog(DialogType.INPUT, parent_window, text=name)
-    if response == Gtk.ResponseType.CANCEL:
-        return
-
-    bq_services = bouquets[selected_bouquet]
-    index = bq_services.index(fav_id)
-    old_ch = channels.pop(fav_id, None)
-    new_fav_id = "{}::{}\n#DESCRIPTION {}\n".format(fav_id.split("::")[0], response, response)
-    model.set(itr, {2: response, 7: new_fav_id})
-    channels[new_fav_id] = old_ch._replace(service=response, fav_id=new_fav_id)
-    bq_services.pop(index)
-    bq_services.insert(index, new_fav_id)
-
-
 # ***************** Movement *******************#
 
 def move_items(key, view: Gtk.TreeView):
@@ -139,15 +120,14 @@ def is_some_level(paths):
 
 # ***************** Rename *******************#
 
-def rename(view, parent_window, target, fav_view=None, service_view=None, channels=None):
+def rename(view, parent_window, target, fav_view=None, service_view=None, services=None):
     selection = get_selection(view, parent_window)
     if not selection:
         return
 
     model, paths = selection
     itr = model.get_iter(paths)
-    f_id = None
-    channel_name = None
+    f_id, srv_name, srv_type = None, None, None
 
     if target is ViewTarget.SERVICES:
         name, fav_id = model.get(itr, 3, 18)
@@ -155,7 +135,7 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, channe
         response = show_dialog(DialogType.INPUT, parent_window, name)
         if response == Gtk.ResponseType.CANCEL:
             return
-        channel_name = response
+        srv_name = response
         model.set_value(itr, 3, response)
         if fav_view is not None:
             for row in fav_view.get_model():
@@ -163,13 +143,13 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, channe
                     row[2] = response
                     break
     elif target is ViewTarget.FAV:
-        name, fav_id = model.get(itr, 2, 7)
+        name, srv_type, fav_id = model.get(itr, 2, 5, 7)
         f_id = fav_id
         response = show_dialog(DialogType.INPUT, parent_window, name)
         if response == Gtk.ResponseType.CANCEL:
             return
 
-        channel_name = response
+        srv_name = response
         model.set_value(itr, 2, response)
 
         if service_view is not None:
@@ -178,9 +158,14 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, channe
                     row[3] = response
                     break
 
-    old_ch = channels.get(f_id, None)
-    if old_ch:
-        channels[f_id] = old_ch._replace(service=channel_name)
+    old_srv = services.get(f_id, None)
+    if old_srv:
+        if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
+            old_name = old_srv.service
+            new_fav_id = f_id.replace(old_name.strip(), srv_name.strip(), 2)
+            services[f_id] = old_srv._replace(service=srv_name, fav_id=new_fav_id)
+        else:
+            services[f_id] = old_srv._replace(service=srv_name)
 
 
 def get_selection(view, parent):
