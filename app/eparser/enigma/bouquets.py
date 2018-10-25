@@ -75,7 +75,7 @@ def get_bouquet(path, name, bq_type):
                     name, desc = str(ch_data[-1]).split("\n#DESCRIPTION")
                 services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id, 0))
 
-    return srvs[0].strip("#NAME").strip(), services
+    return srvs[0].lstrip("#NAME").strip(), services
 
 
 def parse_bouquets(path, bq_name, bq_type):
