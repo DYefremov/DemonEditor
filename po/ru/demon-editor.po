@@ -482,6 +482,9 @@ msgstr "Этот элемент не разрешен к удалению!"
 msgid "This item is not allowed to edit!"
 msgstr "Элемент не предназначен для редактирования!"
 
+msgid "Not allowed in this context!"
+msgstr "Запрещено в данном контексте!"
+
 msgid "Please, download files from receiver or setup your path for read data!"
 msgstr "Пожалуйста, загрузите файлы из приемника или настройте путь для чтения данных!"
 
