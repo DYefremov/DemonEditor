@@ -161,8 +161,10 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, servic
     old_srv = services.get(f_id, None)
     if old_srv:
         if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
-            old_name = old_srv.service
-            new_fav_id = f_id.replace(old_name.strip(), srv_name.strip(), 2)
+            l, sep, r = f_id.partition("#DESCRIPTION")
+            old_name = old_srv.service.strip()
+            new_name = srv_name.strip()
+            new_fav_id = "".join((new_name.join(l.rsplit(old_name, 1)), sep, new_name.join(r.rsplit(old_name, 1))))
             services[f_id] = old_srv._replace(service=srv_name, fav_id=new_fav_id)
         else:
             services[f_id] = old_srv._replace(service=srv_name)

@@ -1465,8 +1465,8 @@ class MainAppWindow:
         data = model[paths][:]
         cur_name, srv_type, fav_id = data[2], data[5], data[7]
 
-        if srv_type == BqServiceType.IPTV.name:
-            show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
+        if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
+            show_dialog(DialogType.ERROR, self._main_window, "This action is not allowed in current context!")
             return
 
         response = show_dialog(DialogType.INPUT, self._main_window, cur_name)
