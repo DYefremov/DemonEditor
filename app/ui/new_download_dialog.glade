@@ -38,21 +38,6 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-connect</property>
   </object>
-  <object class="GtkImage" id="reboot_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-jump-to</property>
-  </object>
-  <object class="GtkImage" id="reload_bouquet_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-refresh</property>
-  </object>
-  <object class="GtkImage" id="reload_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-convert</property>
-  </object>
   <object class="GtkWindow" id="download_dialog_window">
     <property name="width_request">560</property>
     <property name="can_focus">False</property>
@@ -362,7 +347,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="use_http_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
@@ -439,13 +424,13 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">
 </property>
-                    <property name="halign">center</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
+                    <property name="margin_bottom">5</property>
                     <property name="row_spacing">2</property>
                     <property name="column_spacing">2</property>
                     <child>
-                      <object class="GtkLabel" id="label4">
+                      <object class="GtkLabel" id="login_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Login:</property>
@@ -457,12 +442,13 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="login_field1">
+                      <object class="GtkEntry" id="login_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="width_chars">15</property>
                         <property name="text">root</property>
+                        <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_name">avatar-default-symbolic</property>
-                        <property name="primary_icon_activatable">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -470,7 +456,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="port_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Port:</property>
@@ -482,7 +468,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="port_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
@@ -497,7 +483,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label5">
+                      <object class="GtkLabel" id="password_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Password:</property>
@@ -509,14 +495,14 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="password_field2">
+                      <object class="GtkEntry" id="password_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="visibility">False</property>
                         <property name="invisible_char">●</property>
+                        <property name="width_chars">15</property>
                         <property name="text">root</property>
                         <property name="primary_icon_name">emblem-readonly</property>
-                        <property name="primary_icon_activatable">False</property>
                         <property name="input_purpose">password</property>
                       </object>
                       <packing>
@@ -525,113 +511,29 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label19">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Timeout:</property>
-                        <property name="xalign">0.10000000149011612</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry">
+                      <object class="GtkButton" id="test_connection_button">
+                        <property name="label" translatable="yes">Test</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="caps_lock_warning">False</property>
-                        <property name="primary_icon_name">alarm-symbolic</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Test connection</property>
+                        <property name="hexpand">True</property>
+                        <property name="image">connection_image</property>
+                        <property name="always_show_image">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="buttons_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="spacing">5</property>
-                    <property name="homogeneous">True</property>
-                    <child>
-                      <object class="GtkButton" id="reload_all_data_button">
-                        <property name="label" translatable="yes">Reload data</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="image">reload_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="reload_bouquets_button">
-                        <property name="label">Reload bouquets</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="image">reload_bouquet_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="test_connection_button">
-                        <property name="label" translatable="yes">Test connection</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="image">connection_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="reboot_button">
-                        <property name="label" translatable="yes">Reboot </property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Reboot the receiver</property>
-                        <property name="image">reboot_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
                   </packing>
                 </child>
               </object>
@@ -649,6 +551,7 @@ Author: Dmitriy Yefremov
                     <property name="active">True</property>
                     <property name="draw_indicator">False</property>
                     <property name="group">telnet_radio_button</property>
+                    <signal name="toggled" handler="on_settings_button" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -664,6 +567,7 @@ Author: Dmitriy Yefremov
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">False</property>
                     <property name="group">ftp_radio_button</property>
+                    <signal name="toggled" handler="on_settings_button" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -679,6 +583,7 @@ Author: Dmitriy Yefremov
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">False</property>
                     <property name="group">http_radio_button</property>
+                    <signal name="toggled" handler="on_settings_button" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -789,11 +694,5 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkAdjustment" id="telnet_timeout_adjustment">
-    <property name="lower">1</property>
-    <property name="upper">11</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
   </object>
 </interface>

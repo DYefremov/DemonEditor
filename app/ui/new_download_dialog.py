@@ -15,6 +15,7 @@ class DownloadDialog:
 
         handlers = {"on_receive": self.on_receive,
                     "on_send": self.on_send,
+                    "on_settings_button": self.on_settings_button,
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
@@ -33,9 +34,14 @@ class DownloadDialog:
         self._bouquets_radio_button = builder.get_object("bouquets_radio_button")
         self._satellites_radio_button = builder.get_object("satellites_radio_button")
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
+        self._login_entry = builder.get_object("login_entry")
+        self._password_entry = builder.get_object("password_entry")
+        self._port_entry = builder.get_object("port_entry")
 
         if profile is Profile.NEUTRINO_MP:
             self._webtv_radio_button.set_visible(True)
+            builder.get_object("http_radio_button").set_visible(False)
+            builder.get_object("use_http_box").set_visible(False)
 
     def show(self):
         self._dialog_window.show()
@@ -61,6 +67,22 @@ class DownloadDialog:
 
     def destroy(self):
         self._dialog_window.destroy()
+
+    def on_settings_button(self, button):
+        if button.get_active():
+            label = button.get_label()
+            if label == "Telnet":
+                self._login_entry.set_text(self._properties.get("telnet_user", ""))
+                self._password_entry.set_text(self._properties.get("telnet_password", ""))
+                self._port_entry.set_text(self._properties.get("telnet_port", "23"))
+            elif label == "HTTP":
+                self._login_entry.set_text(self._properties.get("user", "root"))
+                self._password_entry.set_text(self._properties.get("password", "root"))
+                self._port_entry.set_text("80")
+            elif label == "FTP":
+                self._login_entry.set_text(self._properties.get("user", "root"))
+                self._password_entry.set_text(self._properties.get("password", "root"))
+                self._port_entry.set_text(self._properties.get("port", "21"))
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
