@@ -547,6 +547,13 @@ def get_base_model(model):
     return model
 
 
+def get_model_data(view):
+    """ Returns model name and base model from the given view """
+    model = get_base_model(view.get_model())
+    model_name = model.get_name()
+    return model_name, model
+
+
 def append_text_to_tview(char, view):
     """ Appending text and scrolling  to a given line in the text view. """
     buf = view.get_buffer()

@@ -17,11 +17,11 @@ from app.tools.media import Player
 from .new_download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KEY_MAP
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection
+    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -559,7 +559,7 @@ class MainAppWindow:
         return False
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
-        model_name, model = self.get_model_data(view)
+        model_name, model = get_model_data(view)
         drop_info = view.get_dest_row_at_pos(x, y)
         data = data.get_text()
         if not data:
@@ -651,7 +651,7 @@ class MainAppWindow:
 
     def on_view_press(self, view, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
-            name, model = self.get_model_data(view)
+            name, model = get_model_data(view)
             self.delete_views_selection(name)
 
     def delete_views_selection(self, name):
@@ -952,8 +952,10 @@ class MainAppWindow:
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
         key = event.keyval
+        map_key = KEY_MAP.get(key, None)
+        key = map_key if map_key else key
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        model_name, model = self.get_model_data(view)
+        model_name, model = get_model_data(view)
 
         if ctrl and key == Gdk.KEY_c or key == Gdk.KEY_C:
             if model_name == self._SERVICE_LIST_NAME:
@@ -975,18 +977,14 @@ class MainAppWindow:
         elif key == Gdk.KEY_Delete:
             self.on_delete(view)
 
-    def get_model_data(self, view):
-        """ Returns model name and base model from the given view """
-        model = get_base_model(view.get_model())
-        model_name = model.get_name()
-        return model_name, model
-
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
         key = event.keyval
+        map_key = KEY_MAP.get(key, None)
+        key = map_key if map_key else key
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
-        model_name, model = self.get_model_data(view)
+        model_name, model = get_model_data(view)
 
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
@@ -1027,7 +1025,7 @@ class MainAppWindow:
 
     def on_view_focus(self, view, focus_event):
         profile = Profile(self._profile)
-        model_name, model = self.get_model_data(view)
+        model_name, model = get_model_data(view)
         not_empty = len(model) > 0  # if  > 0 model has items
 
         if model_name == self._BOUQUETS_LIST_NAME:
@@ -1447,7 +1445,7 @@ class MainAppWindow:
             self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
 
     def on_rename(self, view):
-        name, model = self.get_model_data(view)
+        name, model = get_model_data(view)
         if name == self._BOUQUETS_LIST_NAME:
             self.on_bouquets_edit(view)
         elif name == self._FAV_LIST_NAME:
