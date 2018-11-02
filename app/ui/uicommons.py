@@ -26,9 +26,9 @@ HIDE_ICON = theme.load_icon("go-jump", 16, 0) if theme.lookup_icon("go-jump", 16
 TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symbolic", 16, 0) else _IMAGE_MISSING
 IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.load_icon("emblem-shared", 16, 0) else None
 
-# keys for move in lists
-MOVE_KEYS = (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_Home, Gdk.KEY_End,
-             Gdk.KEY_KP_Page_Up, Gdk.KEY_KP_Page_Down)  # KEY_KP_Page_Up(Down) for laptop!
+# Keys for move in lists. KEY_KP_(NAME) for laptop!!!
+MOVE_KEYS = (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_Home, Gdk.KEY_KP_Home, Gdk.KEY_End,
+             Gdk.KEY_KP_End, Gdk.KEY_KP_Page_Up, Gdk.KEY_KP_Page_Down)
 
 
 class ViewTarget(Enum):

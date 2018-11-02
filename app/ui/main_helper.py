@@ -85,9 +85,9 @@ def move_items(key, view: Gtk.TreeView):
             else:
                 max_path.prev()
                 move_down(max_path, model, paths)
-        elif key in (Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up, Gdk.KEY_Home):
+        elif key in (Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up, Gdk.KEY_Home, Gdk.KEY_KP_Home):
             move_up(min_path if is_tree_store else cursor_path, model, paths)
-        elif key in (Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down, Gdk.KEY_End):
+        elif key in (Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down, Gdk.KEY_End, Gdk.KEY_KP_End):
             move_down(max_path if is_tree_store else cursor_path, model, paths)
 
 
