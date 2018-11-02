@@ -31,6 +31,16 @@ MOVE_KEYS = (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.K
              Gdk.KEY_KP_End, Gdk.KEY_KP_Page_Up, Gdk.KEY_KP_Page_Down)
 
 
+KEY_MAP = {Gdk.KEY_Cyrillic_es: Gdk.KEY_c, Gdk.KEY_Cyrillic_ES: Gdk.KEY_c,
+           Gdk.KEY_Cyrillic_che: Gdk.KEY_x, Gdk.KEY_Cyrillic_CHE: Gdk.KEY_x,
+           Gdk.KEY_Cyrillic_em: Gdk.KEY_v, Gdk.KEY_Cyrillic_EM: Gdk.KEY_v,
+           Gdk.KEY_Cyrillic_ka: Gdk.KEY_r, Gdk.KEY_Cyrillic_KA: Gdk.KEY_r,
+           Gdk.KEY_Cyrillic_u: Gdk.KEY_e, Gdk.KEY_Cyrillic_U: Gdk.KEY_e,
+           Gdk.KEY_Cyrillic_de: Gdk.KEY_l, Gdk.KEY_Cyrillic_DE: Gdk.KEY_l,
+           Gdk.KEY_Cyrillic_er: Gdk.KEY_h, Gdk.KEY_Cyrillic_ER: Gdk.KEY_h,
+           Gdk.KEY_Cyrillic_ze: Gdk.KEY_p, Gdk.KEY_Cyrillic_ZE: Gdk.KEY_p}
+
+
 class ViewTarget(Enum):
     """ Used for set target view """
     BOUQUET = 0
