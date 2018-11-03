@@ -1,8 +1,9 @@
 from gi.repository import GLib
 
 from app.commons import run_idle, run_task
-from app.ftp import download_data, DownloadType, upload_data
-from app.properties import Profile
+from app.connections import download_data, DownloadType, upload_data
+from app.properties import Profile, get_config
+from app.ui.settings_dialog import show_settings_dialog
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, get_message
 
@@ -16,6 +17,7 @@ class DownloadDialog:
         handlers = {"on_receive": self.on_receive,
                     "on_send": self.on_send,
                     "on_settings_button": self.on_settings_button,
+                    "on_preferences": self.on_preferences,
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
@@ -23,6 +25,7 @@ class DownloadDialog:
         builder.add_from_file(UI_RESOURCES_PATH + "new_download_dialog.glade")
         builder.connect_signals(handlers)
 
+        self._current_property = "FTP"
         self._dialog_window = builder.get_object("download_dialog_window")
         self._dialog_window.set_transient_for(transient)
         self._info_bar = builder.get_object("info_bar")
@@ -36,6 +39,7 @@ class DownloadDialog:
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
         self._login_entry = builder.get_object("login_entry")
         self._password_entry = builder.get_object("password_entry")
+        self._host_entry = builder.get_object("host_entry")
         self._port_entry = builder.get_object("port_entry")
 
         if profile is Profile.NEUTRINO_MP:
@@ -83,6 +87,10 @@ class DownloadDialog:
                 self._login_entry.set_text(self._properties.get("user", "root"))
                 self._password_entry.set_text(self._properties.get("password", "root"))
                 self._port_entry.set_text(self._properties.get("port", "21"))
+            self._current_property = label
+
+    def on_preferences(self, item):
+        show_settings_dialog(self._dialog_window, get_config())
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

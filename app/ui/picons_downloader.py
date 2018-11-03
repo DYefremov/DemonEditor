@@ -8,7 +8,7 @@ import time
 from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task
-from app.ftp import upload_data, DownloadType
+from app.connections import upload_data, DownloadType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.properties import Profile
 from app.tools.satellites import SatellitesParser, SatelliteSource

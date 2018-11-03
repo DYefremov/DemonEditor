@@ -193,5 +193,19 @@ def telnet(host, port=23, user="", password="", timeout=5):
         yield
 
 
+def test_telnet(host, port, user, password, timeout):
+    tn = Telnet(host=host, port=port, timeout=timeout)
+    time.sleep(1)
+    tn.read_until(b"login: ", timeout=2)
+    tn.write(user.encode("utf-8") + b"\n")
+    time.sleep(timeout)
+    tn.read_until(b"Password: ", timeout=2)
+    tn.write(password.encode("utf-8") + b"\n")
+    time.sleep(timeout)
+    yield tn.read_very_eager()
+    tn.close()
+    yield "Done"
+
+
 if __name__ == "__main__":
     pass
