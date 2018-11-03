@@ -39,28 +39,20 @@ def write_config(config):
 def get_default_settings():
     return {
         Profile.ENIGMA_2.value: {
-            "host": "127.0.0.1", "port": "21",
-            "user": "root", "password": "root",
-            "telnet_user": "", "telnet_password": "",
-            "telnet_port": "23", "telnet_timeout": 5,
-            "services_path": "/etc/enigma2/",
-            "user_bouquet_path": "/etc/enigma2/",
-            "satellites_xml_path": "/etc/tuxbox/",
-            "picons_path": "/usr/share/enigma2/picon",
-            "data_dir_path": DATA_PATH + "enigma2/",
-            "picons_dir_path": DATA_PATH + "enigma2/picons/",
+            "host": "127.0.0.1", "port": "21", "user": "root", "password": "root",
+            "http_user": "root", "http_password": "", "http_port": "80", "http_timeout": 5,
+            "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 5,
+            "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
+            "satellites_xml_path": "/etc/tuxbox/",  "data_dir_path": DATA_PATH + "enigma2/",
+            "picons_path": "/usr/share/enigma2/picon", "picons_dir_path": DATA_PATH + "enigma2/picons/",
             "v5_support": False},
         Profile.NEUTRINO_MP.value: {
-            "host": "127.0.0.1", "port": "21",
-            "user": "root", "password": "root",
-            "telnet_user": "root", "telnet_password": "",
-            "telnet_port": "23", "telnet_timeout": 1,
-            "services_path": "/var/tuxbox/config/zapit/",
-            "user_bouquet_path": "/var/tuxbox/config/zapit/",
-            "satellites_xml_path": "/var/tuxbox/config/",
-            "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/",
-            "data_dir_path": DATA_PATH + "neutrino/",
-            "picons_dir_path": DATA_PATH + "neutrino/picons/"},
+            "host": "127.0.0.1", "port": "21", "user": "root", "password": "root",
+            "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2,
+            "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 1,
+            "services_path": "/var/tuxbox/config/zapit/", "user_bouquet_path": "/var/tuxbox/config/zapit/",
+            "satellites_xml_path": "/var/tuxbox/config/", "data_dir_path": DATA_PATH + "neutrino/",
+            "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/", "picons_dir_path": DATA_PATH + "neutrino/picons/"},
         "profile": Profile.ENIGMA_2.value}
 
 
