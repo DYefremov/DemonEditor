@@ -8,7 +8,7 @@ from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.properties import Profile
-from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON
+from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
 
@@ -67,17 +67,17 @@ def move_items(key, view: Gtk.TreeView):
                 parent_itr = model.iter_parent(model.get_iter(paths[0]))
                 parent_index = model.get_path(parent_itr)
                 children_num = model.iter_n_children(parent_itr)
-                if key in (Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down, Gdk.KEY_End):
+                if key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END):
                     children_num -= 1
                 min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
                 max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
                 is_tree_store = True
 
-        if key == Gdk.KEY_Up:
+        if key is KeyboardKey.UP:
             top_path = Gtk.TreePath(paths[0])
             top_path.prev()
             move_up(top_path, model, paths)
-        elif key == Gdk.KEY_Down:
+        elif key is KeyboardKey.DOWN:
             down_path = Gtk.TreePath(paths[-1])
             down_path.next()
             if down_path < max_path:
@@ -85,9 +85,9 @@ def move_items(key, view: Gtk.TreeView):
             else:
                 max_path.prev()
                 move_down(max_path, model, paths)
-        elif key in (Gdk.KEY_Page_Up, Gdk.KEY_KP_Page_Up, Gdk.KEY_Home, Gdk.KEY_KP_Home):
+        elif key in (KeyboardKey.PAGE_UP, KeyboardKey.HOME):
             move_up(min_path if is_tree_store else cursor_path, model, paths)
-        elif key in (Gdk.KEY_Page_Down, Gdk.KEY_KP_Page_Down, Gdk.KEY_End, Gdk.KEY_KP_End):
+        elif key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END):
             move_down(max_path if is_tree_store else cursor_path, model, paths)
 
 

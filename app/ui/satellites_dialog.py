@@ -7,7 +7,7 @@ from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey
 from .dialogs import show_dialog, DialogType, WaitDialog
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 
@@ -106,31 +106,29 @@ class SatellitesDialog:
             view.expand_row(path, column)
 
     def on_up(self, item):
-        move_items(Gdk.KEY_Up, self._sat_view)
+        move_items(KeyboardKey.UP, self._sat_view)
 
     def on_down(self, item):
-        move_items(Gdk.KEY_Down, self._sat_view)
+        move_items(KeyboardKey.DOWN, self._sat_view)
 
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
-        key = event.keyval
+        key = KeyboardKey(event.hardware_keycode)
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
 
-        if key == Gdk.KEY_Delete:
+        if key is KeyboardKey.DELETE:
             self.on_remove(view)
-        elif key == Gdk.KEY_Insert:
+        elif key is KeyboardKey.INSERT:
             pass
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
+        elif ctrl and key is KeyboardKey.E:
             self.on_edit(view)
-        elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
+        elif ctrl and key is KeyboardKey.S:
             self.on_satellite()
-        elif ctrl and key == Gdk.KEY_t or key == Gdk.KEY_T:
+        elif ctrl and key is KeyboardKey.T:
             self.on_transponder()
-        elif key == Gdk.KEY_space:
-            pass
         elif ctrl and key in MOVE_KEYS:
             move_items(key, self._sat_view)
-        elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
+        elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
 
     def on_popover_release(self, menu, event):

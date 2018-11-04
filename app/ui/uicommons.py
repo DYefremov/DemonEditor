@@ -26,19 +26,43 @@ HIDE_ICON = theme.load_icon("go-jump", 16, 0) if theme.lookup_icon("go-jump", 16
 TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symbolic", 16, 0) else _IMAGE_MISSING
 IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.load_icon("emblem-shared", 16, 0) else None
 
+
+class KeyboardKey(Enum):
+    """ The raw(hardware) codes of the keyboard keys """
+    E = 26
+    R = 27
+    T = 28
+    P = 33
+    S = 39
+    H = 43
+    L = 46
+    X = 53
+    C = 54
+    V = 55
+    INSERT = 118
+    HOME = 110
+    END = 115
+    UP = 111
+    DOWN = 116
+    PAGE_UP = 112
+    PAGE_DOWN = 117
+    LEFT = 113
+    RIGHT = 114
+    F2 = 23
+    DELETE = 119
+    BACK_SPACE = 22
+    CTRL_L = 37
+    CTRL_R = 105
+
+    @classmethod
+    def _missing_(cls, value):
+        """ Overridden for skip ValueError if value is not found. """
+        pass
+
+
 # Keys for move in lists. KEY_KP_(NAME) for laptop!!!
-MOVE_KEYS = (Gdk.KEY_Up, Gdk.KEY_Page_Up, Gdk.KEY_Down, Gdk.KEY_Page_Down, Gdk.KEY_Home, Gdk.KEY_KP_Home, Gdk.KEY_End,
-             Gdk.KEY_KP_End, Gdk.KEY_KP_Page_Up, Gdk.KEY_KP_Page_Down)
-
-
-KEY_MAP = {Gdk.KEY_Cyrillic_es: Gdk.KEY_c, Gdk.KEY_Cyrillic_ES: Gdk.KEY_c,
-           Gdk.KEY_Cyrillic_che: Gdk.KEY_x, Gdk.KEY_Cyrillic_CHE: Gdk.KEY_x,
-           Gdk.KEY_Cyrillic_em: Gdk.KEY_v, Gdk.KEY_Cyrillic_EM: Gdk.KEY_v,
-           Gdk.KEY_Cyrillic_ka: Gdk.KEY_r, Gdk.KEY_Cyrillic_KA: Gdk.KEY_r,
-           Gdk.KEY_Cyrillic_u: Gdk.KEY_e, Gdk.KEY_Cyrillic_U: Gdk.KEY_e,
-           Gdk.KEY_Cyrillic_de: Gdk.KEY_l, Gdk.KEY_Cyrillic_DE: Gdk.KEY_l,
-           Gdk.KEY_Cyrillic_er: Gdk.KEY_h, Gdk.KEY_Cyrillic_ER: Gdk.KEY_h,
-           Gdk.KEY_Cyrillic_ze: Gdk.KEY_p, Gdk.KEY_Cyrillic_ZE: Gdk.KEY_p}
+MOVE_KEYS = (KeyboardKey.UP, KeyboardKey.PAGE_UP, KeyboardKey.DOWN, KeyboardKey.PAGE_DOWN, KeyboardKey.HOME,
+             KeyboardKey.END)
 
 
 class ViewTarget(Enum):

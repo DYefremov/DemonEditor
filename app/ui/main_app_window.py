@@ -17,7 +17,7 @@ from app.tools.media import Player
 from .new_download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KEY_MAP
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
@@ -951,70 +951,71 @@ class MainAppWindow:
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
-        key = event.keyval
-        map_key = KEY_MAP.get(key, None)
-        key = map_key if map_key else key
+        key = KeyboardKey(event.hardware_keycode)
+        if not key:
+            return
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key == Gdk.KEY_c or key == Gdk.KEY_C:
+        if ctrl and key is KeyboardKey.C:
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_copy(view, ViewTarget.FAV)
             elif model_name == self._FAV_LIST_NAME:
                 self.on_copy(view, ViewTarget.SERVICES)
             else:
                 self.on_copy(view, ViewTarget.BOUQUET)
-        elif ctrl and key == Gdk.KEY_x or key == Gdk.KEY_X:
+        elif ctrl and key is KeyboardKey.X:
             if model_name == self._FAV_LIST_NAME:
                 self.on_cut(view, ViewTarget.FAV)
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_cut(view, ViewTarget.BOUQUET)
-        elif ctrl and key == Gdk.KEY_v or key == Gdk.KEY_V:
+        elif ctrl and key is KeyboardKey.V:
             if model_name == self._FAV_LIST_NAME:
                 self.on_paste(view, ViewTarget.FAV)
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_paste(view, ViewTarget.BOUQUET)
-        elif key == Gdk.KEY_Delete:
+        elif key is KeyboardKey.DELETE:
             self.on_delete(view)
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
-        key = event.keyval
-        map_key = KEY_MAP.get(key, None)
-        key = map_key if map_key else key
+        key = KeyboardKey(event.hardware_keycode)
+        print(event.hardware_keycode)
+        if not key:
+            return
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
         model_name, model = get_model_data(view)
 
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
-        elif model_name == self._FAV_LIST_NAME and key == Gdk.KEY_Control_L or key == Gdk.KEY_Control_R:
+        elif model_name == self._FAV_LIST_NAME and key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
             self.update_fav_num_column(model)
             self.update_bouquet_list()
-        elif ctrl and key == Gdk.KEY_Insert:
+        elif ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_to_fav_copy(view)
             elif model_name == self._BOUQUETS_LIST_NAME:
                 self.on_new_bouquet(view)
-        elif ctrl and key == Gdk.KEY_BackSpace and model_name == self._SERVICE_LIST_NAME:
+        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self._SERVICE_LIST_NAME:
             self.on_to_fav_end_copy(view)
-        elif ctrl and key == Gdk.KEY_s or key == Gdk.KEY_S:
+        elif ctrl and key is KeyboardKey.S:
             self.on_data_save()
-        elif ctrl and key == Gdk.KEY_l or key == Gdk.KEY_L:
+        elif ctrl and key is KeyboardKey.L:
             self.on_locked(None)
-        elif ctrl and key == Gdk.KEY_h or key == Gdk.KEY_H:
+        elif ctrl and key is KeyboardKey.H:
             self.on_hide(None)
-        elif ctrl and key == Gdk.KEY_R or key == Gdk.KEY_r or key == Gdk.KEY_F2:
+        elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
             self.on_rename(view)
-        elif ctrl and key == Gdk.KEY_E or key == Gdk.KEY_e:
+        elif ctrl and key is KeyboardKey.E:
             if model_name == self._BOUQUETS_LIST_NAME:
                 self.on_rename(view)
                 return
             self.on_service_edit(view)
-        elif key == Gdk.KEY_Left or key == Gdk.KEY_Right:
+        elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-        elif ctrl and model_name == self._FAV_LIST_NAME and key in (Gdk.KEY_P, Gdk.KEY_p):
+        elif ctrl and model_name == self._FAV_LIST_NAME and key is KeyboardKey.P:
             self.on_play_stream()
 
     def on_download(self, item):
