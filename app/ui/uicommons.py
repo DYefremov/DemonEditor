@@ -53,6 +53,11 @@ class KeyboardKey(Enum):
     BACK_SPACE = 22
     CTRL_L = 37
     CTRL_R = 105
+    # Laptop codes
+    HOME_KP = 79
+    END_KP = 87
+    PAGE_UP_KP = 81
+    PAGE_DOWN_KP = 89
 
     @classmethod
     def _missing_(cls, value):
@@ -62,7 +67,7 @@ class KeyboardKey(Enum):
 
 # Keys for move in lists. KEY_KP_(NAME) for laptop!!!
 MOVE_KEYS = (KeyboardKey.UP, KeyboardKey.PAGE_UP, KeyboardKey.DOWN, KeyboardKey.PAGE_DOWN, KeyboardKey.HOME,
-             KeyboardKey.END)
+             KeyboardKey.END, KeyboardKey.HOME_KP, KeyboardKey.END_KP, KeyboardKey.PAGE_UP_KP, KeyboardKey.PAGE_DOWN_KP)
 
 
 class ViewTarget(Enum):

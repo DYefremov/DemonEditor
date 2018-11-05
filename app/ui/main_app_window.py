@@ -980,7 +980,6 @@ class MainAppWindow:
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
         key = KeyboardKey(event.hardware_keycode)
-        print(event.hardware_keycode)
         if not key:
             return
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK

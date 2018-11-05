@@ -305,6 +305,7 @@ class SatellitesDialog:
             satellite = Satellite(sat[0], sat[-2], sat[-1], transponders)
             sats.append(satellite)
 
+
 # ***************** Transponder dialog *******************#
 
 class TransponderDialog:
