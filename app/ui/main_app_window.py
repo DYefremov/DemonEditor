@@ -505,6 +505,7 @@ class MainAppWindow:
         selection = self.get_selection(view)
         if selection:
             self.receive_selection(view=self._fav_view, drop_info=None, data=selection)
+            scroll_to(0, self._fav_view)
 
     def on_to_fav_end_copy(self, view):
         """  Copy items from main to end of fav list """
