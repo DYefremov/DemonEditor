@@ -50,6 +50,7 @@ Author: Dmitriy Yefremov
     <property name="stock">gtk-connect</property>
   </object>
   <object class="GtkDialog" id="settings_dialog">
+    <property name="use-header-bar">1</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
@@ -72,19 +73,30 @@ Author: Dmitriy Yefremov
           </object>
         </child>
         <child>
-          <object class="GtkButton">
-            <property name="width_request">48</property>
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Cancel</property>
-            <property name="always_show_image">True</property>
+            <property name="can_focus">False</property>
             <child>
-              <object class="GtkImage">
+              <object class="GtkButton" id="ok_button">
+                <property name="width_request">48</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-undo</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Ok</property>
+                <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage" id="ok_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-apply</property>
+                  </object>
+                </child>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -92,14 +104,15 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="apply_button">
             <property name="width_request">48</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Save</property>
+            <signal name="clicked" handler="apply_settings" swapped="no"/>
             <child>
-              <object class="GtkImage">
+              <object class="GtkImage" id="apply_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="stock">gtk-save</property>
@@ -107,16 +120,11 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="-6">cancel_button</action-widget>
-      <action-widget response="-5">ok_button</action-widget>
-    </action-widgets>
     <child internal-child="vbox">
       <object class="GtkBox" id="main_box">
         <property name="can_focus">False</property>
@@ -129,50 +137,7 @@ Author: Dmitriy Yefremov
             <property name="halign">center</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="cancel_button">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="apply_button">
-                <property name="label">gtk-apply</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="apply_settings" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="ok_button">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -968,9 +933,10 @@ Author: Dmitriy Yefremov
           <object class="GtkFrame" id="local_file_paths_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">1</property>
-            <property name="margin_right">1</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="label_xalign">0.019999999552965164</property>
             <property name="shadow_type">in</property>
             <child>
@@ -1057,8 +1023,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">cancel_button</action-widget>
-      <action-widget response="-5">ok_button</action-widget>
+      <action-widget response="ok">ok_button</action-widget>
     </action-widgets>
   </object>
 </interface>

@@ -1068,8 +1068,6 @@ class MainAppWindow:
         for elem in self._COMMONS_ELEMENTS:
             self._tool_elements[elem].set_sensitive(not_empty)
 
-        # self._tool_elements["services_add_new_popup_item"].set_sensitive(len(self._bouquets_model))
-
     def on_hide(self, item):
         self.set_service_flags(Flag.HIDE)
 
