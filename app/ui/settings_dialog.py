@@ -77,7 +77,6 @@ class SettingsDialog:
         response = self._dialog.run()
         if response == Gtk.ResponseType.OK:
             self.apply_settings()
-            write_config(self._options)
         self._dialog.destroy()
 
         return response
@@ -155,6 +154,7 @@ class SettingsDialog:
         options["picons_dir_path"] = self._picons_dir_field.get_text()
         if profile is Profile.ENIGMA_2:
             options["v5_support"] = self._support_ver5_check_button.get_active()
+        write_config(self._options)
 
     @run_task
     def on_connection_test(self, item):

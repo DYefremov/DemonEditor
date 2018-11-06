@@ -11,6 +11,7 @@ from .dialogs import show_dialog, DialogType, get_message
 
 class DownloadDialog:
     def __init__(self, transient, properties, open_data_callback, profile=Profile.ENIGMA_2):
+        self._profile_properties = properties.get(profile.value)
         self._properties = properties
         self._open_data_callback = open_data_callback
         self._profile = profile
@@ -34,8 +35,8 @@ class DownloadDialog:
         self._text_view = builder.get_object("text_view")
         self._expander = builder.get_object("expander")
 
-        self._host_entry = builder.get_object("host_entry").set_text(properties["host"])
-        self._data_path_entry = builder.get_object("data_path_entry").set_text(properties["data_dir_path"])
+        self._host_entry = builder.get_object("host_entry")
+        self._data_path_entry = builder.get_object("data_path_entry")
         self._remove_unused_check_button = builder.get_object("remove_unused_check_button")
         self._all_radio_button = builder.get_object("all_radio_button")
         self._bouquets_radio_button = builder.get_object("bouquets_radio_button")
@@ -45,6 +46,8 @@ class DownloadDialog:
         self._password_entry = builder.get_object("password_entry")
         self._host_entry = builder.get_object("host_entry")
         self._port_entry = builder.get_object("port_entry")
+        self._settings_buttons_box = builder.get_object("settings_buttons_box")
+        self.init_properties()
 
         if profile is Profile.NEUTRINO_MP:
             self._webtv_radio_button.set_visible(True)
@@ -53,6 +56,10 @@ class DownloadDialog:
 
     def show(self):
         self._dialog_window.show()
+
+    def init_properties(self):
+        self._host_entry.set_text(self._profile_properties["host"])
+        self._data_path_entry.set_text(self._profile_properties["data_dir_path"])
 
     @run_idle
     def on_receive(self, item):
@@ -80,21 +87,28 @@ class DownloadDialog:
         if button.get_active():
             label = button.get_label()
             if label == "Telnet":
-                self._login_entry.set_text(self._properties.get("telnet_user", ""))
-                self._password_entry.set_text(self._properties.get("telnet_password", ""))
-                self._port_entry.set_text(self._properties.get("telnet_port", ""))
+                self._login_entry.set_text(self._profile_properties.get("telnet_user", ""))
+                self._password_entry.set_text(self._profile_properties.get("telnet_password", ""))
+                self._port_entry.set_text(self._profile_properties.get("telnet_port", ""))
             elif label == "HTTP":
-                self._login_entry.set_text(self._properties.get("http_user", "root"))
-                self._password_entry.set_text(self._properties.get("http_password", ""))
-                self._port_entry.set_text(self._properties.get("http_port", ""))
+                self._login_entry.set_text(self._profile_properties.get("http_user", "root"))
+                self._password_entry.set_text(self._profile_properties.get("http_password", ""))
+                self._port_entry.set_text(self._profile_properties.get("http_port", ""))
             elif label == "FTP":
-                self._login_entry.set_text(self._properties.get("user", ""))
-                self._password_entry.set_text(self._properties.get("password", ""))
-                self._port_entry.set_text(self._properties.get("port", ""))
+                self._login_entry.set_text(self._profile_properties.get("user", ""))
+                self._password_entry.set_text(self._profile_properties.get("password", ""))
+                self._port_entry.set_text(self._profile_properties.get("port", ""))
             self._current_property = label
 
     def on_preferences(self, item):
-        show_settings_dialog(self._dialog_window, get_config())
+        show_settings_dialog(self._dialog_window, self._properties)
+        self._profile_properties = get_config().get(self._profile.value)
+
+        for button in self._settings_buttons_box.get_children():
+            if button.get_active():
+                self.on_settings_button(button)
+                self.init_properties()
+                break
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -107,10 +121,10 @@ class DownloadDialog:
             self.clear_output()
 
             if download:
-                download_data(properties=self._properties, download_type=d_type, callback=self.append_output)
+                download_data(properties=self._profile_properties, download_type=d_type, callback=self.append_output)
             else:
                 self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
-                upload_data(properties=self._properties,
+                upload_data(properties=self._profile_properties,
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active(),
                             profile=self._profile,

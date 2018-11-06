@@ -530,7 +530,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child type="label">
-              <object class="GtkBox">
+              <object class="GtkBox" id="settings_buttons_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>

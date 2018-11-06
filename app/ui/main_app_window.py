@@ -1020,7 +1020,7 @@ class MainAppWindow:
 
     def on_download(self, item):
         DownloadDialog(transient=self._main_window,
-                       properties=self._options.get(self._profile),
+                       properties=self._options,
                        open_data_callback=self.open_data,
                        profile=Profile(self._profile)).show()
 
