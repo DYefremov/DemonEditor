@@ -173,7 +173,7 @@ class SettingsDialog:
         user, password = self._http_login_field.get_text(), self._http_password_field.get_text()
         try:
             params = urlencode({"text": "Connection test", "type": 2, "timeout": 5})
-            with urlopen("http://{}/web/message?%s".format(self._host_field.get_text()) % params, timeout=2) as f:
+            with urlopen("http://{}/web/message?%s".format(self._host_field.get_text()) % params, timeout=5) as f:
                 dom = parse(f)
                 for elem in dom.getElementsByTagName("e2simplexmlresult"):
                     for ch in elem.childNodes:
@@ -206,7 +206,7 @@ class SettingsDialog:
         try:
             with FTP(host=host, user=user, passwd=password, timeout=5) as ftp:
                 self.show_info_message("OK.  {}".format(ftp.getwelcome()), Gtk.MessageType.INFO)
-        except (error_perm, ConnectionRefusedError) as e:
+        except (error_perm, ConnectionRefusedError, OSError) as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         finally:
             self.show_spinner(False)

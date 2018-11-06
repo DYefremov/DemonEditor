@@ -14,7 +14,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
-from .new_download_dialog import DownloadDialog
+from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey

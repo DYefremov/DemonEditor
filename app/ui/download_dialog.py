@@ -2,7 +2,9 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType, upload_data
-from app.properties import Profile
+from app.properties import Profile, get_config
+from app.ui.main_helper import append_text_to_tview
+from app.ui.settings_dialog import show_settings_dialog
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .dialogs import show_dialog, DialogType, get_message
 
@@ -15,6 +17,8 @@ class DownloadDialog:
 
         handlers = {"on_receive": self.on_receive,
                     "on_send": self.on_send,
+                    "on_settings_button": self.on_settings_button,
+                    "on_preferences": self.on_preferences,
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
@@ -22,10 +26,14 @@ class DownloadDialog:
         builder.add_from_file(UI_RESOURCES_PATH + "download_dialog.glade")
         builder.connect_signals(handlers)
 
-        self._dialog = builder.get_object("download_dialog")
-        self._dialog.set_transient_for(transient)
+        self._current_property = "FTP"
+        self._dialog_window = builder.get_object("download_dialog_window")
+        self._dialog_window.set_transient_for(transient)
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
+        self._text_view = builder.get_object("text_view")
+        self._expander = builder.get_object("expander")
+
         self._host_entry = builder.get_object("host_entry").set_text(properties["host"])
         self._data_path_entry = builder.get_object("data_path_entry").set_text(properties["data_dir_path"])
         self._remove_unused_check_button = builder.get_object("remove_unused_check_button")
@@ -33,12 +41,18 @@ class DownloadDialog:
         self._bouquets_radio_button = builder.get_object("bouquets_radio_button")
         self._satellites_radio_button = builder.get_object("satellites_radio_button")
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
+        self._login_entry = builder.get_object("login_entry")
+        self._password_entry = builder.get_object("password_entry")
+        self._host_entry = builder.get_object("host_entry")
+        self._port_entry = builder.get_object("port_entry")
+
         if profile is Profile.NEUTRINO_MP:
             self._webtv_radio_button.set_visible(True)
+            builder.get_object("http_radio_button").set_visible(False)
+            builder.get_object("use_http_box").set_visible(False)
 
     def show(self):
-        self._dialog.run()
-        self._dialog.destroy()
+        self._dialog_window.show()
 
     @run_idle
     def on_receive(self, item):
@@ -46,7 +60,7 @@ class DownloadDialog:
 
     @run_idle
     def on_send(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog_window) != Gtk.ResponseType.CANCEL:
             self.download(False, self.get_download_type())
 
     def get_download_type(self):
@@ -56,14 +70,31 @@ class DownloadDialog:
         elif self._satellites_radio_button.get_active():
             download_type = DownloadType.SATELLITES
         elif self._webtv_radio_button.get_active():
-            download_type = DownloadType.WEBTV
+            download_type = DownloadType.WEB_TV
         return download_type
 
-    def run(self):
-        return self._dialog.run()
-
     def destroy(self):
-        self._dialog.destroy()
+        self._dialog_window.destroy()
+
+    def on_settings_button(self, button):
+        if button.get_active():
+            label = button.get_label()
+            if label == "Telnet":
+                self._login_entry.set_text(self._properties.get("telnet_user", ""))
+                self._password_entry.set_text(self._properties.get("telnet_password", ""))
+                self._port_entry.set_text(self._properties.get("telnet_port", ""))
+            elif label == "HTTP":
+                self._login_entry.set_text(self._properties.get("http_user", "root"))
+                self._password_entry.set_text(self._properties.get("http_password", ""))
+                self._port_entry.set_text(self._properties.get("http_port", ""))
+            elif label == "FTP":
+                self._login_entry.set_text(self._properties.get("user", ""))
+                self._password_entry.set_text(self._properties.get("password", ""))
+                self._port_entry.set_text(self._properties.get("port", ""))
+            self._current_property = label
+
+    def on_preferences(self, item):
+        show_settings_dialog(self._dialog_window, get_config())
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -72,15 +103,19 @@ class DownloadDialog:
     def download(self, download, d_type):
         """ Download/upload data from/to receiver """
         try:
+            self._expander.set_expanded(True)
+            self.clear_output()
+
             if download:
-                download_data(properties=self._properties, download_type=d_type)
+                download_data(properties=self._properties, download_type=d_type, callback=self.append_output)
             else:
                 self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
                 upload_data(properties=self._properties,
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active(),
                             profile=self._profile,
-                            callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+                            callback=self.append_output,
+                            done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
         except Exception as e:
             message = str(getattr(e, "message", str(e)))
             self.show_info_message(message, Gtk.MessageType.ERROR)
@@ -93,6 +128,14 @@ class DownloadDialog:
         self._info_bar.set_visible(True)
         self._info_bar.set_message_type(message_type)
         self._message_label.set_text(text)
+
+    @run_idle
+    def append_output(self, text):
+        append_text_to_tview(text, self._text_view)
+
+    @run_idle
+    def clear_output(self):
+        self._text_view.get_buffer().set_text("")
 
 
 if __name__ == "__main__":
