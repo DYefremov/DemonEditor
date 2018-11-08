@@ -4,8 +4,10 @@ import time
 from enum import Enum
 from ftplib import FTP, error_perm
 from telnetlib import Telnet
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+from xml.dom.minidom import parse
 
 from app.commons import log
 from app.properties import Profile
@@ -23,6 +25,10 @@ class DownloadType(Enum):
     SATELLITES = 2
     PICONS = 3
     WEBTV = 4
+
+
+class TestException(Exception):
+    pass
 
 
 def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
@@ -43,7 +49,7 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
                     name = name.split()[-1]
                     download_file(ftp, name, save_path, callback)
         # satellites.xml and webtv section
-        if download_type in (DownloadType.ALL, DownloadType.SATELLITES, DownloadType.WEB_TV):
+        if download_type in (DownloadType.ALL, DownloadType.SATELLITES, DownloadType.WEBTV):
             ftp.cwd(properties["satellites_xml_path"])
             files.clear()
             ftp.dir(files.append)
@@ -52,7 +58,7 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
                 name = str(file).strip()
                 if download_type in (DownloadType.ALL, DownloadType.SATELLITES) and name.endswith(_SAT_XML_FILE):
                     download_file(ftp, _SAT_XML_FILE, save_path, callback)
-                if download_type in (DownloadType.ALL, DownloadType.WEB_TV) and name.endswith(_WEBTV_XML_FILE):
+                if download_type in (DownloadType.ALL, DownloadType.WEBTV) and name.endswith(_WEBTV_XML_FILE):
                     download_file(ftp, _WEBTV_XML_FILE, save_path, callback)
 
         if callback is not None:
@@ -97,10 +103,10 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                     callback()
                 return send
 
-        if profile is Profile.NEUTRINO_MP and download_type in (DownloadType.ALL, DownloadType.WEB_TV):
+        if profile is Profile.NEUTRINO_MP and download_type in (DownloadType.ALL, DownloadType.WEBTV):
             ftp.cwd(properties["satellites_xml_path"])
             send = send_file(_WEBTV_XML_FILE, data_path, ftp)
-            if download_type is DownloadType.WEB_TV:
+            if download_type is DownloadType.WEBTV:
                 tn.send("init 6")
                 if callback is not None:
                     callback()
@@ -196,7 +202,44 @@ def telnet(host, port=23, user="", password="", timeout=5):
         yield
 
 
-def test_telnet(host, port, user, password, timeout):
+# ***************** Connections testing *******************#
+
+
+def test_ftp(host, port, user, password, timeout=2):
+    try:
+        with FTP(host=host, user=user, passwd=password, timeout=timeout) as ftp:
+            return ftp.getwelcome()
+    except (error_perm, ConnectionRefusedError, OSError) as e:
+        raise TestException(e)
+
+
+def test_http(host, port, user, password, timeout=5):
+    try:
+        params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
+        with urlopen("http://{}/web/message?%s".format(host) % params, timeout=5) as f:
+            dom = parse(f)
+            msg = ""
+            for elem in dom.getElementsByTagName("e2simplexmlresult"):
+                for ch in elem.childNodes:
+                    if ch.nodeType == ch.ELEMENT_NODE:
+                        msg = "".join(t.nodeValue for t in ch.childNodes if t.nodeType == t.TEXT_NODE)
+            return msg
+    except (URLError, HTTPError) as e:
+        raise TestException(e)
+
+
+def test_telnet(host, port, user, password, timeout=2):
+    try:
+        gen = telnet_test(host, port, user, password, timeout)
+        res = next(gen)
+        print(res)
+        res = next(gen)
+        return res
+    except (socket.timeout, OSError) as e:
+        raise TestException(e)
+
+
+def telnet_test(host, port, user, password, timeout):
     tn = Telnet(host=host, port=port, timeout=timeout)
     time.sleep(1)
     tn.read_until(b"login: ", timeout=2)

@@ -1,13 +1,7 @@
-import socket
 from enum import Enum
-from ftplib import error_perm, FTP
-from urllib.error import URLError, HTTPError
-from urllib.parse import urlencode
-from urllib.request import urlopen
-from xml.dom.minidom import parse
 
 from app.commons import run_task, run_idle
-from app.connections import test_telnet
+from app.connections import test_telnet, test_ftp, TestException, test_http
 from app.properties import write_config, Profile, get_default_settings
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 from .main_helper import update_entry_data
@@ -171,16 +165,10 @@ class SettingsDialog:
 
     def test_http(self):
         user, password = self._http_login_field.get_text(), self._http_password_field.get_text()
+        host, port = self._host_field.get_text(), self._http_port_field.get_text()
         try:
-            params = urlencode({"text": "Connection test", "type": 2, "timeout": 5})
-            with urlopen("http://{}/web/message?%s".format(self._host_field.get_text()) % params, timeout=5) as f:
-                dom = parse(f)
-                for elem in dom.getElementsByTagName("e2simplexmlresult"):
-                    for ch in elem.childNodes:
-                        if ch.nodeType == ch.ELEMENT_NODE:
-                            msg = "".join(t.nodeValue for t in ch.childNodes if t.nodeType == t.TEXT_NODE)
-                            self.show_info_message(msg, Gtk.MessageType.INFO)
-        except (URLError, HTTPError) as e:
+            self.show_info_message(test_http(host, port, user, password), Gtk.MessageType.INFO)
+        except TestException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         finally:
             self.show_spinner(False)
@@ -190,13 +178,9 @@ class SettingsDialog:
         host, port = self._host_field.get_text(), self._telnet_port_field.get_text()
         user, password = self._telnet_login_field.get_text(), self._telnet_password_field.get_text()
         try:
-            gen = test_telnet(host, port, user, password, timeout)
-            res = next(gen)
-            print(res)
-            res = next(gen)
-            self.show_info_message(str(res), Gtk.MessageType.INFO)
+            self.show_info_message(test_telnet(host, port, user, password, timeout), Gtk.MessageType.INFO)
             self.show_spinner(False)
-        except (socket.timeout, OSError) as e:
+        except TestException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
             self.show_spinner(False)
 
@@ -204,9 +188,8 @@ class SettingsDialog:
         host, port = self._host_field.get_text(), self._port_field.get_text()
         user, password = self._login_field.get_text(), self._password_field.get_text()
         try:
-            with FTP(host=host, user=user, passwd=password, timeout=5) as ftp:
-                self.show_info_message("OK.  {}".format(ftp.getwelcome()), Gtk.MessageType.INFO)
-        except (error_perm, ConnectionRefusedError, OSError) as e:
+            self.show_info_message("OK.  {}".format(test_ftp(host, port, user, password)), Gtk.MessageType.INFO)
+        except TestException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         finally:
             self.show_spinner(False)
