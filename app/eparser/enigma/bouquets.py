@@ -5,6 +5,7 @@ from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouque
 
 _TV_ROOT_FILE_NAME = "bouquets.tv"
 _RADIO_ROOT_FILE_NAME = "bouquets.radio"
+_DEFAULT_BOUQUET_NAME = "favourites"
 
 
 def get_bouquets(path):
@@ -22,7 +23,11 @@ def write_bouquets(path, bouquets):
         line.append("#NAME {}\n".format(bqs.name))
 
         for bq in bqs.bouquets:
-            bq_name = re.sub(pattern, "_", bq.name)
+            bq_name = bq.name
+            if bq_name == "Favourites (TV)" or bq_name == "Favourites (Radio)":
+                bq_name = _DEFAULT_BOUQUET_NAME
+            else:
+                bq_name = re.sub(pattern, "_", bq.name)
             line.append(srv_line.format(bq_name, bq.type))
             write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
 
