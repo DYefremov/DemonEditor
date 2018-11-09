@@ -492,6 +492,7 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
                     <property name="width_chars">8</property>
+                    <property name="max_width_chars">8</property>
                     <property name="text" translatable="yes">21</property>
                     <property name="caps_lock_warning">False</property>
                     <property name="primary_icon_name">network-workgroup-symbolic</property>
@@ -507,6 +508,7 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
                     <property name="width_chars">8</property>
+                    <property name="max_width_chars">8</property>
                     <property name="caps_lock_warning">False</property>
                     <property name="primary_icon_name">alarm-symbolic</property>
                     <property name="input_purpose">digits</property>

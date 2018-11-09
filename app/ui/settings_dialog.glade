@@ -367,6 +367,7 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">6</property>
+                            <property name="max_width_chars">6</property>
                             <property name="text">21</property>
                             <property name="primary_icon_name">network-workgroup-symbolic</property>
                           </object>
@@ -442,6 +443,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="max_length">5</property>
                             <property name="width_chars">6</property>
+                            <property name="max_width_chars">6</property>
                             <property name="text" translatable="yes">80</property>
                             <property name="primary_icon_name">network-workgroup-symbolic</property>
                           </object>
@@ -500,6 +502,7 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">6</property>
+                            <property name="max_width_chars">6</property>
                             <property name="text" translatable="yes">23</property>
                             <property name="primary_icon_name">network-workgroup-symbolic</property>
                           </object>
@@ -524,6 +527,7 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">12</property>
+                            <property name="max_width_chars">15</property>
                             <property name="primary_icon_name">avatar-default-symbolic</property>
                           </object>
                           <packing>
@@ -547,6 +551,7 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">12</property>
+                            <property name="max_width_chars">15</property>
                             <property name="primary_icon_name">emblem-readonly</property>
                           </object>
                           <packing>
@@ -572,6 +577,7 @@ Author: Dmitriy Yefremov
                             <property name="tooltip_text" translatable="yes">Timeout between commands in seconds</property>
                             <property name="max_length">2</property>
                             <property name="width_chars">6</property>
+                            <property name="max_width_chars">6</property>
                             <property name="primary_icon_name">alarm-symbolic</property>
                             <property name="input_purpose">number</property>
                             <property name="adjustment">telnet_timeout_adjustment</property>
