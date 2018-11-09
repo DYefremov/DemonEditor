@@ -6,7 +6,8 @@ from ftplib import FTP, error_perm
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request, urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, \
+    install_opener
 from xml.dom.minidom import parse
 
 from app.commons import log
@@ -205,7 +206,7 @@ def telnet(host, port=23, user="", password="", timeout=5):
 # ***************** Connections testing *******************#
 
 
-def test_ftp(host, port, user, password, timeout=2):
+def test_ftp(host, port, user, password, timeout=5):
     try:
         with FTP(host=host, user=user, passwd=password, timeout=timeout) as ftp:
             return ftp.getwelcome()
@@ -216,7 +217,15 @@ def test_ftp(host, port, user, password, timeout=2):
 def test_http(host, port, user, password, timeout=5):
     try:
         params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
-        with urlopen("http://{}/web/message?%s".format(host) % params, timeout=5) as f:
+        url = "http://{}:{}/web/message?{}".format(host, port, params)
+        # authentication
+        pass_mgr = HTTPPasswordMgrWithDefaultRealm()
+        pass_mgr.add_password(None, url, user, password)
+        auth_handler = HTTPBasicAuthHandler(pass_mgr)
+        opener = build_opener(auth_handler)
+        install_opener(opener)
+
+        with urlopen(url, timeout=5) as f:
             dom = parse(f)
             msg = ""
             for elem in dom.getElementsByTagName("e2simplexmlresult"):
@@ -228,7 +237,7 @@ def test_http(host, port, user, password, timeout=5):
         raise TestException(e)
 
 
-def test_telnet(host, port, user, password, timeout=2):
+def test_telnet(host, port, user, password, timeout=5):
     try:
         gen = telnet_test(host, port, user, password, timeout)
         res = next(gen)
