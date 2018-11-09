@@ -60,9 +60,8 @@ class KeyboardKey(Enum):
     PAGE_DOWN_KP = 89
 
     @classmethod
-    def _missing_(cls, value):
-        """ Overridden for skip ValueError if value is not found. """
-        pass
+    def value_exist(cls, value):
+        return value in (val.value for val in cls.__members__.values())
 
 
 # Keys for move in lists. KEY_KP_(NAME) for laptop!!!

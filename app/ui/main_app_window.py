@@ -952,9 +952,10 @@ class MainAppWindow:
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
-        key = KeyboardKey(event.hardware_keycode)
-        if not key:
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
             return
+        key = KeyboardKey(key_code)
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         model_name, model = get_model_data(view)
 
@@ -980,9 +981,10 @@ class MainAppWindow:
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
-        key = KeyboardKey(event.hardware_keycode)
-        if not key:
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
             return
+        key = KeyboardKey(key_code)
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         alt = event.state & Gdk.ModifierType.MOD1_MASK
         model_name, model = get_model_data(view)

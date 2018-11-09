@@ -113,7 +113,10 @@ class SatellitesDialog:
 
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
-        key = KeyboardKey(event.hardware_keycode)
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+        key = KeyboardKey(key_code)
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
 
         if key is KeyboardKey.DELETE:
