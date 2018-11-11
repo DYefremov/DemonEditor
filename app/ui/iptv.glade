@@ -34,9 +34,10 @@ Author: Dmitriy Yefremov
   <!-- interface-copyright 2018 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkDialog" id="search_unavailable_streams_dialog">
+    <property name="use-header-bar">1</property>
     <property name="width_request">320</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes"> </property>
+    <property name="title" translatable="yes">   </property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
@@ -50,7 +51,7 @@ Author: Dmitriy Yefremov
       <placeholder/>
     </child>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="search_unavailable_dialog_box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">1</property>
@@ -59,7 +60,7 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="button6">
+              <object class="GtkButton" id="search_unavailable_cancel_button">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -70,8 +71,11 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">0</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -81,12 +85,13 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkFrame">
+          <object class="GtkFrame" id="search_unavailable_box_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">2</property>
             <property name="margin_right">2</property>
             <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="label_xalign">0</property>
             <property name="shadow_type">in</property>
             <child>
@@ -190,6 +195,9 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-6">search_unavailable_cancel_button</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkListStore" id="stream_type_liststore">
     <columns>
@@ -206,105 +214,61 @@ Author: Dmitriy Yefremov
     </data>
   </object>
   <object class="GtkDialog" id="iptv_dialog">
+    <property name="use-header-bar">1</property>
     <property name="width_request">480</property>
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Stream data</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="iptv_dialog_header">
+    <signal name="response" handler="on_response" swapped="no"/>
+    <child type="action">
+      <object class="GtkButton" id="iptv_dialog_cancel_button">
+        <property name="label">gtk-cancel</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Stream data</property>
-        <property name="spacing">2</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButton" id="iptv_dialog_cancel_button">
-            <property name="label">gtk-cancel</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_cancel" swapped="no"/>
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="spacing">2</property>
-            <child>
-              <object class="GtkButton" id="iptv_dialog_add_button">
-                <property name="label">gtk-add</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_save" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="iptv_dialog_save_button">
-                <property name="label">gtk-save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_save" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
       </object>
     </child>
+    <child type="action">
+      <object class="GtkButton" id="iptv_dialog_add_button">
+        <property name="label">gtk-add</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
+        <signal name="clicked" handler="on_save" swapped="no"/>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="iptv_dialog_save_button">
+        <property name="label">gtk-save</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
+        <signal name="clicked" handler="on_save" swapped="no"/>
+      </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="iptv_dialog_box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkBox" id="iptv_dialog_main_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="margin_top">2</property>
             <property name="orientation">vertical</property>
             <child>
@@ -482,6 +446,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="iptv_dialog_ts_data_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_bottom">5</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
@@ -655,11 +620,15 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-6">iptv_dialog_cancel_button</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkDialog" id="iptv_list_configuration_dialog">
+    <property name="use-header-bar">1</property>
     <property name="width_request">400</property>
     <property name="can_focus">False</property>
-    <property name="title"> </property>
+    <property name="title"> IPTV streams list configuration</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
@@ -668,73 +637,39 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar">
+    <signal name="response" handler="on_response" swapped="no"/>
+    <child type="action">
+      <object class="GtkButton" id="close_config_list_button">
+        <property name="label">gtk-close</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="spacing">2</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButton" id="close_config_list_button">
-            <property name="label">gtk-close</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="margin_right">15</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child type="title">
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">IPTV streams list configuration</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="list_configuration_apply_button">
-            <property name="label">gtk-apply</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="margin_left">15</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_apply" swapped="no"/>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
       </object>
     </child>
+    <child type="action">
+       <object class="GtkButton" id="list_configuration_apply_button">
+         <property name="label">gtk-apply</property>
+         <property name="visible">True</property>
+         <property name="can_focus">True</property>
+         <property name="receives_default">True</property>
+         <property name="use_stock">True</property>
+         <property name="always_show_image">True</property>
+         <signal name="clicked" handler="on_apply" swapped="no"/>
+       </object>
+    </child>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="iptv_list_configuration_dialog_box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkBox" id="iptv_list_data_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="margin_top">2</property>
             <property name="orientation">vertical</property>
             <child>
@@ -835,6 +770,7 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
                 <property name="label_xalign">0.019999999552965164</property>
                 <property name="shadow_type">in</property>
                 <child>
@@ -1135,6 +1071,9 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkInfoBar" id="list_configuration_info_bar">
             <property name="can_focus">False</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
+            <property name="margin_bottom">1</property>
             <property name="show_close_button">True</property>
             <signal name="response" handler="on_info_bar_close" swapped="no"/>
             <child internal-child="action_area">
@@ -1185,7 +1124,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-7">close_config_list_button</action-widget>
+      <action-widget response="-6">close_config_list_button</action-widget>
     </action-widgets>
   </object>
 </interface>

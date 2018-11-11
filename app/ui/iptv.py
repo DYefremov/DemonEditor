@@ -27,10 +27,10 @@ def is_data_correct(elems):
 class IptvDialog:
 
     def __init__(self, transient, view, services, bouquet, profile=Profile.ENIGMA_2, action=Action.ADD):
-        handlers = {"on_entry_changed": self.on_entry_changed,
+        handlers = {"on_response": self.on_response,
+                    "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
                     "on_save": self.on_save,
-                    "on_cancel": self.on_cancel,
                     "on_stream_type_changed": self.on_stream_type_changed}
 
         builder = Gtk.Builder()
@@ -88,8 +88,9 @@ class IptvDialog:
     def show(self):
         self._dialog.run()
 
-    def on_cancel(self, item):
-        self._dialog.destroy()
+    def on_response(self, dialog, response):
+        if response == Gtk.ResponseType.CANCEL:
+            self._dialog.destroy()
 
     def on_save(self, item):
         self.on_url_changed(self._url_entry)
@@ -278,6 +279,7 @@ class IptvListConfigurationDialog:
 
     def __init__(self, transient, services, iptv_rows, bouquet, profile):
         handlers = {"on_apply": self.on_apply,
+                    "on_response": self.on_response,
                     "on_stream_type_default_togged": self.on_stream_type_default_togged,
                     "on_stream_type_changed": self.on_stream_type_changed,
                     "on_default_type_toggled": self.on_default_type_toggled,
@@ -328,7 +330,10 @@ class IptvListConfigurationDialog:
 
     def show(self):
         self._dialog.run()
-        self._dialog.destroy()
+
+    def on_response(self, dialog, response):
+        if response == Gtk.ResponseType.CANCEL:
+            self._dialog.destroy()
 
     def on_stream_type_changed(self, box):
         self.update_reference()
