@@ -50,7 +50,7 @@ Author: Dmitriy Yefremov
         <property name="spacing">5</property>
         <property name="show_close_button">True</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="header_left_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">2</property>
@@ -256,14 +256,14 @@ Author: Dmitriy Yefremov
                 <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkGrid">
+                  <object class="GtkGrid" id="main_settings_bo">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="row_spacing">2</property>
                     <property name="column_spacing">2</property>
                     <property name="column_homogeneous">True</property>
                     <child>
-                      <object class="GtkLabel" id="label9">
+                      <object class="GtkLabel" id="ip_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Receiver IP:</property>
@@ -290,7 +290,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label11">
+                      <object class="GtkLabel" id="data_path_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Current data path:</property>
@@ -350,7 +350,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="spacing">2</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="use_http_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Use HTTP</property>
@@ -362,7 +362,7 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSwitch">
+                          <object class="GtkSwitch" id="use_http_switch">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Use http to reload data in the receiver.</property>
@@ -402,7 +402,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkFrame">
+          <object class="GtkFrame" id="settings_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>

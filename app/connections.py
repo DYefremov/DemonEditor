@@ -6,15 +6,16 @@ from ftplib import FTP, error_perm
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, \
-    install_opener
+from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
 from xml.dom.minidom import parse
 
 from app.commons import log
 from app.properties import Profile
 
-__DATA_FILES_LIST = ("tv", "radio", "lamedb", "lamedb5", "blacklist", "whitelist",  # enigma 2
-                     "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
+_BQ_FILES_LIST = ("tv", "radio",  # enigma 2
+                  "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
+
+_DATA_FILES_LIST = ("lamedb", "lamedb5", "services.xml", "blacklist", "whitelist",)
 
 _SAT_XML_FILE = "satellites.xml"
 _WEBTV_XML_FILE = "webtv.xml"
@@ -43,10 +44,10 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(properties["services_path"])
             ftp.dir(files.append)
-
+            file_list = _BQ_FILES_LIST + _DATA_FILES_LIST if download_type is DownloadType.ALL else _BQ_FILES_LIST
             for file in files:
                 name = str(file).strip()
-                if name.endswith(__DATA_FILES_LIST):
+                if name.endswith(file_list):
                     name = name.split()[-1]
                     download_file(ftp, name, save_path, callback)
         # satellites.xml and webtv section
@@ -67,26 +68,18 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
 
 
 def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
-                callback=None, done_callback=None):
+                callback=None, done_callback=None, use_http=False):
     data_path = properties["data_dir_path"]
     host = properties["host"]
     # telnet
     tn = telnet(host=host, user=properties.get("telnet_user", "root"), password=properties.get("telnet_password", ""),
                 timeout=properties.get("telnet_timeout", 5))
     next(tn)
-    web_reachable = False
-    try:
-        # Checking if OpenWebif is reachable
-        urlopen(Request("http://{}/#".format(host)), timeout=1)
-    except HTTPError as er:
-        web_reachable = er.code == 401
-    except Exception:
-        pass  # NOP
-    else:
-        web_reachable = True
 
-    if profile is Profile.ENIGMA_2 and download_type is DownloadType.BOUQUETS and web_reachable:
-        tn.send('wget -qO - "http://localhost/web/message?text=User+bouquets+will+be+updated&type=2&timeout=10"')
+    if profile is Profile.ENIGMA_2 and download_type is DownloadType.BOUQUETS and use_http:
+        params = urlencode({"text": "User bouquets will be updated!", "type": 2, "timeout": 5})
+        url = "http://{}:{}/web/message?{}".format(host, properties.get("http_port", "80"), params)
+        tn.send('wget -qO - "{}"'.format(url))
     else:
         # terminate enigma or neutrino
         tn.send("init 4")
@@ -95,22 +88,22 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
 
-        if download_type is DownloadType.ALL or download_type is DownloadType.SATELLITES:
+        if download_type is DownloadType.SATELLITES:
             ftp.cwd(properties["satellites_xml_path"])
-            send = send_file(_SAT_XML_FILE, data_path, ftp)
+            send = send_file(_SAT_XML_FILE, data_path, ftp, callback)
             if download_type is DownloadType.SATELLITES:
                 tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
-                if callback is not None:
-                    callback()
+                if done_callback is not None:
+                    done_callback()
                 return send
 
-        if profile is Profile.NEUTRINO_MP and download_type in (DownloadType.ALL, DownloadType.WEBTV):
+        if profile is Profile.NEUTRINO_MP and download_type is DownloadType.WEBTV:
             ftp.cwd(properties["satellites_xml_path"])
-            send = send_file(_WEBTV_XML_FILE, data_path, ftp)
+            send = send_file(_WEBTV_XML_FILE, data_path, ftp, callback)
             if download_type is DownloadType.WEBTV:
                 tn.send("init 6")
-                if callback is not None:
-                    callback()
+                if done_callback is not None:
+                    done_callback()
                 return send
 
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
@@ -120,42 +113,21 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                 ftp.dir(files.append)
                 for file in files:
                     name = str(file).strip()
-                    if name.endswith(__DATA_FILES_LIST):
+                    if name.endswith(("tv", "radio", "bouquets.xml", "ubouquets.xml")):
                         name = name.split()[-1]
-                        ftp.delete(name)
-                        callback("Deleting file: {}\n".format(name))
+                        callback("Deleting file: {}.   Status: {}\n".format(name, ftp.delete(name)))
 
+            file_list = _BQ_FILES_LIST + _DATA_FILES_LIST if download_type is DownloadType.ALL else _BQ_FILES_LIST
             for file_name in os.listdir(data_path):
                 if file_name == _SAT_XML_FILE or file_name == _WEBTV_XML_FILE:
                     continue
-                if file_name.endswith(__DATA_FILES_LIST):
-                    callback("Uploading file: {}\n".format(file_name))
-                    send_file(file_name, data_path, ftp)
+                if file_name.endswith(file_list):
+                    send_file(file_name, data_path, ftp, callback)
 
         if download_type is DownloadType.PICONS:
-            picons_dir_path = properties.get("picons_dir_path")
-            picons_path = properties.get("picons_path")
-            try:
-                ftp.cwd(picons_path)
-            except error_perm as e:
-                if str(e).startswith("550"):
-                    ftp.mkd(picons_path)  # if not exist
-                    ftp.cwd(picons_path)
+            upload_picons(ftp, properties.get("picons_dir_path"), properties.get("picons_path"))
 
-            files = []
-            ftp.dir(files.append)
-            picons_suf = (".jpg", ".png")
-
-            for file in files:
-                name = str(file).strip()
-                if name.endswith(picons_suf):
-                    name = name.split()[-1]
-                    ftp.delete(name)
-            for file_name in os.listdir(picons_dir_path):
-                if file_name.endswith(picons_suf):
-                    send_file(file_name, picons_dir_path, ftp)
-
-        if profile is Profile.ENIGMA_2 and download_type is DownloadType.BOUQUETS and web_reachable:
+        if profile is Profile.ENIGMA_2 and download_type is DownloadType.BOUQUETS and use_http:
             tn.send("wget -qO - http://127.0.0.1/web/servicelistreload?mode=2")
         else:
             # resume enigma or restart neutrino
@@ -165,16 +137,38 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
             done_callback()
 
 
+def upload_picons(ftp, src, dest):
+    try:
+        ftp.cwd(dest)
+    except error_perm as e:
+        if str(e).startswith("550"):
+            ftp.mkd(dest)  # if not exist
+            ftp.cwd(dest)
+    files = []
+    ftp.dir(files.append)
+    picons_suf = (".jpg", ".png")
+    for file in files:
+        name = str(file).strip()
+        if name.endswith(picons_suf):
+            name = name.split()[-1]
+            ftp.delete(name)
+    for file_name in os.listdir(src):
+        if file_name.endswith(picons_suf):
+            send_file(file_name, src, ftp)
+
+
 def download_file(ftp, name, save_path, callback):
     with open(save_path + name, "wb") as f:
-        ftp.retrbinary("RETR " + name, f.write)
-        callback("Downloading file: {}\n".format(name))
+        resp = ftp.retrbinary("RETR " + name, f.write)
+        callback("Downloading file: {}.   Status: {}\n".format(name, str(resp)))
 
 
-def send_file(file_name, path, ftp):
+def send_file(file_name, path, ftp, callback):
     """ Opens the file in binary mode and transfers into receiver """
     with open(path + file_name, "rb") as f:
-        return ftp.storbinary("STOR " + file_name, f)
+        send = ftp.storbinary("STOR " + file_name, f)
+        callback("Uploading file: {}.   Status: {}\n".format(file_name, str(send)))
+        return send
 
 
 def telnet(host, port=23, user="", password="", timeout=5):
@@ -219,11 +213,7 @@ def test_http(host, port, user, password, timeout=5):
         params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
         url = "http://{}:{}/web/message?{}".format(host, port, params)
         # authentication
-        pass_mgr = HTTPPasswordMgrWithDefaultRealm()
-        pass_mgr.add_password(None, url, user, password)
-        auth_handler = HTTPBasicAuthHandler(pass_mgr)
-        opener = build_opener(auth_handler)
-        install_opener(opener)
+        init_auth(password, url, user)
 
         with urlopen(url, timeout=5) as f:
             dom = parse(f)
@@ -235,6 +225,15 @@ def test_http(host, port, user, password, timeout=5):
             return msg
     except (URLError, HTTPError) as e:
         raise TestException(e)
+
+
+def init_auth(password, url, user):
+    """ Init authentication """
+    pass_mgr = HTTPPasswordMgrWithDefaultRealm()
+    pass_mgr.add_password(None, url, user, password)
+    auth_handler = HTTPBasicAuthHandler(pass_mgr)
+    opener = build_opener(auth_handler)
+    install_opener(opener)
 
 
 def test_telnet(host, port, user, password, timeout=5):

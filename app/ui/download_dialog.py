@@ -46,13 +46,16 @@ class DownloadDialog:
         self._password_entry = builder.get_object("password_entry")
         self._host_entry = builder.get_object("host_entry")
         self._port_entry = builder.get_object("port_entry")
+        self._timeout_entry = builder.get_object("timeout_entry")
         self._settings_buttons_box = builder.get_object("settings_buttons_box")
+        self._use_http_switch = builder.get_object("use_http_switch")
         self.init_properties()
 
         if profile is Profile.NEUTRINO_MP:
             self._webtv_radio_button.set_visible(True)
             builder.get_object("http_radio_button").set_visible(False)
             builder.get_object("use_http_box").set_visible(False)
+            self._use_http_switch.set_active(False)
 
     def show(self):
         self._dialog_window.show()
@@ -90,14 +93,17 @@ class DownloadDialog:
                 self._login_entry.set_text(self._profile_properties.get("telnet_user", ""))
                 self._password_entry.set_text(self._profile_properties.get("telnet_password", ""))
                 self._port_entry.set_text(self._profile_properties.get("telnet_port", ""))
+                self._timeout_entry.set_text(str(self._profile_properties.get("telnet_timeout", 0)))
             elif label == "HTTP":
                 self._login_entry.set_text(self._profile_properties.get("http_user", "root"))
                 self._password_entry.set_text(self._profile_properties.get("http_password", ""))
                 self._port_entry.set_text(self._profile_properties.get("http_port", ""))
+                self._timeout_entry.set_text(str(self._profile_properties.get("http_timeout", 0)))
             elif label == "FTP":
                 self._login_entry.set_text(self._profile_properties.get("user", ""))
                 self._password_entry.set_text(self._profile_properties.get("password", ""))
                 self._port_entry.set_text(self._profile_properties.get("port", ""))
+                self._timeout_entry.set_text("")
             self._current_property = label
 
     def on_preferences(self, item):
@@ -129,7 +135,8 @@ class DownloadDialog:
                             remove_unused=self._remove_unused_check_button.get_active(),
                             profile=self._profile,
                             callback=self.append_output,
-                            done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+                            done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO),
+                            use_http=self._use_http_switch.get_active())
         except Exception as e:
             message = str(getattr(e, "message", str(e)))
             self.show_info_message(message, Gtk.MessageType.ERROR)
