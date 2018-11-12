@@ -48,7 +48,7 @@ class KeyboardKey(Enum):
     PAGE_DOWN = 117
     LEFT = 113
     RIGHT = 114
-    F2 = 23
+    F2 = 68
     DELETE = 119
     BACK_SPACE = 22
     CTRL_L = 37
