@@ -197,7 +197,7 @@ class IptvDialog:
 class SearchUnavailableDialog:
 
     def __init__(self, transient, model, fav_bouquet, iptv_rows, profile):
-        handlers = {"on_search_unavailable_close": self.on_close}
+        handlers = {"on_response": self.on_response}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -263,12 +263,15 @@ class SearchUnavailableDialog:
 
     def show(self):
         response = self._dialog.run()
-        self._dialog.destroy()
 
         return self._to_delete if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT) else False
 
+    def on_response(self, dialog, response):
+        if response == Gtk.ResponseType.CANCEL:
+            self.on_close()
+
     @run_idle
-    def on_close(self, item=None, event=None):
+    def on_close(self):
         if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
         self._download_task = False
