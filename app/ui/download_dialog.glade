@@ -415,8 +415,6 @@ Author: Dmitriy Yefremov
               <object class="GtkGrid" id="settings_grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">
-</property>
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
                 <property name="margin_bottom">5</property>
@@ -438,6 +436,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkEntry" id="login_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                     <property name="text">root</property>
                     <property name="caps_lock_warning">False</property>
                     <property name="primary_icon_name">avatar-default-symbolic</property>
@@ -463,6 +462,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkEntry" id="password_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                     <property name="visibility">False</property>
                     <property name="invisible_char">●</property>
                     <property name="text">root</property>
