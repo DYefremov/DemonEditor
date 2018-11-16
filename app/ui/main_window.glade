@@ -45,6 +45,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="Insert" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -62,6 +63,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_bouquets_cut" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -73,6 +75,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_bouquets_copy" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -84,6 +87,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_bouquets_paste" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -101,6 +105,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_bouquets_edit" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -118,6 +123,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_delete" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
@@ -408,6 +414,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_fav_cut" object="fav_tree_view" swapped="no"/>
+        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -419,6 +426,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_fav_copy" object="fav_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -430,6 +438,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_fav_paste" object="fav_tree_view" swapped="no"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -446,6 +455,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_service_edit" object="fav_tree_view" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -683,6 +693,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_delete" object="fav_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
@@ -2551,6 +2562,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_to_fav_end_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="BackSpace" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -2561,6 +2573,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_to_fav_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="Insert" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -2664,6 +2677,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -2671,10 +2685,10 @@ Author: Dmitriy Yefremov
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="resize_mode">immediate</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_service_edit" object="services_tree_view" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -2757,6 +2771,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_delete" object="services_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
