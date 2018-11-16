@@ -19,15 +19,12 @@ def parse_m3u(path, profile):
     with open(path) as file:
         aggr = [None] * 10
         channels = []
-        count = 0
         name = None
         fav_id = None
         for line in file.readlines():
             if line.startswith("#EXTINF"):
                 name = line[1 + line.index(","):].strip()
-                count += 1
-            elif count == 1:
-                count = 0
+            elif not line.startswith("#"):
                 if profile is Profile.ENIGMA_2:
                     fav_id = ENIGMA2_FAV_ID_FORMAT.format(StreamType.NONE_TS.value, 1, 0, 0, 0, 0,
                                                           line.strip().replace(":", "%3a"), name, name, None)
