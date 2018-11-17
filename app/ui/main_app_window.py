@@ -7,6 +7,7 @@ from functools import lru_cache
 from gi.repository import GLib
 
 from app.commons import run_idle, log, run_task, run_with_delay
+from app.connections import http_request, HttpRequestType
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
@@ -161,6 +162,9 @@ class MainAppWindow:
         self._player = None
         self._full_screen = False
         self._drawing_area_xid = None
+        # http api
+        self._http_api = None
+        self._monitor_signal = False
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -191,9 +195,16 @@ class MainAppWindow:
         self._player_frame = builder.get_object("player_frame")
         self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
+        # Status bar
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
         self.update_profile_label()
+        self._receiver_info_box = builder.get_object("receiver_info_box")
+        self._receiver_info_label = builder.get_object("receiver_info_label")
+        self._signal_box = builder.get_object("signal_box")
+        self._service_name_label = builder.get_object("service_name_label")
+        self._signal_level_bar = builder.get_object("signal_level_bar")
+        self.init_http_api()
         # Dynamically active elements depending on the selected view
         self._tool_elements = {k: builder.get_object(k) for k in self._DYNAMIC_ELEMENTS}
         self._cas_label = builder.get_object("cas_label")
@@ -949,6 +960,7 @@ class MainAppWindow:
                 self.update_services_counts()
 
             self.update_profile_label()
+            self.init_http_api()
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
@@ -1208,6 +1220,7 @@ class MainAppWindow:
 
     @run_idle
     def on_player_play(self, item=None):
+        self.on_zap()
         url = self.get_stream_url()
         self.update_player_buttons()
         if not url:
@@ -1304,6 +1317,80 @@ class MainAppWindow:
         self._main_data_box.set_visible(full)
         self._status_bar_box.set_visible(full)
         self._player_tool_bar.set_visible(full)
+
+    # ************************ HTTP API ****************************#
+    @run_task
+    def init_http_api(self):
+        if self._http_api:
+            self._http_api.close()
+            self._http_api = None
+
+        prp = self._options.get(self._profile)
+        if prp is Profile.NEUTRINO_MP:
+            self.update_info_boxes_visible(False)
+            return
+
+        self._http_api = http_request(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
+                                      prp.get("http_user", ""), prp.get("http_password", ""))
+
+        next(self._http_api)
+        GLib.timeout_add_seconds(1, self.update_receiver_info)
+
+    @run_idle
+    def on_zap(self):
+        path, column = self._fav_view.get_cursor()
+        if not path or not self._http_api:
+            return
+
+        row = self._fav_model[path][:]
+        srv = self._services.get(row[-2], None)
+        if srv and srv.transponder:
+            ref = srv.picon_id.rstrip(".png").replace("_", ":")
+            req = self._http_api.send((HttpRequestType.ZAP, ref))
+            next(self._http_api)
+            if req and req.get("result", False):
+                GLib.timeout_add_seconds(2, self.update_service_info)
+
+    @run_task
+    def update_receiver_info(self):
+        info = self._http_api.send((HttpRequestType.INFO, None))
+        next(self._http_api)
+        if not info:
+            self._http_api.close()
+            self._http_api = None
+            GLib.idle_add(self.update_info_boxes_visible, False)
+            return
+
+        service_info = info.get("service", None)
+        res_info = info.get("info", None)
+        if res_info:
+            image = res_info.get("friendlyimagedistro", "")
+            image_ver = res_info.get("imagever", "")
+            brand = res_info.get("brand", "")
+            model = res_info.get("model", "")
+            info_text = "{} {}  Image: {} {}".format(brand, model, image, image_ver)
+            GLib.idle_add(self._receiver_info_label.set_text, info_text)
+        GLib.idle_add(self._receiver_info_box.set_visible, res_info)
+
+        if service_info:
+            GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
+            GLib.timeout_add_seconds(2, self.update_signal)
+        GLib.idle_add(self._signal_box.set_visible, service_info)
+
+    def update_signal(self):
+        sig = self._http_api.send((HttpRequestType.SIGNAL, None))
+        next(self._http_api)
+        self._signal_level_bar.set_value(sig.get("snr", 0))
+        return self._monitor_signal
+
+    def update_service_info(self):
+        info = self._http_api.send((HttpRequestType.INFO, None))
+        next(self._http_api)
+        if info:
+            service_info = info.get("service", None)
+            if service_info:
+                GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
+                GLib.timeout_add_seconds(1, self.update_signal)
 
     # ***************** Filter and search *********************#
 
@@ -1590,6 +1677,11 @@ class MainAppWindow:
 
     def get_format_version(self):
         return 5 if self._options.get(self._profile).get("v5_support", False) else 4
+
+    @run_idle
+    def update_info_boxes_visible(self, visible):
+        self._signal_box.set_visible(visible)
+        self._receiver_info_box.set_visible(visible)
 
 
 def start_app():

@@ -1,13 +1,14 @@
+import json
 import os
 import socket
 import time
+import urllib
 from enum import Enum
 from ftplib import FTP, error_perm
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
-from xml.dom.minidom import parse
 
 from app.commons import log
 from app.properties import Profile
@@ -27,6 +28,12 @@ class DownloadType(Enum):
     SATELLITES = 2
     PICONS = 3
     WEBTV = 4
+
+
+class HttpRequestType(Enum):
+    ZAP = "zap?sRef="
+    INFO = "about"
+    SIGNAL = "tunersignal"
 
 
 class TestException(Exception):
@@ -71,7 +78,7 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                 callback=None, done_callback=None, use_http=False):
     data_path = properties["data_dir_path"]
     host = properties["host"]
-    base_url = "http://{}:{}/web/".format(host, properties.get("http_port", "80"))
+    base_url = "http://{}:{}/api/".format(host, properties.get("http_port", "80"))
     tn, ht = None, None  # telnet, http
 
     try:
@@ -216,12 +223,7 @@ def http(user, password, url, callback):
     while True:
         url = yield
         with urlopen(url, timeout=5) as f:
-            dom = parse(f)
-            msg = None
-            for elem in dom.getElementsByTagName("e2simplexmlresult"):
-                for ch in elem.childNodes:
-                    if ch.nodeType == ch.ELEMENT_NODE:
-                        msg = "".join(t.nodeValue for t in ch.childNodes if t.nodeType == t.TEXT_NODE)
+            msg = json.load(f).get("message", None)
             if msg:
                 callback("HTTP: {}\n".format(msg))
 
@@ -251,6 +253,27 @@ def telnet(host, port=23, user="", password="", timeout=5):
         yield
 
 
+# ***************** http api *******************#
+
+def http_request(host, port, user, password):
+    base_url = "http://{}:{}/api/".format(host, port)
+    init_auth(user, password, base_url)
+    while True:
+        req_type, ref = yield
+        url = base_url
+        if req_type is HttpRequestType.ZAP:
+            url = base_url + "zap?sRef={}".format(urllib.parse.quote(ref))
+        elif req_type is HttpRequestType.INFO:
+            url = base_url + HttpRequestType.INFO.value
+        elif req_type is HttpRequestType.SIGNAL:
+            url = base_url + HttpRequestType.SIGNAL.value
+
+        try:
+            with urlopen(url, timeout=5) as f:
+                yield json.load(f)
+        except (URLError, HTTPError):
+            yield None
+
 # ***************** Connections testing *******************#
 
 
@@ -265,18 +288,12 @@ def test_ftp(host, port, user, password, timeout=5):
 def test_http(host, port, user, password, timeout=5):
     try:
         params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
-        url = "http://{}:{}/web/message?{}".format(host, port, params)
+        url = "http://{}:{}/api/message?{}".format(host, port, params)
         # authentication
         init_auth(user, password, url)
 
         with urlopen(url, timeout=5) as f:
-            dom = parse(f)
-            msg = ""
-            for elem in dom.getElementsByTagName("e2simplexmlresult"):
-                for ch in elem.childNodes:
-                    if ch.nodeType == ch.ELEMENT_NODE:
-                        msg = "".join(t.nodeValue for t in ch.childNodes if t.nodeType == t.TEXT_NODE)
-            return msg
+            return json.load(f).get("message", "")
     except (URLError, HTTPError) as e:
         raise TestException(e)
 
