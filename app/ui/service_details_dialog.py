@@ -602,13 +602,13 @@ class ServiceDetailsDialog:
         self.update_reference_entry()
 
     def update_reference_entry(self):
-        srv_type = 0 if self._srv_type_entry.get_text() == "2" else 1
+        srv_type = int(self._srv_type_entry.get_text())
         ssid = int(self._sid_entry.get_text())
         tid = int(self._transponder_id_entry.get_text())
         nid = int(self._network_id_entry.get_text())
         if self._profile is Profile.ENIGMA_2:
             on_id = int(self._namespace_entry.get_text())
-            ref = "1:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0".format(srv_type, ssid, tid, nid, on_id)
+            ref = "1:0:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0".format(srv_type, ssid, tid, nid, on_id)
             self._reference_entry.set_text(ref)
         else:
             self._reference_entry.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))

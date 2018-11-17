@@ -151,6 +151,7 @@ def parse_services(services, transponders, path):
         sp = "0"
         tid = data[2]
         nid = data[3]
+        srv_type = int(data[4])
         transponder_id = "{}:{}:{}".format(data[1], tid, nid)
         transponder = transponders.get(transponder_id, None)
 
@@ -160,7 +161,7 @@ def parse_services(services, transponders, path):
         onid = str(data[1]).lstrip(sp).upper()
         # For comparison in bouquets. Needed in upper case!!!
         fav_id = "{}:{}:{}:{}".format(ssid, tid, nid, onid)
-        picon_id = "1_0_{}_{}_{}_{}_{}_0_0_0.png".format(1, ssid, tid, nid, onid)
+        picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(srv_type, ssid, tid, nid, onid)
 
         all_flags = ch[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
