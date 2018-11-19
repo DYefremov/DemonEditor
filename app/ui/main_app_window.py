@@ -1326,7 +1326,7 @@ class MainAppWindow:
             self._http_api = None
 
         prp = self._options.get(self._profile)
-        if prp is Profile.NEUTRINO_MP:
+        if prp is Profile.NEUTRINO_MP or not prp.get("http_api_support", False):
             self.update_info_boxes_visible(False)
             return
 
