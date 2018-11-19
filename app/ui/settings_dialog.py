@@ -55,6 +55,7 @@ class SettingsDialog:
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         self._support_ver5_check_button = builder.get_object("support_ver5_check_button")
+        self._support_http_api_check_button = builder.get_object("support_http_api_check_button")
         self._settings_stack = builder.get_object("settings_stack")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
@@ -65,6 +66,7 @@ class SettingsDialog:
         profile = Profile(self._active_profile)
         self._neutrino_radio_button.set_active(profile is Profile.NEUTRINO_MP)
         self._support_ver5_check_button.set_sensitive(profile is not Profile.NEUTRINO_MP)
+        self._support_http_api_check_button.set_sensitive(profile is not Profile.NEUTRINO_MP)
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(profile is not Profile.NEUTRINO_MP)
 
     def show(self):
@@ -86,6 +88,7 @@ class SettingsDialog:
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(profile is not Profile.NEUTRINO_MP)
         self.set_profile(profile)
         self._support_ver5_check_button.set_sensitive(profile is Profile.ENIGMA_2)
+        self._support_http_api_check_button.set_sensitive(profile is Profile.ENIGMA_2)
 
     def set_profile(self, profile):
         self._active_profile = profile.value
@@ -123,6 +126,7 @@ class SettingsDialog:
         self._picons_dir_field.set_text(options.get("picons_dir_path", ""))
         if Profile(self._active_profile) is Profile.ENIGMA_2:
             self._support_ver5_check_button.set_active(options.get("v5_support", False))
+            self._support_http_api_check_button.set_active(options.get("http_api_support", False))
 
     def apply_settings(self, item=None):
         profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
@@ -148,6 +152,8 @@ class SettingsDialog:
         options["picons_dir_path"] = self._picons_dir_field.get_text()
         if profile is Profile.ENIGMA_2:
             options["v5_support"] = self._support_ver5_check_button.get_active()
+            options["http_api_support"] = self._support_http_api_check_button.get_active()
+
         write_config(self._options)
 
     @run_task

@@ -1380,7 +1380,10 @@ class MainAppWindow:
     def update_signal(self):
         sig = self._http_api.send((HttpRequestType.SIGNAL, None))
         next(self._http_api)
-        self._signal_level_bar.set_value(sig.get("snr", 0))
+        val = sig.get("snr", 0)
+        self._signal_level_bar.set_value(val if val else 0)
+        self._signal_level_bar.set_visible(val)
+
         return self._monitor_signal
 
     def update_service_info(self):

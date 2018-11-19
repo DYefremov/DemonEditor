@@ -681,125 +681,225 @@ Author: Dmitriy Yefremov
             <property name="margin_top">5</property>
             <property name="spacing">5</property>
             <child>
-              <object class="GtkFrame" id="stb_paths_frame">
+              <object class="GtkBox" id="paths_bo">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label_xalign">0.019999999552965164</property>
-                <property name="shadow_type">in</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkGrid" id="stb_dirs_grid">
+                  <object class="GtkFrame" id="stb_paths_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="row_spacing">2</property>
-                    <property name="column_homogeneous">True</property>
+                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkLabel" id="label5">
+                      <object class="GtkGrid" id="stb_dirs_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Services and Bouquets files:</property>
-                        <property name="xalign">0</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="row_spacing">2</property>
+                        <property name="column_homogeneous">True</property>
+                        <child>
+                          <object class="GtkLabel" id="label5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Services and Bouquets files:</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="services_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="text">/etc/enigma2/</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label6">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">User bouquet files:</property>
+                            <property name="xalign">2.2351741291171123e-10</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="user_bouquet_field">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="text">/etc/enigma2/</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label7">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Satellites.xml file:</property>
+                            <property name="xalign">0.019999999552965164</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="satellites_xml_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="text">/etc/tuxbox/</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label20">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Picons:</property>
+                            <property name="xalign">2.2351741291171123e-10</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="picons_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="text">/usr/share/enigma2/picon</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">7</property>
+                          </packing>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
                     </child>
-                    <child>
-                      <object class="GtkEntry" id="services_field">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="text">/etc/enigma2/</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label6">
+                    <child type="label">
+                      <object class="GtkLabel" id="stb_paths_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">User bouquet files:</property>
-                        <property name="xalign">2.2351741291171123e-10</property>
+                        <property name="label" translatable="yes">STB file paths:</property>
                       </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="user_bouquet_field">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="text">/etc/enigma2/</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label7">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Satellites.xml file:</property>
-                        <property name="xalign">0.019999999552965164</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="satellites_xml_field">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="text">/etc/tuxbox/</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label20">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Picons:</property>
-                        <property name="xalign">2.2351741291171123e-10</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="picons_field">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="text">/usr/share/enigma2/picon</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">7</property>
-                      </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
-                <child type="label">
-                  <object class="GtkLabel" id="stb_paths_label">
+                <child>
+                  <object class="GtkFrame" id="local_file_paths_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">STB file paths:</property>
+                    <property name="margin_top">5</property>
+                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkGrid" id="local_paths_grid">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="row_spacing">2</property>
+                        <property name="column_homogeneous">True</property>
+                        <child>
+                          <object class="GtkLabel" id="label18">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Picons path:</property>
+                            <property name="xalign">0.019999999552965164</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="picons_dir_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="text">/data/picons</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="secondary_icon_name">folder-open-symbolic</property>
+                            <signal name="icon-press" handler="on_picons_dir_field_icon_press" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label8">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Data path:</property>
+                            <property name="lines">0</property>
+                            <property name="xalign">0.019999999552965164</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="data_dir_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="text">/data</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="secondary_icon_name">folder-open-symbolic</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
+                            <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
+                            <signal name="icon-press" handler="on_data_dir_field_icon_press" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Local file paths:</property>
+                      </object>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -810,6 +910,7 @@ Author: Dmitriy Yefremov
             </child>
             <child>
               <object class="GtkFrame" id="settings_profile_frame">
+                <property name="width_request">140</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label_xalign">0.20000000298023224</property>
@@ -820,15 +921,17 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
+                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkRadioButton" id="enigma_radio_button">
                         <property name="label">Enigma2 </property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="margin_top">5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">neutrino_radio_button</property>
                         <signal name="toggled" handler="on_profile_changed" swapped="no"/>
@@ -855,6 +958,22 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkCheckButton" id="support_http_api_check_button">
+                        <property name="label" translatable="yes">Enable HTTP API
+  (experimental)
+ </property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkSeparator" id="settings_prof_separator">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -863,7 +982,7 @@ Author: Dmitriy Yefremov
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="padding">2</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -873,25 +992,29 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="margin_top">5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">enigma_radio_button</property>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
+                        <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSeparator" id="settings_prof_separator2">
+                      <object class="GtkAlignment">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <child>
+                          <placeholder/>
+                        </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
+                        <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="padding">2</property>
-                        <property name="position">4</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
@@ -900,7 +1023,6 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="margin_top">3</property>
                         <property name="image">reset_image</property>
                         <property name="always_show_image">True</property>
                         <signal name="clicked" handler="on_reset" swapped="no"/>
@@ -912,10 +1034,22 @@ Author: Dmitriy Yefremov
                         <property name="position">5</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkSeparator" id="settings_prof_separator2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">2</property>
+                        <property name="position">7</property>
+                      </packing>
+                    </child>
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkLabel" id="label12">
+                  <object class="GtkLabel" id="active_profile_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Active profile:</property>
@@ -933,97 +1067,6 @@ Author: Dmitriy Yefremov
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame" id="local_file_paths_frame">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
-            <property name="label_xalign">0.019999999552965164</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkGrid" id="local_paths_grid">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_bottom">5</property>
-                <property name="row_spacing">2</property>
-                <property name="column_homogeneous">True</property>
-                <child>
-                  <object class="GtkLabel" id="label18">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Picons path:</property>
-                    <property name="xalign">0.019999999552965164</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="picons_dir_field">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="text">/data/picons</property>
-                    <property name="primary_icon_stock">gtk-edit</property>
-                    <property name="secondary_icon_name">folder-open-symbolic</property>
-                    <signal name="icon-press" handler="on_picons_dir_field_icon_press" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label8">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Data path:</property>
-                    <property name="lines">0</property>
-                    <property name="xalign">0.019999999552965164</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="data_dir_field">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="text">/data</property>
-                    <property name="primary_icon_stock">gtk-edit</property>
-                    <property name="secondary_icon_name">folder-open-symbolic</property>
-                    <property name="primary_icon_activatable">False</property>
-                    <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                    <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                    <signal name="icon-press" handler="on_data_dir_field_icon_press" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-            <child type="label">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Local file paths:</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
           </packing>
         </child>
       </object>
