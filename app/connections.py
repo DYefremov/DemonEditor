@@ -223,7 +223,7 @@ def http(user, password, url, callback):
     while True:
         url = yield
         with urlopen(url, timeout=5) as f:
-            msg = json.load(f).get("message", None)
+            msg = json.loads(f.read().decode("utf-8")).get("message", None)
             if msg:
                 callback("HTTP: {}\n".format(msg))
 
@@ -270,9 +270,10 @@ def http_request(host, port, user, password):
 
         try:
             with urlopen(url, timeout=5) as f:
-                yield json.load(f)
+                yield json.loads(f.read().decode("utf-8"))
         except (URLError, HTTPError):
             yield None
+
 
 # ***************** Connections testing *******************#
 
@@ -293,7 +294,7 @@ def test_http(host, port, user, password, timeout=5):
         init_auth(user, password, url)
 
         with urlopen(url, timeout=5) as f:
-            return json.load(f).get("message", "")
+            return json.loads(f.read().decode("utf-8")).get("message", "")
     except (URLError, HTTPError) as e:
         raise TestException(e)
 
