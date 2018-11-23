@@ -39,6 +39,7 @@ class KeyboardKey(Enum):
     X = 53
     C = 54
     V = 55
+    Z = 52
     INSERT = 118
     HOME = 110
     END = 115
