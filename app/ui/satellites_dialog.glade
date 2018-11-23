@@ -845,6 +845,7 @@ Author: Dmitriy Yefremov
     </data>
   </object>
   <object class="GtkDialog" id="satellite_dialog">
+    <property name="use-header-bar">1</property>
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="destroy_with_parent">True</property>
@@ -904,10 +905,10 @@ Author: Dmitriy Yefremov
           <object class="GtkFrame" id="satellite_dialog_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="margin_top">5</property>
-            <property name="margin_bottom">2</property>
+            <property name="margin_bottom">5</property>
             <property name="label_xalign">0.019999999552965164</property>
             <property name="shadow_type">in</property>
             <child>
@@ -1032,6 +1033,7 @@ Author: Dmitriy Yefremov
     </data>
   </object>
   <object class="GtkDialog" id="transponder_dialog">
+    <property name="use-header-bar">1</property>
     <property name="width_request">320</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
@@ -1094,9 +1096,10 @@ Author: Dmitriy Yefremov
           <object class="GtkFrame" id="transponder_dialog_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="label_xalign">0.019999999552965164</property>
             <property name="shadow_type">in</property>
             <child>
