@@ -1003,9 +1003,6 @@ class MainAppWindow:
 
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
-        elif model_name == self._FAV_LIST_NAME and key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
-            self.update_fav_num_column(model)
-            self.update_bouquet_list()
         elif ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
@@ -1029,8 +1026,14 @@ class MainAppWindow:
             self.on_service_edit(view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-        elif ctrl and model_name == self._FAV_LIST_NAME and key is KeyboardKey.P:
-            self.on_play_stream()
+        elif ctrl and model_name == self._FAV_LIST_NAME:
+            if key is KeyboardKey.P:
+                self.on_play_stream()
+            if key is KeyboardKey.Z:
+                self.on_zap()
+            elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
+                self.update_fav_num_column(model)
+                self.update_bouquet_list()
 
     def on_download(self, item):
         DownloadDialog(transient=self._main_window,
@@ -1139,6 +1142,7 @@ class MainAppWindow:
     def on_fav_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.on_play_stream()
+            self.on_zap()
         else:
             return self.on_view_popup_menu(menu, event)
 
@@ -1220,7 +1224,6 @@ class MainAppWindow:
 
     @run_idle
     def on_player_play(self, item=None):
-        self.on_zap()
         url = self.get_stream_url()
         self.update_player_buttons()
         if not url:
