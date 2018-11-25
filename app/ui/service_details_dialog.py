@@ -497,7 +497,7 @@ class ServiceDetailsDialog:
             system = self._sys_combo_box.get_active_id()
             pos = str(round(self._sat_pos_button.get_value(), 1))
             return freq, rate, pol, fec, system, pos
-        elif tr_type == "t":
+        elif tr_type in "tc":
             o_srv = self._old_service
             return o_srv.freq, o_srv.rate, o_srv.pol, o_srv.fec, o_srv.system, o_srv.pos
 
