@@ -14,7 +14,8 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **Ctrl + S, T** in Satellites edit tool for create satellite or transponder.                                                                 
 * **Ctrl + L** - parental lock.                                                                                                          
 * **Ctrl + H** - hide/skip.                                                                                                                                                                                                 
-* **Ctrl + P** - start play IPTV or other stream in the bouquet list.                                                                                                                                                      
+* **Ctrl + P** - start play IPTV or other stream in the bouquet list.                                                   
+* **Ctrl + Z** - switch(**zap**) the channel(works when the HTTP API is enabled, Enigma2 only).                                                                                                                                                                                                                                                                                     
 * **Space** - select/deselect.                                                                                                                                                                                                                                                                                                           
 * **Left/Right** - remove selection.                                                                                       
 * **Ctrl + Up, Down, PageUp, PageDown, Home, End** - move selected items in the list.                                                                                                                                                                                                                                                                                                                                        
@@ -26,11 +27,12 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 ### Minimum requirements:
 Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings.
 #### Note.
-To create a simple debian package, you can use the build-deb.sh                                                         
+To create a simple debian package, you can use the *build-deb.sh.*                                                         
 
 Tests only with openATV image and Formuler F1 receiver in my preferred Linux distros                                    
 (latest Linux Mint 18.* and 19 MATE 64-bit)!                                                                                                                                                       
 
-**Terrestrial and cable channels at the moment are not supported!**
+**Terrestrial(DVB-T/T2) channels are supported with limitations (Enigma2 only)!**                                                                                     
+**Cable channels at the moment are not supported!**
 
 
