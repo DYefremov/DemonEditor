@@ -1420,13 +1420,22 @@ class MainAppWindow:
         self._sat_positions.clear()
         sat_positions = set()
         terrestrial = False
+        cable = False
+
         for srv in self._services.values():
-            if srv.transponder_type == "s" and srv.pos:
+            tr_type = srv.transponder_type
+            if tr_type == "s" and srv.pos:
                 sat_positions.add(float(srv.pos))
-            elif srv.transponder_type == "t":
+            elif tr_type == "t":
                 terrestrial = True
+            elif tr_type == "c":
+                cable = True
+
         if terrestrial:
             self._sat_positions.append("T")
+        if cable:
+            self._sat_positions.append("C")
+
         self._sat_positions.extend(map(str, sorted(sat_positions)))
         if self._filter_bar.is_visible():
             self.update_filter_sat_positions()

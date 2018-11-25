@@ -197,7 +197,7 @@ class ServiceDetailsDialog:
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
         self.select_active_text(self._sys_combo_box, srv.system)
-        if tr_type == "t" and self._profile is Profile.ENIGMA_2:
+        if tr_type in "tc" and self._profile is Profile.ENIGMA_2:
             self.update_ui_for_terrestrial()
         else:
             self.set_sat_positions(srv.pos)
