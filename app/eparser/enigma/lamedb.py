@@ -1,7 +1,6 @@
-"""   This module used for parsing and write lamedb file
+"""   This module used for parsing and write lamedb file   """
+import re
 
-      Currently implemented only for satellite channels!!!
-"""
 from app.commons import log
 from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
@@ -82,6 +81,32 @@ def parse(path, version=4):
     raise SyntaxError("Unsupported version of the format.")
 
 
+def parse_v3(services, transponders, path):
+    """ Parsing version 3 """
+    for t in transponders:
+        tr = transponders[t].lower()
+        tr_type = tr[0:1]
+        if tr_type == "c":
+            tr += ":0:0:0"
+        elif tr_type == "t":
+            tr += ":0:0"
+        else:
+            tr_data = tr.split(_SEP)
+            len_data = len(tr_data)
+            if len_data == 6:
+                tr_data.append("0")
+            elif len_data == 9:
+                tr_data.insert(6, "0")
+                tr_data.append("0")
+                tr_data.append("2")
+
+            tr = _SEP.join(tr_data)
+
+        transponders[t] = tr
+
+    return parse_services(services, transponders, path)
+
+
 def parse_v4(path):
     """ Parsing version 4 """
     with open(path + _FILE_NAME, "r", encoding="utf-8", errors="replace") as file:
@@ -91,14 +116,20 @@ def parse_v4(path):
             log("lamedb parse error: " + str(e))
         else:
             transponders, sep, services = data.partition("transponders")  # 1 step
-            if not transponders.endswith("/4/\n"):
-                msg = "lamedb parsing error: unsupported format.\n Only version 4 is supported!"
+            pattern = re.compile("/[34]/$")
+            match = re.search(pattern, transponders)
+            if not match:
+                msg = "lamedb parsing error: unsupported format."
                 log(msg)
                 raise SyntaxError(msg)
+
             transponders, sep, services = services.partition("services")  # 2 step
             services, sep, _ = services.partition("\nend")  # 3 step
 
-            return parse_services(services.split("\n"), parse_transponders(transponders.split("/")), path)
+            if match.group() == "/3/":
+                return parse_v3(services.split("\n"), parse_transponders(transponders.split("/")), path)
+
+        return parse_services(services.split("\n"), parse_transponders(transponders.split("/")), path)
 
 
 def parse_v5(path):
@@ -147,10 +178,25 @@ def parse_services(services, transponders, path):
         srv.remove(srv[0])
 
     for ch in srv:
-        data = str(ch[0]).split(_SEP)
+        data_id = str(ch[0]).lower()  # lower is for lamedb ver.3
+        data = data_id.split(_SEP)
         sp = "0"
         tid = data[2]
         nid = data[3]
+        # For lamedb ver.3
+        is_v3 = False
+        if len(tid) < 4:
+            is_v3 = True
+            tid = "{:0>4}".format(tid)
+            data[2] = tid
+        if len(nid) < 4:
+            is_v3 = True
+            nid = "{:0>4}".format(nid)
+            data[3] = nid
+        if is_v3:
+            data[0] = "{:0>4}".format(data[0])
+            data_id = _SEP.join(data)
+
         srv_type = int(data[4])
         transponder_id = "{}:{}:{}".format(data[1], tid, nid)
         transponder = transponders.get(transponder_id, None)
@@ -206,7 +252,7 @@ def parse_services(services, transponders, path):
                                     fec=FEC[tr[3]],
                                     system=system,
                                     pos=pos,
-                                    data_id=ch[0],
+                                    data_id=data_id,
                                     fav_id=fav_id,
                                     transponder=transponder))
     return channels

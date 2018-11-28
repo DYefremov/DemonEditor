@@ -32,6 +32,9 @@ To create a simple debian package, you can use the *build-deb.sh.*
 Tests only with openATV image and Formuler F1 receiver in my preferred Linux distros                                    
 (latest Linux Mint 18.* and 19 MATE 64-bit)!                                                                                                                                                       
 
-**Terrestrial(DVB-T/T2) and cable channels are supported(Enigma2 only) with limitation!**                                                                                     
+**Terrestrial(DVB-T/T2) and cable channels are supported(Enigma2 only) with limitation!** 
+
+Main supported **lamedb** format is version **4**. Versions **3** and **5** has only experimental support!                                                                                                                                          
+For version **3** is only read mode available. When saving, version **4** format is used!                                                                                                                       
 
 
