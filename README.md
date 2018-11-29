@@ -35,6 +35,6 @@ Tests only with openATV image and Formuler F1 receiver in my preferred Linux dis
 **Terrestrial(DVB-T/T2) and cable channels are supported(Enigma2 only) with limitation!** 
 
 Main supported **lamedb** format is version **4**. Versions **3** and **5** has only experimental support!                                                                                                                                          
-For version **3** is only read mode available. When saving, version **4** format is used!                                                                                                                       
+For version **3** is only read mode available. When saving, version **4** format is used instead!                                                                                                                       
 
 
