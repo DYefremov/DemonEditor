@@ -861,7 +861,7 @@ class MainAppWindow:
             return
 
         self.clear_current_data()
-        
+
         profile = Profile(self._profile)
         if profile is Profile.ENIGMA_2:
             self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
