@@ -297,7 +297,7 @@ Author: Dmitriy Yefremov
           <object class="GtkButton" id="create_left_popover_munu_button">
             <property name="label">gtk-new</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">New empty configuration</property>
             <property name="relief">none</property>
@@ -326,7 +326,7 @@ Author: Dmitriy Yefremov
           <object class="GtkButton" id="open_left_popover_munu_button">
             <property name="label">gtk-open</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="relief">none</property>
             <property name="use_stock">True</property>
@@ -343,7 +343,7 @@ Author: Dmitriy Yefremov
           <object class="GtkButton" id="save_left_popover_munu_button">
             <property name="label">gtk-save</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="relief">none</property>
             <property name="use_stock">True</property>
@@ -372,7 +372,7 @@ Author: Dmitriy Yefremov
           <object class="GtkButton" id="exit_left_popover_munu_button">
             <property name="label">gtk-quit</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="relief">none</property>
             <property name="use_stock">True</property>
@@ -724,7 +724,7 @@ Author: Dmitriy Yefremov
           <object class="GtkButton">
             <property name="label">gtk-preferences</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="relief">none</property>
             <property name="use_stock">True</property>
@@ -751,16 +751,10 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
           <object class="GtkButton">
             <property name="label">gtk-about</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="relief">none</property>
             <property name="use_stock">True</property>
