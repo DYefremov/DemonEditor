@@ -71,6 +71,7 @@ class MainAppWindow:
                     "on_download": self.on_download,
                     "on_data_open": self.on_data_open,
                     "on_data_save": self.on_data_save,
+                    "on_new_configuration": self.on_new_configuration,
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_tree_view_key_release": self.on_tree_view_key_release,
                     "on_bouquets_selection": self.on_bouquets_selection,
@@ -853,6 +854,22 @@ class MainAppWindow:
         if profile is Profile.ENIGMA_2:
             # blacklist
             write_blacklist(path, self._blacklist)
+
+    def on_new_configuration(self, item):
+        """ Creates new empty configuration """
+        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
+            return
+
+        self.clear_current_data()
+        
+        profile = Profile(self._profile)
+        if profile is Profile.ENIGMA_2:
+            self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
+            self._bouquets_model.append(None, ["Favourites (Radio)", None, None, BqType.RADIO.value])
+        elif profile is Profile.NEUTRINO_MP:
+            self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
+            self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
+            self._bouquets_model.append(None, ["WEBTV", None, None, BqType.WEBTV.value])
 
     def on_services_selection(self, model, path, column):
         self.update_service_bar(model, path)
