@@ -33,67 +33,6 @@ Author: Dmitriy Yefremov
   <!-- interface-name DemonEditor -->
   <!-- interface-copyright 2018 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
-  <object class="GtkPopoverMenu" id="add_header_popover_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkFrame">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="label_xalign">0</property>
-        <property name="shadow_type">in</property>
-        <child>
-          <object class="GtkBox" id="add_header_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">2</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Satellite</property>
-                <property name="centered">True</property>
-                <signal name="clicked" handler="on_satellite_add" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Transponder</property>
-                <property name="centered">True</property>
-                <signal name="clicked" handler="on_transponder_add" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-        </child>
-        <child type="label_item">
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">main</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-  </object>
   <object class="GtkListStore" id="fec_store">
     <columns>
       <!-- column-name fec -->
@@ -139,135 +78,122 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <signal name="button-release-event" handler="on_popover_release" swapped="no"/>
     <child>
-      <object class="GtkFrame" id="left_popover_munu_frame">
+      <object class="GtkBox" id="left_popover_munu_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="label_xalign">0</property>
-        <property name="shadow_type">in</property>
+        <property name="halign">center</property>
+        <property name="margin_left">10</property>
+        <property name="margin_right">10</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkButton" id="open_left_popover_munu_button">
+            <property name="label">gtk-open</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="relief">none</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_open" object="satellites_tree_store" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_left_popover_munu_button">
+            <property name="label">gtk-save</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="relief">none</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_save" object="satellites_editor_tree_view" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">2</property>
-            <child>
-              <object class="GtkButton" id="open_left_popover_munu_button">
-                <property name="label">gtk-open</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_open" object="satellites_tree_store" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="save_left_popover_munu_button">
-                <property name="label">gtk-save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_save" object="satellites_editor_tree_view" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="save_as_left_popover_munu_button">
-                <property name="label">gtk-save-as</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_save_as" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="update_left_popover_munu_button">
-                <property name="label">gtk-refresh</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_update" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="exit_left_popover_munu_button">
-                <property name="label">gtk-quit</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">none</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_quit" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">6</property>
-              </packing>
-            </child>
           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
         </child>
-        <child type="label_item">
-          <placeholder/>
+        <child>
+          <object class="GtkButton" id="save_as_left_popover_munu_button">
+            <property name="label">gtk-save-as</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="relief">none</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_save_as" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="update_left_popover_munu_button">
+            <property name="label">gtk-refresh</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="relief">none</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_update" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">7</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">2</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="exit_left_popover_menu_button">
+            <property name="label">gtk-quit</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="relief">none</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_quit" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">9</property>
+          </packing>
         </child>
       </object>
       <packing>
@@ -336,41 +262,46 @@ Author: Dmitriy Yefremov
       </row>
     </data>
   </object>
+  <object class="GtkImage" id="popup_menu_add_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-add</property>
+  </object>
+  <object class="GtkImage" id="popup_menu_add_image_2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-add</property>
+  </object>
   <object class="GtkMenu" id="popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="reserve_toggle_size">False</property>
     <child>
-      <object class="GtkImageMenuItem" id="add_popoup_menu_item">
-        <property name="label">gtk-add</property>
+      <object class="GtkImageMenuItem" id="add_sat_popup_menu_item">
+        <property name="label" translatable="yes">Satellite</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="add_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkMenuItem" id="add_sat_popup_menu_item">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Satellite</property>
-                <property name="use_underline">True</property>
-                <signal name="activate" handler="on_satellite_add" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="add_tr_popup_menu_item">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Transponder</property>
-                <property name="use_underline">True</property>
-                <signal name="activate" handler="on_transponder_add" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
+        <property name="image">popup_menu_add_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_satellite_add" swapped="no"/>
+        <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="add_tr_popup_menu_item">
+        <property name="label" translatable="yes">Transponder</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">popup_menu_add_image_2</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_transponder_add" swapped="no"/>
+        <accelerator key="t" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_menu_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
       </object>
     </child>
     <child>
@@ -381,6 +312,13 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="satellites_editor_tree_view" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_menu_separator_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
       </object>
     </child>
     <child>
@@ -391,6 +329,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_remove" object="satellites_editor_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
@@ -561,79 +500,6 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Satellites edit tool</property>
           </object>
-        </child>
-        <child>
-          <object class="GtkBox" id="right_header_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkMenuButton" id="add_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Add</property>
-                <property name="popover">add_header_popover_menu</property>
-                <child>
-                  <object class="GtkImage" id="add_header_button_img">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-add</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="edit_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Edit</property>
-                <signal name="clicked" handler="on_edit" object="satellites_editor_tree_view" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="edit_header_button_img">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-edit</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="remove_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Remove</property>
-                <signal name="clicked" handler="on_remove" object="satellites_editor_tree_view" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="remove_header_button_img">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-remove</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
         </child>
       </object>
     </child>
@@ -848,10 +714,12 @@ Author: Dmitriy Yefremov
     <property name="use-header-bar">1</property>
     <property name="can_focus">False</property>
     <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <property name="gravity">center</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="satellites_dialog_header">
         <property name="visible">True</property>
@@ -1038,11 +906,13 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">320</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <property name="gravity">center</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="transponder_dialog_header">
         <property name="visible">True</property>
@@ -1467,9 +1337,11 @@ Author: Dmitriy Yefremov
   <object class="GtkWindow" id="satellites_update_window">
     <property name="can_focus">False</property>
     <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <property name="gravity">center</property>
     <signal name="delete-event" handler="on_quit" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar">

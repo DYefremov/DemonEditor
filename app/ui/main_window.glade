@@ -1365,7 +1365,6 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="main_data_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_top">1</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkSearchBar" id="search_bar">
@@ -1534,6 +1533,18 @@ Author: Dmitriy Yefremov
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="top_separator">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">2</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
