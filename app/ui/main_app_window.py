@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 from contextlib import suppress
 from functools import lru_cache
@@ -29,7 +30,7 @@ from .settings_dialog import show_settings_dialog
 from .service_details_dialog import ServiceDetailsDialog, Action
 
 
-class MainAppWindow:
+class Application(Gtk.Application):
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
     _SERVICE_LIST_NAME = "services_list_store"
@@ -63,7 +64,9 @@ class MainAppWindow:
                          "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
         handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
                     "on_about_app": self.on_about_app,
@@ -205,7 +208,6 @@ class MainAppWindow:
         self._signal_box = builder.get_object("signal_box")
         self._service_name_label = builder.get_object("service_name_label")
         self._signal_level_bar = builder.get_object("signal_level_bar")
-        self.init_http_api()
         # Dynamically active elements depending on the selected view
         self._tool_elements = {k: builder.get_object(k) for k in self._DYNAMIC_ELEMENTS}
         self._cas_label = builder.get_object("cas_label")
@@ -237,7 +239,14 @@ class MainAppWindow:
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
                                                builder.get_object("search_up_button"))
-        self._main_window.show()
+
+    def do_startup(self):
+        Gtk.Application.do_startup(self)
+        self.init_http_api()
+
+    def do_activate(self):
+        self._main_window.set_application(self)
+        self._main_window.present()
 
     def init_drag_and_drop(self):
         """ Enable drag-and-drop """
@@ -270,7 +279,7 @@ class MainAppWindow:
         """  Called before app quit """
         write_config(self._options)  # storing current config
         self.on_player_close()
-        Gtk.main_quit()
+        self.quit()
 
     def on_resize(self, window):
         """ Stores new size properties for app window after resize """
@@ -864,8 +873,10 @@ class MainAppWindow:
 
         profile = Profile(self._profile)
         if profile is Profile.ENIGMA_2:
-            self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
-            self._bouquets_model.append(None, ["Favourites (Radio)", None, None, BqType.RADIO.value])
+            parent = self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
+            self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None), parent)
+            parent = self._bouquets_model.append(None, ["Favourites (Radio)", None, None, BqType.RADIO.value])
+            self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None), parent)
         elif profile is Profile.NEUTRINO_MP:
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
             self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
@@ -1717,12 +1728,8 @@ class MainAppWindow:
 
 
 def start_app():
-    MainAppWindow()
-    Gtk.main()
-
-
-def close_app():
-    Gtk.main_quit()
+    app = Application()
+    app.run(sys.argv)
 
 
 if __name__ == "__main__":
