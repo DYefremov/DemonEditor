@@ -34,6 +34,7 @@ class HttpRequestType(Enum):
     ZAP = "zap?sRef="
     INFO = "about"
     SIGNAL = "tunersignal"
+    STREAM = "streamcurrentm3u"
 
 
 class TestException(Exception):
@@ -267,10 +268,15 @@ def http_request(host, port, user, password):
             url = base_url + HttpRequestType.INFO.value
         elif req_type is HttpRequestType.SIGNAL:
             url = base_url + HttpRequestType.SIGNAL.value
+        elif req_type is HttpRequestType.STREAM:
+            url = base_url + HttpRequestType.STREAM.value
 
         try:
             with urlopen(url, timeout=5) as f:
-                yield json.loads(f.read().decode("utf-8"))
+                if req_type is HttpRequestType.STREAM:
+                    yield f.read().decode("utf-8")
+                else:
+                    yield json.loads(f.read().decode("utf-8"))
         except (URLError, HTTPError):
             yield None
 

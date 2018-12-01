@@ -15,6 +15,7 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **Ctrl + L** - parental lock.                                                                                                          
 * **Ctrl + H** - hide/skip.                                                                                                                                                                                                 
 * **Ctrl + P** - start play IPTV or other stream in the bouquet list.                                                   
+* **Ctrl + W** - switch to the channel and watch in the program.                                                                                              
 * **Ctrl + Z** - switch(**zap**) the channel(works when the HTTP API is enabled, Enigma2 only).                                                                                                                                                                                                                                                                                     
 * **Space** - select/deselect.                                                                                                                                                                                                                                                                                                           
 * **Left/Right** - remove selection.                                                                                       

@@ -1057,6 +1057,8 @@ class Application(Gtk.Application):
         elif ctrl and model_name == self._FAV_LIST_NAME:
             if key is KeyboardKey.P:
                 self.on_play_stream()
+            if key is KeyboardKey.W:
+                self.on_zap(self.on_watch)
             if key is KeyboardKey.Z:
                 self.on_zap()
             elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
@@ -1368,19 +1370,37 @@ class Application(Gtk.Application):
         GLib.timeout_add_seconds(1, self.update_receiver_info)
 
     @run_idle
-    def on_zap(self):
+    def on_watch(self):
+        """ Switch to the channel and watch in the player """
+        m3u = self._http_api.send((HttpRequestType.STREAM, None))
+        next(self._http_api)
+        if m3u:
+            url = [s for s in m3u.split("\n") if not s.startswith("#")]
+            if url:
+                GLib.timeout_add_seconds(1, self.play, url[0])
+
+    @run_task
+    def on_zap(self, callback=None):
+        """ Switch(zap) the channel """
         path, column = self._fav_view.get_cursor()
         if not path or not self._http_api:
             return
+
+        if self._player and self._player.is_playing():
+            self._player.stop()
 
         row = self._fav_model[path][:]
         srv = self._services.get(row[-2], None)
         if srv and srv.transponder:
             ref = srv.picon_id.rstrip(".png").replace("_", ":")
+
             req = self._http_api.send((HttpRequestType.ZAP, ref))
             next(self._http_api)
             if req and req.get("result", False):
                 GLib.timeout_add_seconds(2, self.update_service_info)
+                GLib.idle_add(scroll_to, path, self._fav_view)
+                if callback is not None:
+                    callback()
 
     @run_task
     def update_receiver_info(self):
