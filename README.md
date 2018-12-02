@@ -27,6 +27,10 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * Preview (playing) IPTV or other streams directly from the bouquet list(should be installed VLC).                                         
 ### Minimum requirements:
 Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings.
+#### Launching
+To start the program, in most cases it is enough to download the archive, unpack and run it by                                                   
+double clicking on DemonEditor.desktop in the root directory, or launching from the console                                                           
+with the command: ```python3 ./start.py```                                                                                                                                                    
 #### Note.
 To create a simple debian package, you can use the *build-deb.sh.*                                                         
 
