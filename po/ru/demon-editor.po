@@ -1,13 +1,17 @@
 # Copyright (C) 2018 Dmitriy Yefremov
 # This file is distributed under the MIT license.
-# Dmitriy Yefremov , 2018.
+#
+#
 msgid ""
 msgstr ""
+"Last-Translator: Dmitry Yefremov\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "translator-credits"
+msgstr ""
 
 # Main
 msgid "Service"
@@ -563,6 +567,9 @@ msgstr "Изменений не требуется!"
 
 msgid "This list does not contains IPTV streams!"
 msgstr "Текущий список не содержит потоков IPTV!"
+
+msgid "New empty configuration"
+msgstr "Новая конфигурация"
 
 
 

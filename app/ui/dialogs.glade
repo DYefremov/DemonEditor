@@ -49,6 +49,7 @@ Author: Dmitriy Yefremov
 Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
     <property name="authors">Dmitriy Yefremov
 </property>
+    <property name="translator_credits" translatable="yes">translator-credits</property>
     <property name="logo_icon_name">accessories-text-editor</property>
     <property name="wrap_license">True</property>
     <property name="license_type">mit-x11</property>
