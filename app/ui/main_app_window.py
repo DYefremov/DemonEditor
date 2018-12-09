@@ -248,6 +248,13 @@ class Application(Gtk.Application):
         self._main_window.set_application(self)
         self._main_window.present()
 
+    def do_shutdown(self):
+        """  Performs shutdown tasks """
+        write_config(self._options)  # storing current config
+        if self._player:
+            self._player.release()
+        Gtk.Application.do_shutdown(self)
+
     def init_drag_and_drop(self):
         """ Enable drag-and-drop """
         target = []
@@ -276,9 +283,6 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_close_app(self, *args):
-        """  Called before app quit """
-        write_config(self._options)  # storing current config
-        self.on_player_close()
         self.quit()
 
     def on_resize(self, window):
@@ -1276,10 +1280,6 @@ class Application(Gtk.Application):
                 self._player_box.set_size_request(w * 0.6, -1)
 
         self._player_box.set_visible(True)
-
-        if self._player.is_playing():
-            self.on_player_stop()
-
         GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
 
     def get_stream_url(self):

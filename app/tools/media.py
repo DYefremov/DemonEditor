@@ -1,3 +1,4 @@
+from app.commons import run_task
 from app.tools import vlc
 
 
@@ -15,13 +16,14 @@ class Player:
         _VLC_INSTANCE = vlc.Instance("--quiet --no-xlib").media_player_new()
         return _VLC_INSTANCE
 
+    @run_task
     def play(self, mrl=None):
-        if not self._is_playing:
-            if mrl:
-                self._player.set_mrl(mrl)
-            self._player.play()
-            self._is_playing = True
+        if mrl:
+            self._player.set_mrl(mrl)
+        self._player.play()
+        self._is_playing = True
 
+    @run_task
     def stop(self):
         if self._is_playing:
             self._player.stop()
@@ -30,6 +32,7 @@ class Player:
     def pause(self):
         self._player.pause()
 
+    @run_task
     def release(self):
         if self._player:
             self._is_playing = False
