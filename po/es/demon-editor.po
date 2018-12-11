@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Last-Translator: Frank Neirynck\n"
-"Language: nl\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -16,19 +16,19 @@ msgstr "Frank Neirynck <frank@insink.be>"
 
 # Main
 msgid "Service"
-msgstr "Dienst"
+msgstr "Servicio"
 
 msgid "Package"
-msgstr "Pakket"
+msgstr "Paquete"
 
 msgid "Type"
-msgstr "Type"
+msgstr "Tipo"
 
 msgid "Picon"
 msgstr "Picon"
 
 msgid "Freq"
-msgstr "Freq."
+msgstr "Frec."
 
 msgid "Rate"
 msgstr "Rate"
@@ -37,358 +37,358 @@ msgid "Pol"
 msgstr "Pol."
 
 msgid "System"
-msgstr "Systeem"
+msgstr "Sistema"
 
 msgid "Pos"
 msgstr "Pos."
 
 msgid "Num"
-msgstr "Nr"
+msgstr "Núm"
 
 msgid "Current IP:"
-msgstr "Huidig IP:"
+msgstr "IP actual:"
 
 msgid "Assign"
-msgstr "Toekennen"
+msgstr "Assignar"
 
 msgid "Bouquet details"
-msgstr "Details Boeket"
+msgstr "Detailes Ramo"
 
 msgid "Bouquets"
-msgstr "Boeketten"
+msgstr "Ramos"
 
 msgid "Copy"
-msgstr "Kopieer"
+msgstr "Copiar"
 
 msgid "Copy reference"
-msgstr "Referentiekopie"
+msgstr "Copia de Referencia"
 
 msgid "Download"
-msgstr "Download"
+msgstr "Descargar"
 
 msgid "Edit"
-msgstr "Wijzig"
+msgstr "Editar"
 
 msgid "Edit "
-msgstr "Wijzig "
+msgstr "Editar "
 
 msgid "Edit mаrker text"
-msgstr "Wijzig mаrker tekst"
+msgstr "Editar testo del mаrcador"
 
 msgid "FTP-transfer"
-msgstr "FTP-overdracht"
+msgstr "Transferencia-FTP"
 
 msgid "Global search"
-msgstr "Globale zoekopdracht"
+msgstr "Búsqueda Global"
 
 msgid "Hide"
-msgstr "Verberg"
+msgstr "Esconder"
 
 msgid "Hide/Skip On/Off     Ctrl + H"
-msgstr "Verberg/Overslaan Aan/Uit      Ctrl + H"
+msgstr "Esconder/Saltar Encender/Apagar      Ctrl + H"
 
 msgid "Add IPTV or stream service"
-msgstr "Voeg IPTV of stream dienst toe"
+msgstr "Añadir servicio IPTV"
 
 msgid "Import m3u"
-msgstr "Importeer m3u"
+msgstr "Importar m3u"
 
 msgid "Import m3u file"
-msgstr "Importeer m3u file"
+msgstr "Importar fichero m3u"
 
 msgid "List configuration"
-msgstr "Lijst configuratie"
+msgstr "Lista configuración"
 
 msgid "Rename for this bouquet"
-msgstr "Hernoem voor dit boeket"
+msgstr "Renombrar para este ramo"
 
 msgid "Set default name"
-msgstr "Stel standaard naam in"
+msgstr "Establecer nombre predeterminado"
 
 msgid "Insert marker"
-msgstr "Inserteer marker"
+msgstr "Inserter marcador"
 
 msgid "Locate in services"
-msgstr "Zoek in diensten"
+msgstr "Buscar en servicios"
 
 msgid "Locked"
-msgstr "Gesloten"
+msgstr "Cerrado"
 
 msgid "Move"
-msgstr "Verplaats"
+msgstr "Mover"
 
 msgid "New"
-msgstr "Nieuw"
+msgstr "Nuevo"
 
 msgid "New bouquet"
-msgstr "Nieuw boeket"
+msgstr "Ramo nuevo"
 
 msgid "Create bouquet"
-msgstr "Creeer boeket"
+msgstr "Crear ramo"
 
 msgid "For current satellite"
-msgstr "Voor huidige satelliet"
+msgstr "Para el Satélite actual"
 
 msgid "For current package"
-msgstr "Voor huidig pakket"
+msgstr "Para el paquete actual"
 
 msgid "For current type"
-msgstr "Voor huidig type"
+msgstr "Para el tipo actual"
 
 msgid "For each satellite"
-msgstr "Voor elke satelliet"
+msgstr "Para cada Satélite"
 
 msgid "For each package"
-msgstr "Voor elk pakket"
+msgstr "Para cada paquete"
 
 msgid "For each type"
-msgstr "Voor elk type"
+msgstr "Para cada tipo"
 
 msgid "Open"
-msgstr "Open"
+msgstr "Abrir"
 
 msgid "Parent lock On/Off     Ctrl + L"
-msgstr "Ouderlijk slot aan/uit     Ctrl + L"
+msgstr "Bloqueo parentesco Encender/Apagar     Ctrl + L"
 
 msgid "Picons"
 msgstr "Picons"
 
 msgid "Picons downloader"
-msgstr "Picons downloader"
+msgstr "Picons descargar"
 
 msgid "Satellites downloader"
-msgstr "Satellieten downloader"
+msgstr "Satélites descargar"
 
 msgid "Remove"
-msgstr "Verwijder"
+msgstr "Remover"
 
 msgid "Remove all unavailable"
-msgstr "Verwijder alle onbeschikbare"
+msgstr "Remover toto lo indisponible"
 
 msgid "Satellites editor"
-msgstr "Satelliet editor"
+msgstr "Editor Satélites"
 
 msgid "Save"
-msgstr "Opslaan"
+msgstr "Guardar"
 
 msgid "Search"
-msgstr "Zoek"
+msgstr "Buscar"
 
 msgid "Services"
-msgstr "Diensten"
+msgstr "Servicios"
 
 msgid "Services filter"
-msgstr "Diensten filter"
+msgstr "Filtro servicios"
 
 msgid "Settings"
-msgstr "Instellingen"
+msgstr "Configuraciones"
 
 msgid "Up"
-msgstr "Boven"
+msgstr "Arriba"
 
 msgid "Down"
-msgstr "Onder"
+msgstr "Abajo"
 
 msgid "Active profile:"
-msgstr "Actief profiel:"
+msgstr "Perfil activo:"
 
 msgid "All"
-msgstr "Alle"
+msgstr "Todo"
 
 msgid "Are you sure?"
-msgstr "Ben je zeker?"
+msgstr "Estás seguro?"
 
 msgid "Current data path:"
-msgstr "Huidig datapad:"
+msgstr "Ruta de datos actual:"
 
 msgid "Data:"
-msgstr "Data:"
+msgstr "Datos:"
 
 msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Enigma2 kanaal and satelliet lijst editor voor GNU/Linux"
+msgstr "Editor de Canales y Satélites Enigma2 para GNU/Linux"
 
 msgid "Host:"
-msgstr "Host:"
+msgstr "Anfitrión:"
 
 msgid "Loading data..."
-msgstr "Laden data..."
+msgstr "Cargar datos..."
 
 msgid "Receive"
-msgstr "Ontvangen"
+msgstr "Recibir"
 
 msgid "Receive files from receiver"
-msgstr "Ophalen files van uw ontvanger"
+msgstr "Recibir ficheros de su receptor"
 
 msgid "Receiver IP:"
-msgstr "Ontvanger IP:"
+msgstr "Receptor IP:"
 
 msgid "Remove unused bouquets"
-msgstr "Verwijder ongebruikte boeketten"
+msgstr "Remover ramos sin usar"
 
 msgid "Reset profile"
-msgstr "Profiel terugzetten"
+msgstr "Restablecer perfil"
 
 msgid "Satellites"
-msgstr "Satellieten"
+msgstr "Satélites"
 
 msgid "Satellites.xml file:"
-msgstr "Satellites.xml bestand:"
+msgstr "Fichero Satellites.xml:"
 
 msgid "Selected"
-msgstr "Geselecteerd"
+msgstr "Seleccionado"
 
 msgid "Send"
-msgstr "Verzend"
+msgstr "Enviar"
 
 msgid "Send files to receiver"
-msgstr "Verzend bestanden naar ontvanger"
+msgstr "Enviar ficheros al receptor"
 
 msgid "Services and Bouquets files:"
-msgstr "Diensten en Boeketten bestanden:"
+msgstr "Ficheros de Servicios y ramos:"
 
 msgid "User bouquet files:"
-msgstr "Importeer boeket bestanden:"
+msgstr "Importar ficheros de ramos:"
 
 msgid "Extra:"
 msgstr "Extra:"
 
 # Filter bar
 msgid "Only free"
-msgstr "Enkel gratis"
+msgstr "Solamente gratis"
 
 msgid "All positions"
-msgstr "Alle posities"
+msgstr "Todas las posiciones"
 
 msgid "All types"
-msgstr "Alle types"
+msgstr "Todas los tipos"
 
 # Streams player
 msgid "Play"
 msgstr "Play"
 
 msgid "Stop playback"
-msgstr "Stop afspelen"
+msgstr "Detener la reproducción"
 
 msgid "Previous stream in the list"
-msgstr "Vorige stream in de lijst"
+msgstr "Secuencia anterior en la lista"
 
 msgid "Next stream in the list"
-msgstr "Volgende stream in de lijst"
+msgstr "Secuencia siguiente en la lista"
 
 msgid "Toggle in fullscreen"
-msgstr "Wissel naar volledig scherm"
+msgstr "Cambiar a pantalla completa"
 
 msgid "Close"
-msgstr "Afsluiten"
+msgstr "Cerrar"
 
 # Picons dialog
 msgid "Load providers"
-msgstr "Laad leveranciers"
+msgstr "Cargar Proveedores"
 
 msgid "Providers"
-msgstr "Leveranciers"
+msgstr "Proveedores"
 
 msgid "Receive picons"
-msgstr "Ontvang picons"
+msgstr "Recibir picons"
 
 msgid "Picons name format:"
-msgstr "Picons naam formaat:"
+msgstr "Picons formato nombres:"
 
 msgid "Resize:"
-msgstr "Verklein/vergroot:"
+msgstr "Redimensionar:"
 
 msgid "Current picons path:"
-msgstr "Huidig pad picons:"
+msgstr "Ruta acual Picons:"
 
 msgid "Receiver picons path:"
-msgstr "Ontvanger picons pad:"
+msgstr "Ruta picons receptor:"
 
 msgid "Picons download tool"
-msgstr "Picons download gereedschap"
+msgstr "Picons herramiento de descarga"
 
 msgid "Transfer to receiver"
-msgstr "Transfereren naar ontvanger"
+msgstr "Transferir al receptor"
 
 msgid "Downloader"
-msgstr "Downloader"
+msgstr "Descargador"
 
 msgid "Converter"
-msgstr "Omvormer"
+msgstr "Convertidor"
 
 msgid "Convert"
-msgstr "Converteer"
+msgstr "Convertir"
 
 msgid "Path to save:"
-msgstr "Pad om op te slaan:"
+msgstr "Ruto para guardar:"
 
 msgid "Path to Enigma2 picons:"
-msgstr "Pad naar Enigma2 picons:"
+msgstr "Ruta a picons Enigma2:"
 
 msgid "Specify the correct position value for the provider!"
-msgstr "Geeft de juiste positie waarde voor de provider!"
+msgstr "Especifique la posición correcta para el proveedor!"
 
 msgid "Converter between name formats"
-msgstr "Omvormer tussen naam formaten"
+msgstr "Conversor entre formatos de nombre"
 
 msgid "Receive picons for providers"
-msgstr "Ontvang picons voor leveranciers"
+msgstr "Recibir picons para proovedor"
 
 msgid "Load satellite providers."
-msgstr "Laad satelliet leveranciers."
+msgstr "Cargar proovedores Satélite."
 
 msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
-msgstr "Om automatisch de ID in te stellen voor picons,\nlaad eerst de vereiste serviceslijst in via het hoofdvenster van het programma."
+msgstr "Para configurar automáticamente los identificadores para picons, \nprimero cargue la lista de servicios requeridos en la ventana principal."
 
 # Satellites editor
 msgid "Satellites edit tool"
-msgstr "Satelliet wijzingingsgereedschap"
+msgstr "Edito de Satélites"
 
 msgid "Add"
-msgstr "Voeg toe"
+msgstr "Añadir"
 
 msgid "Satellite"
-msgstr "Satelliet"
+msgstr "Satélite"
 
 msgid "Transponder"
-msgstr "Transponder"
+msgstr "Transpondedor"
 
 msgid "Satellite properties:"
-msgstr "Satelliet eigenschappen:"
+msgstr "Propiedades del Satélite:"
 
 msgid "Transponder properties:"
-msgstr "Transponder eigenschappen:"
+msgstr "Propiedades  del Transpondedor:"
 
 msgid "Name"
-msgstr "Naam"
+msgstr "Nombre"
 
 msgid "Position"
-msgstr "Positie"
+msgstr "Posición"
 
 # Satellites update dialog
 msgid "Satellites update"
-msgstr "Actualiseren Satelliet"
+msgstr "Actualisar Satélite"
 
 msgid "Remove selection"
-msgstr "Verwijder selectie"
+msgstr "Remover selección"
 
 # Service details dialog
 msgid "Service data:"
-msgstr "Gegevens Dienst:"
+msgstr "Datos servicio:"
 
 msgid "Transponder data:"
-msgstr "Gegevens Transponder:"
+msgstr "Datos Transpondedor:"
 
 msgid "Service data"
-msgstr "Gegevens Dienst"
+msgstr "Datos servicio"
 
 msgid "Transponder details"
-msgstr "Details Transponder"
+msgstr "Detailes Transpondedor"
 
 msgid "Changes will be applied to all services of this transponder!\nContinue?"
-msgstr "Wijzigingen zullen worden doorgevoerd op alle diensten van deze transponder!\nDoorgaan?"
+msgstr "Los cambios se aplicarán a todos los servicios de este transpondedor!\nContinuar?"
 
 msgid "Reference"
-msgstr "Referentie"
+msgstr "Referencia"
 
 msgid "Namespace"
 msgstr "Namespace"
@@ -397,174 +397,175 @@ msgid "Flags:"
 msgstr "Flags:"
 
 msgid "Delays (ms):"
-msgstr "Vertraging (mc)"
+msgstr "Retraso (mc)"
 
 msgid "Bitstream"
-msgstr "Bitstream"
+msgstr "Secuencia de Bits"
 
 msgid "Description"
-msgstr "Omschrijving"
+msgstr "Descripción"
 
 msgid "Source:"
-msgstr "Bron:"
+msgstr "Fuente:"
 
 msgid "Cancel"
-msgstr "Annuleren"
+msgstr "Annular"
 
 msgid "Update"
-msgstr "Bijwerken"
+msgstr "Actualisar"
 
 msgid "Filter"
-msgstr "Filteren"
+msgstr "Filtrar"
 
 msgid "Find"
-msgstr "Zoeken"
+msgstr "Buscar"
 
 # IPTV dialog
 msgid "Stream data"
-msgstr "Gegevens stream"
+msgstr "Datos de la Secuencia"
 
 # IPTV list configuration dialog
 msgid "Starting values"
-msgstr "Start waardes"
+msgstr "Volores iniciales"
 
 msgid "Reset to default"
-msgstr "Reset naar standaard"
+msgstr "Restablecer a predeterminado"
 
 msgid "IPTV streams list configuration"
-msgstr "Configureren IPTV Streamlijst"
+msgstr "Configurar lista de Secuencias IPTV"
 
 #Settings dialog
 msgid "Preferences"
-msgstr "Voorkeuren"
+msgstr "Preferencias"
 
 msgid "Profile:"
-msgstr "Profiel:"
+msgstr "Perfil:"
 
 msgid "Timeout between commands in seconds"
-msgstr "Time-out tussen opdrachten in seconden"
+msgstr "Tiempo de espera entre comandos en segundos"
 
 msgid "Timeout:"
 msgstr "Time-out:"
 
 msgid "Login:"
-msgstr "Log in:"
+msgstr "Usuario:"
 
 msgid "Options"
-msgstr "Opties"
+msgstr "Opciones"
 
 msgid "Password:"
-msgstr "Paswoord:"
+msgstr "Contraseña:"
 
 msgid "Picons:"
 msgstr "Picons:"
 
 msgid "Port:"
-msgstr "Poort:"
+msgstr "Puerta:"
 
 msgid "Data path:"
-msgstr "Gegevenspad:"
+msgstr "Ruta de datos:"
 
 msgid "Picons path:"
-msgstr "Picons pad:"
+msgstr "Ruda de Picons:"
 
 msgid "Network settings:"
-msgstr "Netwerk instellingen:"
+msgstr "Configuración de red:"
 
 msgid "STB file paths:"
-msgstr "STB bestandspad:"
+msgstr "Ruta de ficherors STB:"
 
 msgid "Local file paths:"
-msgstr "Lokaal bestandspad:"
+msgstr "Ruta de ficheros local:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
-msgstr "Fout. Er is geen boeket geselecteerd!"
+msgstr "Error. Ningún ramo está seleccionado!"
 
 msgid "This item is not allowed to be removed!"
-msgstr "Dit item kan niet verwijderd worden!"
+msgstr "Este artículo no puede ser eliminado!"
 
 msgid "This item is not allowed to edit!"
-msgstr "Dit item kan niet gewijzigd worden!"
+msgstr "Este artículo no puede ser editado!"
 
 msgid "Not allowed in this context!"
-msgstr "Niet toegelaten in deze contekst!"
+msgstr "No permitido en este contexto!"
 
 msgid "Please, download files from receiver or setup your path for read data!"
-msgstr "Download alstublieft bestanden van de ontvanger of stel het pad in voor het lezen van gegevens!"
+msgstr "Por favor, descargue archivos desde el receptor o configure su ruta para leer los datos!"
 
 msgid "Reading data error!"
-msgstr "Fout tijdens het legezen van gegevens!"
+msgstr "Error de lectura de datos!"
 
 msgid "No m3u file is selected!"
-msgstr "Geen m3u bestand geslecteerd!"
+msgstr "Ningún archivo m3u ha sido seleccionado!"
 
 msgid "Not implemented yet!"
-msgstr "Nog niet geïmplementeerd!"
+msgstr "Aun no implementado!"
 
 msgid "The text of marker is empty, please try again!"
-msgstr "De tekst van de marker is leeg. Probeer opnieuw!"
+msgstr "El texto del marcador está vacío, inténtalo de nuevo!"
 
 msgid "Please, select only one item!"
-msgstr "Kies maar 1 item graag!"
+msgstr "Por favor, seleccione solo un elemento!"
 
 msgid "No png file is selected!"
-msgstr "Geen png bestand geselecteerd!"
+msgstr "Ningún fichero png seleccionado!"
 
 msgid "No reference is present!"
-msgstr "Geen referentie aanwezig!"
+msgstr "Ninguna referencia presente!"
 
 msgid "No selected item!"
-msgstr "Geen item geseleceerd!"
+msgstr "Ningún elemento seleccionado!"
 
 msgid "The task is already running!"
-msgstr "Deze taak is al bezig!"
+msgstr "La tarea ya se está ejecutando!"
 
 msgid "Done!"
-msgstr "Gedaan!"
+msgstr "Hecho!"
 
 msgid "Please, wait..."
-msgstr "Even geduld, aub..."
+msgstr "Por favor, espere..."
 
 msgid "Resizing..."
-msgstr "Verkleinen/Vergroten..."
+msgstr "Redimensionamiento..."
 
 msgid "Select paths!"
-msgstr "Selecteer paden!"
+msgstr "Seleccione rutas!"
 
 msgid "No satellite is selected!"
-msgstr "Geen satelliet geselecteerd!"
+msgstr "Ningún Satélite seleccionado!"
 
 msgid "Please, select only one satellite!"
-msgstr "Selecteer alstublieft slechts één satelliet!"
+msgstr "Seleccione solo un Satélite!"
 
 msgid "Please check your parameters and try again."
-msgstr "Controleer aub uw parameters en probeer opnieuw!"
+msgstr "Por favor revise sus parámetros y vuelva a intentar!"
 
 msgid "No satellites.xml file is selected!"
-msgstr "Geen satellites.xml geselecteerd!"
+msgstr "Ningún satellites.xml seleccionado!"
 
 msgid "Error. Verify the data!"
-msgstr "Fout. Controleer de gegevens!"
+msgstr "Error. Revise sus datos!"
 
 msgid "Operation not allowed in this context!"
-msgstr "Opdracht niet toegestaan ​​in deze context!"
+msgstr "Operación no permitida en este contexto!"
 
 msgid "No VLC is found. Check that it is installed!"
-msgstr "Geen VLC gevonden. Controleer of VLC gïnstalleerd is!"
+msgstr "VLC no encontrado. Verifica si está instalado!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Even geduld, test van streams bezig ..."
+msgstr "Por favor espera una prueba de las secuencias..."
 
 msgid "Found"
-msgstr "Gevonden"
+msgstr "Encontrado"
 
 msgid "unavailable streams."
-msgstr "Steams niet aanwezig."
+msgstr "Secuencias no presentes"
 
 msgid "No changes required!"
-msgstr "Geen wijzigingen vereist!"
+msgstr "ningún cambio requerido!"
 
 msgid "This list does not contains IPTV streams!"
-msgstr "Deze lijst bevat geen IPTV streams!"
+msgstr "La lista no contiene secuencias IPTV!"
+
