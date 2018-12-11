@@ -155,6 +155,7 @@ class Application(Gtk.Application):
         self._picons = {}
         self._blacklist = set()
         self._current_bq_name = None
+        self._bq_selected = ""  # Current selected bouquet
         # Current satellite positions in the services list
         self._sat_positions = []
         # Player
@@ -301,7 +302,7 @@ class Application(Gtk.Application):
     def fav_service_data_function(self, column, render, model, itr, data):
         """ Data function for the service column of FAV list """
         fav_id = model.get_value(itr, 7)
-        bq = self._extra_bouquets.get(self.get_selected_bouquet(), None)
+        bq = self._extra_bouquets.get(self._bq_selected, None)
         has_id = bq.get(fav_id, None) if bq else bq
         render.set_property("foreground", self._EXTRA_COLOR) if has_id else render.set_property("foreground-set", None)
 
@@ -451,9 +452,8 @@ class Application(Gtk.Application):
 
     def remove_favs(self, itrs, model):
         """ Deleting bouquet services """
-        bq_selected = self.get_selected_bouquet()
-        if bq_selected:
-            fav_bouquet = self._bouquets.get(bq_selected, None)
+        if self._bq_selected:
+            fav_bouquet = self._bouquets.get(self._bq_selected, None)
             if fav_bouquet:
                 for itr in itrs:
                     del fav_bouquet[int(model.get_path(itr)[0])]
@@ -584,9 +584,8 @@ class Application(Gtk.Application):
 
     def update_bouquet_list(self):
         """ Update bouquet after move items """
-        bq_selected = self.get_selected_bouquet()
-        if bq_selected:
-            fav_bouquet = self._bouquets[bq_selected]
+        if self._bq_selected:
+            fav_bouquet = self._bouquets[self._bq_selected]
             fav_bouquet.clear()
             for row in self._fav_model:
                 fav_bouquet.append(row[7])
@@ -926,6 +925,12 @@ class Application(Gtk.Application):
         self._bq_name_label.set_text(self._current_bq_name if self._current_bq_name else "")
         self._fav_model.clear()
 
+        if self._current_bq_name:
+            ch_row = model[model.get_iter(path)][:]
+            self._bq_selected = "{}:{}".format(ch_row[0], ch_row[3])
+        else:
+            self._bq_selected = ""
+
         if self._bouquets_view.row_expanded(path):
             self._bouquets_view.collapse_row(path)
         else:
@@ -959,30 +964,15 @@ class Application(Gtk.Application):
 
     def check_bouquet_selection(self):
         """ checks and returns bouquet if selected """
-        bq_selected = self.get_selected_bouquet()
-
-        if not bq_selected:
+        if not self._bq_selected:
             show_dialog(DialogType.ERROR, self._main_window, "Error. No bouquet is selected!")
             return
 
-        if Profile(self._profile) is Profile.NEUTRINO_MP and bq_selected.endswith(BqType.WEBTV.value):
+        if Profile(self._profile) is Profile.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
             show_dialog(DialogType.ERROR, self._main_window, "Operation not allowed in this context!")
             return
 
-        return bq_selected
-
-    def get_selected_bouquet(self):
-        """  returns 'name:type' of last selected bouquet or False  """
-        if self._current_bq_name is None:
-            return False
-
-        for row in self._bouquets_model:
-            chs_rows = row.iterchildren()
-            for ch_row in chs_rows:
-                name = ch_row[0]
-                if name == self._current_bq_name:
-                    return "{}:{}".format(name, ch_row[3])
-        return False
+        return self._bq_selected
 
     @run_idle
     def update_bouquets_type(self):
@@ -1117,21 +1107,19 @@ class Application(Gtk.Application):
                     self._tool_elements[elem].set_sensitive(not_empty)
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
-            bq_selected = False
             if model_name == self._FAV_LIST_NAME:
-                bq_selected = self.get_selected_bouquet()
-                if profile is Profile.NEUTRINO_MP and bq_selected:
-                    name, bq_type = bq_selected.split(":")
-                    bq_selected = BqType(bq_type) is BqType.WEBTV
+                if profile is Profile.NEUTRINO_MP and self._bq_selected:
+                    name, bq_type = self._bq_selected.split(":")
+                    self._bq_selected = BqType(bq_type) is BqType.WEBTV
 
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "fav_paste_popup_item"):
                     self._tool_elements[elem].set_sensitive(not is_service and self._rows_buffer)
                 elif elem in self._FAV_ENIGMA_ELEMENTS:
                     if profile is Profile.ENIGMA_2:
-                        self._tool_elements[elem].set_sensitive(bq_selected and not is_service)
+                        self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
                 elif elem in self._FAV_IPTV_ELEMENTS:
-                    self._tool_elements[elem].set_sensitive(bq_selected and not is_service)
+                    self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
                 else:
                     self._tool_elements[elem].set_sensitive(not_empty and not is_service)
             for elem in self._SERVICE_ELEMENTS:
@@ -1152,10 +1140,10 @@ class Application(Gtk.Application):
 
     def set_service_flags(self, flag):
         profile = Profile(self._profile)
-        bq_selected = self.get_selected_bouquet()
+
         if profile is Profile.ENIGMA_2:
             set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
-        elif profile is Profile.NEUTRINO_MP and bq_selected:
+        elif profile is Profile.NEUTRINO_MP and self._bq_selected:
             model, paths = self._bouquets_view.get_selection().get_selected_rows()
             itr = model.get_iter(paths[0])
             value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
@@ -1195,7 +1183,7 @@ class Application(Gtk.Application):
 
     def on_insert_marker(self, view):
         """ Inserts marker into bouquet services list. """
-        insert_marker(view, self._bouquets, self.get_selected_bouquet(), self._services, self._main_window)
+        insert_marker(view, self._bouquets, self._bq_selected, self._services, self._main_window)
         self.update_fav_num_column(self._fav_model)
 
     def on_fav_press(self, menu, event):
@@ -1211,7 +1199,7 @@ class Application(Gtk.Application):
         response = IptvDialog(self._main_window,
                               self._fav_view,
                               self._services,
-                              self._bouquets.get(self.get_selected_bouquet(), None),
+                              self._bouquets.get(self._bq_selected, None),
                               Profile(self._profile),
                               Action.ADD).show()
         if response != Gtk.ResponseType.CANCEL:
@@ -1229,11 +1217,10 @@ class Application(Gtk.Application):
             show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
             return
 
-        bq_selected = self.get_selected_bouquet()
-        if not bq_selected:
+        if not self._bq_selected:
             return
 
-        bouquet = self._bouquets.get(bq_selected, [])
+        bouquet = self._bouquets.get(self._bq_selected, [])
         IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bouquet, profile).show()
 
     @run_idle
@@ -1243,14 +1230,13 @@ class Application(Gtk.Application):
             show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
             return
 
-        bq_selected = self.get_selected_bouquet()
-        if not bq_selected:
+        if not self._bq_selected:
             return
 
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        fav_bqt = self._bouquets.get(bq_selected, None)
+        fav_bqt = self._bouquets.get(self._bq_selected, None)
         prf = Profile(self._profile)
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
         if response:
@@ -1267,14 +1253,14 @@ class Application(Gtk.Application):
             return
 
         channels = parse_m3u(response, Profile(self._profile))
-        bq_selected = self.get_selected_bouquet()
-        if channels and bq_selected:
-            bq_services = self._bouquets.get(bq_selected)
+
+        if channels and self._bq_selected:
+            bq_services = self._bouquets.get(self._bq_selected)
             self._fav_model.clear()
             for ch in channels:
                 self._services[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
-            next(self.update_bouquet_services(self._fav_model, None, bq_selected), False)
+            next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
     # ***************** Player *********************#
 
@@ -1578,7 +1564,7 @@ class Application(Gtk.Application):
                     return IptvDialog(self._main_window,
                                       self._fav_view,
                                       self._services,
-                                      self._bouquets.get(self.get_selected_bouquet(), None),
+                                      self._bouquets.get(self._bq_selected, None),
                                       Profile(self._profile),
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)
@@ -1603,8 +1589,7 @@ class Application(Gtk.Application):
 
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
-        bq_selected = self.get_selected_bouquet()
-        if not bq_selected:
+        if not self._bq_selected:
             show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
             return
 
@@ -1648,18 +1633,17 @@ class Application(Gtk.Application):
             return
 
         srv = self._services.get(fav_id, None)
-        selected_bq = self.get_selected_bouquet()
-        ex_bq = self._extra_bouquets.get(selected_bq, None)
+        ex_bq = self._extra_bouquets.get(self._bq_selected, None)
 
         if srv.service == response and ex_bq:
             ex_bq.pop(fav_id, None)
             if not ex_bq:
-                self._extra_bouquets.pop(selected_bq, None)
+                self._extra_bouquets.pop(self._bq_selected, None)
         else:
             if ex_bq:
                 ex_bq[fav_id] = response
             else:
-                self._extra_bouquets[selected_bq] = {fav_id: response}
+                self._extra_bouquets[self._bq_selected] = {fav_id: response}
 
         model.set_value(model.get_iter(paths), 2, response)
 
@@ -1671,8 +1655,7 @@ class Application(Gtk.Application):
         model, paths = selection
         fav_id = model[paths][7]
         srv = self._services.get(fav_id, None)
-        selected_bq = self.get_selected_bouquet()
-        ex_bq = self._extra_bouquets.get(selected_bq, None)
+        ex_bq = self._extra_bouquets.get(self._bq_selected, None)
 
         if not ex_bq:
             show_dialog(DialogType.ERROR, self._main_window, "No changes required!")
@@ -1682,7 +1665,7 @@ class Application(Gtk.Application):
                 show_dialog(DialogType.ERROR, self._main_window, "No changes required!")
                 return
             if not ex_bq:
-                self._extra_bouquets.pop(selected_bq, None)
+                self._extra_bouquets.pop(self._bq_selected, None)
 
         model.set_value(model.get_iter(paths), 2, srv.service)
 
