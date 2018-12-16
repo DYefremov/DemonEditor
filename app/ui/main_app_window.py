@@ -19,7 +19,7 @@ from app.tools.media import Player
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, NEW_COLOR
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
@@ -54,10 +54,6 @@ class Application(Gtk.Application):
                          "fav_edit_popup_item", "fav_edit_sub_menu_popup_item", "fav_locate_popup_item",
                          "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
-
-    # Colors
-    _NEW_COLOR = "#ffe6cc"  # Color for new services in the main list
-    _EXTRA_COLOR = "#33a8ff"  # Color for services with a extra name for the bouquet
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -801,8 +797,7 @@ class Application(Gtk.Application):
             if flags:
                 f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
                 if f_flags and Flag.is_new(int(f_flags[0][2:])):
-                    tooltip = "Marked as new"
-                    background = self._NEW_COLOR
+                    background = NEW_COLOR
 
             s = srv + (tooltip, background)
             itr = self._services_model.append(s)

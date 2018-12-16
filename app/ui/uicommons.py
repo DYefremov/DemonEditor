@@ -26,6 +26,10 @@ HIDE_ICON = theme.load_icon("go-jump", 16, 0) if theme.lookup_icon("go-jump", 16
 TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symbolic", 16, 0) else _IMAGE_MISSING
 IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.load_icon("emblem-shared", 16, 0) else None
 
+# Colors
+NEW_COLOR = "#ffe6cc"  # Color for new services in the main list
+EXTRA_COLOR = "#33a8ff"  # Color for services with a extra name for the bouquet
+
 
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys """
