@@ -206,6 +206,10 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
       <!-- column-name picon -->
       <column type="GdkPixbuf"/>
+      <!-- column-name tooltip -->
+      <column type="gchararray"/>
+      <!-- column-name background -->
+      <column type="gchararray"/>
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
@@ -1919,7 +1923,7 @@ Author: Dmitriy Yefremov
                                   </object>
                                 </child>
                                 <child>
-                                  <object class="GtkTreeViewColumn" id="extra">
+                                  <object class="GtkTreeViewColumn" id="extra_column">
                                     <property name="visible">False</property>
                                     <property name="title" translatable="yes">extra</property>
                                     <child>
@@ -2162,6 +2166,7 @@ Author: Dmitriy Yefremov
                                             <property name="max_width_chars">5</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="background">10</attribute>
                                             <attribute name="text">0</attribute>
                                           </attributes>
                                         </child>
@@ -2170,19 +2175,24 @@ Author: Dmitriy Yefremov
                                     <child>
                                       <object class="GtkTreeViewColumn" id="fav_service_column">
                                         <property name="resizable">True</property>
-                                        <property name="spacing">2</property>
                                         <property name="min_width">50</property>
                                         <property name="title" translatable="yes">Service</property>
                                         <property name="expand">True</property>
                                         <child>
-                                          <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf"/>
+                                          <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf">
+                                            <property name="xpad">2</property>
+                                          </object>
                                           <attributes>
+                                            <attribute name="cell-background">10</attribute>
                                             <attribute name="pixbuf">8</attribute>
                                           </attributes>
                                         </child>
                                         <child>
-                                          <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf"/>
+                                          <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf">
+                                            <property name="xpad">2</property>
+                                          </object>
                                           <attributes>
+                                            <attribute name="cell-background">10</attribute>
                                             <attribute name="pixbuf">1</attribute>
                                           </attributes>
                                         </child>
@@ -2192,18 +2202,25 @@ Author: Dmitriy Yefremov
                                             <property name="width_chars">25</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="background">10</attribute>
                                             <attribute name="text">2</attribute>
                                           </attributes>
                                         </child>
                                         <child>
-                                          <object class="GtkCellRendererPixbuf" id="fav_locked_cellrendererpixbuf"/>
+                                          <object class="GtkCellRendererPixbuf" id="fav_locked_cellrendererpixbuf">
+                                            <property name="xpad">2</property>
+                                          </object>
                                           <attributes>
+                                            <attribute name="cell-background">10</attribute>
                                             <attribute name="pixbuf">3</attribute>
                                           </attributes>
                                         </child>
                                         <child>
-                                          <object class="GtkCellRendererPixbuf" id="fav_hide_cellrendererpixbuf"/>
+                                          <object class="GtkCellRendererPixbuf" id="fav_hide_cellrendererpixbuf">
+                                            <property name="xpad">2</property>
+                                          </object>
                                           <attributes>
+                                            <attribute name="cell-background">10</attribute>
                                             <attribute name="pixbuf">4</attribute>
                                           </attributes>
                                         </child>
@@ -2220,6 +2237,7 @@ Author: Dmitriy Yefremov
                                             <property name="xalign">0.50999999046325684</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="background">10</attribute>
                                             <attribute name="text">5</attribute>
                                           </attributes>
                                         </child>
@@ -2235,6 +2253,7 @@ Author: Dmitriy Yefremov
                                             <property name="xalign">0.50999999046325684</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="background">10</attribute>
                                             <attribute name="text">6</attribute>
                                           </attributes>
                                         </child>
@@ -2247,7 +2266,26 @@ Author: Dmitriy Yefremov
                                         <child>
                                           <object class="GtkCellRendererText" id="fav_id_cellrenderertext4"/>
                                           <attributes>
+                                            <attribute name="background">10</attribute>
                                             <attribute name="text">7</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="fav_extra_column">
+                                        <property name="visible">False</property>
+                                        <property name="title" translatable="yes">extra</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="fav_tooltip_cellrenderertext"/>
+                                          <attributes>
+                                            <attribute name="text">9</attribute>
+                                          </attributes>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="fav_background_cellrenderertext"/>
+                                          <attributes>
+                                            <attribute name="text">10</attribute>
                                           </attributes>
                                         </child>
                                       </object>

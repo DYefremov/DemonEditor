@@ -28,7 +28,7 @@ IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.load_icon("emblem-s
 
 # Colors
 NEW_COLOR = "#ffe6cc"  # Color for new services in the main list
-EXTRA_COLOR = "#33a8ff"  # Color for services with a extra name for the bouquet
+EXTRA_COLOR = "#b3e6cc"  # Color for services with a extra name for the bouquet
 
 
 class KeyboardKey(Enum):
@@ -127,6 +127,8 @@ class Column(Enum):
     FAV_POS = 6
     FAV_ID = 7
     FAV_PICON = 8
+    FAV_TOOLTIP = 9
+    FAV_BACKGROUND = 10
 
     def __index__(self):
         """ Overridden to get the index in slices directly """

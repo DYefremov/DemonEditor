@@ -19,7 +19,8 @@ from app.tools.media import Player
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, NEW_COLOR
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, \
+    NEW_COLOR, EXTRA_COLOR, Column
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
@@ -238,6 +239,7 @@ class Application(Gtk.Application):
 
     def do_activate(self):
         self._main_window.set_application(self)
+        self._main_window.set_wmclass("DemonEditor", "DemonEditor")
         self._main_window.present()
 
     def do_shutdown(self):
@@ -311,7 +313,11 @@ class Application(Gtk.Application):
         model, paths = view.get_selection().get_selected_rows()
 
         if target is ViewTarget.FAV:
-            self._rows_buffer.extend((0, *model.get(model.get_iter(path), 2, 3, 4, 5, 7, 16, 18, 8)) for path in paths)
+            self._rows_buffer.extend((0, *model.get(model.get_iter(path), Column.SRV_CODED.value,
+                                                    Column.SRV_SERVICE.value, Column.SRV_LOCKED.value,
+                                                    Column.SRV_HIDE.value, Column.SRV_TYPE.value,
+                                                    Column.SRV_POS.value, Column.SRV_FAV_ID.value,
+                                                    Column.SRV_PICON.value), None, None) for path in paths)
         elif target is ViewTarget.SERVICES:
             self._rows_buffer.extend(model[path][:] for path in paths)
         elif target is ViewTarget.BOUQUET:
@@ -647,17 +653,17 @@ class Application(Gtk.Application):
                 dest_index -= 1
                 for ext_row in ext_rows:
                     dest_index += 1
-                    fav_id = ext_row[18]
+                    fav_id = ext_row[Column.SRV_FAV_ID]
                     ch = self._services[fav_id]
-                    model.insert(dest_index, (0, ch.coded, ch.service, ch.locked, ch.hide,
-                                              ch.service_type, ch.pos, ch.fav_id, self._picons.get(ch.picon_id, None)))
+                    model.insert(dest_index, (0, ch.coded, ch.service, ch.locked, ch.hide, ch.service_type, ch.pos,
+                                              ch.fav_id, self._picons.get(ch.picon_id, None), None, None))
                     fav_bouquet.insert(dest_index, ch.fav_id)
             elif source == self._FAV_LIST_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
                 in_rows = [model[in_itr][:] for in_itr in in_itrs]
                 for row in in_rows:
                     model.insert(dest_index, row)
-                    fav_bouquet.insert(dest_index, row[7])
+                    fav_bouquet.insert(dest_index, row[Column.FAV_ID])
                 for in_itr in in_itrs:
                     del fav_bouquet[int(model.get_path(in_itr)[0])]
                     model.remove(in_itr)
@@ -859,7 +865,7 @@ class Application(Gtk.Application):
         write_bouquets(path, bouquets, profile)
         # Getting services
         services_model = get_base_model(self._services_view.get_model())
-        services = [Service(*row[:]) for row in services_model]
+        services = [Service(*row[: Column.SRV_TOOLTIP]) for row in services_model]
         write_services(path, services, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
         # removing bouquet files
         if profile is Profile.ENIGMA_2:
@@ -932,9 +938,10 @@ class Application(Gtk.Application):
             if ex_services:
                 ex_srv_name = ex_services.get(srv_id)
             if srv:
+                tooltip, background = None, EXTRA_COLOR if ex_srv_name else None
                 self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
                                         srv.hide, srv.service_type, srv.pos, srv.fav_id,
-                                        self._picons.get(srv.picon_id, None)))
+                                        self._picons.get(srv.picon_id, None), tooltip, background))
         yield True
 
     def check_bouquet_selection(self):
@@ -1619,7 +1626,8 @@ class Application(Gtk.Application):
             else:
                 self._extra_bouquets[self._bq_selected] = {fav_id: response}
 
-        model.set_value(model.get_iter(paths), 2, response)
+        model.set(model.get_iter(paths), {Column.FAV_SERVICE.value: response, Column.FAV_TOOLTIP.value: None,
+                                          Column.FAV_BACKGROUND.value: EXTRA_COLOR})
 
     def on_set_default_name_for_bouquet(self, item):
         selection = get_selection(self._fav_view, self._main_window)
@@ -1627,7 +1635,7 @@ class Application(Gtk.Application):
             return
 
         model, paths = selection
-        fav_id = model[paths][7]
+        fav_id = model[paths][Column.FAV_ID.value]
         srv = self._services.get(fav_id, None)
         ex_bq = self._extra_bouquets.get(self._bq_selected, None)
 
@@ -1641,7 +1649,8 @@ class Application(Gtk.Application):
             if not ex_bq:
                 self._extra_bouquets.pop(self._bq_selected, None)
 
-        model.set_value(model.get_iter(paths), 2, srv.service)
+        model.set(model.get_iter(paths), {Column.FAV_SERVICE.value: srv.service, Column.FAV_TOOLTIP.value: None,
+                                          Column.FAV_BACKGROUND.value: None})
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)
