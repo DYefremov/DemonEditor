@@ -88,5 +88,46 @@ class BqGenType(Enum):
     EACH_TYPE = 5
 
 
+class Column(Enum):
+    """ Column nums in the views """
+    # main view
+    SRV_CAS_FLAGS = 0
+    SRV_STANDARD = 1
+    SRV_CODED = 2
+    SRV_SERVICE = 3
+    SRV_LOCKED = 4
+    SRV_HIDE = 5
+    SRV_PACKAGE = 6
+    SRV_TYPE = 7
+    SRV_PICON = 8
+    SRV_PICON_ID = 9
+    SRV_SSID = 10
+    SRV_FREQ = 11
+    SRV_RATE = 12
+    SRV_POL = 13
+    SRV_FEC = 14
+    SRV_SYSTEM = 15
+    SRV_POS = 16
+    SRV_DATA_ID = 17
+    SRV_FAV_ID = 18
+    SRV_TRANSPONDER = 19
+    SRV_TOOLTIP = 20
+    SRV_BACKGROUND = 21
+    # fav view
+    FAV_NUM = 0
+    FAV_CODED = 1
+    FAV_SERVICE = 2
+    FAV_LOCKED = 3
+    FAV_HIDE = 4
+    FAV_TYPE = 5
+    FAV_POS = 6
+    FAV_ID = 7
+    FAV_PICON = 8
+
+    def __index__(self):
+        """ Overridden to get the index in slices directly """
+        return self.value
+
+
 if __name__ == "__main__":
     pass

@@ -42,21 +42,21 @@ class Application(Gtk.Application):
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
                      "fav_picon_popup_item", "fav_copy_popup_item")
-    _BOUQUET_ELEMENTS = ("edit_tool_button", "new_tool_button", "bouquets_new_popup_item", "bouquets_edit_popup_item",
+    _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
-    _COMMONS_ELEMENTS = ("edit_tool_button", "bouquets_remove_popup_item", "fav_remove_popup_item")
+    _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
-    _DYNAMIC_ELEMENTS = ("services_popup_menu", "new_tool_button", "edit_tool_button", "locked_tool_button",
-                         "fav_cut_popup_item", "fav_paste_popup_item", "bouquets_new_popup_item", "hide_tool_button",
-                         "bouquets_remove_popup_item", "fav_remove_popup_item", "bouquets_edit_popup_item",
-                         "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
-                         "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
+    _DYNAMIC_ELEMENTS = ("services_popup_menu", "locked_tool_button", "fav_cut_popup_item", "fav_paste_popup_item",
+                         "bouquets_new_popup_item", "hide_tool_button", "bouquets_remove_popup_item",
+                         "fav_remove_popup_item", "bouquets_edit_popup_item", "fav_insert_marker_popup_item",
+                         "fav_edit_popup_item", "fav_edit_sub_menu_popup_item", "fav_locate_popup_item",
+                         "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
 
     # Colors
-    _NEW_COLOR = "#ff5733"  # Color for new services in the main list
+    _NEW_COLOR = "#ffe6cc"  # Color for new services in the main list
     _EXTRA_COLOR = "#33a8ff"  # Color for services with a extra name for the bouquet
 
     def __init__(self, **kwargs):
@@ -216,11 +216,6 @@ class Application(Gtk.Application):
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
-        # Renders
-        self._service_render = builder.get_object("service_cellrenderertext")
-        self._fav_service_render = builder.get_object("fav_service_cellrenderertext")
-        self._service_column = builder.get_object("service_column")
-        self._fav_service_column = builder.get_object("fav_service_column")
         # Clipboard
         self._clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         # Wait dialog
@@ -243,7 +238,6 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.init_service_renders()
         self.init_http_api()
 
     def do_activate(self):
@@ -282,29 +276,6 @@ class Application(Gtk.Application):
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
         event.state |= Gdk.ModifierType.CONTROL_MASK
-
-    def init_service_renders(self):
-        profile = Profile(self._profile)
-        func = self.service_data_function if profile is Profile.ENIGMA_2 else None
-        fav_func = self.fav_service_data_function if profile is Profile.ENIGMA_2 else None
-        self._service_column.set_cell_data_func(self._service_render, func, None)
-        self._fav_service_column.set_cell_data_func(self._fav_service_render, fav_func, None)
-
-    def service_data_function(self, column, render: Gtk.CellRendererText, model, itr, data):
-        """ Data function for the service column of main list """
-        render.set_property("foreground-set", None)
-        cas_flags = model.get_value(itr, 0)
-        if cas_flags:
-            f_flags = list(filter(lambda x: x.startswith("f:"), cas_flags.split(",")))
-            if f_flags and Flag.is_new(int(f_flags[0][2:])):
-                render.set_property("foreground", self._NEW_COLOR)
-
-    def fav_service_data_function(self, column, render, model, itr, data):
-        """ Data function for the service column of FAV list """
-        fav_id = model.get_value(itr, 7)
-        bq = self._extra_bouquets.get(self._bq_selected, None)
-        has_id = bq.get(fav_id, None) if bq else bq
-        render.set_property("foreground", self._EXTRA_COLOR) if has_id else render.set_property("foreground-set", None)
 
     @run_idle
     def on_close_app(self, *args):
@@ -825,7 +796,16 @@ class Application(Gtk.Application):
 
     def append_services_data(self, services):
         for srv in services:
-            itr = self._services_model.append(srv)
+            flags = srv.flags_cas
+            tooltip, background = None, None
+            if flags:
+                f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
+                if f_flags and Flag.is_new(int(f_flags[0][2:])):
+                    tooltip = "Marked as new"
+                    background = self._NEW_COLOR
+
+            s = srv + (tooltip, background)
+            itr = self._services_model.append(s)
             self._services_model.set_value(itr, 8, self._picons.get(srv.picon_id, None))
             yield True
         self._wait_dialog.hide()
@@ -1006,7 +986,6 @@ class Application(Gtk.Application):
                 self.update_services_counts()
 
             self.update_profile_label()
-            self.init_service_renders()
             self.init_http_api()
 
     def on_tree_view_key_press(self, view, event):

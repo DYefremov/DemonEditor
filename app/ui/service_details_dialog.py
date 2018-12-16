@@ -6,7 +6,7 @@ from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE
 from app.properties import Profile
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column
 from .dialogs import show_dialog, DialogType, Action
 from .main_helper import get_base_model
 
@@ -183,7 +183,7 @@ class ServiceDetailsDialog:
         if not itr:
             return
 
-        srv = Service(*self._current_model[itr][:])
+        srv = Service(*self._current_model[itr][: Column.SRV_TOOLTIP])
         self._old_service = srv
         self._current_itr = itr
         # Service
@@ -197,7 +197,7 @@ class ServiceDetailsDialog:
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
         self.select_active_text(self._sys_combo_box, srv.system)
-        if tr_type in "tc" and self._profile is Profile.ENIGMA_2:
+        if tr_type and tr_type in "tc" and self._profile is Profile.ENIGMA_2:
             self.update_ui_for_terrestrial()
         else:
             self.set_sat_positions(srv.pos)
