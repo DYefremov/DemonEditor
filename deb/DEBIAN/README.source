@@ -42,5 +42,4 @@ Terrestrial(DVB-T/T2) and cable channels are supported(Enigma2 only) with limita
 Main supported lamedb format is version 4. Versions 3 and 5 has only experimental support!
 For version 3 is only read mode available. When saving, version 4 format is used instead!
 
- -- Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>  Thu, 06 Dec 2018 11:27:21 +0300
 
