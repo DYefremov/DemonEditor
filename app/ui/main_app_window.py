@@ -43,17 +43,18 @@ class Application(Gtk.Application):
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
                      "fav_picon_popup_item", "fav_copy_popup_item")
-    _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item",
-                         "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
-    _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item")
+    _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
+                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "edit_header_button",
+                         "new_header_button")
+    _COMMONS_ELEMENTS = ("edit_header_button", "bouquets_remove_popup_item", "fav_remove_popup_item")
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
-    _DYNAMIC_ELEMENTS = ("services_popup_menu", "locked_tool_button", "fav_cut_popup_item", "fav_paste_popup_item",
-                         "bouquets_new_popup_item", "hide_tool_button", "bouquets_remove_popup_item",
-                         "fav_remove_popup_item", "bouquets_edit_popup_item", "fav_insert_marker_popup_item",
-                         "fav_edit_popup_item", "fav_edit_sub_menu_popup_item", "fav_locate_popup_item",
-                         "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
+    _DYNAMIC_ELEMENTS = ("services_popup_menu", "new_header_button", "edit_header_button", "locked_tool_button",
+                         "fav_cut_popup_item", "fav_paste_popup_item", "bouquets_new_popup_item", "hide_tool_button",
+                         "bouquets_remove_popup_item", "fav_remove_popup_item", "bouquets_edit_popup_item",
+                         "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
+                         "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
 
     def __init__(self, **kwargs):
@@ -87,7 +88,7 @@ class Application(Gtk.Application):
                     "on_service_edit": self.on_service_edit,
                     "on_services_add_new": self.on_services_add_new,
                     "on_delete": self.on_delete,
-                    "on_tool_edit": self.on_tool_edit,
+                    "on_tool_edit": self.on_header_edit,
                     "on_to_fav_copy": self.on_to_fav_copy,
                     "on_to_fav_end_copy": self.on_to_fav_end_copy,
                     "on_view_drag_begin": self.on_view_drag_begin,
@@ -313,11 +314,9 @@ class Application(Gtk.Application):
         model, paths = view.get_selection().get_selected_rows()
 
         if target is ViewTarget.FAV:
-            self._rows_buffer.extend((0, *model.get(model.get_iter(path), Column.SRV_CODED.value,
-                                                    Column.SRV_SERVICE.value, Column.SRV_LOCKED.value,
-                                                    Column.SRV_HIDE.value, Column.SRV_TYPE.value,
-                                                    Column.SRV_POS.value, Column.SRV_FAV_ID.value,
-                                                    Column.SRV_PICON.value), None, None) for path in paths)
+            self._rows_buffer.extend((0, *model.get(model.get_iter(path), Column.SRV_CODED, Column.SRV_SERVICE,
+                                                    Column.SRV_LOCKED, Column.SRV_HIDE, Column.SRV_TYPE, Column.SRV_POS,
+                                                    Column.SRV_FAV_ID, Column.SRV_PICON), None, None) for path in paths)
         elif target is ViewTarget.SERVICES:
             self._rows_buffer.extend(model[path][:] for path in paths)
         elif target is ViewTarget.BOUQUET:
@@ -513,8 +512,8 @@ class Application(Gtk.Application):
                 scroll_to(model.get_path(it), view, paths)
             self._bouquets[key] = []
 
-    def on_tool_edit(self, item):
-        """ Edit tool bar button """
+    def on_header_edit(self, item):
+        """ Edit header bar button """
         if self._services_view.is_focus():
             self.on_service_edit(self._services_view)
         elif self._fav_view.is_focus():
@@ -797,13 +796,15 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_services_data(self, services):
+        profile = Profile(self._profile)
         for srv in services:
-            flags = srv.flags_cas
             tooltip, background = None, None
-            if flags:
-                f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
-                if f_flags and Flag.is_new(int(f_flags[0][2:])):
-                    background = NEW_COLOR
+            if profile is Profile.ENIGMA_2:
+                flags = srv.flags_cas
+                if flags:
+                    f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
+                    if f_flags and Flag.is_new(int(f_flags[0][2:])):
+                        background = NEW_COLOR
 
             s = srv + (tooltip, background)
             itr = self._services_model.append(s)
@@ -1626,8 +1627,8 @@ class Application(Gtk.Application):
             else:
                 self._extra_bouquets[self._bq_selected] = {fav_id: response}
 
-        model.set(model.get_iter(paths), {Column.FAV_SERVICE.value: response, Column.FAV_TOOLTIP.value: None,
-                                          Column.FAV_BACKGROUND.value: EXTRA_COLOR})
+        model.set(model.get_iter(paths), {Column.FAV_SERVICE: response, Column.FAV_TOOLTIP: None,
+                                          Column.FAV_BACKGROUND: EXTRA_COLOR})
 
     def on_set_default_name_for_bouquet(self, item):
         selection = get_selection(self._fav_view, self._main_window)
@@ -1635,7 +1636,7 @@ class Application(Gtk.Application):
             return
 
         model, paths = selection
-        fav_id = model[paths][Column.FAV_ID.value]
+        fav_id = model[paths][Column.FAV_ID]
         srv = self._services.get(fav_id, None)
         ex_bq = self._extra_bouquets.get(self._bq_selected, None)
 
@@ -1649,8 +1650,8 @@ class Application(Gtk.Application):
             if not ex_bq:
                 self._extra_bouquets.pop(self._bq_selected, None)
 
-        model.set(model.get_iter(paths), {Column.FAV_SERVICE.value: srv.service, Column.FAV_TOOLTIP.value: None,
-                                          Column.FAV_BACKGROUND.value: None})
+        model.set(model.get_iter(paths), {Column.FAV_SERVICE: srv.service, Column.FAV_TOOLTIP: None,
+                                          Column.FAV_BACKGROUND: None})
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)

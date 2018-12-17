@@ -2,7 +2,7 @@ import locale
 import os
 
 import gi
-from enum import Enum
+from enum import Enum, IntEnum
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -92,7 +92,7 @@ class BqGenType(Enum):
     EACH_TYPE = 5
 
 
-class Column(Enum):
+class Column(IntEnum):
     """ Column nums in the views """
     # main view
     SRV_CAS_FLAGS = 0

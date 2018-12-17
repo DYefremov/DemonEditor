@@ -366,11 +366,11 @@ class ServiceDetailsDialog:
             self.update_picon_name(self._old_service.picon_id, service.picon_id)
 
         flags = service.flags_cas
-        extra_data = {Column.SRV_TOOLTIP.value: None, Column.SRV_BACKGROUND.value: None}
+        extra_data = {Column.SRV_TOOLTIP: None, Column.SRV_BACKGROUND: None}
         if flags:
             f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
             if f_flags and Flag.is_new(int(f_flags[0][2:])):
-                extra_data[Column.SRV_BACKGROUND.value] = NEW_COLOR
+                extra_data[Column.SRV_BACKGROUND] = NEW_COLOR
 
         self._current_model.set(self._current_itr, extra_data)
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
@@ -541,9 +541,10 @@ class ServiceDetailsDialog:
 
     def update_transponder_services(self, transponder, tr_type):
         for itr in self._transponder_services_iters:
-            srv = self._current_model[itr][:]
-            srv[-9], srv[-8], srv[-7], srv[-6], srv[-5], srv[-4] = self.get_transponder_values(tr_type)
-            srv[-1] = transponder
+            srv = self._current_model[itr][:Column.SRV_TOOLTIP]
+            srv[Column.SRV_FREQ], srv[Column.SRV_RATE], srv[Column.SRV_POL], srv[Column.SRV_FEC], srv[
+                Column.SRV_SYSTEM], srv[Column.SRV_POS] = self.get_transponder_values(tr_type)
+            srv[Column.SRV_TRANSPONDER] = transponder
             srv = Service(*srv)
             self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
             self._current_model.set(itr, {i: v for i, v in enumerate(srv)})
@@ -642,8 +643,9 @@ class TransponderServicesDialog:
 
     def append_services(self, model, transponder, tr_iters):
         for row in model:
-            if row[-1] == transponder:
-                self._srv_model.append((row[3], row[6], row[7], row[10], row[11], row[16]))
+            if row[Column.SRV_TRANSPONDER] == transponder:
+                self._srv_model.append((row[Column.SRV_SERVICE], row[Column.SRV_PACKAGE], row[Column.SRV_TYPE],
+                                        row[Column.SRV_SSID], row[Column.SRV_FREQ], row[Column.SRV_POS]))
                 tr_iters.append(model.get_iter(row.path))
 
     def show(self):
