@@ -444,7 +444,7 @@ class Application(Gtk.Application):
         for row in rows:
             # There are channels with the same parameters except for the name.
             # None because it can have duplicates! Need fix
-            fav_id = row[-2]
+            fav_id = row[Column.SRV_FAV_ID]
             for bq in self._bouquets:
                 services = self._bouquets[bq]
                 if services:
@@ -453,7 +453,7 @@ class Application(Gtk.Application):
                         srv_ids_to_delete.add(fav_id)
             self._services.pop(fav_id, None)
 
-        for f_itr in filter(lambda r: r[7] in srv_ids_to_delete, self._fav_model):
+        for f_itr in filter(lambda r: r[Column.FAV_ID] in srv_ids_to_delete, self._fav_model):
             self._fav_model.remove(f_itr.iter)
         self.update_fav_num_column(self._fav_model)
         self.update_sat_positions()

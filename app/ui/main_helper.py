@@ -8,7 +8,7 @@ from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.properties import Profile
-from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey
+from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
 
@@ -25,13 +25,13 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
         return
 
     # Searching for max num value in all marker services (if empty default = 0)
-    max_num = max(map(lambda num: int(num.data_id, 18),
+    max_num = max(map(lambda num: int(num.data_id, 16),
                       filter(lambda ch: ch.service_type == BqServiceType.MARKER.name, channels.values())), default=0)
-    max_num = '{:x}'.format(max_num + 1)
+    max_num = '{:X}'.format(max_num + 1)
     fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
-    marker = (None, None, response, None, None, s_type, None, fav_id, None)
+    marker = (None, None, response, None, None, s_type, None, fav_id, None, None, None)
     itr = model.insert_before(model.get_iter(paths[0]), marker) if paths else model.insert(0, marker)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
     channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
@@ -130,32 +130,32 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, servic
     f_id, srv_name, srv_type = None, None, None
 
     if target is ViewTarget.SERVICES:
-        name, fav_id = model.get(itr, 3, 18)
+        name, fav_id = model.get(itr, Column.SRV_SERVICE, Column.SRV_FAV_ID)
         f_id = fav_id
         response = show_dialog(DialogType.INPUT, parent_window, name)
         if response == Gtk.ResponseType.CANCEL:
             return
         srv_name = response
-        model.set_value(itr, 3, response)
+        model.set_value(itr, Column.SRV_SERVICE, response)
         if fav_view is not None:
             for row in fav_view.get_model():
-                if row[7] == fav_id:
-                    row[2] = response
+                if row[Column.FAV_ID] == fav_id:
+                    row[Column.FAV_SERVICE] = response
                     break
     elif target is ViewTarget.FAV:
-        name, srv_type, fav_id = model.get(itr, 2, 5, 7)
+        name, srv_type, fav_id = model.get(itr, Column.FAV_SERVICE, Column.FAV_TYPE, Column.FAV_ID)
         f_id = fav_id
         response = show_dialog(DialogType.INPUT, parent_window, name)
         if response == Gtk.ResponseType.CANCEL:
             return
 
         srv_name = response
-        model.set_value(itr, 2, response)
+        model.set_value(itr, Column.FAV_SERVICE, response)
 
         if service_view is not None:
             for row in get_base_model(service_view.get_model()):
-                if row[18] == fav_id:
-                    row[3] = response
+                if row[Column.SRV_FAV_ID] == fav_id:
+                    row[Column.SRV_SERVICE] = response
                     break
 
     old_srv = services.get(f_id, None)
@@ -208,9 +208,9 @@ def set_flags(flag, services_view, fav_view, services, blacklist):
         if target is ViewTarget.SERVICES:
             set_hide(services, model, paths)
         else:
-            fav_ids = [model.get_value(model.get_iter(path), 7) for path in paths]
+            fav_ids = [model.get_value(model.get_iter(path), Column.FAV_ID) for path in paths]
             srv_model = get_base_model(services_view.get_model())
-            srv_paths = [row.path for row in srv_model if row[18] in fav_ids]
+            srv_paths = [row.path for row in srv_model if row[Column.SRV_FAV_ID] in fav_ids]
             set_hide(services, srv_model, srv_paths)
     elif flag is Flag.LOCK:
         set_lock(blacklist, services, model, paths, target, services_model=get_base_model(services_view.get_model()))
@@ -220,20 +220,20 @@ def set_flags(flag, services_view, fav_view, services, blacklist):
 
 def update_fav_model(fav_view, services):
     for row in get_base_model(fav_view.get_model()):
-        srv = services.get(row[7], None)
+        srv = services.get(row[Column.FAV_ID], None)
         if srv:
-            row[3], row[4] = srv.locked, srv.hide
+            row[Column.FAV_LOCKED], row[Column.FAV_HIDE] = srv.locked, srv.hide
 
 
 def set_lock(blacklist, services, model, paths, target, services_model):
-    col_num = 4 if target is ViewTarget.SERVICES else 3
+    col_num = Column.SRV_LOCKED if target is ViewTarget.SERVICES else Column.FAV_LOCKED
     locked = has_locked_hide(model, paths, col_num)
 
     ids = []
 
     for path in paths:
         itr = model.get_iter(path)
-        fav_id = model.get_value(itr, 18 if target is ViewTarget.SERVICES else 7)
+        fav_id = model.get_value(itr, Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID)
         srv = services.get(fav_id, None)
         if srv:
             bq_id = to_bouquet_id(srv)
@@ -251,13 +251,13 @@ def set_lock(blacklist, services, model, paths, target, services_model):
 
 def update_services_model(ids, locked, services_model):
     for srv in services_model:
-        if srv[18] in ids:
-            srv[4] = None if locked else LOCKED_ICON
+        if srv[Column.SRV_FAV_ID] in ids:
+            srv[Column.SRV_LOCKED] = None if locked else LOCKED_ICON
         yield True
 
 
 def set_hide(services, model, paths):
-    col_num = 5
+    col_num = Column.SRV_HIDE
     hide = has_locked_hide(model, paths, col_num)
 
     for path in paths:
@@ -292,7 +292,7 @@ def set_hide(services, model, paths):
                 flags.append(value)
 
         model.set_value(itr, 0, (",".join(reversed(sorted(flags)))))
-        fav_id = model.get_value(itr, 18)
+        fav_id = model.get_value(itr, Column.SRV_FAV_ID)
         srv = services.get(fav_id, None)
         if srv:
             services[fav_id] = srv._replace(hide=None if hide else HIDE_ICON)
@@ -317,9 +317,9 @@ def locate_in_services(fav_view, services_view, parent_window):
         show_dialog(DialogType.ERROR, parent_window, "Please, select only one item!")
         return
 
-    fav_id = model.get_value(model.get_iter(paths[0]), 7)
+    fav_id = model.get_value(model.get_iter(paths[0]), Column.FAV_ID)
     for index, row in enumerate(services_view.get_model()):
-        if row[18] == fav_id:
+        if row[Column.SRV_FAV_ID] == fav_id:
             scroll_to(index, services_view)
             break
 
@@ -347,7 +347,7 @@ def update_picons_data(path, picons):
 def append_picons(picons, model):
     def append_picons_data(pcs, mod):
         for r in mod:
-            mod.set_value(mod.get_iter(r.path), 8, pcs.get(r[9], None))
+            mod.set_value(mod.get_iter(r.path), Column.SRV_PICON, pcs.get(r[Column.SRV_PICON_ID], None))
             yield True
 
     app = append_picons_data(picons, model)
@@ -368,11 +368,11 @@ def assign_picon(target, srv_view, fav_view, transient, picons, options, service
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
         return
 
-    picon_pos = 8
+    picon_pos = Column.SRV_PICON
     model = get_base_model(model)
     itr = model.get_iter(paths)
-    fav_id = model.get_value(itr, 18 if target is ViewTarget.SERVICES else 7)
-    picon_id = services.get(fav_id)[9]
+    fav_id = model.get_value(itr, Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID)
+    picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
 
     if picon_id:
         picon_file = options.get("picons_dir_path") + picon_id
@@ -382,9 +382,9 @@ def assign_picon(target, srv_view, fav_view, transient, picons, options, service
             picons[picon_id] = picon
             model.set_value(itr, picon_pos, picon)
             if target is ViewTarget.SERVICES:
-                set_picon(fav_id, fav_view.get_model(), picon, 7, picon_pos)
+                set_picon(fav_id, fav_view.get_model(), picon, Column.FAV_ID, picon_pos)
             else:
-                set_picon(fav_id, get_base_model(srv_view.get_model()), picon, 18, picon_pos)
+                set_picon(fav_id, get_base_model(srv_view.get_model()), picon, Column.SRV_FAV_ID, picon_pos)
 
 
 def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):
@@ -401,26 +401,26 @@ def remove_picon(target, srv_view, fav_view, picons, options):
 
     fav_ids = []
     picon_ids = []
-    picon_pos = 8  # picon position is equal for services and fav
+    picon_pos = Column.SRV_PICON  # picon position is equal for services and fav
 
     for path in paths:
         itr = model.get_iter(path)
         model.set_value(itr, picon_pos, None)
         if target is ViewTarget.SERVICES:
-            fav_ids.append(model.get_value(itr, 18))
-            picon_ids.append(model.get_value(itr, 9))
+            fav_ids.append(model.get_value(itr, Column.SRV_FAV_ID))
+            picon_ids.append(model.get_value(itr, Column.SRV_PICON_ID))
         else:
-            srv_type, fav_id = model.get(itr, 5, 7)
+            srv_type, fav_id = model.get(itr, Column.FAV_TYPE, Column.FAV_ID)
             if srv_type == BqServiceType.IPTV.name:
                 picon_ids.append("{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id.split(":")[0:10]).strip())
             else:
                 fav_ids.append(fav_id)
 
     def remove(md, path, it):
-        if md.get_value(it, 7 if target is ViewTarget.SERVICES else 18) in fav_ids:
+        if md.get_value(it, Column.FAV_ID if target is ViewTarget.SERVICES else Column.SRV_FAV_ID) in fav_ids:
             md.set_value(it, picon_pos, None)
             if target is ViewTarget.FAV:
-                picon_ids.append(md.get_value(it, 9))
+                picon_ids.append(md.get_value(it, Column.SRV_PICON_ID))
 
     fav_view.get_model().foreach(remove) if target is ViewTarget.SERVICES else get_base_model(
         srv_view.get_model()).foreach(remove)
@@ -443,13 +443,13 @@ def copy_picon_reference(target, view, services, clipboard, transient):
         return
 
     if target is ViewTarget.SERVICES:
-        picon_id = model.get_value(model.get_iter(paths), 9)
+        picon_id = model.get_value(model.get_iter(paths), Column.SRV_PICON_ID)
         if picon_id:
             clipboard.set_text(picon_id.rstrip(".png"), -1)
         else:
             show_dialog(DialogType.ERROR, transient, "No reference is present!")
     elif target is ViewTarget.FAV:
-        fav_id = model.get_value(model.get_iter(paths), 7)
+        fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
         srv = services.get(fav_id, None)
         if srv and srv.picon_id:
             clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
@@ -477,15 +477,19 @@ def get_picon_pixbuf(path):
 
 def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback):
     """ Auto-generate and append list of bouquets """
-    fav_id_index = 18
-    index = 6 if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE) else 16 if gen_type in (
-        BqGenType.SAT, BqGenType.EACH_SAT) else 7
+    fav_id_index = Column.SRV_FAV_ID
+    index = Column.SRV_TYPE
+    if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE):
+        index = Column.SRV_PACKAGE
+    elif gen_type in (BqGenType.SAT, BqGenType.EACH_SAT):
+        index = Column.SRV_POS
+
     model, paths = view.get_selection().get_selected_rows()
     bq_type = BqType.BOUQUET.value if profile is Profile.NEUTRINO_MP else BqType.TV.value
     if gen_type in (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE):
         if not is_only_one_item_selected(paths, transient):
             return
-        service = Service(*model[paths][:])
+        service = Service(*model[paths][:Column.SRV_TOOLTIP])
         if service.service_type not in tv_types:
             bq_type = BqType.RADIO.value
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
@@ -564,7 +568,7 @@ def append_text_to_tview(char, view):
 
 def get_iptv_url(row, profile):
     """ Returns url from iptv type row """
-    data = row[7].split(":" if profile is Profile.ENIGMA_2 else "::")
+    data = row[Column.FAV_ID].split(":" if profile is Profile.ENIGMA_2 else "::")
     if profile is Profile.ENIGMA_2:
         data = list(filter(lambda x: "http" in x, data))
     if data:
