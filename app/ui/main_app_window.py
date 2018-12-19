@@ -3,6 +3,7 @@ import shutil
 import sys
 
 from contextlib import suppress
+from datetime import datetime
 from functools import lru_cache
 
 from gi.repository import GLib
@@ -833,11 +834,14 @@ class Application(Gtk.Application):
 
         profile = Profile(self._profile)
         path = self._options.get(self._profile).get("data_dir_path")
-        backup_path = path + "backup/"
+        backup_path = "{}backup/{}/".format(path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
         os.makedirs(os.path.dirname(backup_path), exist_ok=True)
         # backup files in data dir(skipping dirs and satellites.xml)
         for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
             shutil.move(os.path.join(path, file), backup_path + file)
+        # compressing to zip and delete remaining files
+        shutil.make_archive(backup_path, "zip", backup_path)
+        shutil.rmtree(backup_path)
 
         bouquets = []
 
