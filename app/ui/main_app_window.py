@@ -560,7 +560,7 @@ class Application(Gtk.Application):
             fav_bouquet = self._bouquets[self._bq_selected]
             fav_bouquet.clear()
             for row in self._fav_model:
-                fav_bouquet.append(row[7])
+                fav_bouquet.append(row[Column.FAV_ID])
 
     # ***************** Drag-and-drop *********************#
 
@@ -1194,7 +1194,7 @@ class Application(Gtk.Application):
             show_dialog(DialogType.ERROR, transient=self._main_window, text="Neutrino at the moment not supported!")
             return
 
-        iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
+        iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
             show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
             return
@@ -1499,22 +1499,27 @@ class Application(Gtk.Application):
     def on_filter_changed(self, item):
         GLib.idle_add(self._services_model_filter.refilter, priority=GLib.PRIORITY_LOW)
 
-    def services_filter_function(self, model, iter, data):
+    def services_filter_function(self, model, itr, data):
         if self._services_model_filter is None or self._services_model_filter == "None":
             return True
         else:
-            txt = self._filter_entry.get_text() in str(model.get(iter, 3, 6, 7, 10, 11, 12, 13, 14, 15, 16))
+            txt = self._filter_entry.get_text() in str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE,
+                                                                 Column.SRV_TYPE, Column.SRV_SSID, Column.SRV_FREQ,
+                                                                 Column.SRV_RATE, Column.SRV_POL, Column.SRV_FEC,
+                                                                 Column.SRV_SYSTEM, Column.SRV_POS))
             type_active = self._filter_types_box.get_active() > 0
             pos_active = self._filter_sat_positions_box.get_active() > 0
-            free = not model.get(iter, 2)[0] if self._filter_only_free_button.get_active() else True
+            free = not model.get(itr, Column.SRV_CODED)[0] if self._filter_only_free_button.get_active() else True
 
             if type_active and pos_active:
-                return self._filter_types_box.get_active_id() == model.get(iter, 7)[
-                    0] and self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt and free
+                active_id = self._filter_types_box.get_active_id() == model.get(itr, Column.SRV_TYPE)[0]
+                pos = self._filter_sat_positions_box.get_active_id() == model.get(itr, Column.SRV_POS)[0]
+                return active_id and pos and txt and free
             elif type_active:
-                return self._filter_types_box.get_active_id() == model.get(iter, 7)[0] and txt and free
+                return self._filter_types_box.get_active_id() == model.get(itr, Column.SRV_TYPE)[0] and txt and free
             elif pos_active:
-                return self._filter_sat_positions_box.get_active_id() == model.get(iter, 16)[0] and txt and free
+                pos = self._filter_sat_positions_box.get_active_id() == model.get(itr, Column.SRV_POS)[0]
+                return pos and txt and free
 
             return txt and free
 
@@ -1539,7 +1544,7 @@ class Application(Gtk.Application):
         if is_only_one_item_selected(paths, self._main_window):
             model_name = get_base_model(model).get_name()
             if model_name == self._FAV_LIST_NAME:
-                srv_type = model.get_value(model.get_iter(paths), 5)
+                srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
                 if srv_type == BqServiceType.MARKER.name:
                     return self.on_rename(view)
                 elif srv_type == BqServiceType.IPTV.name:
@@ -1604,7 +1609,7 @@ class Application(Gtk.Application):
 
         model, paths = selection
         data = model[paths][:]
-        cur_name, srv_type, fav_id = data[2], data[5], data[7]
+        cur_name, srv_type, fav_id = data[Column.FAV_SERVICE], data[Column.FAV_TYPE], data[Column.FAV_ID]
 
         if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
             show_dialog(DialogType.ERROR, self._main_window, "Not allowed in this context!")
@@ -1663,8 +1668,8 @@ class Application(Gtk.Application):
         ids = {}
         if Profile(self._profile) is Profile.ENIGMA_2:
             for r in self._services_model:
-                data = r[9].split("_")
-                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[9]
+                data = r[Column.SRV_PICON_ID].split("_")
+                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
 
         dialog = PiconsDialog(self._main_window, self._options, ids, self._sat_positions, Profile(self._profile))
         dialog.show()
