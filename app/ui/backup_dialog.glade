@@ -30,7 +30,7 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Extract</property>
-            <signal name="clicked" handler="on_extract" swapped="no"/>
+            <signal name="clicked" handler="on_restore_all" swapped="no"/>
             <child>
               <object class="GtkImage" id="extract_button_image">
                 <property name="visible">True</property>
@@ -185,7 +185,7 @@
         <property name="can_focus">False</property>
         <property name="image">restore_popup_menu_item_image</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_extract" swapped="no"/>
+        <signal name="activate" handler="on_restore_bouquets" swapped="no"/>
         <accelerator key="r" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
@@ -196,6 +196,7 @@
         <property name="can_focus">False</property>
         <property name="image">restore_popup_menu_item_image2</property>
         <property name="use_stock">False</property>
+        <signal name="activate" handler="on_restore_all" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
