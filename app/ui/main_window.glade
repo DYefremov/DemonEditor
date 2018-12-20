@@ -1270,7 +1270,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="backup_tool_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">extract-archive-symbolic</property>
+                    <property name="icon_name">drive-harddisk-symbolic</property>
                   </object>
                 </child>
               </object>

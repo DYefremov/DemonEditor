@@ -21,7 +21,7 @@
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Backup tool</property>
+        <property name="title" translatable="yes">Backups</property>
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
@@ -35,7 +35,7 @@
               <object class="GtkImage" id="extract_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">extract-archive-symbolic</property>
+                <property name="icon_name">drive-harddisk-symbolic</property>
               </object>
             </child>
           </object>
@@ -65,41 +65,155 @@
       </object>
     </child>
     <child>
-      <object class="GtkScrolledWindow" id="main_view_scrolled_window">
-        <property name="width_request">480</property>
+      <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkTreeView" id="main_view">
+          <object class="GtkScrolledWindow" id="main_view_scrolled_window">
+            <property name="width_request">480</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="model">main_list_store</property>
-            <property name="headers_visible">False</property>
-            <property name="search_column">0</property>
-            <property name="rubber_banding">True</property>
-            <child internal-child="selection">
-              <object class="GtkTreeSelection"/>
-            </child>
+            <property name="shadow_type">in</property>
             <child>
-              <object class="GtkTreeViewColumn" id="backup_date_column">
-                <property name="title" translatable="yes">Backup</property>
-                <property name="clickable">True</property>
-                <property name="alignment">0.5</property>
-                <property name="reorderable">True</property>
-                <property name="sort_column_id">0</property>
-                <child>
-                  <object class="GtkCellRendererText" id="date_render">
-                    <property name="xpad">10</property>
+              <object class="GtkTreeView" id="main_view">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="model">main_list_store</property>
+                <property name="headers_visible">False</property>
+                <property name="search_column">0</property>
+                <property name="rubber_banding">True</property>
+                <signal name="button-press-event" handler="on_view_popup_menu" object="popup_menu" swapped="no"/>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="main_view_selection">
+                    <property name="mode">multiple</property>
                   </object>
-                  <attributes>
-                    <attribute name="text">0</attribute>
-                  </attributes>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="backup_date_column">
+                    <property name="title" translatable="yes">Backup</property>
+                    <property name="clickable">True</property>
+                    <property name="alignment">0.5</property>
+                    <property name="reorderable">True</property>
+                    <property name="sort_column_id">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="date_render">
+                        <property name="xpad">10</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
                 </child>
               </object>
             </child>
           </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
+        <child>
+          <object class="GtkInfoBar" id="info_bar">
+            <property name="can_focus">False</property>
+            <property name="show_close_button">True</property>
+            <signal name="response" handler="on_info_bar_close" swapped="no"/>
+            <child internal-child="action_area">
+              <object class="GtkButtonBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">6</property>
+                <property name="layout_style">end</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child internal-child="content_area">
+              <object class="GtkBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">16</property>
+                <child>
+                  <object class="GtkLabel" id="message_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">message</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="restore_popup_menu_item_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-revert-to-saved</property>
+  </object>
+  <object class="GtkImage" id="restore_popup_menu_item_image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-revert-to-saved</property>
+  </object>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="restore_bouquets_popup_menu_item">
+        <property name="label" translatable="yes">Restore bouquets</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">restore_popup_menu_item_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_extract" swapped="no"/>
+        <accelerator key="r" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="restore_all_popup_menu_item">
+        <property name="label" translatable="yes">Restore all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">restore_popup_menu_item_image2</property>
+        <property name="use_stock">False</property>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_menu_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="remove_popup_menu_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
