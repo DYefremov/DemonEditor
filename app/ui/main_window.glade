@@ -735,7 +735,7 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkModelButton">
+          <object class="GtkModelButton" id="sat_editor_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -749,7 +749,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkModelButton">
+          <object class="GtkModelButton" id="picons_downloader_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -763,7 +763,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkModelButton">
+          <object class="GtkModelButton" id="import_m3u_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -777,7 +777,21 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkModelButton" id="backup_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Backup</property>
+            <signal name="clicked" handler="on_backup_tool_show" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="popover_menu_separator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
@@ -788,7 +802,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkModelButton">
+          <object class="GtkModelButton" id="settings_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -802,7 +816,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkSeparator" id="popover_menu_separator2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_top">5</property>
@@ -815,7 +829,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkModelButton">
+          <object class="GtkModelButton" id="about_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -980,7 +994,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="download_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">network-transmit-receive</property>
+                    <property name="icon_name">network-transmit-receive-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1001,7 +1015,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="save_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-save</property>
+                    <property name="icon_name">document-save-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1034,7 +1048,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="filter_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-spell-check</property>
+                    <property name="icon_name">tools-check-spelling-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1055,7 +1069,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="search_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-find</property>
+                    <property name="icon_name">system-search-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1111,7 +1125,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">go-jump</property>
+                    <property name="icon_name">go-jump-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1139,7 +1153,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="edit_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-edit</property>
+                    <property name="icon_name">document-edit-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1161,7 +1175,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="new_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-new</property>
+                    <property name="icon_name">document-new-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -1193,14 +1207,14 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="sat_editor_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-select-all</property>
+                    <property name="icon_name">edit-select-all-symbolic</property>
                   </object>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -1214,14 +1228,14 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="picons_downloader_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">insert-image</property>
+                    <property name="icon_name">insert-image-symbolic</property>
                   </object>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -1235,14 +1249,35 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="import_m3u_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">insert-link</property>
+                    <property name="icon_name">insert-link-symbolic</property>
                   </object>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">7</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="backup_tool_header_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Backup</property>
+                <signal name="clicked" handler="on_backup_tool_show" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="backup_tool_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">extract-archive-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -1446,7 +1481,7 @@ Author: Dmitriy Yefremov
                             <property name="height_request">32</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="primary_icon_name">edit-find-symbolic</property>
+                            <property name="primary_icon_name">system-search-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">False</property>
                             <signal name="changed" handler="on_search" swapped="no"/>
@@ -1539,7 +1574,7 @@ Author: Dmitriy Yefremov
                             <property name="height_request">32</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="primary_icon_name">tools-check-spelling</property>
+                            <property name="primary_icon_name">tools-check-spelling-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">False</property>
                             <signal name="search-changed" handler="on_filter_changed" swapped="no"/>

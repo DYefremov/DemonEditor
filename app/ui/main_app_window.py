@@ -17,6 +17,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
+from app.ui.backup import BackupDialog
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
@@ -104,6 +105,7 @@ class Application(Gtk.Application):
                     "on_locked": self.on_locked,
                     "on_model_changed": self.on_model_changed,
                     "on_import_m3u": self.on_import_m3u,
+                    "on_backup_tool_show": self.on_backup_tool_show,
                     "on_insert_marker": self.on_insert_marker,
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
@@ -1247,6 +1249,12 @@ class Application(Gtk.Application):
                 self._services[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
+
+    # ***************** Backup tool ****************#
+
+    def on_backup_tool_show(self, item):
+        """ Shows backup tool dialog """
+        BackupDialog(self._main_window, self._options.get(self._profile).get("data_dir_path", "") + "backup/").show()
 
     # ***************** Player *********************#
 
