@@ -1,8 +1,10 @@
 import os
 import shutil
+import tempfile
 from enum import Enum
 
 from app.commons import run_idle
+from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
 
@@ -13,7 +15,7 @@ class RestoreType(Enum):
 
 
 class BackupDialog:
-    def __init__(self, transient, data_path, callback):
+    def __init__(self, transient, data_path, profile, callback):
         handlers = {"on_restore_bouquets": self.on_restore_bouquets,
                     "on_restore_all": self.on_restore_all,
                     "on_remove": self.on_remove,
@@ -27,6 +29,7 @@ class BackupDialog:
 
         self._data_path = data_path
         self._backup_path = data_path + "backup/"
+        self._profile = profile
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -100,18 +103,29 @@ class BackupDialog:
         if show_dialog(DialogType.QUESTION, self._dialog_window) == Gtk.ResponseType.CANCEL:
             return
 
-        file_name = model.get_value(model.get_iter(paths[0]), 0) + ".zip"
-        file_name = self._backup_path + file_name
+        file_name = model.get_value(model.get_iter(paths[0]), 0)
+        full_file_name = self._backup_path + file_name + ".zip"
 
-        if restore_type is RestoreType.ALL:
-            try:
-                shutil.unpack_archive(file_name, self._data_path)
-            except FileNotFoundError as e:
-                self.show_info_message(str(e), Gtk.MessageType.ERROR)
-            else:
-                self._open_data_callback(self._data_path)
-        elif restore_type is RestoreType.BOUQUETS:
-            show_dialog(DialogType.ERROR, transient=self._dialog_window, text="Not implemented yet!")
+        try:
+            if restore_type is RestoreType.ALL:
+                for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(self._data_path, f)),
+                                   os.listdir(self._data_path)):
+                    os.remove(os.path.join(self._data_path, file))
+                shutil.unpack_archive(full_file_name, self._data_path)
+            elif restore_type is RestoreType.BOUQUETS:
+                tmp_dir = tempfile.gettempdir() + "/" + file_name
+                cond = (".tv", ".radio") if self._profile is Profile.ENIGMA_2 else "bouquets.xml"
+                shutil.unpack_archive(full_file_name, tmp_dir)
+                for file in filter(lambda f: f.endswith(cond), os.listdir(self._data_path)):
+                    os.remove(os.path.join(self._data_path, file))
+                for file in filter(lambda f: f.endswith(cond), os.listdir(tmp_dir)):
+                    shutil.move(os.path.join(tmp_dir, file), self._data_path + file)
+                shutil.rmtree(tmp_dir)
+        except FileNotFoundError as e:
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self.show_info_message("Done!", Gtk.MessageType.INFO)
+            self._open_data_callback(self._data_path)
 
 
 if __name__ == "__main__":

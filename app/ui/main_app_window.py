@@ -1256,6 +1256,7 @@ class Application(Gtk.Application):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window,
                      self._options.get(self._profile).get("data_dir_path", ""),
+                     Profile(self._profile),
                      self.open_data).show()
 
     # ***************** Player *********************#
