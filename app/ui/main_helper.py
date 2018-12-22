@@ -25,9 +25,9 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
         return
 
     # Searching for max num value in all marker services (if empty default = 0)
-    max_num = max(map(lambda num: int(num.data_id, 18),
+    max_num = max(map(lambda num: int(num.data_id, 16),
                       filter(lambda ch: ch.service_type == BqServiceType.MARKER.name, channels.values())), default=0)
-    max_num = '{:x}'.format(max_num + 1)
+    max_num = '{:X}'.format(max_num + 1)
     fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
