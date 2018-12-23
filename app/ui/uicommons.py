@@ -27,8 +27,8 @@ TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symboli
 IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.load_icon("emblem-shared", 16, 0) else None
 
 # Colors
-NEW_COLOR = "#ff5c33"  # Color for new services in the main list
-EXTRA_COLOR = "#33adff"  # Color for services with a extra name for the bouquet
+NEW_COLOR = "rgb(255,230,204)"  # Color for new services in the main list
+EXTRA_COLOR = "rgb(179,230,204)"  # Color for services with a extra name for the bouquet
 
 
 class KeyboardKey(Enum):

@@ -209,7 +209,7 @@ Author: Dmitriy Yefremov
       <!-- column-name tooltip -->
       <column type="gchararray"/>
       <!-- column-name background -->
-      <column type="gchararray"/>
+      <column type="GdkRGBA"/>
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
@@ -919,7 +919,7 @@ Author: Dmitriy Yefremov
       <!-- column-name tooltip -->
       <column type="gchararray"/>
       <!-- column-name background -->
-      <column type="gchararray"/>
+      <column type="GdkRGBA"/>
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
   </object>
@@ -1741,6 +1741,7 @@ Author: Dmitriy Yefremov
                                         <property name="xpad">2</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="pixbuf">2</attribute>
                                       </attributes>
                                     </child>
@@ -1750,7 +1751,7 @@ Author: Dmitriy Yefremov
                                         <property name="width_chars">25</property>
                                       </object>
                                       <attributes>
-                                        <attribute name="foreground">21</attribute>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">3</attribute>
                                       </attributes>
                                     </child>
@@ -1759,6 +1760,7 @@ Author: Dmitriy Yefremov
                                         <property name="xpad">2</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="pixbuf">4</attribute>
                                       </attributes>
                                     </child>
@@ -1767,6 +1769,7 @@ Author: Dmitriy Yefremov
                                         <property name="xpad">2</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="pixbuf">5</attribute>
                                       </attributes>
                                     </child>
@@ -1786,6 +1789,7 @@ Author: Dmitriy Yefremov
                                         <property name="width_chars">15</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">6</attribute>
                                       </attributes>
                                     </child>
@@ -1804,6 +1808,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.51999998092651367</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">7</attribute>
                                       </attributes>
                                     </child>
@@ -1817,6 +1822,7 @@ Author: Dmitriy Yefremov
                                     <child>
                                       <object class="GtkCellRendererPixbuf" id="picon_cellrendererpixbuf"/>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="pixbuf">8</attribute>
                                       </attributes>
                                     </child>
@@ -1848,6 +1854,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">10</attribute>
                                       </attributes>
                                     </child>
@@ -1866,6 +1873,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">11</attribute>
                                       </attributes>
                                     </child>
@@ -1884,6 +1892,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">12</attribute>
                                       </attributes>
                                     </child>
@@ -1902,6 +1911,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">13</attribute>
                                       </attributes>
                                     </child>
@@ -1920,6 +1930,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">14</attribute>
                                       </attributes>
                                     </child>
@@ -1938,6 +1949,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">15</attribute>
                                       </attributes>
                                     </child>
@@ -1955,6 +1967,7 @@ Author: Dmitriy Yefremov
                                         <property name="xalign">0.50999999046325684</property>
                                       </object>
                                       <attributes>
+                                        <attribute name="cell-background-rgba">21</attribute>
                                         <attribute name="text">16</attribute>
                                       </attributes>
                                     </child>
@@ -2007,10 +2020,7 @@ Author: Dmitriy Yefremov
                                       </attributes>
                                     </child>
                                     <child>
-                                      <object class="GtkCellRendererText" id="background_cellrenderertext"/>
-                                      <attributes>
-                                        <attribute name="text">21</attribute>
-                                      </attributes>
+                                      <object class="GtkCellRendererPixbuf" id="background_cellrenderertext"/>
                                     </child>
                                   </object>
                                 </child>
@@ -2240,6 +2250,7 @@ Author: Dmitriy Yefremov
                                             <property name="max_width_chars">5</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="text">0</attribute>
                                           </attributes>
                                         </child>
@@ -2256,6 +2267,7 @@ Author: Dmitriy Yefremov
                                             <property name="xpad">2</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="pixbuf">8</attribute>
                                           </attributes>
                                         </child>
@@ -2264,6 +2276,7 @@ Author: Dmitriy Yefremov
                                             <property name="xpad">2</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="pixbuf">1</attribute>
                                           </attributes>
                                         </child>
@@ -2273,7 +2286,7 @@ Author: Dmitriy Yefremov
                                             <property name="width_chars">25</property>
                                           </object>
                                           <attributes>
-                                            <attribute name="foreground">10</attribute>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="text">2</attribute>
                                           </attributes>
                                         </child>
@@ -2282,6 +2295,7 @@ Author: Dmitriy Yefremov
                                             <property name="xpad">2</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="pixbuf">3</attribute>
                                           </attributes>
                                         </child>
@@ -2290,6 +2304,7 @@ Author: Dmitriy Yefremov
                                             <property name="xpad">2</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="pixbuf">4</attribute>
                                           </attributes>
                                         </child>
@@ -2306,6 +2321,7 @@ Author: Dmitriy Yefremov
                                             <property name="xalign">0.50999999046325684</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="text">5</attribute>
                                           </attributes>
                                         </child>
@@ -2321,6 +2337,7 @@ Author: Dmitriy Yefremov
                                             <property name="xalign">0.50999999046325684</property>
                                           </object>
                                           <attributes>
+                                            <attribute name="cell-background-rgba">10</attribute>
                                             <attribute name="text">6</attribute>
                                           </attributes>
                                         </child>
@@ -2349,10 +2366,7 @@ Author: Dmitriy Yefremov
                                           </attributes>
                                         </child>
                                         <child>
-                                          <object class="GtkCellRendererText" id="fav_background_cellrenderertext"/>
-                                          <attributes>
-                                            <attribute name="text">10</attribute>
-                                          </attributes>
+                                          <object class="GtkCellRendererPixbuf" id="fav_background_cellrenderertext"/>
                                         </child>
                                       </object>
                                     </child>

@@ -6,7 +6,7 @@ from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE
 from app.properties import Profile
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, NEW_COLOR
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column
 from .dialogs import show_dialog, DialogType, Action
 from .main_helper import get_base_model
 
@@ -31,7 +31,7 @@ class ServiceDetailsDialog:
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
-    def __init__(self, transient, options, srv_view, fav_view, services, bouquets, action=Action.EDIT):
+    def __init__(self, transient, options, srv_view, fav_view, services, bouquets, new_color, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
@@ -58,6 +58,7 @@ class ServiceDetailsDialog:
         self._old_service = None
         self._services = services
         self._bouquets = bouquets
+        self._new_color = new_color
         self._transponder_services_iters = None
         self._current_model = None
         self._current_itr = None
@@ -370,7 +371,7 @@ class ServiceDetailsDialog:
         if flags:
             f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
             if f_flags and Flag.is_new(int(f_flags[0][2:])):
-                extra_data[Column.SRV_BACKGROUND] = NEW_COLOR
+                extra_data[Column.SRV_BACKGROUND] = self._new_color
 
         self._current_model.set(self._current_itr, extra_data)
         self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})

@@ -21,8 +21,8 @@ from app.ui.backup import BackupDialog
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, \
-    NEW_COLOR, EXTRA_COLOR, Column
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
+    EXTRA_COLOR, NEW_COLOR
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
@@ -166,6 +166,10 @@ class Application(Gtk.Application):
         # http api
         self._http_api = None
         self._monitor_signal = False
+        # Colors
+        self._use_colors = False
+        self._NEW_COLOR = None  # Color for new services in the main list
+        self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -199,7 +203,6 @@ class Application(Gtk.Application):
         # Status bar
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
-        self.update_profile_label()
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
         self._signal_box = builder.get_object("signal_box")
@@ -213,7 +216,6 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
-        self.init_drag_and_drop()  # drag and drop
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -239,6 +241,9 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
+        self.update_profile_label()
+        self.init_drag_and_drop()
+        self.init_colors()
         self.init_http_api()
 
     def do_activate(self):
@@ -274,6 +279,44 @@ class Application(Gtk.Application):
         self._bouquets_view.drag_source_set_target_list(None)
         self._bouquets_view.drag_dest_add_text_targets()
         self._bouquets_view.drag_source_add_text_targets()
+
+    def init_colors(self, update=False):
+        """ Initialisation of background colors for the services.
+
+            If update=False - first call on program start, else - after options changes!
+        """
+        profile = Profile(self._profile)
+        if profile is Profile.ENIGMA_2:
+            opts = self._options.get(self._profile)
+            self._use_colors = opts.get("use_colors", False)
+            if self._use_colors:
+                new_rgb = Gdk.RGBA()
+                extra_rgb = Gdk.RGBA()
+                new_rgb = new_rgb if new_rgb.parse(opts.get("new_color", NEW_COLOR)) else None
+                extra_rgb = extra_rgb if extra_rgb.parse(opts.get("extra_color", EXTRA_COLOR)) else None
+                if update:
+                    gen = self.update_background_colors(new_rgb, extra_rgb)
+                    GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+                else:
+                    self._NEW_COLOR = new_rgb
+                    self._EXTRA_COLOR = extra_rgb
+
+    def update_background_colors(self, new_color, extra_color):
+        if extra_color != self._EXTRA_COLOR:
+            for row in self._fav_model:
+                if row[Column.FAV_BACKGROUND]:
+                    row[Column.FAV_BACKGROUND] = extra_color
+                    yield True
+
+        if new_color != self._NEW_COLOR:
+            for row in self._services_model:
+                if row[Column.SRV_BACKGROUND]:
+                    row[Column.SRV_BACKGROUND] = new_color
+                    yield True
+
+        self._NEW_COLOR = new_color
+        self._EXTRA_COLOR = extra_color
+        yield True
 
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
@@ -799,15 +842,14 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_services_data(self, services):
-        profile = Profile(self._profile)
         for srv in services:
             tooltip, background = None, None
-            if profile is Profile.ENIGMA_2:
+            if self._use_colors:
                 flags = srv.flags_cas
                 if flags:
                     f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
                     if f_flags and Flag.is_new(int(f_flags[0][2:])):
-                        background = NEW_COLOR
+                        background = self._NEW_COLOR
 
             s = srv + (tooltip, background)
             itr = self._services_model.append(s)
@@ -945,7 +987,7 @@ class Application(Gtk.Application):
             if ex_services:
                 ex_srv_name = ex_services.get(srv_id)
             if srv:
-                tooltip, background = None, EXTRA_COLOR if ex_srv_name else None
+                tooltip, background = None, self._EXTRA_COLOR if self._use_colors and ex_srv_name else None
                 self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
                                         srv.hide, srv.service_type, srv.pos, srv.fav_id,
                                         self._picons.get(srv.picon_id, None), tooltip, background))
@@ -995,6 +1037,7 @@ class Application(Gtk.Application):
                 self.update_services_counts()
 
             self.update_profile_label()
+            self.init_colors(True)
             self.init_http_api()
 
     def on_tree_view_key_press(self, view, event):
@@ -1568,6 +1611,7 @@ class Application(Gtk.Application):
                                       self._services,
                                       self._bouquets.get(self._bq_selected, None),
                                       Profile(self._profile),
+                                      self._NEW_COLOR,
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)
 
@@ -1576,7 +1620,8 @@ class Application(Gtk.Application):
                                           self._services_view,
                                           self._fav_view,
                                           self._services,
-                                          self._bouquets)
+                                          self._bouquets,
+                                          self._NEW_COLOR)
             dialog.show()
 
     def on_services_add_new(self, item):
@@ -1648,7 +1693,7 @@ class Application(Gtk.Application):
                 self._extra_bouquets[self._bq_selected] = {fav_id: response}
 
         model.set(model.get_iter(paths), {Column.FAV_SERVICE: response, Column.FAV_TOOLTIP: None,
-                                          Column.FAV_BACKGROUND: EXTRA_COLOR})
+                                          Column.FAV_BACKGROUND: self._EXTRA_COLOR})
 
     def on_set_default_name_for_bouquet(self, item):
         selection = get_selection(self._fav_view, self._main_window)

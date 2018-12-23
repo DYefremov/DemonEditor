@@ -45,7 +45,8 @@ def get_default_settings():
             "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
             "satellites_xml_path": "/etc/tuxbox/",  "data_dir_path": DATA_PATH + "enigma2/",
             "picons_path": "/usr/share/enigma2/picon", "picons_dir_path": DATA_PATH + "enigma2/picons/",
-            "v5_support": False, "http_api_support": False},
+            "v5_support": False, "http_api_support": False,
+            "use_colors": True, "new_color": "rgb(255,230,204)", "extra_color": "rgb(179,230,204)"},
         Profile.NEUTRINO_MP.value: {
             "host": "127.0.0.1", "port": "21", "user": "root", "password": "root",
             "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2,
