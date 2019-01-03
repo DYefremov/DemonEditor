@@ -944,6 +944,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="label_xalign">0.019999999552965164</property>
                         <property name="shadow_type">in</property>
@@ -1006,6 +1007,87 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkFrame" id="backup_frame">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="label_xalign">0.019999999552965164</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkGrid" id="backup_grid">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_bottom">5</property>
+                            <property name="row_spacing">5</property>
+                            <property name="column_spacing">5</property>
+                            <child>
+                              <object class="GtkSwitch" id="before_save_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="halign">end</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="before_downloading_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="halign">end</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
+                                <property name="label" translatable="yes">Before saving</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Before downloading from the receiver</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Backup:</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkBox" id="program_box">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
@@ -1033,14 +1115,14 @@ Author: Dmitriy Yefremov
                                   <object class="GtkBox" id="set_color_switch_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="margin_top">10</property>
+                                    <property name="margin_top">5</property>
                                     <property name="spacing">5</property>
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Set background color for the services</property>
-                                        <property name="xalign">1</property>
+                                        <property name="xalign">0</property>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
@@ -1076,13 +1158,13 @@ Author: Dmitriy Yefremov
                                     <property name="margin_top">5</property>
                                     <property name="margin_bottom">5</property>
                                     <property name="row_spacing">5</property>
-                                    <property name="column_spacing">5</property>
+                                    <property name="column_spacing">20</property>
                                     <child>
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Marked as new:</property>
-                                        <property name="xalign">1</property>
+                                        <property name="xalign">0</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1106,7 +1188,7 @@ Author: Dmitriy Yefremov
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">With an extra name in the bouquet:</property>
-                                        <property name="xalign">1</property>
+                                        <property name="xalign">0</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1131,9 +1213,6 @@ Author: Dmitriy Yefremov
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
-                                </child>
-                                <child>
-                                  <placeholder/>
                                 </child>
                               </object>
                             </child>
@@ -1211,14 +1290,11 @@ Author: Dmitriy Yefremov
                             <property name="position">1</property>
                           </packing>
                         </child>
-                        <child>
-                          <placeholder/>
-                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -1241,9 +1317,6 @@ Author: Dmitriy Yefremov
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
     </child>

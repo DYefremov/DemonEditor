@@ -70,6 +70,8 @@ class SettingsDialog:
         self._support_ver5_check_button = builder.get_object("support_ver5_check_button")
         self._support_http_api_check_button = builder.get_object("support_http_api_check_button")
         # Program
+        self._before_save_switch = builder.get_object("before_save_switch")
+        self._before_downloading_switch = builder.get_object("before_downloading_switch")
         self._program_box = builder.get_object("program_box")
         self._colors_grid = builder.get_object("colors_grid")
         self._set_color_switch = builder.get_object("set_color_switch")
@@ -146,6 +148,9 @@ class SettingsDialog:
         self._picons_field.set_text(options.get("picons_path", ""))
         self._data_dir_field.set_text(options.get("data_dir_path", ""))
         self._picons_dir_field.set_text(options.get("picons_dir_path", ""))
+        self._before_save_switch.set_active(options.get("backup_before_save", True))
+        self._before_downloading_switch.set_active(options.get("backup_before_downloading", True))
+
         if Profile(self._active_profile) is Profile.ENIGMA_2:
             self._support_ver5_check_button.set_active(options.get("v5_support", False))
             self._support_http_api_check_button.set_active(options.get("http_api_support", False))
@@ -179,6 +184,9 @@ class SettingsDialog:
         options["picons_path"] = self._picons_field.get_text()
         options["data_dir_path"] = self._data_dir_field.get_text()
         options["picons_dir_path"] = self._picons_dir_field.get_text()
+        options["backup_before_save"] = self._before_save_switch.get_active()
+        options["backup_before_downloading"] = self._before_downloading_switch.get_active()
+
         if profile is Profile.ENIGMA_2:
             options["v5_support"] = self._support_ver5_check_button.get_active()
             options["http_api_support"] = self._support_http_api_check_button.get_active()

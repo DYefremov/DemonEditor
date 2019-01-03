@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from datetime import datetime
 from enum import Enum
 
 from app.commons import run_idle
@@ -108,9 +109,7 @@ class BackupDialog:
 
         try:
             if restore_type is RestoreType.ALL:
-                for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(self._data_path, f)),
-                                   os.listdir(self._data_path)):
-                    os.remove(os.path.join(self._data_path, file))
+                clear_data_path(self._data_path)
                 shutil.unpack_archive(full_file_name, self._data_path)
             elif restore_type is RestoreType.BOUQUETS:
                 tmp_dir = tempfile.gettempdir() + "/" + file_name
@@ -126,6 +125,24 @@ class BackupDialog:
         else:
             self.show_info_message("Done!", Gtk.MessageType.INFO)
             self._open_data_callback(self._data_path)
+
+
+def backup_data(path):
+    """ Creating data backup from a folder at the specified path """
+    backup_path = "{}backup/{}/".format(path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    os.makedirs(os.path.dirname(backup_path), exist_ok=True)
+    # backup files in data dir(skipping dirs and satellites.xml)
+    for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+        shutil.move(os.path.join(path, file), backup_path + file)
+    # compressing to zip and delete remaining files
+    shutil.make_archive(backup_path, "zip", backup_path)
+    shutil.rmtree(backup_path)
+
+
+def clear_data_path(path):
+    """ Clearing data at the specified path excluding satellites.xml file """
+    for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+        os.remove(os.path.join(path, file))
 
 
 if __name__ == "__main__":

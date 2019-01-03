@@ -3,6 +3,7 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType, upload_data
 from app.properties import Profile, get_config
+from app.ui.backup import backup_data
 from app.ui.main_helper import append_text_to_tview
 from app.ui.settings_dialog import show_settings_dialog
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
@@ -66,6 +67,9 @@ class DownloadDialog:
 
     @run_idle
     def on_receive(self, item):
+        if self._profile_properties.get("backup_before_downloading", True):
+            backup_data(self._profile_properties.get("data_dir_path", self._data_path_entry.get_text()))
+
         self.download(True, self.get_download_type())
 
     @run_idle

@@ -1,9 +1,7 @@
 import os
-import shutil
 import sys
 
 from contextlib import suppress
-from datetime import datetime
 from functools import lru_cache
 
 from gi.repository import GLib
@@ -17,7 +15,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
-from app.ui.backup import BackupDialog
+from app.ui.backup import BackupDialog, backup_data, clear_data_path
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
@@ -877,15 +875,10 @@ class Application(Gtk.Application):
             return
 
         profile = Profile(self._profile)
-        path = self._options.get(self._profile).get("data_dir_path")
-        backup_path = "{}backup/{}/".format(path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
-        os.makedirs(os.path.dirname(backup_path), exist_ok=True)
-        # backup files in data dir(skipping dirs and satellites.xml)
-        for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
-            shutil.move(os.path.join(path, file), backup_path + file)
-        # compressing to zip and delete remaining files
-        shutil.make_archive(backup_path, "zip", backup_path)
-        shutil.rmtree(backup_path)
+        options = self._options.get(self._profile)
+        path = options.get("data_dir_path")
+        # Backup data or clearing data path
+        backup_data(path) if options.get("backup_before_save", True) else clear_data_path(path)
 
         bouquets = []
 
@@ -1293,7 +1286,7 @@ class Application(Gtk.Application):
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
-    # ***************** Backup tool ****************#
+    # ***************** Backup  ********************#
 
     def on_backup_tool_show(self, item):
         """ Shows backup tool dialog """
