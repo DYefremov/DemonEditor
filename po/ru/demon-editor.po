@@ -571,6 +571,45 @@ msgstr "Текущий список не содержит потоков IPTV!"
 msgid "New empty configuration"
 msgstr "Новая конфигурация"
 
+msgid "No data to save!"
+msgstr "Нет данных для сохранения!"
+
+msgid "Network"
+msgstr "Сеть"
+
+msgid "Paths"
+msgstr "Пути"
+
+msgid "Program"
+msgstr "Программа"
+
+msgid "Backup:"
+msgstr "Резервное копирование:"
+
+msgid "Backup"
+msgstr "Резервное копирование"
+
+msgid "Before saving"
+msgstr "Перед сохранением"
+
+msgid "Before downloading from the receiver"
+msgstr "Перед загрузкой с ресивера"
+
+msgid "Set background color for the services"
+msgstr "Установить цвет фона для сервисов"
+
+msgid "Marked as new:"
+msgstr "Помеченные как новые:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "С пользовательским именем в букете:"
+
+msgid "About"
+msgstr "О программе"
+
+
+
+
 
 
 
