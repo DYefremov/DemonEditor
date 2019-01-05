@@ -113,7 +113,7 @@ class BackupDialog:
                 shutil.unpack_archive(full_file_name, self._data_path)
             elif restore_type is RestoreType.BOUQUETS:
                 tmp_dir = tempfile.gettempdir() + "/" + file_name
-                cond = (".tv", ".radio") if self._profile is Profile.ENIGMA_2 else ("bouquets.xml", "bouquets.xml")
+                cond = (".tv", ".radio") if self._profile is Profile.ENIGMA_2 else "bouquets.xml"
                 shutil.unpack_archive(full_file_name, tmp_dir)
                 for file in filter(lambda f: f.endswith(cond), os.listdir(self._data_path)):
                     os.remove(os.path.join(self._data_path, file))
