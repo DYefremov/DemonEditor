@@ -871,6 +871,10 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_data_save(self, *args):
+        if len(self._bouquets_model) == 0:
+            show_dialog(DialogType.ERROR, self._main_window, "No data to save!")
+            return
+
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
