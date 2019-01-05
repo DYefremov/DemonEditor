@@ -589,6 +589,15 @@ msgstr "Резервное копирование:"
 msgid "Backup"
 msgstr "Резервное копирование"
 
+msgid "Backups"
+msgstr "Резервные копии"
+
+msgid "Restore bouquets"
+msgstr "Восстановить букеты"
+
+msgid "Restore all"
+msgstr "Восстановить все"
+
 msgid "Before saving"
 msgstr "Перед сохранением"
 
@@ -606,6 +615,9 @@ msgstr "С пользовательским именем в букете:"
 
 msgid "About"
 msgstr "О программе"
+
+msgid "Exit"
+msgstr "Выход"
 
 
 
