@@ -47,7 +47,7 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="destroy_with_parent">True</property>
-    <property name="icon_name">insert-object</property>
+    <property name="icon_name">document-revert</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
