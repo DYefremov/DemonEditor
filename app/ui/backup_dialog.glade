@@ -47,7 +47,7 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="destroy_with_parent">True</property>
-    <property name="icon_name">extract-archive</property>
+    <property name="icon_name">insert-object</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
@@ -71,7 +71,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="restore_bouquets_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">document-revert-symbolic</property>
+                    <property name="icon_name">document-revert</property>
                   </object>
                 </child>
               </object>
@@ -92,7 +92,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="restore_all_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">edit-select-all-symbolic</property>
+                    <property name="icon_name">edit-select-all</property>
                   </object>
                 </child>
               </object>
@@ -124,7 +124,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="remove_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">user-trash-symbolic</property>
+                    <property name="icon_name">user-trash</property>
                   </object>
                 </child>
               </object>
@@ -247,7 +247,7 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="restore_popup_menu_item_image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-revert-to-saved</property>
+    <property name="stock">gtk-select-all</property>
   </object>
   <object class="GtkMenu" id="popup_menu">
     <property name="visible">True</property>
