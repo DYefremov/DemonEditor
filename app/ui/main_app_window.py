@@ -1608,7 +1608,6 @@ class Application(Gtk.Application):
                                       self._services,
                                       self._bouquets.get(self._bq_selected, None),
                                       Profile(self._profile),
-                                      self._NEW_COLOR,
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)
 
