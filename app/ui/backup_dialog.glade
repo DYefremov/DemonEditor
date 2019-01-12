@@ -188,6 +188,7 @@ Author: Dmitriy Yefremov
                     <property name="activate_on_single_click">True</property>
                     <signal name="button-press-event" handler="on_view_popup_menu" object="popup_menu" swapped="no"/>
                     <signal name="cursor-changed" handler="on_cursor_changed" swapped="no"/>
+                    <signal name="key-release-event" handler="on_key_release" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="main_view_selection">
                         <property name="mode">multiple</property>

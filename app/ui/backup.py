@@ -10,7 +10,7 @@ from app.commons import run_idle
 from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey
 
 
 class RestoreType(Enum):
@@ -27,7 +27,8 @@ class BackupDialog:
                     "on_info_button_toggled": self.on_info_button_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_cursor_changed": self.on_cursor_changed,
-                    "on_resize": self.on_resize}
+                    "on_resize": self.on_resize,
+                    "on_key_release": self.on_key_release}
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -167,6 +168,21 @@ class BackupDialog:
     def on_resize(self, window):
         if self._options:
             self._options["backup_tool_window_size"] = window.get_size()
+
+    def on_key_release(self, view, event):
+        """  Handling  keystrokes  """
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+        key = KeyboardKey(key_code)
+        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+
+        if key is KeyboardKey.DELETE:
+            self.on_remove(view)
+        elif ctrl and key is KeyboardKey.E:
+            self.restore(RestoreType.ALL)
+        elif ctrl and key is KeyboardKey.R:
+            self.restore(RestoreType.BOUQUETS)
 
 
 def backup_data(path, backup_path):
