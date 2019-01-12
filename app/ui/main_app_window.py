@@ -881,8 +881,9 @@ class Application(Gtk.Application):
         profile = Profile(self._profile)
         options = self._options.get(self._profile)
         path = options.get("data_dir_path")
+        backup_path = options.get("backup_dir_path", path + "backup/")
         # Backup data or clearing data path
-        backup_data(path) if options.get("backup_before_save", True) else clear_data_path(path)
+        backup_data(path, backup_path) if options.get("backup_before_save", True) else clear_data_path(path)
 
         bouquets = []
 

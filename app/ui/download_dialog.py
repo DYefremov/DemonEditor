@@ -68,7 +68,9 @@ class DownloadDialog:
     @run_idle
     def on_receive(self, item):
         if self._profile_properties.get("backup_before_downloading", True):
-            backup_data(self._profile_properties.get("data_dir_path", self._data_path_entry.get_text()))
+            data_path = self._profile_properties.get("data_dir_path", self._data_path_entry.get_text())
+            backup_path = self._profile_properties.get("backup_dir_path", data_path + "backup/")
+            backup_data(data_path, backup_path)
 
         self.download(True, self.get_download_type())
 

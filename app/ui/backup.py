@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from app.commons import run_idle
-from app.properties import Profile, get_default_settings
+from app.properties import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import append_text_to_tview
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
@@ -34,10 +34,9 @@ class BackupDialog:
         builder.add_from_file(UI_RESOURCES_PATH + "backup_dialog.glade")
         builder.connect_signals(handlers)
 
-        def_settings = get_default_settings().get(profile.value)
         self._options = options.get(profile.value)
-        self._data_path = options.get("data_dir_path", def_settings["data_dir_path"])
-        self._backup_path = options.get("backup_dir_path", def_settings["backup_dir_path"])
+        self._data_path = self._options.get("data_dir_path", "")
+        self._backup_path = self._options.get("backup_dir_path", self._data_path + "backup/")
         self._profile = profile
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
@@ -53,7 +52,7 @@ class BackupDialog:
         window_size = self._options.get("backup_tool_window_size", None)
         if window_size:
             self._dialog_window.resize(*window_size)
-            
+
         self.init_data()
 
     def show(self):
@@ -170,9 +169,9 @@ class BackupDialog:
             self._options["backup_tool_window_size"] = window.get_size()
 
 
-def backup_data(path):
+def backup_data(path, backup_path):
     """ Creating data backup from a folder at the specified path """
-    backup_path = "{}backup/{}/".format(path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    backup_path = "{}{}/".format(backup_path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     # backup files in data dir(skipping dirs and satellites.xml)
     for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
