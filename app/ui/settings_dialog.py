@@ -23,8 +23,7 @@ class Property(Enum):
 class SettingsDialog:
 
     def __init__(self, transient, options):
-        handlers = {"on_data_dir_field_icon_press": self.on_data_dir_field_icon_press,
-                    "on_picons_dir_field_icon_press": self.on_picons_dir_field_icon_press,
+        handlers = {"on_field_icon_press": self.on_field_icon_press,
                     "on_profile_changed": self.on_profile_changed,
                     "on_reset": self.on_reset,
                     "apply_settings": self.apply_settings,
@@ -60,6 +59,7 @@ class SettingsDialog:
         self._data_dir_field = builder.get_object("data_dir_field")
         self._picons_field = builder.get_object("picons_field")
         self._picons_dir_field = builder.get_object("picons_dir_field")
+        self._backup_dir_field = builder.get_object("backup_dir_field")
         # Info bar
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
@@ -98,10 +98,7 @@ class SettingsDialog:
 
         return response
 
-    def on_data_dir_field_icon_press(self, entry, icon, event_button):
-        update_entry_data(entry, self._dialog, self._options.get(self._options.get("profile")))
-
-    def on_picons_dir_field_icon_press(self, entry, icon, event_button):
+    def on_field_icon_press(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, self._options.get(self._options.get("profile")))
 
     def on_profile_changed(self, item):
@@ -130,26 +127,29 @@ class SettingsDialog:
         self.set_settings()
 
     def set_settings(self):
+        def_settings = get_default_settings().get(self._active_profile)
         options = self._options.get(self._active_profile)
-        self._host_field.set_text(options.get("host", ""))
-        self._port_field.set_text(options.get("port", ""))
-        self._login_field.set_text(options.get("user", ""))
-        self._password_field.set_text(options.get("password", ""))
-        self._http_login_field.set_text(options.get("http_user", ""))
-        self._http_password_field.set_text(options.get("http_password", ""))
-        self._http_port_field.set_text(options.get("http_port", "80"))
-        self._telnet_login_field.set_text(options.get("telnet_user", ""))
-        self._telnet_password_field.set_text(options.get("telnet_password", ""))
-        self._telnet_port_field.set_text(options.get("telnet_port", ""))
-        self._telnet_timeout_spin_button.set_value(options.get("telnet_timeout", 5))
-        self._services_field.set_text(options.get("services_path", ""))
-        self._user_bouquet_field.set_text(options.get("user_bouquet_path", ""))
-        self._satellites_xml_field.set_text(options.get("satellites_xml_path", ""))
-        self._picons_field.set_text(options.get("picons_path", ""))
-        self._data_dir_field.set_text(options.get("data_dir_path", ""))
-        self._picons_dir_field.set_text(options.get("picons_dir_path", ""))
-        self._before_save_switch.set_active(options.get("backup_before_save", True))
-        self._before_downloading_switch.set_active(options.get("backup_before_downloading", True))
+        self._host_field.set_text(options.get("host", def_settings["host"]))
+        self._port_field.set_text(options.get("port", def_settings["port"]))
+        self._login_field.set_text(options.get("user", def_settings["user"]))
+        self._password_field.set_text(options.get("password", def_settings["password"]))
+        self._http_login_field.set_text(options.get("http_user", def_settings["http_user"]))
+        self._http_password_field.set_text(options.get("http_password", def_settings["http_password"]))
+        self._http_port_field.set_text(options.get("http_port", def_settings["http_port"]))
+        self._telnet_login_field.set_text(options.get("telnet_user", def_settings["telnet_user"]))
+        self._telnet_password_field.set_text(options.get("telnet_password", def_settings["telnet_password"]))
+        self._telnet_port_field.set_text(options.get("telnet_port", def_settings["telnet_port"]))
+        self._telnet_timeout_spin_button.set_value(options.get("telnet_timeout", def_settings["telnet_timeout"]))
+        self._services_field.set_text(options.get("services_path", def_settings["services_path"]))
+        self._user_bouquet_field.set_text(options.get("user_bouquet_path", def_settings["user_bouquet_path"]))
+        self._satellites_xml_field.set_text(options.get("satellites_xml_path", def_settings["satellites_xml_path"]))
+        self._picons_field.set_text(options.get("picons_path", def_settings["picons_path"]))
+        self._data_dir_field.set_text(options.get("data_dir_path", def_settings["data_dir_path"]))
+        self._picons_dir_field.set_text(options.get("picons_dir_path", def_settings["picons_dir_path"]))
+        self._backup_dir_field.set_text(options.get("backup_dir_path", def_settings["backup_dir_path"]))
+        self._before_save_switch.set_active(options.get("backup_before_save", def_settings["backup_before_save"]))
+        self._before_downloading_switch.set_active(options.get("backup_before_downloading",
+                                                               def_settings["backup_before_downloading"]))
 
         if Profile(self._active_profile) is Profile.ENIGMA_2:
             self._support_ver5_check_button.set_active(options.get("v5_support", False))
@@ -184,6 +184,7 @@ class SettingsDialog:
         options["picons_path"] = self._picons_field.get_text()
         options["data_dir_path"] = self._data_dir_field.get_text()
         options["picons_dir_path"] = self._picons_dir_field.get_text()
+        options["backup_dir_path"] = self._backup_dir_field.get_text()
         options["backup_before_save"] = self._before_save_switch.get_active()
         options["backup_before_downloading"] = self._before_downloading_switch.get_active()
 

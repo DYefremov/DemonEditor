@@ -1295,7 +1295,7 @@ class Application(Gtk.Application):
     def on_backup_tool_show(self, item):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window,
-                     self._options.get(self._profile).get("data_dir_path", ""),
+                     self._options,
                      Profile(self._profile),
                      self.open_data).show()
 

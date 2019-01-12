@@ -45,6 +45,7 @@ def get_default_settings():
             "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
             "satellites_xml_path": "/etc/tuxbox/", "data_dir_path": DATA_PATH + "enigma2/",
             "picons_path": "/usr/share/enigma2/picon", "picons_dir_path": DATA_PATH + "enigma2/picons/",
+            "backup_dir_path": DATA_PATH + "enigma2/backup/",
             "backup_before_save": True, "backup_before_downloading": True,
             "v5_support": False, "http_api_support": False,
             "use_colors": True, "new_color": "rgb(255,230,204)", "extra_color": "rgb(179,230,204)"},
@@ -55,6 +56,7 @@ def get_default_settings():
             "services_path": "/var/tuxbox/config/zapit/", "user_bouquet_path": "/var/tuxbox/config/zapit/",
             "satellites_xml_path": "/var/tuxbox/config/", "data_dir_path": DATA_PATH + "neutrino/",
             "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/", "picons_dir_path": DATA_PATH + "neutrino/picons/",
+            "backup_dir_path": DATA_PATH + "neutrino/backup/",
             "backup_before_save": True, "backup_before_downloading": True},
         "profile": Profile.ENIGMA_2.value}
 

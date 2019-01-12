@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from app.commons import run_idle
-from app.properties import Profile
+from app.properties import Profile, get_default_settings
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import append_text_to_tview
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
@@ -19,22 +19,25 @@ class RestoreType(Enum):
 
 
 class BackupDialog:
-    def __init__(self, transient, data_path, profile, callback):
+    def __init__(self, transient, options, profile, callback):
         handlers = {"on_restore_bouquets": self.on_restore_bouquets,
                     "on_restore_all": self.on_restore_all,
                     "on_remove": self.on_remove,
                     "on_view_popup_menu": self.on_view_popup_menu,
                     "on_info_button_toggled": self.on_info_button_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
-                    "on_cursor_changed": self.on_cursor_changed}
+                    "on_cursor_changed": self.on_cursor_changed,
+                    "on_resize": self.on_resize}
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "backup_dialog.glade")
         builder.connect_signals(handlers)
 
-        self._data_path = data_path
-        self._backup_path = data_path + "backup/"
+        def_settings = get_default_settings().get(profile.value)
+        self._options = options.get(profile.value)
+        self._data_path = options.get("data_dir_path", def_settings["data_dir_path"])
+        self._backup_path = options.get("backup_dir_path", def_settings["backup_dir_path"])
         self._profile = profile
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
@@ -46,6 +49,11 @@ class BackupDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        # Setting the last size of the dialog window if it was saved
+        window_size = self._options.get("backup_tool_window_size", None)
+        if window_size:
+            self._dialog_window.resize(*window_size)
+            
         self.init_data()
 
     def show(self):
@@ -156,6 +164,10 @@ class BackupDialog:
         else:
             self.show_info_message("Done!", Gtk.MessageType.INFO)
             self._open_data_callback(self._data_path)
+
+    def on_resize(self, window):
+        if self._options:
+            self._options["backup_tool_window_size"] = window.get_size()
 
 
 def backup_data(path):

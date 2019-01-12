@@ -592,6 +592,9 @@ msgstr "Резервное копирование"
 msgid "Backups"
 msgstr "Резервные копии"
 
+msgid "Backup path:"
+msgstr "Путь к резервным копиям:"
+
 msgid "Restore bouquets"
 msgstr "Восстановить букеты"
 
@@ -612,6 +615,9 @@ msgstr "Помеченные как новые:"
 
 msgid "With an extra name in the bouquet:"
 msgstr "С пользовательским именем в букете:"
+
+msgid "Select"
+msgstr "Выбрать"
 
 msgid "About"
 msgstr "О программе"
