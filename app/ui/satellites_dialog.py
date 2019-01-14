@@ -35,7 +35,6 @@ class SatellitesDialog:
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
-                    "on_popover_release": self.on_popover_release,
                     "on_row_activated": self.on_row_activated,
                     "on_resize": self.on_resize,
                     "on_quit": self.on_quit}
@@ -132,9 +131,6 @@ class SatellitesDialog:
             move_items(key, self._sat_view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-
-    def on_popover_release(self, menu, event):
-        menu.hide()
 
     @run_idle
     def on_satellites_list_load(self, model):

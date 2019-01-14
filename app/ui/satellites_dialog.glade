@@ -1,10 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.1 
+
+The MIT License (MIT)
+
+Copyright (c) 2018-2019 Dmitriy Yefremov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Dmitriy Yefremov
+
+-->
 <!--
 
 The MIT License (MIT)
 
-Copyright (c) 2018 Dmitriy Yefremov
+Copyright (c) 2018-2019 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +57,7 @@ Author: Dmitriy Yefremov
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-copyright 2018 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2019 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkListStore" id="fec_store">
     <columns>
@@ -76,7 +102,6 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkPopoverMenu" id="left_header_menu">
     <property name="can_focus">False</property>
-    <signal name="button-release-event" handler="on_popover_release" swapped="no"/>
     <child>
       <object class="GtkBox" id="left_popover_munu_box">
         <property name="visible">True</property>
@@ -89,15 +114,51 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkButton" id="open_left_popover_munu_button">
-            <property name="label">gtk-open</property>
+          <object class="GtkModelButton" id="open_popover_munu_button">
+            <property name="width_request">85</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="relief">none</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
+            <property name="text" translatable="yes">Open</property>
             <signal name="clicked" handler="on_open" object="satellites_tree_store" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="save_popover_munu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Save</property>
+            <signal name="clicked" handler="on_save" object="satellites_editor_tree_view" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="save_as_popover_munu_button">
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Save as...</property>
+            <signal name="clicked" handler="on_save_as" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -106,15 +167,12 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="save_left_popover_munu_button">
-            <property name="label">gtk-save</property>
+          <object class="GtkModelButton" id="update_popover_munu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="relief">none</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_save" object="satellites_editor_tree_view" swapped="no"/>
+            <property name="text" translatable="yes">Update</property>
+            <signal name="clicked" handler="on_update" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -130,69 +188,22 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">2</property>
             <property name="position">5</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="save_as_left_popover_munu_button">
-            <property name="label">gtk-save-as</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="relief">none</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_save_as" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">6</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="update_left_popover_munu_button">
-            <property name="label">gtk-refresh</property>
+          <object class="GtkModelButton" id="exit_popover_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="relief">none</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_update" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">7</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="padding">2</property>
-            <property name="position">8</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="exit_left_popover_menu_button">
-            <property name="label">gtk-quit</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="relief">none</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
+            <property name="text" translatable="yes">Exit</property>
             <signal name="clicked" handler="on_quit" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">9</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </object>
