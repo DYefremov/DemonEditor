@@ -4,7 +4,7 @@ import re
 from app.commons import log
 from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
-from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag
+from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType
 
 _HEADER = "eDVB services /{}/"
 _SEP = ":"  # separator
@@ -220,23 +220,31 @@ def parse_services(services, transponders, path):
 
         if transponder is not None:
             tr_type, sp, tr = str(transponder).partition(" ")
+            tr_type = TrType(tr_type)
             tr = tr.split(_SEP)
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
             # removing all non printable symbols!
             srv_name = "".join(c for c in ch[1] if c.isprintable())
+            pol = POLARIZATION.get(tr[2], None)
+            fec = FEC.get(tr[3], None)
+            system = None
+            pos = None
 
-            if tr_type == "t":
-                system = "DVB-T"
-                pos = "T"
-            elif tr_type == "c":
-                system = "CABLE"
-                pos = "C"
-            else:
+            if tr_type is TrType.Satellite:
                 system = "DVB-S2" if len(tr) > 7 else "DVB-S"
                 pos = "{}.{}".format(tr[4][:-1], tr[4][-1:])
+            if tr_type is TrType.Terrestrial:
+                system = "DVB-T"
+                pos = "T"
+                pol = None
+                fec = T_FEC.get(tr[3], None)
+            elif tr_type is TrType.Cable:
+                system = "DVB-C"
+                pos = "C"
+                pol = None
 
             channels.append(Service(flags_cas=ch[2],
-                                    transponder_type=tr_type,
+                                    transponder_type=tr_type.value,
                                     coded=coded,
                                     service=srv_name,
                                     locked=locked,
@@ -248,8 +256,8 @@ def parse_services(services, transponders, path):
                                     ssid=data[0],
                                     freq=tr[0],
                                     rate=tr[1],
-                                    pol=POLARIZATION.get(tr[2], None),
-                                    fec=FEC[tr[3]],
+                                    pol=pol,
+                                    fec=fec,
                                     system=system,
                                     pos=pos,
                                     data_id=data_id,

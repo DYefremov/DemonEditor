@@ -30,7 +30,7 @@ Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarizati
 class TrType(Enum):
     """ Transponders type """
     Satellite = "s"
-    Terestrial = "t"
+    Terrestrial = "t"
     Cable = "c"
 
 
@@ -98,6 +98,12 @@ class Pilot(Enum):
     Auto = "2"
 
 
+class SystemCable(Enum):
+    """  System of cable service """
+    ANNEX_A = 0
+    ANNEX_C = 1
+
+
 ROLL_OFF = {"0": "35%", "1": "25%", "2": "20%", "3": "Auto"}
 
 POLARIZATION = {"0": "H", "1": "V", "2": "L", "3": "R"}
@@ -110,7 +116,7 @@ FEC = {"0": "Auto", "1": "1/2", "2": "2/3", "3": "3/4", "4": "5/6", "5": "7/8", 
        "25": "3/5", "26": "4/5", "27": "9/10", "28": "Auto"}
 
 FEC_DEFAULT = {"0": "Auto", "1": "1/2", "2": "2/3", "3": "3/4", "4": "5/6", "5": "7/8", "6": "8/9", "7": "3/5",
-               "8": "4/5", "9": "9/10"}
+               "8": "4/5", "9": "9/10", "10": "6/7", "15": "None"}
 
 SYSTEM = {"0": "DVB-S", "1": "DVB-S2"}
 
@@ -119,6 +125,23 @@ MODULATION = {"0": "Auto", "1": "QPSK", "2": "8PSK", "4": "16APSK", "5": "32APSK
 SERVICE_TYPE = {"-2": "Data", "1": "TV", "2": "Radio", "3": "Data", "10": "Radio", "22": "TV (H264)",
                 "25": "TV (HD)", "31": "TV (UHD)"}
 
+# Terrestrial
+BANDWIDTH = {"0": "Auto", "1": "8Mhz", "2": "7Mhz", "3": "6Mhz"}
+
+T_MODULATION = {"0": "Auto", "1": "QPSK", "2": "QAM16", "3": "QAM64"}
+
+TRANSMISSION_MODE = {"0": "Auto", "1": "2k", "3": "8k"}
+
+GUARD_INTERVAL = {"0": "Auto", "1": "1/32", "2": "1/16", "3": "1/8", "4": "1/4"}
+
+HIERARCHY = {"0": "Auto", "1": "None", "2": "1", "3": "2", "4": "4"}
+
+T_FEC = {"0": "1/2", "1": "2/3", "2": "3/4", "3": "5/6", "4": "7/8", "5": "Auto", "6": "6/7", "7": "8/9"}
+
+# Cable
+C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
+
+# CAS
 CAS = {"C:2600": "BISS", "C:0b00": "Conax", "C:0b01": "Conax", "C:0b02": "Conax", "C:0baa": "Conax", "C:0602": "Irdeto",
        "C:0604": "Irdeto", "C:0606": "Irdeto", "C:0608": "Irdeto", "C:0622": "Irdeto", "C:0626": "Irdeto",
        "C:0664": "Irdeto", "C:0614": "Irdeto", "C:0692": "Irdeto", "C:1801": "Nagravision", "C:0500": "Viaccess",
