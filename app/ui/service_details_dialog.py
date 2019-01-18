@@ -4,7 +4,7 @@ import os
 from app.commons import run_idle
 from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
-    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE
+    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType
 from app.properties import Profile
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column
 from .dialogs import show_dialog, DialogType, Action
@@ -50,6 +50,7 @@ class ServiceDetailsDialog:
         self._dialog = builder.get_object("service_details_dialog")
         self._dialog.set_transient_for(transient)
         self._profile = Profile(options["profile"])
+        self._tr_type = None
         self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
         self._picons_dir_path = options.get(self._profile.value)["picons_dir_path"]
         self._services_view = srv_view
@@ -192,13 +193,14 @@ class ServiceDetailsDialog:
         self._package_entry.set_text(srv.package)
         self._sid_entry.set_text(str(int(srv.ssid, 16)))
         # Transponder
-        tr_type = srv.transponder_type
+        if self._profile is Profile.ENIGMA_2:
+            self._tr_type = TrType(srv.transponder_type)
         self._freq_entry.set_text(srv.freq)
         self._rate_entry.set_text(srv.rate)
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
         self.select_active_text(self._sys_combo_box, srv.system)
-        if tr_type and tr_type in "tc" and self._profile is Profile.ENIGMA_2:
+        if self._tr_type in (TrType.Cable, TrType.Terrestrial):
             self.update_ui_for_terrestrial()
         else:
             self.set_sat_positions(srv.pos)
@@ -265,21 +267,30 @@ class ServiceDetailsDialog:
         """ Transponder data initialisation """
         data = srv.data_id.split(":")
         tr_data = srv.transponder.split(":")
-
-        if srv.system == "DVB-S2":
-            self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
-            self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
-            self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
-            self._tr_flag_entry.set_text(tr_data[7])
-            if len(tr_data) > 12:
-                self._stream_id_entry.set_text(tr_data[11])
-                self._pls_code_entry.set_text(tr_data[12])
-                self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[13]))
+        tr_type = TrType(srv.transponder_type)
 
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
         self._network_id_entry.set_text(str(int(data[3], 16)))
-        self.select_active_text(self._invertion_combo_box, Inversion(tr_data[5]).name)
+
+        if tr_type is TrType.Satellite:
+            self.select_active_text(self._invertion_combo_box, Inversion(tr_data[5]).name)
+            if srv.system == "DVB-S2":
+                self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
+                self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
+                self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
+                self._tr_flag_entry.set_text(tr_data[7])
+                if len(tr_data) > 12:
+                    self._stream_id_entry.set_text(tr_data[11])
+                    self._pls_code_entry.set_text(tr_data[12])
+                    self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[13]))
+        elif tr_type is TrType.Cable:
+            self.select_active_text(self._invertion_combo_box, Inversion(tr_data[2]).name)
+            self.select_active_text(self._mod_combo_box, C_MODULATION.get(tr_data[3]))
+            self.select_active_text(self._fec_combo_box, FEC_DEFAULT.get(tr_data[4]))
+        elif tr_type is TrType.Terrestrial:
+            self.select_active_text(self._mod_combo_box, T_MODULATION.get(tr_data[4]))
+
         # Should be called last to properly initialize the reference
         self._srv_type_entry.set_text(data[4])
 
@@ -296,7 +307,9 @@ class ServiceDetailsDialog:
     def init_neutrino_ui_elements(self):
         self._builder.get_object("flags_box").set_visible(False)
         self._builder.get_object("pids_grid").set_visible(False)
-        self._builder.get_object("tr_grid").remove_column(7)
+        tr_grid = self._builder.get_object("tr_grid")
+        tr_grid.remove_column(7)
+        tr_grid.set_margin_bottom(5)
         self._builder.get_object("tr_extra_expander").set_visible(False)
         self._builder.get_object("srv_separator").set_visible(False)
 
@@ -347,17 +360,28 @@ class ServiceDetailsDialog:
         self.on_edit() if self._action is Action.EDIT else self.on_new()
         self._dialog.destroy()
 
+    def on_new(self):
+        """ Create new service. """
+        service = self.get_service(*self.get_srv_data(), self.get_satellite_transponder_data())
+        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+
     def on_edit(self):
+        """ Edit current service.  """
         fav_id, data_id = self.get_srv_data()
         # transponder
         transponder = self._old_service.transponder
-        tr_type = self._old_service.transponder_type
         if self._tr_edit_switch.get_active():
-            transponder = self.get_transponder_data(tr_type)
+            if self._tr_type is TrType.Satellite:
+                transponder = self.get_satellite_transponder_data()
+            elif self._tr_type is TrType.Terrestrial:
+                transponder = self.get_terrestrial_transponder_data()
+            elif self._tr_type is TrType.Cable:
+                transponder = self.get_cable_transponder_data()
+
             if self._transponder_services_iters:
-                self.update_transponder_services(transponder, tr_type)
+                self.update_transponder_services(transponder)
         # service
-        service = self.get_service(fav_id, data_id, transponder, tr_type)
+        service = self.get_service(fav_id, data_id, transponder)
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
             self.update_bouquets(fav_id, old_fav_id)
@@ -412,14 +436,12 @@ class ServiceDetailsDialog:
                 os.rename(old_file, new_file)
                 break
 
-    def on_new(self):
-        service = self.get_service(*self.get_srv_data(), self.get_transponder_data())
-        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+    # ***************** Service ********************* #
 
-    def get_service(self, fav_id, data_id, transponder, tr_type):
-        freq, rate, pol, fec, system, pos = self.get_transponder_values(tr_type)
+    def get_service(self, fav_id, data_id, transponder):
+        freq, rate, pol, fec, system, pos = self.get_transponder_values()
         return Service(flags_cas=self.get_flags(),
-                       transponder_type=tr_type,
+                       transponder_type=self._old_service.transponder_type,
                        coded=CODED_ICON if self._cas_entry.get_text() else None,
                        service=self._name_entry.get_text(),
                        locked=self._old_service.locked,
@@ -497,20 +519,27 @@ class ServiceDetailsDialog:
             fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
             return fav_id, self._old_service.data_id
 
-    def get_transponder_values(self, tr_type):
-        if tr_type == "s":
+    # ***************** Transponder ********************* #
+
+    def get_transponder_values(self):
+        freq = self._freq_entry.get_text()
+        fec = self._fec_combo_box.get_active_id()
+
+        if self._tr_type is TrType.Satellite or self._profile is Profile.NEUTRINO_MP:
             freq = self._freq_entry.get_text()
             rate = self._rate_entry.get_text()
             pol = self._pol_combo_box.get_active_id()
-            fec = self._fec_combo_box.get_active_id()
             system = self._sys_combo_box.get_active_id()
             pos = str(round(self._sat_pos_button.get_value(), 1))
             return freq, rate, pol, fec, system, pos
-        elif tr_type in "tc":
+        elif self._tr_type is TrType.Terrestrial:
             o_srv = self._old_service
-            return o_srv.freq, o_srv.rate, o_srv.pol, o_srv.fec, o_srv.system, o_srv.pos
+            return freq, o_srv.rate, o_srv.pol, fec, o_srv.system, o_srv.pos
+        elif self._tr_type is TrType.Cable:
+            o_srv = self._old_service
+            return freq, self._rate_entry.get_text(), o_srv.pol, fec, o_srv.system, o_srv.pos
 
-    def get_transponder_data(self, tr_type):
+    def get_satellite_transponder_data(self):
         sys = self._sys_combo_box.get_active_id()
         freq = self._freq_entry.get_text()
         rate = self._rate_entry.get_text()
@@ -540,11 +569,25 @@ class ServiceDetailsDialog:
             srv_sys = None
             return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
 
-    def update_transponder_services(self, transponder, tr_type):
+    def get_terrestrial_transponder_data(self):
+        return self._old_service.transponder
+
+    def get_cable_transponder_data(self):
+        tr_data = re.split("\s|:", self._old_service.transponder)
+        if tr_data:
+            # frequency, symbol_rate, modulation, inversion, fec_inner, system;
+            tr_data[1] = self._freq_entry.get_text()
+            tr_data[2] = self._rate_entry.get_text()
+            tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
+            tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, T_MODULATION)
+            tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
+        return self._old_service.transponder
+
+    def update_transponder_services(self, transponder):
         for itr in self._transponder_services_iters:
             srv = self._current_model[itr][:Column.SRV_TOOLTIP]
             srv[Column.SRV_FREQ], srv[Column.SRV_RATE], srv[Column.SRV_POL], srv[Column.SRV_FEC], srv[
-                Column.SRV_SYSTEM], srv[Column.SRV_POS] = self.get_transponder_values(tr_type)
+                Column.SRV_SYSTEM], srv[Column.SRV_POS] = self.get_transponder_values()
             srv[Column.SRV_TRANSPONDER] = transponder
             srv = Service(*srv)
             self._services[srv.fav_id] = self._services.pop(srv.fav_id)._replace(transponder=transponder)
@@ -552,7 +595,7 @@ class ServiceDetailsDialog:
 
     # ***************** Others *********************#
 
-    def select_active_text(self, box: Gtk.ComboBox, text):
+    def select_active_text(self, box, text):
         model = box.get_model()
         for index, row in enumerate(model):
             if row[0] == text:
@@ -573,13 +616,8 @@ class ServiceDetailsDialog:
         return get_key_by_value(dc, cb_id)
 
     @run_idle
-    def on_tr_edit_toggled(self, switch: Gtk.Switch, active):
+    def on_tr_edit_toggled(self, switch, active):
         if active and self._action is Action.EDIT:
-            if self._old_service.transponder_type == "t":
-                show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
-                switch.set_active(False)
-                return
-
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
                                                  self._current_model,
@@ -590,7 +628,8 @@ class ServiceDetailsDialog:
                 self._transponder_services_iters = None
                 return
 
-        self.update_dvb_s2_elements(active and self._sys_combo_box.get_active_id() == "DVB-S2")
+        self.update_dvb_s2_elements(active and (self._sys_combo_box.get_active_id() == "DVB-S2"
+                                                or self._old_service.transponder_type in "tc"))
 
         for elem in self._TRANSPONDER_ELEMENTS:
             elem.set_sensitive(active)
@@ -625,10 +664,46 @@ class ServiceDetailsDialog:
 
     def update_ui_for_terrestrial(self):
         self._pids_grid.set_visible(False)
-        tr_frame = self._builder.get_object("transponder_data_frame")
-        tr_frame.set_visible(False)
-        self._builder.get_object("srv_separator").set_visible(False)
-        self._reference_entry.set_max_width_chars(22)
+        tr_box = self._builder.get_object("tr_box")
+        tr_grid = self._builder.get_object("tr_grid")
+        extra_tr_grid = self._builder.get_object("extra_transponder_grid")
+        tr_grid.remove_column(0)
+        tr_grid.remove_column(2)
+        extra_tr_grid.remove_column(0)
+        for i in range(7):
+            extra_tr_grid.remove_column(2)
+
+        children = extra_tr_grid.get_children()
+        for child in children:
+            extra_tr_grid.remove(child)
+
+        tr_grid.insert_column(3)
+        tr_grid.insert_column(4)
+        # FEC
+        fec_model = self._fec_combo_box.get_model()
+        # Modulation
+        tr_grid.attach(children[1], 3, 0, 1, 1)
+        tr_grid.attach(self._mod_combo_box, 3, 1, 1, 1)
+        modulation_model = self._mod_combo_box.get_model()
+        modulation_model.clear()
+        # Inversion
+        tr_grid.attach(children[3], 4, 0, 1, 1)
+        tr_grid.attach(self._invertion_combo_box, 4, 1, 1, 1)
+
+        if self._tr_type is TrType.Cable:
+            tr_box.remove(self._tr_extra_expander)
+            tr_grid.set_margin_bottom(5)
+            for v in C_MODULATION.values():
+                modulation_model.append([v, ])
+            fec_model.append(("None",))
+        elif self._tr_type is TrType.Terrestrial:
+            # Removing the latest FEC elements from the model
+            for itr in [fec_model.get_iter(Gtk.TreePath.new_from_string(str(i))) for i in range(7, 11)]:
+                fec_model.remove(itr)
+
+            tr_grid.remove_column(1)
+            for v in T_MODULATION.values():
+                modulation_model.append([v, ])
 
 
 class TransponderServicesDialog:
