@@ -100,8 +100,8 @@ class Pilot(Enum):
 
 class SystemCable(Enum):
     """  System of cable service """
-    ANNEX_A = 0
-    ANNEX_C = 1
+    ANNEX_A = "0"
+    ANNEX_C = "1"
 
 
 ROLL_OFF = {"0": "35%", "1": "25%", "2": "20%", "3": "Auto"}
@@ -137,6 +137,8 @@ GUARD_INTERVAL = {"0": "Auto", "1": "1/32", "2": "1/16", "3": "1/8", "4": "1/4"}
 HIERARCHY = {"0": "Auto", "1": "None", "2": "1", "3": "2", "4": "4"}
 
 T_FEC = {"0": "1/2", "1": "2/3", "2": "3/4", "3": "5/6", "4": "7/8", "5": "Auto", "6": "6/7", "7": "8/9"}
+
+T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "2": "DVB-T/T2"}
 
 # Cable
 C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
