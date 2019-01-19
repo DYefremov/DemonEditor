@@ -4,7 +4,8 @@ import os
 from app.commons import run_idle
 from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
-    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType
+    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType, \
+    SystemCable, T_SYSTEM
 from app.properties import Profile
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column
 from .dialogs import show_dialog, DialogType, Action
@@ -200,8 +201,10 @@ class ServiceDetailsDialog:
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
         self.select_active_text(self._sys_combo_box, srv.system)
-        if self._tr_type in (TrType.Cable, TrType.Terrestrial):
+        if self._tr_type is TrType.Terrestrial:
             self.update_ui_for_terrestrial()
+        elif self._tr_type is TrType.Cable:
+            self.update_ui_for_cable()
         else:
             self.set_sat_positions(srv.pos)
 
@@ -288,9 +291,10 @@ class ServiceDetailsDialog:
             self.select_active_text(self._invertion_combo_box, Inversion(tr_data[2]).name)
             self.select_active_text(self._mod_combo_box, C_MODULATION.get(tr_data[3]))
             self.select_active_text(self._fec_combo_box, FEC_DEFAULT.get(tr_data[4]))
+            self.select_active_text(self._sys_combo_box, SystemCable(tr_data[5]).name)
         elif tr_type is TrType.Terrestrial:
+            self.select_active_text(self._sys_combo_box, T_SYSTEM.get(tr_data[8]))
             self.select_active_text(self._mod_combo_box, T_MODULATION.get(tr_data[4]))
-
         # Should be called last to properly initialize the reference
         self._srv_type_entry.set_text(data[4])
 
@@ -581,6 +585,7 @@ class ServiceDetailsDialog:
             tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
             tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, T_MODULATION)
             tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
+            tr_data[6] = get_value_by_name(SystemCable, self._sys_combo_box.get_active_id())
         return self._old_service.transponder
 
     def update_transponder_services(self, transponder):
@@ -663,15 +668,29 @@ class ServiceDetailsDialog:
             self._reference_entry.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
 
     def update_ui_for_terrestrial(self):
-        self._pids_grid.set_visible(False)
+        tr_grid = self.get_transponder_grid_for_non_satellite()
+        # Models
+        fec_model, modulation_model, system_model = self.get_models_for_non_satellite()
+        # Removing the latest FEC elements from the model
+        for itr in [fec_model.get_iter(Gtk.TreePath.new_from_string(str(i))) for i in range(7, 11)]:
+            fec_model.remove(itr)
+
+        for v in T_SYSTEM.values():
+            system_model.append((v,))
+
+        tr_grid.remove_column(1)
+        for v in T_MODULATION.values():
+            modulation_model.append((v,))
+
+    def update_ui_for_cable(self):
+        tr_grid = self.get_transponder_grid_for_non_satellite()
         tr_box = self._builder.get_object("tr_box")
-        tr_grid = self._builder.get_object("tr_grid")
+        # Models
+        fec_model, modulation_model, system_model = self.get_models_for_non_satellite()
+
         extra_tr_grid = self._builder.get_object("extra_transponder_grid")
-        tr_grid.remove_column(0)
-        tr_grid.remove_column(2)
-        extra_tr_grid.remove_column(0)
-        for i in range(7):
-            extra_tr_grid.remove_column(2)
+        for i in range(6):
+            extra_tr_grid.remove_column(3)
 
         children = extra_tr_grid.get_children()
         for child in children:
@@ -679,31 +698,46 @@ class ServiceDetailsDialog:
 
         tr_grid.insert_column(3)
         tr_grid.insert_column(4)
-        # FEC
-        fec_model = self._fec_combo_box.get_model()
+        tr_grid.insert_column(5)
         # Modulation
         tr_grid.attach(children[1], 3, 0, 1, 1)
         tr_grid.attach(self._mod_combo_box, 3, 1, 1, 1)
+        for v in C_MODULATION.values():
+            modulation_model.append((v,))
+        # Inversion
+        tr_grid.attach(children[5], 4, 0, 1, 1)
+        tr_grid.attach(self._invertion_combo_box, 4, 1, 1, 1)
+        # System
+        tr_grid.attach(children[3], 5, 0, 1, 1)
+        tr_grid.attach(self._sys_combo_box, 5, 1, 1, 1)
+        system_model.append((SystemCable.ANNEX_A.name,))
+        system_model.append((SystemCable.ANNEX_C.name,))
+        # FEC
+        fec_model.append(("None",))
+        # Extra
+        tr_box.remove(self._tr_extra_expander)
+        tr_grid.set_margin_bottom(5)
+        self._freq_entry.set_width_chars(10)
+        self._freq_entry.set_max_width_chars(10)
+        self._rate_entry.set_width_chars(10)
+        self._rate_entry.set_max_width_chars(10)
+        self._transponder_id_entry.set_max_width_chars(8)
+        self._network_id_entry.set_max_width_chars(8)
+
+    def get_transponder_grid_for_non_satellite(self):
+        self._pids_grid.set_visible(False)
+        tr_grid = self._builder.get_object("tr_grid")
+        tr_grid.remove_column(0)
+        tr_grid.remove_column(2)
+        return tr_grid
+
+    def get_models_for_non_satellite(self):
+        fec_model = self._fec_combo_box.get_model()
         modulation_model = self._mod_combo_box.get_model()
         modulation_model.clear()
-        # Inversion
-        tr_grid.attach(children[3], 4, 0, 1, 1)
-        tr_grid.attach(self._invertion_combo_box, 4, 1, 1, 1)
-
-        if self._tr_type is TrType.Cable:
-            tr_box.remove(self._tr_extra_expander)
-            tr_grid.set_margin_bottom(5)
-            for v in C_MODULATION.values():
-                modulation_model.append([v, ])
-            fec_model.append(("None",))
-        elif self._tr_type is TrType.Terrestrial:
-            # Removing the latest FEC elements from the model
-            for itr in [fec_model.get_iter(Gtk.TreePath.new_from_string(str(i))) for i in range(7, 11)]:
-                fec_model.remove(itr)
-
-            tr_grid.remove_column(1)
-            for v in T_MODULATION.values():
-                modulation_model.append([v, ])
+        system_model = self._sys_combo_box.get_model()
+        system_model.clear()
+        return fec_model, modulation_model, system_model
 
 
 class TransponderServicesDialog:
