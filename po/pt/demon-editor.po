@@ -1,0 +1,621 @@
+# Copyright (C) 2018 Frank Neirynck
+# This file is distributed under the MIT license.
+#
+#Frank Neirynck <frank@insink.be>, 2018.
+#
+msgid ""
+msgstr ""
+"Last-Translator: Frank Neirynck\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "translator-credits"
+msgstr "Frank Neirynck <frank@insink.be>"
+
+# Main
+msgid "Service"
+msgstr "Serviço"
+
+msgid "Package"
+msgstr "Pacote"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Picon"
+msgstr "Picon"
+
+msgid "Freq"
+msgstr "Freq."
+
+msgid "Rate"
+msgstr "Ratio"
+
+msgid "Pol"
+msgstr "Pol."
+
+msgid "System"
+msgstr "Sistema"
+
+msgid "Pos"
+msgstr "Pos."
+
+msgid "Num"
+msgstr "Núm"
+
+msgid "Current IP:"
+msgstr "IP atual:"
+
+msgid "Assign"
+msgstr "Atribuir"
+
+msgid "Bouquet details"
+msgstr "Detalhes do Ramo"
+
+msgid "Bouquets"
+msgstr "Ramos"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Copy reference"
+msgstr "Copia de Referência"
+
+msgid "Download"
+msgstr "Descarregar"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Edit "
+msgstr "Editar "
+
+msgid "Edit mаrker text"
+msgstr "Editar texto do mаrcador"
+
+msgid "FTP-transfer"
+msgstr "Transferência-FTP"
+
+msgid "Global search"
+msgstr "Pesquisa Global"
+
+msgid "Hide"
+msgstr "Esconder"
+
+msgid "Hide/Skip On/Off     Ctrl + H"
+msgstr "Esconder/Pular Acender/Desligar      Ctrl + H"
+
+msgid "Add IPTV or stream service"
+msgstr "Acrescentar serviço IPTV"
+
+msgid "Import m3u"
+msgstr "Importar m3u"
+
+msgid "Import m3u file"
+msgstr "Importar ficheiro m3u"
+
+msgid "List configuration"
+msgstr "Lista configuração"
+
+msgid "Rename for this bouquet"
+msgstr "Renomear para este ramo"
+
+msgid "Set default name"
+msgstr "Estabelecer nome predeterminado"
+
+msgid "Insert marker"
+msgstr "Inserir marcador"
+
+msgid "Locate in services"
+msgstr "Procurar em serviços"
+
+msgid "Locked"
+msgstr "Fechado"
+
+msgid "Move"
+msgstr "Mover"
+
+msgid "New"
+msgstr "Novo"
+
+msgid "New bouquet"
+msgstr "Ramo novo"
+
+msgid "Create bouquet"
+msgstr "Criar ramo"
+
+msgid "For current satellite"
+msgstr "Para o satélite atual"
+
+msgid "For current package"
+msgstr "Para o pacote atual"
+
+msgid "For current type"
+msgstr "Para o tipo atual"
+
+msgid "For each satellite"
+msgstr "Para cada Satélite"
+
+msgid "For each package"
+msgstr "Para cada pacote"
+
+msgid "For each type"
+msgstr "Para cada tipo"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Parent lock On/Off     Ctrl + L"
+msgstr "Bloqueio parentesco Acender/Desligar   Ctrl + L"
+
+msgid "Picons"
+msgstr "Picons"
+
+msgid "Picons downloader"
+msgstr "Picons descargar"
+
+msgid "Satellites downloader"
+msgstr "Satélites descarregar"
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Remove all unavailable"
+msgstr "Remover tudo lo indisponível"
+
+msgid "Satellites editor"
+msgstr "Editor Satélites"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Search"
+msgstr "Procurar"
+
+msgid "Services"
+msgstr "Serviços"
+
+msgid "Services filter"
+msgstr "Filtro serviços"
+
+msgid "Settings"
+msgstr "Configurações"
+
+msgid "Up"
+msgstr "Arriba"
+
+msgid "Down"
+msgstr "Abaixo"
+
+msgid "Active profile:"
+msgstr "Perfil ativo:"
+
+msgid "All"
+msgstr "Tudo"
+
+msgid "Are you sure?"
+msgstr "Tem certeza?"
+
+msgid "Current data path:"
+msgstr "Rota de dados atual:"
+
+msgid "Data:"
+msgstr "Dados:"
+
+msgid "Enigma2 channel and satellites list editor for GNU/Linux"
+msgstr "Editor de Canais e Satélites Enigma2 para GNU/Linux"
+
+msgid "Host:"
+msgstr "Anfitrião:"
+
+msgid "Loading data..."
+msgstr "Carregar dados..."
+
+msgid "Receive"
+msgstr "Receber"
+
+msgid "Receive files from receiver"
+msgstr "Receber ficheiros do seu receptor"
+
+msgid "Receiver IP:"
+msgstr "Receptor IP:"
+
+msgid "Remove unused bouquets"
+msgstr "Remover ramos sem usar"
+
+msgid "Reset profile"
+msgstr "Restabelecer perfil"
+
+msgid "Satellites"
+msgstr "Satélites"
+
+msgid "Satellites.xml file:"
+msgstr "Ficheiro Satellites.xml:"
+
+msgid "Selected"
+msgstr "Selecionado"
+
+msgid "Send"
+msgstr "Enviar"
+
+msgid "Send files to receiver"
+msgstr "Enviar ficheiros ao recetor"
+
+msgid "Services and Bouquets files:"
+msgstr "Ficheiros de Serviços e ramos:"
+
+msgid "User bouquet files:"
+msgstr "Importar ficheiros de ramos:"
+
+msgid "Extra:"
+msgstr "Extra:"
+
+# Filter bar
+msgid "Only free"
+msgstr "Somente de graça"
+
+msgid "All positions"
+msgstr "Todas as posições"
+
+msgid "All types"
+msgstr "Todos os tipos"
+
+# Streams player
+msgid "Play"
+msgstr "Play"
+
+msgid "Stop playback"
+msgstr "Deter a reprodução"
+
+msgid "Previous stream in the list"
+msgstr "Sequência anterior na lista"
+
+msgid "Next stream in the list"
+msgstr "Sequência siguinte na lista"
+
+msgid "Toggle in fullscreen"
+msgstr "Trocar na ecrã completa"
+
+msgid "Close"
+msgstr "Fexar"
+
+# Picons dialog
+msgid "Load providers"
+msgstr "Carregar provedores"
+
+msgid "Providers"
+msgstr "Fornecedores"
+
+msgid "Receive picons"
+msgstr "Recever picons"
+
+msgid "Picons name format:"
+msgstr "Picons formato nomes:"
+
+msgid "Resize:"
+msgstr "Redimensionar:"
+
+msgid "Current picons path:"
+msgstr "Rota atual Picons:"
+
+msgid "Receiver picons path:"
+msgstr "Rota picons recetor:"
+
+msgid "Picons download tool"
+msgstr "Picons ferramenta de descarga"
+
+msgid "Transfer to receiver"
+msgstr "Transferir ao recetor"
+
+msgid "Downloader"
+msgstr "Descarregador"
+
+msgid "Converter"
+msgstr "Conversor"
+
+msgid "Convert"
+msgstr "Converter"
+
+msgid "Path to save:"
+msgstr "Rota para guardar:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Rota a picons Enigma2:"
+
+msgid "Specify the correct position value for the provider!"
+msgstr "Especifique a posição correta para o provedor!"
+
+msgid "Converter between name formats"
+msgstr "Conversor entre formatos de nomes"
+
+msgid "Receive picons for providers"
+msgstr "Recever picons para provedor"
+
+msgid "Load satellite providers."
+msgstr "Carregar provedores Satélite."
+
+msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
+msgstr "Para configurar automaticamente os identificadores para picons, \nprimeiro carregue a lista de serviços necessários na janela principal."
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "Editor de Satélites"
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "Satellite"
+msgstr "Satélite"
+
+msgid "Transponder"
+msgstr "Transponder"
+
+msgid "Satellite properties:"
+msgstr "Propriedades do Satélite:"
+
+msgid "Transponder properties:"
+msgstr "Propriedades do Transponder:"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Position"
+msgstr "Posição"
+
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "Atualisar Satélite"
+
+msgid "Remove selection"
+msgstr "Remover seleçáo"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "Dados serviço:"
+
+msgid "Transponder data:"
+msgstr "Dados Transponder:"
+
+msgid "Service data"
+msgstr "Dados serviço"
+
+msgid "Transponder details"
+msgstr "Detalhes Transponder"
+
+msgid "Changes will be applied to all services of this transponder!\nContinue?"
+msgstr "Os mudanças serão aplicadas a todos os serviços deste transponder!\nContinuar?"
+
+msgid "Reference"
+msgstr "Referência"
+
+msgid "Namespace"
+msgstr "Namespace"
+
+msgid "Flags:"
+msgstr "Flags:"
+
+msgid "Delays (ms):"
+msgstr "Atraso (mc)"
+
+msgid "Bitstream"
+msgstr "Sequência de Bits"
+
+msgid "Description"
+msgstr "Descrição"
+
+msgid "Source:"
+msgstr "Fonte:"
+
+msgid "Cancel"
+msgstr "Annular"
+
+msgid "Update"
+msgstr "Atualizar"
+
+msgid "Filter"
+msgstr "Filtrar"
+
+msgid "Find"
+msgstr "Procurar"
+
+# IPTV dialog
+msgid "Stream data"
+msgstr "Dados da sequência"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "Valores iniciais"
+
+msgid "Reset to default"
+msgstr "Restabelecer a predeterminado"
+
+msgid "IPTV streams list configuration"
+msgstr "Configurar lista de sequências IPTV"
+
+#Settings dialog
+msgid "Preferences"
+msgstr "Preferências"
+
+msgid "Profile:"
+msgstr "Perfil:"
+
+msgid "Timeout between commands in seconds"
+msgstr "Tempo de espera entre comandos em segundos"
+
+msgid "Timeout:"
+msgstr "Time-out:"
+
+msgid "Login:"
+msgstr "Usuário:"
+
+msgid "Options"
+msgstr "Opções"
+
+msgid "Password:"
+msgstr "Palavra-passe:"
+
+msgid "Picons:"
+msgstr "Picons:"
+
+msgid "Port:"
+msgstr "Porta:"
+
+msgid "Data path:"
+msgstr "Rota de dados:"
+
+msgid "Picons path:"
+msgstr "Rota de Picons:"
+
+msgid "Network settings:"
+msgstr "Configuração de rede:"
+
+msgid "STB file paths:"
+msgstr "Rota de ficheirors STB:"
+
+msgid "Local file paths:"
+msgstr "Rota de ficheiros local:"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "Erro. Nenhum ramo está selecionado!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "Este artigo não pode ser eliminado!"
+
+msgid "This item is not allowed to edit!"
+msgstr "Este artigo não pode ser editado!"
+
+msgid "Not allowed in this context!"
+msgstr "Náo permitido neste contexto!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "Por favor, descarregue arquivos desde o recetor ou configure a sua rota para ler os dados!"
+
+msgid "Reading data error!"
+msgstr "Erro de leitura de dados!"
+
+msgid "No m3u file is selected!"
+msgstr "Nenhum ficheiro m3u foi selecionado!"
+
+msgid "Not implemented yet!"
+msgstr "Ainda não implementado!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "O texto do marcador está vazio, tente de novo!"
+
+msgid "Please, select only one item!"
+msgstr "Por favor, selecione só um elemento!"
+
+msgid "No png file is selected!"
+msgstr "Nenhum ficheiro png foi selecionado!"
+
+msgid "No reference is present!"
+msgstr "Nenhuma referência presente!"
+
+msgid "No selected item!"
+msgstr "Nenhum elemento selecionado!"
+
+msgid "The task is already running!"
+msgstr "A tarefa ya está en execuçáo!"
+
+msgid "Done!"
+msgstr "Feito!"
+
+msgid "Please, wait..."
+msgstr "Por favor, espere..."
+
+msgid "Resizing..."
+msgstr "A redimensionar..."
+
+msgid "Select paths!"
+msgstr "Selecione as rotas!"
+
+msgid "No satellite is selected!"
+msgstr "Nemhun Satélite selecionado!"
+
+msgid "Please, select only one satellite!"
+msgstr "Selecione só um Satélite!"
+
+msgid "Please check your parameters and try again."
+msgstr "Por favor rever seus parâmetros e volte a tentar!"
+
+msgid "No satellites.xml file is selected!"
+msgstr "Nemhun satellites.xml selecionado!"
+
+msgid "Error. Verify the data!"
+msgstr "Erro. Rever os dados!"
+
+msgid "Operation not allowed in this context!"
+msgstr "Operação não permitida neste contexto!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "VLC não achado. Verifique se está instalado!"
+
+# Search unavailable streams dialog
+msgid "Please wait,  streams testing  in progress..."
+msgstr "Por favor aguarde uma prova das sequências..."
+
+msgid "Found"
+msgstr "Achado"
+
+msgid "unavailable streams."
+msgstr "Sequências não presentes"
+
+msgid "No changes required!"
+msgstr "Nemhuma mudança requerida!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "A lista não tem sequências IPTV!"
+
+msgid "New empty configuration"
+msgstr "Nova configuração vazia"
+
+msgid "No data to save!"
+msgstr "Não há dados para guardar!"
+
+msgid "Network"
+msgstr "Rede"
+
+msgid "Paths"
+msgstr "Rotas"
+
+msgid "Program"
+msgstr "Programa"
+
+msgid "Backup:"
+msgstr "Backup:"
+
+msgid "Backup"
+msgstr "Backup"
+
+msgid "Backups"
+msgstr "Backups"
+
+msgid "Restore bouquets"
+msgstr "Restaurar ramos"
+
+msgid "Restore all"
+msgstr "Restaurar tudo"
+
+msgid "Before saving"
+msgstr "Antes de guardar"
+
+msgid "Before downloading from the receiver"
+msgstr "Antes de recever do recetor"
+
+msgid "Set background color for the services"
+msgstr "Determinar a cor de fundo para serviços"
+
+msgid "Marked as new:"
+msgstr "Marcado como novo:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "Com nome adicional em ramo:"
+
+msgid "About"
+msgstr "Acerca"
+
+msgid "Exit"
+msgstr "Sair"
