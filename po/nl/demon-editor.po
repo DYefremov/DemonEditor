@@ -568,3 +568,54 @@ msgstr "Geen wijzigingen vereist!"
 
 msgid "This list does not contains IPTV streams!"
 msgstr "Deze lijst bevat geen IPTV streams!"
+
+msgid "New empty configuration"
+msgstr "Nieuwe lege configuratie"
+
+msgid "No data to save!"
+msgstr "Geen gegevens om op te slaan!"
+
+msgid "Network"
+msgstr "Netwerk"
+
+msgid "Paths"
+msgstr "Paden"
+
+msgid "Program"
+msgstr "Programma"
+
+msgid "Backup:"
+msgstr "Backup:"
+
+msgid "Backup"
+msgstr "Backup"
+
+msgid "Backups"
+msgstr "Backups"
+
+msgid "Restore bouquets"
+msgstr "Herstek boeketten"
+
+msgid "Restore all"
+msgstr "Herstel alles"
+
+msgid "Before saving"
+msgstr "Voor opslaan"
+
+msgid "Before downloading from the receiver"
+msgstr "Voor download uit de ontvanger"
+
+msgid "Set background color for the services"
+msgstr "Stel achtergrond kleur in voor diensten"
+
+msgid "Marked as new:"
+msgstr "Gemarkeerd als nieuw:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "Met een extra naam in het boeket:"
+
+msgid "About"
+msgstr "Over"
+
+msgid "Exit"
+msgstr "Exit"

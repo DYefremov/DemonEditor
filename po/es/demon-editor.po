@@ -31,7 +31,7 @@ msgid "Freq"
 msgstr "Frec."
 
 msgid "Rate"
-msgstr "Rate"
+msgstr "Ratio"
 
 msgid "Pol"
 msgstr "Pol."
@@ -52,7 +52,7 @@ msgid "Assign"
 msgstr "Assignar"
 
 msgid "Bouquet details"
-msgstr "Detailes Ramo"
+msgstr "Detalles Ramo"
 
 msgid "Bouquets"
 msgstr "Ramos"
@@ -73,7 +73,7 @@ msgid "Edit "
 msgstr "Editar "
 
 msgid "Edit mаrker text"
-msgstr "Editar testo del mаrcador"
+msgstr "Editar texto del mаrcador"
 
 msgid "FTP-transfer"
 msgstr "Transferencia-FTP"
@@ -106,7 +106,7 @@ msgid "Set default name"
 msgstr "Establecer nombre predeterminado"
 
 msgid "Insert marker"
-msgstr "Inserter marcador"
+msgstr "Insertar marcador"
 
 msgid "Locate in services"
 msgstr "Buscar en servicios"
@@ -163,7 +163,7 @@ msgid "Remove"
 msgstr "Remover"
 
 msgid "Remove all unavailable"
-msgstr "Remover toto lo indisponible"
+msgstr "Remover todo lo indisponible"
 
 msgid "Satellites editor"
 msgstr "Editor Satélites"
@@ -260,7 +260,7 @@ msgid "All positions"
 msgstr "Todas las posiciones"
 
 msgid "All types"
-msgstr "Todas los tipos"
+msgstr "Todos los tipos"
 
 # Streams player
 msgid "Play"
@@ -298,7 +298,7 @@ msgid "Resize:"
 msgstr "Redimensionar:"
 
 msgid "Current picons path:"
-msgstr "Ruta acual Picons:"
+msgstr "Ruta actual Picons:"
 
 msgid "Receiver picons path:"
 msgstr "Ruta picons receptor:"
@@ -319,7 +319,7 @@ msgid "Convert"
 msgstr "Convertir"
 
 msgid "Path to save:"
-msgstr "Ruto para guardar:"
+msgstr "Ruta para guardar:"
 
 msgid "Path to Enigma2 picons:"
 msgstr "Ruta a picons Enigma2:"
@@ -337,11 +337,11 @@ msgid "Load satellite providers."
 msgstr "Cargar proovedores Satélite."
 
 msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
-msgstr "Para configurar automáticamente los identificadores para picons, \nprimero cargue la lista de servicios requeridos en la ventana principal."
+msgstr "Para configurar automáticamente los identificadores para picons, \nprimero cargue la lista de serviços requeridos en la ventana principal."
 
 # Satellites editor
 msgid "Satellites edit tool"
-msgstr "Edito de Satélites"
+msgstr "Editor de Satélites"
 
 msgid "Add"
 msgstr "Añadir"
@@ -382,7 +382,7 @@ msgid "Service data"
 msgstr "Datos servicio"
 
 msgid "Transponder details"
-msgstr "Detailes Transpondedor"
+msgstr "Detalles Transpondedor"
 
 msgid "Changes will be applied to all services of this transponder!\nContinue?"
 msgstr "Los cambios se aplicarán a todos los servicios de este transpondedor!\nContinuar?"
@@ -426,7 +426,7 @@ msgstr "Datos de la Secuencia"
 
 # IPTV list configuration dialog
 msgid "Starting values"
-msgstr "Volores iniciales"
+msgstr "Valores iniciales"
 
 msgid "Reset to default"
 msgstr "Restablecer a predeterminado"
@@ -466,7 +466,7 @@ msgid "Data path:"
 msgstr "Ruta de datos:"
 
 msgid "Picons path:"
-msgstr "Ruda de Picons:"
+msgstr "Ruta de Picons:"
 
 msgid "Network settings:"
 msgstr "Configuración de red:"
@@ -527,7 +527,7 @@ msgid "Please, wait..."
 msgstr "Por favor, espere..."
 
 msgid "Resizing..."
-msgstr "Redimensionamiento..."
+msgstr "Redimensionando..."
 
 msgid "Select paths!"
 msgstr "Seleccione rutas!"
@@ -569,3 +569,53 @@ msgstr "ningún cambio requerido!"
 msgid "This list does not contains IPTV streams!"
 msgstr "La lista no contiene secuencias IPTV!"
 
+msgid "New empty configuration"
+msgstr "Nueva configuración vacía"
+
+msgid "No data to save!"
+msgstr "No hay datos para guardar!"
+
+msgid "Network"
+msgstr "Red"
+
+msgid "Paths"
+msgstr "Rutas"
+
+msgid "Program"
+msgstr "Programa"
+
+msgid "Backup:"
+msgstr "Backup:"
+
+msgid "Backup"
+msgstr "Backup"
+
+msgid "Backups"
+msgstr "Backups"
+
+msgid "Restore bouquets"
+msgstr "Restaurar ramos"
+
+msgid "Restore all"
+msgstr "Restaurar todo"
+
+msgid "Before saving"
+msgstr "Antes de guardar"
+
+msgid "Before downloading from the receiver"
+msgstr "Antes de recibir del receptor"
+
+msgid "Set background color for the services"
+msgstr "Determinar color de fondo para servicios"
+
+msgid "Marked as new:"
+msgstr "Marcado como nuevo:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "Con nombre adicional en ramo:"
+
+msgid "About"
+msgstr "Sobre"
+
+msgid "Exit"
+msgstr "Salir"
