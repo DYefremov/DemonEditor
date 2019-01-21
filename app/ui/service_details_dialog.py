@@ -5,7 +5,7 @@ from app.commons import run_idle
 from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType, \
-    SystemCable, T_SYSTEM
+    SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, HIERARCHY, T_FEC
 from app.properties import Profile
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column
 from .dialogs import show_dialog, DialogType, Action
@@ -293,8 +293,18 @@ class ServiceDetailsDialog:
             self.select_active_text(self._fec_combo_box, FEC_DEFAULT.get(tr_data[4]))
             self.select_active_text(self._sys_combo_box, SystemCable(tr_data[5]).name)
         elif tr_type is TrType.Terrestrial:
-            self.select_active_text(self._sys_combo_box, T_SYSTEM.get(tr_data[8]))
+            self.select_active_text(self._fec_combo_box, T_FEC.get(tr_data[2]))
+            # Pol -> Bandwidth
+            self.select_active_text(self._pol_combo_box, BANDWIDTH.get(tr_data[1]))
             self.select_active_text(self._mod_combo_box, T_MODULATION.get(tr_data[4]))
+            # Transmission Mode -> Roll off
+            self.select_active_text(self._rolloff_combo_box, TRANSMISSION_MODE.get(tr_data[5]))
+            # GuardInterval -> Pilot
+            self.select_active_text(self._pilot_combo_box, GUARD_INTERVAL.get(tr_data[6]))
+            # Hierarchy -> Pls Mode
+            self.select_active_text(self._pls_mode_combo_box, HIERARCHY.get(tr_data[7]))
+            self.select_active_text(self._invertion_combo_box, Inversion(tr_data[8]).name)
+            self.select_active_text(self._sys_combo_box, T_SYSTEM.get(tr_data[9]))
         # Should be called last to properly initialize the reference
         self._srv_type_entry.set_text(data[4])
 
@@ -622,6 +632,11 @@ class ServiceDetailsDialog:
 
     @run_idle
     def on_tr_edit_toggled(self, switch, active):
+        if active and self._profile is Profile.ENIGMA_2 and self._old_service.transponder_type in "tc":
+            show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+            switch.set_active(False)
+            return
+
         if active and self._action is Action.EDIT:
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
@@ -669,18 +684,55 @@ class ServiceDetailsDialog:
 
     def update_ui_for_terrestrial(self):
         tr_grid = self.get_transponder_grid_for_non_satellite()
+        tr_grid.remove_column(1)
+        tr_grid.insert_column(1)
+        extra_tr_grid = self._builder.get_object("extra_transponder_grid")
+        for i in range(4):
+            extra_tr_grid.remove_column(6)
+        # Bandwidth -> Pol
+        pol_label = self._builder.get_object("pol_label")
+        pol_label.set_text("Bandwidth")
+        tr_grid.attach(pol_label, 1, 0, 1, 1)
+        tr_grid.attach(self._pol_combo_box, 1, 1, 1, 1)
+        # Rate -> FEC
+        self._builder.get_object("fec_label").set_text("Rate HP/LP")
+        # Modulation
+        tr_grid.insert_column(4)
+        extra_tr_grid.remove_column(1)
+        tr_grid.attach(self._builder.get_object("mod_label"), 4, 0, 1, 1)
+        tr_grid.attach(self._mod_combo_box, 4, 1, 1, 1)
+        # TransmissionMode -> Roll off
+        rolloff_label = self._builder.get_object("rolloff_label")
+        rolloff_label.set_text("T mode")
+        # GuardInterval -> Pilot
+        pilot_label = self._builder.get_object("pilot_label")
+        pilot_label.set_text("Guard Interval")
+        # Hierarchy -> Pls Mode
+        pls_mode_label = self._builder.get_object("pls_mode_label")
+        pls_mode_label.set_text("Hierarchy")
         # Models
-        fec_model, modulation_model, system_model = self.get_models_for_non_satellite()
+        fec_model, modulation_model, sys_model = self.get_models_for_non_satellite()
+        pol_model = self._pol_combo_box.get_model()
+        roll_off_model = self._rolloff_combo_box.get_model()
+        pilot_model = self._pilot_combo_box.get_model()
+        pls_model = self._pls_mode_combo_box.get_model()
+        # Models clearing
+        for m in pol_model, roll_off_model, pilot_model, pls_model:
+            m.clear()
+
+        self.init_terrestrial_models((pol_model, modulation_model, roll_off_model, pilot_model, pls_model, sys_model),
+                                     (BANDWIDTH, T_MODULATION, TRANSMISSION_MODE, GUARD_INTERVAL, HIERARCHY, T_SYSTEM))
+
         # Removing the latest FEC elements from the model
         for itr in [fec_model.get_iter(Gtk.TreePath.new_from_string(str(i))) for i in range(7, 11)]:
             fec_model.remove(itr)
+        # Extra
+        self._namespace_entry.set_max_width_chars(20)
 
-        for v in T_SYSTEM.values():
-            system_model.append((v,))
-
-        tr_grid.remove_column(1)
-        for v in T_MODULATION.values():
-            modulation_model.append((v,))
+    def init_terrestrial_models(self, models, properties):
+        for index, model in enumerate(models):
+            for v in properties[index].values():
+                model.append((v,))
 
     def update_ui_for_cable(self):
         tr_grid = self.get_transponder_grid_for_non_satellite()
@@ -689,26 +741,23 @@ class ServiceDetailsDialog:
         fec_model, modulation_model, system_model = self.get_models_for_non_satellite()
 
         extra_tr_grid = self._builder.get_object("extra_transponder_grid")
-        for i in range(6):
-            extra_tr_grid.remove_column(3)
-
-        children = extra_tr_grid.get_children()
-        for child in children:
+        for child in extra_tr_grid.get_children():
             extra_tr_grid.remove(child)
+        tr_grid.remove(extra_tr_grid)
 
         tr_grid.insert_column(3)
         tr_grid.insert_column(4)
         tr_grid.insert_column(5)
         # Modulation
-        tr_grid.attach(children[1], 3, 0, 1, 1)
+        tr_grid.attach(self._builder.get_object("mod_label"), 3, 0, 1, 1)
         tr_grid.attach(self._mod_combo_box, 3, 1, 1, 1)
         for v in C_MODULATION.values():
             modulation_model.append((v,))
         # Inversion
-        tr_grid.attach(children[5], 4, 0, 1, 1)
+        tr_grid.attach(self._builder.get_object("inversion_label"), 4, 0, 1, 1)
         tr_grid.attach(self._invertion_combo_box, 4, 1, 1, 1)
         # System
-        tr_grid.attach(children[3], 5, 0, 1, 1)
+        tr_grid.attach(self._builder.get_object("system_label"), 5, 0, 1, 1)
         tr_grid.attach(self._sys_combo_box, 5, 1, 1, 1)
         system_model.append((SystemCable.ANNEX_A.name,))
         system_model.append((SystemCable.ANNEX_C.name,))
@@ -750,6 +799,7 @@ class TransponderServicesDialog:
         self._dialog.set_transient_for(transient)
         self._srv_model = builder.get_object("transponder_services_liststore")
         self.append_services(model, transponder, tr_iters)
+        builder.get_object("srv_list_dialog_info_bar").connect("response", lambda bar, resp: bar.hide())
 
     def append_services(self, model, transponder, tr_iters):
         for row in model:
