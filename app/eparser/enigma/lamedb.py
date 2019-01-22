@@ -4,7 +4,7 @@ import re
 from app.commons import log
 from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
-from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType
+from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType, FEC_DEFAULT
 
 _HEADER = "eDVB services /{}/"
 _SEP = ":"  # separator
@@ -225,23 +225,24 @@ def parse_services(services, transponders, path):
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
             # removing all non printable symbols!
             srv_name = "".join(c for c in ch[1] if c.isprintable())
-            pol = POLARIZATION.get(tr[2], None)
-            fec = FEC.get(tr[3], None)
+            pol = None
+            fec = None
             system = None
             pos = None
 
             if tr_type is TrType.Satellite:
+                pol = POLARIZATION.get(tr[2], None)
+                fec = FEC.get(tr[3], None)
                 system = "DVB-S2" if len(tr) > 7 else "DVB-S"
                 pos = "{}.{}".format(tr[4][:-1], tr[4][-1:])
             if tr_type is TrType.Terrestrial:
                 system = "DVB-T"
                 pos = "T"
-                pol = None
                 fec = T_FEC.get(tr[3], None)
             elif tr_type is TrType.Cable:
                 system = "DVB-C"
                 pos = "C"
-                pol = None
+                fec = FEC_DEFAULT.get(tr[4])
 
             channels.append(Service(flags_cas=ch[2],
                                     transponder_type=tr_type.value,

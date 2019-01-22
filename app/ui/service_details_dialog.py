@@ -593,9 +593,10 @@ class ServiceDetailsDialog:
             tr_data[1] = self._freq_entry.get_text()
             tr_data[2] = self._rate_entry.get_text()
             tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
-            tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, T_MODULATION)
+            tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, C_MODULATION)
             tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
             tr_data[6] = get_value_by_name(SystemCable, self._sys_combo_box.get_active_id())
+            return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
         return self._old_service.transponder
 
     def update_transponder_services(self, transponder):
@@ -632,7 +633,7 @@ class ServiceDetailsDialog:
 
     @run_idle
     def on_tr_edit_toggled(self, switch, active):
-        if active and self._profile is Profile.ENIGMA_2 and self._old_service.transponder_type in "tc":
+        if active and self._profile is Profile.ENIGMA_2 and self._old_service.transponder_type == "t":
             show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
             switch.set_active(False)
             return
