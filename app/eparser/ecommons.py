@@ -126,19 +126,20 @@ SERVICE_TYPE = {"-2": "Data", "1": "TV", "2": "Radio", "3": "Data", "10": "Radio
                 "25": "TV (HD)", "31": "TV (UHD)"}
 
 # Terrestrial
-BANDWIDTH = {"0": "Auto", "1": "8Mhz", "2": "7Mhz", "3": "6Mhz"}
+BANDWIDTH = {"0": "8MHz", "1": "7MHz", "2": "6MHz", "3": "Auto", "4": "5MHz", "5": "1/712MHz", "6": "10MHz"}
 
-T_MODULATION = {"0": "Auto", "1": "QPSK", "2": "QAM16", "3": "QAM64"}
+T_MODULATION = {"0": "QPSK", "1": "QAM16", "2": "QAM64", "3": "Auto", "4": "QAM256"}
 
-TRANSMISSION_MODE = {"0": "Auto", "1": "2k", "3": "8k"}
+TRANSMISSION_MODE = {"0": "2k", "1": "8k", "2": "Auto", "3": "4k", "4": "1k", "5": "16k", "6": "32k"}
 
-GUARD_INTERVAL = {"0": "Auto", "1": "1/32", "2": "1/16", "3": "1/8", "4": "1/4"}
+GUARD_INTERVAL = {"0": "1/32", "1": "1/16", "2": "1/8", "3": "1/4", "4": "Auto", "5": "1/128", "6": "19/128",
+                  "7": "19/256"}
 
-HIERARCHY = {"0": "Auto", "1": "None", "2": "1", "3": "2", "4": "4"}
+HIERARCHY = {"0": "None", "1": "1", "2": "2", "3": "4",  "4": "Auto"}
 
 T_FEC = {"0": "1/2", "1": "2/3", "2": "3/4", "3": "5/6", "4": "7/8", "5": "Auto", "6": "6/7", "7": "8/9"}
 
-T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "2": "DVB-T/T2"}
+T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "-1": "DVB-T/T2"}
 
 # Cable
 C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
