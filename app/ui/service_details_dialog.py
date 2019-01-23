@@ -385,15 +385,19 @@ class ServiceDetailsDialog:
         # transponder
         transponder = self._old_service.transponder
         if self._tr_edit_switch.get_active():
-            if self._tr_type is TrType.Satellite:
-                transponder = self.get_satellite_transponder_data()
-            elif self._tr_type is TrType.Terrestrial:
-                transponder = self.get_terrestrial_transponder_data()
-            elif self._tr_type is TrType.Cable:
-                transponder = self.get_cable_transponder_data()
-
-            if self._transponder_services_iters:
-                self.update_transponder_services(transponder)
+            try:
+                if self._tr_type is TrType.Satellite:
+                    transponder = self.get_satellite_transponder_data()
+                elif self._tr_type is TrType.Terrestrial:
+                    transponder = self.get_terrestrial_transponder_data()
+                elif self._tr_type is TrType.Cable:
+                    transponder = self.get_cable_transponder_data()
+            except Exception as e:
+                print(e)
+                show_dialog(DialogType.ERROR, transient=self._dialog, text="Error getting transponder parameters!")
+            else:
+                if self._transponder_services_iters:
+                    self.update_transponder_services(transponder)
         # service
         service = self.get_service(fav_id, data_id, transponder)
         old_fav_id = self._old_service.fav_id
@@ -538,17 +542,17 @@ class ServiceDetailsDialog:
     def get_transponder_values(self):
         freq = self._freq_entry.get_text()
         fec = self._fec_combo_box.get_active_id()
+        system = self._sys_combo_box.get_active_id()
 
         if self._tr_type is TrType.Satellite or self._profile is Profile.NEUTRINO_MP:
             freq = self._freq_entry.get_text()
             rate = self._rate_entry.get_text()
             pol = self._pol_combo_box.get_active_id()
-            system = self._sys_combo_box.get_active_id()
             pos = str(round(self._sat_pos_button.get_value(), 1))
             return freq, rate, pol, fec, system, pos
         elif self._tr_type is TrType.Terrestrial:
             o_srv = self._old_service
-            return freq, o_srv.rate, o_srv.pol, fec, o_srv.system, o_srv.pos
+            return freq, o_srv.rate, o_srv.pol, fec, system, o_srv.pos
         elif self._tr_type is TrType.Cable:
             o_srv = self._old_service
             return freq, self._rate_entry.get_text(), o_srv.pol, fec, o_srv.system, o_srv.pos
@@ -584,20 +588,33 @@ class ServiceDetailsDialog:
             return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
 
     def get_terrestrial_transponder_data(self):
-        return self._old_service.transponder
+        tr_data = re.split("\s|:", self._old_service.transponder)
+        # frequency, bandwidth, code rate HP, code rate LP, modulation, transmission mode, guard interval, hierarchy,
+        # inversion, system, plp_id
+        # Bandwidth -> Pol, Rate -> FEC, TransmissionMode -> Roll off, GuardInterval -> Pilot, Hierarchy -> Pls Mode
+        tr_data[1] = self._freq_entry.get_text()
+        tr_data[2] = self.get_value_from_combobox_id(self._pol_combo_box, BANDWIDTH)
+        rate = self.get_value_from_combobox_id(self._fec_combo_box, T_FEC)
+        tr_data[3] = rate
+        tr_data[4] = rate
+        tr_data[5] = self.get_value_from_combobox_id(self._mod_combo_box, T_MODULATION)
+        tr_data[6] = self.get_value_from_combobox_id(self._rolloff_combo_box, TRANSMISSION_MODE)
+        tr_data[7] = self.get_value_from_combobox_id(self._pilot_combo_box, GUARD_INTERVAL)
+        tr_data[8] = self.get_value_from_combobox_id(self._pls_mode_combo_box, HIERARCHY)
+        tr_data[9] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
+        tr_data[10] = self.get_value_from_combobox_id(self._sys_combo_box, T_SYSTEM)
+        return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
 
     def get_cable_transponder_data(self):
         tr_data = re.split("\s|:", self._old_service.transponder)
-        if tr_data:
-            # frequency, symbol_rate, modulation, inversion, fec_inner, system;
-            tr_data[1] = self._freq_entry.get_text()
-            tr_data[2] = self._rate_entry.get_text()
-            tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
-            tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, C_MODULATION)
-            tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
-            tr_data[6] = get_value_by_name(SystemCable, self._sys_combo_box.get_active_id())
-            return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
-        return self._old_service.transponder
+        # frequency, symbol_rate, modulation, inversion, fec_inner, system;
+        tr_data[1] = self._freq_entry.get_text()
+        tr_data[2] = self._rate_entry.get_text()
+        tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
+        tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, C_MODULATION)
+        tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
+        tr_data[6] = get_value_by_name(SystemCable, self._sys_combo_box.get_active_id())
+        return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
 
     def update_transponder_services(self, transponder):
         for itr in self._transponder_services_iters:
@@ -633,11 +650,6 @@ class ServiceDetailsDialog:
 
     @run_idle
     def on_tr_edit_toggled(self, switch, active):
-        if active and self._profile is Profile.ENIGMA_2 and self._old_service.transponder_type == "t":
-            show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
-            switch.set_active(False)
-            return
-
         if active and self._action is Action.EDIT:
             self._transponder_services_iters = []
             response = TransponderServicesDialog(self._dialog,
