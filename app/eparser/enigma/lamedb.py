@@ -4,7 +4,7 @@ import re
 from app.commons import log
 from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
-from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType, FEC_DEFAULT
+from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType, FEC_DEFAULT, T_SYSTEM
 
 _HEADER = "eDVB services /{}/"
 _SEP = ":"  # separator
@@ -170,15 +170,15 @@ def parse_transponders(arg):
 
 
 def parse_services(services, transponders, path):
-    """ Parsing channels """
-    channels = []
+    """ Parsing services """
+    services_list = []
     blacklist = str(get_blacklist(path))
-    srv = split(services, 3)
-    if srv[0][0] == "":  # remove first empty element
-        srv.remove(srv[0])
+    srvs = split(services, 3)
+    if srvs[0][0] == "":  # remove first empty element
+        srvs.remove(srvs[0])
 
-    for ch in srv:
-        data_id = str(ch[0]).lower()  # lower is for lamedb ver.3
+    for srv in srvs:
+        data_id = str(srv[0]).lower()  # lower is for lamedb ver.3
         data = data_id.split(_SEP)
         sp = "0"
         tid = data[2]
@@ -209,7 +209,7 @@ def parse_services(services, transponders, path):
         fav_id = "{}:{}:{}:{}".format(ssid, tid, nid, onid)
         picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(srv_type, ssid, tid, nid, onid)
 
-        all_flags = ch[2].split(",")
+        all_flags = srv[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
         hide = HIDE_ICON if flags and Flag.is_hide(int(flags[0][2:])) else None
@@ -224,7 +224,7 @@ def parse_services(services, transponders, path):
             tr = tr.split(_SEP)
             service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
             # removing all non printable symbols!
-            srv_name = "".join(c for c in ch[1] if c.isprintable())
+            srv_name = "".join(c for c in srv[1] if c.isprintable())
             pol = None
             fec = None
             system = None
@@ -236,7 +236,7 @@ def parse_services(services, transponders, path):
                 system = "DVB-S2" if len(tr) > 7 else "DVB-S"
                 pos = "{}.{}".format(tr[4][:-1], tr[4][-1:])
             if tr_type is TrType.Terrestrial:
-                system = "DVB-T"
+                system = T_SYSTEM.get(tr[9], None)
                 pos = "T"
                 fec = T_FEC.get(tr[3], None)
             elif tr_type is TrType.Cable:
@@ -244,27 +244,27 @@ def parse_services(services, transponders, path):
                 pos = "C"
                 fec = FEC_DEFAULT.get(tr[4])
 
-            channels.append(Service(flags_cas=ch[2],
-                                    transponder_type=tr_type.value,
-                                    coded=coded,
-                                    service=srv_name,
-                                    locked=locked,
-                                    hide=hide,
-                                    package=package,
-                                    service_type=service_type,
-                                    picon=None,
-                                    picon_id=picon_id,
-                                    ssid=data[0],
-                                    freq=tr[0],
-                                    rate=tr[1],
-                                    pol=pol,
-                                    fec=fec,
-                                    system=system,
-                                    pos=pos,
-                                    data_id=data_id,
-                                    fav_id=fav_id,
-                                    transponder=transponder))
-    return channels
+            services_list.append(Service(flags_cas=srv[2],
+                                         transponder_type=tr_type.value,
+                                         coded=coded,
+                                         service=srv_name,
+                                         locked=locked,
+                                         hide=hide,
+                                         package=package,
+                                         service_type=service_type,
+                                         picon=None,
+                                         picon_id=picon_id,
+                                         ssid=data[0],
+                                         freq=tr[0],
+                                         rate=tr[1],
+                                         pol=pol,
+                                         fec=fec,
+                                         system=system,
+                                         pos=pos,
+                                         data_id=data_id,
+                                         fav_id=fav_id,
+                                         transponder=transponder))
+    return services_list
 
 
 def split(itr, size):
