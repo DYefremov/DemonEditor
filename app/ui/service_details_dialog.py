@@ -119,6 +119,7 @@ class ServiceDetailsDialog:
         self._sat_pos_button = builder.get_object("sat_pos_button")
         self._pol_combo_box = builder.get_object("pol_combo_box")
         self._fec_combo_box = builder.get_object("fec_combo_box")
+        self._rate_lp_combo_box = builder.get_object("rate_lp_combo_box")
         self._sys_combo_box = builder.get_object("sys_combo_box")
         self._mod_combo_box = builder.get_object("mod_combo_box")
         self._invertion_combo_box = builder.get_object("invertion_combo_box")
@@ -133,7 +134,7 @@ class ServiceDetailsDialog:
         self._TRANSPONDER_ELEMENTS = (self._sat_pos_button, self._pol_combo_box, self._invertion_combo_box,
                                       self._sys_combo_box, self._freq_entry, self._transponder_id_entry,
                                       self._network_id_entry, self._namespace_entry, self._fec_combo_box,
-                                      self._rate_entry)
+                                      self._rate_entry, self._rate_lp_combo_box)
 
         if self._action is Action.EDIT:
             self.update_data_elements()
@@ -294,6 +295,7 @@ class ServiceDetailsDialog:
             self.select_active_text(self._sys_combo_box, SystemCable(tr_data[5]).name)
         elif tr_type is TrType.Terrestrial:
             self.select_active_text(self._fec_combo_box, T_FEC.get(tr_data[2]))
+            self.select_active_text(self._rate_lp_combo_box, T_FEC.get(tr_data[3]))
             # Pol -> Bandwidth
             self.select_active_text(self._pol_combo_box, BANDWIDTH.get(tr_data[1]))
             self.select_active_text(self._mod_combo_box, T_MODULATION.get(tr_data[4]))
@@ -591,12 +593,11 @@ class ServiceDetailsDialog:
         tr_data = re.split("\s|:", self._old_service.transponder)
         # frequency, bandwidth, code rate HP, code rate LP, modulation, transmission mode, guard interval, hierarchy,
         # inversion, system, plp_id
-        # Bandwidth -> Pol, Rate -> FEC, TransmissionMode -> Roll off, GuardInterval -> Pilot, Hierarchy -> Pls Mode
+        # Bandwidth -> Pol, Rate HP -> FEC, TransmissionMode -> Roll off, GuardInterval -> Pilot, Hierarchy -> Pls Mode
         tr_data[1] = self._freq_entry.get_text()
         tr_data[2] = self.get_value_from_combobox_id(self._pol_combo_box, BANDWIDTH)
-        rate = self.get_value_from_combobox_id(self._fec_combo_box, T_FEC)
-        tr_data[3] = rate
-        tr_data[4] = rate
+        tr_data[3] = self.get_value_from_combobox_id(self._fec_combo_box, T_FEC)
+        tr_data[4] = self.get_value_from_combobox_id(self._rate_lp_combo_box, T_FEC)
         tr_data[5] = self.get_value_from_combobox_id(self._mod_combo_box, T_MODULATION)
         tr_data[6] = self.get_value_from_combobox_id(self._rolloff_combo_box, TRANSMISSION_MODE)
         tr_data[7] = self.get_value_from_combobox_id(self._pilot_combo_box, GUARD_INTERVAL)
@@ -707,8 +708,14 @@ class ServiceDetailsDialog:
         pol_label.set_text("Bandwidth")
         tr_grid.attach(pol_label, 1, 0, 1, 1)
         tr_grid.attach(self._pol_combo_box, 1, 1, 1, 1)
-        # Rate -> FEC
-        self._builder.get_object("fec_label").set_text("Rate HP/LP")
+        # Rate HP -> FEC
+        self._builder.get_object("fec_label").set_text("Rate HP")
+        # Rate LP
+        tr_grid.insert_column(3)
+        rate_lp_label = self._builder.get_object("pls_code_label")
+        rate_lp_label.set_text("Rate LP")
+        tr_grid.attach(rate_lp_label, 3, 0, 1, 1)
+        tr_grid.attach(self._rate_lp_combo_box, 3, 1, 1, 1)
         # Modulation
         tr_grid.insert_column(4)
         extra_tr_grid.remove_column(1)
@@ -740,7 +747,8 @@ class ServiceDetailsDialog:
         for itr in [fec_model.get_iter(Gtk.TreePath.new_from_string(str(i))) for i in range(7, 11)]:
             fec_model.remove(itr)
         # Extra
-        self._namespace_entry.set_max_width_chars(20)
+        self._namespace_entry.set_max_width_chars(15)
+        self._sys_combo_box.set_hexpand(False)
 
     def init_terrestrial_models(self, models, properties):
         for index, model in enumerate(models):

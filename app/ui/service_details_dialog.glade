@@ -217,6 +217,19 @@
       </row>
     </data>
   </object>
+  <object class="GtkComboBox" id="rate_lp_combo_box">
+    <property name="visible">True</property>
+    <property name="sensitive">False</property>
+    <property name="can_focus">False</property>
+    <property name="model">fec_list_store</property>
+    <property name="id_column">0</property>
+    <child>
+      <object class="GtkCellRendererText" id="rate_lp_cellrenderertext"/>
+      <attributes>
+        <attribute name="text">0</attribute>
+      </attributes>
+    </child>
+  </object>
   <object class="GtkDialog" id="service_details_dialog">
     <property name="use-header-bar">1</property>
     <property name="can_focus">False</property>
