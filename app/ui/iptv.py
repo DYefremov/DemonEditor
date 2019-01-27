@@ -1,4 +1,5 @@
 import re
+import urllib
 from urllib.error import HTTPError
 
 from urllib.parse import urlparse
@@ -110,10 +111,10 @@ class IptvDialog:
         self.init_enigma2_data(fav_id) if self._profile is Profile.ENIGMA_2 else self.init_neutrino_data(fav_id)
 
     def init_enigma2_data(self, fav_id):
-        data, sep, desc = fav_id.partition("#DESCRIPTION:")
+        data, sep, desc = fav_id.partition("#DESCRIPTION")
         self._description_entry.set_text(desc.strip())
         data = data.split(":")
-        if len(data) < 12:
+        if len(data) < 11:
             return
         self._stream_type_combobox.set_active(0 if StreamType(data[0].strip()) is StreamType.DVB_TS else 1)
         self._srv_type_entry.set_text(data[2])
@@ -121,7 +122,7 @@ class IptvDialog:
         self._tr_id_entry.set_text(str(int(data[4], 16)))
         self._net_id_entry.set_text(str(int(data[5], 16)))
         self._namespace_entry.set_text(str(int(data[6], 16)))
-        self._url_entry.set_text(data[10].replace("%3a", ":"))
+        self._url_entry.set_text(urllib.request.unquote(data[10].strip()))
         self._update_reference_entry()
 
     def init_neutrino_data(self, fav_id):
@@ -163,7 +164,7 @@ class IptvDialog:
                                               int(self._tr_id_entry.get_text()),
                                               int(self._net_id_entry.get_text()),
                                               int(self._namespace_entry.get_text()),
-                                              self._url_entry.get_text().replace(":", "%3a"),
+                                              urllib.request.quote(self._url_entry.get_text()),
                                               name, name)
         self.update_bouquet_data(name, fav_id)
 

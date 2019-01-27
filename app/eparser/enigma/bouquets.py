@@ -72,7 +72,8 @@ def get_bouquet(path, name, bq_type):
             if ch_data[1] == "64":
                 services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.MARKER, ch, ch_data[2]))
             elif "http" in ch:
-                services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.IPTV, ch, 0))
+                stream_data = ch.split("#DESCRIPTION", 1)
+                services.append(BouquetService(stream_data[-1].strip(":").strip(), BqServiceType.IPTV, ch, 0))
             else:
                 fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
                 name = None
