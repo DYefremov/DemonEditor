@@ -1136,10 +1136,6 @@ class Application(Gtk.Application):
                     self._tool_elements[elem].set_sensitive(not_empty)
         else:
             is_service = model_name == self._SERVICE_LIST_NAME
-            if model_name == self._FAV_LIST_NAME:
-                if profile is Profile.NEUTRINO_MP and self._bq_selected:
-                    name, bq_type = self._bq_selected.split(":")
-                    self._bq_selected = BqType(bq_type) is BqType.WEBTV
 
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "fav_paste_popup_item"):
@@ -1288,6 +1284,7 @@ class Application(Gtk.Application):
             self._fav_model.clear()
             for ch in channels:
                 self._services[ch.fav_id] = ch
+                print(ch)
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
