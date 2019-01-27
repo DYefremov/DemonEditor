@@ -488,6 +488,7 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Update</property>
                 <signal name="clicked" handler="on_update" swapped="no"/>
                 <child>
                   <object class="GtkImage" id="update_header_button_img">
@@ -840,6 +841,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkSpinButton" id="sat_position_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="width_chars">5</property>
                     <property name="secondary_icon_activatable">False</property>
                     <property name="secondary_icon_sensitive">False</property>
                     <property name="input_purpose">number</property>
