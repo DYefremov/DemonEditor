@@ -1284,7 +1284,6 @@ class Application(Gtk.Application):
             self._fav_model.clear()
             for ch in channels:
                 self._services[ch.fav_id] = ch
-                print(ch)
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
