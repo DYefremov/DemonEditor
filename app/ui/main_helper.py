@@ -1,6 +1,8 @@
 """ This is helper module for ui """
 import os
 import shutil
+import urllib.request
+
 from gi.repository import GdkPixbuf, GLib
 
 from app.commons import run_task
@@ -573,7 +575,7 @@ def get_iptv_url(row, profile):
         data = list(filter(lambda x: "http" in x, data))
     if data:
         url = data[0]
-        return url.replace("%3a", ":") if profile is Profile.ENIGMA_2 else url
+        return urllib.request.unquote(url) if profile is Profile.ENIGMA_2 else url
 
 
 def on_popup_menu(menu, event):
