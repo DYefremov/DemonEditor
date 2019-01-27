@@ -1,4 +1,5 @@
 """ Module for IPTV and streams support """
+import urllib.request
 from enum import Enum
 
 from app.properties import Profile
@@ -36,13 +37,16 @@ def parse_m3u(path, profile):
                     mr = Service(None, None, None, grp_name, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None)
                     services.append(mr)
             elif not line.startswith("#"):
+                url = line.strip()
                 if profile is Profile.ENIGMA_2:
-                    fav_id = ENIGMA2_FAV_ID_FORMAT.format(StreamType.NONE_TS.value, 1, 0, 0, 0, 0,
-                                                          line.strip().replace(":", "%3a"), name, name, None)
+                    url = urllib.request.quote(line.strip())
+                    stream_type = StreamType.NONE_TS.value
+                    fav_id = ENIGMA2_FAV_ID_FORMAT.format(stream_type, 1, 0, 0, 0, 0, url, name, name, None)
                 elif profile is Profile.NEUTRINO_MP:
-                    fav_id = NEUTRINO_FAV_ID_FORMAT.format(line.strip(), "", 0, None, None, None, None, "", "", 1)
-                srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
-                services.append(srv)
+                    fav_id = NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
+                if name and url:
+                    srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
+                    services.append(srv)
 
     return services
 
