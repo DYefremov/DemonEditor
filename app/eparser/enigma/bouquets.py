@@ -79,7 +79,7 @@ def get_bouquet(path, name, bq_type):
                 name = None
                 if len(ch_data) == 12:
                     name, desc = str(ch_data[-1]).split("\n#DESCRIPTION")
-                services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id, 0))
+                services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), 0))
 
     return srvs[0].lstrip("#NAME").strip(), services
 
