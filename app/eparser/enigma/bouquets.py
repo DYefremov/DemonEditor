@@ -70,7 +70,8 @@ def get_bouquet(path, name, bq_type):
         for ch in srvs[1:]:
             ch_data = ch.strip().split(":")
             if ch_data[1] == "64":
-                services.append(BouquetService(ch_data[-1].split("\n")[0], BqServiceType.MARKER, ch, ch_data[2]))
+                marker_data = ch.split("#DESCRIPTION", 1)
+                services.append(BouquetService(marker_data[1].strip(), BqServiceType.MARKER, ch, ch_data[2]))
             elif "http" in ch:
                 stream_data = ch.split("#DESCRIPTION", 1)
                 services.append(BouquetService(stream_data[-1].strip(":").strip(), BqServiceType.IPTV, ch, 0))
