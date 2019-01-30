@@ -73,8 +73,6 @@ class Application(Gtk.Application):
                     "on_bouquets_selection": self.on_bouquets_selection,
                     "on_satellite_editor_show": self.on_satellite_editor_show,
                     "on_services_selection": self.on_services_selection,
-                    "on_up": self.on_up,
-                    "on_down": self.on_down,
                     "on_fav_cut": self.on_fav_cut,
                     "on_bouquets_cut": self.on_bouquets_cut,
                     "on_services_copy": self.on_services_copy,
@@ -327,12 +325,6 @@ class Application(Gtk.Application):
     def on_resize(self, window):
         """ Stores new size properties for app window after resize """
         self._options["window_size"] = window.get_size()
-
-    def on_up(self, item):
-        self.move_items(Gdk.KEY_Up)
-
-    def on_down(self, item):
-        self.move_items(Gdk.KEY_Down)
 
     @run_idle
     def on_about_app(self, item):
@@ -1043,11 +1035,14 @@ class Application(Gtk.Application):
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
+
         key = KeyboardKey(key_code)
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key is KeyboardKey.C:
+        if ctrl and key in MOVE_KEYS:
+            self.move_items(key)
+        elif ctrl and key is KeyboardKey.C:
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_copy(view, ViewTarget.FAV)
             elif model_name == self._FAV_LIST_NAME:
@@ -1072,14 +1067,12 @@ class Application(Gtk.Application):
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
+
         key = KeyboardKey(key_code)
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
-        alt = event.state & Gdk.ModifierType.MOD1_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key in MOVE_KEYS:
-            self.move_items(key)
-        elif ctrl and key is KeyboardKey.INSERT:
+        if ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_to_fav_copy(view)
