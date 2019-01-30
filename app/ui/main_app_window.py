@@ -330,6 +330,7 @@ class Application(Gtk.Application):
     def on_about_app(self, item):
         show_dialog(DialogType.ABOUT, self._main_window)
 
+    @run_idle
     def move_items(self, key):
         """ Move items in fav or bouquets tree view """
         if self._services_view.is_focus():

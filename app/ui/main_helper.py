@@ -77,10 +77,12 @@ def move_items(key, view: Gtk.TreeView):
 
         if key is KeyboardKey.UP:
             top_path = Gtk.TreePath(paths[0])
+            set_cursor(top_path, paths, selection, view)
             top_path.prev()
             move_up(top_path, model, paths)
         elif key is KeyboardKey.DOWN:
             down_path = Gtk.TreePath(paths[-1])
+            set_cursor(down_path, paths, selection, view)
             down_path.next()
             if down_path < max_path:
                 move_down(down_path, model, paths)
@@ -118,6 +120,12 @@ def is_some_level(paths):
         if len(prev) != len(current) or (len(prev) == 2 and len(current) == 2 and prev[0] != current[0]):
             return
     return True
+
+
+def set_cursor(dest_path, paths, selection, view):
+    view.set_cursor(dest_path, view.get_column(0), False)
+    for p in paths:
+        selection.select_path(p)
 
 
 # ***************** Rename *******************#
