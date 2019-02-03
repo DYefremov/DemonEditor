@@ -1418,7 +1418,7 @@ class Application(Gtk.Application):
             if url:
                 GLib.timeout_add_seconds(1, self.play, url[0])
 
-    @run_task
+    @run_idle
     def on_zap(self, callback=None):
         """ Switch(zap) the channel """
         path, column = self._fav_view.get_cursor()
@@ -1429,7 +1429,7 @@ class Application(Gtk.Application):
             self._player.stop()
 
         row = self._fav_model[path][:]
-        srv = self._services.get(row[-2], None)
+        srv = self._services.get(row[Column.FAV_ID], None)
         if srv and srv.transponder:
             ref = srv.picon_id.rstrip(".png").replace("_", ":")
 
