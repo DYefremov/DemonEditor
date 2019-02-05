@@ -15,7 +15,8 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
-from app.ui.backup import BackupDialog, backup_data, clear_data_path
+from .backup import BackupDialog, backup_data, clear_data_path
+from .import_dialog import ImportDialog
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
@@ -101,6 +102,7 @@ class Application(Gtk.Application):
                     "on_locked": self.on_locked,
                     "on_model_changed": self.on_model_changed,
                     "on_import_m3u": self.on_import_m3u,
+                    "on_import_bouquets": self.on_import_bouquets,
                     "on_backup_tool_show": self.on_backup_tool_show,
                     "on_insert_marker": self.on_insert_marker,
                     "on_fav_press": self.on_fav_press,
@@ -1261,6 +1263,8 @@ class Application(Gtk.Application):
         if response:
             next(self.remove_favs(response, self._fav_model), False)
 
+    # ***************** Import  ********************#
+
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
         response = get_chooser_dialog(self._main_window, self._options.get(self._profile), "*.m3u", "m3u files")
@@ -1280,6 +1284,13 @@ class Application(Gtk.Application):
                 self._services[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
+
+    def on_import_bouquets(self, item):
+        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        ImportDialog(self._main_window, response, Profile(self._profile)).show()
 
     # ***************** Backup  ********************#
 
