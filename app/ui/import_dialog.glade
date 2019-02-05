@@ -43,15 +43,27 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="services_list_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="dialog_window">
     <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">480</property>
     <property name="default_height">320</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="gravity">center</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Import services and bouquets</property>
+        <property name="title" translatable="yes">Import bouquets and services </property>
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
@@ -69,15 +81,17 @@ Author: Dmitriy Yefremov
           </object>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkCheckButton" id="info_check_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="receives_default">False</property>
+            <property name="draw_indicator">False</property>
+            <signal name="toggled" handler="on_info_button_toggled" swapped="no"/>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-info</property>
+                <property name="stock">gtk-dialog-info</property>
               </object>
             </child>
           </object>
@@ -97,52 +111,95 @@ Author: Dmitriy Yefremov
           <object class="GtkPaned" id="main_paned">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="wide_handle">True</property>
             <child>
-              <object class="GtkScrolledWindow" id="screlled_window">
+              <object class="GtkBox" id="bouquets_box">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="main_view">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">2</property>
+                    <property name="label" translatable="yes">Bouquets</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="bouquets_screlled_window">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">main_list_store</property>
-                    <property name="headers_visible">False</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection">
-                        <property name="mode">multiple</property>
-                      </object>
-                    </child>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeViewColumn" id="bouquet_column">
-                        <property name="title" translatable="yes">Bouquets</property>
-                        <property name="expand">True</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="bq_name_renderer">
-                            <property name="xpad">15</property>
-                            <property name="xalign">0.019999999552965164</property>
+                      <object class="GtkTreeView" id="main_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">main_list_store</property>
+                        <property name="headers_clickable">False</property>
+                        <property name="search_column">0</property>
+                        <signal name="cursor-changed" handler="on_cursor_changed" swapped="no"/>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection">
+                            <property name="mode">multiple</property>
                           </object>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
                         </child>
                         <child>
-                          <object class="GtkCellRendererText" id="bq_type_renderer"/>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="bouquet_name_column">
+                            <property name="title" translatable="yes">Name</property>
+                            <property name="expand">True</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="bq_name_renderer">
+                                <property name="xalign">0.019999999552965164</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                         <child>
-                          <object class="GtkCellRendererToggle" id="bq_selected_renderer">
-                            <property name="xalign">0.98000001907348633</property>
+                          <object class="GtkTreeViewColumn" id="bouquet_type_column">
+                            <property name="title" translatable="yes">Type</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="bq_type_renderer">
+                                <property name="xalign">0.50999999046325684</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
                           </object>
-                          <attributes>
-                            <attribute name="active">2</attribute>
-                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="bouquet_selected_column">
+                            <property name="title" translatable="yes">Selected</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererToggle" id="bq_selected_renderer">
+                                <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
+                              </object>
+                              <attributes>
+                                <attribute name="active">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -151,21 +208,73 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="text_view_scrolled_window">
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
+              <object class="GtkBox" id="services_box">
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTextView" id="text_view">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">2</property>
+                    <property name="label" translatable="yes">Bouquet details</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="services_view_scrolled_window">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="pixels_above_lines">5</property>
-                    <property name="editable">False</property>
-                    <property name="left_margin">10</property>
-                    <property name="right_margin">10</property>
-                    <property name="indent">10</property>
-                    <property name="cursor_visible">False</property>
-                    <property name="accepts_tab">False</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTreeView" id="services_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">services_list_store</property>
+                        <property name="headers_clickable">False</property>
+                        <property name="search_column">0</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="service_name_column">
+                            <property name="title" translatable="yes">Name</property>
+                            <property name="expand">True</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="info_name_renderer">
+                                <property name="xalign">0.019999999552965164</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="service_type_column">
+                            <property name="title" translatable="yes">Type</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="info_type_renderer"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -184,6 +293,7 @@ Author: Dmitriy Yefremov
           <object class="GtkInfoBar" id="info_bar">
             <property name="can_focus">False</property>
             <property name="show_close_button">True</property>
+            <signal name="response" handler="on_info_bar_close" swapped="no"/>
             <child internal-child="action_area">
               <object class="GtkButtonBox">
                 <property name="can_focus">False</property>
@@ -205,6 +315,7 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">message</property>
+                    <property name="wrap">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
