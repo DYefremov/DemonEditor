@@ -43,14 +43,6 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="services_list_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name type -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkWindow" id="dialog_window">
     <property name="can_focus">False</property>
     <property name="modal">True</property>
@@ -58,6 +50,7 @@ Author: Dmitriy Yefremov
     <property name="default_width">480</property>
     <property name="default_height">320</property>
     <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
@@ -67,12 +60,14 @@ Author: Dmitriy Yefremov
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
-          <object class="GtkButton">
+          <object class="GtkButton" id="import_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Import</property>
+            <signal name="clicked" handler="on_import" swapped="no"/>
             <child>
-              <object class="GtkImage">
+              <object class="GtkImage" id="import_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="stock">gtk-revert-to-saved</property>
@@ -88,7 +83,7 @@ Author: Dmitriy Yefremov
             <property name="draw_indicator">False</property>
             <signal name="toggled" handler="on_info_button_toggled" swapped="no"/>
             <child>
-              <object class="GtkImage">
+              <object class="GtkImage" id="info_check_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="stock">gtk-dialog-info</property>
@@ -104,8 +99,12 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkBox" id="main_box">
+        <property name="width_request">480</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin_left">1</property>
+        <property name="margin_right">1</property>
+        <property name="margin_bottom">1</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkPaned" id="main_paned">
@@ -133,6 +132,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="bouquets_screlled_window">
+                    <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
@@ -143,7 +143,9 @@ Author: Dmitriy Yefremov
                         <property name="model">main_list_store</property>
                         <property name="headers_clickable">False</property>
                         <property name="search_column">0</property>
+                        <signal name="button-press-event" handler="on_popup_menu" object="popup_menu" swapped="no"/>
                         <signal name="cursor-changed" handler="on_cursor_changed" swapped="no"/>
+                        <signal name="select-all" handler="on_select_all" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection">
                             <property name="mode">multiple</property>
@@ -184,6 +186,7 @@ Author: Dmitriy Yefremov
                             <property name="alignment">0.5</property>
                             <child>
                               <object class="GtkCellRendererToggle" id="bq_selected_renderer">
+                                <property name="xalign">0.50999999046325684</property>
                                 <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
                               </object>
                               <attributes>
@@ -227,6 +230,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="services_view_scrolled_window">
+                    <property name="width_request">150</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
@@ -260,7 +264,9 @@ Author: Dmitriy Yefremov
                             <property name="title" translatable="yes">Type</property>
                             <property name="alignment">0.5</property>
                             <child>
-                              <object class="GtkCellRendererText" id="info_type_renderer"/>
+                              <object class="GtkCellRendererText" id="info_type_renderer">
+                                <property name="xalign">0.50999999046325684</property>
+                              </object>
                               <attributes>
                                 <attribute name="text">1</attribute>
                               </attributes>
@@ -339,5 +345,42 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkImage" id="remove_selection_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo</property>
+  </object>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="select_all_popup_item">
+        <property name="label">gtk-select-all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_select_all" object="main_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="unselect_all_popup_item">
+        <property name="label" translatable="yes">Remove selection</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">remove_selection_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_unselect_all" object="main_view" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="services_list_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+    </columns>
   </object>
 </interface>

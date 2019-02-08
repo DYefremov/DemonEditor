@@ -798,6 +798,13 @@ class Application(Gtk.Application):
             for bq in bouquet.bouquets:
                 self.append_bouquet(bq, parent)
 
+    def add_to_bouquets(self, bqs):
+        for bouquets in bqs:
+            for row in self._bouquets_model:
+                if row[-1] == bouquets.type:
+                    for bq in bouquets.bouquets:
+                        self.append_bouquet(bq, row.iter)
+
     def append_bouquet(self, bq, parent):
         name, bt_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
         self._bouquets_model.append(parent, [name, locked, hidden, bt_type])
@@ -1290,7 +1297,11 @@ class Application(Gtk.Application):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
-        ImportDialog(self._main_window, response, Profile(self._profile)).show()
+        ImportDialog(self._main_window, response,
+                     Profile(self._profile),
+                     self._services.keys(),
+                     self.append_services,
+                     self.add_to_bouquets).show()
 
     # ***************** Backup  ********************#
 

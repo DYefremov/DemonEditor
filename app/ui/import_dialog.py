@@ -1,24 +1,36 @@
+from contextlib import suppress
+
 from app.commons import run_idle
 from app.eparser import get_bouquets, get_services
 from app.properties import Profile
 from app.ui.dialogs import get_message
+from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH
 
 
 class ImportDialog:
-    def __init__(self, transient, path, profile):
-        handlers = {"on_cursor_changed": self.on_cursor_changed,
+    def __init__(self, transient, path, profile, service_ids, services_appender, bouquets_appender):
+        handlers = {"on_import": self.on_import,
+                    "on_cursor_changed": self.on_cursor_changed,
                     "on_info_button_toggled": self.on_info_button_toggled,
                     "on_selected_toggled": self.on_selected_toggled,
-                    "on_info_bar_close": self.on_info_bar_close}
+                    "on_info_bar_close": self.on_info_bar_close,
+                    "on_select_all": self.on_select_all,
+                    "on_unselect_all": self.on_unselect_all,
+                    "on_popup_menu": on_popup_menu}
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "import_dialog.glade")
         builder.connect_signals(handlers)
 
-        self._bouquets = {}
+        self._bq_services = {}
         self._services = {}
+        self._service_ids = service_ids
+        self.append_services = services_appender
+        self.append_bouquets = bouquets_appender
+        self._profile = profile
+        self._bouquets = None
 
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -37,19 +49,56 @@ class ImportDialog:
         self._dialog_window.show()
 
     def init_data(self, path, profile):
+        if profile is Profile.NEUTRINO_MP:
+            self.show_info_message(get_message("Not implemented yet!"), Gtk.MessageType.WARNING)
+            return
+
         try:
-            bouquets = get_bouquets(path, profile)
-            for bqs in bouquets:
+            self._bouquets = get_bouquets(path, profile)
+            for bqs in self._bouquets:
                 for bq in bqs.bouquets:
                     self._main_model.append((bq.name, bq.type, True))
-                    self._bouquets[(bq.name, bq.type)] = bq.services
+                    self._bq_services[(bq.name, bq.type)] = bq.services
             # Note! Getting default format ver. 4
             services = get_services(path, profile, 4 if profile is Profile.ENIGMA_2 else 0)
             for srv in services:
                 self._services[srv.fav_id] = srv
-            self.show_info_message(get_message("Not implemented yet!"), Gtk.MessageType.WARNING)
+
         except FileNotFoundError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
+
+    def on_import(self, item):
+        if self._profile is Profile.NEUTRINO_MP:
+            self.show_info_message(get_message("Not implemented yet!"), Gtk.MessageType.WARNING)
+            return
+
+        services = set()
+        to_delete = set()
+
+        for row in self._main_model:
+            bq = (row[0], row[1])
+            if row[-1]:
+                for bq_srv in self._bq_services.get(bq, []):
+                    srv = self._services.get(bq_srv.data, None)
+                    if srv:
+                        services.add(srv)
+            else:
+                to_delete.add(bq)
+
+        bqs_to_delete = []
+        for bqs in self._bouquets:
+            for bq in bqs.bouquets:
+                if (bq.name, bq.type) in to_delete:
+                    bqs_to_delete.append(bq)
+
+        for bqs in self._bouquets:
+            bq = bqs.bouquets
+            for b in bqs_to_delete:
+                with suppress(ValueError):
+                    bq.remove(b)
+
+        self.append_bouquets(self._bouquets)
+        self.append_services(list(filter(lambda s: s.fav_id not in self._service_ids, services)))
 
     @run_idle
     def on_cursor_changed(self, view):
@@ -58,7 +107,7 @@ class ImportDialog:
 
         self._services_model.clear()
         model, paths = view.get_selection().get_selected_rows()
-        bq_services = self._bouquets.get(model.get(model.get_iter(paths[0]), 0, 1))
+        bq_services = self._bq_services.get(model.get(model.get_iter(paths[0]), 0, 1))
         for bq_srv in bq_services:
             srv = self._services.get(bq_srv.data, None)
             if srv:
@@ -80,6 +129,15 @@ class ImportDialog:
     @run_idle
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
+
+    def on_select_all(self, view):
+        self.update_selection(view, True)
+
+    def on_unselect_all(self, view):
+        self.update_selection(view, False)
+
+    def update_selection(self, view, select):
+        view.get_model().foreach(lambda mod, path, itr:  mod.set_value(itr, 2, select))
 
 
 if __name__ == "__main__":
