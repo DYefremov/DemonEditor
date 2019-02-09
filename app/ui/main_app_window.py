@@ -786,7 +786,6 @@ class Application(Gtk.Application):
             self.append_bouquets(bouquets)
             self.append_services(services)
             self.update_sat_positions()
-            self.update_services_counts(len(self._services.values()))
 
     def append_blacklist(self, black_list):
         if black_list:
@@ -857,6 +856,8 @@ class Application(Gtk.Application):
             s = srv + (tooltip, background)
             itr = self._services_model.append(s)
             self._services_model.set_value(itr, 8, self._picons.get(srv.picon_id, None))
+            yield True
+            self.update_services_counts(len(self._services.values()))
             yield True
         self._wait_dialog.hide()
 

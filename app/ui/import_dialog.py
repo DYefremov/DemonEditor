@@ -49,10 +49,6 @@ class ImportDialog:
         self._dialog_window.show()
 
     def init_data(self, path, profile):
-        if profile is Profile.NEUTRINO_MP:
-            self.show_info_message(get_message("Not implemented yet!"), Gtk.MessageType.WARNING)
-            return
-
         try:
             self._bouquets = get_bouquets(path, profile)
             for bqs in self._bouquets:
@@ -68,10 +64,6 @@ class ImportDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_import(self, item):
-        if self._profile is Profile.NEUTRINO_MP:
-            self.show_info_message(get_message("Not implemented yet!"), Gtk.MessageType.WARNING)
-            return
-
         services = set()
         to_delete = set()
 
