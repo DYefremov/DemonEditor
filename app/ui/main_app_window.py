@@ -410,7 +410,7 @@ class Application(Gtk.Application):
         for row in self._rows_buffer:
             dest_index += 1
             model.insert(dest_index, row)
-            fav_bouquet.insert(dest_index, row[7])
+            fav_bouquet.insert(dest_index, row[Column.FAV_ID])
 
         if model.get_name() == self._FAV_LIST_NAME:
             self.update_fav_num_column(model)
@@ -803,7 +803,7 @@ class Application(Gtk.Application):
     def add_to_bouquets(self, bqs):
         for bouquets in bqs:
             for row in self._bouquets_model:
-                if row[-1] == bouquets.type:
+                if row[Column.BQ_TYPE] == bouquets.type:
                     for bq in bouquets.bouquets:
                         self.append_bouquet(bq, row.iter)
 
@@ -840,6 +840,7 @@ class Application(Gtk.Application):
         for srv in services:
             #  adding channels to dict with fav_id as keys
             self._services[srv.fav_id] = srv
+        self.update_services_counts(len(self._services.values()))
         gen = self.append_services_data(services)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
@@ -855,9 +856,7 @@ class Application(Gtk.Application):
 
             s = srv + (tooltip, background)
             itr = self._services_model.append(s)
-            self._services_model.set_value(itr, 8, self._picons.get(srv.picon_id, None))
-            yield True
-            self.update_services_counts(len(self._services.values()))
+            self._services_model.set_value(itr, Column.SRV_PICON, self._picons.get(srv.picon_id, None))
             yield True
         self._wait_dialog.hide()
 
@@ -900,7 +899,8 @@ class Application(Gtk.Application):
                 num_of_children = model.iter_n_children(itr)
                 for num in range(num_of_children):
                     bq_itr = model.iter_nth_child(itr, num)
-                    bq_name, locked, hidden, bq_type = model.get(bq_itr, 0, 1, 2, 3)
+                    bq_name, locked, hidden, bq_type = model.get(bq_itr, Column.BQ_NAME, Column.BQ_LOCKED,
+                                                                 Column.BQ_HIDDEN, Column.BQ_TYPE)
                     bq_id = "{}:{}".format(bq_name, bq_type)
                     favs = self._bouquets[bq_id]
                     ex_s = self._extra_bouquets.get(bq_id)
@@ -910,7 +910,7 @@ class Application(Gtk.Application):
                     bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden)
                     bqs.append(bq)
             if len(b_path) == 1:
-                bouquets.append(Bouquets(*model.get(itr, 0, 3), bqs if bqs else []))
+                bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
 
         profile = Profile(self._profile)
         # Getting bouquets
@@ -948,7 +948,7 @@ class Application(Gtk.Application):
 
     def update_service_bar(self, model, path):
         def_val = "Unknown"
-        cas = model.get_value(model.get_iter(path), 0)
+        cas = model.get_value(model.get_iter(path), Column.SRV_CAS_FLAGS)
         if not cas:
             return
         cas_values = list(filter(lambda val: val.startswith("C:"), cas.split(",")))
@@ -961,7 +961,7 @@ class Application(Gtk.Application):
 
         if self._current_bq_name:
             ch_row = model[model.get_iter(path)][:]
-            self._bq_selected = "{}:{}".format(ch_row[0], ch_row[3])
+            self._bq_selected = "{}:{}".format(ch_row[Column.BQ_NAME], ch_row[Column.BQ_TYPE])
         else:
             self._bq_selected = ""
 
@@ -979,7 +979,7 @@ class Application(Gtk.Application):
         if path:
             tree_iter = model.get_iter(path)
 
-        key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, 0, 3))
+        key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, Column.BQ_NAME, Column.BQ_TYPE))
         services = self._bouquets.get(key, None)
         ex_services = self._extra_bouquets.get(key, None)
         if not services:
@@ -1017,11 +1017,11 @@ class Application(Gtk.Application):
             if bqs_rows:
                 bq_type = row[-1]
                 for b_row in bqs_rows:
-                    bq_id = "{}:{}".format(b_row[0], b_row[-1])
+                    bq_id = "{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE])
                     bq = self._bouquets.get(bq_id, None)
                     if bq:
-                        b_row[-1] = bq_type
-                        self._bouquets["{}:{}".format(b_row[0], b_row[-1])] = bq
+                        b_row[Column.BQ_TYPE] = bq_type
+                        self._bouquets["{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE])] = bq
 
     def delete_selection(self, view, *args):
         """ Used for clear selection on given view(s) """
