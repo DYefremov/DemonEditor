@@ -129,6 +129,11 @@ class Column(IntEnum):
     FAV_PICON = 8
     FAV_TOOLTIP = 9
     FAV_BACKGROUND = 10
+    # bouquets view
+    BQ_NAME = 0
+    BQ_LOCKED = 1
+    BQ_HIDDEN = 2
+    BQ_TYPE = 3
 
     def __index__(self):
         """ Overridden to get the index in slices directly """
