@@ -43,6 +43,43 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkImage" id="remove_selection_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo</property>
+  </object>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="select_all_popup_item">
+        <property name="label">gtk-select-all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_select_all" object="main_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="unselect_all_popup_item">
+        <property name="label" translatable="yes">Remove selection</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">remove_selection_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_unselect_all" object="main_view" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="services_list_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="dialog_window">
     <property name="can_focus">False</property>
     <property name="modal">True</property>
@@ -145,6 +182,7 @@ Author: Dmitriy Yefremov
                         <property name="search_column">0</property>
                         <signal name="button-press-event" handler="on_popup_menu" object="popup_menu" swapped="no"/>
                         <signal name="cursor-changed" handler="on_cursor_changed" swapped="no"/>
+                        <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                         <signal name="select-all" handler="on_select_all" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection">
@@ -246,7 +284,7 @@ Author: Dmitriy Yefremov
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="service_name_column">
-                            <property name="title" translatable="yes">Name</property>
+                            <property name="title" translatable="yes">Service</property>
                             <property name="expand">True</property>
                             <property name="alignment">0.5</property>
                             <child>
@@ -345,42 +383,5 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="remove_selection_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">edit-undo</property>
-  </object>
-  <object class="GtkMenu" id="popup_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="select_all_popup_item">
-        <property name="label">gtk-select-all</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_select_all" object="main_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="unselect_all_popup_item">
-        <property name="label" translatable="yes">Remove selection</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">remove_selection_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_unselect_all" object="main_view" swapped="no"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkListStore" id="services_list_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name type -->
-      <column type="gchararray"/>
-    </columns>
   </object>
 </interface>

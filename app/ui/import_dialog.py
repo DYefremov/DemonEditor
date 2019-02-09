@@ -3,9 +3,8 @@ from contextlib import suppress
 from app.commons import run_idle
 from app.eparser import get_bouquets, get_services
 from app.properties import Profile
-from app.ui.dialogs import get_message
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, UI_RESOURCES_PATH
+from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey
 
 
 class ImportDialog:
@@ -17,7 +16,8 @@ class ImportDialog:
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
-                    "on_popup_menu": on_popup_menu}
+                    "on_popup_menu": on_popup_menu,
+                    "on_key_press": self.on_key_press}
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -130,6 +130,19 @@ class ImportDialog:
 
     def update_selection(self, view, select):
         view.get_model().foreach(lambda mod, path, itr:  mod.set_value(itr, 2, select))
+
+    def on_key_press(self, view, event):
+        """  Handling  keystrokes  """
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+        key = KeyboardKey(key_code)
+
+        if key is KeyboardKey.SPACE:
+            path, column = view.get_cursor()
+            itr = self._main_model.get_iter(path)
+            selected = self._main_model.get_value(itr, 2)
+            self._main_model.set_value(itr, 2, not selected)
 
 
 if __name__ == "__main__":
