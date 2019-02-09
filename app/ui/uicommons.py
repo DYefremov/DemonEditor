@@ -55,6 +55,7 @@ class KeyboardKey(Enum):
     LEFT = 113
     RIGHT = 114
     F2 = 68
+    SPACE = 65
     DELETE = 119
     BACK_SPACE = 22
     CTRL_L = 37
