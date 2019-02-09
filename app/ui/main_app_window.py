@@ -793,10 +793,13 @@ class Application(Gtk.Application):
             self._blacklist.update(black_list)
 
     def append_bouquets(self, bqs):
-        for bouquet in bqs:
-            parent = self._bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
-            for bq in bouquet.bouquets:
-                self.append_bouquet(bq, parent)
+        if len(self._bouquets_model):
+            self.add_to_bouquets(bqs)
+        else:
+            for bouquet in bqs:
+                parent = self._bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
+                for bq in bouquet.bouquets:
+                    self.append_bouquet(bq, parent)
 
     def add_to_bouquets(self, bqs):
         for bouquets in bqs:
@@ -1301,7 +1304,7 @@ class Application(Gtk.Application):
                      Profile(self._profile),
                      self._services.keys(),
                      self.append_services,
-                     self.add_to_bouquets).show()
+                     self.append_bouquets).show()
 
     # ***************** Backup  ********************#
 
