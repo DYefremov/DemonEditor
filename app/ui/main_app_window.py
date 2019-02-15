@@ -1297,11 +1297,8 @@ class Application(Gtk.Application):
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
     def on_import_bouquets(self, item):
-        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
-        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
-            return
-
-        ImportDialog(self._main_window, response,
+        ImportDialog(self._main_window,
+                     self._options.get(self._profile),
                      Profile(self._profile),
                      self._services.keys(),
                      self.append_services,

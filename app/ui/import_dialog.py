@@ -3,13 +3,16 @@ from contextlib import suppress
 from app.commons import run_idle
 from app.eparser import get_bouquets, get_services
 from app.properties import Profile
+from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey
 
 
 class ImportDialog:
-    def __init__(self, transient, path, profile, service_ids, services_appender, bouquets_appender):
+    def __init__(self, transient, options, profile, service_ids, services_appender, bouquets_appender):
         handlers = {"on_import": self.on_import,
+                    "on_import_single": self.on_import_single,
+                    "on_import_all": self.on_import_all,
                     "on_cursor_changed": self.on_cursor_changed,
                     "on_info_button_toggled": self.on_info_button_toggled,
                     "on_selected_toggled": self.on_selected_toggled,
@@ -30,6 +33,7 @@ class ImportDialog:
         self.append_services = services_appender
         self.append_bouquets = bouquets_appender
         self._profile = profile
+        self._options = options
         self._bouquets = None
 
         self._dialog_window = builder.get_object("dialog_window")
@@ -43,27 +47,45 @@ class ImportDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
 
-        self.init_data(path, profile)
-
     def show(self):
         self._dialog_window.show()
 
-    def init_data(self, path, profile):
+    def init_data(self, path):
+        self._main_model.clear()
+        self._services_model.clear()
+
         try:
-            self._bouquets = get_bouquets(path, profile)
+            self._bouquets = get_bouquets(path, self._profile)
             for bqs in self._bouquets:
                 for bq in bqs.bouquets:
                     self._main_model.append((bq.name, bq.type, True))
                     self._bq_services[(bq.name, bq.type)] = bq.services
             # Note! Getting default format ver. 4
-            services = get_services(path, profile, 4 if profile is Profile.ENIGMA_2 else 0)
+            services = get_services(path, self._profile, 4 if self._profile is Profile.ENIGMA_2 else 0)
             for srv in services:
                 self._services[srv.fav_id] = srv
-
         except FileNotFoundError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
+    def on_import_single(self, item):
+        response = get_chooser_dialog(self._dialog_window, self._options, "*.tv", "bouquet files")
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        if not str(response).endswith(".tv"):
+            show_dialog(DialogType.ERROR, self._dialog_window, text="No bouquet file is selected!")
+            return
+
+    def on_import_all(self, item):
+        response = show_dialog(DialogType.CHOOSER, self._dialog_window, options=self._options)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+        self.init_data(response)
+
     def on_import(self, item):
+        if not self._bouquets:
+            return
+
         services = set()
         to_delete = set()
 
@@ -99,6 +121,9 @@ class ImportDialog:
 
         self._services_model.clear()
         model, paths = view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
         bq_services = self._bq_services.get(model.get(model.get_iter(paths[0]), 0, 1))
         for bq_srv in bq_services:
             srv = self._services.get(bq_srv.data, None)
@@ -129,7 +154,7 @@ class ImportDialog:
         self.update_selection(view, False)
 
     def update_selection(self, view, select):
-        view.get_model().foreach(lambda mod, path, itr:  mod.set_value(itr, 2, select))
+        view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 2, select))
 
     def on_key_press(self, view, event):
         """  Handling  keystrokes  """

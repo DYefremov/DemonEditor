@@ -781,7 +781,7 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Import bouquets and services</property>
+            <property name="text" translatable="yes">Import user data</property>
             <signal name="clicked" handler="on_import_bouquets" swapped="no"/>
           </object>
           <packing>
