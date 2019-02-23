@@ -11,7 +11,7 @@ from app.connections import http_request, HttpRequestType
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
-from app.eparser.enigma.bouquets import BqServiceType
+from app.eparser.enigma.bouquets import BqServiceType, get_bouquet
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
@@ -41,22 +41,30 @@ class Application(Gtk.Application):
 
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_popup_menu",)
+
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
                      "fav_picon_popup_item", "fav_copy_popup_item")
+
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "edit_header_button",
-                         "new_header_button")
+                         "new_header_button", "bouquet_import_popup_item")
+
     _COMMONS_ELEMENTS = ("edit_header_button", "bouquets_remove_popup_item", "fav_remove_popup_item")
+
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
+
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
+
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
+
     _DYNAMIC_ELEMENTS = ("services_popup_menu", "new_header_button", "edit_header_button", "locked_tool_button",
                          "fav_cut_popup_item", "fav_paste_popup_item", "bouquets_new_popup_item", "hide_tool_button",
                          "bouquets_remove_popup_item", "fav_remove_popup_item", "bouquets_edit_popup_item",
                          "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
                          "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
-                         "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item")
+                         "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item",
+                         "bouquet_import_popup_item")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -102,6 +110,7 @@ class Application(Gtk.Application):
                     "on_locked": self.on_locked,
                     "on_model_changed": self.on_model_changed,
                     "on_import_m3u": self.on_import_m3u,
+                    "on_import_bouquet": self.on_import_bouquet,
                     "on_import_bouquets": self.on_import_bouquets,
                     "on_backup_tool_show": self.on_backup_tool_show,
                     "on_insert_marker": self.on_insert_marker,
@@ -1296,9 +1305,51 @@ class Application(Gtk.Application):
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
+    def on_import_bouquet(self, item):
+        if len(self._bouquets_model) == 0:
+            show_dialog(DialogType.ERROR, self._main_window, text="No user data is loaded!")
+            return
+
+        profile = Profile(self._profile)
+        if profile is not Profile.ENIGMA_2:
+            show_dialog(DialogType.ERROR, transient=self._main_window, text="Not implemented yet!")
+            return
+
+        model, paths = self._bouquets_view.get_selection().get_selected_rows()
+        if not paths:
+            show_dialog(DialogType.ERROR, self._main_window, "No selected item!")
+            return
+
+        itr = model.get_iter(paths[0])
+        pat = ".{}".format(model.get(itr, Column.BQ_TYPE)[0])
+        f_pattern = "userbouquet.*{}".format(pat)
+
+        response = get_chooser_dialog(self._main_window, self._options.get(self._profile), f_pattern, "bouquet files")
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        if not str(response).endswith(pat):
+            show_dialog(DialogType.ERROR, self._main_window, text="No bouquet file is selected!")
+            return
+
+        path, sep, f_name = response.rpartition("userbouquet.")
+        name, sep, suf = f_name.rpartition(".")
+        bq = get_bouquet(path, name, suf)
+        bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
+
+        if model.iter_n_children(itr):
+            self.append_bouquet(bouquet, itr)
+        else:
+            p_itr = model.iter_parent(itr)
+            self.append_bouquet(bouquet, p_itr)
+
     def on_import_bouquets(self, item):
+        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
         ImportDialog(self._main_window,
-                     self._options.get(self._profile),
+                     response,
                      Profile(self._profile),
                      self._services.keys(),
                      self.append_services,

@@ -3,16 +3,13 @@ from contextlib import suppress
 from app.commons import run_idle
 from app.eparser import get_bouquets, get_services
 from app.properties import Profile
-from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey
 
 
 class ImportDialog:
-    def __init__(self, transient, options, profile, service_ids, services_appender, bouquets_appender):
+    def __init__(self, transient, path, profile, service_ids, services_appender, bouquets_appender):
         handlers = {"on_import": self.on_import,
-                    "on_import_single": self.on_import_single,
-                    "on_import_all": self.on_import_all,
                     "on_cursor_changed": self.on_cursor_changed,
                     "on_info_button_toggled": self.on_info_button_toggled,
                     "on_selected_toggled": self.on_selected_toggled,
@@ -33,7 +30,6 @@ class ImportDialog:
         self.append_services = services_appender
         self.append_bouquets = bouquets_appender
         self._profile = profile
-        self._options = options
         self._bouquets = None
 
         self._dialog_window = builder.get_object("dialog_window")
@@ -47,13 +43,15 @@ class ImportDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
 
+        self.init_data(path)
+
     def show(self):
         self._dialog_window.show()
 
+    @run_idle
     def init_data(self, path):
         self._main_model.clear()
         self._services_model.clear()
-
         try:
             self._bouquets = get_bouquets(path, self._profile)
             for bqs in self._bouquets:
@@ -66,21 +64,6 @@ class ImportDialog:
                 self._services[srv.fav_id] = srv
         except FileNotFoundError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
-
-    def on_import_single(self, item):
-        response = get_chooser_dialog(self._dialog_window, self._options, "*.tv", "bouquet files")
-        if response == Gtk.ResponseType.CANCEL:
-            return
-
-        if not str(response).endswith(".tv"):
-            show_dialog(DialogType.ERROR, self._dialog_window, text="No bouquet file is selected!")
-            return
-
-    def on_import_all(self, item):
-        response = show_dialog(DialogType.CHOOSER, self._dialog_window, options=self._options)
-        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
-            return
-        self.init_data(response)
 
     def on_import(self, item):
         if not self._bouquets:
