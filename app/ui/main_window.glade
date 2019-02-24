@@ -314,12 +314,12 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkModelButton" id="create_munu_button">
+          <object class="GtkModelButton" id="import_munu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="text" translatable="yes">New empty configuration</property>
-            <signal name="clicked" handler="on_new_configuration" swapped="no"/>
+            <property name="text" translatable="yes">Import</property>
+            <property name="menu_name">submenu1</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -328,12 +328,12 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkModelButton" id="import_munu_button">
+          <object class="GtkModelButton" id="create_munu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Import</property>
-            <property name="menu_name">submenu1</property>
+            <property name="text" translatable="yes">New empty configuration</property>
+            <signal name="clicked" handler="on_new_configuration" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -446,7 +446,10 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="valign">center</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">5</property>
+            <property name="margin_top">5</property>
             <property name="menu_name">main</property>
             <property name="inverted">True</property>
           </object>
@@ -833,31 +836,6 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkModelButton" id="settings_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Settings</property>
-            <signal name="clicked" handler="on_preferences" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator" id="popover_menu_separator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkModelButton" id="tools_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -872,7 +850,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="popover_menu_separator2">
+          <object class="GtkSeparator" id="popover_menu_separator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
@@ -880,6 +858,31 @@ Author: Dmitriy Yefremov
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="settings_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Settings</property>
+            <signal name="clicked" handler="on_preferences" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="popover_menu_separator2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -893,7 +896,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </object>
@@ -981,7 +984,10 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="valign">center</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">5</property>
+            <property name="margin_top">5</property>
             <property name="menu_name">main</property>
             <property name="inverted">True</property>
           </object>
