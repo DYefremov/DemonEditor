@@ -625,6 +625,26 @@ msgstr "О программе"
 msgid "Exit"
 msgstr "Выход"
 
+msgid "Tools"
+msgstr "Инструменты"
+
+#Import
+msgid "Import"
+msgstr "Импортировать"
+
+msgid "Bouquet"
+msgstr "Букет"
+
+msgid "Bouquets and services"
+msgstr "Букеты и сервисы"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "Основной список не содержит сервисов для данного букета!"
+
+msgid "No bouquet file is selected!"
+msgstr "Не выбран файл букета!"
+
+
 
 
 
