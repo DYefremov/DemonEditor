@@ -1333,7 +1333,7 @@ class Application(Gtk.Application):
         name, sep, suf = f_name.rpartition(".")
         bq = get_bouquet(path, name, suf)
         bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
-        
+
         s_values = self._services
         imported = list(filter(lambda x: x.data in s_values or x.type is BqServiceType.IPTV, bouquet.services))
         if len(imported) == 0:
