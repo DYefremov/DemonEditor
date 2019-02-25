@@ -50,7 +50,8 @@ class Application(Gtk.Application):
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "edit_header_button",
                          "new_header_button", "bouquet_import_popup_item")
 
-    _COMMONS_ELEMENTS = ("edit_header_button", "bouquets_remove_popup_item", "fav_remove_popup_item")
+    _COMMONS_ELEMENTS = ("edit_header_button", "bouquets_remove_popup_item",
+                         "fav_remove_popup_item", "import_bq_menu_button")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
 
@@ -64,7 +65,7 @@ class Application(Gtk.Application):
                          "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
                          "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
                          "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item",
-                         "bouquet_import_popup_item")
+                         "bouquet_import_popup_item", "import_bq_menu_button")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1306,10 +1307,6 @@ class Application(Gtk.Application):
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
     def on_import_bouquet(self, item):
-        if len(self._bouquets_model) == 0:
-            show_dialog(DialogType.ERROR, self._main_window, text="No user data is loaded!")
-            return
-
         profile = Profile(self._profile)
         if profile is not Profile.ENIGMA_2:
             show_dialog(DialogType.ERROR, transient=self._main_window, text="Not implemented yet!")
@@ -1336,6 +1333,13 @@ class Application(Gtk.Application):
         name, sep, suf = f_name.rpartition(".")
         bq = get_bouquet(path, name, suf)
         bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
+        
+        s_values = self._services
+        imported = list(filter(lambda x: x.data in s_values or x.type is BqServiceType.IPTV, bouquet.services))
+        if len(imported) == 0:
+            show_dialog(DialogType.ERROR, self._main_window,
+                        text="The main list does not contain services for this bouquet!")
+            return
 
         if model.iter_n_children(itr):
             self.append_bouquet(bouquet, itr)
