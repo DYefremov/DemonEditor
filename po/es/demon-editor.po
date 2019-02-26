@@ -1,7 +1,7 @@
-# Copyright (C) 2018 Frank Neirynck
+# Copyright (C) 2018-2019 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-#Frank Neirynck <frank@insink.be>, 2018.
+#Frank Neirynck <frank@insink.be>, 2018-2019.
 #
 msgid ""
 msgstr ""
@@ -593,6 +593,8 @@ msgstr "Backup"
 msgid "Backups"
 msgstr "Backups"
 
+msgid "Backup path:"
+msgstr "Ruta del backup:"					
 msgid "Restore bouquets"
 msgstr "Restaurar ramos"
 
@@ -614,8 +616,30 @@ msgstr "Marcado como nuevo:"
 msgid "With an extra name in the bouquet:"
 msgstr "Con nombre adicional en ramo:"
 
+msgid "Select"
+msgstr "Seleccione"	   
+
 msgid "About"
 msgstr "Sobre"
 
 msgid "Exit"
 msgstr "Salir"
+
+msgid "Tools"
+msgstr "Herramientas"
+
+#Import
+msgid "Import"
+msgstr "Importar"
+
+msgid "Bouquet"
+msgstr "Ramo"
+
+msgid "Bouquets and services"
+msgstr "Ramos y servicios"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "La lista principal no contiene servicios para este ramo!"
+
+msgid "No bouquet file is selected!"
+msgstr "Nigún fichero de ramo ha sido seleccionado!"

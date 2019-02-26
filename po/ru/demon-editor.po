@@ -1,10 +1,10 @@
-# Copyright (C) 2018 Dmitriy Yefremov
+# Copyright (C) 2018-2019 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
 msgid ""
 msgstr ""
-"Last-Translator: Dmitry Yefremov\n"
+"Last-Translator: Dmitriy Yefremov\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
