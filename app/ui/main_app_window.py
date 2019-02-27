@@ -1352,12 +1352,9 @@ class Application(Gtk.Application):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
-        ImportDialog(self._main_window,
-                     response,
-                     Profile(self._profile),
-                     self._services.keys(),
-                     self.append_services,
-                     self.append_bouquets).show()
+        ImportDialog(self._main_window, response, Profile(self._profile), self._services.keys(),
+                     lambda b, s: (self._wait_dialog.show(), self.append_bouquets(b),
+                                   self.append_services(s), self.update_sat_positions())).show()
 
     # ***************** Backup  ********************#
 

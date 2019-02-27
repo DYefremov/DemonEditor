@@ -3,12 +3,13 @@ from contextlib import suppress
 from app.commons import run_idle
 from app.eparser import get_bouquets, get_services
 from app.properties import Profile
+from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey
 
 
 class ImportDialog:
-    def __init__(self, transient, path, profile, service_ids, services_appender, bouquets_appender):
+    def __init__(self, transient, path, profile, service_ids, appender):
         handlers = {"on_import": self.on_import,
                     "on_cursor_changed": self.on_cursor_changed,
                     "on_info_button_toggled": self.on_info_button_toggled,
@@ -27,8 +28,7 @@ class ImportDialog:
         self._bq_services = {}
         self._services = {}
         self._service_ids = service_ids
-        self.append_services = services_appender
-        self.append_bouquets = bouquets_appender
+        self._append = appender
         self._profile = profile
         self._bouquets = None
 
@@ -66,7 +66,7 @@ class ImportDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_import(self, item):
-        if not self._bouquets:
+        if not self._bouquets or show_dialog(DialogType.QUESTION, self._dialog_window) == Gtk.ResponseType.CANCEL:
             return
 
         services = set()
@@ -94,8 +94,8 @@ class ImportDialog:
                 with suppress(ValueError):
                     bq.remove(b)
 
-        self.append_bouquets(self._bouquets)
-        self.append_services(list(filter(lambda s: s.fav_id not in self._service_ids, services)))
+        self._append(self._bouquets, list(filter(lambda s: s.fav_id not in self._service_ids, services)))
+        self._dialog_window.destroy()
 
     @run_idle
     def on_cursor_changed(self, view):
