@@ -25,7 +25,8 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data
+    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data, \
+    remove_all_unused_picons
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -122,6 +123,7 @@ class Application(Gtk.Application):
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
                     "on_reference_picon": self.on_reference_picon,
+                    "on_remove_unused_picons": self.on_remove_unused_picons,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_search_toggled": self.on_search_toggled,
                     "on_search_down": self.on_search_down,
@@ -1820,6 +1822,12 @@ class Application(Gtk.Application):
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
         copy_picon_reference(self.get_target_view(view), view, self._services, self._clipboard, self._main_window)
+
+    def on_remove_unused_picons(self, item):
+        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
+            return
+
+        remove_all_unused_picons(self._options.get(self._profile), self._picons, self._services.values())
 
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV

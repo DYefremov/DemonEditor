@@ -435,15 +435,7 @@ def remove_picon(target, srv_view, fav_view, picons, options):
     fav_view.get_model().foreach(remove) if target is ViewTarget.SERVICES else get_base_model(
         srv_view.get_model()).foreach(remove)
 
-    pions_path = options.get("picons_dir_path")
-    backup_path = options.get("data_dir_path") + "backup/picons/"
-    os.makedirs(os.path.dirname(backup_path), exist_ok=True)
-
-    for p_id in picon_ids:
-        picons[p_id] = None
-        src = pions_path + p_id
-        if os.path.isfile(src):
-            shutil.move(src, backup_path + p_id)
+    remove_picons(options, picon_ids, picons)
 
 
 def copy_picon_reference(target, view, services, clipboard, transient):
@@ -465,6 +457,23 @@ def copy_picon_reference(target, view, services, clipboard, transient):
             clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
         else:
             show_dialog(DialogType.ERROR, transient, "No reference is present!")
+
+
+def remove_all_unused_picons(options, picons, services):
+    ids = {s.picon_id for s in services}
+    pcs = list(filter(lambda x: x not in ids, picons))
+    remove_picons(options, pcs, picons)
+
+
+def remove_picons(options, picon_ids, picons):
+    pions_path = options.get("picons_dir_path")
+    backup_path = options.get("backup_dir_path") + "picons/"
+    os.makedirs(os.path.dirname(backup_path), exist_ok=True)
+    for p_id in picon_ids:
+        picons[p_id] = None
+        src = pions_path + p_id
+        if os.path.isfile(src):
+            shutil.move(src, backup_path + p_id)
 
 
 def is_only_one_item_selected(paths, transient):

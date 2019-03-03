@@ -528,6 +528,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-remove</property>
   </object>
+  <object class="GtkImage" id="remove_all_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-remove</property>
+  </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -800,6 +805,22 @@ Author: Dmitriy Yefremov
                 <signal name="activate" handler="on_reference_picon" object="fav_tree_view" swapped="no"/>
               </object>
             </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_remove_unused_picons_popup_item">
+                <property name="label" translatable="yes">Remove all unused</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">remove_all_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_remove_unused_picons" swapped="no"/>
+              </object>
+            </child>
           </object>
         </child>
       </object>
@@ -822,6 +843,11 @@ Author: Dmitriy Yefremov
         <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
+  </object>
+  <object class="GtkImage" id="remove_all_image_2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-remove</property>
   </object>
   <object class="GtkPopoverMenu" id="right_header_popover_menu">
     <property name="can_focus">False</property>
@@ -1023,10 +1049,256 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-select-all</property>
   </object>
+  <object class="GtkImage" id="select_all_image_2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-select-all</property>
+  </object>
   <object class="GtkImage" id="select_all_image_3">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-select-all</property>
+  </object>
+  <object class="GtkMenu" id="services_popup_menu">
+    <property name="visible">True</property>
+    <property name="sensitive">False</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="services_to_fav_end_move_popup_item">
+        <property name="label">gtk-goto-last</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_to_fav_end_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="BackSpace" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_to_fav_move_popup_item">
+        <property name="label">gtk-goto-first</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_to_fav_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="Insert" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_create_bouquet_popup_item">
+        <property name="label" translatable="yes">Create bouquet</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">new_image</property>
+        <property name="use_stock">False</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="services_bouquet_popup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_sat_popup_item">
+                <property name="label" translatable="yes">For current satellite</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">save_as_image_2</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_satellite" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_package_popup_item">
+                <property name="label" translatable="yes">For current package</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">save_as_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_package" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_type_popup_item">
+                <property name="label" translatable="yes">For current type</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">save_as_image_3</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_type" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_bouquet_separator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_sat_popup_item">
+                <property name="label" translatable="yes">For each satellite</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">select_all_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_satellite" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_package_popup_item">
+                <property name="label" translatable="yes">For each package</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">select_all_image_2</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_package" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_type_popup_item">
+                <property name="label" translatable="yes">For each type</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">select_all_image_3</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_type" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_copy_popup_item">
+        <property name="label">gtk-copy</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_edit_popup_item">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_service_edit" object="services_tree_view" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_add_new_popup_item">
+        <property name="label">gtk-new</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_services_add_new" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_picon_popup_item">
+        <property name="label" translatable="yes">Picon</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">insert_image_2</property>
+        <property name="use_stock">False</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="services_picon_popoup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkImageMenuItem" id="services_assign_picon_popup_item">
+                <property name="label" translatable="yes">Assign</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">insert_link_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_assign_picon" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_remove_picon_popup_item">
+                <property name="label" translatable="yes">Remove</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">clear_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_remove_picon" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_reference_picon_popup_item">
+                <property name="label" translatable="yes">Copy reference</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">copy_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_reference_picon" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="services_remove_unused_picons_popup_item">
+                <property name="label" translatable="yes">Remove all unused</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">remove_all_image_2</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_remove_unused_picons" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_6">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_remove_popup_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_delete" object="services_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
@@ -2940,236 +3212,6 @@ Author: Dmitriy Yefremov
             <property name="position">1</property>
           </packing>
         </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="slect_all_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-select-all</property>
-  </object>
-  <object class="GtkMenu" id="services_popup_menu">
-    <property name="visible">True</property>
-    <property name="sensitive">False</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="services_to_fav_end_move_popup_item">
-        <property name="label">gtk-goto-last</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_to_fav_end_copy" object="services_tree_view" swapped="no"/>
-        <accelerator key="BackSpace" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_to_fav_move_popup_item">
-        <property name="label">gtk-goto-first</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_to_fav_copy" object="services_tree_view" swapped="no"/>
-        <accelerator key="Insert" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_create_bouquet_popup_item">
-        <property name="label" translatable="yes">Create bouquet</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">new_image</property>
-        <property name="use_stock">False</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="services_bouquet_popup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_sat_popup_item">
-                <property name="label" translatable="yes">For current satellite</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">save_as_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_satellite" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_package_popup_item">
-                <property name="label" translatable="yes">For current package</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">save_as_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_package" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_type_popup_item">
-                <property name="label" translatable="yes">For current type</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">save_as_image_3</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_type" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="services_bouquet_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_sat_popup_item">
-                <property name="label" translatable="yes">For each satellite</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">select_all_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_satellite" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_package_popup_item">
-                <property name="label" translatable="yes">For each package</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">slect_all_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_package" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_type_popup_item">
-                <property name="label" translatable="yes">For each type</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">select_all_image_3</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_type" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_copy_popup_item">
-        <property name="label">gtk-copy</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_edit_popup_item">
-        <property name="label">gtk-edit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_service_edit" object="services_tree_view" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_add_new_popup_item">
-        <property name="label">gtk-new</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_services_add_new" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_3">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_picon_popup_item">
-        <property name="label" translatable="yes">Picon</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">insert_image_2</property>
-        <property name="use_stock">False</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="services_picon_popoup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="services_assign_picon_popup_item">
-                <property name="label" translatable="yes">Assign</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">insert_link_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_assign_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_remove_picon_popup_item">
-                <property name="label" translatable="yes">Remove</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">clear_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_4">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_reference_picon_popup_item">
-                <property name="label" translatable="yes">Copy reference</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">copy_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_5">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_remove_popup_item">
-        <property name="label">gtk-remove</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" object="services_tree_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
