@@ -1347,7 +1347,7 @@ class Application(Gtk.Application):
             self.append_bouquet(bouquet, itr)
         else:
             p_itr = model.iter_parent(itr)
-            self.append_bouquet(bouquet, p_itr)
+            self.append_bouquet(bouquet, p_itr) if p_itr else self.append_bouquet(bouquet, itr)
 
     def on_import_bouquets(self, item):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
