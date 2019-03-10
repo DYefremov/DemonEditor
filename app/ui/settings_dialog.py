@@ -6,7 +6,7 @@ from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http
 from app.properties import write_config, Profile, get_default_settings
 from app.ui.dialogs import get_message
-from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, NEW_COLOR, EXTRA_COLOR
+from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, NEW_COLOR, EXTRA_COLOR, FavClickMode
 from .main_helper import update_entry_data
 
 
@@ -29,7 +29,8 @@ class SettingsDialog:
                     "apply_settings": self.apply_settings,
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
-                    "on_set_color_switch_state": self.on_set_color_switch_state}
+                    "on_set_color_switch_state": self.on_set_color_switch_state,
+                    "on_http_mode_switch_state": self.on_http_mode_switch_state}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -72,11 +73,16 @@ class SettingsDialog:
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
-        self._program_box = builder.get_object("program_box")
+        self._program_frame = builder.get_object("program_frame")
+        self._extra_support_grid = builder.get_object("extra_support_grid")
         self._colors_grid = builder.get_object("colors_grid")
         self._set_color_switch = builder.get_object("set_color_switch")
         self._new_color_button = builder.get_object("new_color_button")
         self._extra_color_button = builder.get_object("extra_color_button")
+        self._click_mode_disabled_button = builder.get_object("click_mode_disabled_button")
+        self._click_mode_stream_button = builder.get_object("click_mode_stream_button")
+        self._click_mode_play_button = builder.get_object("click_mode_play_button")
+        self._click_mode_zap_button = builder.get_object("click_mode_zap_button")
         # Options
         self._options = options
         self._active_profile = options.get("profile")
@@ -87,8 +93,12 @@ class SettingsDialog:
         is_enigma_profile = profile is Profile.ENIGMA_2
         self._neutrino_radio_button.set_active(profile is Profile.NEUTRINO_MP)
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
-        self._program_box.set_sensitive(is_enigma_profile)
+        self._program_frame.set_sensitive(is_enigma_profile)
+        self._extra_support_grid.set_sensitive(is_enigma_profile)
         self.update_subtitle(profile)
+        http_active = self._support_http_api_check_button.get_active()
+        self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
+        self._click_mode_play_button.set_sensitive(is_enigma_profile and http_active)
 
     def show(self):
         response = self._dialog.run()
@@ -129,6 +139,7 @@ class SettingsDialog:
     def set_settings(self):
         def_settings = get_default_settings().get(self._active_profile)
         options = self._options.get(self._active_profile)
+
         self._host_field.set_text(options.get("host", def_settings["host"]))
         self._port_field.set_text(options.get("port", def_settings["port"]))
         self._login_field.set_text(options.get("user", def_settings["user"]))
@@ -150,6 +161,7 @@ class SettingsDialog:
         self._before_save_switch.set_active(options.get("backup_before_save", def_settings["backup_before_save"]))
         self._before_downloading_switch.set_active(options.get("backup_before_downloading",
                                                                def_settings["backup_before_downloading"]))
+        self.set_fav_click_mode(options.get("fav_click_mode", def_settings["fav_click_mode"]))
 
         if Profile(self._active_profile) is Profile.ENIGMA_2:
             self._support_ver5_check_button.set_active(options.get("v5_support", False))
@@ -187,6 +199,7 @@ class SettingsDialog:
         options["backup_dir_path"] = self._backup_dir_field.get_text()
         options["backup_before_save"] = self._before_save_switch.get_active()
         options["backup_before_downloading"] = self._before_downloading_switch.get_active()
+        options["fav_click_mode"] = self.get_fav_click_mode()
 
         if profile is Profile.ENIGMA_2:
             options["v5_support"] = self._support_ver5_check_button.get_active()
@@ -257,6 +270,30 @@ class SettingsDialog:
 
     def on_set_color_switch_state(self, switch, state):
         self._colors_grid.set_sensitive(state)
+
+    def on_http_mode_switch_state(self, switch, state):
+        self._click_mode_play_button.set_sensitive(state)
+        self._click_mode_zap_button.set_sensitive(state)
+        if self._click_mode_play_button.get_active() or self._click_mode_zap_button.get_active():
+            self._click_mode_disabled_button.set_active(True)
+
+    @run_idle
+    def set_fav_click_mode(self, mode):
+        mode = FavClickMode(mode)
+        self._click_mode_disabled_button.set_active(mode is FavClickMode.DISABLED)
+        self._click_mode_stream_button.set_active(mode is FavClickMode.STREAM)
+        self._click_mode_play_button.set_active(mode is FavClickMode.PLAY)
+        self._click_mode_zap_button.set_active(mode is FavClickMode.ZAP)
+
+    def get_fav_click_mode(self):
+        if self._click_mode_zap_button.get_active():
+            return FavClickMode.ZAP
+        if self._click_mode_play_button.get_active():
+            return FavClickMode.PLAY
+        if self._click_mode_stream_button.get_active():
+            return FavClickMode.STREAM
+
+        return FavClickMode.DISABLED
 
 
 if __name__ == "__main__":

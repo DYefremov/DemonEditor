@@ -840,6 +840,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkFrame" id="local_file_paths_frame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_top">5</property>
                         <property name="label_xalign">0.019999999552965164</property>
                         <property name="shadow_type">in</property>
                         <child>
@@ -1077,6 +1078,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_bottom">1</property>
                                 <property name="hexpand">True</property>
                                 <property name="label" translatable="yes">Before saving</property>
                                 <property name="xalign">0</property>
@@ -1117,13 +1119,13 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkBox" id="program_box">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="margin_top">5</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkFrame" id="program_frame">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="margin_left">5</property>
                             <property name="margin_right">5</property>
@@ -1183,7 +1185,6 @@ Author: Dmitriy Yefremov
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_top">5</property>
-                                    <property name="margin_bottom">5</property>
                                     <property name="row_spacing">5</property>
                                     <property name="column_spacing">20</property>
                                     <child>
@@ -1262,43 +1263,169 @@ Author: Dmitriy Yefremov
                             <property name="label_xalign">0.019999999552965164</property>
                             <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkGrid" id="extra_support_grid">
+                              <object class="GtkBox" id="parogram_extra_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">center</property>
-                                <property name="valign">start</property>
-                                <property name="margin_left">10</property>
-                                <property name="margin_right">10</property>
-                                <property name="margin_bottom">10</property>
-                                <property name="row_spacing">5</property>
-                                <property name="column_spacing">50</property>
-                                <property name="column_homogeneous">True</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_bottom">5</property>
+                                <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkCheckButton" id="support_ver5_check_button">
-                                    <property name="label" translatable="yes">Ver. 5 support
-(experimental)</property>
+                                  <object class="GtkGrid" id="extra_support_grid">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="draw_indicator">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="row_spacing">5</property>
+                                    <property name="column_spacing">5</property>
+                                    <child>
+                                      <object class="GtkSwitch" id="support_ver5_check_button">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="halign">end</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSwitch" id="support_http_api_check_button">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="halign">end</property>
+                                        <signal name="state-set" handler="on_http_mode_switch_state" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">1</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="label" translatable="yes">Enable ver. 5 support (experimental)</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="label" translatable="yes">Enable HTTP API (experimental)</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">0</property>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkCheckButton" id="support_http_api_check_button">
-                                    <property name="label" translatable="yes">Enable HTTP API
-  (experimental)</property>
+                                  <object class="GtkFrame">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="draw_indicator">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_top">5</property>
+                                    <property name="label_xalign">0.5</property>
+                                    <property name="shadow_type">in</property>
+                                    <child>
+                                      <object class="GtkGrid" id="double_click_mode_grid">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="margin_bottom">5</property>
+                                        <property name="column_spacing">5</property>
+                                        <child>
+                                          <object class="GtkRadioButton" id="click_mode_zap_button">
+                                            <property name="label" translatable="yes">Zap</property>
+                                            <property name="visible">True</property>
+                                            <property name="sensitive">False</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Switch(zap) the channel on the receiver(Ctrl + Z).</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <property name="group">click_mode_disabled_button</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioButton" id="click_mode_play_button">
+                                            <property name="label" translatable="yes">Play</property>
+                                            <property name="visible">True</property>
+                                            <property name="sensitive">False</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Switch to the channel and watch in the program(Ctrl + W).</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <property name="group">click_mode_stream_button</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioButton" id="click_mode_stream_button">
+                                            <property name="label" translatable="yes">Play  stream</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Starts play IPTV or other stream in the program (Ctrl + P).</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <property name="group">click_mode_play_button</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkRadioButton" id="click_mode_disabled_button">
+                                            <property name="label" translatable="yes">Disabled</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="tooltip_text" translatable="yes">Disabled</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                            <property name="group">click_mode_play_button</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child type="label">
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Double click on the service in the bouquet list:</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">0</property>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                               </object>

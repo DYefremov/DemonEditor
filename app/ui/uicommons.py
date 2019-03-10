@@ -32,10 +32,12 @@ EXTRA_COLOR = "rgb(179,230,204)"  # Color for services with a extra name for the
 
 
 class KeyboardKey(Enum):
-    """ The raw(hardware) codes of the keyboard keys """
+    """ The raw(hardware) codes of the keyboard keys. """
+    Q = 24
     E = 26
     R = 27
     T = 28
+    O = 32
     P = 33
     S = 39
     H = 43
@@ -76,15 +78,23 @@ MOVE_KEYS = (KeyboardKey.UP, KeyboardKey.PAGE_UP, KeyboardKey.DOWN, KeyboardKey.
              KeyboardKey.END, KeyboardKey.HOME_KP, KeyboardKey.END_KP, KeyboardKey.PAGE_UP_KP, KeyboardKey.PAGE_DOWN_KP)
 
 
+class FavClickMode(IntEnum):
+    """ Double click mode on the service in the bouquet(FAV) list. """
+    DISABLED = 0
+    STREAM = 1
+    PLAY = 2
+    ZAP = 3
+
+
 class ViewTarget(Enum):
-    """ Used for set target view """
+    """ Used for set target view. """
     BOUQUET = 0
     FAV = 1
     SERVICES = 2
 
 
 class BqGenType(Enum):
-    """  Bouquet generation type """
+    """  Bouquet generation type. """
     SAT = 0
     EACH_SAT = 1
     PACKAGE = 2

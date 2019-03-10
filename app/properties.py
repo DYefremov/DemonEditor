@@ -48,7 +48,8 @@ def get_default_settings():
             "backup_dir_path": DATA_PATH + "enigma2/backup/",
             "backup_before_save": True, "backup_before_downloading": True,
             "v5_support": False, "http_api_support": False,
-            "use_colors": True, "new_color": "rgb(255,230,204)", "extra_color": "rgb(179,230,204)"},
+            "use_colors": True, "new_color": "rgb(255,230,204)", "extra_color": "rgb(179,230,204)",
+            "fav_click_mode": 0},
         Profile.NEUTRINO_MP.value: {
             "host": "127.0.0.1", "port": "21", "user": "root", "password": "root",
             "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2,
@@ -57,7 +58,8 @@ def get_default_settings():
             "satellites_xml_path": "/var/tuxbox/config/", "data_dir_path": DATA_PATH + "neutrino/",
             "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/", "picons_dir_path": DATA_PATH + "neutrino/picons/",
             "backup_dir_path": DATA_PATH + "neutrino/backup/",
-            "backup_before_save": True, "backup_before_downloading": True},
+            "backup_before_save": True, "backup_before_downloading": True,
+            "fav_click_mode": 0},
         "profile": Profile.ENIGMA_2.value}
 
 
