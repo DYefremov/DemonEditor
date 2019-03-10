@@ -1066,7 +1066,11 @@ class Application(Gtk.Application):
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key in MOVE_KEYS:
+        if ctrl and key is KeyboardKey.O:
+            self.open_data()
+        elif ctrl and key is KeyboardKey.Q:
+            self.quit()
+        elif ctrl and key in MOVE_KEYS:
             self.move_items(key)
         elif ctrl and key is KeyboardKey.C:
             if model_name == self._SERVICE_LIST_NAME:
