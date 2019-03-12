@@ -7,6 +7,7 @@ from enum import Enum
 from html.parser import HTMLParser
 
 from app.eparser import Satellite, Transponder, is_transponder_valid
+from app.eparser.ecommons import PLS_MODE
 
 
 class SatelliteSource(Enum):
@@ -152,9 +153,17 @@ class SatellitesParser(HTMLParser):
 
     def get_transponders_for_fly_sat(self, trs):
         """ Parsing transponders for FlySat """
+        pls_pattern = re.compile("(PLS:)+ (Root|Gold|Combo)+ (\\d+)?")
+        is_id_pattern = re.compile("(Stream) (\\d+)")
+        pls_modes = {v: k for k, v in PLS_MODE.items()}
+
         if self._rows:
             zeros = "000"
+            is_ids = []
             for r in self._rows:
+                if len(r) == 1:
+                    is_ids.extend(re.findall(is_id_pattern, r[0]))
+                    continue
                 if len(r) < 3:
                     continue
                 data = r[2].split(" ")
@@ -171,16 +180,35 @@ class SatellitesParser(HTMLParser):
                 sys, mod = sys
                 mod = "QPSK" if sys == "DVB-S" else mod
 
-                tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None)
-                if is_transponder_valid(tr):
-                    trs.append(tr)
+                pls = re.findall(pls_pattern, r[1])
+                pls_code = None
+                pls_mode = None
+
+                if pls:
+                    pls_code = pls[0][2]
+                    pls_mode = pls_modes.get(pls[0][1], None)
+
+                if is_ids:
+                    tr = trs.pop()
+                    for index, is_id in enumerate(is_ids):
+                        tr = tr._replace(is_id=is_id[1])
+                        if is_transponder_valid(tr):
+                            trs.append(tr)
+                else:
+                    tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, None)
+                    if is_transponder_valid(tr):
+                        trs.append(tr)
+                is_ids.clear()
 
     def get_transponders_for_lyng_sat(self, trs):
         """ Parsing transponders for LyngSat """
-        frq_pol_pattern = re.compile("(\d{4,5}).*([RLHV])(.*\d$)")
-        sr_fec_pattern = re.compile("^(\d{4,5})-(\d/\d)(.+PSK)?(.*)?$")
-        sys_pattern = re.compile("(DVB-S[2]?)(.*)?")
+        frq_pol_pattern = re.compile("(\\d{4,5}).*([RLHV])(.*\\d$)")
+        sr_fec_pattern = re.compile("^(\\d{4,5})-(\\d/\\d)(.+PSK)?(.*)?$")
+        sys_pattern = re.compile("(DVB-S[2]?) ?(PLS+ (Root|Gold|Combo)+ (\\d+))* ?(multistream stream (\\d+))?",
+                                 re.IGNORECASE)
         zeros = "000"
+        pls_modes = {v: k for k, v in PLS_MODE.items()}
+
         for r in filter(lambda x: len(x) > 8, self._rows):
             freq = re.match(frq_pol_pattern, r[2])
             if not freq:
@@ -191,12 +219,18 @@ class SatellitesParser(HTMLParser):
                 continue
             sr, fec, mod = sr_fec.group(1), sr_fec.group(2), sr_fec.group(3)
             mod = mod.strip() if mod else "Auto"
-            sys = re.match(sys_pattern, r[-4])
-            if not sys:
-                continue
-            sys = sys.group(1)
 
-            tr = Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, None, None, None)
+            res = re.match(sys_pattern, r[-4])
+            if not res:
+                continue
+
+            sys = res.group(1)
+            pls_mode = res.group(3)
+            pls_mode = pls_modes.get(pls_mode.capitalize(), None) if pls_mode else pls_mode
+            pls_code = res.group(4)
+            pls_id = res.group(6)
+
+            tr = Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, pls_id)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
