@@ -5,6 +5,7 @@ from math import fabs
 
 from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
+from app.eparser.ecommons import PLS_MODE
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey
@@ -360,7 +361,7 @@ class TransponderDialog:
         self._fec_box.set_active_id(transponder.fec_inner)
         self._sys_box.set_active_id(transponder.system)
         self._mod_box.set_active_id(transponder.modulation)
-        self._pls_mode_box.set_active_id(transponder.pls_mode)
+        self._pls_mode_box.set_active_id(PLS_MODE.get(transponder.pls_mode, None))
         self._is_id_entry.set_text(transponder.is_id if transponder.is_id else "")
         self._pls_code_entry.set_text(transponder.pls_code if transponder.pls_code else "")
 
