@@ -1,15 +1,75 @@
 from contextlib import suppress
+from pathlib import Path
 
 from app.commons import run_idle
 from app.eparser import get_bouquets, get_services
+from app.eparser.ecommons import BqType, BqServiceType, Bouquet
+from app.eparser.enigma.bouquets import get_bouquet
+from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.properties import Profile
-from app.ui.dialogs import show_dialog, DialogType
+from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey
+from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
+
+
+def import_bouquet(transient, profile, model, path, options, services, appender):
+    """ Import of single bouquet """
+    itr = model.get_iter(path)
+    bq_type = BqType(model.get(itr, Column.BQ_TYPE)[0])
+    pattern, f_pattern = None, None
+
+    if profile is Profile.ENIGMA_2:
+        pattern = ".{}".format(bq_type.value)
+        f_pattern = "userbouquet.*{}".format(pattern)
+    elif profile is Profile.NEUTRINO_MP:
+        pattern = "webtv.xml" if bq_type is BqType.WEBTV else "bouquets.xml"
+        f_pattern = "bouquets.xml"
+        if bq_type is BqType.TV:
+            f_pattern = "ubouquets.xml"
+        elif bq_type is BqType.WEBTV:
+            f_pattern = "webtv.xml"
+
+    file_path = get_chooser_dialog(transient, options, f_pattern, "bouquet files")
+    if file_path == Gtk.ResponseType.CANCEL:
+        return
+
+    if not str(file_path).endswith(pattern):
+        show_dialog(DialogType.ERROR, transient, text="No bouquet file is selected!")
+        return
+
+    if profile is Profile.ENIGMA_2:
+        bq = get_enigma2_bouquet(file_path)
+        imported = list(filter(lambda x: x.data in services or x.type is BqServiceType.IPTV, bq.services))
+
+        if len(imported) == 0:
+            show_dialog(DialogType.ERROR, transient, text="The main list does not contain services for this bouquet!")
+            return
+
+        if model.iter_n_children(itr):
+            appender(bq, itr)
+        else:
+            p_itr = model.iter_parent(itr)
+            appender(bq, p_itr) if p_itr else appender(bq, itr)
+    elif profile is Profile.NEUTRINO_MP:
+        # print(Path(file_path).name + "/")
+        if bq_type is BqType.WEBTV:
+            bqs = parse_webtv(file_path, "WEBTV", bq_type.value)
+        else:
+            bqs = get_neutrino_bouquets(file_path, "", bq_type.value)
+        file_path = "{}/".format(Path(file_path).parent)
+        ImportDialog(transient, file_path, profile, services.keys(), lambda b, s: appender(b), (bqs,)).show()
+
+
+def get_enigma2_bouquet(path):
+    path, sep, f_name = path.rpartition("userbouquet.")
+    name, sep, suf = f_name.rpartition(".")
+    bq = get_bouquet(path, name, suf)
+    bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
+    return bouquet
 
 
 class ImportDialog:
-    def __init__(self, transient, path, profile, service_ids, appender):
+    def __init__(self, transient, path, profile, service_ids, appender, bouquets=None):
         handlers = {"on_import": self.on_import,
                     "on_cursor_changed": self.on_cursor_changed,
                     "on_info_button_toggled": self.on_info_button_toggled,
@@ -30,7 +90,7 @@ class ImportDialog:
         self._service_ids = service_ids
         self._append = appender
         self._profile = profile
-        self._bouquets = None
+        self._bouquets = bouquets
 
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -53,7 +113,8 @@ class ImportDialog:
         self._main_model.clear()
         self._services_model.clear()
         try:
-            self._bouquets = get_bouquets(path, self._profile)
+            if not self._bouquets:
+                self._bouquets = get_bouquets(path, self._profile)
             for bqs in self._bouquets:
                 for bq in bqs.bouquets:
                     self._main_model.append((bq.name, bq.type, True))

@@ -11,17 +11,17 @@ from app.connections import http_request, HttpRequestType
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
-from app.eparser.enigma.bouquets import BqServiceType, get_bouquet
+from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
 from .backup import BackupDialog, backup_data, clear_data_path
-from .import_dialog import ImportDialog
+from .imports import ImportDialog, import_bouquet
 from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
-    EXTRA_COLOR, NEW_COLOR
+    EXTRA_COLOR, NEW_COLOR, FavClickMode
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
@@ -175,6 +175,7 @@ class Application(Gtk.Application):
         self._drawing_area_xid = None
         # http api
         self._http_api = None
+        self._fav_click_mode = None
         self._monitor_signal = False
         # Colors
         self._use_colors = False
@@ -1236,8 +1237,14 @@ class Application(Gtk.Application):
 
     def on_fav_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.on_play_stream()
-            self.on_zap()
+            if self._fav_click_mode is FavClickMode.DISABLED:
+                return
+            elif self._fav_click_mode is FavClickMode.STREAM:
+                self.on_play_stream()
+            elif self._fav_click_mode is FavClickMode.PLAY:
+                self.on_zap(self.on_watch)
+            elif self._fav_click_mode is FavClickMode.ZAP:
+                self.on_zap()
         else:
             return self.on_view_popup_menu(menu, event)
 
@@ -1273,7 +1280,7 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_remove_all_unavailable(self, item):
-        iptv_rows = list(filter(lambda r: r[5] == BqServiceType.IPTV.value, self._fav_model))
+        iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
             show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
             return
@@ -1314,44 +1321,14 @@ class Application(Gtk.Application):
 
     def on_import_bouquet(self, item):
         profile = Profile(self._profile)
-        if profile is not Profile.ENIGMA_2:
-            show_dialog(DialogType.ERROR, transient=self._main_window, text="Not implemented yet!")
-            return
-
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
             show_dialog(DialogType.ERROR, self._main_window, "No selected item!")
             return
 
-        itr = model.get_iter(paths[0])
-        pat = ".{}".format(model.get(itr, Column.BQ_TYPE)[0])
-        f_pattern = "userbouquet.*{}".format(pat)
-
-        response = get_chooser_dialog(self._main_window, self._options.get(self._profile), f_pattern, "bouquet files")
-        if response == Gtk.ResponseType.CANCEL:
-            return
-
-        if not str(response).endswith(pat):
-            show_dialog(DialogType.ERROR, self._main_window, text="No bouquet file is selected!")
-            return
-
-        path, sep, f_name = response.rpartition("userbouquet.")
-        name, sep, suf = f_name.rpartition(".")
-        bq = get_bouquet(path, name, suf)
-        bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
-
-        s_values = self._services
-        imported = list(filter(lambda x: x.data in s_values or x.type is BqServiceType.IPTV, bouquet.services))
-        if len(imported) == 0:
-            show_dialog(DialogType.ERROR, self._main_window,
-                        text="The main list does not contain services for this bouquet!")
-            return
-
-        if model.iter_n_children(itr):
-            self.append_bouquet(bouquet, itr)
-        else:
-            p_itr = model.iter_parent(itr)
-            self.append_bouquet(bouquet, p_itr) if p_itr else self.append_bouquet(bouquet, itr)
+        opts = self._options.get(self._profile)
+        appender = self.append_bouquet if profile is Profile.ENIGMA_2 else self.append_bouquets
+        import_bouquet(self._main_window, profile, model, paths[0], opts, self._services, appender)
 
     def on_import_bouquets(self, item):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
@@ -1479,17 +1456,17 @@ class Application(Gtk.Application):
             self._http_api = None
 
         prp = self._options.get(self._profile)
+        self._fav_click_mode = FavClickMode(prp.get("fav_click_mode", FavClickMode.DISABLED))
+
         if prp is Profile.NEUTRINO_MP or not prp.get("http_api_support", False):
             self.update_info_boxes_visible(False)
             return
 
         self._http_api = http_request(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
                                       prp.get("http_user", ""), prp.get("http_password", ""))
-
         next(self._http_api)
         GLib.timeout_add_seconds(1, self.update_receiver_info)
 
-    @run_idle
     def on_watch(self):
         """ Switch to the channel and watch in the player """
         m3u = self._http_api.send((HttpRequestType.STREAM, None))
