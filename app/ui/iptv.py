@@ -9,7 +9,7 @@ from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT
 from app.properties import Profile
-from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON
+from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column
 from .dialogs import Action, show_dialog, DialogType
 from .main_helper import get_base_model, get_iptv_url
 
@@ -183,11 +183,11 @@ class IptvDialog:
             old_srv = self._services.pop(self._current_srv[7])
             self._services[fav_id] = old_srv._replace(service=name, fav_id=fav_id)
             self._bouquet[self._paths[0][0]] = fav_id
-            self._model.set(self._model.get_iter(self._paths), {2: name, 7: fav_id})
+            self._model.set(self._model.get_iter(self._paths), {Column.FAV_SERVICE: name, Column.FAV_ID: fav_id})
         else:
             aggr = [None] * 10
             s_type = BqServiceType.IPTV.name
-            srv = (None, None, name, None, None, s_type, None, fav_id, None)
+            srv = (None, None, name, None, None, s_type, None, fav_id, *aggr[0:3])
             itr = self._model.insert_after(self._model.get_iter(self._paths[0]),
                                            srv) if self._paths else self._model.insert(0, srv)
             self._model.set_value(itr, 1, IPTV_ICON)
