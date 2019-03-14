@@ -51,7 +51,6 @@ def import_bouquet(transient, profile, model, path, options, services, appender)
             p_itr = model.iter_parent(itr)
             appender(bq, p_itr) if p_itr else appender(bq, itr)
     elif profile is Profile.NEUTRINO_MP:
-        # print(Path(file_path).name + "/")
         if bq_type is BqType.WEBTV:
             bqs = parse_webtv(file_path, "WEBTV", bq_type.value)
         else:
