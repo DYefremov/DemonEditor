@@ -7,7 +7,8 @@ from functools import lru_cache
 from gi.repository import GLib
 
 from app.commons import run_idle, log, run_task, run_with_delay
-from app.connections import http_request, HttpRequestType
+from app.connections import http_request, HttpRequestType, download_data, DownloadType, upload_data, test_http, \
+    TestException
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag
@@ -761,6 +762,47 @@ class Application(Gtk.Application):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self._main_window, self._options.get(self._profile))
 
+    def on_download(self, item):
+        DownloadDialog(transient=self._main_window,
+                       properties=self._options,
+                       open_data_callback=self.open_data,
+                       profile=Profile(self._profile)).show()
+
+    @run_task
+    def on_download_data(self):
+        try:
+            download_data(properties=self._options.get(self._profile),
+                          download_type=DownloadType.ALL,
+                          callback=lambda x: print(x, end=""))
+        except Exception as e:
+            GLib.idle_add(show_dialog, DialogType.ERROR, self._main_window, str(e))
+        else:
+            GLib.idle_add(self.open_data)
+
+    @run_task
+    def on_upload_data(self, download_type):
+        try:
+            profile = Profile(self._profile)
+            opts = self._options.get(self._profile)
+            use_http = profile is Profile.ENIGMA_2
+
+            if profile is Profile.ENIGMA_2:
+                host, port = opts.get("host", "127.0.0.1"), opts.get("http_port")
+                user, password = opts.get("http_user", "root"), opts.get("http_password", "")
+                try:
+                    test_http(host, port, user, password, skip_message=True)
+                except TestException:
+                    use_http = False
+
+            upload_data(properties=opts,
+                        download_type=download_type,
+                        remove_unused=True,
+                        profile=profile,
+                        callback=lambda x: print(x, end=""),
+                        use_http=use_http)
+        except Exception as e:
+            GLib.idle_add(show_dialog, DialogType.ERROR, self._main_window, str(e))
+
     @run_idle
     def on_data_open(self, model):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
@@ -1103,7 +1145,13 @@ class Application(Gtk.Application):
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key is KeyboardKey.INSERT:
+        if ctrl and key is KeyboardKey.D:
+            self.on_download_data()
+        elif ctrl and key is KeyboardKey.U:
+            self.on_upload_data(DownloadType.ALL)
+        elif ctrl and key is KeyboardKey.B:
+            self.on_upload_data(DownloadType.BOUQUETS)
+        elif ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_to_fav_copy(view)
@@ -1136,12 +1184,6 @@ class Application(Gtk.Application):
             elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
                 self.update_fav_num_column(model)
                 self.update_bouquet_list()
-
-    def on_download(self, item):
-        DownloadDialog(transient=self._main_window,
-                       properties=self._options,
-                       open_data_callback=self.open_data,
-                       profile=Profile(self._profile)).show()
 
     def on_view_focus(self, view, focus_event):
         profile = Profile(self._profile)
