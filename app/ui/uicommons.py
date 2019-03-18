@@ -37,14 +37,17 @@ class KeyboardKey(Enum):
     E = 26
     R = 27
     T = 28
+    U = 30
     O = 32
     P = 33
     S = 39
+    D = 40
     H = 43
     L = 46
     X = 53
     C = 54
     V = 55
+    B = 56
     W = 25
     Z = 52
     INSERT = 118
