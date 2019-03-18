@@ -775,7 +775,7 @@ class Application(Gtk.Application):
                           download_type=DownloadType.ALL,
                           callback=lambda x: print(x, end=""))
         except Exception as e:
-            GLib.idle_add(show_dialog, DialogType.ERROR, self._main_window, str(e))
+            self.show_error_dialog(str(e))
         else:
             GLib.idle_add(self.open_data)
 
@@ -801,7 +801,11 @@ class Application(Gtk.Application):
                         callback=lambda x: print(x, end=""),
                         use_http=use_http)
         except Exception as e:
-            GLib.idle_add(show_dialog, DialogType.ERROR, self._main_window, str(e))
+            self.show_error_dialog(str(e))
+
+    @run_idle
+    def show_error_dialog(self, message):
+        show_dialog(DialogType.ERROR, self._main_window, message)
 
     @run_idle
     def on_data_open(self, model):
