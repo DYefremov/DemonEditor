@@ -41,7 +41,7 @@ class TestException(Exception):
     pass
 
 
-def download_data(*, properties, download_type=DownloadType.ALL, callback=None):
+def download_data(*, properties, download_type=DownloadType.ALL, callback):
     with FTP(host=properties["host"], user=properties["user"], passwd=properties["password"]) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
@@ -292,10 +292,11 @@ def test_ftp(host, port, user, password, timeout=5):
         raise TestException(e)
 
 
-def test_http(host, port, user, password, timeout=5):
+def test_http(host, port, user, password, timeout=5, skip_message=False):
     try:
         params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
-        url = "http://{}:{}/api/message?{}".format(host, port, params)
+        params = "statusinfo" if skip_message else "message?{}".format(params)
+        url = "http://{}:{}/api/{}".format(host, port, params)
         # authentication
         init_auth(user, password, url)
 
