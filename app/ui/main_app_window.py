@@ -354,6 +354,7 @@ class Application(Gtk.Application):
         move_items(key, self._fav_view if self._fav_view.is_focus() else self._bouquets_view)
 
     # ***************** Copy - Cut - Paste *********************#
+
     def on_services_copy(self, view):
         self.on_copy(view, target=ViewTarget.FAV)
 
@@ -434,7 +435,7 @@ class Application(Gtk.Application):
     def bouquet_paste(self, selection):
         model, paths = selection.get_selected_rows()
         if len(paths) > 1:
-            show_dialog(DialogType.ERROR, self._main_window, "Please, select only one item!")
+            self.show_error_dialog("Please, select only one item!")
             return
 
         path = paths[0]
@@ -515,7 +516,7 @@ class Application(Gtk.Application):
     def delete_bouquets(self, itrs, model):
         """ Deleting bouquets """
         if len(itrs) == 1 and len(model.get_path(itrs[0])) < 2:
-            show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to be removed!")
+            self.show_error_dialog("This item is not allowed to be removed!")
             return
 
         for itr in itrs:
@@ -721,7 +722,7 @@ class Application(Gtk.Application):
                     model.remove(in_itr)
             self.update_fav_num_column(model)
         except ValueError as e:
-            show_dialog(DialogType.ERROR, self._main_window, str(e))
+            self.show_error_dialog(str(e))
 
     def on_view_press(self, view, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
@@ -804,10 +805,6 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
 
     @run_idle
-    def show_error_dialog(self, message):
-        show_dialog(DialogType.ERROR, self._main_window, message)
-
-    @run_idle
     def on_data_open(self, model):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
@@ -831,15 +828,15 @@ class Application(Gtk.Application):
             update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
         except FileNotFoundError as e:
             self._wait_dialog.hide()
-            show_dialog(DialogType.ERROR, self._main_window, getattr(e, "message", str(e)) + "\n\n" +
-                        get_message("Please, download files from receiver or setup your path for read data!"))
+            msg = get_message("Please, download files from receiver or setup your path for read data!")
+            self.show_error_dialog(getattr(e, "message", str(e)) + "\n\n" + msg)
         except SyntaxError as e:
             self._wait_dialog.hide()
-            show_dialog(DialogType.ERROR, self._main_window, str(e))
+            self.show_error_dialog(str(e))
         except Exception as e:
             self._wait_dialog.hide()
             log("Append services error: " + str(e))
-            show_dialog(DialogType.ERROR, self._main_window, "Reading data error!\n" + str(e))
+            self.show_error_dialog(get_message("Reading data error!") + "\n" + str(e))
         else:
             self.append_blacklist(black_list)
             self.append_bouquets(bouquets)
@@ -936,7 +933,7 @@ class Application(Gtk.Application):
     @run_idle
     def on_data_save(self, *args):
         if len(self._bouquets_model) == 0:
-            show_dialog(DialogType.ERROR, self._main_window, get_message("No data to save!"))
+            self.show_error_dialog("No data to save!")
             return
 
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
@@ -1059,11 +1056,11 @@ class Application(Gtk.Application):
     def check_bouquet_selection(self):
         """ checks and returns bouquet if selected """
         if not self._bq_selected:
-            show_dialog(DialogType.ERROR, self._main_window, "Error. No bouquet is selected!")
+            self.show_error_dialog("Error. No bouquet is selected!")
             return
 
         if Profile(self._profile) is Profile.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
-            show_dialog(DialogType.ERROR, self._main_window, "Operation not allowed in this context!")
+            self.show_error_dialog("Operation not allowed in this context!")
             return
 
         return self._bq_selected
@@ -1310,12 +1307,12 @@ class Application(Gtk.Application):
     def on_iptv_list_configuration(self, item):
         profile = Profile(self._profile)
         if profile is Profile.NEUTRINO_MP:
-            show_dialog(DialogType.ERROR, transient=self._main_window, text="Neutrino at the moment not supported!")
+            self.show_error_dialog("Neutrino at the moment not supported!")
             return
 
         iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
-            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
+            self.show_error_dialog("This list does not contains IPTV streams!")
             return
 
         if not self._bq_selected:
@@ -1328,7 +1325,7 @@ class Application(Gtk.Application):
     def on_remove_all_unavailable(self, item):
         iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
-            show_dialog(DialogType.ERROR, self._main_window, "This list does not contains IPTV streams!")
+            self.show_error_dialog("This list does not contains IPTV streams!")
             return
 
         if not self._bq_selected:
@@ -1352,7 +1349,7 @@ class Application(Gtk.Application):
             return
 
         if not str(response).endswith("m3u"):
-            show_dialog(DialogType.ERROR, self._main_window, text="No m3u file is selected!")
+            self.show_error_dialog("No m3u file is selected!")
             return
 
         channels = parse_m3u(response, Profile(self._profile))
@@ -1369,7 +1366,7 @@ class Application(Gtk.Application):
         profile = Profile(self._profile)
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
-            show_dialog(DialogType.ERROR, self._main_window, "No selected item!")
+            self.show_error_dialog("No selected item!")
             return
 
         opts = self._options.get(self._profile)
@@ -1412,7 +1409,7 @@ class Application(Gtk.Application):
             try:
                 self._player = Player()
             except (NameError, AttributeError):
-                show_dialog(DialogType.ERROR, self._main_window, "No VLC is found. Check that it is installed!")
+                self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
             else:
                 if self._drawing_area_xid:
@@ -1728,7 +1725,7 @@ class Application(Gtk.Application):
     def on_bouquets_edit(self, view):
         """ Rename bouquets """
         if not self._bq_selected:
-            show_dialog(DialogType.ERROR, self._main_window, "This item is not allowed to edit!")
+            self.show_error_dialog("This item is not allowed to edit!")
             return
 
         model, paths = view.get_selection().get_selected_rows()
@@ -1763,7 +1760,7 @@ class Application(Gtk.Application):
         cur_name, srv_type, fav_id = data[Column.FAV_SERVICE], data[Column.FAV_TYPE], data[Column.FAV_ID]
 
         if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
-            show_dialog(DialogType.ERROR, self._main_window, "Not allowed in this context!")
+            self.show_error_dialog("Not allowed in this context!")
             return
 
         response = show_dialog(DialogType.INPUT, self._main_window, cur_name)
@@ -1797,11 +1794,11 @@ class Application(Gtk.Application):
         ex_bq = self._extra_bouquets.get(self._bq_selected, None)
 
         if not ex_bq:
-            show_dialog(DialogType.ERROR, self._main_window, "No changes required!")
+            self.show_error_dialog("No changes required!")
             return
         else:
             if not ex_bq.pop(fav_id, None):
-                show_dialog(DialogType.ERROR, self._main_window, "No changes required!")
+                self.show_error_dialog("No changes required!")
                 return
             if not ex_bq:
                 self._extra_bouquets.pop(self._bq_selected, None)
@@ -1899,6 +1896,10 @@ class Application(Gtk.Application):
     def update_info_boxes_visible(self, visible):
         self._signal_box.set_visible(visible)
         self._receiver_info_box.set_visible(visible)
+
+    @run_idle
+    def show_error_dialog(self, message):
+        show_dialog(DialogType.ERROR, self._main_window, message)
 
 
 def start_app():
