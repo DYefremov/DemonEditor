@@ -60,7 +60,7 @@ def write_satellites(satellites, data_path):
             transponder_child.setAttribute("system", get_key_by_value(SYSTEM, tr.system))
             transponder_child.setAttribute("modulation", get_key_by_value(MODULATION, tr.modulation))
             if tr.pls_mode:
-                transponder_child.setAttribute("pls_mode", get_key_by_value(PLS_MODE, tr.pls_mode))
+                transponder_child.setAttribute("pls_mode", tr.pls_mode)
             if tr.pls_code:
                 transponder_child.setAttribute("pls_code", tr.pls_code)
             if tr.is_id:
@@ -88,7 +88,7 @@ def parse_transponders(elem, sat_name):
                                  FEC[atr["fec_inner"].value],
                                  SYSTEM[atr["system"].value],
                                  MODULATION[atr["modulation"].value],
-                                 PLS_MODE[atr["pls_mode"].value] if "pls_mode" in atr else None,
+                                 atr["pls_mode"].value if "pls_mode" in atr else None,
                                  atr["pls_code"].value if "pls_code" in atr else None,
                                  atr["is_id"].value if "is_id" in atr else None)
             except Exception as e:
