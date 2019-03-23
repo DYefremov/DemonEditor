@@ -2,6 +2,7 @@
     for  replace or update current satellites.xml file.
 """
 import re
+
 import requests
 from enum import Enum
 from html.parser import HTMLParser
@@ -138,6 +139,7 @@ class SatellitesParser(HTMLParser):
         return "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
 
     def get_transponders(self, sat_url):
+        """ Getting transponders(sorted by frequency). """
         self._rows.clear()
         url = "https://www.flysat.com/" + sat_url if self._source is SatelliteSource.FLYSAT else sat_url
         request = requests.get(url=url, headers=self._HEADERS)
@@ -149,13 +151,15 @@ class SatellitesParser(HTMLParser):
                 self.get_transponders_for_fly_sat(trs)
             elif self._source is SatelliteSource.LYNGSAT:
                 self.get_transponders_for_lyng_sat(trs)
-        return trs
+
+        return sorted(trs, key=lambda x: int(x.frequency))
 
     def get_transponders_for_fly_sat(self, trs):
         """ Parsing transponders for FlySat """
         pls_pattern = re.compile("(PLS:)+ (Root|Gold|Combo)+ (\\d+)?")
         is_id_pattern = re.compile("(Stream) (\\d+)")
         pls_modes = {v: k for k, v in PLS_MODE.items()}
+        n_trs = []
 
         if self._rows:
             zeros = "000"
@@ -193,12 +197,13 @@ class SatellitesParser(HTMLParser):
                     for index, is_id in enumerate(is_ids):
                         tr = tr._replace(is_id=is_id[1])
                         if is_transponder_valid(tr):
-                            trs.append(tr)
+                            n_trs.append(tr)
                 else:
                     tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, None)
                     if is_transponder_valid(tr):
                         trs.append(tr)
                 is_ids.clear()
+            trs.extend(n_trs)
 
     def get_transponders_for_lyng_sat(self, trs):
         """ Parsing transponders for LyngSat """
