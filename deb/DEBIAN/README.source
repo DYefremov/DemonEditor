@@ -6,8 +6,8 @@ Enigma2 channel and satellites list editor for GNU/Linux.
 
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc)
-Keyboard shortcuts:
 
+Keyboard shortcuts:
     Ctrl + Insert - copies the selected channels from the main list to the the bouquet beginning
     or inserts (creates) a new bouquet.
     Ctrl + BackSpace - copies the selected channels from the main list to the bouquet end.
@@ -24,18 +24,18 @@ Keyboard shortcuts:
     Space - select/deselect.
     Left/Right - remove selection.
     Ctrl + Up, Down, PageUp, PageDown, Home, End - move selected items in the list.
+    Ctrl + O - (re)load user data from current dir.
+    Ctrl + D - load data from receiver.
+    Ctrl + U/B upload data/bouquets to receiver.
 
 Extra:
-
     Multiple selections in lists only with Space key (as in file managers).
     Ability to import IPTV into bouquet (Neutrino WEBTV) from m3u files.
     Ability to download picons and update satellites (transponders) from web.
     Preview (playing) IPTV or other streams directly from the bouquet list(should be installed VLC).
 
 Minimum requirements:
-
-Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings.
-Launching
+    Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings.
 
 Terrestrial(DVB-T/T2) and cable channels are supported(Enigma2 only) with limitation!
 
