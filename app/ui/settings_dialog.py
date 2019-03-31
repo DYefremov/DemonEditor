@@ -1,12 +1,10 @@
 from enum import Enum
 
-from gi.repository import Gdk
-
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http
 from app.properties import write_config, Profile, get_default_settings
 from app.ui.dialogs import get_message
-from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, NEW_COLOR, EXTRA_COLOR, FavClickMode
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, NEW_COLOR, EXTRA_COLOR, FavClickMode
 from .main_helper import update_entry_data
 
 
@@ -95,7 +93,6 @@ class SettingsDialog:
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
         self._program_frame.set_sensitive(is_enigma_profile)
         self._extra_support_grid.set_sensitive(is_enigma_profile)
-        self.update_subtitle(profile)
         http_active = self._support_http_api_check_button.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
         self._click_mode_play_button.set_sensitive(is_enigma_profile and http_active)
@@ -116,10 +113,6 @@ class SettingsDialog:
         self._active_profile = profile.value
         self.set_settings()
         self.init_ui_elements(profile)
-
-    def update_subtitle(self, profile):
-        sub = "{} Enigma2" if profile is Profile.ENIGMA_2 else "{} Neutrino-MP"
-        self._header_bar.set_subtitle(sub.format(get_message("Profile:")))
 
     def set_profile(self, profile):
         self._active_profile = profile.value
