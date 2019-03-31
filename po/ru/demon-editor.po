@@ -644,6 +644,37 @@ msgstr "Основной список не содержит сервисов д�
 msgid "No bouquet file is selected!"
 msgstr "Не выбран файл букета!"
 
+msgid "Remove all unused"
+msgstr "Удалить все неиспользуемые"
+
+msgid "Test"
+msgstr "Тестировать"
+
+msgid "Test connection"
+msgstr "Тестировать соединение"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Двойной клик по сервису в списке букетов:"
+
+msgid "Zap"
+msgstr "Переключить"
+
+msgid "Play  stream"
+msgstr "Воспроизведение потока"
+
+msgid "Disabled"
+msgstr "Выкл."
+
+msgid "Enable ver. 5 support (experimental)"
+msgstr "Включить поддержку вер. 5 (экспериментально)"
+
+msgid "Enable HTTP API (experimental)"
+msgstr "Включить HTTP API (экспериментально)"
+
+
+
+
+
 
 
 
