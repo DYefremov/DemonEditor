@@ -1047,6 +1047,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkBox" id="program_main_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_top">5</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkFrame" id="backup_frame">
