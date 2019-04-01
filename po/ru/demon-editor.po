@@ -671,6 +671,16 @@ msgstr "Включить поддержку вер. 5 (эксперимента�
 msgid "Enable HTTP API (experimental)"
 msgstr "Включить HTTP API (экспериментально)"
 
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Переключить канал(Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Переклють канал и просмотр в программе(Ctrl + W)."
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Воспроизведение IPTV или другого потока в программе(Ctrl + P)"
+
+
 
 
 
