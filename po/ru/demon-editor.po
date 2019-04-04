@@ -630,13 +630,13 @@ msgstr "Инструменты"
 
 #Import
 msgid "Import"
-msgstr "Импортировать"
+msgstr "Импорт"
 
 msgid "Bouquet"
-msgstr "Букет"
+msgstr "Букета"
 
 msgid "Bouquets and services"
-msgstr "Букеты и сервисы"
+msgstr "Букетов и сервисов"
 
 msgid "The main list does not contain services for this bouquet!"
 msgstr "Основной список не содержит сервисов для данного букета!"
@@ -660,7 +660,7 @@ msgid "Zap"
 msgstr "Переключить"
 
 msgid "Play  stream"
-msgstr "Воспроизведение потока"
+msgstr "Воспр. потока"
 
 msgid "Disabled"
 msgstr "Выкл."
