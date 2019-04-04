@@ -113,6 +113,9 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Options</property>
+                <attributes>
+                  <attribute name="weight" value="semibold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -126,13 +129,12 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
-                <property name="margin_bottom">5</property>
-                <property name="spacing">5</property>
                 <child>
                   <object class="GtkLabel" id="active_profile_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Active profile:</property>
+                    <property name="margin_right">2</property>
+                    <property name="label" translatable="yes">Profile:</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -259,7 +261,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">6</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkFrame" id="network_settings_frame">
@@ -791,7 +792,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkFrame" id="stb_paths_frame">
@@ -1047,7 +1047,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkBox" id="program_main_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">5</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkFrame" id="backup_frame">

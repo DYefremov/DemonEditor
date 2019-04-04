@@ -93,7 +93,8 @@ Author: Dmitriy Yefremov
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Import bouquets and services </property>
+        <property name="title" translatable="yes">Import</property>
+        <property name="subtitle" translatable="yes">Bouquets and services</property>
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
