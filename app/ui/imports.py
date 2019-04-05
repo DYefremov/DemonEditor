@@ -7,7 +7,7 @@ from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.enigma.bouquets import get_bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.properties import Profile
-from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog
+from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
 
@@ -126,6 +126,10 @@ class ImportDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_import(self, item):
+        if not any(r[-1] for r in self._main_model):
+            self.show_info_message(get_message("No selected item!"), Gtk.MessageType.ERROR)
+            return
+
         if not self._bouquets or show_dialog(DialogType.QUESTION, self._dialog_window) == Gtk.ResponseType.CANCEL:
             return
 
