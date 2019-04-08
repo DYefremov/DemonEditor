@@ -1,7 +1,7 @@
 # Copyright (C) 2018-2019 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-#Frank Neirynck <frank@insink.be>, 2018-2019.
+# Frank Neirynck <frank@insink.be>, 2018-2019.
 #
 msgid ""
 msgstr ""
@@ -10,6 +10,11 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
 
 msgid "translator-credits"
 msgstr "Frank Neirynck <frank@insink.be>"
@@ -336,8 +341,13 @@ msgstr "Recibir picons para proovedor"
 msgid "Load satellite providers."
 msgstr "Cargar proovedores Satélite."
 
-msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
-msgstr "Para configurar automáticamente los identificadores para picons, \nprimero cargue la lista de serviços requeridos en la ventana principal."
+msgid ""
+"To automatically set the identifiers for picons,\n"
+"first load the required services list into the main application window."
+
+msgstr ""
+"Para configurar automáticamente los identificadores para picons, \n"
+"primero cargue la lista de serviços requeridos en la ventana principal."
 
 # Satellites editor
 msgid "Satellites edit tool"
@@ -384,8 +394,12 @@ msgstr "Datos servicio"
 msgid "Transponder details"
 msgstr "Detalles Transpondedor"
 
-msgid "Changes will be applied to all services of this transponder!\nContinue?"
-msgstr "Los cambios se aplicarán a todos los servicios de este transpondedor!\nContinuar?"
+msgid ""
+"Changes will be applied to all services of this transponder!\n"
+"Continue?"
+msgstr ""
+"Los cambios se aplicarán a todos los servicios de este transpondedor!\n"
+"Continuar?"
 
 msgid "Reference"
 msgstr "Referencia"
@@ -434,7 +448,7 @@ msgstr "Restablecer a predeterminado"
 msgid "IPTV streams list configuration"
 msgstr "Configurar lista de Secuencias IPTV"
 
-#Settings dialog
+# Settings dialog
 msgid "Preferences"
 msgstr "Preferencias"
 
@@ -594,7 +608,8 @@ msgid "Backups"
 msgstr "Backups"
 
 msgid "Backup path:"
-msgstr "Ruta del backup:"					
+msgstr "Ruta del backup:"
+
 msgid "Restore bouquets"
 msgstr "Restaurar ramos"
 
@@ -617,7 +632,7 @@ msgid "With an extra name in the bouquet:"
 msgstr "Con nombre adicional en ramo:"
 
 msgid "Select"
-msgstr "Seleccione"	   
+msgstr "Seleccione"
 
 msgid "About"
 msgstr "Sobre"
@@ -628,7 +643,7 @@ msgstr "Salir"
 msgid "Tools"
 msgstr "Herramientas"
 
-#Import
+# Import
 msgid "Import"
 msgstr "Importar"
 
@@ -643,3 +658,39 @@ msgstr "La lista principal no contiene servicios para este ramo!"
 
 msgid "No bouquet file is selected!"
 msgstr "Nigún fichero de ramo ha sido seleccionado!"
+
+msgid "Remove all unused"
+msgstr "Quite todos los"
+
+msgid "Test"
+msgstr "Prueba"
+
+msgid "Test connection"
+msgstr "Probar conexión"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Haga doble clic en el servicio en la lista de bouquet:"
+
+msgid "Zap"
+msgstr "Zapear"
+
+msgid "Play  stream"
+msgstr "Reproducir secuencia"
+
+msgid "Disabled"
+msgstr "Desactivado"
+
+msgid "Enable ver. 5 support (experimental)"
+msgstr "Soporte para ver. 5 (experimental)"
+
+msgid "Enable HTTP API (experimental)"
+msgstr "Habilitar API HTTP (experimental)"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Cambiar (ZAP) el canal (Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Cambiar el canal y ver en el programa (Ctrl + W)"
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Reproducir IPTV u otro flujo en el programa (Ctrl + P)"

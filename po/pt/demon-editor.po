@@ -595,6 +595,7 @@ msgstr "Backups"
 
 msgid "Backup path:"
 msgstr "Rota do backup:"
+
 msgid "Restore bouquets"
 msgstr "Restaurar ramos"
 
@@ -615,6 +616,7 @@ msgstr "Marcado como novo:"
 
 msgid "With an extra name in the bouquet:"
 msgstr "Com nome adicional em ramo:"
+
 msgid "Select"
 msgstr "Selecione"				   
 
@@ -642,3 +644,39 @@ msgstr "A lista pricipal no tem serviços em esta ramo!"
 
 msgid "No bouquet file is selected!"
 msgstr "Nemhuma ficheiro de ramo foi selecionado!"
+
+msgid "Remove all unused"
+msgstr "Remova todos os não utilizados"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Test connection"
+msgstr "Testar a conexão"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Clique duas vezes no serviço na lista de ramos:"
+
+msgid "Zap"
+msgstr "Zap"
+
+msgid "Play  stream"
+msgstr "Play  stream"
+
+msgid "Disabled"
+msgstr "Desativado"
+
+msgid "Enable ver. 5 support (experimental)"
+msgstr "Ativar ver. 5 suporte (experimental)"
+
+msgid "Enable HTTP API (experimental)"
+msgstr "Ativar HTTP API (experimental)"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Mudar(zap) o canal(Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Troque o canal e ver no programa(Ctrl + W)."
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Tocar IPTV ou outro fluxo no programa(Ctrl + P)"
