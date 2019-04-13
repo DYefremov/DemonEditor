@@ -15,6 +15,8 @@ MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
 class StreamType(Enum):
     DVB_TS = "1"
     NONE_TS = "4097"
+    NONE_REC_1 = "5001"
+    NONE_REC_2 = "5002"
 
 
 def parse_m3u(path, profile):

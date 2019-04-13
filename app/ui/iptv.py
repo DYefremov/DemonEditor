@@ -25,6 +25,17 @@ def is_data_correct(elems):
     return True
 
 
+def get_stream_type(box):
+    active = box.get_active()
+    if active == 0:
+        return StreamType.DVB_TS.value
+    elif active == 1:
+        return StreamType.NONE_TS.value
+    elif active == 2:
+        return StreamType.NONE_REC_1.value
+    return StreamType.NONE_REC_2.value
+
+
 class IptvDialog:
 
     def __init__(self, transient, view, services, bouquet, profile=Profile.ENIGMA_2, action=Action.ADD):
@@ -116,7 +127,21 @@ class IptvDialog:
         data = data.split(":")
         if len(data) < 11:
             return
-        self._stream_type_combobox.set_active(0 if StreamType(data[0].strip()) is StreamType.DVB_TS else 1)
+
+        s_type = data[0].strip()
+        try:
+            stream_type = StreamType(s_type)
+            if stream_type is StreamType.DVB_TS:
+                self._stream_type_combobox.set_active(0)
+            elif stream_type is StreamType.NONE_TS:
+                self._stream_type_combobox.set_active(1)
+            elif stream_type is StreamType.NONE_REC_1:
+                self._stream_type_combobox.set_active(2)
+            elif stream_type is StreamType.NONE_REC_2:
+                self._stream_type_combobox.set_active(3)
+        except ValueError:
+            show_dialog(DialogType.ERROR, "Unknown stream type {}".format(s_type))
+
         self._srv_type_entry.set_text(data[2])
         self._sid_entry.set_text(str(int(data[3], 16)))
         self._tr_id_entry.set_text(str(int(data[4], 16)))
@@ -140,7 +165,7 @@ class IptvDialog:
                                                                      int(self._namespace_entry.get_text())))
 
     def get_type(self):
-        return 1 if self._stream_type_combobox.get_active() == 0 else 4097
+        return get_stream_type(self._stream_type_combobox)
 
     def on_entry_changed(self, entry):
         if _PATTERN.search(entry.get_text()):
@@ -409,10 +434,10 @@ class IptvListConfigurationDialog:
                 data = data.split(":")
 
                 if reset:
-                    data[0] = " 4097"
+                    data[0] = StreamType.NONE_TS.value
                     data[2], data[3], data[4], data[5], data[6] = "10000"
                 else:
-                    data[0] = " 4097" if self._stream_type_combobox.get_active() == 1 else "1"
+                    data[0] = get_stream_type(self._stream_type_combobox)
                     data[2] = "1" if type_default else self._list_srv_type_entry.get_text()
                     data[3] = "{:X}".format(index) if sid_auto else "0"
                     data[4] = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
@@ -431,7 +456,7 @@ class IptvListConfigurationDialog:
     @run_idle
     def update_reference(self):
         if is_data_correct(self._digit_elems):
-            stream_type = "4097" if self._stream_type_combobox.get_active() == 1 else "1"
+            stream_type = get_stream_type(self._stream_type_combobox)
             self._reference_label.set_text(
                 _ENIGMA2_REFERENCE.format(stream_type, *[int(elem.get_text()) for elem in self._digit_elems]))
 
