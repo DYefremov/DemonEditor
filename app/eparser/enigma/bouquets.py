@@ -90,7 +90,7 @@ def parse_bouquets(path, bq_name, bq_type):
         lines = file.readlines()
         bouquets = None
         nm_sep = "#NAME"
-        bq_pattern = re.compile(".*\"userbouquet\\.+(.*)\\.+[tv|radio].*")
+        bq_pattern = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
 
         for line in lines:
             if nm_sep in line:
@@ -106,9 +106,7 @@ def parse_bouquets(path, bq_name, bq_type):
                                                locked=None,
                                                hidden=None))
                 else:
-                    msg = "No bouquet name found for: {}".format(line)
-                    print("No bouquet name found for: {}".format(line))
-                    raise ValueError(msg)
+                    raise ValueError("No bouquet name found for: {}".format(line))
 
     return bouquets
 
