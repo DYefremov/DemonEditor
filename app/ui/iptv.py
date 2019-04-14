@@ -306,7 +306,7 @@ class SearchUnavailableDialog:
 
 class IptvListConfigurationDialog:
 
-    def __init__(self, transient, services, iptv_rows, bouquet, profile):
+    def __init__(self, transient, services, iptv_rows, bouquet, fav_model, profile):
         handlers = {"on_apply": self.on_apply,
                     "on_response": self.on_response,
                     "on_stream_type_default_togged": self.on_stream_type_default_togged,
@@ -329,6 +329,7 @@ class IptvListConfigurationDialog:
         self._rows = iptv_rows
         self._services = services
         self._bouquet = bouquet
+        self._fav_model = fav_model
         self._profile = profile
 
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
@@ -417,9 +418,6 @@ class IptvListConfigurationDialog:
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
 
-        if len(self._bouquet) != len(self._rows):
-            return
-
         if self._profile is Profile.ENIGMA_2:
             reset = self._reset_to_default_switch.get_active()
             type_default = self._type_check_button.get_active()
@@ -428,28 +426,31 @@ class IptvListConfigurationDialog:
             nid_default = self._nid_check_button.get_active()
             namespace_default = self._namespace_check_button.get_active()
 
+            stream_type = StreamType.NONE_TS.value if reset else get_stream_type(self._stream_type_combobox)
+            srv_type = "1" if type_default else self._list_srv_type_entry.get_text()
+            tid = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
+            nid = "0" if nid_default else "{:X}".format(int(self._list_nid_entry.get_text()))
+            namespace = "0" if namespace_default else "{:X}".format(int(self._list_namespace_entry.get_text()))
+
             for index, row in enumerate(self._rows):
-                fav_id = row[7]
+                fav_id = row[Column.FAV_ID]
                 data, sep, desc = fav_id.partition("http")
                 data = data.split(":")
 
                 if reset:
-                    data[0] = StreamType.NONE_TS.value
                     data[2], data[3], data[4], data[5], data[6] = "10000"
                 else:
-                    data[0] = get_stream_type(self._stream_type_combobox)
-                    data[2] = "1" if type_default else self._list_srv_type_entry.get_text()
+                    data[0], data[2], data[4], data[5], data[6] = stream_type, srv_type, tid, nid, namespace
                     data[3] = "{:X}".format(index) if sid_auto else "0"
-                    data[4] = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
-                    data[5] = "0" if nid_default else "{:X}".format(int(self._list_nid_entry.get_text()))
-                    data[6] = "0" if namespace_default else "{:X}".format(int(self._list_namespace_entry.get_text()))
 
                 data = ":".join(data)
                 new_fav_id = "{}{}{}".format(data, sep, desc)
-                row[7] = new_fav_id
-                self._bouquet[index] = new_fav_id
+                row[Column.FAV_ID] = new_fav_id
                 srv = self._services.pop(fav_id, None)
                 self._services[new_fav_id] = srv._replace(fav_id=new_fav_id)
+
+            self._bouquet.clear()
+            list(map(lambda r: self._bouquet.append(r[Column.FAV_ID]), self._fav_model))
 
             self._info_bar.set_visible(True)
 

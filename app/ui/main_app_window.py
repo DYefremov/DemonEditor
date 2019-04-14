@@ -1318,8 +1318,8 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        bouquet = self._bouquets.get(self._bq_selected, [])
-        IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bouquet, profile).show()
+        bq = self._bouquets.get(self._bq_selected, [])
+        IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bq, self._fav_model, profile).show()
 
     @run_idle
     def on_remove_all_unavailable(self, item):
