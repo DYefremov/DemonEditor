@@ -17,6 +17,7 @@ from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
+from app.ui.epg_dialog import EpgDialog
 from .backup import BackupDialog, backup_data, clear_data_path
 from .imports import ImportDialog, import_bouquet
 from .download_dialog import DownloadDialog
@@ -133,6 +134,7 @@ class Application(Gtk.Application):
                     "on_search_up": self.on_search_up,
                     "on_search": self.on_search,
                     "on_iptv": self.on_iptv,
+                    "on_epg_list_configuration": self.on_epg_list_configuration,
                     "on_iptv_list_configuration": self.on_iptv_list_configuration,
                     "on_play_stream": self.on_play_stream,
                     "on_player_play": self.on_player_play,
@@ -1341,6 +1343,14 @@ class Application(Gtk.Application):
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
         if response:
             next(self.remove_favs(response, self._fav_model), False)
+
+    # ****************** EPG  **********************#
+
+    def on_epg_list_configuration(self, item):
+        if Profile(self._profile) is not Profile.ENIGMA_2:
+            self.show_error_dialog("Only Enigma2 is supported!")
+            return
+        EpgDialog(self._main_window, self._options.get(self._profile), self._services, self._fav_model).show()
 
     # ***************** Import  ********************#
 

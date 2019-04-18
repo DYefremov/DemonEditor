@@ -82,6 +82,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-revert-to-saved</property>
   </object>
+  <object class="GtkImage" id="epg_configuration_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-index</property>
+  </object>
   <object class="GtkImage" id="export_to_m3u_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -578,7 +583,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_3">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -666,7 +671,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_1">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_4">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -737,6 +742,22 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
+              <object class="GtkImageMenuItem" id="fav_epg_configuration_popup_item">
+                <property name="label" translatable="yes">EPG configuration</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">epg_configuration_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_7">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
               <object class="GtkImageMenuItem" id="fav_iptv_list_configuration_popup_item">
                 <property name="label" translatable="yes">List configuration</property>
                 <property name="visible">True</property>
@@ -747,7 +768,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_7">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_8">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -767,7 +788,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_8">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_9">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -805,7 +826,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_9">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -821,7 +842,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_11">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -841,7 +862,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_4">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_12">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
