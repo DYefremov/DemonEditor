@@ -1,4 +1,5 @@
 """ Module for IPTV and streams support """
+import re
 import urllib.request
 from enum import Enum
 
@@ -51,6 +52,25 @@ def parse_m3u(path, profile):
                     services.append(srv)
 
     return services
+
+
+def export_to_m3u(path, bouquet):
+    pattern = re.compile(".*:(http.*):.*")
+    lines = ["#EXTM3U\n"]
+
+    for s in bouquet.services:
+        bq_type = s.type
+        if bq_type is BqServiceType.IPTV:
+            res = re.match(pattern, s.data)
+            if not res:
+                continue
+            data = res.group(1)
+            lines.append("#EXTINF:-1,{}\n{}\n".format(s.name, urllib.request.unquote(data.strip())))
+        elif bq_type is BqServiceType.MARKER:
+            pass
+
+    with open(path + "{}.m3u".format(bouquet.name), "w", encoding="utf-8") as file:
+        file.writelines(lines)
 
 
 if __name__ == "__main__":

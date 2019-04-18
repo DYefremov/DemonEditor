@@ -11,8 +11,9 @@ from app.connections import http_request, HttpRequestType, download_data, Downlo
     TestException
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, Flag
+from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
+from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
@@ -113,6 +114,7 @@ class Application(Gtk.Application):
                     "on_locked": self.on_locked,
                     "on_model_changed": self.on_model_changed,
                     "on_import_m3u": self.on_import_m3u,
+                    "on_export_to_m3u": self.on_export_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
                     "on_import_bouquets": self.on_import_bouquets,
                     "on_backup_tool_show": self.on_backup_tool_show,
@@ -1361,6 +1363,25 @@ class Application(Gtk.Application):
                 self._services[ch.fav_id] = ch
                 bq_services.append(ch.fav_id)
             next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
+
+    @run_idle
+    def on_export_to_m3u(self, item):
+        i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
+        bq_services = [BouquetService(r[Column.FAV_SERVICE],
+                                      BqServiceType(r[Column.FAV_TYPE]),
+                                      r[Column.FAV_ID],
+                                      r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
+
+        if not bq_services:
+            self.show_error_dialog("No data to save!")
+            return
+
+        if not any(s.type is BqServiceType.IPTV for s in bq_services):
+            self.show_error_dialog("This list does not contains IPTV streams!")
+            return
+
+        path = self._options.get(self._profile).get("data_dir_path", "")
+        export_to_m3u(path, Bouquet(self._current_bq_name, None, bq_services, None, None))
 
     def on_import_bouquet(self, item):
         profile = Profile(self._profile)

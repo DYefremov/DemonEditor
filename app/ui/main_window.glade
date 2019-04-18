@@ -82,6 +82,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-revert-to-saved</property>
   </object>
+  <object class="GtkImage" id="export_to_m3u_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-save-as</property>
+  </object>
   <object class="GtkImage" id="extra_edit_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -573,7 +578,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -626,7 +631,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_5">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_2">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -643,7 +648,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_">
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -661,7 +666,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_2">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -689,9 +694,19 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_6">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_5">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
+                <property name="label" translatable="yes">Add IPTV or stream service</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">network_transmit_receive_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_iptv" swapped="no"/>
               </object>
             </child>
             <child>
@@ -706,17 +721,17 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
-                <property name="label" translatable="yes">Add IPTV or stream service</property>
+              <object class="GtkImageMenuItem" id="fav_export_m3u_popup_item">
+                <property name="label" translatable="yes">Export to m3u</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="image">network_transmit_receive_image</property>
+                <property name="image">export_to_m3u_image</property>
                 <property name="use_stock">False</property>
-                <signal name="activate" handler="on_iptv" swapped="no"/>
+                <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_6">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -752,7 +767,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_3">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_8">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -790,7 +805,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_5">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_9">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -806,7 +821,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_1">
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
