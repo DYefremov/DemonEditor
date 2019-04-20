@@ -24,7 +24,8 @@ LOCKED_ICON = theme.load_icon("changes-prevent-symbolic", 16, 0) if theme.lookup
     "system-lock-screen", 16, 0) else _IMAGE_MISSING
 HIDE_ICON = theme.load_icon("go-jump", 16, 0) if theme.lookup_icon("go-jump", 16, 0) else _IMAGE_MISSING
 TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symbolic", 16, 0) else _IMAGE_MISSING
-IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.load_icon("emblem-shared", 16, 0) else None
+IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.lookup_icon("emblem-shared", 16, 0) else None
+EPG_ICON = theme.load_icon("gtk-index", 16, 0) if theme.lookup_icon("gtk-index", 16, 0) else None
 
 # Colors
 NEW_COLOR = "rgb(255,230,204)"  # Color for new services in the main list
