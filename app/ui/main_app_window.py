@@ -1346,11 +1346,18 @@ class Application(Gtk.Application):
 
     # ****************** EPG  **********************#
 
+    @run_idle
     def on_epg_list_configuration(self, item):
         if Profile(self._profile) is not Profile.ENIGMA_2:
             self.show_error_dialog("Only Enigma2 is supported!")
             return
-        EpgDialog(self._main_window, self._options.get(self._profile), self._services, self._fav_model).show()
+
+        if not any(r[Column.FAV_TYPE] == BqServiceType.IPTV.value for r in self._fav_model):
+            self.show_error_dialog("This list does not contains IPTV streams!")
+            return
+
+        bq = self._bouquets.get(self._bq_selected)
+        EpgDialog(self._main_window, self._options.get(self._profile), self._services,  bq, self._fav_model).show()
 
     # ***************** Import  ********************#
 
