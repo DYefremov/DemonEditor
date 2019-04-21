@@ -1,5 +1,6 @@
 from app.commons import run_idle
 from app.tools.epg import EPG
+from app.ui.dialogs import get_message
 from .main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
 
@@ -51,13 +52,11 @@ class EpgDialog:
 
         try:
             refs = EPG.get_epg_refs(self._options.get("data_dir_path", "") + "epg.dat")
-
             # for source lamedb
             srvs = {k[:k.rfind(":")]: v for k, v in self._services.items()}
             list(map(self._services_model.append,
                      map(lambda s: (s.service, s.fav_id),
                          filter(None, [srvs.get(ref) for ref in refs]))))
-
         except (FileNotFoundError, ValueError) as e:
             self.show_info_message("Read epg.dat error: {}".format(e), Gtk.MessageType.ERROR)
         else:
@@ -68,9 +67,14 @@ class EpgDialog:
     def show(self):
         self._dialog.show()
 
+    @run_idle
     def on_apply(self, item):
         self._bouquet.clear()
         list(map(self._bouquet.append, [r[Column.FAV_ID] for r in self._bouquet_model]))
+        for index, row in enumerate(self._ex_fav_model):
+            row[Column.FAV_ID] = self._bouquet[index]
+
+        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def on_save_to_xml(self, item):
         pass
@@ -79,18 +83,28 @@ class EpgDialog:
         pass
 
     def on_auto_configuration(self, item):
-        source = {r[0]: r[1] for r in self._services_model}
+        source = {"".join(r[0].split()).upper(): r[1] for r in self._services_model}
         success_count = 0
 
         for r in self._bouquet_filter_model:
-            ref = source.get(r[Column.FAV_SERVICE], None)
+            name = "".join(r[Column.FAV_SERVICE].split()).upper()
+            ref = source.get(name, None)
             if ref:
-                r[Column.FAV_LOCKED] = EPG_ICON
-                print("Found for {}".format(r[Column.FAV_SERVICE]))
+                self.assign_data(r, ref)
                 success_count += 1
 
         self.show_info_message("Done! Count of successfully configured services: {}".format(success_count),
                                Gtk.MessageType.INFO)
+
+    def assign_data(self, row, ref):
+        row[Column.FAV_LOCKED] = EPG_ICON
+        fav_id = row[Column.FAV_ID]
+        fav_id_data = fav_id.split(":")
+        fav_id_data[3:7] = ref.split(":")
+        new_fav_id = ":".join(fav_id_data)
+        service = self._services.pop(fav_id)
+        self._services[new_fav_id] = service._replace(fav_id=new_fav_id)
+        row[Column.FAV_ID] = new_fav_id
 
     def on_filter_toggled(self, button: Gtk.ToggleButton):
         self._filter_bar.set_search_mode(button.get_active())
