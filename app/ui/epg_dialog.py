@@ -2,7 +2,7 @@ from app.commons import run_idle
 from app.tools.epg import EPG
 from app.ui.dialogs import get_message
 from .main_helper import on_popup_menu
-from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
 
 
 class EpgDialog:
@@ -16,7 +16,10 @@ class EpgDialog:
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_filter_changed": self.on_filter_changed,
                     "on_info_bar_close": self.on_info_bar_close,
-                    "on_popup_menu": on_popup_menu}
+                    "on_popup_menu": on_popup_menu,
+                    "on_drag_begin": self.on_drag_begin,
+                    "on_drag_data_get": self.on_drag_data_get,
+                    "on_drag_data_received": self.on_drag_data_received}
 
         self._services = services
         self._ex_fav_model = fav_model
@@ -30,6 +33,8 @@ class EpgDialog:
 
         self._dialog = builder.get_object("epg_dialog_window")
         self._dialog.set_transient_for(transient)
+        self._source_view = builder.get_object("source_view")
+        self._bouquet_view = builder.get_object("bouquet_view")
         self._bouquet_model = builder.get_object("bouquet_list_store")
         self._services_model = builder.get_object("services_list_store")
         self._info_bar = builder.get_object("info_bar")
@@ -38,10 +43,9 @@ class EpgDialog:
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_entry = builder.get_object("filter_entry")
         self._services_filter_model = builder.get_object("services_filter_model")
-        self._bouquet_filter_model = builder.get_object("bouquet_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
-        self._bouquet_filter_model.set_visible_func(self.bouquet_filter_function)
 
+        self.init_drag_and_drop()
         self.init_data()
 
     @run_idle
@@ -86,7 +90,7 @@ class EpgDialog:
         source = {"".join(r[0].split()).upper(): r[1] for r in self._services_model}
         success_count = 0
 
-        for r in self._bouquet_filter_model:
+        for r in self._bouquet_model:
             name = "".join(r[Column.FAV_SERVICE].split()).upper()
             ref = source.get(name, None)
             if ref:
@@ -110,12 +114,7 @@ class EpgDialog:
         self._filter_bar.set_search_mode(button.get_active())
 
     def on_filter_changed(self, entry):
-        self._bouquet_filter_model.refilter()
         self._services_filter_model.refilter()
-
-    def bouquet_filter_function(self, model, itr, data):
-        txt = self._filter_entry.get_text().upper()
-        return model is None or model == "None" or txt in model.get_value(itr, Column.FAV_SERVICE).upper()
 
     def services_filter_function(self, model, itr, data):
         txt = self._filter_entry.get_text().upper()
@@ -129,6 +128,33 @@ class EpgDialog:
         self._info_bar.set_visible(True)
         self._info_bar.set_message_type(message_type)
         self._message_label.set_text(text)
+
+    # ***************** Drag-and-drop *********************#
+    def init_drag_and_drop(self):
+        """ Enable drag-and-drop """
+        target = []
+        self._source_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
+        self._source_view.drag_source_add_text_targets()
+        self._bouquet_view.enable_model_drag_dest(target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._bouquet_view.drag_dest_add_text_targets()
+
+    def on_drag_begin(self, view, context):
+        """ Selects a row under the cursor in the view at the dragging beginning. """
+        selection = view.get_selection()
+        if selection.count_selected_rows() > 1:
+            view.do_toggle_cursor_row(view)
+
+    def on_drag_data_get(self, view: Gtk.TreeView, drag_context, data, info, time):
+        model, paths = view.get_selection().get_selected_rows()
+        if paths:
+            val = model.get_value(model.get_iter(paths), 1)
+            data.set_text(val, -1)
+
+    def on_drag_data_received(self, view: Gtk.TreeView, drag_context, x, y, data, info, time):
+        path, pos = view.get_dest_row_at_pos(x, y)
+        model = view.get_model()
+        self.assign_data(model[path], data.get_text())
+        return False
 
 
 if __name__ == "__main__":

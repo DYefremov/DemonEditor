@@ -59,12 +59,6 @@ Author: Dmitriy Yefremov
       <column type="GdkRGBA"/>
     </columns>
   </object>
-  <object class="GtkTreeModelFilter" id="bouquet_filter_model">
-    <property name="child_model">bouquet_list_store</property>
-  </object>
-  <object class="GtkTreeModelSort" id="bouquet_sort_model">
-    <property name="model">bouquet_filter_model</property>
-  </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
       <!-- column-name service -->
@@ -295,12 +289,14 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeView" id="source_service_column">
+                      <object class="GtkTreeView" id="source_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">service_sort_model</property>
                         <property name="search_column">0</property>
                         <property name="enable_grid_lines">both</property>
+                        <signal name="drag-begin" handler="on_drag_begin" swapped="no"/>
+                        <signal name="drag-data-get" handler="on_drag_data_get" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection"/>
                         </child>
@@ -383,14 +379,15 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeView" id="fav_tree_view">
+                      <object class="GtkTreeView" id="bouquet_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">bouquet_sort_model</property>
+                        <property name="model">bouquet_list_store</property>
                         <property name="search_column">2</property>
                         <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
+                        <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection">
                             <property name="mode">multiple</property>
