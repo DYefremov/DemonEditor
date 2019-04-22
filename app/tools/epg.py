@@ -1,7 +1,7 @@
 """  Module for working with epg.dat file """
 
 import struct
-from xml.dom.minidom import parse, Node
+from xml.dom.minidom import parse, Node, Document
 
 from app.eparser.ecommons import BouquetService, BqServiceType
 
@@ -43,6 +43,7 @@ class EPG:
 
 
 class ChannelsParser:
+    _COMMENT = "File was created in DemonEditor"
 
     @staticmethod
     def get_refs_from_xml(path):
@@ -77,6 +78,32 @@ class ChannelsParser:
                                 comment_count -= 1
                                 current_data = s_node.data
         return services
+
+    @staticmethod
+    def write_refs_to_xml(path, services):
+        header = '<?xml version="1.0" encoding="utf-8"?>\n<!--  Created in DemonEditor.  -->\n<channels>\n'
+        ind = "    "
+        doc = Document()
+        lines = [header]
+
+        for srv in services:
+            srv_type = srv.type
+            if srv_type is BqServiceType.IPTV:
+                channel_child = doc.createElement("channel")
+                channel_child.setAttribute("id", str(srv.num))
+                data = srv.data.strip().split(":")
+                channel_child.appendChild(doc.createTextNode(":".join(data[:10])))
+                comment = doc.createComment(srv.name)
+                lines.append("{}{}{}\n".format(ind, str(channel_child.toxml()), str(comment.toxml())))
+            elif srv_type is BqServiceType.MARKER:
+                comment = doc.createComment(srv.name)
+                lines.append("{}{}\n".format(ind, str(comment.toxml())))
+
+        lines.append("</channels>")
+        doc.unlink()
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
 
 
 if __name__ == "__main__":

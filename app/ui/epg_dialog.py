@@ -1,5 +1,6 @@
 from app.commons import run_idle
-from app.tools.epg import EPG
+from app.eparser.ecommons import BouquetService, BqServiceType
+from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message
 from .main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
@@ -19,7 +20,8 @@ class EpgDialog:
                     "on_popup_menu": on_popup_menu,
                     "on_drag_begin": self.on_drag_begin,
                     "on_drag_data_get": self.on_drag_data_get,
-                    "on_drag_data_received": self.on_drag_data_received}
+                    "on_drag_data_received": self.on_drag_data_received,
+                    "on_resize": self.on_resize}
 
         self._services = services
         self._ex_fav_model = fav_model
@@ -44,6 +46,10 @@ class EpgDialog:
         self._filter_entry = builder.get_object("filter_entry")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
+        # Setting the last size of the dialog window
+        window_size = self._options.get("epg_tool_window_size", None)
+        if window_size:
+            self._dialog.resize(*window_size)
 
         self.init_drag_and_drop()
         self.init_data()
@@ -80,8 +86,21 @@ class EpgDialog:
 
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
+    @run_idle
     def on_save_to_xml(self, item):
-        pass
+        services = []
+        iptv_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
+        for r in self._bouquet_model:
+            srv_type = r[Column.FAV_TYPE]
+            if srv_type in iptv_types:
+                srv = BouquetService(name=r[Column.FAV_SERVICE],
+                                     type=BqServiceType(srv_type),
+                                     data=r[Column.FAV_ID],
+                                     num=r[Column.FAV_NUM])
+                services.append(srv)
+
+        ChannelsParser.write_refs_to_xml(self._options.get("data_dir_path", "") + "channels.xml", services)
+        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def on_options(self, item):
         pass
@@ -155,6 +174,10 @@ class EpgDialog:
         model = view.get_model()
         self.assign_data(model[path], data.get_text())
         return False
+
+    def on_resize(self, window):
+        if self._options:
+            self._options["epg_tool_window_size"] = window.get_size()
 
 
 if __name__ == "__main__":
