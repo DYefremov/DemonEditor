@@ -1,9 +1,16 @@
+from enum import Enum
+
 from app.commons import run_idle
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message
 from .main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
+
+
+class RefsSource(Enum):
+    LAMEDB = 0
+    XML = 1
 
 
 class EpgDialog:
@@ -27,6 +34,7 @@ class EpgDialog:
         self._ex_fav_model = fav_model
         self._options = options
         self._bouquet = bouquet
+        self._refs_source = RefsSource.XML
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -62,17 +70,32 @@ class EpgDialog:
 
         try:
             refs = EPG.get_epg_refs(self._options.get("data_dir_path", "") + "epg.dat")
-            # for source lamedb
-            srvs = {k[:k.rfind(":")]: v for k, v in self._services.items()}
-            list(map(self._services_model.append,
-                     map(lambda s: (s.service, s.fav_id),
-                         filter(None, [srvs.get(ref) for ref in refs]))))
+            if self._refs_source is RefsSource.LAMEDB:
+                self.init_lamedb_source(refs)
+            elif self._refs_source is RefsSource.XML:
+                self.init_xml_source(refs)
+            else:
+                self.show_info_message("Unknown names source!", Gtk.MessageType.ERROR)
+                return
         except (FileNotFoundError, ValueError) as e:
-            self.show_info_message("Read epg.dat error: {}".format(e), Gtk.MessageType.ERROR)
+            self.show_info_message("Read data error: {}".format(e), Gtk.MessageType.ERROR)
         else:
             if len(self._services_model) == 0:
                 msg = "Current epg.dat file does not contains references for the services of this bouquet!"
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
+
+    def init_lamedb_source(self, refs):
+        srvs = {k[:k.rfind(":")]: v for k, v in self._services.items()}
+        list(map(self._services_model.append,
+                 map(lambda s: (s.service, s.fav_id),
+                     filter(None, [srvs.get(ref) for ref in refs]))))
+
+    def init_xml_source(self, refs):
+        s_refs = ChannelsParser.get_refs_from_xml(self._options.get("data_dir_path", "") + "channels.xml")
+        for ref in refs:
+            srv = s_refs.get(ref, None)
+            if srv:
+                self._services_model.append(srv)
 
     def show(self):
         self._dialog.show()
@@ -113,13 +136,17 @@ class EpgDialog:
             name = "".join(r[Column.FAV_SERVICE].split()).upper()
             ref = source.get(name, None)
             if ref:
-                self.assign_data(r, ref)
+                self.assign_data(r, ref, True)
                 success_count += 1
 
         self.show_info_message("Done! Count of successfully configured services: {}".format(success_count),
                                Gtk.MessageType.INFO)
 
-    def assign_data(self, row, ref):
+    def assign_data(self, row, ref, show_error=False):
+        if row[Column.FAV_TYPE] == BqServiceType.MARKER.value:
+            if not show_error:
+                self.show_info_message(get_message("Not allowed in this context!"), Gtk.MessageType.ERROR)
+            return
         row[Column.FAV_LOCKED] = EPG_ICON
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")

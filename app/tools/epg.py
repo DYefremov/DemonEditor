@@ -47,11 +47,8 @@ class ChannelsParser:
 
     @staticmethod
     def get_refs_from_xml(path):
-        services = []
+        refs = {}
         dom = parse(path)
-
-        description = "".join(n.data + "\n" for n in dom.childNodes if n.nodeType == Node.COMMENT_NODE)
-        services.append(BouquetService(name=description, type=BqServiceType.MARKER, data=None, num=-1))
 
         for elem in dom.getElementsByTagName("channels"):
             c_count = 0
@@ -65,19 +62,17 @@ class ChannelsParser:
                         comment_count += 1
                         txt = n.data.strip()
                         if comment_count:
-                            services.append(BouquetService(name=txt, type=BqServiceType.MARKER, data=None, num=c_count))
                             comment_count -= 1
                         else:
-                            services.append(BouquetService(name=txt,
-                                                           type=BqServiceType.DEFAULT,
-                                                           data="{}:{}:{}:{}".format(*current_data.split(":")[3:7]),
-                                                           num=c_count))
+                            ref_data = current_data.split(":")
+                            refs["{}:{}:{}".format(*ref_data[3:6])] = (txt, "{}:{}:{}:{}".format(*ref_data[3:7]))
+
                     if n.hasChildNodes():
                         for s_node in n.childNodes:
                             if s_node.nodeType == Node.TEXT_NODE:
                                 comment_count -= 1
                                 current_data = s_node.data
-        return services
+        return refs
 
     @staticmethod
     def write_refs_to_xml(path, services):
