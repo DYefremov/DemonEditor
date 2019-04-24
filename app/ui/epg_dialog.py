@@ -35,7 +35,9 @@ class EpgDialog:
                     "on_drag_begin": self.on_drag_begin,
                     "on_drag_data_get": self.on_drag_data_get,
                     "on_drag_data_received": self.on_drag_data_received,
-                    "on_resize": self.on_resize}
+                    "on_resize": self.on_resize,
+                    "on_names_source_changed": self.on_names_source_changed,
+                    "on_options_save": self.on_options_save}
 
         self._services = services
         self._ex_fav_model = fav_model
@@ -63,6 +65,9 @@ class EpgDialog:
         self._filter_entry = builder.get_object("filter_entry")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
+        # Options
+        self._lamedb_radiobutton = builder.get_object("lamedb_radiobutton")
+        self._xml_chooser_button = builder.get_object("xml_chooser_button")
         # Setting the last size of the dialog window
         window_size = self._options.get("epg_tool_window_size", None)
         if window_size:
@@ -207,6 +212,16 @@ class EpgDialog:
                                     self._bouquet_model,
                                     Profile.ENIGMA_2).show()
 
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._info_bar.set_visible(True)
+        self._info_bar.set_message_type(message_type)
+        self._message_label.set_text(text)
+
+    def on_bouquet_popup_menu(self, menu, event):
+        self._assign_ref_popup_item.set_sensitive(self._current_ref)
+        on_popup_menu(menu, event)
+
     # ***************** Drag-and-drop *********************#
 
     def init_drag_and_drop(self):
@@ -235,20 +250,19 @@ class EpgDialog:
         self.assign_data(model[path], data.get_text())
         return False
 
+    # ***************** Options *********************#
+
     def on_resize(self, window):
         if self._options:
             self._options["epg_tool_window_size"] = window.get_size()
 
-    @run_idle
-    def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(True)
-        self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(text)
+    def on_names_source_changed(self, button):
+        self._refs_source = RefsSource.LAMEDB if button.get_active() else RefsSource.XML
+        self._xml_chooser_button.set_sensitive(not button.get_active())
 
-    def on_bouquet_popup_menu(self, menu, event):
-        self._assign_ref_popup_item.set_sensitive(self._current_ref)
-        on_popup_menu(menu, event)
-
+    def on_options_save(self, item):
+        pass
+    
 
 if __name__ == "__main__":
     pass
