@@ -2,8 +2,10 @@ from enum import Enum
 
 from app.commons import run_idle
 from app.eparser.ecommons import BouquetService, BqServiceType
+from app.properties import Profile
 from app.tools.epg import EPG, ChannelsParser
-from app.ui.dialogs import get_message
+from app.ui.dialogs import get_message, Action
+from app.ui.iptv import IptvListConfigurationDialog, IptvDialog
 from .main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
 
@@ -25,6 +27,11 @@ class EpgDialog:
                     "on_filter_changed": self.on_filter_changed,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_popup_menu": on_popup_menu,
+                    "on_bouquet_popup_menu": self.on_bouquet_popup_menu,
+                    "on_copy_ref": self.on_copy_ref,
+                    "on_assign_ref": self.on_assign_ref,
+                    "on_edit": self.on_edit,
+                    "on_list_configuration": self.on_list_configuration,
                     "on_drag_begin": self.on_drag_begin,
                     "on_drag_data_get": self.on_drag_data_get,
                     "on_drag_data_received": self.on_drag_data_received,
@@ -34,6 +41,7 @@ class EpgDialog:
         self._ex_fav_model = fav_model
         self._options = options
         self._bouquet = bouquet
+        self._current_ref = []
         self._refs_source = RefsSource.XML
 
         builder = Gtk.Builder()
@@ -49,6 +57,7 @@ class EpgDialog:
         self._services_model = builder.get_object("services_list_store")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
+        self._assign_ref_popup_item = builder.get_object("bouquet_assign_ref_popup_item")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_entry = builder.get_object("filter_entry")
@@ -169,13 +178,37 @@ class EpgDialog:
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
 
-    @run_idle
-    def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(True)
-        self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(text)
+    def on_copy_ref(self, item):
+        model, paths = self._source_view.get_selection().get_selected_rows()
+        self._current_ref.clear()
+        self._current_ref.append(model[paths][1])
+
+    def on_assign_ref(self, item):
+        if self._current_ref:
+            model, paths = self._bouquet_view.get_selection().get_selected_rows()
+            self.assign_data(model[paths], self._current_ref.pop())
+
+    def on_edit(self, item):
+        response = IptvDialog(self._dialog,
+                              self._bouquet_view,
+                              self._services,
+                              self._bouquet,
+                              Profile.ENIGMA_2,
+                              Action.EDIT).show()
+        if response != Gtk.ResponseType.CANCEL:
+            pass
+
+    def on_list_configuration(self, item):
+        iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._bouquet_model))
+        IptvListConfigurationDialog(self._dialog,
+                                    self._services,
+                                    iptv_rows,
+                                    self._bouquet,
+                                    self._bouquet_model,
+                                    Profile.ENIGMA_2).show()
 
     # ***************** Drag-and-drop *********************#
+
     def init_drag_and_drop(self):
         """ Enable drag-and-drop """
         target = []
@@ -205,6 +238,16 @@ class EpgDialog:
     def on_resize(self, window):
         if self._options:
             self._options["epg_tool_window_size"] = window.get_size()
+
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._info_bar.set_visible(True)
+        self._info_bar.set_message_type(message_type)
+        self._message_label.set_text(text)
+
+    def on_bouquet_popup_menu(self, menu, event):
+        self._assign_ref_popup_item.set_sensitive(self._current_ref)
+        on_popup_menu(menu, event)
 
 
 if __name__ == "__main__":

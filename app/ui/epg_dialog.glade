@@ -59,6 +59,78 @@ Author: Dmitriy Yefremov
       <column type="GdkRGBA"/>
     </columns>
   </object>
+  <object class="GtkImage" id="copy_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-copy</property>
+  </object>
+  <object class="GtkMenu" id="source_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="source_copy_ref_popup_item">
+        <property name="label" translatable="yes">Copy reference</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">copy_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_copy_ref" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="insert_link_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">insert-link</property>
+  </object>
+  <object class="GtkImage" id="list_config_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-properties</property>
+  </object>
+  <object class="GtkMenu" id="bouquet_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquet_assign_ref_popup_item">
+        <property name="label" translatable="yes">Assign</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">insert_link_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_assign_ref" swapped="no"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquet_edit_popup_item">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_edit" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="bouquet_pupup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquet_list_config_popup_item">
+        <property name="label" translatable="yes">List configuration</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">list_config_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_list_configuration" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
       <!-- column-name service -->
@@ -296,6 +368,7 @@ Author: Dmitriy Yefremov
                         <property name="model">service_sort_model</property>
                         <property name="search_column">0</property>
                         <property name="enable_grid_lines">both</property>
+                        <signal name="button-press-event" handler="on_popup_menu" object="source_popup_menu" swapped="no"/>
                         <signal name="drag-begin" handler="on_drag_begin" swapped="no"/>
                         <signal name="drag-data-get" handler="on_drag_data_get" swapped="no"/>
                         <child internal-child="selection">
@@ -388,6 +461,7 @@ Author: Dmitriy Yefremov
                         <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="activate_on_single_click">True</property>
+                        <signal name="button-press-event" handler="on_bouquet_popup_menu" object="bouquet_popup_menu" swapped="no"/>
                         <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection">
