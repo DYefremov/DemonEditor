@@ -37,7 +37,9 @@ class EpgDialog:
                     "on_drag_data_received": self.on_drag_data_received,
                     "on_resize": self.on_resize,
                     "on_names_source_changed": self.on_names_source_changed,
-                    "on_options_save": self.on_options_save}
+                    "on_options_save": self.on_options_save,
+                    "on_use_web_source_switch": self.on_use_web_source_switch,
+                    "on_update_on_start_switch": self.on_update_on_start_switch}
 
         self._services = services
         self._ex_fav_model = fav_model
@@ -68,6 +70,7 @@ class EpgDialog:
         # Options
         self._lamedb_radiobutton = builder.get_object("lamedb_radiobutton")
         self._xml_chooser_button = builder.get_object("xml_chooser_button")
+        self._web_source_box = builder.get_object("web_source_box")
         # Setting the last size of the dialog window
         window_size = self._options.get("epg_tool_window_size", None)
         if window_size:
@@ -262,7 +265,13 @@ class EpgDialog:
 
     def on_options_save(self, item):
         pass
-    
+
+    def on_update_on_start_switch(self, switch, state):
+        pass
+
+    def on_use_web_source_switch(self, switch, state):
+        self._web_source_box.set_sensitive(state)
+
 
 if __name__ == "__main__":
     pass
