@@ -1,3 +1,7 @@
+import gzip
+import os
+import shutil
+import urllib.request
 from enum import Enum
 
 from app.commons import run_idle
@@ -11,7 +15,7 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICO
 
 
 class RefsSource(Enum):
-    LAMEDB = 0
+    SERVICES = 0
     XML = 1
 
 
@@ -20,8 +24,8 @@ class EpgDialog:
     def __init__(self, transient, options, services, bouquet, fav_model):
 
         handlers = {"on_apply": self.on_apply,
+                    "on_update": self.on_update,
                     "on_save_to_xml": self.on_save_to_xml,
-                    "on_options": self.on_options,
                     "on_auto_configuration": self.on_auto_configuration,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_filter_changed": self.on_filter_changed,
@@ -39,6 +43,7 @@ class EpgDialog:
                     "on_names_source_changed": self.on_names_source_changed,
                     "on_options_save": self.on_options_save,
                     "on_use_web_source_switch": self.on_use_web_source_switch,
+                    "on_enable_filtering_switch": self.on_enable_filtering_switch,
                     "on_update_on_start_switch": self.on_update_on_start_switch}
 
         self._services = services
@@ -46,7 +51,9 @@ class EpgDialog:
         self._options = options
         self._bouquet = bouquet
         self._current_ref = []
-        self._refs_source = RefsSource.XML
+        self._enable_dat_filter = False
+        self._use_web_source = False
+        self._refs_source = RefsSource.SERVICES
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -68,15 +75,21 @@ class EpgDialog:
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
         # Options
-        self._lamedb_radiobutton = builder.get_object("lamedb_radiobutton")
+        self._xml_radiobutton = builder.get_object("xml_radiobutton")
         self._xml_chooser_button = builder.get_object("xml_chooser_button")
+        self._names_source_box = builder.get_object("names_source_box")
         self._web_source_box = builder.get_object("web_source_box")
+        self._use_web_source_switch = builder.get_object("use_web_source_switch")
+        self._url_to_xml_entry = builder.get_object("url_to_xml_entry")
+        self._enable_filtering_switch = builder.get_object("enable_filtering_switch")
+        self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
         # Setting the last size of the dialog window
         window_size = self._options.get("epg_tool_window_size", None)
         if window_size:
             self._dialog.resize(*window_size)
 
         self.init_drag_and_drop()
+        self.init_options()
         self.init_data()
 
     @run_idle
@@ -86,8 +99,10 @@ class EpgDialog:
             self._bouquet_model.append(row)
 
         try:
-            refs = EPG.get_epg_refs(self._options.get("data_dir_path", "") + "epg.dat")
-            if self._refs_source is RefsSource.LAMEDB:
+            refs = None
+            if self._enable_dat_filter:
+                refs = EPG.get_epg_refs(self._options.get("data_dir_path", "") + "epg.dat")
+            if self._refs_source is RefsSource.SERVICES:
                 self.init_lamedb_source(refs)
             elif self._refs_source is RefsSource.XML:
                 self.init_xml_source(refs)
@@ -103,16 +118,43 @@ class EpgDialog:
 
     def init_lamedb_source(self, refs):
         srvs = {k[:k.rfind(":")]: v for k, v in self._services.items()}
-        list(map(self._services_model.append,
-                 map(lambda s: (s.service, s.fav_id),
-                     filter(None, [srvs.get(ref) for ref in refs]))))
+        s_types = (BqServiceType.MARKER.value, BqServiceType.IPTV.value)
+        filtered = filter(None, [srvs.get(ref) for ref in refs]) if refs else filter(
+            lambda s: s.service_type not in s_types, self._services.values())
+        list(map(self._services_model.append, map(lambda s: (s.service, s.fav_id), filtered)))
 
     def init_xml_source(self, refs):
-        s_refs = ChannelsParser.get_refs_from_xml(self._options.get("data_dir_path", "") + "channels.xml")
-        for ref in refs:
-            srv = s_refs.get(ref, None)
-            if srv:
-                self._services_model.append(srv)
+        data_path = self._options.get("data_dir_path", "")
+        s_refs = None
+        if self._use_web_source:
+            url = self._url_to_xml_entry.get_text()
+            path = data_path + os.path.basename(url)
+            f_name, headers = urllib.request.urlretrieve(url, path)
+            content_type = headers.get("Content-Type", "")
+
+            if content_type == "application/gzip":
+                out_file = data_path + "channels_out.xml"
+                with open(out_file, "wb") as f_out:
+                    with gzip.open(f_name, "rb") as f:
+                        shutil.copyfileobj(f, f_out)
+                os.remove(f_name)
+                s_refs = ChannelsParser.get_refs_from_xml(out_file)
+            else:
+                raise ValueError("Unsupported file type: {}".format(content_type))
+        else:
+            xml_path = self._xml_chooser_button.get_filename()
+            if xml_path:
+                s_refs = ChannelsParser.get_refs_from_xml(xml_path)
+            else:
+                raise ValueError("The path to the xml file is not set!")
+
+        if refs:
+            list(map(self._services_model.append, filter(None, [s_refs.get(ref, None) for ref in refs])))
+        else:
+            for k, v in s_refs.items():
+                self._services_model.append(v)
+
+        print("Services count: ", len(self._services_model))
 
     def show(self):
         self._dialog.show()
@@ -125,6 +167,13 @@ class EpgDialog:
             row[Column.FAV_ID] = self._bouquet[index]
 
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+
+    @run_idle
+    def on_update(self, item):
+        self._services_model.clear()
+        self._bouquet_model.clear()
+        self.init_options()
+        self.init_data()
 
     @run_idle
     def on_save_to_xml(self, item):
@@ -141,9 +190,6 @@ class EpgDialog:
 
         ChannelsParser.write_refs_to_xml(self._options.get("data_dir_path", "") + "channels.xml", services)
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
-
-    def on_options(self, item):
-        pass
 
     def on_auto_configuration(self, item):
         source = {"".join(r[0].split()).upper(): r[1] for r in self._services_model}
@@ -164,6 +210,7 @@ class EpgDialog:
             if not show_error:
                 self.show_info_message(get_message("Not allowed in this context!"), Gtk.MessageType.ERROR)
             return
+
         row[Column.FAV_LOCKED] = EPG_ICON
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
@@ -255,22 +302,45 @@ class EpgDialog:
 
     # ***************** Options *********************#
 
+    def init_options(self):
+        epg_options = self._options.get("epg_options", None)
+        if epg_options:
+            self._refs_source = RefsSource.XML if epg_options.get("xml_source", False) else RefsSource.SERVICES
+            self._xml_radiobutton.set_active(self._refs_source is RefsSource.XML)
+            self._use_web_source = epg_options.get("use_web_source", False)
+            self._use_web_source_switch.set_active(self._use_web_source)
+            self._url_to_xml_entry.set_text(epg_options.get("url_to_xml", ""))
+            self._enable_dat_filter = epg_options.get("enable_filtering", False)
+            self._enable_filtering_switch.set_active(self._enable_dat_filter)
+            local_xml_path = epg_options.get("local_path_to_xml", None)
+            if local_xml_path:
+                self._xml_chooser_button.set_filename(local_xml_path)
+
+    def on_options_save(self, item):
+        epg_options = {"xml_source": self._xml_radiobutton.get_active(),
+                       "use_web_source": self._use_web_source_switch.get_active(),
+                       "local_path_to_xml": self._xml_chooser_button.get_filename(),
+                       "url_to_xml": self._url_to_xml_entry.get_text(),
+                       "enable_filtering": self._enable_filtering_switch.get_active()}
+        self._options["epg_options"] = epg_options
+
     def on_resize(self, window):
         if self._options:
             self._options["epg_tool_window_size"] = window.get_size()
 
     def on_names_source_changed(self, button):
-        self._refs_source = RefsSource.LAMEDB if button.get_active() else RefsSource.XML
-        self._xml_chooser_button.set_sensitive(not button.get_active())
+        self._refs_source = RefsSource.XML if button.get_active() else RefsSource.SERVICES
+        self._names_source_box.set_sensitive(button.get_active())
 
-    def on_options_save(self, item):
-        pass
+    def on_enable_filtering_switch(self, switch, state):
+        self._epg_dat_source_box.set_sensitive(state)
 
     def on_update_on_start_switch(self, switch, state):
         pass
 
     def on_use_web_source_switch(self, switch, state):
         self._web_source_box.set_sensitive(state)
+        self._xml_chooser_button.set_sensitive(not state)
 
 
 if __name__ == "__main__":
