@@ -3,7 +3,7 @@
 import struct
 from xml.dom.minidom import parse, Node, Document
 
-from app.eparser.ecommons import BouquetService, BqServiceType
+from app.eparser.ecommons import BqServiceType
 
 
 class EPG:
@@ -47,8 +47,10 @@ class ChannelsParser:
 
     @staticmethod
     def get_refs_from_xml(path):
+        """ Returns tuple from references dict and list description. """
         refs = {}
         dom = parse(path)
+        description = "".join(n.data + "\n" for n in dom.childNodes if n.nodeType == Node.COMMENT_NODE)
 
         for elem in dom.getElementsByTagName("channels"):
             c_count = 0
@@ -72,7 +74,7 @@ class ChannelsParser:
                             if s_node.nodeType == Node.TEXT_NODE:
                                 comment_count -= 1
                                 current_data = s_node.data
-        return refs
+        return refs, description
 
     @staticmethod
     def write_refs_to_xml(path, services):
