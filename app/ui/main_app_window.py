@@ -1357,7 +1357,7 @@ class Application(Gtk.Application):
             return
 
         bq = self._bouquets.get(self._bq_selected)
-        EpgDialog(self._main_window, self._options.get(self._profile), self._services,  bq, self._fav_model).show()
+        EpgDialog(self._main_window, self._options.get(self._profile), self._services, bq, self._fav_model).show()
 
     # ***************** Import  ********************#
 
@@ -1397,8 +1397,16 @@ class Application(Gtk.Application):
             self.show_error_dialog("This list does not contains IPTV streams!")
             return
 
-        path = self._options.get(self._profile).get("data_dir_path", "")
-        export_to_m3u(path, Bouquet(self._current_bq_name, None, bq_services, None, None))
+        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        try:
+            export_to_m3u(response, Bouquet(self._current_bq_name, None, bq_services, None, None))
+        except Exception as e:
+            self.show_error_dialog(str(e))
+        else:
+            show_dialog(DialogType.INFO, self._main_window, "Done!")
 
     def on_import_bouquet(self, item):
         profile = Profile(self._profile)
