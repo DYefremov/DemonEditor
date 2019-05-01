@@ -18,6 +18,7 @@ class DialogType(Enum):
     QUESTION = "question_dialog"
     ABOUT = "about_dialog"
     WAIT = "wait_dialog"
+    INFO = "info_dialog"
 
 
 class WaitDialog:
@@ -42,6 +43,9 @@ class WaitDialog:
 
 def show_dialog(dialog_type: DialogType, transient, text=None, options=None, action_type=None, file_filter=None):
     """ Shows dialogs by name """
+    if dialog_type is DialogType.INFO:
+        return get_info_dialog(transient, text)
+
     builder, dialog = get_dialog_from_xml(dialog_type, transient)
 
     if dialog_type is DialogType.CHOOSER and options:
@@ -102,6 +106,13 @@ def get_chooser_dialog(transient, options, pattern, name):
                        options=options,
                        action_type=Gtk.FileChooserAction.OPEN,
                        file_filter=file_filter)
+
+
+def get_info_dialog(transient, text):
+    dialog = Gtk.MessageDialog(parent=transient, type=Gtk.MessageType.INFO, buttons=Gtk.ButtonsType.OK)
+    dialog.set_markup(get_message(text))
+    dialog.run()
+    dialog.destroy()
 
 
 def get_message(message):
