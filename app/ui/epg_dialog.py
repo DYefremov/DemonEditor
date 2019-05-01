@@ -11,7 +11,7 @@ from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message, Action
 from app.ui.iptv import IptvListConfigurationDialog, IptvDialog
 from .main_helper import on_popup_menu, update_entry_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON, KeyboardKey
 
 
 class RefsSource(Enum):
@@ -45,7 +45,8 @@ class EpgDialog:
                     "on_use_web_source_switch": self.on_use_web_source_switch,
                     "on_enable_filtering_switch": self.on_enable_filtering_switch,
                     "on_update_on_start_switch": self.on_update_on_start_switch,
-                    "on_field_icon_press": self.on_field_icon_press}
+                    "on_field_icon_press": self.on_field_icon_press,
+                    "on_key_release": self.on_key_release}
 
         self._services = services
         self._ex_fav_model = fav_model
@@ -97,8 +98,7 @@ class EpgDialog:
             self._dialog.resize(*window_size)
 
         self.init_drag_and_drop()
-        self.init_options()
-        self.init_data()
+        self.on_update()
 
     @run_idle
     def init_data(self):
@@ -170,6 +170,19 @@ class EpgDialog:
     def show(self):
         self._dialog.show()
 
+    def on_key_release(self, view, event):
+        """  Handling  keystrokes  """
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+        key = KeyboardKey(key_code)
+        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+
+        if ctrl and key is KeyboardKey.C:
+            self.on_copy_ref()
+        elif ctrl and key is KeyboardKey.V:
+            self.on_assign_ref()
+
     @run_idle
     def on_apply(self, item):
         self._bouquet.clear()
@@ -180,7 +193,7 @@ class EpgDialog:
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     @run_idle
-    def on_update(self, item):
+    def on_update(self, item=None):
         self._services_model.clear()
         self._bouquet_model.clear()
         self._source_info_label.set_text("")
@@ -250,15 +263,17 @@ class EpgDialog:
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
 
-    def on_copy_ref(self, item):
+    def on_copy_ref(self, item=None):
         model, paths = self._source_view.get_selection().get_selected_rows()
         self._current_ref.clear()
-        self._current_ref.append(model[paths][1])
+        if paths:
+            self._current_ref.append(model[paths][1])
 
-    def on_assign_ref(self, item):
+    def on_assign_ref(self, item=None):
         if self._current_ref:
             model, paths = self._bouquet_view.get_selection().get_selected_rows()
             self.assign_data(model[paths], self._current_ref.pop())
+            self.update_epg_count()
 
     def on_edit(self, item):
         response = IptvDialog(self._dialog,
