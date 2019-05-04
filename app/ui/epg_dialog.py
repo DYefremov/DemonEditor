@@ -5,6 +5,7 @@ import urllib.request
 from enum import Enum
 
 from app.commons import run_idle
+from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.properties import Profile
 from app.tools.epg import EPG, ChannelsParser
@@ -55,6 +56,7 @@ class EpgDialog:
         self._current_ref = []
         self._enable_dat_filter = False
         self._use_web_source = False
+        self._update_epg_data_on_start = False
         self._refs_source = RefsSource.SERVICES
 
         builder = Gtk.Builder()
@@ -91,6 +93,7 @@ class EpgDialog:
         self._enable_filtering_switch = builder.get_object("enable_filtering_switch")
         self._epg_dat_path_entry = builder.get_object("epg_dat_path_entry")
         self._epg_dat_stb_path_entry = builder.get_object("epg_dat_stb_path_entry")
+        self._update_on_start_switch = builder.get_object("update_on_start_switch")
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
         # Setting the last size of the dialog window
         window_size = self._options.get("epg_tool_window_size", None)
@@ -102,6 +105,13 @@ class EpgDialog:
 
     @run_idle
     def init_data(self):
+        if self._update_epg_data_on_start:
+            try:
+                self.download_epg_from_stb()
+            except OSError as e:
+                self.show_info_message("Download epg.dat file error: {}".format(e), Gtk.MessageType.ERROR)
+                return
+
         for r in self._ex_fav_model:
             row = [*r[:]]
             self._bouquet_model.append(row)
@@ -125,7 +135,7 @@ class EpgDialog:
             source_count = len(self._services_model)
             if source_count == 0:
                 msg = "Current epg.dat file does not contains references for the services of this bouquet!"
-                self.show_info_message(msg, Gtk.MessageType.ERROR)
+                self.show_info_message(msg, Gtk.MessageType.WARNING)
             self._source_count_label.set_text(str(source_count))
 
     def init_lamedb_source(self, refs):
@@ -137,35 +147,21 @@ class EpgDialog:
 
     def init_xml_source(self, refs):
         data_path = self._epg_dat_path_entry.get_text()
+        xml_path = self.download_xml(data_path) if self._use_web_source else self._xml_chooser_button.get_filename()
+        if not self._use_web_source and not xml_path:
+            raise ValueError("The path to the xml file is not set!")
 
-        if self._use_web_source:
-            url = self._url_to_xml_entry.get_text()
-            path = data_path + os.path.basename(url)
-            f_name, headers = urllib.request.urlretrieve(url, path)
-            content_type = headers.get("Content-Type", "")
-
-            if content_type == "application/gzip":
-                out_file = data_path + "channels_out.xml"
-                with open(out_file, "wb") as f_out:
-                    with gzip.open(f_name, "rb") as f:
-                        shutil.copyfileobj(f, f_out)
-                os.remove(f_name)
-                s_refs, info = ChannelsParser.get_refs_from_xml(out_file)
-            else:
-                raise ValueError("Unsupported file type: {}".format(content_type))
+        try:
+            s_refs, info = ChannelsParser.get_refs_from_xml(xml_path)
+        except Exception as e:
+            raise ValueError("Xml parsing error: {}".format(e))
         else:
-            xml_path = self._xml_chooser_button.get_filename()
-            if xml_path:
-                s_refs, info = ChannelsParser.get_refs_from_xml(xml_path)
+            if refs:
+                list(map(self._services_model.append, filter(None, [s_refs.get(ref, None) for ref in refs])))
             else:
-                raise ValueError("The path to the xml file is not set!")
-
-        if refs:
-            list(map(self._services_model.append, filter(None, [s_refs.get(ref, None) for ref in refs])))
-        else:
-            for k, v in s_refs.items():
-                self._services_model.append(v)
-        self.update_source_info(info)
+                for k, v in s_refs.items():
+                    self._services_model.append(v)
+            self.update_source_info(info)
 
     def show(self):
         self._dialog.show()
@@ -362,6 +358,8 @@ class EpgDialog:
             epg_dat_path = epg_options.get("epg_dat_path", epg_dat_path)
             self._epg_dat_path_entry.set_text(epg_dat_path)
             self._epg_dat_stb_path_entry.set_text(epg_options.get("epg_dat_stb_path", default_epg_data_stb_path))
+            self._update_epg_data_on_start = epg_options.get("epg_data_update_on_start", False)
+            self._update_on_start_switch.set_active(self._update_epg_data_on_start)
             local_xml_path = epg_options.get("local_path_to_xml", None)
             if local_xml_path:
                 self._xml_chooser_button.set_filename(local_xml_path)
@@ -374,7 +372,8 @@ class EpgDialog:
                        "url_to_xml": self._url_to_xml_entry.get_text(),
                        "enable_filtering": self._enable_filtering_switch.get_active(),
                        "epg_dat_path": self._epg_dat_path_entry.get_text(),
-                       "epg_dat_stb_path": self._epg_dat_stb_path_entry.get_text()}
+                       "epg_dat_stb_path": self._epg_dat_stb_path_entry.get_text(),
+                       "epg_data_update_on_start": self._update_on_start_switch.get_active()}
         self._options["epg_options"] = epg_options
 
     def on_resize(self, window):
@@ -387,6 +386,7 @@ class EpgDialog:
 
     def on_enable_filtering_switch(self, switch, state):
         self._epg_dat_source_box.set_sensitive(state)
+        self._update_on_start_switch.set_active(False if not state else self._update_epg_data_on_start)
 
     def on_update_on_start_switch(self, switch, state):
         pass
@@ -397,6 +397,36 @@ class EpgDialog:
 
     def on_field_icon_press(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, self._options)
+
+    # ***************** Downloads *********************#
+
+    def download_epg_from_stb(self):
+        """ Download the epg.dat file via ftp from the receiver. """
+        download_data(properties=self._options, download_type=DownloadType.EPG, callback=print)
+
+    def download_xml(self, data_path):
+        """ Downloads gzipped xml file that contains services names with references from the web.
+
+            Returns path on the extracted xml file!
+        """
+        url = self._url_to_xml_entry.get_text()
+        file_name = os.path.basename(url)
+        path = data_path + file_name
+        f_name, headers = urllib.request.urlretrieve(url, path)
+        content_type = headers.get("Content-Type", "")
+
+        if content_type != "application/gzip":
+            raise ValueError("Unsupported file type: {}".format(content_type))
+
+        out_file = data_path + file_name.rstrip(".gz")
+        out_file = out_file if out_file.endswith(".xml") else data_path + "channels_out.xml"
+
+        with open(out_file, "wb") as f_out:
+            with gzip.open(f_name, "rb") as f:
+                shutil.copyfileobj(f, f_out)
+        os.remove(f_name)
+
+        return out_file
 
 
 if __name__ == "__main__":

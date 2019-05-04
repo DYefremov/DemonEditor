@@ -28,6 +28,7 @@ class DownloadType(Enum):
     SATELLITES = 2
     PICONS = 3
     WEBTV = 4
+    EPG = 5
 
 
 class HttpRequestType(Enum):
@@ -48,7 +49,7 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback):
         save_path = properties["data_dir_path"]
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
-        # bouquets section
+        # bouquets
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(properties["services_path"])
             ftp.dir(files.append)
@@ -58,7 +59,7 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback):
                 if name.endswith(file_list):
                     name = name.split()[-1]
                     download_file(ftp, name, save_path, callback)
-        # satellites.xml and webtv section
+        # satellites.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES, DownloadType.WEBTV):
             ftp.cwd(properties["satellites_xml_path"])
             files.clear()
@@ -70,6 +71,20 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback):
                     download_file(ftp, _SAT_XML_FILE, save_path, callback)
                 if download_type in (DownloadType.ALL, DownloadType.WEBTV) and name.endswith(_WEBTV_XML_FILE):
                     download_file(ftp, _WEBTV_XML_FILE, save_path, callback)
+        # epg.dat
+        if download_type is DownloadType.EPG:
+            stb_path = properties["services_path"]
+            epg_options = properties.get("epg_options", None)
+            if epg_options:
+                stb_path = epg_options.get("epg_dat_stb_path", stb_path)
+                save_path = epg_options.get("epg_dat_path", save_path)
+            ftp.cwd(stb_path)
+            ftp.dir(files.append)
+            for file in files:
+                name = str(file).strip()
+                if name.endswith("epg.dat"):
+                    name = name.split()[-1]
+                    download_file(ftp, name, save_path, callback)
 
         if callback is not None:
             callback("\nDone.\n")
