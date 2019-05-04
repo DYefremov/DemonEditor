@@ -1,5 +1,7 @@
 import gzip
+import locale
 import os
+import re
 import shutil
 import urllib.request
 from enum import Enum
@@ -214,13 +216,28 @@ class EpgDialog:
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def on_auto_configuration(self, item):
-        source = {"".join(r[0].split()).upper(): r[1] for r in self._services_model}
+        """ Simple mapping of services by name. """
+        use_cyrillic = locale.getdefaultlocale()[0] in ("ru_RU",)  # "be_BY", "uk_UA", "sr_RS"
+        tr = None
+        if use_cyrillic:
+            symbols = (u"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯTB",
+                       u"ABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUATV")
+            tr = {ord(k): ord(v) for k, v in zip(*symbols)}
+
+        source = {}
+        for row in self._services_model:
+            name = re.sub("\\W+", "", str(row[0])).upper()
+            name = name.translate(tr) if use_cyrillic else name
+            source[name] = row[1]
+
         success_count = 0
 
         for r in self._bouquet_model:
             if r[Column.FAV_TYPE] != BqServiceType.IPTV.value:
                 continue
-            name = "".join(r[Column.FAV_SERVICE].split()).upper()
+            name = re.sub("\\W+", "", str(r[Column.FAV_SERVICE])).upper()
+            if use_cyrillic:
+                name = name.translate(tr)
             ref = source.get(name, None)
             if ref:
                 self.assign_data(r, ref, True)
