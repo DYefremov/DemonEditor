@@ -111,28 +111,24 @@ Author: Dmitriy Yefremov
     </child>
   </object>
   <object class="GtkDialog" id="input_dialog">
+    <property name="width_request">320</property>
     <property name="can_focus">False</property>
-    <property name="title"> </property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon_name">gtk-edit</property>
+    <property name="title" translatable="yes"> </property>
     <property name="type_hint">dialog</property>
-    <child type="titlebar">
+    <child>
       <placeholder/>
     </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="input_dialog_vbox">
-        <property name="width_request">320</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area2">
+          <object class="GtkButtonBox">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="button3">
+              <object class="GtkButton" id="input_dialog_cancel_button">
                 <property name="label">gtk-undo</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -146,7 +142,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button4">
+              <object class="GtkButton" id="input_dialog_ok_button">
                 <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -167,29 +163,17 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="input_dialog_box">
+          <object class="GtkEntry" id="input_entry">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
             <property name="margin_top">5</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
-            <child>
-              <object class="GtkEntry" id="input_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="primary_icon_stock">gtk-edit</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="secondary_icon_sensitive">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
+            <property name="margin_bottom">5</property>
+            <property name="primary_icon_stock">gtk-edit</property>
+            <property name="primary_icon_activatable">False</property>
+            <property name="secondary_icon_activatable">False</property>
+            <property name="secondary_icon_sensitive">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -200,71 +184,8 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">button3</action-widget>
-      <action-widget response="-5">button4</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkFileChooserDialog" id="path_chooser_dialog">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">  </property>
-    <property name="modal">True</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon_name">document-open</property>
-    <property name="type_hint">dialog</property>
-    <property name="action">select-folder</property>
-    <property name="do_overwrite_confirmation">True</property>
-    <child>
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="filechooser_dialog_vbox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="filechooser_dialog_action_area">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button2">
-                <property name="label">gtk-undo</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button1">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">button2</action-widget>
-      <action-widget response="-12">button1</action-widget>
+      <action-widget response="-6">input_dialog_cancel_button</action-widget>
+      <action-widget response="-5">input_dialog_ok_button</action-widget>
     </action-widgets>
   </object>
   <object class="GtkMessageDialog" id="question_dialog">
@@ -316,7 +237,7 @@ Author: Dmitriy Yefremov
       <placeholder/>
     </child>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox4">
+      <object class="GtkBox" id="wait_dialog_vbox">
         <property name="width_request">118</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>

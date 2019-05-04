@@ -1,9 +1,12 @@
 """ Common module for showing dialogs """
 import locale
+import os
 from enum import Enum
 
 from app.commons import run_idle
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
+
+_IS_GNOME_SESSION = bool(os.environ.get("GNOME_DESKTOP_SESSION_ID"))
 
 
 class Action(Enum):
@@ -45,55 +48,18 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
     """ Shows dialogs by name """
     if dialog_type is DialogType.INFO:
         return get_info_dialog(transient, text)
-
-    builder, dialog = get_dialog_from_xml(dialog_type, transient)
-
-    if dialog_type is DialogType.CHOOSER and options:
-        if action_type is not None:
-            dialog.set_action(action_type)
-        if file_filter is not None:
-            dialog.add_filter(file_filter)
-
-        path = options.get("data_dir_path")
-        dialog.set_current_folder(path)
-
+    elif dialog_type is DialogType.CHOOSER and options:
+        return get_file_chooser_dialog(transient, text, options, action_type, file_filter)
+    elif dialog_type is DialogType.INPUT:
+        return get_input_dialog(transient, text)
+    else:
+        builder, dialog = get_dialog_from_xml(dialog_type, transient)
+        if text:
+            dialog.set_markup(get_message(text))
         response = dialog.run()
-        if response == -12:  # -12 for fix assertion 'gtk_widget_get_can_default (widget)' failed
-            if dialog.get_filename():
-                path = dialog.get_filename()
-                if action_type is not Gtk.FileChooserAction.OPEN:
-                    path = path + "/"
-
-            response = path
         dialog.destroy()
 
         return response
-
-    if dialog_type is DialogType.INPUT:
-        entry = builder.get_object("input_entry")
-        entry.set_text(text if text else "")
-        response = dialog.run()
-        txt = entry.get_text()
-        dialog.destroy()
-
-        return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
-
-    if text:
-        dialog.set_markup(get_message(text))
-    response = dialog.run()
-    dialog.destroy()
-
-    return response
-
-
-def get_dialog_from_xml(dialog_type, transient):
-    builder = Gtk.Builder()
-    builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_type.value,))
-    dialog = builder.get_object(dialog_type.value)
-    dialog.set_transient_for(transient)
-
-    return builder, dialog
 
 
 def get_chooser_dialog(transient, options, pattern, name):
@@ -108,11 +74,57 @@ def get_chooser_dialog(transient, options, pattern, name):
                        file_filter=file_filter)
 
 
+def get_file_chooser_dialog(transient, text, options, action_type, file_filter):
+    dialog = Gtk.FileChooserDialog(get_message(text) if text else "", transient,
+                                   action_type if action_type is not None else Gtk.FileChooserAction.SELECT_FOLDER,
+                                   (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
+                                   use_header_bar=_IS_GNOME_SESSION)
+    if file_filter is not None:
+        dialog.add_filter(file_filter)
+
+    path = options.get("data_dir_path")
+    dialog.set_current_folder(path)
+    response = dialog.run()
+    if response == Gtk.ResponseType.OK:
+        if dialog.get_filename():
+            path = dialog.get_filename()
+            if action_type is not Gtk.FileChooserAction.OPEN:
+                path = path + "/"
+            response = path
+    dialog.destroy()
+
+    return response
+
+
 def get_info_dialog(transient, text):
-    dialog = Gtk.MessageDialog(parent=transient, type=Gtk.MessageType.INFO, buttons=Gtk.ButtonsType.OK)
-    dialog.set_markup(get_message(text))
+    dialog = Gtk.MessageDialog(text=get_message(text),
+                               parent=transient,
+                               type=Gtk.MessageType.INFO,
+                               buttons=Gtk.ButtonsType.OK,
+                               use_header_bar=_IS_GNOME_SESSION)
     dialog.run()
     dialog.destroy()
+
+
+def get_input_dialog(transient, text):
+    builder, dialog = get_dialog_from_xml(DialogType.INPUT, transient)
+    entry = builder.get_object("input_entry")
+    entry.set_text(text if text else "")
+    response = dialog.run()
+    txt = entry.get_text()
+    dialog.destroy()
+
+    return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
+
+
+def get_dialog_from_xml(dialog_type, transient):
+    builder = Gtk.Builder()
+    builder.set_translation_domain(TEXT_DOMAIN)
+    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_type.value,))
+    dialog = builder.get_object(dialog_type.value)
+    dialog.set_transient_for(transient)
+
+    return builder, dialog
 
 
 def get_message(message):
