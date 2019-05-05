@@ -615,7 +615,7 @@ Author: Dmitriy Yefremov
     <property name="use-header-bar">1</property>
     <property name="width_request">400</property>
     <property name="can_focus">False</property>
-    <property name="title"> IPTV streams list configuration</property>
+    <property name="title" translatable="yes">IPTV streams list configuration</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>

@@ -217,9 +217,10 @@ class EpgDialog:
 
     def on_auto_configuration(self, item):
         """ Simple mapping of services by name. """
-        use_cyrillic = locale.getdefaultlocale()[0] in ("ru_RU",)  # "be_BY", "uk_UA", "sr_RS"
+        use_cyrillic = locale.getdefaultlocale()[0] in ("ru_RU", "be_BY", "uk_UA", "sr_RS")
         tr = None
         if use_cyrillic:
+            # TODO add characters for: "be_BY", "uk_UA", "sr_RS"
             symbols = (u"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯTB",
                        u"ABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUATV")
             tr = {ord(k): ord(v) for k, v in zip(*symbols)}
