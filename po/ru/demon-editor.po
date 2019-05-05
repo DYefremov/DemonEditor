@@ -690,7 +690,7 @@ msgid "Apply"
 msgstr "Применить"
 
 msgid "EPG source"
-msgstr "Источник EPG "
+msgstr "Источник EPG"
 
 msgid "Service names source:"
 msgstr "Источник имен сервисов:"
@@ -724,6 +724,12 @@ msgstr "Путь в ресивере:"
 
 msgid "Update on start"
 msgstr "Обновлять при запуске"
+
+msgid "Auto configuration by service names."
+msgstr "Автонастройка по именам сервисов."
+
+msgid "Save list to xml."
+msgstr "Сохранить список в XML."
 
 
 
