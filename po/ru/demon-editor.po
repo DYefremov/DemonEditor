@@ -680,6 +680,52 @@ msgstr "Переклють канал и просмотр в программе(
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Воспроизведение IPTV или другого потока в программе(Ctrl + P)"
 
+msgid "Export to m3u"
+msgstr "Экспорт в m3u"
+
+msgid "EPG configuration"
+msgstr "Конфигурация EPG"
+
+msgid "Apply"
+msgstr "Применить"
+
+msgid "EPG source"
+msgstr "Источник EPG "
+
+msgid "Service names source:"
+msgstr "Источник имен сервисов:"
+
+msgid "Main service list"
+msgstr "Основной список сервисов:"
+
+msgid "XML file"
+msgstr "Файл XML"
+
+msgid "Use web source"
+msgstr "Использовать веб-источник"
+
+msgid "Url to *.xml.gz file:"
+msgstr "URL к файлу *.xml.gz:"
+
+msgid "Enable filtering"
+msgstr "Включить фильтрацию"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Фильтровать по наличию в файле epg.dat."
+
+msgid "Paths to the epg.dat file:"
+msgstr "Пути к файлу epg.dat:"
+
+msgid "Local path:"
+msgstr "Локальный путь:"
+
+msgid "STB path:"
+msgstr "Путь в ресивере:"
+
+msgid "Update on start"
+msgstr "Обновлять при запуске"
+
+
 
 
 
