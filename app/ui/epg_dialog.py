@@ -11,7 +11,7 @@ from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.properties import Profile
 from app.tools.epg import EPG, ChannelsParser
-from app.ui.dialogs import get_message, Action
+from app.ui.dialogs import get_message, Action, show_dialog, DialogType
 from app.ui.iptv import IptvListConfigurationDialog, IptvDialog
 from .main_helper import on_popup_menu, update_entry_data
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON, KeyboardKey
@@ -51,7 +51,8 @@ class EpgDialog:
                     "on_field_icon_press": self.on_field_icon_press,
                     "on_key_release": self.on_key_release}
 
-        self._services = services
+        self._services = {}
+        self._ex_services = services
         self._ex_fav_model = fav_model
         self._options = options
         self._bouquet = bouquet
@@ -116,6 +117,8 @@ class EpgDialog:
 
         for r in self._ex_fav_model:
             row = [*r[:]]
+            fav_id = r[Column.FAV_ID]
+            self._services[fav_id] = self._ex_services[fav_id].fav_id
             self._bouquet_model.append(row)
 
         self._bouquet_count_label.set_text(str(len(self._bouquet_model)))
@@ -141,10 +144,10 @@ class EpgDialog:
             self._source_count_label.set_text(str(source_count))
 
     def init_lamedb_source(self, refs):
-        srvs = {k[:k.rfind(":")]: v for k, v in self._services.items()}
+        srvs = {k[:k.rfind(":")]: v for k, v in self._ex_services.items()}
         s_types = (BqServiceType.MARKER.value, BqServiceType.IPTV.value)
         filtered = filter(None, [srvs.get(ref) for ref in refs]) if refs else filter(
-            lambda s: s.service_type not in s_types, self._services.values())
+            lambda s: s.service_type not in s_types, self._ex_services.values())
         list(map(self._services_model.append, map(lambda s: (s.service, s.fav_id), filtered)))
 
     def init_xml_source(self, refs):
@@ -183,17 +186,26 @@ class EpgDialog:
 
     @run_idle
     def on_apply(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
         self._bouquet.clear()
         list(map(self._bouquet.append, [r[Column.FAV_ID] for r in self._bouquet_model]))
         for index, row in enumerate(self._ex_fav_model):
-            row[Column.FAV_ID] = self._bouquet[index]
-
-        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+            fav_id = self._bouquet[index]
+            row[Column.FAV_ID] = fav_id
+            if row[Column.FAV_TYPE] == BqServiceType.IPTV.name:
+                old_fav_id = self._services[fav_id]
+                srv = self._ex_services.pop(old_fav_id, None)
+                if srv:
+                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id)
+        self._dialog.destroy()
 
     @run_idle
     def on_update(self, item=None):
         self._services_model.clear()
         self._bouquet_model.clear()
+        self._services.clear()
         self._source_info_label.set_text("")
         self._bouquet_epg_count_label.set_text("")
         self.init_options()
@@ -201,6 +213,10 @@ class EpgDialog:
 
     @run_idle
     def on_save_to_xml(self, item):
+        response = show_dialog(DialogType.CHOOSER, self._dialog, options=self._options)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
         services = []
         iptv_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
         for r in self._bouquet_model:
@@ -212,17 +228,18 @@ class EpgDialog:
                                      num=r[Column.FAV_NUM])
                 services.append(srv)
 
-        ChannelsParser.write_refs_to_xml(self._epg_dat_path_entry.get_text() + "channels.xml", services)
+        ChannelsParser.write_refs_to_xml(response + "channels.xml", services)
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
+    @run_idle
     def on_auto_configuration(self, item):
         """ Simple mapping of services by name. """
         use_cyrillic = locale.getdefaultlocale()[0] in ("ru_RU", "be_BY", "uk_UA", "sr_RS")
         tr = None
         if use_cyrillic:
-            # TODO add characters for: "be_BY", "uk_UA", "sr_RS"
-            symbols = (u"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯTB",
-                       u"ABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUATV")
+            # may be not entirely correct
+            symbols = (u"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯІÏҐЎЈЂЉЊЋЏTB",
+                       u"ABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUAIEGUEDLNCJTV")
             tr = {ord(k): ord(v) for k, v in zip(*symbols)}
 
         source = {}
@@ -232,6 +249,7 @@ class EpgDialog:
             source[name] = row[1]
 
         success_count = 0
+        not_founded = {}
 
         for r in self._bouquet_model:
             if r[Column.FAV_TYPE] != BqServiceType.IPTV.value:
@@ -239,10 +257,19 @@ class EpgDialog:
             name = re.sub("\\W+", "", str(r[Column.FAV_SERVICE])).upper()
             if use_cyrillic:
                 name = name.translate(tr)
-            ref = source.get(name, None)
+            ref = source.get(name, None)  # Not [pop], because the list may contain duplicates or similar names!
             if ref:
                 self.assign_data(r, ref, True)
                 success_count += 1
+            else:
+                not_founded[name] = r
+        # Additional attempt to search in the remaining elements
+        for n in not_founded:
+            for k in source:
+                if n in k:
+                    self.assign_data(not_founded[n], source[k], True)
+                    success_count += 1
+                    break
 
         self.update_epg_count()
         self.show_info_message("Done! Count of successfully configured services: {}".format(success_count),
@@ -260,7 +287,7 @@ class EpgDialog:
         new_fav_id = ":".join(fav_id_data)
         service = self._services.pop(fav_id, None)
         if service:
-            self._services[new_fav_id] = service._replace(fav_id=new_fav_id)
+            self._services[new_fav_id] = service
             row[Column.FAV_ID] = new_fav_id
             row[Column.FAV_LOCKED] = EPG_ICON
 
