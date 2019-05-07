@@ -322,10 +322,12 @@ class EpgDialog:
         if paths:
             row = self._bouquet_model[paths]
             self.reset_row_data(row)
+            self.update_epg_count()
 
     @run_idle
     def on_list_reset(self, item):
         list(map(self.reset_row_data, self._bouquet_model))
+        self.update_epg_count()
 
     def reset_row_data(self, row):
         default_fav_id = self._services.pop(row[Column.FAV_ID], None)
