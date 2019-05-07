@@ -84,10 +84,10 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="icon_name">insert-link</property>
   </object>
-  <object class="GtkImage" id="list_config_image">
+  <object class="GtkImage" id="restore_all_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-properties</property>
+    <property name="stock">gtk-select-all</property>
   </object>
   <object class="GtkMenu" id="bouquet_popup_menu">
     <property name="visible">True</property>
@@ -104,30 +104,29 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="bouquet_edit_popup_item">
-        <property name="label">gtk-edit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
       <object class="GtkSeparatorMenuItem" id="bouquet_pupup_separator">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="bouquet_list_config_popup_item">
-        <property name="label" translatable="yes">List configuration</property>
+      <object class="GtkImageMenuItem" id="bouquet_list_reset_popup_item">
+        <property name="label">gtk-revert-to-saved</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="image">list_config_image</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_reset" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="bouquet_list_reset_all_popup_item">
+        <property name="label" translatable="yes">Restore all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">restore_all_image</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_list_configuration" swapped="no"/>
+        <signal name="activate" handler="on_list_reset" swapped="no"/>
       </object>
     </child>
   </object>
@@ -955,6 +954,7 @@ Author: Dmitriy Yefremov
                         <property name="model">bouquet_list_store</property>
                         <property name="search_column">2</property>
                         <property name="enable_grid_lines">both</property>
+                        <property name="tooltip_column">9</property>
                         <signal name="button-press-event" handler="on_bouquet_popup_menu" object="bouquet_popup_menu" swapped="no"/>
                         <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
                         <signal name="key-release-event" handler="on_key_release" swapped="no"/>

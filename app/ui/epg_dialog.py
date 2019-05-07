@@ -9,10 +9,8 @@ from enum import Enum
 from app.commons import run_idle
 from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
-from app.properties import Profile
 from app.tools.epg import EPG, ChannelsParser
-from app.ui.dialogs import get_message, Action, show_dialog, DialogType
-from app.ui.iptv import IptvListConfigurationDialog, IptvDialog
+from app.ui.dialogs import get_message, show_dialog, DialogType
 from .main_helper import on_popup_menu, update_entry_data
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON, KeyboardKey
 
@@ -37,8 +35,8 @@ class EpgDialog:
                     "on_bouquet_popup_menu": self.on_bouquet_popup_menu,
                     "on_copy_ref": self.on_copy_ref,
                     "on_assign_ref": self.on_assign_ref,
-                    "on_edit": self.on_edit,
-                    "on_list_configuration": self.on_list_configuration,
+                    "on_reset": self.on_reset,
+                    "on_list_reset": self.on_list_reset,
                     "on_drag_begin": self.on_drag_begin,
                     "on_drag_data_get": self.on_drag_data_get,
                     "on_drag_data_received": self.on_drag_data_received,
@@ -61,6 +59,7 @@ class EpgDialog:
         self._use_web_source = False
         self._update_epg_data_on_start = False
         self._refs_source = RefsSource.SERVICES
+        self._show_tooltips = True
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -266,7 +265,7 @@ class EpgDialog:
         # Additional attempt to search in the remaining elements
         for n in not_founded:
             for k in source:
-                if n in k:
+                if k.startswith(n):
                     self.assign_data(not_founded[n], source[k], True)
                     success_count += 1
                     break
@@ -290,6 +289,7 @@ class EpgDialog:
             self._services[new_fav_id] = service
             row[Column.FAV_ID] = new_fav_id
             row[Column.FAV_LOCKED] = EPG_ICON
+            row[Column.FAV_TOOLTIP] = ":".join(fav_id_data[:10]) if self._show_tooltips else None
 
     def on_filter_toggled(self, button: Gtk.ToggleButton):
         self._filter_bar.set_search_mode(button.get_active())
@@ -316,24 +316,22 @@ class EpgDialog:
             self.assign_data(model[paths], self._current_ref.pop())
             self.update_epg_count()
 
-    def on_edit(self, item):
-        response = IptvDialog(self._dialog,
-                              self._bouquet_view,
-                              self._services,
-                              self._bouquet,
-                              Profile.ENIGMA_2,
-                              Action.EDIT).show()
-        if response != Gtk.ResponseType.CANCEL:
-            pass
+    @run_idle
+    def on_reset(self, item):
+        model, paths = self._bouquet_view.get_selection().get_selected_rows()
+        if paths:
+            row = self._bouquet_model[paths]
+            self.reset_row_data(row)
 
-    def on_list_configuration(self, item):
-        iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._bouquet_model))
-        IptvListConfigurationDialog(self._dialog,
-                                    self._services,
-                                    iptv_rows,
-                                    self._bouquet,
-                                    self._bouquet_model,
-                                    Profile.ENIGMA_2).show()
+    @run_idle
+    def on_list_reset(self, item):
+        list(map(self.reset_row_data, self._bouquet_model))
+
+    def reset_row_data(self, row):
+        default_fav_id = self._services.pop(row[Column.FAV_ID], None)
+        if default_fav_id:
+            self._services[default_fav_id] = default_fav_id
+            row[Column.FAV_ID], row[Column.FAV_LOCKED], row[Column.FAV_TOOLTIP] = default_fav_id, None, None
 
     @run_idle
     def show_info_message(self, text, message_type):
