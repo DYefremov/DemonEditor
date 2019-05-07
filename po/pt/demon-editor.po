@@ -680,3 +680,43 @@ msgstr "Troque o canal e ver no programa(Ctrl + W)."
 
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Tocar IPTV ou outro fluxo no programa(Ctrl + P)"
+
+msgid "Export to m3u"
+msgstr "Exportar na m3u"
+
+msgid "EPG configuration"
+msgstr "Configuraçao EPG"
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "EPG source"
+msgstr "Fonte EPG"
+
+msgid "Service names source:"
+msgstr "Fonte de nomes de serviço:"
+
+msgid "Main service list"
+msgstr "Lista de serviço principal:"
+
+msgid "XML file"
+msgstr "Arquivo XML"
+
+msgid "Use web source"
+msgstr "Usar fonte web"
+
+msgid "Url to *.xml.gz file:"
+msgstr "Url para o arquivo *.xml.gz:"
+
+msgid "Enable filtering"
+msgstr "Ativar filtragem"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Filtrar por presença no arquivo epg.dat."
+
+msgid "Paths to the epg.dat file:"
+msgstr "Ruta para o arquivo epg.dat:"
+
+msgid "Local path:"
+msgstr "Ruta local:"
+

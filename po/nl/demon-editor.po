@@ -693,3 +693,43 @@ msgstr "Schakel het kanaal in en bekijk het programma (CTRL + W)"
 
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Speel IPTV of andere stream af en bekijk het programma (CTRL + P)"
+
+msgid "Export to m3u"
+msgstr "Uitvoeren naar m3u"
+
+msgid "EPG configuration"
+msgstr "Configureer EPG"
+
+msgid "Apply"
+msgstr "Toepassen"
+
+msgid "EPG source"
+msgstr "Bron EPG"
+
+msgid "Service names source:"
+msgstr "Naam van bron van de dienst:"
+
+msgid "Main service list"
+msgstr "Hoofdlijst diensten:"
+
+msgid "XML file"
+msgstr "XML file"
+
+msgid "Use web source"
+msgstr "Gebruik web bron"
+
+msgid "Url to *.xml.gz file:"
+msgstr "URL van de *.xml.gz file:"
+
+msgid "Enable filtering"
+msgstr "Zet filteren aan"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Filter op aanwezigheid van epg.dat. file"
+
+msgid "Paths to the epg.dat file:"
+msgstr "Pad naar epg.dat:"
+
+msgid "Local path:"
+msgstr "Lokaal pad:"
+
