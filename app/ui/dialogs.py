@@ -6,7 +6,97 @@ from enum import Enum
 from app.commons import run_idle
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
-_IS_GNOME_SESSION = bool(os.environ.get("GNOME_DESKTOP_SESSION_ID"))
+_IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
+
+
+class Button(Enum):
+    def __str__(self):
+        return self.value
+
+    OK = """
+    <child type="action">
+          <object class="GtkButton" id="ok_button">
+            <property name="label">gtk-ok</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+          </object>
+        </child>
+    """
+    CANCEL = """
+    <child type="action">
+          <object class="GtkButton" id="cancel_button">
+            <property name="label">gtk-cancel</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
+          </object>
+        </child>
+    """
+
+
+class ButtonAction(Enum):
+    def __str__(self):
+        return self.value
+
+    CANCEL = '<action-widget response="-6">cancel_button</action-widget>'
+    OK = '<action-widget response="-5">ok_button</action-widget>'
+
+
+class Dialog(Enum):
+    def __str__(self):
+        return self.value
+
+    INPUT = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <interface>
+      <requires lib="gtk+" version="3.20"/>
+      <object class="GtkDialog" id="input_dialog">
+        <property name="use-header-bar">{use_header}</property>
+        <property name="default_width">320</property>
+        <property name="resizable">False</property>
+        <property name="modal">True</property>
+        <property name="title" translatable="yes">{title}</property>
+        <property name="can_focus">False</property>
+        <property name="type_hint">dialog</property>
+        {cancel_button}
+        {ok_button}
+        <child>
+          <placeholder/>
+        </child>
+        <child internal-child="vbox">
+          <object class="GtkBox">
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkEntry" id="input_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="primary_icon_stock">gtk-edit</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="secondary_icon_sensitive">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <action-widgets>
+          {cancel_action}
+          {ok_action}
+        </action-widgets>
+      </object>
+    </interface>
+    """
 
 
 class Action(Enum):
@@ -107,7 +197,12 @@ def get_info_dialog(transient, text):
 
 
 def get_input_dialog(transient, text):
-    builder, dialog = get_dialog_from_xml(DialogType.INPUT, transient)
+    builder = Gtk.Builder()
+    builder.add_from_string(Dialog.INPUT.format(use_header=_IS_GNOME_SESSION, title="",
+                                                ok_button=Button.OK, cancel_button=Button.CANCEL,
+                                                cancel_action=ButtonAction.CANCEL, ok_action=ButtonAction.OK))
+    dialog = builder.get_object("input_dialog")
+    dialog.set_transient_for(transient)
     entry = builder.get_object("input_entry")
     entry.set_text(text if text else "")
     response = dialog.run()
