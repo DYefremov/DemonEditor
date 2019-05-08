@@ -48,13 +48,10 @@ class ButtonAction(Enum):
 
 
 class Dialog(Enum):
-    def __str__(self):
-        return self.value
-
     INPUT = """
     <?xml version="1.0" encoding="UTF-8"?>
     <interface>
-      <requires lib="gtk+" version="3.20"/>
+      <requires lib="gtk+" version="3.16"/>
       <object class="GtkDialog" id="input_dialog">
         <property name="use-header-bar">{use_header}</property>
         <property name="default_width">320</property>
@@ -97,6 +94,35 @@ class Dialog(Enum):
       </object>
     </interface>
     """
+    MESSAGE = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <interface>
+      <object class="GtkMessageDialog" id="message_dialog">
+        <property name="use-header-bar">{use_header}</property>
+        <property name="width_request">320</property>
+        <property name="can_focus">False</property>
+        <property name="resizable">False</property>
+        <property name="modal">True</property>
+        <property name="default_width">320</property>
+        <property name="default_height">240</property>
+        <property name="destroy_with_parent">True</property>
+        <property name="type_hint">dialog</property>
+        <property name="message_type">question</property>
+        <property name="buttons">ok-cancel</property>
+        <property name="text" translatable="yes">Are you sure?</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child internal-child="vbox">
+          <object class="GtkBox" id="question_dialog_vbox">
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">2</property>
+          </object>
+        </child>
+      </object>
+    </interface>
+  """
 
 
 class Action(Enum):
@@ -142,6 +168,8 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
         return get_file_chooser_dialog(transient, text, options, action_type, file_filter)
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
+    elif dialog_type is DialogType.QUESTION:
+        return get_message_dialog(transient, DialogType.QUESTION)
     else:
         builder, dialog = get_dialog_from_xml(dialog_type, transient)
         if text:
@@ -198,9 +226,9 @@ def get_info_dialog(transient, text):
 
 def get_input_dialog(transient, text):
     builder = Gtk.Builder()
-    builder.add_from_string(Dialog.INPUT.format(use_header=_IS_GNOME_SESSION, title="",
-                                                ok_button=Button.OK, cancel_button=Button.CANCEL,
-                                                cancel_action=ButtonAction.CANCEL, ok_action=ButtonAction.OK))
+    builder.add_from_string(Dialog.INPUT.value.format(use_header=_IS_GNOME_SESSION, title="",
+                                                      ok_button=Button.OK, cancel_button=Button.CANCEL,
+                                                      cancel_action=ButtonAction.CANCEL, ok_action=ButtonAction.OK))
     dialog = builder.get_object("input_dialog")
     dialog.set_transient_for(transient)
     entry = builder.get_object("input_entry")
@@ -210,6 +238,16 @@ def get_input_dialog(transient, text):
     dialog.destroy()
 
     return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
+
+
+def get_message_dialog(transient, dialog_type):
+    builder = Gtk.Builder()
+    builder.add_from_string(Dialog.MESSAGE.value.format(use_header=_IS_GNOME_SESSION))
+    dialog = builder.get_object("message_dialog")
+    dialog.set_transient_for(transient)
+    response = dialog.run()
+    dialog.destroy()
+    return response
 
 
 def get_dialog_from_xml(dialog_type, transient):

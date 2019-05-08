@@ -110,41 +110,6 @@ Author: Dmitriy Yefremov
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="question_dialog">
-    <property name="width_request">320</property>
-    <property name="can_focus">False</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="default_width">320</property>
-    <property name="default_height">240</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
-    <property name="message_type">question</property>
-    <property name="buttons">ok-cancel</property>
-    <property name="text" translatable="yes">Are you sure?</property>
-    <child>
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="question_dialog_vbox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="messagedialog-action_area">
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkDialog" id="wait_dialog">
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
