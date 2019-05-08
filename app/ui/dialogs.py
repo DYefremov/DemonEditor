@@ -109,17 +109,7 @@ class Dialog(Enum):
         <property name="type_hint">dialog</property>
         <property name="message_type">question</property>
         <property name="buttons">ok-cancel</property>
-        <property name="text" translatable="yes">Are you sure?</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child internal-child="vbox">
-          <object class="GtkBox" id="question_dialog_vbox">
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">2</property>
-          </object>
-        </child>
+        <property name="text" translatable="yes">{text}</property>
       </object>
     </interface>
   """
@@ -242,7 +232,8 @@ def get_input_dialog(transient, text):
 
 def get_message_dialog(transient, dialog_type):
     builder = Gtk.Builder()
-    builder.add_from_string(Dialog.MESSAGE.value.format(use_header=_IS_GNOME_SESSION))
+    builder.set_translation_domain(TEXT_DOMAIN)
+    builder.add_from_string(Dialog.MESSAGE.value.format(use_header=0, text="Are you sure?"))
     dialog = builder.get_object("message_dialog")
     dialog.set_transient_for(transient)
     response = dialog.run()
