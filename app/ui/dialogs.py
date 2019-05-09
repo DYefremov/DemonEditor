@@ -10,9 +10,6 @@ _IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 
 
 class Button(Enum):
-    def __str__(self):
-        return self.value
-
     OK = """
     <child type="action">
           <object class="GtkButton" id="ok_button">
@@ -38,13 +35,16 @@ class Button(Enum):
         </child>
     """
 
-
-class ButtonAction(Enum):
     def __str__(self):
         return self.value
 
+
+class ButtonAction(Enum):
     CANCEL = '<action-widget response="-6">cancel_button</action-widget>'
     OK = '<action-widget response="-5">ok_button</action-widget>'
+
+    def __str__(self):
+        return self.value
 
 
 class Dialog(Enum):
@@ -60,6 +60,9 @@ class Dialog(Enum):
         <property name="title" translatable="yes">{title}</property>
         <property name="can_focus">False</property>
         <property name="type_hint">dialog</property>
+        <property name="skip_taskbar_hint">True</property>
+        <property name="skip_pager_hint">True</property>
+        <property name="gravity">center</property>
         {cancel_button}
         {ok_button}
         <child>
@@ -97,18 +100,19 @@ class Dialog(Enum):
     MESSAGE = """
     <?xml version="1.0" encoding="UTF-8"?>
     <interface>
+      <requires lib="gtk+" version="3.16"/>
       <object class="GtkMessageDialog" id="message_dialog">
         <property name="use-header-bar">{use_header}</property>
-        <property name="width_request">320</property>
         <property name="can_focus">False</property>
-        <property name="resizable">False</property>
         <property name="modal">True</property>
         <property name="default_width">320</property>
-        <property name="default_height">240</property>
         <property name="destroy_with_parent">True</property>
         <property name="type_hint">dialog</property>
-        <property name="message_type">question</property>
-        <property name="buttons">ok-cancel</property>
+        <property name="skip_taskbar_hint">True</property>
+        <property name="skip_pager_hint">True</property>
+        <property name="gravity">center</property>
+        <property name="message_type">{message_type}</property>
+        <property name="buttons">{buttons_type}</property>
         <property name="text" translatable="yes">{text}</property>
       </object>
     </interface>
@@ -121,13 +125,16 @@ class Action(Enum):
 
 
 class DialogType(Enum):
-    INPUT = "input_dialog"
-    CHOOSER = "path_chooser_dialog"
-    ERROR = "error_dialog"
-    QUESTION = "question_dialog"
+    INPUT = "input"
+    CHOOSER = "chooser"
+    ERROR = "error"
+    QUESTION = "question"
+    INFO = "info"
     ABOUT = "about_dialog"
     WAIT = "wait_dialog"
-    INFO = "info_dialog"
+
+    def __str__(self):
+        return self.value
 
 
 class WaitDialog:
@@ -152,22 +159,14 @@ class WaitDialog:
 
 def show_dialog(dialog_type: DialogType, transient, text=None, options=None, action_type=None, file_filter=None):
     """ Shows dialogs by name """
-    if dialog_type is DialogType.INFO:
-        return get_info_dialog(transient, text)
+    if dialog_type in (DialogType.INFO, DialogType.ERROR):
+        return get_message_dialog(transient, dialog_type, Gtk.ButtonsType.OK, text)
     elif dialog_type is DialogType.CHOOSER and options:
         return get_file_chooser_dialog(transient, text, options, action_type, file_filter)
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
-        return get_message_dialog(transient, DialogType.QUESTION)
-    else:
-        builder, dialog = get_dialog_from_xml(dialog_type, transient)
-        if text:
-            dialog.set_markup(get_message(text))
-        response = dialog.run()
-        dialog.destroy()
-
-        return response
+        return get_message_dialog(transient, DialogType.QUESTION, Gtk.ButtonsType.OK_CANCEL, "Are you sure?")
 
 
 def get_chooser_dialog(transient, options, pattern, name):
@@ -204,16 +203,6 @@ def get_file_chooser_dialog(transient, text, options, action_type, file_filter):
     return response
 
 
-def get_info_dialog(transient, text):
-    dialog = Gtk.MessageDialog(text=get_message(text),
-                               parent=transient,
-                               type=Gtk.MessageType.INFO,
-                               buttons=Gtk.ButtonsType.OK,
-                               use_header_bar=_IS_GNOME_SESSION)
-    dialog.run()
-    dialog.destroy()
-
-
 def get_input_dialog(transient, text):
     builder = Gtk.Builder()
     builder.add_from_string(Dialog.INPUT.value.format(use_header=_IS_GNOME_SESSION, title="",
@@ -230,10 +219,13 @@ def get_input_dialog(transient, text):
     return txt if response == Gtk.ResponseType.OK else Gtk.ResponseType.CANCEL
 
 
-def get_message_dialog(transient, dialog_type):
+def get_message_dialog(transient, message_type, buttons_type, text):
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_from_string(Dialog.MESSAGE.value.format(use_header=0, text="Are you sure?"))
+    builder.add_from_string(Dialog.MESSAGE.value.format(use_header=0,
+                                                        message_type=message_type,
+                                                        buttons_type=int(buttons_type),
+                                                        text=text))
     dialog = builder.get_object("message_dialog")
     dialog.set_transient_for(transient)
     response = dialog.run()

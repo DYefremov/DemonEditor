@@ -75,41 +75,6 @@ Author: Dmitriy Yefremov
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="error_dialog">
-    <property name="width_request">320</property>
-    <property name="can_focus">False</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="default_width">320</property>
-    <property name="default_height">240</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon_name">accessories-text-editor</property>
-    <property name="type_hint">dialog</property>
-    <property name="message_type">error</property>
-    <property name="buttons">ok</property>
-    <child>
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="error_dialog_vbox">
-        <property name="can_focus">False</property>
-        <property name="resize_mode">immediate</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="messagedialog-action_area8">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkDialog" id="wait_dialog">
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
