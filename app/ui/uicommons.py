@@ -10,6 +10,8 @@ from gi.repository import Gtk, Gdk
 # path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/demoneditor/app/ui/"
 
+IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
+
 # translation
 TEXT_DOMAIN = "demon-editor"
 if UI_RESOURCES_PATH == "app/ui/":

@@ -1,7 +1,6 @@
 import re
 import urllib
 from urllib.error import HTTPError
-
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -9,13 +8,14 @@ from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT
 from app.properties import Profile
-from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column
-from .dialogs import Action, show_dialog, DialogType
+from .dialogs import Action, show_dialog, DialogType, get_dialogs_string
 from .main_helper import get_base_model, get_iptv_url
+from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
-_PATTERN = re.compile("(?:^[\s]*$|\D)")
+_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
+_UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
 
 
 def is_data_correct(elems):
@@ -47,7 +47,8 @@ class IptvDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade", ("iptv_dialog", "stream_type_liststore"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
+                                        ("iptv_dialog", "stream_type_liststore"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("iptv_dialog")
@@ -322,8 +323,8 @@ class IptvListConfigurationDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade",
-                                      ("iptv_list_configuration_dialog", "stream_type_liststore"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
+                                        ("iptv_list_configuration_dialog", "stream_type_liststore"))
         builder.connect_signals(handlers)
 
         self._rows = iptv_rows

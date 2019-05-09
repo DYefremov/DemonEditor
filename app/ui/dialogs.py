@@ -1,12 +1,10 @@
 """ Common module for showing dialogs """
 import locale
-import os
 from enum import Enum
+from functools import lru_cache
 
 from app.commons import run_idle
-from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
-
-_IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
+from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
 
 
 class Button(Enum):
@@ -187,7 +185,7 @@ def get_file_chooser_dialog(transient, text, options, action_type, file_filter):
     dialog = Gtk.FileChooserDialog(get_message(text) if text else "", transient,
                                    action_type if action_type is not None else Gtk.FileChooserAction.SELECT_FOLDER,
                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
-                                   use_header_bar=_IS_GNOME_SESSION)
+                                   use_header_bar=IS_GNOME_SESSION)
     if file_filter is not None:
         dialog.add_filter(file_filter)
 
@@ -207,7 +205,7 @@ def get_file_chooser_dialog(transient, text, options, action_type, file_filter):
 
 def get_input_dialog(transient, text):
     builder = Gtk.Builder()
-    builder.add_from_string(Dialog.INPUT.value.format(use_header=_IS_GNOME_SESSION, title="",
+    builder.add_from_string(Dialog.INPUT.value.format(use_header=IS_GNOME_SESSION, title="",
                                                       ok_button=Button.OK, cancel_button=Button.CANCEL,
                                                       cancel_action=ButtonAction.CANCEL, ok_action=ButtonAction.OK))
     dialog = builder.get_object("input_dialog")
@@ -259,6 +257,12 @@ def get_dialog_from_xml(dialog_type, transient):
 def get_message(message):
     """ returns translated message """
     return locale.dgettext(TEXT_DOMAIN, message)
+
+
+@lru_cache(maxsize=5)
+def get_dialogs_string(path):
+    with open(path, "r") as f:
+        return "".join(f)
 
 
 if __name__ == "__main__":
