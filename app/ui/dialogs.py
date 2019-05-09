@@ -130,8 +130,8 @@ class DialogType(Enum):
     ERROR = "error"
     QUESTION = "question"
     INFO = "info"
-    ABOUT = "about_dialog"
-    WAIT = "wait_dialog"
+    ABOUT = "about"
+    WAIT = "wait"
 
     def __str__(self):
         return self.value
@@ -167,6 +167,8 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
         return get_message_dialog(transient, DialogType.QUESTION, Gtk.ButtonsType.OK_CANCEL, "Are you sure?")
+    elif dialog_type is DialogType.ABOUT:
+        return get_about_dialog(transient)
 
 
 def get_chooser_dialog(transient, options, pattern, name):
@@ -230,14 +232,25 @@ def get_message_dialog(transient, message_type, buttons_type, text):
     dialog.set_transient_for(transient)
     response = dialog.run()
     dialog.destroy()
+
+    return response
+
+
+def get_about_dialog(transient):
+    builder, dialog = get_dialog_from_xml(DialogType.ABOUT, transient)
+    dialog.set_transient_for(transient)
+    response = dialog.run()
+    dialog.destroy()
+
     return response
 
 
 def get_dialog_from_xml(dialog_type, transient):
+    dialog_name = dialog_type.value + "_dialog"
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_type.value,))
-    dialog = builder.get_object(dialog_type.value)
+    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_name,))
+    dialog = builder.get_object(dialog_name)
     dialog.set_transient_for(transient)
 
     return builder, dialog
