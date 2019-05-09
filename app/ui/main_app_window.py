@@ -1785,6 +1785,9 @@ class Application(Gtk.Application):
 
             model.set_value(itr, 0, response)
             self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
+            self._current_bq_name = response
+            self._bq_name_label.set_text(self._current_bq_name)
+            self._bq_selected = "{}:{}".format(response, bq_type)
 
     def on_rename(self, view):
         name, model = get_model_data(view)
