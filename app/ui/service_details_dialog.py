@@ -7,9 +7,11 @@ from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, P
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType, \
     SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, HIERARCHY, T_FEC
 from app.properties import Profile
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column
-from .dialogs import show_dialog, DialogType, Action
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, IS_GNOME_SESSION
+from .dialogs import show_dialog, DialogType, Action, get_dialogs_string
 from .main_helper import get_base_model
+
+_UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
 
 
 class ServiceDetailsDialog:
@@ -44,7 +46,7 @@ class ServiceDetailsDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade")
+        builder.add_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION))
         builder.connect_signals(handlers)
         self._builder = builder
 
@@ -65,9 +67,9 @@ class ServiceDetailsDialog:
         self._current_model = None
         self._current_itr = None
         # Patterns
-        self._DIGIT_PATTERN = re.compile("\D")
-        self._NON_EMPTY_PATTERN = re.compile("(?:^[\s]*$|\D)")
-        self._CAID_PATTERN = re.compile("(?:^[\s]*$)|(C:[0-9a-z]{4})(,C:[0-9a-z]{4})*")
+        self._DIGIT_PATTERN = re.compile("\\D")
+        self._NON_EMPTY_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
+        self._CAID_PATTERN = re.compile("(?:^[\\s]*$)|(C:[0-9a-z]{4})(,C:[0-9a-z]{4})*")
         # Buttons
         self._apply_button = builder.get_object("apply_button")
         self._create_button = builder.get_object("create_button")
@@ -814,8 +816,8 @@ class TransponderServicesDialog:
     def __init__(self, transient, model, transponder, tr_iters):
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "service_details_dialog.glade",
-                                      ("tr_services_dialog", "transponder_services_liststore"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
+                                        ("tr_services_dialog", "transponder_services_liststore"))
         self._dialog = builder.get_object("tr_services_dialog")
         self._dialog.set_transient_for(transient)
         self._srv_model = builder.get_object("transponder_services_liststore")
