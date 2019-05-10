@@ -425,6 +425,7 @@ Author: Dmitriy Yefremov
       <object class="GtkHeaderBar" id="satellites_editor_header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="title" translatable="yes">Satellites edit tool</property>
         <property name="spacing">1</property>
         <property name="show_close_button">True</property>
         <child>
@@ -504,13 +505,6 @@ Author: Dmitriy Yefremov
                 <property name="position">4</property>
               </packing>
             </child>
-          </object>
-        </child>
-        <child type="title">
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Satellites edit tool</property>
           </object>
         </child>
       </object>
@@ -723,7 +717,8 @@ Author: Dmitriy Yefremov
     </data>
   </object>
   <object class="GtkDialog" id="satellite_dialog">
-    <property name="use-header-bar">1</property>
+    <property name="use-header-bar">{use_header}</property>
+    <property name="title" translatable="yes">Satellite</property>
     <property name="can_focus">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
@@ -732,41 +727,29 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="satellites_dialog_header">
+    <child type="action">
+      <object class="GtkButton" id="sat_cancel_button">
+        <property name="label">gtk-cancel</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Satellite</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkButton" id="sat_cancel_button">
-            <property name="label">gtk-cancel</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="sat_ok_button">
-            <property name="label">gtk-ok</property>
-            <property name="width_request">90</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="sat_ok_button">
+        <property name="label">gtk-ok</property>
+        <property name="width_request">90</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
       </object>
     </child>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox3">
+      <object class="GtkBox" id="satelitte_dialog_vbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
@@ -792,7 +775,7 @@ Author: Dmitriy Yefremov
             <property name="label_xalign">0.019999999552965164</property>
             <property name="shadow_type">in</property>
             <child>
-              <object class="GtkGrid" id="grid3">
+              <object class="GtkGrid" id="satellite_dialog_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
@@ -914,7 +897,8 @@ Author: Dmitriy Yefremov
     </data>
   </object>
   <object class="GtkDialog" id="transponder_dialog">
-    <property name="use-header-bar">1</property>
+    <property name="use-header-bar">{use_header}</property>
+    <property name="title" translatable="yes">Transponder</property>
     <property name="width_request">320</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
@@ -926,37 +910,25 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="transponder_dialog_header">
+    <child type="action">
+      <object class="GtkButton" id="tr_cancel_button">
+        <property name="label">gtk-cancel</property>
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Transponder</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkButton" id="tr_cancel_button">
-            <property name="label">gtk-cancel</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="tr_ok_button">
-            <property name="label">gtk-ok</property>
-            <property name="width_request">90</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="tr_ok_button">
+        <property name="label">gtk-ok</property>
+        <property name="width_request">90</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
       </object>
     </child>
     <child internal-child="vbox">

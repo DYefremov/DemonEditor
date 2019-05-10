@@ -8,9 +8,11 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey
-from .dialogs import show_dialog, DialogType, WaitDialog
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION
+from .dialogs import show_dialog, DialogType, WaitDialog, get_dialogs_string
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
+
+_UI_PATH = UI_RESOURCES_PATH + "satellites_dialog.glade"
 
 
 def show_satellites_dialog(transient, options):
@@ -42,9 +44,9 @@ class SatellitesDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("satellites_editor_window", "satellites_tree_store", "popup_menu",
-                                       "left_header_menu", "popup_menu_add_image", "popup_menu_add_image_2"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH),
+                                        ("satellites_editor_window", "satellites_tree_store", "popup_menu",
+                                         "left_header_menu", "popup_menu_add_image", "popup_menu_add_image_2"))
         builder.connect_signals(handlers)
 
         self._window = builder.get_object("satellites_editor_window")
@@ -316,9 +318,9 @@ class TransponderDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("transponder_dialog", "pol_store", "fec_store", "mod_store", "system_store",
-                                       "pls_mode_store"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
+                                        ("transponder_dialog", "pol_store", "fec_store", "mod_store", "system_store",
+                                         "pls_mode_store"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("transponder_dialog")
@@ -400,8 +402,8 @@ class SatelliteDialog:
     def __init__(self, transient, satellite: Satellite = None):
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
-                                      ("satellite_dialog", "side_store", "pos_adjustment"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
+                                        ("satellite_dialog", "side_store", "pos_adjustment"))
 
         self._dialog = builder.get_object("satellite_dialog")
         self._dialog.set_transient_for(transient)
