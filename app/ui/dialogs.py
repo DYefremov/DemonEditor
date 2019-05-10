@@ -7,94 +7,7 @@ from app.commons import run_idle
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
 
 
-class Button(Enum):
-    OK = """
-    <child type="action">
-          <object class="GtkButton" id="ok_button">
-            <property name="label">gtk-ok</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-        </child>
-    """
-    CANCEL = """
-    <child type="action">
-          <object class="GtkButton" id="cancel_button">
-            <property name="label">gtk-cancel</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-        </child>
-    """
-
-    def __str__(self):
-        return self.value
-
-
-class ButtonAction(Enum):
-    CANCEL = '<action-widget response="-6">cancel_button</action-widget>'
-    OK = '<action-widget response="-5">ok_button</action-widget>'
-
-    def __str__(self):
-        return self.value
-
-
 class Dialog(Enum):
-    INPUT = """
-    <?xml version="1.0" encoding="UTF-8"?>
-    <interface>
-      <requires lib="gtk+" version="3.16"/>
-      <object class="GtkDialog" id="input_dialog">
-        <property name="use-header-bar">{use_header}</property>
-        <property name="default_width">320</property>
-        <property name="resizable">False</property>
-        <property name="modal">True</property>
-        <property name="title" translatable="yes">{title}</property>
-        <property name="can_focus">False</property>
-        <property name="type_hint">dialog</property>
-        <property name="skip_taskbar_hint">True</property>
-        <property name="skip_pager_hint">True</property>
-        <property name="gravity">center</property>
-        {cancel_button}
-        {ok_button}
-        <child>
-          <placeholder/>
-        </child>
-        <child internal-child="vbox">
-          <object class="GtkBox">
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">2</property>
-            <child>
-              <object class="GtkEntry" id="input_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="primary_icon_stock">gtk-edit</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="secondary_icon_sensitive">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-        </child>
-        <action-widgets>
-          {cancel_action}
-          {ok_action}
-        </action-widgets>
-      </object>
-    </interface>
-    """
     MESSAGE = """
     <?xml version="1.0" encoding="UTF-8"?>
     <interface>
@@ -111,7 +24,6 @@ class Dialog(Enum):
         <property name="gravity">center</property>
         <property name="message_type">{message_type}</property>
         <property name="buttons">{buttons_type}</property>
-        <property name="text" translatable="yes">{text}</property>
       </object>
     </interface>
   """
@@ -204,12 +116,7 @@ def get_file_chooser_dialog(transient, text, options, action_type, file_filter):
 
 
 def get_input_dialog(transient, text):
-    builder = Gtk.Builder()
-    builder.add_from_string(Dialog.INPUT.value.format(use_header=IS_GNOME_SESSION, title="",
-                                                      ok_button=Button.OK, cancel_button=Button.CANCEL,
-                                                      cancel_action=ButtonAction.CANCEL, ok_action=ButtonAction.OK))
-    dialog = builder.get_object("input_dialog")
-    dialog.set_transient_for(transient)
+    builder, dialog = get_dialog_from_xml(DialogType.INPUT, transient, use_header=IS_GNOME_SESSION)
     entry = builder.get_object("input_entry")
     entry.set_text(text if text else "")
     response = dialog.run()
@@ -222,12 +129,11 @@ def get_input_dialog(transient, text):
 def get_message_dialog(transient, message_type, buttons_type, text):
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_from_string(Dialog.MESSAGE.value.format(use_header=0,
-                                                        message_type=message_type,
-                                                        buttons_type=int(buttons_type),
-                                                        text=text))
+    dialog_str = Dialog.MESSAGE.value.format(use_header=0, message_type=message_type, buttons_type=int(buttons_type))
+    builder.add_from_string(dialog_str)
     dialog = builder.get_object("message_dialog")
     dialog.set_transient_for(transient)
+    dialog.set_markup(get_message(text))
     response = dialog.run()
     dialog.destroy()
 
@@ -243,11 +149,12 @@ def get_about_dialog(transient):
     return response
 
 
-def get_dialog_from_xml(dialog_type, transient):
+def get_dialog_from_xml(dialog_type, transient, use_header=0, title=""):
     dialog_name = dialog_type.value + "_dialog"
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
-    builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", (dialog_name,))
+    dialog_str = get_dialogs_string(UI_RESOURCES_PATH + "dialogs.glade").format(use_header=use_header, title=title)
+    builder.add_objects_from_string(dialog_str, (dialog_name,))
     dialog = builder.get_object(dialog_name)
     dialog.set_transient_for(transient)
 
