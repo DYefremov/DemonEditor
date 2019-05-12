@@ -7,11 +7,19 @@ from gi.repository import GLib
 _LOG_FILE = "demon-editor.log"
 _DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 _LOGGER_NAME = "main_logger"
-logging.Logger(_LOGGER_NAME)
-logging.basicConfig(level=logging.INFO,
-                    filename=_LOG_FILE,
-                    format="%(asctime)s %(message)s",
-                    datefmt=_DATE_FORMAT)
+_USE_LOG = False
+
+
+def init_logger():
+    global _USE_LOG
+    _USE_LOG = True
+    logging.Logger(_LOGGER_NAME)
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(message)s",
+                        datefmt=_DATE_FORMAT,
+                        handlers=[logging.FileHandler(_LOG_FILE),
+                                  logging.StreamHandler()])
+    log("Logging is enabled.", level=logging.INFO)
 
 
 def get_logger():
@@ -19,7 +27,7 @@ def get_logger():
 
 
 def log(message, level=logging.ERROR):
-    get_logger().log(level, message)
+    get_logger().log(level, message) if _USE_LOG else print(message)
 
 
 def run_idle(func):
