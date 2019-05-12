@@ -4,9 +4,9 @@ import sys
 from contextlib import suppress
 from functools import lru_cache
 
-from gi.repository import GLib
+from gi.repository import GLib, Gio
 
-from app.commons import run_idle, log, run_task, run_with_delay
+from app.commons import run_idle, log, run_task, run_with_delay, init_logger
 from app.connections import http_request, HttpRequestType, download_data, DownloadType, upload_data, test_http, \
     TestException
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
@@ -72,7 +72,9 @@ class Application(Gtk.Application):
                          "bouquet_import_popup_item", "import_bq_menu_button")
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
+        # Adding command line options
+        self.add_main_option("log", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
 
         handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
@@ -273,6 +275,16 @@ class Application(Gtk.Application):
         if self._player:
             self._player.release()
         Gtk.Application.do_shutdown(self)
+
+    def do_command_line(self, command_line):
+        """ Processing command line parameters. """
+        options = command_line.get_options_dict()
+        options = options.end().unpack()
+        if "log" in options:
+            init_logger()
+
+        self.activate()
+        return 0
 
     def init_drag_and_drop(self):
         """ Enable drag-and-drop """
