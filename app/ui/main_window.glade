@@ -1097,7 +1097,6 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkMenu" id="services_popup_menu">
     <property name="visible">True</property>
-    <property name="sensitive">False</property>
     <property name="can_focus">False</property>
     <child>
       <object class="GtkImageMenuItem" id="services_to_fav_end_move_popup_item">

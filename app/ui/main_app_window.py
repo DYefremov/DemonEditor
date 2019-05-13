@@ -3,6 +3,7 @@ import sys
 
 from contextlib import suppress
 from functools import lru_cache
+from itertools import chain
 
 from gi.repository import GLib, Gio
 
@@ -42,9 +43,10 @@ class Application(Gtk.Application):
     _SERVICE_LIST_NAME = "services_list_store"
     _FAV_LIST_NAME = "fav_list_store"
     _BOUQUETS_LIST_NAME = "bouquets_tree_store"
-
     # Dynamically active elements depending on the selected view
-    _SERVICE_ELEMENTS = ("services_popup_menu",)
+    _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
+                         "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
+                         "services_add_new_popup_item", "services_picon_popup_item", "services_remove_popup_item")
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
@@ -62,14 +64,6 @@ class Application(Gtk.Application):
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
-
-    _DYNAMIC_ELEMENTS = ("services_popup_menu", "new_header_button", "edit_header_button", "locked_tool_button",
-                         "fav_cut_popup_item", "fav_paste_popup_item", "bouquets_new_popup_item", "hide_tool_button",
-                         "bouquets_remove_popup_item", "fav_remove_popup_item", "bouquets_edit_popup_item",
-                         "fav_insert_marker_popup_item", "fav_edit_popup_item", "fav_edit_sub_menu_popup_item",
-                         "fav_locate_popup_item", "fav_picon_popup_item", "fav_iptv_popup_item", "fav_copy_popup_item",
-                         "bouquets_cut_popup_item", "bouquets_copy_popup_item", "bouquets_paste_popup_item",
-                         "bouquet_import_popup_item", "import_bq_menu_button")
 
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
@@ -111,7 +105,6 @@ class Application(Gtk.Application):
                     "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
                     "on_view_press": self.on_view_press,
                     "on_view_popup_menu": self.on_view_popup_menu,
-                    "on_popover_release": self.on_popover_release,
                     "on_view_focus": self.on_view_focus,
                     "on_hide": self.on_hide,
                     "on_locked": self.on_locked,
@@ -226,8 +219,6 @@ class Application(Gtk.Application):
         self._signal_box = builder.get_object("signal_box")
         self._service_name_label = builder.get_object("service_name_label")
         self._signal_level_bar = builder.get_object("signal_level_bar")
-        # Dynamically active elements depending on the selected view
-        self._tool_elements = {k: builder.get_object(k) for k in self._DYNAMIC_ELEMENTS}
         self._cas_label = builder.get_object("cas_label")
         self._fav_count_label = builder.get_object("fav_count_label")
         self._bouquets_count_label = builder.get_object("bouquets_count_label")
@@ -256,6 +247,10 @@ class Application(Gtk.Application):
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
                                                builder.get_object("search_up_button"))
+        # Dynamically active elements depending on the selected view
+        d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
+                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
+        self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
@@ -769,10 +764,6 @@ class Application(Gtk.Application):
 
             menu.popup(None, None, None, None, event.button, event.time)
             return True
-
-    def on_popover_release(self, menu, event):
-        """ Hides popover after mouse click. Used if element of Popover menu is Gtk.Button! """
-        menu.hide()
 
     @run_idle
     def on_satellite_editor_show(self, model):
