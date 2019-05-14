@@ -774,6 +774,7 @@ class Application(Gtk.Application):
         DownloadDialog(transient=self._main_window,
                        properties=self._options,
                        open_data_callback=self.open_data,
+                       update_settings_callback=self.update_options,
                        profile=Profile(self._profile)).show()
 
     @run_task
@@ -1095,17 +1096,18 @@ class Application(Gtk.Application):
     def on_preferences(self, item):
         response = show_settings_dialog(self._main_window, self._options)
         if response != Gtk.ResponseType.CANCEL:
-            profile = self._options.get("profile")
-            self._ip_label.set_text(self._options.get(profile).get("host"))
+            self.update_options()
 
-            if profile != self._profile:
-                self._profile = profile
-                self.clear_current_data()
-                self.update_services_counts()
-
-            self.update_profile_label()
-            self.init_colors(True)
-            self.init_http_api()
+    def update_options(self):
+        profile = self._options.get("profile")
+        self._ip_label.set_text(self._options.get(profile).get("host"))
+        if profile != self._profile:
+            self._profile = profile
+            self.clear_current_data()
+            self.update_services_counts()
+        self.update_profile_label()
+        self.init_colors(True)
+        self.init_http_api()
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """

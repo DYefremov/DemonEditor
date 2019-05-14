@@ -3,7 +3,6 @@ from enum import Enum
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http
 from app.properties import write_config, Profile, get_default_settings
-from app.ui.dialogs import get_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, NEW_COLOR, EXTRA_COLOR, FavClickMode
 from .main_helper import update_entry_data
 

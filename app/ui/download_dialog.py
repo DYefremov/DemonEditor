@@ -11,10 +11,11 @@ from .dialogs import show_dialog, DialogType, get_message
 
 
 class DownloadDialog:
-    def __init__(self, transient, properties, open_data_callback, profile=Profile.ENIGMA_2):
+    def __init__(self, transient, properties, open_data_callback, update_settings_callback, profile=Profile.ENIGMA_2):
         self._profile_properties = properties.get(profile.value)
         self._properties = properties
         self._open_data_callback = open_data_callback
+        self._update_settings_callback = update_settings_callback
         self._profile = profile
 
         handlers = {"on_receive": self.on_receive,
@@ -50,13 +51,9 @@ class DownloadDialog:
         self._timeout_entry = builder.get_object("timeout_entry")
         self._settings_buttons_box = builder.get_object("settings_buttons_box")
         self._use_http_switch = builder.get_object("use_http_switch")
+        self._http_radio_button = builder.get_object("http_radio_button")
+        self._use_http_box = builder.get_object("use_http_box")
         self.init_properties()
-
-        if profile is Profile.NEUTRINO_MP:
-            self._webtv_radio_button.set_visible(True)
-            builder.get_object("http_radio_button").set_visible(False)
-            builder.get_object("use_http_box").set_visible(False)
-            self._use_http_switch.set_active(False)
 
     def show(self):
         self._dialog_window.show()
@@ -64,6 +61,11 @@ class DownloadDialog:
     def init_properties(self):
         self._host_entry.set_text(self._profile_properties["host"])
         self._data_path_entry.set_text(self._profile_properties["data_dir_path"])
+        is_enigma = self._profile is Profile.ENIGMA_2
+        self._webtv_radio_button.set_visible(not is_enigma)
+        self._http_radio_button.set_visible(is_enigma)
+        self._use_http_box.set_visible(is_enigma)
+        self._use_http_switch.set_active(is_enigma)
 
     @run_idle
     def on_receive(self, item):
@@ -114,12 +116,14 @@ class DownloadDialog:
 
     def on_preferences(self, item):
         show_settings_dialog(self._dialog_window, self._properties)
+        self._profile = Profile(self._properties.get("profile", Profile.ENIGMA_2.value))
         self._profile_properties = get_config().get(self._profile.value)
+        self.init_properties()
+        self._update_settings_callback()
 
         for button in self._settings_buttons_box.get_children():
             if button.get_active():
                 self.on_settings_button(button)
-                self.init_properties()
                 break
 
     def on_info_bar_close(self, bar=None, resp=None):
