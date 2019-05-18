@@ -3,7 +3,7 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType, upload_data
 from app.properties import Profile, get_config
-from app.ui.backup import backup_data
+from app.ui.backup import backup_data, restore_data
 from app.ui.main_helper import append_text_to_tview
 from app.ui.settings_dialog import show_settings_dialog
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
@@ -69,11 +69,6 @@ class DownloadDialog:
 
     @run_idle
     def on_receive(self, item):
-        if self._profile_properties.get("backup_before_downloading", True):
-            data_path = self._profile_properties.get("data_dir_path", self._data_path_entry.get_text())
-            backup_path = self._profile_properties.get("backup_dir_path", data_path + "backup/")
-            backup_data(data_path, backup_path)
-
         self.download(True, self.get_download_type())
 
     @run_idle
@@ -132,11 +127,16 @@ class DownloadDialog:
     @run_task
     def download(self, download, d_type):
         """ Download/upload data from/to receiver """
-        try:
-            self._expander.set_expanded(True)
-            self.clear_output()
+        self._expander.set_expanded(True)
+        self.clear_output()
+        backup, backup_src, data_path = self._profile_properties.get("backup_before_downloading", True), None, None
 
+        try:
             if download:
+                if backup and d_type is not DownloadType.SATELLITES:
+                    data_path = self._profile_properties.get("data_dir_path", self._data_path_entry.get_text())
+                    backup_path = self._profile_properties.get("backup_dir_path", data_path + "backup/")
+                    backup_src = backup_data(data_path, backup_path, d_type is DownloadType.ALL)
                 download_data(properties=self._profile_properties, download_type=d_type, callback=self.append_output)
             else:
                 self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
@@ -150,6 +150,8 @@ class DownloadDialog:
         except Exception as e:
             message = str(getattr(e, "message", str(e)))
             self.show_info_message(message, Gtk.MessageType.ERROR)
+            if all((download, backup, data_path)):
+                restore_data(backup_src, data_path)
         else:
             if download and d_type is not DownloadType.SATELLITES:
                 GLib.idle_add(self._open_data_callback)

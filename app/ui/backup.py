@@ -185,16 +185,28 @@ class BackupDialog:
             self.restore(RestoreType.BOUQUETS)
 
 
-def backup_data(path, backup_path):
-    """ Creating data backup from a folder at the specified path """
+def backup_data(path, backup_path, move=True):
+    """ Creating data backup from a folder at the specified path
+
+        Returns full path to the compressed file.
+    """
     backup_path = "{}{}/".format(backup_path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     # backup files in data dir(skipping dirs and satellites.xml)
     for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
-        shutil.move(os.path.join(path, file), backup_path + file)
+        src, dst = os.path.join(path, file), backup_path + file
+        shutil.move(src, dst) if move else shutil.copy(src, dst)
     # compressing to zip and delete remaining files
-    shutil.make_archive(backup_path, "zip", backup_path)
+    zip_file = shutil.make_archive(backup_path, "zip", backup_path)
     shutil.rmtree(backup_path)
+
+    return zip_file
+
+
+def restore_data(src, dst):
+    """ Unpacks backup data. """
+    clear_data_path(dst)
+    shutil.unpack_archive(src, dst)
 
 
 def clear_data_path(path):
