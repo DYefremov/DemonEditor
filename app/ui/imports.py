@@ -173,9 +173,12 @@ class ImportDialog:
 
         bq_services = self._bq_services.get(model.get(model.get_iter(paths[0]), 0, 1))
         for bq_srv in bq_services:
-            srv = self._services.get(bq_srv.data, None)
-            if srv:
-                self._services_model.append((srv.service, srv.service_type))
+            if bq_srv.type is BqServiceType.DEFAULT:
+                srv = self._services.get(bq_srv.data, None)
+                if srv:
+                    self._services_model.append((srv.service, srv.service_type))
+            else:
+                self._services_model.append((bq_srv.name, bq_srv.type.value))
 
     def on_info_button_toggled(self, button):
         active = button.get_active()
