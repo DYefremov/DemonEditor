@@ -3,13 +3,15 @@ import time
 import concurrent.futures
 from math import fabs
 
+from gi.repository import GLib
+
 from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION
-from .dialogs import show_dialog, DialogType, WaitDialog, get_dialogs_string
+from .dialogs import show_dialog, DialogType, get_dialogs_string
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 
 _UI_PATH = UI_RESOURCES_PATH + "satellites_dialog.glade"
@@ -52,7 +54,6 @@ class SatellitesDialog:
         self._window = builder.get_object("satellites_editor_window")
         self._window.set_transient_for(transient)
         self._sat_view = builder.get_object("satellites_editor_tree_view")
-        self._wait_dialog = WaitDialog(self._window)
         # Setting the last size of the dialog window if it was saved
         window_size = self._options.get("sat_editor_window_size", None)
         if window_size:
@@ -62,7 +63,9 @@ class SatellitesDialog:
                         4: builder.get_object("fec_store"),
                         5: builder.get_object("system_store"),
                         6: builder.get_object("mod_store")}
-        self.on_satellites_list_load(self._sat_view.get_model())
+
+        gen = self.on_satellites_list_load(self._sat_view.get_model())
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def show(self):
         self._window.show()
@@ -135,25 +138,20 @@ class SatellitesDialog:
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
 
-    @run_idle
     def on_satellites_list_load(self, model):
         """ Load satellites data into model """
         try:
-            self._wait_dialog.show()
             satellites = get_satellites(self._data_path)
+            yield True
         except FileNotFoundError as e:
             show_dialog(DialogType.ERROR, self._window, getattr(e, "message", str(e)) +
                         "\n\nPlease, download files from receiver or setup your path for read data!")
+            return
         else:
             model.clear()
-            self.append_data(model, satellites)
-        finally:
-            self._wait_dialog.hide()
-
-    @run_idle
-    def append_data(self, model, satellites):
-        for sat in satellites:
-            append_satellite(model, sat)
+            for sat in satellites:
+                append_satellite(model, sat)
+                yield True
 
     def on_add(self, view):
         """ Common adding """
