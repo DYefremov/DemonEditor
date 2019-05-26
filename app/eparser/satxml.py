@@ -2,13 +2,10 @@
 
     For more info see __COMMENT
 """
-from functools import lru_cache
 from xml.dom.minidom import parse, Document
 
-import os
-
 from app.commons import log
-from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, PLS_MODE, Transponder, Satellite, get_key_by_value
+from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value
 
 __COMMENT = ("   File was created in DemonEditor\n\n"
              "usable flags are\n"
@@ -33,7 +30,7 @@ __COMMENT = ("   File was created in DemonEditor\n\n"
 
 
 def get_satellites(path):
-    return parse_satellites(path, os.path.getsize(path))
+    return parse_satellites(path)
 
 
 def write_satellites(satellites, data_path):
@@ -109,8 +106,7 @@ def parse_sat(elem):
                      parse_transponders(elem, sat_name))
 
 
-@lru_cache(maxsize=1)
-def parse_satellites(path, file_size):
+def parse_satellites(path):
     """ Parsing satellites from xml"""
     dom = parse(path)
     satellites = []
