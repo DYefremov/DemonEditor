@@ -207,7 +207,7 @@ class SatellitesParser(HTMLParser):
 
     def get_transponders_for_lyng_sat(self, trs):
         """ Parsing transponders for LyngSat """
-        frq_pol_pattern = re.compile("(\\d{4,5}).*([RLHV])(.*\\d$)")
+        frq_pol_pattern = re.compile("(\\d{4,5})\\s+([RLHV]).*")
         sr_fec_pattern = re.compile("^(\\d{4,5})-(\\d/\\d)(.+PSK)?(.*)?$")
         sys_pattern = re.compile("(DVB-S[2]?) ?(PLS+ (Root|Gold|Combo)+ (\\d+))* ?(multistream stream (\\d+))?",
                                  re.IGNORECASE)
@@ -215,7 +215,10 @@ class SatellitesParser(HTMLParser):
         pls_modes = {v: k for k, v in PLS_MODE.items()}
 
         for r in filter(lambda x: len(x) > 8, self._rows):
-            freq = re.match(frq_pol_pattern, r[2])
+            for frq in r[1], r[2], r[3]:
+                freq = re.match(frq_pol_pattern, frq)
+                if freq:
+                    break
             if not freq:
                 continue
             frq, pol = freq.group(1), freq.group(2)
