@@ -67,7 +67,7 @@ Author: Dmitriy Yefremov
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Ok</property>
-            <property name="margin_top">10</property>
+            <property name="valign">center</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="ok_button_image">
@@ -84,7 +84,7 @@ Author: Dmitriy Yefremov
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Save</property>
-            <property name="margin_top">10</property>
+            <property name="valign">center</property>
             <signal name="clicked" handler="apply_settings" swapped="no"/>
             <child>
               <object class="GtkImage" id="apply_button_image">
@@ -191,9 +191,7 @@ Author: Dmitriy Yefremov
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Reset profile</property>
             <property name="halign">end</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">2</property>
-            <property name="margin_top">10</property>
+            <property name="valign">center</property>
             <property name="always_show_image">True</property>
             <signal name="clicked" handler="on_reset" swapped="no"/>
             <child>
@@ -550,6 +548,7 @@ Author: Dmitriy Yefremov
                                       <object class="GtkEntry" id="telnet_login_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="hexpand">True</property>
                                         <property name="width_chars">12</property>
                                         <property name="max_width_chars">15</property>
                                         <property name="primary_icon_name">avatar-default-symbolic</property>
@@ -574,6 +573,7 @@ Author: Dmitriy Yefremov
                                       <object class="GtkEntry" id="telnet_password_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="hexpand">True</property>
                                         <property name="width_chars">12</property>
                                         <property name="max_width_chars">15</property>
                                         <property name="primary_icon_name">emblem-readonly</property>
