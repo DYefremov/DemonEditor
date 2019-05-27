@@ -7,6 +7,7 @@ import requests
 from enum import Enum
 from html.parser import HTMLParser
 
+from app.commons import log
 from app.eparser import Satellite, Transponder, is_transponder_valid
 from app.eparser.ecommons import PLS_MODE
 
@@ -81,14 +82,14 @@ class SatellitesParser(HTMLParser):
             try:
                 request = requests.get(url=src, headers=self._HEADERS)
             except requests.exceptions.ConnectionError as e:
-                print(repr(e))
+                log(repr(e))
                 return []
             else:
                 reason = request.reason
                 if reason == "OK":
                     self.feed(request.text)
                 else:
-                    print(reason)
+                    log(reason)
 
         if self._rows:
             if self._source is SatelliteSource.FLYSAT:
@@ -104,7 +105,9 @@ class SatellitesParser(HTMLParser):
                     r_len = len(row)
                     if r_len == 7:
                         current_pos = self.parse_position(row[2])
-                        sats.append((row[4], current_pos, row[5], row[1], False))
+                        name = row[1].rsplit("/")[-1].rstrip(".html").replace("-", " ")
+                        sats.append((name, current_pos, row[5], row[1], False))  # coupled [all in one] satellites
+                        sats.append((row[4], current_pos, row[5], row[3], False))
                     if r_len == 8:  # for a very limited number of satellites
                         data = list(filter(None, row))
                         urls = set()
@@ -125,7 +128,7 @@ class SatellitesParser(HTMLParser):
 
     def get_satellite(self, sat):
         pos = sat[1]
-        return Satellite(name=sat[0] + " ({})".format(pos),
+        return Satellite(name="{} {}".format(pos, sat[0]),
                          flags="0",
                          position=self.get_position(pos.replace(".", "")),
                          transponders=self.get_transponders(sat[3]))
