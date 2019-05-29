@@ -50,10 +50,9 @@ def parse_bouquets(file, name, bq_type):
     if BqType(bq_type) is BqType.BOUQUET:
         for bq in bouquets.bouquets:
             if bq.services:
-                name = bq.name
-                name = name[name.index("]") + 1:]
                 key = int(bq.services[0].data.split(":")[1], 16)
                 if key not in PROVIDER:
+                    pos, sep, name = bq.name.partition("]")
                     PROVIDER[key] = name
 
     return bouquets
