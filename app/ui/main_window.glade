@@ -428,6 +428,45 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
+          <object class="GtkModelButton" id="settings_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">Settings</property>
+            <signal name="clicked" handler="on_preferences" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">9</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="about_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="text" translatable="yes">About</property>
+            <signal name="clicked" handler="on_about_app" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">10</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkModelButton" id="exit_munu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -438,7 +477,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">8</property>
+            <property name="position">11</property>
           </packing>
         </child>
       </object>
@@ -884,186 +923,6 @@ Author: Dmitriy Yefremov
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-remove</property>
-  </object>
-  <object class="GtkPopoverMenu" id="right_header_popover_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkBox" id="right_popover_munu_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkModelButton" id="tools_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Tools</property>
-            <property name="menu_name">submenu1</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator" id="popover_menu_separator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="settings_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="text" translatable="yes">Settings</property>
-            <signal name="clicked" handler="on_preferences" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator" id="popover_menu_separator2">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="about_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="text" translatable="yes">About</property>
-            <signal name="clicked" handler="on_about_app" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">6</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">main</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="tools_popover_grid">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkBox" id="right_popover_munu_tools_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_right">10</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkModelButton" id="sat_editor_menu_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Satellites editor</property>
-                <signal name="clicked" handler="on_satellite_editor_show" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="picons_downloader_menu_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Picons downloader</property>
-                <signal name="clicked" handler="on_picons_loader_show" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="import_m3u_menu_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Import m3u file</property>
-                <signal name="clicked" handler="on_import_m3u" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="backup_menu_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Backup</property>
-                <signal name="clicked" handler="on_backup_tool_show" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="back_to_main_menu_tools_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
-            <property name="margin_left">5</property>
-            <property name="margin_top">5</property>
-            <property name="menu_name">main</property>
-            <property name="inverted">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">submenu1</property>
-        <property name="position">2</property>
-      </packing>
-    </child>
   </object>
   <object class="GtkImage" id="save_as_image">
     <property name="visible">True</property>
@@ -1603,61 +1462,6 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkButton" id="edit_header_button">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Edit</property>
-                <signal name="clicked" handler="on_tool_edit" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="edit_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-edit</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="new_header_button">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">New bouquet</property>
-                <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="new_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-new</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="right_header_box_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="sat_editor_header_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -1675,7 +1479,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -1696,28 +1500,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="import_m3u_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Import m3u file</property>
-                <signal name="clicked" handler="on_import_m3u" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="import_m3u_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">insert-link</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -1738,19 +1521,100 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparator" id="right_header_box_separator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="import_m3u_header_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Import m3u file</property>
+                <signal name="clicked" handler="on_import_m3u" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="import_m3u_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">insert-link</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="export_to_m3u_header_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Export to m3u</property>
+                <signal name="clicked" handler="on_export_to_m3u" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="export_to_m3u_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-save-as</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="position">6</property>
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton" id="right_menu_header_button">
+              <object class="GtkButton" id="epg_configuration_header_button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
-                <property name="direction">none</property>
-                <property name="use_popover">False</property>
-                <property name="popover">right_header_popover_menu</property>
+                <property name="tooltip_text" translatable="yes">EPG configuration</property>
+                <signal name="clicked" handler="on_epg_list_configuration" swapped="no"/>
                 <child>
-                  <placeholder/>
+                  <object class="GtkImage" id="epg_configuration_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-index</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="new_header_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">New bouquet</property>
+                <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="new_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-new</property>
+                  </object>
                 </child>
               </object>
               <packing>

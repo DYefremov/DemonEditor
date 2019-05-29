@@ -50,18 +50,19 @@ class Application(Gtk.Application):
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
-                     "fav_picon_popup_item", "fav_copy_popup_item")
+                     "fav_picon_popup_item", "fav_copy_popup_item", "fav_epg_configuration_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
-                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "edit_header_button",
-                         "new_header_button", "bouquet_import_popup_item")
+                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
+                         "bouquet_import_popup_item")
 
-    _COMMONS_ELEMENTS = ("edit_header_button", "bouquets_remove_popup_item",
-                         "fav_remove_popup_item", "import_bq_menu_button")
+    _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item", "import_bq_menu_button")
 
-    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item",)
+    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item",
+                            "epg_configuration_header_button")
 
-    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
+    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_header_button",
+                          "epg_configuration_header_button")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
@@ -258,6 +259,7 @@ class Application(Gtk.Application):
         self.init_drag_and_drop()
         self.init_colors()
         self.init_http_api()
+        self._services_view.grab_focus()
 
     def do_activate(self):
         self._main_window.set_application(self)
@@ -419,7 +421,7 @@ class Application(Gtk.Application):
             self.fav_paste(selection)
         elif target is ViewTarget.BOUQUET:
             self.bouquet_paste(selection)
-        self.on_view_focus(view, None)
+        self.on_view_focus(view)
 
     def fav_paste(self, selection):
         dest_index = 0
@@ -483,7 +485,7 @@ class Application(Gtk.Application):
         elif model_name == self._SERVICE_LIST_NAME:
             next(self.delete_services(itrs, model, rows), False)
 
-        self.on_view_focus(view, None)
+        self.on_view_focus(view)
 
         return rows
 
@@ -754,13 +756,13 @@ class Application(Gtk.Application):
             name = Gtk.Buildable.get_name(menu)
             if name == "services_popup_menu":
                 self.delete_selection(self._fav_view, self._bouquets_view)
-                self.on_view_focus(self._services_view, None)
+                self.on_view_focus(self._services_view)
             elif name == "fav_popup_menu":
                 self.delete_selection(self._services_view, self._bouquets_view)
-                self.on_view_focus(self._fav_view, None)
+                self.on_view_focus(self._fav_view)
             elif name == "bouquets_popup_menu":
                 self.delete_selection(self._services_view, self._fav_view)
-                self.on_view_focus(self._bouquets_view, None)
+                self.on_view_focus(self._bouquets_view)
 
             menu.popup(None, None, None, None, event.button, event.time)
             return True
@@ -1037,6 +1039,8 @@ class Application(Gtk.Application):
         if len(path) > 1:
             next(self.update_bouquet_services(model, path), False)
 
+        self.on_view_focus(self._bouquets_view)
+
     def update_bouquet_services(self, model, path, bq_key=None):
         """ Updates list of bouquet services """
         tree_iter = None
@@ -1195,10 +1199,11 @@ class Application(Gtk.Application):
                 self.update_fav_num_column(model)
                 self.update_bouquet_list()
 
-    def on_view_focus(self, view, focus_event):
+    def on_view_focus(self, view, focus_event=None):
         profile = Profile(self._profile)
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0  # if  > 0 model has items
+        is_service = model_name == self._SERVICE_LIST_NAME
 
         if model_name == self._BOUQUETS_LIST_NAME:
             for elem in self._tool_elements:
@@ -1211,15 +1216,10 @@ class Application(Gtk.Application):
                 for elem in self._LOCK_HIDE_ELEMENTS:
                     self._tool_elements[elem].set_sensitive(not_empty)
         else:
-            is_service = model_name == self._SERVICE_LIST_NAME
-
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "fav_paste_popup_item"):
                     self._tool_elements[elem].set_sensitive(not is_service and self._rows_buffer)
                 elif elem in self._FAV_ENIGMA_ELEMENTS:
-                    if profile is Profile.ENIGMA_2:
-                        self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
-                elif elem in self._FAV_IPTV_ELEMENTS:
                     self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
                 else:
                     self._tool_elements[elem].set_sensitive(not_empty and not is_service)
@@ -1230,8 +1230,14 @@ class Application(Gtk.Application):
             for elem in self._LOCK_HIDE_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(not_empty and profile is Profile.ENIGMA_2)
 
+        for elem in self._FAV_IPTV_ELEMENTS:
+            self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
         for elem in self._COMMONS_ELEMENTS:
             self._tool_elements[elem].set_sensitive(not_empty)
+
+        if profile is not Profile.ENIGMA_2:
+            for elem in self._FAV_ENIGMA_ELEMENTS:
+                self._tool_elements[elem].set_sensitive(False)
 
     def on_hide(self, item):
         self.set_service_flags(Flag.HIDE)
