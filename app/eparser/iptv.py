@@ -54,8 +54,8 @@ def parse_m3u(path, profile):
     return services
 
 
-def export_to_m3u(path, bouquet):
-    pattern = re.compile(".*:(http.*):.*")
+def export_to_m3u(path, bouquet, profile):
+    pattern = re.compile(".*:(http.*):.*") if profile is Profile.ENIGMA_2 else re.compile("(http.*?)::::.*")
     lines = ["#EXTM3U\n"]
     current_grp = None
 

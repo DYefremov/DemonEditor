@@ -1409,7 +1409,8 @@ class Application(Gtk.Application):
             return
 
         try:
-            export_to_m3u(response, Bouquet(self._current_bq_name, None, bq_services, None, None))
+            bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
+            export_to_m3u(response, bq, Profile(self._profile))
         except Exception as e:
             self.show_error_dialog(str(e))
         else:
