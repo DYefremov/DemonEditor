@@ -64,7 +64,10 @@ class SatellitesDialog:
                         5: builder.get_object("system_store"),
                         6: builder.get_object("mod_store")}
 
-        gen = self.on_satellites_list_load(self._sat_view.get_model())
+        self.load_satellites_list(self._sat_view.get_model())
+
+    def load_satellites_list(self, model):
+        gen = self.on_satellites_list_load(model)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def show(self):
@@ -89,7 +92,7 @@ class SatellitesDialog:
             show_dialog(DialogType.ERROR, self._window, text="No satellites.xml file is selected!")
             return
         self._data_path = response
-        self.on_satellites_list_load(model)
+        self.load_satellites_list(model)
 
     def get_file_dialog_response(self, action: Gtk.FileChooserAction):
         file_filter = Gtk.FileFilter()
