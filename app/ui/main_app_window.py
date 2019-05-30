@@ -1400,10 +1400,6 @@ class Application(Gtk.Application):
                                       r[Column.FAV_ID],
                                       r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
 
-        if not bq_services:
-            self.show_error_dialog("No data to save!")
-            return
-
         if not any(s.type is BqServiceType.IPTV for s in bq_services):
             self.show_error_dialog("This list does not contains IPTV streams!")
             return
