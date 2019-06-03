@@ -6,6 +6,8 @@ import shutil
 import urllib.request
 from enum import Enum
 
+from gi.repository import GLib
+
 from app.commons import run_idle
 from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
@@ -105,42 +107,82 @@ class EpgDialog:
         self.init_drag_and_drop()
         self.on_update()
 
+    def show(self):
+        self._dialog.show()
+
     @run_idle
+    def on_apply(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        self._bouquet.clear()
+        list(map(self._bouquet.append, [r[Column.FAV_ID] for r in self._bouquet_model]))
+        for index, row in enumerate(self._ex_fav_model):
+            fav_id = self._bouquet[index]
+            row[Column.FAV_ID] = fav_id
+            if row[Column.FAV_TYPE] == BqServiceType.IPTV.name:
+                old_fav_id = self._services[fav_id]
+                srv = self._ex_services.pop(old_fav_id, None)
+                if srv:
+                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id)
+        self._dialog.destroy()
+
+    @run_idle
+    def on_update(self, item=None):
+        self._services_model.clear()
+        self._bouquet_model.clear()
+        self._services.clear()
+        self._source_info_label.set_text("")
+        self._bouquet_epg_count_label.set_text("")
+        self.on_info_bar_close()
+        self.init_options()
+        gen = self.init_data()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
     def init_data(self):
-        if self._update_epg_data_on_start:
-            try:
-                self.download_epg_from_stb()
-            except OSError as e:
-                self.show_info_message("Download epg.dat file error: {}".format(e), Gtk.MessageType.ERROR)
-                return
-
-        for r in self._ex_fav_model:
-            row = [*r[:]]
-            fav_id = r[Column.FAV_ID]
-            self._services[fav_id] = self._ex_services[fav_id].fav_id
-            self._bouquet_model.append(row)
-
-        self._bouquet_count_label.set_text(str(len(self._bouquet_model)))
+        gen = self.init_bouquet_data()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
         try:
             refs = None
             if self._enable_dat_filter:
+                if self._update_epg_data_on_start:
+                    try:
+                        self.download_epg_from_stb()
+                    except OSError as e:
+                        self.show_info_message("Download epg.dat file error: {}".format(e), Gtk.MessageType.ERROR)
+                        return
                 refs = EPG.get_epg_refs(self._epg_dat_path_entry.get_text() + "epg.dat")
+                yield True
+
             if self._refs_source is RefsSource.SERVICES:
                 self.init_lamedb_source(refs)
+                yield True
             elif self._refs_source is RefsSource.XML:
                 self.init_xml_source(refs)
+                yield True
             else:
                 self.show_info_message("Unknown names source!", Gtk.MessageType.ERROR)
                 return
         except (FileNotFoundError, ValueError) as e:
             self.show_info_message("Read data error: {}".format(e), Gtk.MessageType.ERROR)
+            return
         else:
             source_count = len(self._services_model)
-            if source_count == 0:
+            self._source_count_label.set_text(str(source_count))
+            if self._enable_dat_filter and source_count == 0:
                 msg = "Current epg.dat file does not contains references for the services of this bouquet!"
                 self.show_info_message(msg, Gtk.MessageType.WARNING)
-            self._source_count_label.set_text(str(source_count))
+        yield True
+
+    def init_bouquet_data(self):
+        for r in self._ex_fav_model:
+            row = [*r[:]]
+            fav_id = r[Column.FAV_ID]
+            self._services[fav_id] = self._ex_services[fav_id].fav_id
+            yield self._bouquet_model.append(row)
+        self._bouquet_count_label.set_text(str(len(self._bouquet_model)))
+        yield True
 
     def init_lamedb_source(self, refs):
         srvs = {k[:k.rfind(":")]: v for k, v in self._ex_services.items()}
@@ -167,9 +209,6 @@ class EpgDialog:
                     self._services_model.append(v)
             self.update_source_info(info)
 
-    def show(self):
-        self._dialog.show()
-
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
         key_code = event.hardware_keycode
@@ -182,33 +221,6 @@ class EpgDialog:
             self.on_copy_ref()
         elif ctrl and key is KeyboardKey.V:
             self.on_assign_ref()
-
-    @run_idle
-    def on_apply(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
-        self._bouquet.clear()
-        list(map(self._bouquet.append, [r[Column.FAV_ID] for r in self._bouquet_model]))
-        for index, row in enumerate(self._ex_fav_model):
-            fav_id = self._bouquet[index]
-            row[Column.FAV_ID] = fav_id
-            if row[Column.FAV_TYPE] == BqServiceType.IPTV.name:
-                old_fav_id = self._services[fav_id]
-                srv = self._ex_services.pop(old_fav_id, None)
-                if srv:
-                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id)
-        self._dialog.destroy()
-
-    @run_idle
-    def on_update(self, item=None):
-        self._services_model.clear()
-        self._bouquet_model.clear()
-        self._services.clear()
-        self._source_info_label.set_text("")
-        self._bouquet_epg_count_label.set_text("")
-        self.init_options()
-        self.init_data()
 
     @run_idle
     def on_save_to_xml(self, item):
