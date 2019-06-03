@@ -203,10 +203,8 @@ class EpgDialog:
             raise ValueError("Xml parsing error: {}".format(e))
         else:
             if refs:
-                list(map(self._services_model.append, filter(None, [s_refs.get(ref, None) for ref in refs])))
-            else:
-                for k, v in s_refs.items():
-                    self._services_model.append(v)
+                s_refs = filter(lambda x: x.num in refs, s_refs)
+            list(map(lambda s: self._services_model.append((s.name, s.data)), s_refs))
             self.update_source_info(info)
 
     def on_key_release(self, view, event):

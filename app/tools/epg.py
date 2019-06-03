@@ -1,9 +1,9 @@
 """  Module for working with epg.dat file """
-
 import struct
+from datetime import datetime
 from xml.dom.minidom import parse, Node, Document
 
-from app.eparser.ecommons import BqServiceType
+from app.eparser.ecommons import BqServiceType, BouquetService
 
 
 class EPG:
@@ -13,7 +13,7 @@ class EPG:
         """ The read algorithm was taken from the eEPGCache::load() function from this source:
             https://github.com/OpenPLi/enigma2/blob/44d9b92f5260c7de1b3b3a1b9a9cbe0f70ca4bf0/lib/dvb/epgcache.cpp#L1300
         """
-        refs = []
+        refs = set()
 
         with open(path, mode="rb") as f:
             crc = struct.unpack("<I", f.read(4))[0]
@@ -37,7 +37,7 @@ class EPG:
                     if n_crc > 0:
                         [f.read(4) for n in range(n_crc)]
 
-                refs.append(service_id)
+                refs.add(service_id)
 
         return refs
 
@@ -47,8 +47,8 @@ class ChannelsParser:
 
     @staticmethod
     def get_refs_from_xml(path):
-        """ Returns tuple from references dict and list description. """
-        refs = {}
+        """ Returns tuple from references and description. """
+        refs = []
         dom = parse(path)
         description = "".join(n.data + "\n" for n in dom.childNodes if n.nodeType == Node.COMMENT_NODE)
 
@@ -67,7 +67,10 @@ class ChannelsParser:
                             comment_count -= 1
                         else:
                             ref_data = current_data.split(":")
-                            refs["{}:{}:{}".format(*ref_data[3:6])] = (txt, "{}:{}:{}:{}".format(*ref_data[3:7]))
+                            refs.append(BouquetService(name=txt,
+                                                       type=BqServiceType.DEFAULT,
+                                                       data="{}:{}:{}:{}".format(*ref_data[3:7]).upper(),
+                                                       num="{}:{}:{}".format(*ref_data[3:6]).upper()))
 
                     if n.hasChildNodes():
                         for s_node in n.childNodes:
@@ -78,8 +81,8 @@ class ChannelsParser:
 
     @staticmethod
     def write_refs_to_xml(path, services):
-        header = '<?xml version="1.0" encoding="utf-8"?>\n<!--  Created in DemonEditor.  -->\n<channels>\n'
-        ind = "    "
+        header = '<?xml version="1.0" encoding="utf-8"?>\n<!--  {} -->\n<!-- {} -->\n<channels>\n'.format(
+            "Created in DemonEditor.", datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
         doc = Document()
         lines = [header]
 
@@ -91,10 +94,10 @@ class ChannelsParser:
                 data = srv.data.strip().split(":")
                 channel_child.appendChild(doc.createTextNode(":".join(data[:10])))
                 comment = doc.createComment(srv.name)
-                lines.append("{}{}{}\n".format(ind, str(channel_child.toxml()), str(comment.toxml())))
+                lines.append("{} {}\n".format(str(channel_child.toxml()), str(comment.toxml())))
             elif srv_type is BqServiceType.MARKER:
                 comment = doc.createComment(srv.name)
-                lines.append("{}{}\n".format(ind, str(comment.toxml())))
+                lines.append("{}\n".format(str(comment.toxml())))
 
         lines.append("</channels>")
         doc.unlink()
