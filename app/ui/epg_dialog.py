@@ -24,7 +24,7 @@ class RefsSource(Enum):
 
 class EpgDialog:
 
-    def __init__(self, transient, options, services, bouquet, fav_model):
+    def __init__(self, transient, options, services, bouquet, fav_model, bouquet_name):
 
         handlers = {"on_apply": self.on_apply,
                     "on_update": self.on_update,
@@ -56,6 +56,7 @@ class EpgDialog:
         self._ex_fav_model = fav_model
         self._options = options
         self._bouquet = bouquet
+        self._bouquet_name = bouquet_name
         self._current_ref = []
         self._enable_dat_filter = False
         self._use_web_source = False
@@ -237,7 +238,7 @@ class EpgDialog:
                                      num=r[Column.FAV_NUM])
                 services.append(srv)
 
-        ChannelsParser.write_refs_to_xml(response + "channels.xml", services)
+        ChannelsParser.write_refs_to_xml("{}{}.xml".format(response, self._bouquet_name), services)
         self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     @run_idle

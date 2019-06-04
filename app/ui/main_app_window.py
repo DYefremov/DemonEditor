@@ -1368,7 +1368,8 @@ class Application(Gtk.Application):
             return
 
         bq = self._bouquets.get(self._bq_selected)
-        EpgDialog(self._main_window, self._options.get(self._profile), self._services, bq, self._fav_model).show()
+        profile = self._options.get(self._profile)
+        EpgDialog(self._main_window, profile, self._services, bq, self._fav_model, self._current_bq_name).show()
 
     # ***************** Import  ********************#
 
