@@ -82,7 +82,7 @@ class ChannelsParser:
     @staticmethod
     def write_refs_to_xml(path, services):
         header = '<?xml version="1.0" encoding="utf-8"?>\n<!--  {} -->\n<!-- {} -->\n<channels>\n'.format(
-            "Created in DemonEditor.", datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+            "Created in DemonEditor.", datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
         doc = Document()
         lines = [header]
 
