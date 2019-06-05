@@ -25,15 +25,18 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **Ctrl + U/B** upload data/bouquets to receiver.                                                                                                                                                                                                                                           
                                                                                                                                                                                                                                                                                                                                         
 ### Extra:                                                                                                                
-* Multiple selections in lists only with Space key (as in file managers).                                                                                                                                                                                                                                                                                                                                                                                                         
-* Ability to import IPTV into bouquet (Neutrino WEBTV) from m3u files.                                                  
-* Ability to download picons and update satellites (transponders) from web.                                                                                                                                                                                                                            
-* Preview (playing) IPTV or other streams directly from the bouquet list(should be installed VLC).                      
+* Import feature.                                                                                                                                                                                                              
+* Multiple selections in lists only with Space key (as in file managers).                                               
+* Ability to download picons and update satellites (transponders) from web.                                             
+* Ability to import into bouquet (Neutrino WEB TV) from m3u.                                                            
+* Ability to export bouquets with IPTV services to m3u.                                                                 
+* Assignment EPG from DVB or XML for IPTV services (Enigma2 only).                                                      
+* Preview (playing) IPTV or other streams directly from the bouquet list (should be installed VLC).                                
                                          
 ### Minimum requirements:
 Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings.                                                               
 
-### Launching                                                                                                           
+### Launching:                                                                                                           
 To start the program, in most cases it is enough to download the archive, unpack and run it by                                                   
 double clicking on DemonEditor.desktop in the root directory, or launching from the console                                                           
 with the command: ```./start.py```                                                                              
@@ -42,12 +45,13 @@ Extra folders can be deleted, excluding the *app* folder and root files like *De
 ### Note.
 To create a simple **debian package**, you can use the *build-deb.sh.*                                                         
 
-Tests only with openATV image and Formuler F1 receiver in my preferred Linux distros                                    
-(latest Linux Mint 18.* and 19 MATE 64-bit)!                                                                                                                                                       
+The program is tested only with openATV image and Formuler F1 receiver in my favourite Linux distributions.                                                              
+(the latest versions of Linux Mint 18.* and 19* MATE 64-bit)!                                                                                                                                                                                                                                                                             
 
-**Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!**                                     
+**Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!**                                                                          
 
-Main supported **lamedb** format is version **4**. Versions **3** and **5** has only experimental support!                                                                                                                                          
-For version **3** is only read mode available. When saving, version **4** format is used instead!                                                                                                                       
+**Important:**                                                                                                          
+Main supported **lamedb** format is version **4**. Versions **3** and **5** has only experimental support!                                                                                                                                                        
+For version **3** is only read mode available. When saving, version **4** format is used instead!                                                                                                                                             
 
 
