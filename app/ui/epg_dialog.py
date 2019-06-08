@@ -5,6 +5,7 @@ import re
 import shutil
 import urllib.request
 from enum import Enum
+from urllib.error import HTTPError, URLError
 
 from gi.repository import GLib
 
@@ -26,7 +27,8 @@ class EpgDialog:
 
     def __init__(self, transient, options, services, bouquet, fav_model, bouquet_name):
 
-        handlers = {"on_apply": self.on_apply,
+        handlers = {"on_close_dialog": self.on_close_dialog,
+                    "on_apply": self.on_apply,
                     "on_update": self.on_update,
                     "on_save_to_xml": self.on_save_to_xml,
                     "on_auto_configuration": self.on_auto_configuration,
@@ -63,6 +65,7 @@ class EpgDialog:
         self._update_epg_data_on_start = False
         self._refs_source = RefsSource.SERVICES
         self._show_tooltips = True
+        self._download_xml_is_active = False
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -78,6 +81,8 @@ class EpgDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._assign_ref_popup_item = builder.get_object("bouquet_assign_ref_popup_item")
+        self._left_header_box = builder.get_object("left_header_box")
+        self._xml_download_progress_bar = builder.get_object("xml_download_progress_bar")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_entry = builder.get_object("filter_entry")
@@ -111,6 +116,9 @@ class EpgDialog:
     def show(self):
         self._dialog.show()
 
+    def on_close_dialog(self, window, event):
+        self._download_xml_is_active = False
+
     @run_idle
     def on_apply(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
@@ -130,50 +138,50 @@ class EpgDialog:
 
     @run_idle
     def on_update(self, item=None):
+        self.clear_data()
+        self.init_options()
+        gen = self.init_data()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def clear_data(self):
         self._services_model.clear()
         self._bouquet_model.clear()
         self._services.clear()
         self._source_info_label.set_text("")
         self._bouquet_epg_count_label.set_text("")
         self.on_info_bar_close()
-        self.init_options()
-        gen = self.init_data()
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def init_data(self):
         gen = self.init_bouquet_data()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-        try:
-            refs = None
-            if self._enable_dat_filter:
-                if self._update_epg_data_on_start:
-                    try:
-                        self.download_epg_from_stb()
-                    except OSError as e:
-                        self.show_info_message("Download epg.dat file error: {}".format(e), Gtk.MessageType.ERROR)
-                        return
-                refs = EPG.get_epg_refs(self._epg_dat_path_entry.get_text() + "epg.dat")
-                yield True
+        refs = None
+        if self._enable_dat_filter:
+            if self._update_epg_data_on_start:
+                try:
+                    self.download_epg_from_stb()
+                except OSError as e:
+                    self.show_info_message("Download epg.dat file error: {}".format(e), Gtk.MessageType.ERROR)
+                    return
+            yield True
 
-            if self._refs_source is RefsSource.SERVICES:
-                self.init_lamedb_source(refs)
-                yield True
-            elif self._refs_source is RefsSource.XML:
-                self.init_xml_source(refs)
-                yield True
-            else:
-                self.show_info_message("Unknown names source!", Gtk.MessageType.ERROR)
+            try:
+                refs = EPG.get_epg_refs(self._epg_dat_path_entry.get_text() + "epg.dat")
+            except FileNotFoundError as e:
+                self.show_info_message("Read data error: {}".format(e), Gtk.MessageType.ERROR)
                 return
-        except (FileNotFoundError, ValueError) as e:
-            self.show_info_message("Read data error: {}".format(e), Gtk.MessageType.ERROR)
-            return
+            yield True
+
+        if self._refs_source is RefsSource.SERVICES:
+            self.init_lamedb_source(refs)
+        elif self._refs_source is RefsSource.XML:
+            xml_gen = self.init_xml_source(refs)
+            try:
+                yield from xml_gen
+            except ValueError as e:
+                self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
-            source_count = len(self._services_model)
-            self._source_count_label.set_text(str(source_count))
-            if self._enable_dat_filter and source_count == 0:
-                msg = "Current epg.dat file does not contains references for the services of this bouquet!"
-                self.show_info_message(msg, Gtk.MessageType.WARNING)
+            self.show_info_message("Unknown names source!", Gtk.MessageType.ERROR)
         yield True
 
     def init_bouquet_data(self):
@@ -191,22 +199,79 @@ class EpgDialog:
         filtered = filter(None, [srvs.get(ref) for ref in refs]) if refs else filter(
             lambda s: s.service_type not in s_types, self._ex_services.values())
         list(map(self._services_model.append, map(lambda s: (s.service, s.fav_id), filtered)))
+        self.update_source_count_info()
 
     def init_xml_source(self, refs):
-        data_path = self._epg_dat_path_entry.get_text()
-        xml_path = self.download_xml(data_path) if self._use_web_source else self._xml_chooser_button.get_filename()
-        if not self._use_web_source and not xml_path:
-            raise ValueError("The path to the xml file is not set!")
+        path = self._epg_dat_path_entry.get_text() if self._use_web_source else self._xml_chooser_button.get_filename()
+        if not path:
+            self.show_info_message("The path to the xml file is not set!", Gtk.MessageType.ERROR)
+            return
+
+        if self._use_web_source:
+            #  Downloading gzipped xml file that contains services names with references from the web.
+            self._download_xml_is_active = True
+            self.update_active_header_elements(False)
+            url = self._url_to_xml_entry.get_text()
+
+            try:
+                with urllib.request.urlopen(url, timeout=2) as fp:
+                    headers = fp.info()
+                    content_type = headers.get("Content-Type", "")
+
+                    if content_type != "application/gzip":
+                        self._download_xml_is_active = False
+                        raise ValueError("{} {} {}".format(get_message("Download XML file error."),
+                                                           get_message("Unsupported file type:"),
+                                                           content_type))
+
+                    file_name = os.path.basename(url)
+                    data_path = self._epg_dat_path_entry.get_text()
+
+                    with open(data_path + file_name, "wb") as tfp:
+                        bs = 1024 * 8
+                        size = -1
+                        read = 0
+                        b_num = 0
+                        if "content-length" in headers:
+                            size = int(headers["Content-Length"])
+
+                        while self._download_xml_is_active:
+                            block = fp.read(bs)
+                            if not block:
+                                break
+                            read += len(block)
+                            tfp.write(block)
+                            b_num += 1
+                            self.update_download_progress(b_num * bs / size)
+                            yield True
+
+                        path = tfp.name.rstrip(".gz")
+            except (HTTPError, URLError) as e:
+                raise ValueError("{} {}".format(get_message("Download XML file error."), e))
+            else:
+                try:
+                    with open(path, "wb") as f_out:
+                        with gzip.open(tfp.name, "rb") as f:
+                            shutil.copyfileobj(f, f_out)
+                    os.remove(tfp.name)
+                except Exception as e:
+                    raise ValueError("{} {}".format(get_message("Unpacking data error."), e))
+            finally:
+                self._download_xml_is_active = False
+                self.update_active_header_elements(True)
 
         try:
-            s_refs, info = ChannelsParser.get_refs_from_xml(xml_path)
+            s_refs, info = ChannelsParser.get_refs_from_xml(path)
+            yield True
         except Exception as e:
-            raise ValueError("Xml parsing error: {}".format(e))
+            raise ValueError("XML parsing error: {}".format(e))
         else:
             if refs:
                 s_refs = filter(lambda x: x.num in refs, s_refs)
             list(map(lambda s: self._services_model.append((s.name, s.data)), s_refs))
             self.update_source_info(info)
+            self.update_source_count_info()
+            yield True
 
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -359,9 +424,27 @@ class EpgDialog:
         self._source_view.set_tooltip_text(info)
 
     @run_idle
+    def update_source_count_info(self):
+        source_count = len(self._services_model)
+        self._source_count_label.set_text(str(source_count))
+        if self._enable_dat_filter and source_count == 0:
+            msg = "Current epg.dat file does not contains references for the services of this bouquet!"
+            self.show_info_message(msg, Gtk.MessageType.WARNING)
+
+    @run_idle
     def update_epg_count(self):
         count = len(list((filter(None, [r[Column.FAV_LOCKED] for r in self._bouquet_model]))))
         self._bouquet_epg_count_label.set_text(str(count))
+
+    @run_idle
+    def update_active_header_elements(self, state):
+        self._left_header_box.set_sensitive(state)
+        self._xml_download_progress_bar.set_visible(not state)
+        self._source_info_label.set_text("" if state else "Downloading XML:")
+
+    @run_idle
+    def update_download_progress(self, value):
+        self._xml_download_progress_bar.set_fraction(value)
 
     def on_bouquet_popup_menu(self, menu, event):
         self._assign_ref_popup_item.set_sensitive(self._current_ref)
@@ -459,30 +542,6 @@ class EpgDialog:
     def download_epg_from_stb(self):
         """ Download the epg.dat file via ftp from the receiver. """
         download_data(properties=self._options, download_type=DownloadType.EPG, callback=print)
-
-    def download_xml(self, data_path):
-        """ Downloads gzipped xml file that contains services names with references from the web.
-
-            Returns path on the extracted xml file!
-        """
-        url = self._url_to_xml_entry.get_text()
-        file_name = os.path.basename(url)
-        path = data_path + file_name
-        f_name, headers = urllib.request.urlretrieve(url, path)
-        content_type = headers.get("Content-Type", "")
-
-        if content_type != "application/gzip":
-            raise ValueError("Unsupported file type: {}".format(content_type))
-
-        out_file = data_path + file_name.rstrip(".gz")
-        out_file = out_file if out_file.endswith(".xml") else data_path + "channels_out.xml"
-
-        with open(out_file, "wb") as f_out:
-            with gzip.open(f_name, "rb") as f:
-                shutil.copyfileobj(f, f_out)
-        os.remove(f_name)
-
-        return out_file
 
 
 if __name__ == "__main__":
