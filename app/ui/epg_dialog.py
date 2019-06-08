@@ -264,7 +264,7 @@ class EpgDialog:
             s_refs, info = ChannelsParser.get_refs_from_xml(path)
             yield True
         except Exception as e:
-            raise ValueError("XML parsing error: {}".format(e))
+            raise ValueError("{} {}".format(get_message("XML parsing error:"), e))
         else:
             if refs:
                 s_refs = filter(lambda x: x.num in refs, s_refs)
@@ -347,8 +347,9 @@ class EpgDialog:
                     break
 
         self.update_epg_count()
-        self.show_info_message("Done! Count of successfully configured services: {}".format(success_count),
-                               Gtk.MessageType.INFO)
+        self.show_info_message("{} {} {}".format(get_message("Done!"),
+                                                 get_message("Count of successfully configured services:"),
+                                                 success_count), Gtk.MessageType.INFO)
 
     def assign_data(self, row, ref, show_error=False):
         if row[Column.FAV_TYPE] != BqServiceType.IPTV.value:
@@ -428,7 +429,7 @@ class EpgDialog:
         source_count = len(self._services_model)
         self._source_count_label.set_text(str(source_count))
         if self._enable_dat_filter and source_count == 0:
-            msg = "Current epg.dat file does not contains references for the services of this bouquet!"
+            msg = get_message("Current epg.dat file does not contains references for the services of this bouquet!")
             self.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_idle

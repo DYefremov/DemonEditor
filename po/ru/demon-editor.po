@@ -731,6 +731,25 @@ msgstr "Автонастройка по именам сервисов."
 msgid "Save list to xml."
 msgstr "Сохранить список в XML."
 
+msgid "Download XML file error."
+msgstr "Ошибка загрузки XML-файла."
+
+msgid "Unsupported file type:"
+msgstr "Неподдерживаемый тип файла:"
+
+msgid "Unpacking data error."
+msgstr "Ошибка распаковки данных."
+
+msgid "XML parsing error:"
+msgstr "Ошибка парсинга XML:"
+
+msgid "Count of successfully configured services:"
+msgstr "Количество успешно сконфигурированных сервисов:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Текущий файл epg.dat не содержит ссылок на сервисы данного букета!"
+
+
 
 
 
