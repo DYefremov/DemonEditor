@@ -734,4 +734,32 @@ msgstr "Ruta al archivo epg.dat:"
 msgid "Local path:"
 msgstr "Ruta local:"
 
+msgid "STB path:"
+msgstr "Ruta STB:"
 
+msgid "Update on start"
+msgstr "Actualisar al iniciar"
+
+msgid "Auto configuration by service names."
+msgstr "Auto configuración por nombres de servicios."
+
+msgid "Save list to xml."
+msgstr "Guardar como XML."
+
+msgid "Download XML file error."
+msgstr "Error bajando archivo XML."
+
+msgid "Unsupported file type:"
+msgstr "Archivo no supportado:"
+
+msgid "Unpacking data error."
+msgstr "Error abriende datos."
+
+msgid "XML parsing error:"
+msgstr "Error analisando XML:"
+
+msgid "Count of successfully configured services:"
+msgstr "Número de servicios configurados con éxito:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Archivo epg.dat actual no tiene referencias a servicios de este ramo!"

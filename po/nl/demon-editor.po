@@ -733,3 +733,33 @@ msgstr "Pad naar epg.dat:"
 msgid "Local path:"
 msgstr "Lokaal pad:"
 
+msgid "STB path:"
+msgstr "STB pad:"
+
+msgid "Update on start"
+msgstr "Actualiseer bij start"
+
+msgid "Auto configuration by service names."
+msgstr "Auto configuratie door dienst namen."
+
+msgid "Save list to xml."
+msgstr "Opslaan als XML."
+
+msgid "Download XML file error."
+msgstr "Fout bij downloaden XML."
+
+msgid "Unsupported file type:"
+msgstr "Ongesupporteerd archieftype:"
+
+msgid "Unpacking data error."
+msgstr "Fout bij uitpakken van de data."
+
+msgid "XML parsing error:"
+msgstr "XML parsingfout:"
+
+msgid "Count of successfully configured services:"
+msgstr "Aantal succesvol geconfigureerde diensten:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Huisige epg.dat bestand heeft geen referenties naar de diensten van dit boeket!"
+
