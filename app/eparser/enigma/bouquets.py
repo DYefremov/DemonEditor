@@ -14,9 +14,9 @@ def get_bouquets(path):
 
 
 def write_bouquets(path, bouquets):
-    srv_line = '#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
+    srv_line = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     line = []
-    pattern = re.compile("[^\w_()]+")
+    pattern = re.compile("[^\\w_()]+")
 
     for bqs in bouquets:
         line.clear()
@@ -28,7 +28,7 @@ def write_bouquets(path, bouquets):
                 bq_name = _DEFAULT_BOUQUET_NAME
             else:
                 bq_name = re.sub(pattern, "_", bq.name)
-            line.append(srv_line.format(bq_name, bq.type))
+            line.append(srv_line.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
             write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
 
         with open(path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
@@ -99,7 +99,7 @@ def parse_bouquets(path, bq_name, bq_type):
             if bouquets and "#SERVICE" in line:
                 name = re.match(bq_pattern, line)
                 if name:
-                    b_name, services = get_bouquet(path,  name.group(1), bq_type)
+                    b_name, services = get_bouquet(path, name.group(1), bq_type)
                     bouquets[2].append(Bouquet(name=b_name,
                                                type=bq_type,
                                                services=services,
