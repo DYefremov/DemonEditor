@@ -76,7 +76,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, options=None, act
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
-        return get_message_dialog(transient, DialogType.QUESTION, Gtk.ButtonsType.OK_CANCEL, "Are you sure?")
+        return get_message_dialog(transient, DialogType.QUESTION, Gtk.ButtonsType.OK_CANCEL, text or "Are you sure?")
     elif dialog_type is DialogType.ABOUT:
         return get_about_dialog(transient)
 
