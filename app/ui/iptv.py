@@ -1,5 +1,8 @@
+import glob
+import os
 import re
 import urllib
+from functools import lru_cache
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -16,6 +19,7 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
+_YOU_TUBE_PATTERN = re.compile(r'https://www.youtube.com/.+(?:v=|\/)([\w-]{11})&?(list=)?([\w-]{34})?.*')
 
 
 def is_data_correct(elems):
@@ -34,6 +38,33 @@ def get_stream_type(box):
     elif active == 2:
         return StreamType.NONE_REC_1.value
     return StreamType.NONE_REC_2.value
+
+
+def get_yt_link(video_id):
+    """ Getting link to YouTube video by id. """
+    headers = {"User-Agent": "Mozilla/5.0"}
+    req = Request("https://youtube.com/get_video_info?video_id={}".format(video_id), headers=headers)
+
+    with urllib.request.urlopen(req, timeout=2) as resp:
+        data = urllib.request.unquote(str(resp.readline())).split("&")
+        out = {k: v for k, sep, v in (str(d).partition("=") for d in map(urllib.request.unquote, data))}
+        return out.get("url", None)
+
+
+@lru_cache(maxsize=1)
+def get_yt_icon(icon_name, size=24):
+    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "Info" icon is returned by default! """
+    default_theme = Gtk.IconTheme.get_default()
+    if default_theme.has_icon(icon_name):
+        return default_theme.load_icon(icon_name, size, 0)
+
+    theme = Gtk.IconTheme.new()
+    for theme_name in map(os.path.basename, filter(os.path.isdir, glob.glob("/usr/share/icons/*"))):
+        theme.set_custom_theme(theme_name)
+        if theme.has_icon(icon_name):
+            return theme.load_icon(icon_name, size, 0)
+
+    return default_theme.load_icon("info", size, 0)
 
 
 class IptvDialog:
@@ -71,6 +102,7 @@ class IptvDialog:
         self._bouquet = bouquet
         self._services = services
         self._model, self._paths = view.get_selection().get_selected_rows()
+        self._yt_video_id = None
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -94,6 +126,7 @@ class IptvDialog:
             self._add_button.set_visible(True)
             if self._profile is Profile.ENIGMA_2:
                 self._update_reference_entry()
+                self._stream_type_combobox.set_active(1)
         elif self._action is Action.EDIT:
             self._current_srv = get_base_model(self._model)[self._paths][:]
             self.init_data(self._current_srv)
@@ -106,10 +139,18 @@ class IptvDialog:
             self._dialog.destroy()
 
     def on_save(self, item):
-        self.on_url_changed(self._url_entry)
+        if self._action is Action.ADD:
+            self.on_url_changed(self._url_entry)
+
         if not is_data_correct(self._digit_elems) or self._url_entry.get_name() == _DIGIT_ENTRY_NAME:
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
+
+        if self._yt_video_id:
+            text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+            if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
+                show_dialog(DialogType.ERROR, self._dialog, "Not implemented yet!")
+                return
 
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
@@ -176,8 +217,16 @@ class IptvDialog:
             self._update_reference_entry()
 
     def on_url_changed(self, entry):
-        url = urlparse(entry.get_text())
+        url_str = entry.get_text()
+        url = urlparse(url_str)
         entry.set_name("GtkEntry" if all([url.scheme, url.netloc, url.path]) else _DIGIT_ENTRY_NAME)
+        yt = re.search(_YOU_TUBE_PATTERN, url_str)
+        if yt:
+            entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
+            self._yt_video_id = yt.group(1)
+        else:
+            entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
+            self._yt_video_id = None
 
     def on_stream_type_changed(self, item):
         self._update_reference_entry()
