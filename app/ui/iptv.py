@@ -7,11 +7,13 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from gi.repository import GLib
+
 from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT
 from app.properties import Profile
-from .dialogs import Action, show_dialog, DialogType, get_dialogs_string
+from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url
 from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION
 
@@ -19,7 +21,8 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
-_YOU_TUBE_PATTERN = re.compile(r'https://www.youtube.com/.+(?:v=|\/)([\w-]{11})&?(list=)?([\w-]{34})?.*')
+_YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=|\/)([\w-]{11})&?(list=)?([\w-]{34})?.*")
+_YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
 
 
 def is_data_correct(elems):
@@ -41,14 +44,18 @@ def get_stream_type(box):
 
 
 def get_yt_link(video_id):
-    """ Getting link to YouTube video by id. """
+    """ Getting link to YouTube video by id.
+
+        returns tuple from the video link and title
+     """
     headers = {"User-Agent": "Mozilla/5.0"}
     req = Request("https://youtube.com/get_video_info?video_id={}".format(video_id), headers=headers)
-
-    with urllib.request.urlopen(req, timeout=2) as resp:
-        data = urllib.request.unquote(str(resp.readline())).split("&")
-        out = {k: v for k, sep, v in (str(d).partition("=") for d in map(urllib.request.unquote, data))}
-        return out.get("url", None)
+    while True:
+        with urllib.request.urlopen(req, timeout=2) as resp:
+            data = urllib.request.unquote(str(resp.readline())).split("&")
+            out = {k: v for k, sep, v in (str(d).partition("=") for d in map(urllib.request.unquote, data))}
+            title = out.get("title", None)
+            return out.get("url", None), title.replace("+", " ") if title else ""
 
 
 @lru_cache(maxsize=1)
@@ -74,7 +81,8 @@ class IptvDialog:
                     "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
                     "on_save": self.on_save,
-                    "on_stream_type_changed": self.on_stream_type_changed}
+                    "on_stream_type_changed": self.on_stream_type_changed,
+                    "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -97,6 +105,8 @@ class IptvDialog:
         self._add_button = builder.get_object("iptv_dialog_add_button")
         self._save_button = builder.get_object("iptv_dialog_save_button")
         self._stream_type_combobox = builder.get_object("stream_type_combobox")
+        self._info_bar = builder.get_object("info_bar")
+        self._message_label = builder.get_object("info_bar_message_label")
         self._action = action
         self._profile = profile
         self._bouquet = bouquet
@@ -143,14 +153,8 @@ class IptvDialog:
             self.on_url_changed(self._url_entry)
 
         if not is_data_correct(self._digit_elems) or self._url_entry.get_name() == _DIGIT_ENTRY_NAME:
-            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            self.show_info_message(get_message("Error. Verify the data!"), Gtk.MessageType.ERROR)
             return
-
-        if self._yt_video_id:
-            text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-            if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
-                show_dialog(DialogType.ERROR, self._dialog, "Not implemented yet!")
-                return
 
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
@@ -220,13 +224,41 @@ class IptvDialog:
         url_str = entry.get_text()
         url = urlparse(url_str)
         entry.set_name("GtkEntry" if all([url.scheme, url.netloc, url.path]) else _DIGIT_ENTRY_NAME)
-        yt = re.search(_YOU_TUBE_PATTERN, url_str)
+
+        yt = re.search(_YT_PATTERN, url_str)
         if yt:
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
-            self._yt_video_id = yt.group(1)
+            video_id = yt.group(1)
+            if video_id:
+                text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+                if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
+                    entry.set_sensitive(False)
+                    gen = self.set_yt_url(entry, video_id)
+                    GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        elif re.match(_YT_VIDEO_PATTERN, url_str):
+            entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
             self._yt_video_id = None
+
+    def set_yt_url(self, entry, video_id):
+        try:
+            link, title = get_yt_link(video_id)
+        except urllib.error.URLError as e:
+            self.show_info_message(get_message("Get link error:") + (str(e)), Gtk.MessageType.ERROR)
+            return
+        else:
+            if self._action is Action.ADD:
+                self._name_entry.set_text(title)
+
+            if link:
+                entry.set_text(link)
+            else:
+                msg = get_message("Get link error:") + " No link received for id: {}".format(video_id)
+                self.show_info_message(msg, Gtk.MessageType.ERROR)
+        finally:
+            entry.set_sensitive(True)
+        yield True
 
     def on_stream_type_changed(self, item):
         self._update_reference_entry()
@@ -268,6 +300,16 @@ class IptvDialog:
             self._model.set_value(itr, 1, IPTV_ICON)
             self._bouquet.insert(self._model.get_path(itr)[0], fav_id)
             self._services[fav_id] = Service(None, None, IPTV_ICON, name, *aggr[0:3], s_type, *aggr, fav_id, None)
+
+    @run_idle
+    def on_info_bar_close(self, bar=None, resp=None):
+        self._info_bar.set_visible(False)
+
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._info_bar.set_visible(True)
+        self._info_bar.set_message_type(message_type)
+        self._message_label.set_text(text)
 
 
 class SearchUnavailableDialog:
