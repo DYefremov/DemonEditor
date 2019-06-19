@@ -437,6 +437,7 @@ Author: Dmitriy Yefremov
                         <property name="margin_right">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
                         <signal name="changed" handler="on_url_changed" swapped="no"/>
                       </object>
                     </child>
