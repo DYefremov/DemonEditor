@@ -170,7 +170,7 @@ class IptvDialog:
             elif stream_type is StreamType.NONE_REC_2:
                 self._stream_type_combobox.set_active(3)
         except ValueError:
-            show_dialog(DialogType.ERROR, "Unknown stream type {}".format(s_type))
+            self.show_info_message("Unknown stream type {}".format(s_type), Gtk.MessageType.ERROR)
 
         self._srv_type_entry.set_text(data[2])
         self._sid_entry.set_text(str(int(data[3], 16)))
