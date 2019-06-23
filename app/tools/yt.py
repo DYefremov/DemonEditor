@@ -4,7 +4,8 @@ import urllib
 from html.parser import HTMLParser
 from urllib.request import Request
 
-_YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=|\/)([\w-]{11})&?(list=)?([\w-]{34})?.*")
+_YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
+_YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{34})?.*")
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
 _HEADERS = {"User-Agent": "Mozilla/5.0"}
 
@@ -20,6 +21,13 @@ class YouTube:
     def get_yt_id(url):
         """ Returns video id or None """
         yt = re.search(_YT_PATTERN, url)
+        if yt:
+            return yt.group(1)
+
+    @staticmethod
+    def get_yt_list_id(url):
+        """ Returns playlist id or None """
+        yt = re.search(_YT_LIST_PATTERN, url)
         if yt:
             return yt.group(1)
 

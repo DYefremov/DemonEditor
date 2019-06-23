@@ -1,3 +1,4 @@
+import concurrent.futures
 import glob
 import os
 import re
@@ -11,9 +12,9 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
-from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT
+from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id
 from app.properties import Profile
-from app.tools.yt import YouTube
+from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url
 from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION
@@ -541,6 +542,156 @@ class IptvListConfigurationDialog:
         else:
             entry.set_name("GtkEntry")
             self.update_reference()
+
+
+class YtListImportDialog:
+    def __init__(self, transient, bouquet, fav_view, profile):
+        handlers = {"on_import": self.on_import,
+                    "on_receive": self.on_receive,
+                    "on_yt_url_entry_changed": self.on_url_entry_changed,
+                    "on_yt_info_bar_close": self.on_info_bar_close,
+                    "on_selected_toggled": self.on_selected_toggled,
+                    "on_close": self.on_close}
+
+        builder = Gtk.Builder()
+        builder.set_translation_domain(TEXT_DOMAIN)
+        builder.add_objects_from_string(
+            get_dialogs_string(UI_RESOURCES_PATH + "yt_dialog.glade").format(use_header=IS_GNOME_SESSION),
+            ("yt_import_dialog_window", "yt_liststore"))
+        builder.connect_signals(handlers)
+
+        self._dialog = builder.get_object("yt_import_dialog_window")
+        self._dialog.set_transient_for(transient)
+        self._list_view_scrolled_window = builder.get_object("yt_list_view_scrolled_window")
+        self._model = builder.get_object("yt_liststore")
+        self._progress_bar = builder.get_object("yt_progress_bar")
+        self._info_bar_box = builder.get_object("yt_info_bar_box")
+        self._message_label = builder.get_object("yt_info_bar_message_label")
+        self._info_bar = builder.get_object("yt_info_bar")
+        self._url_entry = builder.get_object("yt_url_entry")
+        self._receive_button = builder.get_object("yt_receive_button")
+        self._import_button = builder.get_object("yt_import_button")
+        # style
+        self._style_provider = Gtk.CssProvider()
+        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                                    Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+        self._bouquet = bouquet
+        self._fav_path, c = fav_view.get_cursor()
+        self._fav_model = fav_view.get_model()
+        self._profile = profile
+        self._download_task = False
+        self._yt_list_id = None
+        self._yt_list_title = None
+
+    def show(self):
+        self._dialog.show()
+
+    @run_task
+    def on_import(self, item):
+        self.update_active_elements(False)
+        self._download_task = True
+
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+                done_links = []
+                futures = {executor.submit(YouTube.get_yt_link, r[1]): r for r in self._model if r[2]}
+                size = len(futures)
+                counter = 0
+
+                for future in concurrent.futures.as_completed(futures):
+                    if not self._download_task:
+                        executor.shutdown()
+                        return
+                    done_links.append(future.result())
+                    counter += 1
+                    self.update_progress_bar(counter / size)
+        except Exception as e:
+            print(e)
+        else:
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+            self.append_services(done_links)
+        finally:
+            self._download_task = False
+            self.update_active_elements(True)
+
+    def on_receive(self, item):
+        self.update_active_elements(False)
+        self._model.clear()
+        self.on_info_bar_close()
+        self.update_refs_list()
+
+    @run_task
+    def update_refs_list(self):
+        if self._yt_list_id:
+            try:
+                self._yt_list_title, links = PlayListParser.get_yt_playlist(self._yt_list_id)
+            except Exception as e:
+                print(e)
+                return
+            else:
+                gen = self.update_links(links)
+                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            finally:
+                self.update_active_elements(True)
+
+    def update_links(self, links):
+        for l in links:
+            yield self._model.append((l[0], l[1], True, None))
+
+    @run_idle
+    def append_services(self, links):
+        aggr = [None] * 10
+        print("List title:", self._yt_list_title)
+        for l in links:
+            fav_id = get_fav_id(*l, self._profile)
+            srv = Service(None, None, IPTV_ICON, l[1], *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
+            print(srv)
+
+    @run_idle
+    def update_active_elements(self, sensitive):
+        self._list_view_scrolled_window.set_visible(sensitive or not sensitive)
+        self._url_entry.set_sensitive(sensitive)
+        self._receive_button.set_sensitive(sensitive)
+        self._import_button.set_sensitive(sensitive)
+
+    def on_url_entry_changed(self, entry):
+        url_str = entry.get_text()
+        yt_id = YouTube.get_yt_list_id(url_str)
+        entry.set_name("GtkEntry" if yt_id else _DIGIT_ENTRY_NAME)
+        self._receive_button.set_sensitive(bool(yt_id))
+        self._yt_list_id = yt_id
+
+        if yt_id:
+            entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
+        else:
+            entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
+
+    @run_idle
+    def on_info_bar_close(self, bar=None, resp=None):
+        self._info_bar.set_visible(False)
+
+    @run_idle
+    def update_progress_bar(self, value):
+        self._info_bar_box.set_visible(value < 1)
+        self._progress_bar.set_fraction(value)
+
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._info_bar.set_visible(True)
+        self._info_bar.set_message_type(message_type)
+        self._message_label.set_text(text)
+
+    def on_selected_toggled(self, toggle, path):
+        self._model.set_value(self._model.get_iter(path), 2, not toggle.get_active())
+
+    @run_idle
+    def on_close(self, window, event):
+        if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+        self._download_task = False
+        self._dialog.destroy()
 
 
 if __name__ == "__main__":

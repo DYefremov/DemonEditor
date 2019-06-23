@@ -22,7 +22,7 @@ from app.ui.epg_dialog import EpgDialog
 from .backup import BackupDialog, backup_data, clear_data_path
 from .imports import ImportDialog, import_bouquet
 from .download_dialog import DownloadDialog
-from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog
+from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
     EXTRA_COLOR, NEW_COLOR, FavClickMode
@@ -110,6 +110,7 @@ class Application(Gtk.Application):
                     "on_hide": self.on_hide,
                     "on_locked": self.on_locked,
                     "on_model_changed": self.on_model_changed,
+                    "on_import_yt_list": self.on_import_yt_list,
                     "on_import_m3u": self.on_import_m3u,
                     "on_export_to_m3u": self.on_export_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
@@ -1372,6 +1373,14 @@ class Application(Gtk.Application):
         EpgDialog(self._main_window, profile, self._services, bq, self._fav_model, self._current_bq_name).show()
 
     # ***************** Import  ********************#
+
+    def on_import_yt_list(self, item):
+        """ Import playlist from YouTube """
+        if not self._bq_selected:
+            return
+
+        bq = self._bouquets.get(self._bq_selected, [])
+        YtListImportDialog(self._main_window, bq, self._fav_view, Profile(self._profile)).show()
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
