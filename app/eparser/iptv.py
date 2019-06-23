@@ -27,7 +27,7 @@ def parse_m3u(path, profile):
         groups = set()
         counter = 0
         name = None
-        fav_id = None
+        
         for line in file.readlines():
             if line.startswith("#EXTINF"):
                 name = line[1 + line.index(","):].strip()
@@ -41,12 +41,7 @@ def parse_m3u(path, profile):
                     services.append(mr)
             elif not line.startswith("#"):
                 url = line.strip()
-                if profile is Profile.ENIGMA_2:
-                    url = urllib.request.quote(line.strip())
-                    stream_type = StreamType.NONE_TS.value
-                    fav_id = ENIGMA2_FAV_ID_FORMAT.format(stream_type, 1, 0, 0, 0, 0, url, name, name, None)
-                elif profile is Profile.NEUTRINO_MP:
-                    fav_id = NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
+                fav_id = get_fav_id(url, name, profile)
                 if name and url:
                     srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
                     services.append(srv)
@@ -75,6 +70,16 @@ def export_to_m3u(path, bouquet, profile):
 
     with open(path + "{}.m3u".format(bouquet.name), "w", encoding="utf-8") as file:
         file.writelines(lines)
+
+
+def get_fav_id(url, service_name, profile):
+    """ Returns fav id depending on the profile. """
+    if profile is Profile.ENIGMA_2:
+        url = urllib.request.quote(url)
+        stream_type = StreamType.NONE_TS.value
+        return ENIGMA2_FAV_ID_FORMAT.format(stream_type, 1, 0, 0, 0, 0, url, service_name, service_name, None)
+    elif profile is Profile.NEUTRINO_MP:
+        return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
 
 
 if __name__ == "__main__":
