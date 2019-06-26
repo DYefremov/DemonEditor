@@ -16,7 +16,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
 # ***************** Markers *******************#
 
-def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
+def insert_marker(view, bouquets, selected_bouquet, services, parent_window):
     """" Inserts marker into bouquet services list. """
     response = show_dialog(DialogType.INPUT, parent_window)
     if response == Gtk.ResponseType.CANCEL:
@@ -27,16 +27,21 @@ def insert_marker(view, bouquets, selected_bouquet, channels, parent_window):
         return
 
     # Searching for max num value in all marker services (if empty default = 0)
-    max_num = max(map(lambda num: int(num.data_id, 16),
-                      filter(lambda ch: ch.service_type == BqServiceType.MARKER.name, channels.values())), default=0)
-    max_num = '{:X}'.format(max_num + 1)
+    max_num = get_max_marker_num(services)
+    max_num = "{:X}".format(max_num + 1)
     fav_id = "1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(max_num, response, response)
     s_type = BqServiceType.MARKER.name
     model, paths = view.get_selection().get_selected_rows()
     marker = (None, None, response, None, None, s_type, None, fav_id, None, None, None)
     itr = model.insert_before(model.get_iter(paths[0]), marker) if paths else model.insert(0, marker)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
-    channels[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
+    services[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, max_num, fav_id, None)
+
+
+def get_max_marker_num(services):
+    max_num = max(map(lambda num: int(num.data_id, 16),
+                      filter(lambda ch: ch.service_type == BqServiceType.MARKER.name, services.values())), default=0)
+    return max_num
 
 
 # ***************** Movement *******************#
