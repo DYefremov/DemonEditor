@@ -30,7 +30,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data, \
-    remove_all_unused_picons
+    remove_all_unused_picons, get_max_marker_num
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -1379,8 +1379,10 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        bq = self._bouquets.get(self._bq_selected, [])
-        YtListImportDialog(self._main_window, bq, self._fav_view, Profile(self._profile)).show()
+        YtListImportDialog(self._main_window,
+                           Profile(self._profile),
+                           get_max_marker_num(self._services),
+                           self.append_imported_data).show()
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
@@ -1395,12 +1397,15 @@ class Application(Gtk.Application):
         channels = parse_m3u(response, Profile(self._profile))
 
         if channels and self._bq_selected:
-            bq_services = self._bouquets.get(self._bq_selected)
-            self._fav_model.clear()
-            for ch in channels:
-                self._services[ch.fav_id] = ch
-                bq_services.append(ch.fav_id)
-            next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
+            self.append_imported_data(channels)
+
+    def append_imported_data(self, services):
+        bq_services = self._bouquets.get(self._bq_selected)
+        self._fav_model.clear()
+        for srv in services:
+            self._services[srv.fav_id] = srv
+            bq_services.append(srv.fav_id)
+        next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
     @run_idle
     def on_export_to_m3u(self, item):
@@ -1714,10 +1719,10 @@ class Application(Gtk.Application):
         if self._services_model_filter is None or self._services_model_filter == "None":
             return True
         else:
-            txt = self._filter_entry.get_text() in str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE,
-                                                                 Column.SRV_TYPE, Column.SRV_SSID, Column.SRV_FREQ,
-                                                                 Column.SRV_RATE, Column.SRV_POL, Column.SRV_FEC,
-                                                                 Column.SRV_SYSTEM, Column.SRV_POS))
+            r_txt = str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE, Column.SRV_TYPE, Column.SRV_SSID,
+                                  Column.SRV_FREQ, Column.SRV_RATE, Column.SRV_POL, Column.SRV_FEC, Column.SRV_SYSTEM,
+                                  Column.SRV_POS)).upper()
+            txt = self._filter_entry.get_text().upper() in r_txt
             type_active = self._filter_types_box.get_active() > 0
             pos_active = self._filter_sat_positions_box.get_active() > 0
             free = not model.get(itr, Column.SRV_CODED)[0] if self._filter_only_free_button.get_active() else True

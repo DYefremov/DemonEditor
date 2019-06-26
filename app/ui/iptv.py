@@ -12,7 +12,7 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
-from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id
+from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.properties import Profile
 from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
@@ -545,7 +545,7 @@ class IptvListConfigurationDialog:
 
 
 class YtListImportDialog:
-    def __init__(self, transient, bouquet, fav_view, profile):
+    def __init__(self, transient, profile, max_marker_num, appender):
         handlers = {"on_import": self.on_import,
                     "on_receive": self.on_receive,
                     "on_yt_url_entry_changed": self.on_url_entry_changed,
@@ -555,9 +555,8 @@ class YtListImportDialog:
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(
-            get_dialogs_string(UI_RESOURCES_PATH + "yt_dialog.glade").format(use_header=IS_GNOME_SESSION),
-            ("yt_import_dialog_window", "yt_liststore"))
+        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
+                                        ("yt_import_dialog_window", "yt_liststore"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("yt_import_dialog_window")
@@ -577,9 +576,8 @@ class YtListImportDialog:
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        self._bouquet = bouquet
-        self._fav_path, c = fav_view.get_cursor()
-        self._fav_model = fav_view.get_model()
+        self.appender = appender
+        self._max_marker_num = max_marker_num
         self._profile = profile
         self._download_task = False
         self._yt_list_id = None
@@ -590,6 +588,7 @@ class YtListImportDialog:
 
     @run_task
     def on_import(self, item):
+        self.on_info_bar_close()
         self.update_active_elements(False)
         self._download_task = True
 
@@ -643,11 +642,18 @@ class YtListImportDialog:
     @run_idle
     def append_services(self, links):
         aggr = [None] * 10
-        print("List title:", self._yt_list_title)
+        srvs = []
+
+        if self._yt_list_title:
+            title = self._yt_list_title
+            self._max_marker_num += 1
+            fav_id = MARKER_FORMAT.format(self._max_marker_num, title, title)
+            srvs.append(Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None))
+
         for l in links:
             fav_id = get_fav_id(*l, self._profile)
-            srv = Service(None, None, IPTV_ICON, l[1], *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
-            print(srv)
+            srvs.append(Service(None, None, IPTV_ICON, l[1], *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None))
+        self.appender(srvs)
 
     @run_idle
     def update_active_elements(self, sensitive):
