@@ -16,7 +16,7 @@ from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_
 from app.properties import Profile
 from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
-from .main_helper import get_base_model, get_iptv_url
+from .main_helper import get_base_model, get_iptv_url, on_popup_menu
 from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION
 
 _DIGIT_ENTRY_NAME = "digit-entry"
@@ -550,13 +550,17 @@ class YtListImportDialog:
                     "on_receive": self.on_receive,
                     "on_yt_url_entry_changed": self.on_url_entry_changed,
                     "on_yt_info_bar_close": self.on_info_bar_close,
+                    "on_popup_menu": on_popup_menu,
                     "on_selected_toggled": self.on_selected_toggled,
+                    "on_select_all": self.on_select_all,
+                    "on_unselect_all": self.on_unselect_all,
                     "on_close": self.on_close}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("yt_import_dialog_window", "yt_liststore"))
+                                        ("yt_import_dialog_window", "yt_liststore", "yt_popup_menu",
+                                         "remove_selection_image"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("yt_import_dialog_window")
@@ -653,11 +657,10 @@ class YtListImportDialog:
             mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, data_id, fav_id, None)
             srvs.append(mk)
 
-        aggr.append(None)
-
         for l in links:
             fav_id = get_fav_id(*l, self._profile)
-            srvs.append(Service(None, None, IPTV_ICON, l[1], *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None))
+            srv = Service(None, None, IPTV_ICON, l[1], *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
+            srvs.append(srv)
         self.appender(srvs)
 
     @run_idle
@@ -696,6 +699,15 @@ class YtListImportDialog:
 
     def on_selected_toggled(self, toggle, path):
         self._model.set_value(self._model.get_iter(path), 2, not toggle.get_active())
+
+    def on_select_all(self, view):
+        self.update_selection(view, True)
+
+    def on_unselect_all(self, view):
+        self.update_selection(view, False)
+
+    def update_selection(self, view, select):
+        view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 2, select))
 
     def on_close(self, window, event):
         if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
