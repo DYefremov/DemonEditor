@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 
 from gi.repository import GLib
 
-from app.commons import run_idle, run_task
+from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.properties import Profile
@@ -607,10 +607,11 @@ class YtListImportDialog:
                     counter += 1
                     self.update_progress_bar(counter / size)
         except Exception as e:
-            print(e)
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
-            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
-            self.append_services(done_links)
+            if self._download_task:
+                self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+                self.append_services(done_links)
         finally:
             self._download_task = False
             self.update_active_elements(True)
@@ -627,7 +628,7 @@ class YtListImportDialog:
             try:
                 self._yt_list_title, links = PlayListParser.get_yt_playlist(self._yt_list_id)
             except Exception as e:
-                print(e)
+                self.show_info_message(str(e), Gtk.MessageType.ERROR)
                 return
             else:
                 gen = self.update_links(links)
@@ -641,14 +642,18 @@ class YtListImportDialog:
 
     @run_idle
     def append_services(self, links):
-        aggr = [None] * 10
+        aggr = [None] * 9
         srvs = []
 
         if self._yt_list_title:
             title = self._yt_list_title
             self._max_marker_num += 1
-            fav_id = MARKER_FORMAT.format(self._max_marker_num, title, title)
-            srvs.append(Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None))
+            data_id = "{:X}".format(self._max_marker_num)
+            fav_id = MARKER_FORMAT.format(data_id, title, title)
+            mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, data_id, fav_id, None)
+            srvs.append(mk)
+
+        aggr.append(None)
 
         for l in links:
             fav_id = get_fav_id(*l, self._profile)
@@ -692,12 +697,10 @@ class YtListImportDialog:
     def on_selected_toggled(self, toggle, path):
         self._model.set_value(self._model.get_iter(path), 2, not toggle.get_active())
 
-    @run_idle
     def on_close(self, window, event):
         if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
+            return True
         self._download_task = False
-        self._dialog.destroy()
 
 
 if __name__ == "__main__":
