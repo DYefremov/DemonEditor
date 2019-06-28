@@ -17,7 +17,7 @@ from app.properties import Profile
 from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
-from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -554,6 +554,7 @@ class YtListImportDialog:
                     "on_selected_toggled": self.on_selected_toggled,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
+                    "on_key_press": self.on_key_press,
                     "on_close": self.on_close}
 
         builder = Gtk.Builder()
@@ -675,6 +676,7 @@ class YtListImportDialog:
         yt_id = YouTube.get_yt_list_id(url_str)
         entry.set_name("GtkEntry" if yt_id else _DIGIT_ENTRY_NAME)
         self._receive_button.set_sensitive(bool(yt_id))
+        self._import_button.set_sensitive(bool(yt_id))
         self._yt_list_id = yt_id
 
         if yt_id:
@@ -708,6 +710,18 @@ class YtListImportDialog:
 
     def update_selection(self, view, select):
         view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 2, select))
+
+    def on_key_press(self, view, event):
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+        key = KeyboardKey(key_code)
+
+        if key is KeyboardKey.SPACE:
+            path, column = view.get_cursor()
+            itr = self._model.get_iter(path)
+            selected = self._model.get_value(itr, 2)
+            self._model.set_value(itr, 2, not selected)
 
     def on_close(self, window, event):
         if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
