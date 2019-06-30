@@ -572,6 +572,7 @@ class YtListImportDialog:
         self._info_bar_box = builder.get_object("yt_info_bar_box")
         self._message_label = builder.get_object("yt_info_bar_message_label")
         self._info_bar = builder.get_object("yt_info_bar")
+        self._yt_count_label = builder.get_object("yt_count_label")
         self._url_entry = builder.get_object("yt_url_entry")
         self._receive_button = builder.get_object("yt_receive_button")
         self._import_button = builder.get_object("yt_import_button")
@@ -622,8 +623,10 @@ class YtListImportDialog:
             self.update_active_elements(True)
 
     def on_receive(self, item):
+        self.show_invisible_elements()
         self.update_active_elements(False)
         self._model.clear()
+        self._yt_count_label.set_text("0")
         self.on_info_bar_close()
         self.update_refs_list()
 
@@ -644,6 +647,9 @@ class YtListImportDialog:
     def update_links(self, links):
         for l in links:
             yield self._model.append((l[0], l[1], True, None))
+
+        self._yt_count_label.set_text(str(len(self._model)))
+        yield True
 
     @run_idle
     def append_services(self, links):
@@ -666,10 +672,14 @@ class YtListImportDialog:
 
     @run_idle
     def update_active_elements(self, sensitive):
-        self._list_view_scrolled_window.set_visible(sensitive or not sensitive)
         self._url_entry.set_sensitive(sensitive)
         self._receive_button.set_sensitive(sensitive)
         self._import_button.set_sensitive(sensitive)
+
+    def show_invisible_elements(self):
+        self._list_view_scrolled_window.set_visible(True)
+        self._info_bar_box.set_visible(True)
+        self._dialog.set_resizable(True)
 
     def on_url_entry_changed(self, entry):
         url_str = entry.get_text()
@@ -690,7 +700,7 @@ class YtListImportDialog:
 
     @run_idle
     def update_progress_bar(self, value):
-        self._info_bar_box.set_visible(value < 1)
+        self._progress_bar.set_visible(value < 1)
         self._progress_bar.set_fraction(value)
 
     @run_idle
