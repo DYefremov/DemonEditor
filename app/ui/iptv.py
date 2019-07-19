@@ -600,8 +600,9 @@ class YtListImportDialog:
 
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-                done_links = []
-                futures = {executor.submit(YouTube.get_yt_link, r[1]): r for r in self._model if r[2]}
+                done_links = {}
+                rows = list(filter(lambda r: r[2], self._model))
+                futures = {executor.submit(YouTube.get_yt_link, r[1]): r for r in rows}
                 size = len(futures)
                 counter = 0
 
@@ -609,7 +610,8 @@ class YtListImportDialog:
                     if not self._download_task:
                         executor.shutdown()
                         return
-                    done_links.append(future.result())
+
+                    done_links[futures[future]] = future.result()
                     counter += 1
                     self.update_progress_bar(counter / size)
         except Exception as e:
@@ -617,7 +619,7 @@ class YtListImportDialog:
         else:
             if self._download_task:
                 self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
-                self.append_services(done_links)
+                self.append_services([done_links[r] for r in rows])
         finally:
             self._download_task = False
             self.update_active_elements(True)

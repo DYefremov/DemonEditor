@@ -1378,6 +1378,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkCellRendererToggle" id="yt_selected_renderer">
                         <property name="width">50</property>
+                        <signal name="toggled" handler="on_selected_toggled" swapped="no"/>
                       </object>
                       <attributes>
                         <attribute name="active">2</attribute>
