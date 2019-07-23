@@ -200,17 +200,9 @@ class Application(Gtk.Application):
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._main_data_box = builder.get_object("main_data_box")
-        self._player_drawing_area = builder.get_object("player_drawing_area")
-        self._player_box = builder.get_object("player_box")
-        self._player_tool_bar = builder.get_object("player_tool_bar")
-        self._player_prev_button = builder.get_object("player_prev_button")
-        self._player_next_button = builder.get_object("player_next_button")
         self._status_bar_box = builder.get_object("status_bar_box")
         self._services_main_box = builder.get_object("services_main_box")
         self._bouquets_main_box = builder.get_object("bouquets_main_box")
-        # Enabling events for the drawing area
-        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        self._player_frame = builder.get_object("player_frame")
         self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
         # Status bar
@@ -244,6 +236,21 @@ class Application(Gtk.Application):
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_positions_model = builder.get_object("filter_sat_positions_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
+        # Player
+        self._player_box = builder.get_object("player_box")
+        self._player_drawing_area = builder.get_object("player_drawing_area")
+        self._player_tool_bar = builder.get_object("player_tool_bar")
+        self._player_prev_button = builder.get_object("player_prev_button")
+        self._player_next_button = builder.get_object("player_next_button")
+        self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
+        self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
+        self._player_box.bind_property("visible", builder.get_object("left_header_box"), "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("right_header_box"), "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
+        # Enabling events for the drawing area
+        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
+        self._player_frame = builder.get_object("player_frame")
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
@@ -1483,8 +1490,6 @@ class Application(Gtk.Application):
             else:
                 if self._drawing_area_xid:
                     self._player.set_xwindow(self._drawing_area_xid)
-                self._services_main_box.set_visible(False)
-                self._bouquets_main_box.set_visible(False)
                 w, h = self._main_window.get_size()
                 self._player_box.set_size_request(w * 0.6, -1)
 
@@ -1522,8 +1527,6 @@ class Application(Gtk.Application):
             self._player.release()
             self._player = None
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
-        GLib.idle_add(self._services_main_box.set_visible, True, priority=GLib.PRIORITY_LOW)
-        GLib.idle_add(self._bouquets_main_box.set_visible, True, priority=GLib.PRIORITY_LOW)
 
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
