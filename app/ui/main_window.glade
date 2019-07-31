@@ -399,7 +399,7 @@ Author: Dmitriy Yefremov
             <property name="orientation">vertical</property>
             <property name="spacing">2</property>
             <child>
-              <object class="GtkModelButton" id="import_munu_button">
+              <object class="GtkModelButton" id="import_menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -413,7 +413,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="create_munu_button">
+              <object class="GtkModelButton" id="create_menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -438,7 +438,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="open_munu_button">
+              <object class="GtkModelButton" id="open_menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -452,12 +452,13 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="save_munu_button">
+              <object class="GtkModelButton" id="save_menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="text" translatable="yes">Save</property>
                 <signal name="clicked" handler="on_data_save" swapped="no"/>
+                <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -478,7 +479,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="transfer_munu_button">
+              <object class="GtkModelButton" id="transfer_menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1036,6 +1037,7 @@ Author: Dmitriy Yefremov
                     <property name="stock">gtk-save</property>
                   </object>
                 </child>
+                <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>

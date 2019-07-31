@@ -219,6 +219,8 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
+        self._save_header_button = builder.get_object("save_header_button")
+        self._save_header_button.bind_property("sensitive", builder.get_object("save_menu_button"), "sensitive")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -822,7 +824,6 @@ class Application(Gtk.Application):
         except Exception as e:
             self.show_error_dialog(str(e))
 
-    @run_idle
     def on_data_open(self, model):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
@@ -831,35 +832,49 @@ class Application(Gtk.Application):
 
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
-        self._wait_dialog.show()
-        self.clear_current_data()
-        GLib.idle_add(self.append_data, data_path, priority=GLib.PRIORITY_LOW)
+        gen = self.append_data(data_path)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_data(self, data_path):
+        self._wait_dialog.show()
+        yield True
+
         profile = Profile(self._profile)
         data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
+
+        c_gen = self.clear_current_data()
+        yield from c_gen
 
         try:
             black_list = get_blacklist(data_path)
             bouquets = get_bouquets(data_path, Profile(self._profile))
+            yield True
             services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
+            yield True
             update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
+            yield True
         except FileNotFoundError as e:
-            self._wait_dialog.hide()
             msg = get_message("Please, download files from receiver or setup your path for read data!")
             self.show_error_dialog(getattr(e, "message", str(e)) + "\n\n" + msg)
+            return
         except SyntaxError as e:
-            self._wait_dialog.hide()
             self.show_error_dialog(str(e))
+            return
         except Exception as e:
-            self._wait_dialog.hide()
             log("Append services error: " + str(e))
             self.show_error_dialog(get_message("Reading data error!") + "\n" + str(e))
+            return
         else:
             self.append_blacklist(black_list)
             self.append_bouquets(bouquets)
-            self.append_services(services)
+            yield True
+            s_gen = self.append_services(services)
+            yield from s_gen
             self.update_sat_positions()
+            yield True
+        finally:
+            self._wait_dialog.hide()
+            yield True
 
     def append_blacklist(self, black_list):
         if black_list:
@@ -915,10 +930,7 @@ class Application(Gtk.Application):
             #  adding channels to dict with fav_id as keys
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
-        gen = self.append_services_data(services)
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def append_services_data(self, services):
         for srv in services:
             tooltip, background = None, None
             if self._use_colors:
@@ -932,13 +944,22 @@ class Application(Gtk.Application):
             itr = self._services_model.append(s)
             self._services_model.set_value(itr, Column.SRV_PICON, self._picons.get(srv.picon_id, None))
             yield True
-        self._wait_dialog.hide()
 
     def clear_current_data(self):
         """ Clearing current data from lists """
         self._bouquets_model.clear()
+        yield True
         self._fav_model.clear()
-        self._services_model.clear()
+        yield True
+        s_model = self._services_view.get_model()
+        self._services_view.set_model(None)
+        yield True
+        for index, itr in enumerate([row.iter for row in self._services_model]):
+            self._services_model.remove(itr)
+            if index % 50 == 0:
+                yield True
+        yield True
+        self._services_view.set_model(s_model)
         self._blacklist.clear()
         self._services.clear()
         self._rows_buffer.clear()
@@ -947,8 +968,8 @@ class Application(Gtk.Application):
         self._current_bq_name = None
         self._bq_name_label.set_text("")
         self.init_sat_positions()
+        yield True
 
-    @run_idle
     def on_data_save(self, *args):
         if len(self._bouquets_model) == 0:
             self.show_error_dialog("No data to save!")
@@ -957,12 +978,18 @@ class Application(Gtk.Application):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
+        gen = self.save_data()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def save_data(self):
+        self._save_header_button.set_sensitive(False)
         profile = Profile(self._profile)
         options = self._options.get(self._profile)
         path = options.get("data_dir_path")
         backup_path = options.get("backup_dir_path", path + "backup/")
         # Backup data or clearing data path
         backup_data(path, backup_path) if options.get("backup_before_save", True) else clear_data_path(path)
+        yield True
 
         bouquets = []
 
@@ -986,27 +1013,35 @@ class Application(Gtk.Application):
             if len(b_path) == 1:
                 bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
 
-        profile = Profile(self._profile)
         # Getting bouquets
         self._bouquets_view.get_model().foreach(parse_bouquets)
         write_bouquets(path, bouquets, profile)
+        yield True
         # Getting services
         services_model = get_base_model(self._services_view.get_model())
         services = [Service(*row[: Column.SRV_TOOLTIP]) for row in services_model]
         write_services(path, services, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
+        yield True
         # removing bouquet files
         if profile is Profile.ENIGMA_2:
             # blacklist
             write_blacklist(path, self._blacklist)
+
+        self._save_header_button.set_sensitive(True)
+        yield True
 
     def on_new_configuration(self, item):
         """ Creates new empty configuration """
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        self.clear_current_data()
+        gen = self.create_new_configuration(Profile(self._profile))
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-        profile = Profile(self._profile)
+    def create_new_configuration(self, profile):
+        c_gen = self.clear_current_data()
+        yield from c_gen
+
         if profile is Profile.ENIGMA_2:
             parent = self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
             self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None), parent)
@@ -1016,6 +1051,7 @@ class Application(Gtk.Application):
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
             self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
             self._bouquets_model.append(None, ["WEBTV", None, None, BqType.WEBTV.value])
+        yield True
 
     def on_services_selection(self, model, path, column):
         self.update_service_bar(model, path)
@@ -1104,22 +1140,25 @@ class Application(Gtk.Application):
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
-    @run_idle
     def on_preferences(self, item):
         response = show_settings_dialog(self._main_window, self._options)
         if response != Gtk.ResponseType.CANCEL:
-            self.update_options()
+            gen = self.update_options()
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_options(self):
         profile = self._options.get("profile")
         self._ip_label.set_text(self._options.get(profile).get("host"))
         if profile != self._profile:
             self._profile = profile
-            self.clear_current_data()
+            c_gen = self.clear_current_data()
+            yield from c_gen
             self.update_services_counts()
         self.update_profile_label()
         self.init_colors(True)
+        yield True
         self.init_http_api()
+        yield True
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
@@ -1181,8 +1220,6 @@ class Application(Gtk.Application):
                 self.on_new_bouquet(view)
         elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self._SERVICE_LIST_NAME:
             self.on_to_fav_end_copy(view)
-        elif ctrl and key is KeyboardKey.S:
-            self.on_data_save()
         elif ctrl and key is KeyboardKey.L:
             self.on_locked(None)
         elif ctrl and key is KeyboardKey.H:
