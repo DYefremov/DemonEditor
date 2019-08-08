@@ -832,18 +832,17 @@ class Application(Gtk.Application):
 
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
-        gen = self.append_data(data_path)
+        gen = self.update_data(data_path)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def append_data(self, data_path):
+    def update_data(self, data_path):
         self._wait_dialog.show()
         yield True
 
         profile = Profile(self._profile)
         data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
 
-        c_gen = self.clear_current_data()
-        yield from c_gen
+        yield from self.clear_current_data()
 
         try:
             black_list = get_blacklist(data_path)
@@ -866,15 +865,16 @@ class Application(Gtk.Application):
             return
         else:
             self.append_blacklist(black_list)
-            self.append_bouquets(bouquets)
-            yield True
-            s_gen = self.append_services(services)
-            yield from s_gen
-            self.update_sat_positions()
-            yield True
+            yield from self.append_data(bouquets, services)
         finally:
             self._wait_dialog.hide()
             yield True
+
+    def append_data(self, bouquets, services):
+        self.append_bouquets(bouquets)
+        yield from self.append_services(services)
+        self.update_sat_positions()
+        yield True
 
     def append_blacklist(self, black_list):
         if black_list:
@@ -1491,9 +1491,18 @@ class Application(Gtk.Application):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
-        ImportDialog(self._main_window, response, Profile(self._profile), self._services.keys(),
-                     lambda b, s: (self._wait_dialog.show(), self.append_bouquets(b),
-                                   self.append_services(s), self.update_sat_positions())).show()
+        def append(b, s):
+            gen = self.append_imported_data(b, s)
+            GLib.idle_add(lambda: next(gen, False))
+
+        ImportDialog(self._main_window, response, Profile(self._profile), self._services.keys(), append).show()
+
+    def append_imported_data(self, bouquets, services):
+        try:
+            self._wait_dialog.show()
+            yield from self.append_data(bouquets, services)
+        finally:
+            self._wait_dialog.hide()
 
     # ***************** Backup  ********************#
 
