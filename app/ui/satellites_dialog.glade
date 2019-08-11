@@ -541,6 +541,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="satellite_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">Satellite</property>
                 <property name="expand">True</property>
                 <child>
@@ -554,6 +555,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="freq_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">Freq</property>
                 <property name="expand">True</property>
                 <child>
@@ -567,6 +569,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="rate_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">Rate</property>
                 <property name="expand">True</property>
                 <child>
@@ -580,6 +583,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="pol_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">Pol</property>
                 <property name="expand">True</property>
                 <child>
@@ -593,6 +597,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="fec_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">FEC</property>
                 <property name="expand">True</property>
                 <child>
@@ -606,6 +611,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="sys_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">System</property>
                 <property name="expand">True</property>
                 <child>
@@ -619,6 +625,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="mod_column">
                 <property name="resizable">True</property>
+                <property name="min_width">20</property>
                 <property name="title" translatable="yes">Mod</property>
                 <property name="expand">True</property>
                 <child>
