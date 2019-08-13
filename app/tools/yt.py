@@ -1,7 +1,9 @@
 """ Module for working with YouTube service """
+import json
 import re
 import urllib
 from html.parser import HTMLParser
+from json import JSONDecodeError
 from urllib.request import Request
 
 from app.commons import log
@@ -41,8 +43,31 @@ class YouTube:
          """
         req = Request("https://youtube.com/get_video_info?video_id={}".format(video_id), headers=_HEADERS)
         with urllib.request.urlopen(req, timeout=2) as resp:
-            data = resp.read().decode("utf-8").split("&")
+            data = urllib.request.unquote(resp.read().decode("utf-8")).split("&")
             out = {k: v for k, sep, v in (str(d).partition("=") for d in map(urllib.request.unquote, data))}
+            player_resp = out.get("player_response", None)
+
+            if player_resp:
+                try:
+                    resp = json.loads(player_resp)
+                except JSONDecodeError as e:
+                    log("{}: Parsing player response error: {}".format(__class__.__name__, e))
+                else:
+                    det = resp.get("videoDetails", None)
+                    title = det.get("title", None) if det else None
+                    streaming_data = resp.get("streamingData", None)
+                    fmts = streaming_data.get("formats", None) if streaming_data else None
+
+                    if fmts:
+                        url = None
+                        for f in fmts:
+                            # TODO implement the choice of quality.
+                            url = f.get("url", None)
+                            break
+
+                        if url and title:
+                            return url, title.replace("+", " ")
+
             stream_map = out.get("url_encoded_fmt_stream_map", None)
             if stream_map:
                 s_map = {k: v for k, sep, v in (str(d).partition("=") for d in stream_map.split("&"))}

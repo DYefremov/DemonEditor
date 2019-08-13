@@ -1426,7 +1426,7 @@ class Application(Gtk.Application):
         YtListImportDialog(self._main_window,
                            Profile(self._profile),
                            get_max_marker_num(self._services),
-                           self.append_imported_data).show()
+                           self.append_imported_services).show()
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
@@ -1441,9 +1441,9 @@ class Application(Gtk.Application):
         channels = parse_m3u(response, Profile(self._profile))
 
         if channels and self._bq_selected:
-            self.append_imported_data(channels)
+            self.append_imported_services(channels)
 
-    def append_imported_data(self, services):
+    def append_imported_services(self, services):
         bq_services = self._bouquets.get(self._bq_selected)
         self._fav_model.clear()
         for srv in services:
