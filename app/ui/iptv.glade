@@ -1228,6 +1228,35 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="yt_quality_liststore">
+    <columns>
+      <!-- column-name quality -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+      <row>
+        <col id="0">1080p</col>
+      </row>
+      <row>
+        <col id="0">720p</col>
+      </row>
+      <row>
+        <col id="0">480p</col>
+      </row>
+      <row>
+        <col id="0">360p</col>
+      </row>
+      <row>
+        <col id="0">240p</col>
+      </row>
+      <row>
+        <col id="0">144p</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="yt_import_dialog_window">
     <property name="width_request">480</property>
     <property name="can_focus">False</property>
@@ -1270,8 +1299,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkButton" id="yt_import_button">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Import</property>
@@ -1288,6 +1316,25 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="pack_type">end</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBox" id="yt_quality_combobox">
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Desired video quality</property>
+            <property name="model">yt_quality_liststore</property>
+            <property name="active">0</property>
+            <property name="id_column">0</property>
+            <child>
+              <object class="GtkCellRendererText" id="yt_quality_renderer"/>
+              <attributes>
+                <attribute name="text">0</attribute>
+              </attributes>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

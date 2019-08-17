@@ -14,7 +14,7 @@ from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.properties import Profile
-from app.tools.yt import YouTube, PlayListParser
+from app.tools.yt import YouTube, PlayListParser, Quality
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
 from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey
@@ -235,7 +235,8 @@ class IptvDialog:
                 self._name_entry.set_text(title)
 
             if link:
-                entry.set_text(link)
+                # TODO implement the choice of quality.
+                entry.set_text(link[sorted(link, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
             else:
                 msg = get_message("Get link error:") + " No link received for id: {}".format(video_id)
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
@@ -560,8 +561,8 @@ class YtListImportDialog:
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("yt_import_dialog_window", "yt_liststore", "yt_popup_menu",
-                                         "remove_selection_image"))
+                                        ("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
+                                         "yt_popup_menu", "remove_selection_image"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("yt_import_dialog_window")
@@ -576,6 +577,11 @@ class YtListImportDialog:
         self._url_entry = builder.get_object("yt_url_entry")
         self._receive_button = builder.get_object("yt_receive_button")
         self._import_button = builder.get_object("yt_import_button")
+        self._quality_box = builder.get_object("yt_quality_combobox")
+        self._quality_model = builder.get_object("yt_quality_liststore")
+        self._import_button.bind_property("visible", self._quality_box, "visible")
+        self._import_button.bind_property("sensitive", self._quality_box, "sensitive")
+        self._receive_button.bind_property("sensitive", self._import_button, "sensitive")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -650,7 +656,9 @@ class YtListImportDialog:
         for l in links:
             yield self._model.append((l[0], l[1], True, None))
 
-        self._yt_count_label.set_text(str(len(self._model)))
+        size = len(self._model)
+        self._yt_count_label.set_text(str(size))
+        self._import_button.set_visible(size)
         yield True
 
     @run_idle
@@ -666,9 +674,12 @@ class YtListImportDialog:
             mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, data_id, fav_id, None)
             srvs.append(mk)
 
-        for l in links:
-            fav_id = get_fav_id(*l, self._profile)
-            srv = Service(None, None, IPTV_ICON, l[1], *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
+        act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)
+        for link in links:
+            lnk, title = link
+            ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
+            fav_id = get_fav_id(ln, title, self._profile)
+            srv = Service(None, None, IPTV_ICON, title, *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
             srvs.append(srv)
         self.appender(srvs)
 
@@ -676,7 +687,6 @@ class YtListImportDialog:
     def update_active_elements(self, sensitive):
         self._url_entry.set_sensitive(sensitive)
         self._receive_button.set_sensitive(sensitive)
-        self._import_button.set_sensitive(sensitive)
 
     def show_invisible_elements(self):
         self._list_view_scrolled_window.set_visible(True)

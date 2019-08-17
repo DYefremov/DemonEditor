@@ -13,6 +13,8 @@ _YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{23,})
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
 _HEADERS = {"User-Agent": "Mozilla/5.0"}
 
+Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p", 133: "240p", 160: "144p", 0: "0p"}
+
 
 class YouTube:
     """ Helper class for working with YouTube service. """
@@ -39,7 +41,7 @@ class YouTube:
     def get_yt_link(video_id):
         """ Getting link to YouTube video by id.
 
-            returns tuple from the video link and title
+            returns tuple from the video links dict and title
          """
         req = Request("https://youtube.com/get_video_info?video_id={}".format(video_id), headers=_HEADERS)
         with urllib.request.urlopen(req, timeout=2) as resp:
@@ -56,29 +58,28 @@ class YouTube:
                     det = resp.get("videoDetails", None)
                     title = det.get("title", None) if det else None
                     streaming_data = resp.get("streamingData", None)
-                    fmts = streaming_data.get("formats", None) if streaming_data else None
+                    fmts = streaming_data.get("adaptiveFormats", None) if streaming_data else None
 
                     if fmts:
-                        url = None
-                        for f in fmts:
-                            # TODO implement the choice of quality.
-                            url = f.get("url", None)
-                            break
+                        urls = {Quality[i["itag"]]: i["url"] for i in
+                                filter(lambda i: i.get("itag", -1) in Quality, fmts)}
 
-                        if url and title:
-                            return url, title.replace("+", " ")
+                        if urls and title:
+                            return urls, title.replace("+", " ")
 
             stream_map = out.get("url_encoded_fmt_stream_map", None)
             if stream_map:
                 s_map = {k: v for k, sep, v in (str(d).partition("=") for d in stream_map.split("&"))}
                 url, title = s_map.get("url", None), out.get("title", None)
-                return urllib.request.unquote(url) if url else "", title.replace("+", " ") if title else ""
+                url, title = urllib.request.unquote(url) if url else "", title.replace("+", " ") if title else ""
+                if url and title:
+                    return {Quality[0]: url}, title.replace("+", " ")
 
             rsn = out.get("reason", None)
             rsn = rsn.replace("+", " ") if rsn else ""
             log("{}: Getting link to video with id {} filed! Cause: {}".format(__class__.__name__, video_id, rsn))
 
-            return "", rsn
+            return None, rsn
 
 
 class PlayListParser(HTMLParser):
