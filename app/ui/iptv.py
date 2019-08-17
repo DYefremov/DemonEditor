@@ -14,7 +14,7 @@ from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.properties import Profile
-from app.tools.yt import YouTube, PlayListParser, Quality
+from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
 from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey
@@ -67,13 +67,20 @@ class IptvDialog:
                     "on_url_changed": self.on_url_changed,
                     "on_save": self.on_save,
                     "on_stream_type_changed": self.on_stream_type_changed,
+                    "on_yt_quality_changed": self.on_yt_quality_changed,
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("iptv_dialog", "stream_type_liststore"))
+                                        ("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
         builder.connect_signals(handlers)
+
+        self._action = action
+        self._profile = profile
+        self._bouquet = bouquet
+        self._services = services
+        self._yt_links = None
 
         self._dialog = builder.get_object("iptv_dialog")
         self._dialog.set_transient_for(transient)
@@ -92,12 +99,8 @@ class IptvDialog:
         self._stream_type_combobox = builder.get_object("stream_type_combobox")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
-        self._action = action
-        self._profile = profile
-        self._bouquet = bouquet
-        self._services = services
+        self._yt_quality_box = builder.get_object("yt_iptv_quality_combobox")
         self._model, self._paths = view.get_selection().get_selected_rows()
-        self._yt_video_id = None
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -222,11 +225,11 @@ class IptvDialog:
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
-            self._yt_video_id = None
+            self._yt_quality_box.set_visible(False)
 
     def set_yt_url(self, entry, video_id):
         try:
-            link, title = YouTube.get_yt_link(video_id)
+            links, title = YouTube.get_yt_link(video_id)
         except urllib.error.URLError as e:
             self.show_info_message(get_message("Get link error:") + (str(e)), Gtk.MessageType.ERROR)
             return
@@ -234,9 +237,11 @@ class IptvDialog:
             if self._action is Action.ADD:
                 self._name_entry.set_text(title)
 
-            if link:
-                # TODO implement the choice of quality.
-                entry.set_text(link[sorted(link, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
+            if links:
+                if len(links) > 1:
+                    self._yt_quality_box.set_visible(True)
+                entry.set_text(links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
+                self._yt_links = links
             else:
                 msg = get_message("Get link error:") + " No link received for id: {}".format(video_id)
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
@@ -246,6 +251,12 @@ class IptvDialog:
 
     def on_stream_type_changed(self, item):
         self._update_reference_entry()
+
+    def on_yt_quality_changed(self, box):
+        model = box.get_model()
+        active = model.get_value(box.get_active_iter(), 0)
+        if self._yt_links and active in self._yt_links:
+            self._url_entry.set_text(self._yt_links[active])
 
     def save_enigma2_data(self):
         name = self._name_entry.get_text().strip()

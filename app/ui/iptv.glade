@@ -430,15 +430,49 @@ Author: Dmitriy Yefremov
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkEntry" id="url_entry">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                        <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
-                        <signal name="changed" handler="on_url_changed" swapped="no"/>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkEntry" id="url_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_bottom">5</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
+                            <signal name="changed" handler="on_url_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="yt_iptv_quality_combobox">
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Desired video quality</property>
+                            <property name="model">yt_quality_liststore</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_bottom">5</property>
+                            <signal name="changed" handler="on_yt_quality_changed" swapped="no"/>
+                            <property name="active">0</property>
+                            <property name="id_column">0</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="yt_quality_renderer"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                     <child type="label">
