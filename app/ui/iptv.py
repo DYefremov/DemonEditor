@@ -688,6 +688,8 @@ class YtListImportDialog:
         act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)
         for link in links:
             lnk, title = link
+            if not lnk:
+                continue
             ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
             fav_id = get_fav_id(ln, title, self._profile)
             srv = Service(None, None, IPTV_ICON, title, *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)

@@ -13,7 +13,8 @@ _YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{23,})
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
 _HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p", 133: "240p", 160: "144p", 0: "0p"}
+Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p",
+           133: "240p", 160: "144p", 0: "0p", 18: "360p", 22: "720p"}
 
 
 class YouTube:
@@ -58,7 +59,7 @@ class YouTube:
                     det = resp.get("videoDetails", None)
                     title = det.get("title", None) if det else None
                     streaming_data = resp.get("streamingData", None)
-                    fmts = streaming_data.get("adaptiveFormats", None) if streaming_data else None
+                    fmts = streaming_data.get("formats", None) if streaming_data else None
 
                     if fmts:
                         urls = {Quality[i["itag"]]: i["url"] for i in

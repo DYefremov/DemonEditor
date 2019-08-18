@@ -1272,22 +1272,10 @@ Author: Dmitriy Yefremov
         <col id="0" translatable="yes">Auto</col>
       </row>
       <row>
-        <col id="0">1080p</col>
-      </row>
-      <row>
         <col id="0">720p</col>
       </row>
       <row>
-        <col id="0">480p</col>
-      </row>
-      <row>
         <col id="0">360p</col>
-      </row>
-      <row>
-        <col id="0">240p</col>
-      </row>
-      <row>
-        <col id="0">144p</col>
       </row>
     </data>
   </object>
