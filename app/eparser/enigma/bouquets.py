@@ -17,6 +17,7 @@ def write_bouquets(path, bouquets):
     srv_line = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     line = []
     pattern = re.compile("[^\\w_()]+")
+    current_marker = [0]
 
     for bqs in bouquets:
         line.clear()
@@ -29,22 +30,28 @@ def write_bouquets(path, bouquets):
             else:
                 bq_name = re.sub(pattern, "_", bq.name)
             line.append(srv_line.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
-            write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
+            write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services, current_marker)
 
         with open(path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
             file.writelines(line)
 
 
-def write_bouquet(path, name, channels):
+def write_bouquet(path, name, services, current_marker):
     bouquet = ["#NAME {}\n".format(name)]
+    marker = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
 
-    for ch in channels:
-        if ch.service_type == BqServiceType.IPTV.name or ch.service_type == BqServiceType.MARKER.name:
-            bouquet.append("#SERVICE {}\n".format(ch.fav_id.strip()))
+    for srv in services:
+        if srv.service_type == BqServiceType.IPTV.name:
+            bouquet.append("#SERVICE {}\n".format(srv.fav_id.strip()))
+        elif srv.service_type == BqServiceType.MARKER.name:
+            m_data = srv.fav_id.strip().split(":")
+            m_data[2] = current_marker[0]
+            current_marker[0] += 1
+            bouquet.append(marker.format(m_data[2], m_data[-1]))
         else:
-            data = to_bouquet_id(ch)
-            if ch.service:
-                bouquet.append("#SERVICE {}:{}\n#DESCRIPTION {}\n".format(data, ch.service, ch.service))
+            data = to_bouquet_id(srv)
+            if srv.service:
+                bouquet.append("#SERVICE {}:{}\n#DESCRIPTION {}\n".format(data, srv.service, srv.service))
             else:
                 bouquet.append("#SERVICE {}\n".format(data))
 
@@ -52,13 +59,13 @@ def write_bouquet(path, name, channels):
         file.writelines(bouquet)
 
 
-def to_bouquet_id(ch):
+def to_bouquet_id(srv):
     """ Creates bouquet channel id """
-    data_type = ch.data_id
+    data_type = srv.data_id
     if data_type and len(data_type) > 4:
-        data_type = int(ch.data_id.split(":")[4])
+        data_type = int(srv.data_id.split(":")[4])
 
-        return "{}:0:{:X}:{}:0:0:0:".format(1, data_type, ch.fav_id)
+        return "{}:0:{:X}:{}:0:0:0:".format(1, data_type, srv.fav_id)
 
 
 def get_bouquet(path, name, bq_type):

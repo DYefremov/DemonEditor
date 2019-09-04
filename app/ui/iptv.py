@@ -557,7 +557,7 @@ class IptvListConfigurationDialog:
 
 
 class YtListImportDialog:
-    def __init__(self, transient, profile, max_marker_num, appender):
+    def __init__(self, transient, profile, appender):
         handlers = {"on_import": self.on_import,
                     "on_receive": self.on_receive,
                     "on_yt_url_entry_changed": self.on_url_entry_changed,
@@ -600,7 +600,6 @@ class YtListImportDialog:
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         self.appender = appender
-        self._max_marker_num = max_marker_num
         self._profile = profile
         self._download_task = False
         self._yt_list_id = None
@@ -679,10 +678,8 @@ class YtListImportDialog:
 
         if self._yt_list_title:
             title = self._yt_list_title
-            self._max_marker_num += 1
-            data_id = "{:X}".format(self._max_marker_num)
-            fav_id = MARKER_FORMAT.format(data_id, title, title)
-            mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, data_id, fav_id, None)
+            fav_id = MARKER_FORMAT.format(0, title, title)
+            mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, 0, fav_id, None)
             srvs.append(mk)
 
         act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)

@@ -30,7 +30,7 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data, \
-    remove_all_unused_picons, get_max_marker_num
+    remove_all_unused_picons
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .settings_dialog import show_settings_dialog
@@ -1423,10 +1423,7 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        YtListImportDialog(self._main_window,
-                           Profile(self._profile),
-                           get_max_marker_num(self._services),
-                           self.append_imported_services).show()
+        YtListImportDialog(self._main_window,  Profile(self._profile), self.append_imported_services).show()
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
