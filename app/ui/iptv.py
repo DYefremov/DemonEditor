@@ -534,7 +534,9 @@ class IptvListConfigurationDialog:
                 new_fav_id = "{}{}{}".format(data, sep, desc)
                 row[Column.FAV_ID] = new_fav_id
                 srv = self._services.pop(fav_id, None)
-                self._services[new_fav_id] = srv._replace(fav_id=new_fav_id)
+
+                if srv:
+                    self._services[new_fav_id] = srv._replace(fav_id=new_fav_id)
 
             self._bouquet.clear()
             list(map(lambda r: self._bouquet.append(r[Column.FAV_ID]), self._fav_model))
