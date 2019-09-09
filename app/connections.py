@@ -42,7 +42,7 @@ class TestException(Exception):
     pass
 
 
-def download_data(*, properties, download_type=DownloadType.ALL, callback):
+def download_data(*, properties, download_type=DownloadType.ALL, callback=print):
     with FTP(host=properties["host"], user=properties["user"], passwd=properties["password"]) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
@@ -86,12 +86,11 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback):
                     name = name.split()[-1]
                     download_file(ftp, name, save_path, callback)
 
-        if callback is not None:
-            callback("\nDone.\n")
+        callback("\nDone.\n")
 
 
 def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
-                callback=None, done_callback=None, use_http=False):
+                callback=print, done_callback=None, use_http=False):
     data_path = properties["data_dir_path"]
     host = properties["host"]
     base_url = "http://{}:{}/api/".format(host, properties.get("http_port", "80"))
@@ -152,7 +151,7 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                 upload_files(ftp, data_path, _DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                upload_picons(ftp, properties.get("picons_dir_path"), properties.get("picons_path"))
+                upload_picons(ftp, properties.get("picons_dir_path"), properties.get("picons_path"), callback)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino
@@ -203,7 +202,7 @@ def upload_xml(ftp, data_path, xml_path, xml_file, callback):
     send_file(xml_file, data_path, ftp, callback)
 
 
-def upload_picons(ftp, src, dest):
+def upload_picons(ftp, src, dest, callback):
     try:
         ftp.cwd(dest)
     except error_perm as e:
@@ -220,7 +219,7 @@ def upload_picons(ftp, src, dest):
             ftp.delete(name)
     for file_name in os.listdir(src):
         if file_name.endswith(picons_suf):
-            send_file(file_name, src, ftp)
+            send_file(file_name, src, ftp, callback)
 
 
 def download_file(ftp, name, save_path, callback):
