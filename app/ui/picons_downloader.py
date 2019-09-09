@@ -279,10 +279,12 @@ class PiconsDialog:
             return
 
         try:
+            GLib.idle_add(self._expander.set_expanded, True)
             upload_data(properties=self._properties,
                         download_type=DownloadType.PICONS,
                         profile=self._profile,
-                        callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+                        callback=self.append_output,
+                        done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
         except OSError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
