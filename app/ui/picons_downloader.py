@@ -3,7 +3,6 @@ import re
 import shutil
 import subprocess
 import tempfile
-import time
 
 from gi.repository import GLib, GdkPixbuf
 
@@ -23,8 +22,8 @@ class PiconsDialog:
         self._sat_positions = sat_positions
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
-        self._PATTERN = re.compile("^https://www\.lyngsat\.com/[\w-]+\.html$")
-        self._POS_PATTERN = re.compile("^\d+\.\d+[EW]?$")
+        self._PATTERN = re.compile(r"^https://www\.lyngsat\.com/[\w-]+\.html$")
+        self._POS_PATTERN = re.compile(r"^\d+\.\d+[EW]?$")
         self._current_process = None
         self._terminate = False
 
@@ -71,11 +70,16 @@ class PiconsDialog:
         self._enigma2_path_button = builder.get_object("enigma2_path_button")
         self._save_to_button = builder.get_object("save_to_button")
         self._send_button = builder.get_object("send_button")
+        self._cancel_button = builder.get_object("cancel_button")
         self._enigma2_radio_button = builder.get_object("enigma2_radio_button")
         self._neutrino_mp_radio_button = builder.get_object("neutrino_mp_radio_button")
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
+        self._satellite_label = builder.get_object("satellite_label")
+        self._satellite_label.bind_property("visible", builder.get_object("loading_data_label"), "visible", 4)
+        self._satellite_label.bind_property("visible", builder.get_object("loading_data_spinner"), "visible", 4)
+        self._cancel_button.bind_property("visible", builder.get_object("header_download_box"), "visible", 4)
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -88,16 +92,17 @@ class PiconsDialog:
         self._picons_path = self._properties.get("picons_dir_path", "")
         self._picons_dir_entry.set_text(self._picons_path)
         self._enigma2_picons_path = self._picons_path
+
         if profile is Profile.NEUTRINO_MP:
             self._enigma2_picons_path = options.get(Profile.ENIGMA_2.value).get("picons_dir_path", "")
         if not len(self._picon_ids) and self._profile is Profile.ENIGMA_2:
             message = get_message("To automatically set the identifiers for picons,\n"
                                   "first load the required services list into the main application window.")
             self.show_info_message(message, Gtk.MessageType.WARNING)
+            self._satellite_label.show()
 
     def show(self):
         self._dialog.run()
-        self._dialog.destroy()
 
     def on_satellites_view_realize(self, view):
         self.get_satellites(view)
@@ -105,18 +110,22 @@ class PiconsDialog:
     @run_task
     def get_satellites(self, view):
         sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
+        if not sats:
+            self.show_info_message("Getting satellites list error!", Gtk.MessageType.ERROR)
         gen = self.append_satellites(view.get_model(), sats)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_satellites(self, model, sats):
-        for sat in sats:
-            pos = sat[1]
-            name = "{} ({})".format(sat[0], pos)
-            pos = "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
-            if not self._terminate and model:
-                if pos in self._sat_positions:
-                    model.append((name, sat[3], pos))
-            yield True
+        try:
+            for sat in sats:
+                pos = sat[1]
+                name, pos = "{} ({})".format(sat[0], pos), "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
+
+                if not self._terminate and model:
+                    if pos in self._sat_positions:
+                        yield model.append((name, sat[3], pos))
+        finally:
+            self._satellite_label.show()
 
     def on_satellite_selection(self, view, path, column):
         model = view.get_model()
@@ -125,7 +134,10 @@ class PiconsDialog:
     @run_idle
     def on_load_providers(self, item):
         self._expander.set_expanded(True)
+        self.on_info_bar_close()
+        self._cancel_button.show()
         url = self._url_entry.get_text()
+
         self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
                                                  stdout=subprocess.PIPE,
                                                  stderr=subprocess.PIPE,
@@ -133,24 +145,33 @@ class PiconsDialog:
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
         model = self._providers_tree_view.get_model()
         model.clear()
-        self.update_receive_button_state()
         self.append_providers(url, model)
 
     @run_task
     def append_providers(self, url, model):
         self._current_process.wait()
-        providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
-        if providers:
-            for p in providers:
-                model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
-        self.update_receive_button_state()
+        try:
+            self._terminate = False
+            providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
+        except FileNotFoundError:
+            pass  # NOP
+        else:
+            if providers:
+                for p in providers:
+                    if self._terminate:
+                        return
+                    model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
+            self.update_receive_button_state()
+        finally:
+            GLib.idle_add(self._cancel_button.hide)
+            self._terminate = False
 
     def get_pixbuf(self, img_url):
         return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self._TMP_DIR + "www.lyngsat.com/" + img_url,
                                                        width=48, height=48, preserve_aspect_ratio=True)
 
-    @run_idle
     def on_receive(self, item):
+        self._cancel_button.show()
         self.start_download()
 
     @run_task
@@ -170,13 +191,19 @@ class PiconsDialog:
                 scroll_to(prv.path, self._providers_tree_view)
                 return
 
-        for prv in providers:
-            if self._terminate:
-                break
-            self.process_provider(Provider(*prv))
-        self.resize(self._picons_path)
-        if not self._terminate:
+        try:
+            for prv in providers:
+                if self._terminate:
+                    return
+                self.process_provider(Provider(*prv))
+
+            if self._resize_no_radio_button.get_active():
+                self.resize(self._picons_path)
+
             self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+        finally:
+            GLib.idle_add(self._cancel_button.hide)
+            self._terminate = False
 
     def process_provider(self, prv):
         url = prv.url
@@ -195,17 +222,13 @@ class PiconsDialog:
             char = fd.read(1)
             self.append_output(char)
             return True
-        else:
-            return False
+        return False
 
     @run_idle
     def append_output(self, char):
         append_text_to_tview(char, self._text_view)
 
     def resize(self, path):
-        if self._resize_no_radio_button.get_active():
-            return
-
         self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
         command = "mogrify -resize {}! *.png".format(
             "320x240" if self._resize_220_132_radio_button.get_active() else "100x60").split()
@@ -214,18 +237,30 @@ class PiconsDialog:
             self._current_process.wait()
         except FileNotFoundError as e:
             self.show_info_message("Conversion error. " + str(e), Gtk.MessageType.ERROR)
-            self.on_cancel()
+
+    def on_cancel(self, item=None):
+        if self.is_task_running() and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return True
+
+        self.terminate_task()
 
     @run_task
-    def on_cancel(self, item=None):
-        if self._current_process:
-            self._terminate = True
-            self._current_process.terminate()
-            time.sleep(1)
+    def terminate_task(self):
+        self._terminate = True
 
-    @run_idle
-    def on_close(self, item):
-        self.on_cancel(item)
+        if self._current_process:
+            self._current_process.terminate()
+            self.show_info_message(get_message("The task is canceled!"), Gtk.MessageType.WARNING)
+
+    def on_close(self, window, event):
+        if self.on_cancel():
+            return True
+
+        self.clean_data()
+        GLib.idle_add(self._dialog.destroy)
+
+    @run_task
+    def clean_data(self):
         path = self._TMP_DIR + "www.lyngsat.com"
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -239,7 +274,7 @@ class PiconsDialog:
 
     @run_task
     def upload_picons(self):
-        if self._current_process is not None and self._current_process.poll() is None:
+        if self.is_task_running():
             self.show_dialog("The task is already running!", DialogType.ERROR)
             return
 
@@ -276,7 +311,8 @@ class PiconsDialog:
         self.update_selection(view, False)
 
     def update_selection(self, view, select):
-        view.get_model().foreach(lambda mod, path, itr:  mod.set_value(itr, 7, select))
+        view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 7, select))
+        self.update_receive_button_state()
 
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())
@@ -317,7 +353,10 @@ class PiconsDialog:
 
     @run_idle
     def update_receive_button_state(self):
-        self._receive_button.set_sensitive(len(self.get_selected_providers()) > 0)
+        try:
+            return self._receive_button.set_sensitive(len(self.get_selected_providers()) > 0)
+        except TypeError:
+            return False
 
     def get_selected_providers(self):
         """ returns selected providers """
@@ -334,6 +373,9 @@ class PiconsDialog:
             picon_format = Profile.NEUTRINO_MP
 
         return picon_format
+
+    def is_task_running(self):
+        return self._current_process and self._current_process.poll() is None
 
 
 if __name__ == "__main__":
