@@ -356,9 +356,9 @@ class PiconsDialog:
     @run_idle
     def update_receive_button_state(self):
         try:
-            return self._receive_button.set_sensitive(len(self.get_selected_providers()) > 0)
+            self._receive_button.set_sensitive(len(self.get_selected_providers()) > 0)
         except TypeError:
-            return False
+            pass  # NOP
 
     def get_selected_providers(self):
         """ returns selected providers """
