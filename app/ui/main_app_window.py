@@ -1276,7 +1276,10 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty and profile is Profile.ENIGMA_2)
 
         for elem in self._FAV_IPTV_ELEMENTS:
-            self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
+            is_iptv = self._bq_selected and not is_service
+            if profile is Profile.NEUTRINO_MP:
+                is_iptv = is_iptv and BqType(self._bq_selected.split(":")[1]) is BqType.WEBTV
+            self._tool_elements[elem].set_sensitive(is_iptv)
         for elem in self._COMMONS_ELEMENTS:
             self._tool_elements[elem].set_sensitive(not_empty)
 
