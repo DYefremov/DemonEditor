@@ -11,7 +11,7 @@ from app.commons import log
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
 _YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{23,})?.*")
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
-_HEADERS = {"User-Agent": "Mozilla/5.0"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/69.0"}
 
 Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p",
            133: "240p", 160: "144p", 0: "0p", 18: "360p", 22: "720p"}
@@ -91,22 +91,35 @@ class PlayListParser(HTMLParser):
         self._is_header = False
         self._header = ""
         self._playlist = []
+        self._is_script = False
 
     def handle_starttag(self, tag, attrs):
-        if tag == "h1" and ("class", "pl-header-title") in attrs:
-            self._is_header = True
-
-        elif tag == "tr" and ("class", "pl-video yt-uix-tile ") in attrs:
-            p_data = {k: v for k, v in attrs}
-            self._playlist.append((p_data.get("data-title", None), p_data.get("data-video-id", None)))
+        if tag == "script":
+            self._is_script = True
 
     def handle_data(self, data):
-        if self._is_header:
-            self._header = data.strip()
+        if self._is_script:
+            data = data.lstrip()
+            if data.startswith('window["ytInitialData"] = '):
+                data = data.split(";")[0].lstrip('window["ytInitialData"] = ')
+                try:
+                    resp = json.loads(data)
+                except JSONDecodeError as e:
+                    log("{}: Parsing data error: {}".format(__class__.__name__, e))
+                else:
+                    sb = resp.get("sidebar", None)
+                    if sb:
+                        for t in [t["runs"][0] for t in flat("title", sb) if "runs" in t]:
+                            txt = t.get("text", None)
+                            if txt:
+                                self._header = txt
+                                break
 
-    def handle_endtag(self, tag):
-        if self._is_header:
-            self._is_header = False
+                    ct = resp.get("contents", None)
+                    if ct:
+                        for d in [(d["title"]["simpleText"], d["videoId"]) for d in flat("playlistVideoRenderer", ct)]:
+                            self._playlist.append(d)
+            self._is_script = False
 
     def error(self, message):
         log("{} Parsing error: {}".format(__class__.__name__, message))
@@ -125,13 +138,25 @@ class PlayListParser(HTMLParser):
 
            returns tuple from the playlist header and list of tuples (title, video id)
         """
-        request = Request("https://www.youtube.com/playlist?list={}".format(play_list_id), headers=_HEADERS)
+        request = Request("https://www.youtube.com/playlist?list={}&hl=en".format(play_list_id), headers=_HEADERS)
 
         with urllib.request.urlopen(request, timeout=2) as resp:
             data = resp.read().decode("utf-8")
             parser = PlayListParser()
             parser.feed(data)
             return parser.header, parser.playlist
+
+
+def flat(key, d):
+    for k, v in d.items():
+        if k == key:
+            yield v
+        elif isinstance(v, dict):
+            yield from flat(key, v)
+        elif isinstance(v, list):
+            for el in v:
+                if isinstance(el, dict):
+                    yield from flat(key, el)
 
 
 if __name__ == "__main__":
