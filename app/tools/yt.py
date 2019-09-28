@@ -1,4 +1,5 @@
 """ Module for working with YouTube service """
+import gzip
 import json
 import re
 import urllib
@@ -11,7 +12,9 @@ from app.commons import log
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
 _YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{23,})?.*")
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
-_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/69.0"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/69.0",
+            "DNT": "1",
+            "Accept-Encoding": "gzip, deflate"}
 
 Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p",
            133: "240p", 160: "144p", 0: "0p", 18: "360p", 22: "720p"}
@@ -44,9 +47,10 @@ class YouTube:
 
             returns tuple from the video links dict and title
          """
-        req = Request("https://youtube.com/get_video_info?video_id={}".format(video_id), headers=_HEADERS)
+        req = Request("https://youtube.com/get_video_info?video_id={}&hl=en".format(video_id), headers=_HEADERS)
+
         with urllib.request.urlopen(req, timeout=2) as resp:
-            data = urllib.request.unquote(resp.read().decode("utf-8")).split("&")
+            data = urllib.request.unquote(gzip.decompress(resp.read()).decode("utf-8")).split("&")
             out = {k: v for k, sep, v in (str(d).partition("=") for d in map(urllib.request.unquote, data))}
             player_resp = out.get("player_response", None)
 
@@ -141,7 +145,7 @@ class PlayListParser(HTMLParser):
         request = Request("https://www.youtube.com/playlist?list={}&hl=en".format(play_list_id), headers=_HEADERS)
 
         with urllib.request.urlopen(request, timeout=2) as resp:
-            data = resp.read().decode("utf-8")
+            data = gzip.decompress(resp.read()).decode("utf-8")
             parser = PlayListParser()
             parser.feed(data)
             return parser.header, parser.playlist
