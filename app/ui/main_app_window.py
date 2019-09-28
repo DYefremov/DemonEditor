@@ -178,7 +178,6 @@ class Application(Gtk.Application):
         # http api
         self._http_api = None
         self._fav_click_mode = None
-        self._monitor_signal = False
         # Colors
         self._use_colors = False
         self._NEW_COLOR = None  # Color for new services in the main list
@@ -833,7 +832,7 @@ class Application(Gtk.Application):
     def open_data(self, data_path=None):
         """ Opening data and fill views. """
         gen = self.update_data(data_path)
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_DEFAULT_IDLE)
 
     def update_data(self, data_path):
         self._wait_dialog.show()
@@ -956,7 +955,7 @@ class Application(Gtk.Application):
         yield True
         for index, itr in enumerate([row.iter for row in self._services_model]):
             self._services_model.remove(itr)
-            if index % 50 == 0:
+            if index % 25 == 0:
                 yield True
         yield True
         self._services_view.set_model(s_model)
@@ -1426,7 +1425,7 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        YtListImportDialog(self._main_window,  Profile(self._profile), self.append_imported_services).show()
+        YtListImportDialog(self._main_window, Profile(self._profile), self.append_imported_services).show()
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
@@ -1610,23 +1609,24 @@ class Application(Gtk.Application):
         self._player_tool_bar.set_visible(full)
 
     # ************************ HTTP API ****************************#
+
     @run_task
     def init_http_api(self):
-        if self._http_api:
-            self._http_api.close()
-            self._http_api = None
-
         prp = self._options.get(self._profile)
         self._fav_click_mode = FavClickMode(prp.get("fav_click_mode", FavClickMode.DISABLED))
 
         if prp is Profile.NEUTRINO_MP or not prp.get("http_api_support", False):
             self.update_info_boxes_visible(False)
+            if self._http_api:
+                self._http_api.close()
+                self._http_api = None
             return
 
-        self._http_api = http_request(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
-                                      prp.get("http_user", ""), prp.get("http_password", ""))
-        next(self._http_api)
-        GLib.timeout_add_seconds(1, self.update_receiver_info)
+        if not self._http_api:
+            self._http_api = http_request(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
+                                          prp.get("http_user", ""), prp.get("http_password", ""))
+            next(self._http_api)
+            GLib.timeout_add_seconds(1, self.update_receiver_info)
 
     def on_watch(self):
         """ Switch to the channel and watch in the player """
@@ -1655,7 +1655,6 @@ class Application(Gtk.Application):
             req = self._http_api.send((HttpRequestType.ZAP, ref))
             next(self._http_api)
             if req and req.get("result", False):
-                GLib.timeout_add_seconds(2, self.update_service_info)
                 GLib.idle_add(scroll_to, path, self._fav_view)
                 if callback is not None:
                     callback()
@@ -1682,27 +1681,31 @@ class Application(Gtk.Application):
         GLib.idle_add(self._receiver_info_box.set_visible, res_info)
 
         if service_info:
-            GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
-            GLib.timeout_add_seconds(2, self.update_signal)
+            gen = self.update_service_info()
+            GLib.timeout_add_seconds(3, lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self._signal_box.set_visible, service_info)
 
     def update_signal(self):
+        if not self._http_api:
+            return
+
         sig = self._http_api.send((HttpRequestType.SIGNAL, None))
         next(self._http_api)
         val = sig.get("snr", 0)
         self._signal_level_bar.set_value(val if val else 0)
         self._signal_level_bar.set_visible(val)
 
-        return self._monitor_signal
-
     def update_service_info(self):
-        info = self._http_api.send((HttpRequestType.INFO, None))
-        next(self._http_api)
-        if info:
-            service_info = info.get("service", None)
-            if service_info:
-                GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
-                GLib.timeout_add_seconds(1, self.update_signal)
+        while self._http_api:
+            info = self._http_api.send((HttpRequestType.INFO, None))
+            next(self._http_api)
+            if info:
+                service_info = info.get("service", None)
+                if service_info:
+                    GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
+                    if service_info.get("onid", None):
+                        self.update_signal()
+            yield self._http_api
 
     # ***************** Filter and search *********************#
 

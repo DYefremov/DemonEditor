@@ -273,6 +273,7 @@ def telnet(host, port=23, user="", password="", timeout=5):
 def http_request(host, port, user, password):
     base_url = "http://{}:{}/api/".format(host, port)
     init_auth(user, password, base_url)
+
     while True:
         req_type, ref = yield
         url = base_url
@@ -285,18 +286,21 @@ def http_request(host, port, user, password):
         elif req_type is HttpRequestType.STREAM:
             url = base_url + HttpRequestType.STREAM.value
 
-        try:
-            with urlopen(url, timeout=5) as f:
-                if req_type is HttpRequestType.STREAM:
-                    yield f.read().decode("utf-8")
-                else:
-                    yield json.loads(f.read().decode("utf-8"))
-        except (URLError, HTTPError):
-            yield None
+        yield from get_json(req_type, url)
+
+
+def get_json(req_type, url):
+    try:
+        with urlopen(url, timeout=5) as f:
+            if req_type is HttpRequestType.STREAM:
+                yield f.read().decode("utf-8")
+            else:
+                yield json.loads(f.read().decode("utf-8"))
+    except (URLError, HTTPError):
+        yield None
 
 
 # ***************** Connections testing *******************#
-
 
 def test_ftp(host, port, user, password, timeout=5):
     try:

@@ -2686,12 +2686,12 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="receiver_info_box">
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
+                <property name="margin_left">10</property>
                 <child>
                   <object class="GtkLabel" id="receiver_info_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Receiver info</property>
-                    <property name="margin_left">10</property>
                     <property name="label" translatable="yes">Receiver info</property>
                     <attributes>
                       <attribute name="size" value="8000"/>
@@ -2710,7 +2710,7 @@ Author: Dmitriy Yefremov
                 <property name="position">0</property>
               </packing>
             </child>
-            <child>
+            <child type="center">
               <object class="GtkBox" id="ip_status_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -2752,20 +2752,21 @@ Author: Dmitriy Yefremov
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="padding">5</property>
-                <property name="position">1</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
               <object class="GtkBox" id="signal_box">
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkLabel" id="service_name_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Current service</property>
-                    <property name="label" translatable="yes">Service name</property>
                     <property name="justify">fill</property>
                     <property name="xalign">1</property>
                     <attributes>
@@ -2781,12 +2782,9 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkLevelBar" id="signal_level_bar">
                     <property name="width_request">70</property>
-                    <property name="height_request">10</property>
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Tuner signal</property>
                     <property name="valign">center</property>
-                    <property name="margin_right">10</property>
                     <property name="max_value">100</property>
                   </object>
                   <packing>
