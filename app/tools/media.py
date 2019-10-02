@@ -1,13 +1,25 @@
 from app.commons import run_task
 from app.tools import vlc
+from app.tools.vlc import EventType
 
 
 class Player:
     _VLC_INSTANCE = None
 
-    def __init__(self):
+    def __init__(self, rewind_callback=None, position_callback=None):
         self._is_playing = False
         self._player = self.get_vlc_instance()
+        ev_mgr = self._player.event_manager()
+
+        if rewind_callback:
+            # TODO look other EventType options
+            ev_mgr.event_attach(EventType.MediaPlayerBuffering,
+                                lambda e, p: rewind_callback(p.get_media().get_duration()),
+                                self._player)
+        if position_callback:
+            ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
+                                lambda e, p: position_callback(p.get_time()),
+                                self._player)
 
     @staticmethod
     def get_vlc_instance():
@@ -31,6 +43,9 @@ class Player:
 
     def pause(self):
         self._player.pause()
+
+    def set_time(self, time):
+        self._player.set_time(time)
 
     @run_task
     def release(self):

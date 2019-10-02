@@ -138,6 +138,7 @@ class Application(Gtk.Application):
                     "on_player_stop": self.on_player_stop,
                     "on_player_previous": self.on_player_previous,
                     "on_player_next": self.on_player_next,
+                    "on_player_rewind": self.on_player_rewind,
                     "on_player_close": self.on_player_close,
                     "on_player_press": self.on_player_press,
                     "on_full_screen": self.on_full_screen,
@@ -239,6 +240,10 @@ class Application(Gtk.Application):
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         # Player
         self._player_box = builder.get_object("player_box")
+        self._player_scale = builder.get_object("player_scale")
+        self._player_full_time_label = builder.get_object("player_full_time_label")
+        self._player_current_time_label = builder.get_object("player_current_time_label")
+        self._player_rewind_box = builder.get_object("player_rewind_box")
         self._player_drawing_area = builder.get_object("player_drawing_area")
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._player_prev_button = builder.get_object("player_prev_button")
@@ -1528,7 +1533,8 @@ class Application(Gtk.Application):
     def play(self, url):
         if not self._player:
             try:
-                self._player = Player()
+                self._player = Player(rewind_callback=self.on_player_duration_changed,
+                                      position_callback=self.on_player_time_changed)
             except (NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
@@ -1560,6 +1566,9 @@ class Application(Gtk.Application):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
             self.on_play_stream()
 
+    def on_player_rewind(self, scale, scroll_type, value):
+        self._player.set_time(int(value))
+
     def update_player_buttons(self):
         if self._player:
             path, column = self._fav_view.get_cursor()
@@ -1572,6 +1581,24 @@ class Application(Gtk.Application):
             self._player.release()
             self._player = None
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
+
+    @lru_cache(maxsize=1)
+    def on_player_duration_changed(self, duration):
+        self._player_scale.set_value(0)
+        self._player_scale.get_adjustment().set_upper(duration)
+        GLib.idle_add(self._player_rewind_box.set_visible, duration > 0)
+        GLib.idle_add(self._player_current_time_label.set_text, "0")
+        GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration))
+
+    def on_player_time_changed(self, t):
+        if not self._full_screen and self._player_rewind_box.get_visible():
+            GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
+
+    def get_time_str(self, duration):
+        """ returns a string representation of time from duration in milliseconds """
+        m, s = divmod(duration // 1000, 60)
+        h, m = divmod(m, 60)
+        return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
     def on_drawing_area_realize(self, widget):
         self._drawing_area_xid = widget.get_window().get_xid()
