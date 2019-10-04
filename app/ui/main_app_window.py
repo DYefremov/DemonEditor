@@ -205,6 +205,12 @@ class Application(Gtk.Application):
         self._bouquets_main_box = builder.get_object("bouquets_main_box")
         self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
+        # App info
+        self._app_info_box = builder.get_object("app_info_box")
+        self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("right_header_box"), "sensitive", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("left_header_box"), "sensitive", 4)
         # Status bar
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
@@ -273,7 +279,6 @@ class Application(Gtk.Application):
         self.init_drag_and_drop()
         self.init_colors()
         self.init_http_api()
-        self._services_view.grab_focus()
 
     def do_activate(self):
         self._main_window.set_application(self)
@@ -875,9 +880,16 @@ class Application(Gtk.Application):
             yield True
 
     def append_data(self, bouquets, services):
+        if self._app_info_box.get_visible():
+            yield from self.show_app_info(False)
         self.append_bouquets(bouquets)
         yield from self.append_services(services)
         self.update_sat_positions()
+        yield True
+
+    def show_app_info(self, visible):
+        self._app_info_box.set_visible(visible)
+        self._app_info_box.grab_focus() if visible else self._services_view.grab_focus()
         yield True
 
     def append_blacklist(self, black_list):
@@ -1154,6 +1166,7 @@ class Application(Gtk.Application):
         profile = self._options.get("profile")
         self._ip_label.set_text(self._options.get(profile).get("host"))
         if profile != self._profile:
+            yield from self.show_app_info(True)
             self._profile = profile
             c_gen = self.clear_current_data()
             yield from c_gen
@@ -1632,8 +1645,8 @@ class Application(Gtk.Application):
     def on_main_window_state(self, window, event):
         full = not event.new_window_state & Gdk.WindowState.FULLSCREEN
         self._main_data_box.set_visible(full)
-        self._status_bar_box.set_visible(full)
         self._player_tool_bar.set_visible(full)
+        self._status_bar_box.set_visible(full and not self._app_info_box.get_visible())
 
     # ************************ HTTP API ****************************#
 

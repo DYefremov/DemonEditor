@@ -346,6 +346,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkModelButton" id="import_bq_menu_button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="text" translatable="yes">Bouquet</property>
@@ -991,43 +992,41 @@ Author: Dmitriy Yefremov
           </object>
         </child>
         <child>
-          <object class="GtkBox" id="left_header_box">
+          <object class="GtkSeparator" id="left_header_separator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="download_header_button">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">FTP-transfer</property>
+            <signal name="clicked" handler="on_download" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="download_header_button_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">network-wired</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="left_header_box">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
             <property name="spacing">1</property>
-            <child>
-              <object class="GtkSeparator" id="left_header_box_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="download_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">FTP-transfer</property>
-                <signal name="clicked" handler="on_download" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="download_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">network-wired</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
             <child>
               <object class="GtkButton" id="save_header_button">
                 <property name="visible">True</property>
@@ -1051,7 +1050,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkSeparator" id="left_header_box_separator_2">
+              <object class="GtkSeparator" id="left_header_box_separator">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -1105,7 +1104,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkSeparator" id="left_header_box_separator_3">
+              <object class="GtkSeparator" id="left_header_box_separator_2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -1162,12 +1161,13 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox" id="right_header_box">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="spacing">1</property>
             <child>
@@ -1347,7 +1347,6 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkPaned" id="main_paned">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="player_box">
@@ -2719,10 +2718,67 @@ Author: Dmitriy Yefremov
             <property name="position">0</property>
           </packing>
         </child>
+        <child type="center">
+          <object class="GtkBox" id="app_info_box">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="orientation">vertical</property>
+            <signal name="key-press-event" handler="on_tree_view_key_press" object="services_tree_view" swapped="no"/>
+            <signal name="key-release-event" handler="on_tree_view_key_release" object="services_tree_view" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="app_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-edit</property>
+                <property name="icon_size">6</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="app_name_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">DemonEditor</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="scale" value="3"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="app_ver_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">0.4.6 Pre-alpha</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
             <property name="height_request">24</property>
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
