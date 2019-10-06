@@ -68,9 +68,6 @@ msgstr "Загрузить"
 msgid "Edit"
 msgstr "Изменить"
 
-msgid "Edit "
-msgstr "Изменить"
-
 msgid "Edit mаrker text"
 msgstr "Изменить текст маркера"
 
@@ -749,27 +746,20 @@ msgstr "Количество успешно сконфигурированных
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
 msgstr "Текущий файл epg.dat не содержит ссылок на сервисы данного букета!"
 
+msgid "Use HTTP"
+msgstr "Использовать HTTP"
 
+msgid "Close playback"
+msgstr "Закрыть воспроизведение"
 
+msgid "Import YouTube playlist"
+msgstr "Импорт плейлиста YouTube"
 
+msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+msgstr "Найдена ссылка на ресурс YouTube!\nПопробовать получить прямую ссылку на видео?"
 
+msgid "Playlist import"
+msgstr "Импорт плейлиста"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+msgid "Getting link error:"
+msgstr "Ошибка получения ссылки:"

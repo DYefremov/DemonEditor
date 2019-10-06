@@ -231,7 +231,7 @@ class IptvDialog:
         try:
             links, title = YouTube.get_yt_link(video_id)
         except urllib.error.URLError as e:
-            self.show_info_message(get_message("Get link error:") + (str(e)), Gtk.MessageType.ERROR)
+            self.show_info_message(get_message("Getting link error:") + (str(e)), Gtk.MessageType.ERROR)
             return
         else:
             if self._action is Action.ADD:
@@ -243,7 +243,7 @@ class IptvDialog:
                 entry.set_text(links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
                 self._yt_links = links
             else:
-                msg = get_message("Get link error:") + " No link received for id: {}".format(video_id)
+                msg = get_message("Getting link error:") + " No link received for id: {}".format(video_id)
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
         finally:
             entry.set_sensitive(True)

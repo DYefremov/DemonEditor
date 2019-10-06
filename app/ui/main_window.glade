@@ -536,7 +536,7 @@ Author: Dmitriy Yefremov
               <object class="GtkModelButton" id="close_player_menu_button">
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="text" translatable="yes">Close player</property>
+                <property name="text" translatable="yes">Close playback</property>
                 <signal name="clicked" handler="on_player_close" swapped="no"/>
               </object>
               <packing>
@@ -1508,7 +1508,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkToolButton" id="player_close_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Close</property>
+                        <property name="tooltip_text" translatable="yes">Close playback</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-close</property>
                         <signal name="clicked" handler="on_player_close" swapped="no"/>
