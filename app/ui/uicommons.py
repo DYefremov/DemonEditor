@@ -1,4 +1,3 @@
-import locale
 import os
 
 import gi
@@ -16,7 +15,7 @@ IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 TEXT_DOMAIN = "demon-editor"
 if UI_RESOURCES_PATH == "app/ui/":
     LANG_DIR = UI_RESOURCES_PATH + "lang"
-    locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
+    # locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
 
 theme = Gtk.IconTheme.get_default()
 _IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None

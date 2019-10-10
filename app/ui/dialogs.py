@@ -163,7 +163,8 @@ def get_dialog_from_xml(dialog_type, transient, use_header=0, title=""):
 
 def get_message(message):
     """ returns translated message """
-    return locale.dgettext(TEXT_DOMAIN, message)
+    # return locale.dgettext(TEXT_DOMAIN, message)
+    return message
 
 
 @lru_cache(maxsize=5)

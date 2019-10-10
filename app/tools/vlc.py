@@ -199,8 +199,11 @@ def find_lib():
                     break
         else:  # hope, some [DY]LD_LIBRARY_PATH is set...
             # pre-load libvlccore VLC 2.2.8+
-            ctypes.CDLL('libvlccore.dylib')
-            dll = ctypes.CDLL('libvlc.dylib')
+            try:
+                ctypes.CDLL('libvlccore.dylib')
+                dll = ctypes.CDLL('libvlc.dylib')
+            except OSError:
+                pass
 
     else:
         raise NotImplementedError('%s: %s not supported' % (sys.argv[0], sys.platform))
