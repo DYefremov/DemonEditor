@@ -1055,6 +1055,9 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def create_new_configuration(self, profile):
+        if self._app_info_box.get_visible():
+            yield from self.show_app_info(False)
+
         c_gen = self.clear_current_data()
         yield from c_gen
 
