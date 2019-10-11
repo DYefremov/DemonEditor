@@ -74,9 +74,6 @@ msgstr "Download"
 msgid "Edit"
 msgstr "Wijzig"
 
-msgid "Edit "
-msgstr "Wijzig "
-
 msgid "Edit mаrker text"
 msgstr "Wijzig mаrker tekst"
 
@@ -763,3 +760,20 @@ msgstr "Aantal succesvol geconfigureerde diensten:"
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
 msgstr "Huisige epg.dat bestand heeft geen referenties naar de diensten van dit boeket!"
 
+msgid "Use HTTP"
+msgstr "Gebruik HTTP"
+
+msgid "Close playback"
+msgstr "Stop afspelen"
+
+msgid "Import YouTube playlist"
+msgstr "Importeer YouTube playlist"
+
+msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+msgstr "Een link gevonden naar de YouTube bron!\nProberen een rechtstreekse link naar de video te vonden?"
+
+msgid "Playlist import"
+msgstr "Importeer playlist"
+
+msgid "Getting link error:"
+msgstr "Volgende Link error gekregen:"
