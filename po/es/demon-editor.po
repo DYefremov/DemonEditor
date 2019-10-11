@@ -74,9 +74,6 @@ msgstr "Descargar"
 msgid "Edit"
 msgstr "Editar"
 
-msgid "Edit "
-msgstr "Editar "
-
 msgid "Edit mаrker text"
 msgstr "Editar texto del mаrcador"
 
@@ -763,3 +760,21 @@ msgstr "Número de servicios configurados con éxito:"
 
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
 msgstr "Archivo epg.dat actual no tiene referencias a servicios de este ramo!"
+
+msgid "Use HTTP"
+msgstr "Utilizar HTTP"
+
+msgid "Close playback"
+msgstr "Terminar reproducción"
+
+msgid "Import YouTube playlist"
+msgstr "Importar lista de reproducción de YouTube"
+
+msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+msgstr "Encontré un enlace al recurso de YouTube!\nIntentar obtener un enlace directo al video?"
+
+msgid "Playlist import"
+msgstr "Importar lista de reproducción"
+
+msgid "Getting link error:"
+msgstr "Recibido Link error:"
