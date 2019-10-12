@@ -30,7 +30,7 @@ Author: Dmitriy Yefremov
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
+  <!-- interface-description Enigma2 channel and satellites list editor for MacOS. -->
   <!-- interface-copyright 2018 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAboutDialog" id="about_dialog">
@@ -43,7 +43,8 @@ Author: Dmitriy Yefremov
     <property name="version">0.4.6 Pre-alpha</property>
     <property name="copyright">2018-2019 Dmitriy Yefremov
 </property>
-    <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>
+    <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for MacOS.
+    (Experimental)</property>
     <property name="website">https://dyefremov.github.io/DemonEditor/</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
 Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
