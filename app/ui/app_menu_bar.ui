@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu_bar">
+    <submenu>
+      <attribute name="label" translatable="yes">File</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">New empty configuration</attribute>
+          <attribute name="action">app.on_new_configuration</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Open</attribute>
+          <attribute name="action">app.on_data_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Save</attribute>
+          <attribute name="action">app.on_data_save</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">FTP-transfer</attribute>
+          <attribute name="action">app.on_download</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Settings</attribute>
+          <attribute name="action">app.on_preferences</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Exit</attribute>
+          <attribute name="action">app.on_close_app</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Import</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Bouquet</attribute>
+          <attribute name="action">app.on_import_bouquet</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Bouquets and services</attribute>
+          <attribute name="action">app.on_import_bouquets</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Tools</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Satellites editor</attribute>
+        <attribute name="action">app.on_satellite_editor_show</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Picons downloader</attribute>
+        <attribute name="action">app.on_picons_loader_show</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Backups</attribute>
+        <attribute name="action">app.on_backup_tool_show</attribute>
+      </item>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">IPTV</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
+        <attribute name="action">app.on_iptv</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Import m3u</attribute>
+        <attribute name="action">app.on_import_m3u</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
+        <attribute name="action">app.on_import_yt_list</attribute>
+      </item>
+    </submenu>
+    <submenu>
+      <attribute name="label">Help</attribute>
+      <item>
+        <attribute name="label" translatable="yes">About</attribute>
+        <attribute name="action">app.on_about_app</attribute>
+      </item>
+    </submenu>
+  </menu>
+</interface>

@@ -53,18 +53,16 @@ class Application(Gtk.Application):
                      "fav_picon_popup_item", "fav_copy_popup_item", "fav_epg_configuration_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
-                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
-                         "bouquet_import_popup_item")
+                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "bouquet_import_popup_item")
 
-    _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item", "import_bq_menu_button")
+    _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item")
 
-    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item",
-                            "epg_configuration_header_button")
+    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item")
 
-    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_header_button",
-                          "epg_configuration_header_button")
+    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
 
-    _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
+    # _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
+    _LOCK_HIDE_ELEMENTS = ()
 
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
@@ -73,16 +71,9 @@ class Application(Gtk.Application):
 
         handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
-                    "on_about_app": self.on_about_app,
-                    "on_preferences": self.on_preferences,
-                    "on_download": self.on_download,
-                    "on_data_open": self.on_data_open,
-                    "on_data_save": self.on_data_save,
-                    "on_new_configuration": self.on_new_configuration,
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_tree_view_key_release": self.on_tree_view_key_release,
                     "on_bouquets_selection": self.on_bouquets_selection,
-                    "on_satellite_editor_show": self.on_satellite_editor_show,
                     "on_services_selection": self.on_services_selection,
                     "on_fav_cut": self.on_fav_cut,
                     "on_bouquets_cut": self.on_bouquets_cut,
@@ -114,12 +105,9 @@ class Application(Gtk.Application):
                     "on_import_m3u": self.on_import_m3u,
                     "on_export_to_m3u": self.on_export_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
-                    "on_import_bouquets": self.on_import_bouquets,
-                    "on_backup_tool_show": self.on_backup_tool_show,
                     "on_insert_marker": self.on_insert_marker,
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
-                    "on_picons_loader_show": self.on_picons_loader_show,
                     "on_filter_changed": self.on_filter_changed,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
@@ -209,8 +197,6 @@ class Application(Gtk.Application):
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("right_header_box"), "sensitive", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("left_header_box"), "sensitive", 4)
         # Status bar
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
@@ -226,7 +212,6 @@ class Application(Gtk.Application):
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
         self._save_header_button = builder.get_object("save_header_button")
-        self._save_header_button.bind_property("sensitive", builder.get_object("save_menu_button"), "sensitive")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -256,10 +241,6 @@ class Application(Gtk.Application):
         self._player_next_button = builder.get_object("player_next_button")
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
-        self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
-        self._player_box.bind_property("visible", builder.get_object("left_header_box"), "visible", 4)
-        self._player_box.bind_property("visible", builder.get_object("right_header_box"), "visible", 4)
-        self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
@@ -275,6 +256,71 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
+        # File
+        action = Gio.SimpleAction.new("on_new_configuration", None)
+        action.connect("activate", self.on_new_configuration)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_data_open", None)
+        action.connect("activate", self.on_data_open)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_data_save", None)
+        action.connect("activate", self.on_data_save)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_download", None)
+        action.connect("activate", self.on_download)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_preferences", None)
+        action.connect("activate", self.on_preferences)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_close_app", None)
+        action.connect("activate", self.on_close_app)
+        self.add_action(action)
+        # Import
+        action = Gio.SimpleAction.new("on_import_bouquet", None)
+        action.connect("activate", self.on_import_bouquet)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_import_bouquets", None)
+        action.connect("activate", self.on_import_bouquets)
+        self.add_action(action)
+        # Tools
+        action = Gio.SimpleAction.new("on_satellite_editor_show", None)
+        action.connect("activate", self.on_satellite_editor_show)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_picons_loader_show", None)
+        action.connect("activate", self.on_picons_loader_show)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_backup_tool_show", None)
+        action.connect("activate", self.on_backup_tool_show)
+        self.add_action(action)
+        # ITPV
+        action = Gio.SimpleAction.new("on_iptv", None)
+        action.connect("activate", self.on_iptv)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_import_m3u", None)
+        action.connect("activate", self.on_import_m3u)
+        self.add_action(action)
+
+        action = Gio.SimpleAction.new("on_import_yt_list", None)
+        action.connect("activate", self.on_import_yt_list)
+        self.add_action(action)
+        # Help
+        action = Gio.SimpleAction.new("on_about_app", None)
+        action.connect("activate", self.on_about_app)
+        self.add_action(action)
+
+        builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
+        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
+        self.set_menubar(builder.get_object("menu_bar"))
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_colors()
@@ -375,7 +421,7 @@ class Application(Gtk.Application):
         self._options["window_size"] = window.get_size()
 
     @run_idle
-    def on_about_app(self, item):
+    def on_about_app(self, action, value=None):
         show_dialog(DialogType.ABOUT, self._main_window)
 
     @run_idle
@@ -787,11 +833,11 @@ class Application(Gtk.Application):
             return True
 
     @run_idle
-    def on_satellite_editor_show(self, model):
+    def on_satellite_editor_show(self, action, value):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self._main_window, self._options.get(self._profile))
 
-    def on_download(self, item):
+    def on_download(self, action, value):
         DownloadDialog(transient=self._main_window,
                        properties=self._options,
                        open_data_callback=self.open_data,
@@ -833,7 +879,7 @@ class Application(Gtk.Application):
         except Exception as e:
             self.show_error_dialog(str(e))
 
-    def on_data_open(self, model):
+    def on_data_open(self, action, param=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
@@ -1046,7 +1092,7 @@ class Application(Gtk.Application):
         self._save_header_button.set_sensitive(True)
         yield True
 
-    def on_new_configuration(self, item):
+    def on_new_configuration(self, action, value):
         """ Creates new empty configuration """
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
@@ -1159,7 +1205,7 @@ class Application(Gtk.Application):
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
-    def on_preferences(self, item):
+    def on_preferences(self, action, value):
         response = show_settings_dialog(self._main_window, self._options)
         if response != Gtk.ResponseType.CANCEL:
             gen = self.update_options()
@@ -1376,7 +1422,7 @@ class Application(Gtk.Application):
 
     # ***************** IPTV *********************#
 
-    def on_iptv(self, item):
+    def on_iptv(self, action, value=None):
         response = IptvDialog(self._main_window,
                               self._fav_view,
                               self._services,
@@ -1441,14 +1487,14 @@ class Application(Gtk.Application):
 
     # ***************** Import  ********************#
 
-    def on_import_yt_list(self, item):
+    def on_import_yt_list(self, action, value=None):
         """ Import playlist from YouTube """
         if not self._bq_selected:
             return
 
         YtListImportDialog(self._main_window, Profile(self._profile), self.append_imported_services).show()
 
-    def on_import_m3u(self, item):
+    def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
         response = get_chooser_dialog(self._main_window, self._options.get(self._profile), "*.m3u", "m3u files")
         if response == Gtk.ResponseType.CANCEL:
@@ -1495,7 +1541,7 @@ class Application(Gtk.Application):
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
-    def on_import_bouquet(self, item):
+    def on_import_bouquet(self, action, value=None):
         profile = Profile(self._profile)
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
@@ -1506,7 +1552,7 @@ class Application(Gtk.Application):
         appender = self.append_bouquet if profile is Profile.ENIGMA_2 else self.append_bouquets
         import_bouquet(self._main_window, profile, model, paths[0], opts, self._services, appender)
 
-    def on_import_bouquets(self, item):
+    def on_import_bouquets(self, action, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
@@ -1526,7 +1572,7 @@ class Application(Gtk.Application):
 
     # ***************** Backup  ********************#
 
-    def on_backup_tool_show(self, item):
+    def on_backup_tool_show(self, action, value=None):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window,
                      self._options,
@@ -1979,7 +2025,7 @@ class Application(Gtk.Application):
     # ***************** Picons *********************#
 
     @run_idle
-    def on_picons_loader_show(self, item):
+    def on_picons_loader_show(self, action, value):
         ids = {}
         if Profile(self._profile) is Profile.ENIGMA_2:
             for r in self._services_model:
@@ -2051,10 +2097,11 @@ class Application(Gtk.Application):
 
     def update_profile_label(self):
         profile = Profile(self._profile)
-        if profile is Profile.ENIGMA_2:
-            self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
-        elif profile is Profile.NEUTRINO_MP:
-            self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
+        # TODO make a new implementation
+        # if profile is Profile.ENIGMA_2:
+        #     self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
+        # elif profile is Profile.NEUTRINO_MP:
+        #     self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
 
     def get_format_version(self):
         return 5 if self._options.get(self._profile).get("v5_support", False) else 4
