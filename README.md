@@ -12,5 +12,4 @@ Python >= **3.5**, GTK+ >= **3.16**, pygobject3, adwaita-icon-theme, python3-req
 ```pip3 install requests```
 
 ### Launching                                                                                                           
-To start the program, in most cases it is enough to download the archive,
-unpack and run it from the terminal with the command: ```./start.py```                                                                                                                                                                                                                                             
+To start the program, just download the archive, unpack and run it from the terminal with the command: ```./start.py```                                                                                                                                                                                                                                             

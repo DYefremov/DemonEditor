@@ -65,12 +65,28 @@
         <attribute name="action">app.on_iptv</attribute>
       </item>
       <item>
+        <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
+        <attribute name="action">app.on_import_yt_list</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">Import m3u</attribute>
         <attribute name="action">app.on_import_m3u</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
-        <attribute name="action">app.on_import_yt_list</attribute>
+        <attribute name="label" translatable="yes">Export to m3u</attribute>
+        <attribute name="action">app.on_export_to_m3u</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">EPG configuration</attribute>
+        <attribute name="action">app.on_epg_list_configuration</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">List configuration</attribute>
+        <attribute name="action">app.on_iptv_list_configuration</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Remove all unavailable</attribute>
+        <attribute name="action">app.on_remove_all_unavailable</attribute>
       </item>
     </submenu>
     <submenu>

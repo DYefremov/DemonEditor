@@ -256,71 +256,36 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        # File
-        action = Gio.SimpleAction.new("on_new_configuration", None)
-        action.connect("activate", self.on_new_configuration)
-        self.add_action(action)
+        # Init app menu bar handlers
+        main_handlers = ("on_new_configuration", "on_data_open", "on_data_save", "on_download", "on_preferences",
+                         "on_close_app", "on_import_bouquet", "on_import_bouquets", "on_satellite_editor_show",
+                         "on_picons_loader_show", "on_backup_tool_show", "on_about_app")
+        iptv_handlers = ("on_iptv", "on_import_yt_list", "on_import_m3u", "on_export_to_m3u",
+                         "on_epg_list_configuration", "on_iptv_list_configuration", "on_remove_all_unavailable")
 
-        action = Gio.SimpleAction.new("on_data_open", None)
-        action.connect("activate", self.on_data_open)
-        self.add_action(action)
+        def set_action(n, fun, enabled=True):
+            ac = Gio.SimpleAction.new(n, None)
+            ac.connect("activate", lambda a, b: fun(self, a, b))
+            ac.set_enabled(enabled)
+            self.add_action(ac)
+            return ac
 
-        action = Gio.SimpleAction.new("on_data_save", None)
-        action.connect("activate", self.on_data_save)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_download", None)
-        action.connect("activate", self.on_download)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_preferences", None)
-        action.connect("activate", self.on_preferences)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_close_app", None)
-        action.connect("activate", self.on_close_app)
-        self.add_action(action)
+        hd = {d: Application.__dict__.get(d) for d in set(chain.from_iterable((main_handlers, iptv_handlers)))}
+        list(map(lambda x: set_action(*x), hd.items()))
         # Import
-        action = Gio.SimpleAction.new("on_import_bouquet", None)
-        action.connect("activate", self.on_import_bouquet)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_import_bouquets", None)
-        action.connect("activate", self.on_import_bouquets)
-        self.add_action(action)
-        # Tools
-        action = Gio.SimpleAction.new("on_satellite_editor_show", None)
-        action.connect("activate", self.on_satellite_editor_show)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_picons_loader_show", None)
-        action.connect("activate", self.on_picons_loader_show)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_backup_tool_show", None)
-        action.connect("activate", self.on_backup_tool_show)
-        self.add_action(action)
-        # ITPV
-        action = Gio.SimpleAction.new("on_iptv", None)
-        action.connect("activate", self.on_iptv)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_import_m3u", None)
-        action.connect("activate", self.on_import_m3u)
-        self.add_action(action)
-
-        action = Gio.SimpleAction.new("on_import_yt_list", None)
-        action.connect("activate", self.on_import_yt_list)
-        self.add_action(action)
-        # Help
-        action = Gio.SimpleAction.new("on_about_app", None)
-        action.connect("activate", self.on_about_app)
-        self.add_action(action)
+        action = set_action("on_import_bouquet", hd.get("on_import_bouquet"), False)
+        self._tool_elements.get("bouquet_import_popup_item").bind_property("sensitive", action, "enabled")
+        # IPTV
+        iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
+        for h in iptv_handlers:
+            action = set_action(h, hd.get(h), False)
+            iptv_elem.bind_property("sensitive", action, "enabled")
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
         self.set_menubar(builder.get_object("menu_bar"))
+
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_colors()
@@ -1433,7 +1398,7 @@ class Application(Gtk.Application):
             self.update_fav_num_column(self._fav_model)
 
     @run_idle
-    def on_iptv_list_configuration(self, item):
+    def on_iptv_list_configuration(self, action, value=None):
         profile = Profile(self._profile)
         if profile is Profile.NEUTRINO_MP:
             self.show_error_dialog("Neutrino at the moment not supported!")
@@ -1451,7 +1416,7 @@ class Application(Gtk.Application):
         IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bq, self._fav_model, profile).show()
 
     @run_idle
-    def on_remove_all_unavailable(self, item):
+    def on_remove_all_unavailable(self, action, value=None):
         iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
             self.show_error_dialog("This list does not contains IPTV streams!")
@@ -1472,7 +1437,7 @@ class Application(Gtk.Application):
     # ****************** EPG  **********************#
 
     @run_idle
-    def on_epg_list_configuration(self, item):
+    def on_epg_list_configuration(self, action, value=None):
         if Profile(self._profile) is not Profile.ENIGMA_2:
             self.show_error_dialog("Only Enigma2 is supported!")
             return
@@ -1518,7 +1483,7 @@ class Application(Gtk.Application):
         next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
     @run_idle
-    def on_export_to_m3u(self, item):
+    def on_export_to_m3u(self, action, value=None):
         i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
         bq_services = [BouquetService(r[Column.FAV_SERVICE],
                                       BqServiceType(r[Column.FAV_TYPE]),
