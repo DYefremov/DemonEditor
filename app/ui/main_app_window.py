@@ -211,7 +211,6 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
-        self._save_header_button = builder.get_object("save_header_button")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -1009,7 +1008,6 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def save_data(self):
-        self._save_header_button.set_sensitive(False)
         profile = Profile(self._profile)
         options = self._options.get(self._profile)
         path = options.get("data_dir_path")
@@ -1053,8 +1051,6 @@ class Application(Gtk.Application):
         if profile is Profile.ENIGMA_2:
             # blacklist
             write_blacklist(path, self._blacklist)
-
-        self._save_header_button.set_sensitive(True)
         yield True
 
     def on_new_configuration(self, action, value):
