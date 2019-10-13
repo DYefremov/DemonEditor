@@ -984,6 +984,7 @@ class Application(Gtk.Application):
         self._current_bq_name = None
         self._bq_name_label.set_text("")
         self.init_sat_positions()
+        self.update_services_counts()
         yield True
 
     def on_data_save(self, *args):
@@ -1173,7 +1174,6 @@ class Application(Gtk.Application):
             self._profile = profile
             c_gen = self.clear_current_data()
             yield from c_gen
-            self.update_services_counts()
         self.update_profile_label()
         self.init_colors(True)
         yield True
