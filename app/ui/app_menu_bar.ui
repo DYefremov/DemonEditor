@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <menu id="app-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">About</attribute>
+        <attribute name="action">app.on_about_app</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Exit</attribute>
+        <attribute name="action">app.on_close_app</attribute>
+      </item>
+    </section>
+  </menu>
   <menu id="menu_bar">
     <submenu>
       <attribute name="label" translatable="yes">File</attribute>
@@ -16,13 +28,23 @@
           <attribute name="label" translatable="yes">Save</attribute>
           <attribute name="action">app.on_data_save</attribute>
         </item>
+      </section>
+      <section>
         <item>
           <attribute name="label" translatable="yes">FTP-transfer</attribute>
           <attribute name="action">app.on_download</attribute>
         </item>
+      </section>
+      <section>
         <item>
           <attribute name="label" translatable="yes">Settings</attribute>
           <attribute name="action">app.on_preferences</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">About</attribute>
+          <attribute name="action">app.on_about_app</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Exit</attribute>
@@ -76,25 +98,22 @@
         <attribute name="label" translatable="yes">Export to m3u</attribute>
         <attribute name="action">app.on_export_to_m3u</attribute>
       </item>
-      <item>
-        <attribute name="label" translatable="yes">EPG configuration</attribute>
-        <attribute name="action">app.on_epg_list_configuration</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">List configuration</attribute>
-        <attribute name="action">app.on_iptv_list_configuration</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Remove all unavailable</attribute>
-        <attribute name="action">app.on_remove_all_unavailable</attribute>
-      </item>
-    </submenu>
-    <submenu>
-      <attribute name="label">Help</attribute>
-      <item>
-        <attribute name="label" translatable="yes">About</attribute>
-        <attribute name="action">app.on_about_app</attribute>
-      </item>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">EPG configuration</attribute>
+          <attribute name="action">app.on_epg_list_configuration</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">List configuration</attribute>
+          <attribute name="action">app.on_iptv_list_configuration</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Remove all unavailable</attribute>
+          <attribute name="action">app.on_remove_all_unavailable</attribute>
+        </item>
+      </section>
     </submenu>
   </menu>
 </interface>

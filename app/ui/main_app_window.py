@@ -69,79 +69,89 @@ class Application(Gtk.Application):
         # Adding command line options
         self.add_main_option("log", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
 
-        handlers = {"on_close_app": self.on_close_app,
-                    "on_resize": self.on_resize,
-                    "on_tree_view_key_press": self.on_tree_view_key_press,
-                    "on_tree_view_key_release": self.on_tree_view_key_release,
-                    "on_bouquets_selection": self.on_bouquets_selection,
-                    "on_services_selection": self.on_services_selection,
-                    "on_fav_cut": self.on_fav_cut,
-                    "on_bouquets_cut": self.on_bouquets_cut,
-                    "on_services_copy": self.on_services_copy,
-                    "on_fav_copy": self.on_fav_copy,
-                    "on_bouquets_copy": self.on_bouquets_copy,
-                    "on_fav_paste": self.on_fav_paste,
-                    "on_bouquets_paste": self.on_bouquets_paste,
-                    "on_edit": self.on_rename,
-                    "on_rename_for_bouquet": self.on_rename_for_bouquet,
-                    "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
-                    "on_service_edit": self.on_service_edit,
-                    "on_services_add_new": self.on_services_add_new,
-                    "on_delete": self.on_delete,
-                    "on_tool_edit": self.on_header_edit,
-                    "on_to_fav_copy": self.on_to_fav_copy,
-                    "on_to_fav_end_copy": self.on_to_fav_end_copy,
-                    "on_view_drag_begin": self.on_view_drag_begin,
-                    "on_view_drag_data_get": self.on_view_drag_data_get,
-                    "on_view_drag_data_received": self.on_view_drag_data_received,
-                    "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
-                    "on_view_press": self.on_view_press,
-                    "on_view_popup_menu": self.on_view_popup_menu,
-                    "on_view_focus": self.on_view_focus,
-                    "on_hide": self.on_hide,
-                    "on_locked": self.on_locked,
-                    "on_model_changed": self.on_model_changed,
-                    "on_import_yt_list": self.on_import_yt_list,
-                    "on_import_m3u": self.on_import_m3u,
-                    "on_export_to_m3u": self.on_export_to_m3u,
-                    "on_import_bouquet": self.on_import_bouquet,
-                    "on_insert_marker": self.on_insert_marker,
-                    "on_fav_press": self.on_fav_press,
-                    "on_locate_in_services": self.on_locate_in_services,
-                    "on_filter_changed": self.on_filter_changed,
-                    "on_assign_picon": self.on_assign_picon,
-                    "on_remove_picon": self.on_remove_picon,
-                    "on_reference_picon": self.on_reference_picon,
-                    "on_remove_unused_picons": self.on_remove_unused_picons,
-                    "on_filter_toggled": self.on_filter_toggled,
-                    "on_search_toggled": self.on_search_toggled,
-                    "on_search_down": self.on_search_down,
-                    "on_search_up": self.on_search_up,
-                    "on_search": self.on_search,
-                    "on_iptv": self.on_iptv,
-                    "on_epg_list_configuration": self.on_epg_list_configuration,
-                    "on_iptv_list_configuration": self.on_iptv_list_configuration,
-                    "on_play_stream": self.on_play_stream,
-                    "on_player_play": self.on_player_play,
-                    "on_player_stop": self.on_player_stop,
-                    "on_player_previous": self.on_player_previous,
-                    "on_player_next": self.on_player_next,
-                    "on_player_rewind": self.on_player_rewind,
-                    "on_player_close": self.on_player_close,
-                    "on_player_press": self.on_player_press,
-                    "on_full_screen": self.on_full_screen,
-                    "on_drawing_area_realize": self.on_drawing_area_realize,
-                    "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
-                    "on_main_window_state": self.on_main_window_state,
-                    "on_remove_all_unavailable": self.on_remove_all_unavailable,
-                    "on_new_bouquet": self.on_new_bouquet,
-                    "on_bouquets_edit": self.on_bouquets_edit,
-                    "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
-                    "on_create_bouquet_for_each_satellite": self.on_create_bouquet_for_each_satellite,
-                    "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
-                    "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package,
-                    "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
-                    "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
+        self._handlers = {"on_close_app": self.on_close_app,
+                          "on_resize": self.on_resize,
+                          "on_about_app": self.on_about_app,
+                          "on_preferences": self.on_preferences,
+                          "on_download": self.on_download,
+                          "on_data_open": self.on_data_open,
+                          "on_data_save": self.on_data_save,
+                          "on_new_configuration": self.on_new_configuration,
+                          "on_tree_view_key_press": self.on_tree_view_key_press,
+                          "on_tree_view_key_release": self.on_tree_view_key_release,
+                          "on_bouquets_selection": self.on_bouquets_selection,
+                          "on_satellite_editor_show": self.on_satellite_editor_show,
+                          "on_services_selection": self.on_services_selection,
+                          "on_fav_cut": self.on_fav_cut,
+                          "on_bouquets_cut": self.on_bouquets_cut,
+                          "on_services_copy": self.on_services_copy,
+                          "on_fav_copy": self.on_fav_copy,
+                          "on_bouquets_copy": self.on_bouquets_copy,
+                          "on_fav_paste": self.on_fav_paste,
+                          "on_bouquets_paste": self.on_bouquets_paste,
+                          "on_edit": self.on_rename,
+                          "on_rename_for_bouquet": self.on_rename_for_bouquet,
+                          "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
+                          "on_service_edit": self.on_service_edit,
+                          "on_services_add_new": self.on_services_add_new,
+                          "on_delete": self.on_delete,
+                          "on_tool_edit": self.on_header_edit,
+                          "on_to_fav_copy": self.on_to_fav_copy,
+                          "on_to_fav_end_copy": self.on_to_fav_end_copy,
+                          "on_view_drag_begin": self.on_view_drag_begin,
+                          "on_view_drag_data_get": self.on_view_drag_data_get,
+                          "on_view_drag_data_received": self.on_view_drag_data_received,
+                          "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
+                          "on_view_press": self.on_view_press,
+                          "on_view_popup_menu": self.on_view_popup_menu,
+                          "on_view_focus": self.on_view_focus,
+                          "on_hide": self.on_hide,
+                          "on_locked": self.on_locked,
+                          "on_model_changed": self.on_model_changed,
+                          "on_import_yt_list": self.on_import_yt_list,
+                          "on_import_m3u": self.on_import_m3u,
+                          "on_export_to_m3u": self.on_export_to_m3u,
+                          "on_import_bouquet": self.on_import_bouquet,
+                          "on_import_bouquets": self.on_import_bouquets,
+                          "on_backup_tool_show": self.on_backup_tool_show,
+                          "on_insert_marker": self.on_insert_marker,
+                          "on_fav_press": self.on_fav_press,
+                          "on_locate_in_services": self.on_locate_in_services,
+                          "on_picons_loader_show": self.on_picons_loader_show,
+                          "on_filter_changed": self.on_filter_changed,
+                          "on_assign_picon": self.on_assign_picon,
+                          "on_remove_picon": self.on_remove_picon,
+                          "on_reference_picon": self.on_reference_picon,
+                          "on_remove_unused_picons": self.on_remove_unused_picons,
+                          "on_filter_toggled": self.on_filter_toggled,
+                          "on_search_toggled": self.on_search_toggled,
+                          "on_search_down": self.on_search_down,
+                          "on_search_up": self.on_search_up,
+                          "on_search": self.on_search,
+                          "on_iptv": self.on_iptv,
+                          "on_epg_list_configuration": self.on_epg_list_configuration,
+                          "on_iptv_list_configuration": self.on_iptv_list_configuration,
+                          "on_play_stream": self.on_play_stream,
+                          "on_player_play": self.on_player_play,
+                          "on_player_stop": self.on_player_stop,
+                          "on_player_previous": self.on_player_previous,
+                          "on_player_next": self.on_player_next,
+                          "on_player_rewind": self.on_player_rewind,
+                          "on_player_close": self.on_player_close,
+                          "on_player_press": self.on_player_press,
+                          "on_full_screen": self.on_full_screen,
+                          "on_drawing_area_realize": self.on_drawing_area_realize,
+                          "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
+                          "on_main_window_state": self.on_main_window_state,
+                          "on_remove_all_unavailable": self.on_remove_all_unavailable,
+                          "on_new_bouquet": self.on_new_bouquet,
+                          "on_bouquets_edit": self.on_bouquets_edit,
+                          "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
+                          "on_create_bouquet_for_each_satellite": self.on_create_bouquet_for_each_satellite,
+                          "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
+                          "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package,
+                          "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
+                          "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
 
         self._options = get_config()
         self._profile = self._options.get("profile")
@@ -175,7 +185,7 @@ class Application(Gtk.Application):
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
-        builder.connect_signals(handlers)
+        builder.connect_signals(self._handlers)
         self._main_window = builder.get_object("main_window")
         main_window_size = self._options.get("window_size", None)
         # Setting the last size of the window if it was saved
@@ -264,26 +274,26 @@ class Application(Gtk.Application):
 
         def set_action(n, fun, enabled=True):
             ac = Gio.SimpleAction.new(n, None)
-            ac.connect("activate", lambda a, b: fun(self, a, b))
+            ac.connect("activate", fun)
             ac.set_enabled(enabled)
             self.add_action(ac)
             return ac
 
-        hd = {d: Application.__dict__.get(d) for d in set(chain.from_iterable((main_handlers, iptv_handlers)))}
-        list(map(lambda x: set_action(*x), hd.items()))
+        list(map(lambda x: set_action(x, self._handlers.get(x)), main_handlers))
         # Import
-        action = set_action("on_import_bouquet", hd.get("on_import_bouquet"), False)
+        action = set_action("on_import_bouquet", self._handlers.get("on_import_bouquet"), False)
         self._tool_elements.get("bouquet_import_popup_item").bind_property("sensitive", action, "enabled")
         # IPTV
         iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
         for h in iptv_handlers:
-            action = set_action(h, hd.get(h), False)
+            action = set_action(h, self._handlers.get(h), False)
             iptv_elem.bind_property("sensitive", action, "enabled")
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
         self.set_menubar(builder.get_object("menu_bar"))
+        self.set_app_menu(builder.get_object("app-menu"))
 
         self.update_profile_label()
         self.init_drag_and_drop()
@@ -2058,11 +2068,11 @@ class Application(Gtk.Application):
 
     def update_profile_label(self):
         profile = Profile(self._profile)
-        # TODO make a new implementation
-        # if profile is Profile.ENIGMA_2:
-        #     self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
-        # elif profile is Profile.NEUTRINO_MP:
-        #     self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
+        if profile is Profile.ENIGMA_2:
+            ver = self.get_format_version()
+            self._main_window.set_title("DemonEditor [{} Enigma2 v.{}]".format(get_message("Profile:"), ver))
+        elif profile is Profile.NEUTRINO_MP:
+            self._main_window.set_title("DemonEditor [{} Neutrino-MP]".format(get_message("Profile:")))
 
     def get_format_version(self):
         return 5 if self._options.get(self._profile).get("v5_support", False) else 4
