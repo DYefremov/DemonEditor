@@ -140,9 +140,6 @@ class Application(Gtk.Application):
                           "on_player_close": self.on_player_close,
                           "on_player_press": self.on_player_press,
                           "on_full_screen": self.on_full_screen,
-                          "on_drawing_area_realize": self.on_drawing_area_realize,
-                          "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
-                          "on_main_window_state": self.on_main_window_state,
                           "on_remove_all_unavailable": self.on_remove_all_unavailable,
                           "on_new_bouquet": self.on_new_bouquet,
                           "on_bouquets_edit": self.on_bouquets_edit,
@@ -173,7 +170,6 @@ class Application(Gtk.Application):
         # Player
         self._player = None
         self._full_screen = False
-        self._drawing_area_xid = None
         # http api
         self._http_api = None
         self._fav_click_mode = None
@@ -206,7 +202,7 @@ class Application(Gtk.Application):
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
+        self._app_info_box.bind_property("visible", self._main_data_box, "visible", 4)
         # Status bar
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
@@ -244,15 +240,12 @@ class Application(Gtk.Application):
         self._player_full_time_label = builder.get_object("player_full_time_label")
         self._player_current_time_label = builder.get_object("player_current_time_label")
         self._player_rewind_box = builder.get_object("player_rewind_box")
-        self._player_drawing_area = builder.get_object("player_drawing_area")
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
-        # Enabling events for the drawing area
-        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        self._player_frame = builder.get_object("player_frame")
+        self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
@@ -1571,11 +1564,6 @@ class Application(Gtk.Application):
             except (NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
-            else:
-                if self._drawing_area_xid:
-                    self._player.set_xwindow(self._drawing_area_xid)
-                w, h = self._main_window.get_size()
-                self._player_box.set_size_request(w * 0.6, -1)
 
         self._player_box.set_visible(True)
         GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
@@ -1624,7 +1612,7 @@ class Application(Gtk.Application):
         GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration))
 
     def on_player_time_changed(self, t):
-        if not self._full_screen and self._player_rewind_box.get_visible():
+        if self._player_rewind_box.get_visible():
             GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
 
     def get_time_str(self, duration):
@@ -1632,26 +1620,6 @@ class Application(Gtk.Application):
         m, s = divmod(duration // 1000, 60)
         h, m = divmod(m, 60)
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
-
-    def on_drawing_area_realize(self, widget):
-        self._drawing_area_xid = widget.get_window().get_xid()
-        self._player.set_xwindow(self._drawing_area_xid)
-
-    def on_player_drawing_area_draw(self, widget, cr):
-        """ Used for black background drawing in the player drawing area.
-
-            Required for Gtk >= 3.20.
-            More info: https://developer.gnome.org/gtk3/stable/ch32s10.html,
-            https://developer.gnome.org/gtk3/stable/GtkStyleContext.html#gtk-render-background
-        """
-        context = widget.get_style_context()
-        width = widget.get_allocated_width()
-        height = widget.get_allocated_height()
-        Gtk.render_background(context, cr, 0, 0, width, height)
-        r, g, b, a = 0, 0, 0, 1  # black color
-        cr.set_source_rgba(r, g, b, a)
-        cr.rectangle(0, 0, width, height)
-        cr.fill()
 
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
@@ -1661,12 +1629,6 @@ class Application(Gtk.Application):
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
-
-    def on_main_window_state(self, window, event):
-        full = not event.new_window_state & Gdk.WindowState.FULLSCREEN
-        self._main_data_box.set_visible(full)
-        self._player_tool_bar.set_visible(full)
-        self._status_bar_box.set_visible(full and not self._app_info_box.get_visible())
 
     # ************************ HTTP API ****************************#
 
