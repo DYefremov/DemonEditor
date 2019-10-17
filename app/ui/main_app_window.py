@@ -1561,8 +1561,12 @@ class Application(Gtk.Application):
             try:
                 self._player = Player(rewind_callback=self.on_player_duration_changed,
                                       position_callback=self.on_player_time_changed)
-            except (NameError, AttributeError):
-                self.show_error_dialog("No VLC is found. Check that it is installed!")
+            except (NameError, AttributeError, ImportError) as e:
+                if type(e) is ImportError:
+                    self.show_error_dialog(str(e))
+                else:
+                    self.show_error_dialog("No VLC is found. Check that it is installed!")
+                log(str(e))
                 return
 
         self._player_box.set_visible(True)

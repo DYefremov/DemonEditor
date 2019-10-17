@@ -1,3 +1,5 @@
+import sys
+
 from app.commons import run_task
 from app.tools import vlc
 from app.tools.vlc import EventType
@@ -21,12 +23,56 @@ class Player:
                                 lambda e, p: position_callback(p.get_time()),
                                 self._player)
 
-    @staticmethod
-    def get_vlc_instance():
+    def get_vlc_instance(self):
         if Player._VLC_INSTANCE:
             return Player._VLC_INSTANCE
-        _VLC_INSTANCE = vlc.Instance("--quiet --no-xlib").media_player_new()
-        return _VLC_INSTANCE
+
+        if not sys.platform.startswith("darwin"):
+            raise ImportError('This implementation only supported on MacOS')
+
+        try:
+            view = Player.get_nso()
+        except ImportError as e:
+            raise e
+        else:
+            self._VLC_INSTANCE = vlc.Instance().media_player_new()
+            self._VLC_INSTANCE.set_nsobject(view.__c_void_p__())
+
+        return self._VLC_INSTANCE
+
+    @staticmethod
+    def get_nso():
+        """ This code based on pyobjcvlc.py example
+            from  here: https://github.com/oaubert/python-vlc/tree/master/examples
+        """
+        try:
+            from objc import __version__ as __PyObjC__
+        except ImportError:
+            raise ImportError("No PyObjC is installed!")
+        else:
+            from Cocoa import NSBackingStoreBuffered, NSBundle, NSScreen, NSMakeRect, NSView, NSWindow
+
+        try:
+            from Cocoa import NSWindowStyleMaskClosable, NSWindowStyleMaskMiniaturizable, \
+                NSWindowStyleMaskResizable, NSWindowStyleMaskTitled
+        except ImportError as e:
+            raise e
+
+        NSWindowStyleMaskUsual = NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable \
+                                 | NSWindowStyleMaskResizable | NSWindowStyleMaskTitled
+        frame = NSScreen.mainScreen().frame()
+        w = int(frame.size.width * 0.5)
+        h = int(frame.size.height * w / frame.size.width)
+        frame = NSMakeRect(frame.origin.x + 10, frame.origin.y + 10, w, h)
+        window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(frame,
+                                                                               NSWindowStyleMaskUsual,
+                                                                               NSBackingStoreBuffered,
+                                                                               False)
+        view = NSView.alloc().initWithFrame_(frame)
+        window.setContentView_(view)
+        window.setContentAspectRatio_(frame.size)
+        window.makeKeyAndOrderFront_(None)
+        return view
 
     @run_task
     def play(self, mrl=None):

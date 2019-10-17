@@ -11,5 +11,8 @@ Python >= **3.5**, GTK+ >= **3.16**, pygobject3, adwaita-icon-theme, python3-req
 ```brew install python3 gtk+3 pygobject3 adwaita-icon-theme```                                                                  
 ```pip3 install requests```
 
+**Optional:**                                                                                                           
+```pip3 install pyobjc```                                                                                          
+
 ### Launching                                                                                                           
 To start the program, just download the archive, unpack and run it from the terminal with the command: ```./start.py```                                                                                                                                                                                                                                             
