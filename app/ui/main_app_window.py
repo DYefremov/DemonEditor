@@ -183,10 +183,10 @@ class Application(Gtk.Application):
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
         builder.connect_signals(self._handlers)
         self._main_window = builder.get_object("main_window")
-        main_window_size = self._options.get("window_size", None)
+        self._main_window_size = self._options.get("window_size", None)
         # Setting the last size of the window if it was saved
-        if main_window_size:
-            self._main_window.resize(*main_window_size)
+        if self._main_window_size:
+            self._main_window.resize(*self._main_window_size)
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")

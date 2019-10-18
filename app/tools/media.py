@@ -27,16 +27,15 @@ class Player:
         if Player._VLC_INSTANCE:
             return Player._VLC_INSTANCE
 
-        if not sys.platform.startswith("darwin"):
-            raise ImportError('This implementation only supported on MacOS')
+        self._VLC_INSTANCE = vlc.Instance("--no-xlib").media_player_new()
 
-        try:
-            view = Player.get_nso()
-        except ImportError as e:
-            raise e
-        else:
-            self._VLC_INSTANCE = vlc.Instance().media_player_new()
-            self._VLC_INSTANCE.set_nsobject(view.__c_void_p__())
+        if sys.platform.startswith("darwin"):
+            try:
+                view = Player.get_nso()
+            except ImportError as e:
+                raise e
+            else:
+                self._VLC_INSTANCE.set_nsobject(view.__c_void_p__())
 
         return self._VLC_INSTANCE
 
