@@ -1,9 +1,6 @@
 import concurrent.futures
-import glob
-import os
 import re
 import urllib
-from functools import lru_cache
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -41,22 +38,6 @@ def get_stream_type(box):
     elif active == 2:
         return StreamType.NONE_REC_1.value
     return StreamType.NONE_REC_2.value
-
-
-@lru_cache(maxsize=1)
-def get_yt_icon(icon_name, size=24):
-    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "Info" icon is returned by default! """
-    default_theme = Gtk.IconTheme.get_default()
-    if default_theme.has_icon(icon_name):
-        return default_theme.load_icon(icon_name, size, 0)
-
-    theme = Gtk.IconTheme.new()
-    for theme_name in map(os.path.basename, filter(os.path.isdir, glob.glob("/usr/share/icons/*"))):
-        theme.set_custom_theme(theme_name)
-        if theme.has_icon(icon_name):
-            return theme.load_icon(icon_name, size, 0)
-
-    return default_theme.load_icon("info", size, 0)
 
 
 class IptvDialog:
@@ -215,14 +196,14 @@ class IptvDialog:
 
         yt_id = YouTube.get_yt_id(url_str)
         if yt_id:
-            entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
+            entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, Gtk.STOCK_INFO)
             text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
             if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
                 entry.set_sensitive(False)
                 gen = self.set_yt_url(entry, yt_id)
                 GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         elif YouTube.is_yt_video_link(url_str):
-            entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
+            entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, Gtk.STOCK_INFO)
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
             self._yt_quality_box.set_visible(False)
@@ -712,11 +693,7 @@ class YtListImportDialog:
         self._receive_button.set_sensitive(bool(yt_id))
         self._import_button.set_sensitive(bool(yt_id))
         self._yt_list_id = yt_id
-
-        if yt_id:
-            entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
-        else:
-            entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
+        entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, Gtk.STOCK_INFO if yt_id else None)
 
     @run_idle
     def on_info_bar_close(self, bar=None, resp=None):
