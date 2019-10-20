@@ -260,6 +260,8 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", builder.get_object("left_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("right_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("download_header_button"), "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
