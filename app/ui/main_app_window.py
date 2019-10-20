@@ -1550,11 +1550,18 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_player_play(self, item=None):
-        url = self.get_stream_url()
-        self.update_player_buttons()
-        if not url:
-            return
-        self.play(url)
+        path, column = self._fav_view.get_cursor()
+        if path:
+            row = self._fav_model[path][:]
+            if row[Column.FAV_TYPE] != BqServiceType.IPTV.name:
+                self.show_error_dialog("Not allowed in this context!")
+                return
+
+            url = get_iptv_url(row, Profile(self._profile))
+            self.update_player_buttons()
+            if not url:
+                return
+            self.play(url)
 
     def play(self, url):
         if not self._player:
@@ -1571,13 +1578,6 @@ class Application(Gtk.Application):
 
         self._player_box.set_visible(True)
         GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
-
-    def get_stream_url(self):
-        path, column = self._fav_view.get_cursor()
-        if path:
-            row = self._fav_model[path][:]
-            if row[5] == BqServiceType.IPTV.name:
-                return get_iptv_url(row, Profile(self._profile))
 
     def on_player_stop(self, item=None):
         if self._player:
