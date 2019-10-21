@@ -1,0 +1,687 @@
+# Copyright (C) 2018-2019 Dmitriy Yefremov
+# This file is distributed under the MIT license.
+#
+#Charly, 2019.
+#
+msgid ""
+msgstr ""
+"Last-Translator: Charly\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "translator-credits"
+msgstr "Charly"
+
+# Main
+msgid "Service"
+msgstr "Service\t"
+
+msgid "Package"
+msgstr "Paket"
+
+msgid "Type"
+msgstr "Model"
+
+msgid "Picon"
+msgstr "Picon"
+
+msgid "Freq"
+msgstr "Freq"
+
+msgid "Rate"
+msgstr "Bewertung"
+
+msgid "Pol"
+msgstr "Pol."
+
+msgid "System"
+msgstr "System"
+
+msgid "Pos"
+msgstr "Pos."
+
+msgid "Num"
+msgstr "Num"
+
+msgid "Current IP:"
+msgstr "Akt.IP:"
+
+msgid "Assign"
+msgstr "Zuweisen"
+
+msgid "Bouquet details"
+msgstr "Bouquet-Details"
+
+msgid "Bouquets"
+msgstr "Bouquets"
+
+msgid "Copy"
+msgstr "Kopie"
+
+msgid "Copy reference"
+msgstr "Kopiervorlage"
+
+msgid "Download"
+msgstr "Download"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Edit mаrker text"
+msgstr "Bearb. Marker Text"
+
+msgid "FTP-transfer"
+msgstr "FTP-Transfer"
+
+msgid "Global search"
+msgstr "Globale Suche"
+
+msgid "Hide"
+msgstr "Ausblenden"
+
+msgid "Hide/Skip On/Off     Ctrl + H"
+msgstr "Ausblenden/Überspringen Ein/Aus      Ctrl + H"
+
+msgid "Add IPTV or stream service"
+msgstr "Hinzufügen von IPTV oder Streaming-Service"
+
+msgid "Import m3u"
+msgstr "Import m3u"
+
+msgid "Import m3u file"
+msgstr "m3u-Datei importieren"
+
+msgid "List configuration"
+msgstr "Listen-Konfiguration"
+
+msgid "Rename for this bouquet"
+msgstr "Bouquet Umbenennen"
+
+msgid "Set default name"
+msgstr "Standardbezeichnung setzen"
+
+msgid "Insert marker"
+msgstr "Marker einfügen"
+
+msgid "Locate in services"
+msgstr "In den Diensten suchen"
+
+msgid "Locked"
+msgstr "Gesperrt"
+
+msgid "Move"
+msgstr "Verschieben"
+
+msgid "New"
+msgstr "Neu"
+
+msgid "New bouquet"
+msgstr "Neues Bouquet"
+
+msgid "Create bouquet"
+msgstr "Bouquet erstellen"
+
+msgid "For current satellite"
+msgstr "Für den akt. Satelliten"
+
+msgid "For current package"
+msgstr "Für das akt. Paket"
+
+msgid "For current type"
+msgstr "Für den akt. Typ"
+
+msgid "For each satellite"
+msgstr "Für alle Satelliten"
+
+msgid "For each package"
+msgstr "Für jedes Paket"
+
+msgid "For each type"
+msgstr "Für jeden Typ"
+
+msgid "Open"
+msgstr "Öffnen"
+
+msgid "Parent lock On/Off     Ctrl + L"
+msgstr "Elternsperre Ein/Aus     Ctrl + L"
+
+msgid "Picons"
+msgstr "Picons"
+
+msgid "Picons downloader"
+msgstr "Picons Downloader"
+
+msgid "Satellites downloader"
+msgstr "Satellites Downloader"
+
+msgid "Remove"
+msgstr "Entfernen"
+
+msgid "Remove all unavailable"
+msgstr "Entfernt alle nicht verfügbaren"
+
+msgid "Satellites editor"
+msgstr "Satelliten-Editor"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Search"
+msgstr "Suche"
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Services filter"
+msgstr "Service-Filter"
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Up"
+msgstr "Aufwärts"
+
+msgid "Down"
+msgstr "Runter"
+
+msgid "Active profile:"
+msgstr "Aktives Profil:"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Are you sure?"
+msgstr "Bist du sicher?"
+
+msgid "Current data path:"
+msgstr "Aktueller Datenpfad:"
+
+msgid "Data:"
+msgstr "Daten:"
+
+msgid "Enigma2 channel and satellites list editor for GNU/Linux"
+msgstr "Enigma2 Kanal- und Satellitenlisteneditor für GNU/Linux"
+
+msgid "Host:"
+msgstr "Host:"
+
+msgid "Loading data..."
+msgstr "Daten laden..."
+
+msgid "Receive"
+msgstr "Empfangen"
+
+msgid "Receive files from receiver"
+msgstr "Dateien vom Receiver empfangen"
+
+msgid "Receiver IP:"
+msgstr "Receiver IP:"
+
+msgid "Remove unused bouquets"
+msgstr "Nicht benötigte Bouquets entf."
+
+msgid "Reset profile"
+msgstr "Profil zurücksetzen"
+
+msgid "Satellites"
+msgstr "Satelliten"
+
+msgid "Satellites.xml file:"
+msgstr "Satellites.xml Datei:"
+
+msgid "Selected"
+msgstr "Ausgewählt"
+
+msgid "Send"
+msgstr "Senden"
+
+msgid "Send files to receiver"
+msgstr "Dateien zum Receiver senden"
+
+msgid "Services and Bouquets files:"
+msgstr "Services- und Bouquet-Dateien:"
+
+msgid "User bouquet files:"
+msgstr "Benutzer-Bouquetdateien:"
+
+msgid "Extra:"
+msgstr "Extra:"
+
+# Filter bar
+msgid "Only free"
+msgstr "Nur freie"
+
+msgid "All positions"
+msgstr "Alle Positionen"
+
+msgid "All types"
+msgstr "Alle Typen"
+
+# Streams player
+msgid "Play"
+msgstr "Abspielen"
+
+msgid "Stop playback"
+msgstr "Wiedergabe beenden"
+
+msgid "Previous stream in the list"
+msgstr "Vorheriger Stream in der Liste"
+
+msgid "Next stream in the list"
+msgstr "Nächster Stream in der Liste"
+
+msgid "Toggle in fullscreen"
+msgstr "Zu Vollbildmodus umschalten"
+
+msgid "Close"
+msgstr "Schließen"
+
+# Picons dialog
+msgid "Load providers"
+msgstr "Provider laden"
+
+msgid "Providers"
+msgstr "Provider"
+
+msgid "Receive picons"
+msgstr "Picons empfangen"
+
+msgid "Picons name format:"
+msgstr "Picon Namens-Format:"
+
+msgid "Resize:"
+msgstr "Größe ändern:"
+
+msgid "Current picons path:"
+msgstr "Aktueller Piconspfad:"
+
+msgid "Receiver picons path:"
+msgstr "Receiver Piconspfad:"
+
+msgid "Picons download tool"
+msgstr "Picons Download-Tool"
+
+msgid "Transfer to receiver"
+msgstr "Übertragung zum Receiver"
+
+msgid "Downloader"
+msgstr "Downloader"
+
+msgid "Converter"
+msgstr "Konverter"
+
+msgid "Convert"
+msgstr "Konvertierung"
+
+msgid "Path to save:"
+msgstr "Speicherpfad:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Pfad zu Enigma2-Picons:"
+
+msgid "Specify the correct position value for the provider!"
+msgstr "Geben Sie den richtigen Positionswert für den Provider an!"
+
+msgid "Converter between name formats"
+msgstr "Konverter zwischen Namensformaten"
+
+msgid "Receive picons for providers"
+msgstr "Picons für Provider erhalten"
+
+msgid "Load satellite providers."
+msgstr "Lade Satellitenprovider."
+
+msgid ""
+"To automatically set the identifiers for picons,\n"
+"first load the required services list into the main application window."
+msgstr ""
+"Um die IDs für Picons automatisch einzustellen, \n"
+"laden Sie zunächst die Liste der gewünschten Services in das Hauptfenster."
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "Satellitenbearbeitungs-Tool"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Satellite"
+msgstr "Satellit"
+
+msgid "Transponder"
+msgstr "Transponder"
+
+msgid "Satellite properties:"
+msgstr "Satelliten-Eigenschaften:"
+
+msgid "Transponder properties:"
+msgstr "Transponder-Eigenschaften:"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Position"
+msgstr "Position"
+
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "Satelliten-Aktualisierung"
+
+msgid "Remove selection"
+msgstr "Auswahl entfernen"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "Service-Daten:"
+
+msgid "Transponder data:"
+msgstr "Transponder-Daten:"
+
+msgid "Service data"
+msgstr "Servicedaten"
+
+msgid "Transponder details"
+msgstr "Transponderdetails"
+
+msgid ""
+"Changes will be applied to all services of this transponder!\n"
+"Continue?"
+msgstr ""
+"Änderungen werden auf alle Services dieses Transponders angewendet!\n"
+"Fortsetzen?"
+
+msgid "Reference"
+msgstr "Referenz"
+
+msgid "Namespace"
+msgstr "Namensbereich"
+
+msgid "Flags:"
+msgstr "Kennzeichen:"
+
+msgid "Delays (ms):"
+msgstr "Verzögerungen (ms):"
+
+msgid "Bitstream"
+msgstr "Bitstream"
+
+msgid "Description"
+msgstr "Bezeichnung"
+
+msgid "Source:"
+msgstr "Quelle:"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Find"
+msgstr "Finde"
+
+# IPTV dialog
+msgid "Stream data"
+msgstr "Stream-Daten"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "Startwerte"
+
+msgid "Reset to default"
+msgstr "Auf Standard zurücksetzen"
+
+msgid "IPTV streams list configuration"
+msgstr "Konfiguration der IPTV-Stream Liste"
+
+# Settings dialog
+msgid "Preferences"
+msgstr "Einstellungen"
+
+msgid "Profile:"
+msgstr "Profil:"
+
+msgid "Timeout between commands in seconds"
+msgstr "Wartezeit zwischen den Befehlen in Sekunden."
+
+msgid "Timeout:"
+msgstr "Timeout:"
+
+msgid "Login:"
+msgstr "Login:"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "Password:"
+msgstr "Passwort:"
+
+msgid "Picons:"
+msgstr "Picons:"
+
+msgid "Port:"
+msgstr "Port:"
+
+msgid "Data path:"
+msgstr "Datenpfad:"
+
+msgid "Picons path:"
+msgstr "Piconspfad:"
+
+msgid "Network settings:"
+msgstr "Netzwerkeinstellungen:"
+
+msgid "STB file paths:"
+msgstr "STB-Dateipfade:"
+
+msgid "Local file paths:"
+msgstr "Lokale Dateipfade:"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "Fehler. Es wurde kein Bouquet ausgewählt!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "Dieser Eintrag darf nicht entfernt werden!"
+
+msgid "This item is not allowed to edit!"
+msgstr "Dieser Eintrag darf nicht bearbeitet werden!"
+
+msgid "Not allowed in this context!"
+msgstr "In diesem Zusammenhang nicht erlaubt!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "Bitte lade die Dateien vom Receiver herunter oder richte den Pfad für eingelesene Daten ein!"
+
+msgid "Reading data error!"
+msgstr "Lesefehler!"
+
+msgid "No m3u file is selected!"
+msgstr "Es ist keine m3u-Datei ausgewählt!"
+
+msgid "Not implemented yet!"
+msgstr "Noch nicht realisiert!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "Der Text des Markers ist leer, bitte versuchen Sie es erneut!"
+
+msgid "Please, select only one item!"
+msgstr "Bitte wählen Sie nur einen Eintrag aus!"
+
+msgid "No png file is selected!"
+msgstr "Es ist keine png-Datei ausgewählt!"
+
+msgid "No reference is present!"
+msgstr "Es liegt keine Referenz vor!"
+
+msgid "No selected item!"
+msgstr "Kein ausgewählter Eintrag!"
+
+msgid "The task is already running!"
+msgstr "Die Aufgabe läuft bereits!"
+
+msgid "Done!"
+msgstr "Fertig!"
+
+msgid "Please, wait..."
+msgstr "Bitte, warten..."
+
+msgid "Resizing..."
+msgstr "Größe ändern..."
+
+msgid "Select paths!"
+msgstr "Pfade auswählen!"
+
+msgid "No satellite is selected!"
+msgstr "Kein Satellit ist ausgewählt!"
+
+msgid "Please, select only one satellite!"
+msgstr "Bitte wähle nur einen Satelliten aus!"
+
+msgid "Please check your parameters and try again."
+msgstr "Bitte überprüfe die Einstellungen und versuche es erneut."
+
+msgid "No satellites.xml file is selected!"
+msgstr "Keine satellites.xml Datei ausgewählt!"
+
+msgid "Error. Verify the data!"
+msgstr "Fehler. Prüfe die Daten!"
+
+msgid "Operation not allowed in this context!"
+msgstr "Vorgang hier nicht zulässig!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "VLC nicht gefunden. Überprüfe, ob es installiert ist!"
+
+# Search unavailable streams dialog
+msgid "Please wait,  streams testing  in progress..."
+msgstr "Bitte warte, Stream-Test läuft..."
+
+msgid "Found"
+msgstr "Gefunden"
+
+msgid "unavailable streams."
+msgstr "nicht verfügbarer Stream."
+
+msgid "No changes required!"
+msgstr "Keine Änderungen nötig!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "Diese Liste enthält keine IPTV-Streams!"
+
+msgid "New empty configuration"
+msgstr "Neue leere Einstellung"
+
+msgid "No data to save!"
+msgstr "Keine Daten zum Speichern!"
+
+msgid "Network"
+msgstr "Netzwerk"
+
+msgid "Paths"
+msgstr "Pfade"
+
+msgid "Program"
+msgstr "Programm"
+
+msgid "Backup:"
+msgstr "Sicherung:"
+
+msgid "Backup"
+msgstr "Sicherung"
+
+msgid "Backups"
+msgstr "Sicherungen"
+
+msgid "Backup path:"
+msgstr "Sicherungspfad:"
+
+msgid "Restore bouquets"
+msgstr "Bouquets wiederherstellen"
+
+msgid "Restore all"
+msgstr "Alles wiederherstellen"
+
+msgid "Before saving"
+msgstr "Vor dem Speichern"
+
+msgid "Before downloading from the receiver"
+msgstr "Vor dem Herunterladen vom Receiver"
+
+msgid "Set background color for the services"
+msgstr "Hintergrundfarbe für die Services setzen"
+
+msgid "Marked as new:"
+msgstr "Als neu markiert:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "Mit einem extra Namen im Bouquet:"
+
+msgid "Select"
+msgstr "Auswählen"
+
+msgid "About"
+msgstr "Über"
+
+msgid "Exit"
+msgstr "Beenden"
+
+msgid "Tools"
+msgstr "Werkzeug"
+
+# Import
+msgid "Import"
+msgstr "Import"
+
+msgid "Bouquet"
+msgstr "Bouquet"
+
+msgid "Bouquets and services"
+msgstr "Bouquets und Services"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "Die Hauptliste enthält keine Services für dieses Bouquet!"
+
+msgid "No bouquet file is selected!"
+msgstr "Keine Bouquet-Datei ausgewählt!"
+
+msgid "Remove all unused"
+msgstr "Alles ungenutzte entfernen"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Test connection"
+msgstr "Test Verbindung"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Doppelklicke auf das Service in der Bouquetliste:"
+
+msgid "Zap"
+msgstr "Zap"
+
+msgid "Play  stream"
+msgstr "Play  Stream"
+
+msgid "Disabled"
+msgstr "Ausgeschaltet"
+
+msgid "Enable ver. 5 support (experimental)"
+msgstr "Ver.5 Unterstützung aktivieren (experimentell)"
+
+msgid "Enable HTTP API (experimental)"
+msgstr "HTTP-API aktivieren (experimentell)"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Umschalten des Kanals (Strg + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Kanal wechseln und im Programm ansehen(Strg + W)"
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Wiedergabe von IPTV oder anderen Streams im Programm(Strg + P)"
