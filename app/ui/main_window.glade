@@ -2117,6 +2117,19 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="margin_left">10</property>
+                <property name="spacing">2</property>
+                <child>
+                  <object class="GtkImage" id="info_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-info</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
                 <child>
                   <object class="GtkLabel" id="receiver_info_label">
                     <property name="visible">True</property>
@@ -2130,7 +2143,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </object>
@@ -2147,7 +2160,19 @@ Author: Dmitriy Yefremov
                 <property name="halign">center</property>
                 <property name="spacing">2</property>
                 <child>
-                  <object class="GtkLabel" id="label2">
+                  <object class="GtkImage" id="ip_status_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-connect</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="ip_status_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
@@ -2159,7 +2184,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -2174,7 +2199,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -2189,9 +2214,31 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="signal_box">
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
+                <property name="valign">center</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="spacing">5</property>
+                <child>
+                  <object class="GtkEventBox" id="play_current_event_box">
+                    <property name="can_focus">False</property>
+                    <signal name="button-press-event" handler="on_play_current_service" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="play_current_service_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Play</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <property name="stock">gtk-media-play</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
                 <child>
                   <object class="GtkLabel" id="service_name_label">
                     <property name="visible">True</property>
