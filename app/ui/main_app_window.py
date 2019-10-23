@@ -132,6 +132,7 @@ class Application(Gtk.Application):
                           "on_epg_list_configuration": self.on_epg_list_configuration,
                           "on_iptv_list_configuration": self.on_iptv_list_configuration,
                           "on_play_stream": self.on_play_stream,
+                          "on_play_current_service": self.on_play_current_service,
                           "on_player_play": self.on_player_play,
                           "on_player_stop": self.on_player_stop,
                           "on_player_previous": self.on_player_previous,
@@ -246,6 +247,7 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
+        self._signal_level_bar.bind_property("visible", builder.get_object("play_current_event_box"), "visible")
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
@@ -1547,6 +1549,10 @@ class Application(Gtk.Application):
 
     def on_play_stream(self, item=None):
         self.on_player_play()
+
+    def on_play_current_service(self, item, event):
+        if event.button == Gdk.BUTTON_PRIMARY and event.type == Gdk.EventType.BUTTON_PRESS:
+            self.on_watch()
 
     @run_idle
     def on_player_play(self, item=None):
