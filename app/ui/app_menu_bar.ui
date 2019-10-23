@@ -6,6 +6,14 @@
         <attribute name="label" translatable="yes">About</attribute>
         <attribute name="action">app.on_about_app</attribute>
       </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Settings</attribute>
+        <attribute name="action">app.on_preferences</attribute>
+      </item>
+    </section>
+    <section>
       <item>
         <attribute name="label" translatable="yes">Exit</attribute>
         <attribute name="action">app.on_close_app</attribute>
@@ -33,18 +41,6 @@
         <item>
           <attribute name="label" translatable="yes">FTP-transfer</attribute>
           <attribute name="action">app.on_download</attribute>
-        </item>
-      </section>
-      <section>
-        <item>
-          <attribute name="label" translatable="yes">Settings</attribute>
-          <attribute name="action">app.on_preferences</attribute>
-        </item>
-      </section>
-      <section>
-        <item>
-          <attribute name="label" translatable="yes">Exit</attribute>
-          <attribute name="action">app.on_close_app</attribute>
         </item>
       </section>
     </submenu>
@@ -110,13 +106,6 @@
           <attribute name="action">app.on_remove_all_unavailable</attribute>
         </item>
       </section>
-    </submenu>
-    <submenu>
-      <attribute name="label" translatable="yes">Help</attribute>
-      <item>
-        <attribute name="label" translatable="yes">About</attribute>
-        <attribute name="action">app.on_about_app</attribute>
-      </item>
     </submenu>
   </menu>
 </interface>
