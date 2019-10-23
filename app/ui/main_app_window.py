@@ -134,6 +134,7 @@ class Application(Gtk.Application):
                     "on_epg_list_configuration": self.on_epg_list_configuration,
                     "on_iptv_list_configuration": self.on_iptv_list_configuration,
                     "on_play_stream": self.on_play_stream,
+                    "on_play_current_service": self.on_play_current_service,
                     "on_player_play": self.on_player_play,
                     "on_player_stop": self.on_player_stop,
                     "on_player_previous": self.on_player_previous,
@@ -227,6 +228,7 @@ class Application(Gtk.Application):
         self._data_count_label = builder.get_object("data_count_label")
         self._save_header_button = builder.get_object("save_header_button")
         self._save_header_button.bind_property("sensitive", builder.get_object("save_menu_button"), "sensitive")
+        self._signal_level_bar.bind_property("visible", builder.get_object("play_current_event_box"), "visible")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -1539,6 +1541,10 @@ class Application(Gtk.Application):
 
     def on_play_stream(self, item=None):
         self.on_player_play()
+
+    def on_play_current_service(self, item, event):
+        if event.button == Gdk.BUTTON_PRIMARY and event.type == Gdk.EventType.BUTTON_PRESS:
+            self.on_watch()
 
     @run_idle
     def on_player_play(self, item=None):
