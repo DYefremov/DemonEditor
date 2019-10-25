@@ -24,10 +24,25 @@
     <submenu>
       <attribute name="label" translatable="yes">File</attribute>
       <section>
+        <submenu>
+          <attribute name="label" translatable="yes">Import</attribute>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Bouquet</attribute>
+              <attribute name="action">app.on_import_bouquet</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Bouquets and services</attribute>
+              <attribute name="action">app.on_import_bouquets</attribute>
+            </item>
+          </section>
+        </submenu>
         <item>
           <attribute name="label" translatable="yes">New empty configuration</attribute>
           <attribute name="action">app.on_new_configuration</attribute>
         </item>
+      </section>
+      <section>
         <item>
           <attribute name="label" translatable="yes">Open</attribute>
           <attribute name="action">app.on_data_open</attribute>
@@ -45,15 +60,28 @@
       </section>
     </submenu>
     <submenu>
-      <attribute name="label" translatable="yes">Import</attribute>
+      <attribute name="label" translatable="yes">Edit</attribute>
+      <section>
+      <item>
+        <attribute name="label" translatable="yes">Lock</attribute>
+        <attribute name="action">app.on_locked</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Hide</attribute>
+        <attribute name="action">app.on_hide</attribute>
+      </item>
+    </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">View</attribute>
       <section>
         <item>
-          <attribute name="label" translatable="yes">Bouquet</attribute>
-          <attribute name="action">app.on_import_bouquet</attribute>
+          <attribute name="label" translatable="yes">Search</attribute>
+          <attribute name="action">win.search</attribute>
         </item>
         <item>
-          <attribute name="label" translatable="yes">Bouquets and services</attribute>
-          <attribute name="action">app.on_import_bouquets</attribute>
+          <attribute name="label" translatable="yes">Filter</attribute>
+          <attribute name="action">win.filter</attribute>
         </item>
       </section>
     </submenu>

@@ -105,8 +105,6 @@ class Application(Gtk.Application):
                           "on_view_press": self.on_view_press,
                           "on_view_popup_menu": self.on_view_popup_menu,
                           "on_view_focus": self.on_view_focus,
-                          "on_hide": self.on_hide,
-                          "on_locked": self.on_locked,
                           "on_model_changed": self.on_model_changed,
                           "on_import_yt_list": self.on_import_yt_list,
                           "on_import_m3u": self.on_import_m3u,
@@ -123,8 +121,6 @@ class Application(Gtk.Application):
                           "on_remove_picon": self.on_remove_picon,
                           "on_reference_picon": self.on_reference_picon,
                           "on_remove_unused_picons": self.on_remove_unused_picons,
-                          "on_filter_toggled": self.on_filter_toggled,
-                          "on_search_toggled": self.on_search_toggled,
                           "on_search_down": self.on_search_down,
                           "on_search_up": self.on_search_up,
                           "on_search": self.on_search,
@@ -283,6 +279,17 @@ class Application(Gtk.Application):
         for h in iptv_handlers:
             action = set_action(h, self._handlers.get(h), False)
             iptv_elem.bind_property("sensitive", action, "enabled")
+
+        # Search, Filter
+        search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
+        search_action.connect("change-state", self.on_search_toggled)
+        self._main_window.add_action(search_action)  # For "win.*" actions!
+        filter_action = Gio.SimpleAction.new_stateful("filter", None, GLib.Variant.new_boolean(False))
+        filter_action.connect("change-state", self.on_filter_toggled)
+        self._main_window.add_action(filter_action)
+        # Lock, Hide
+        self.add_action(set_action("on_hide", self.on_hide))
+        self.add_action(set_action("on_locked", self.on_locked))
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
@@ -1253,9 +1260,9 @@ class Application(Gtk.Application):
         elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self._SERVICE_LIST_NAME:
             self.on_to_fav_end_copy(view)
         elif ctrl and key is KeyboardKey.L:
-            self.on_locked(None)
+            self.on_locked()
         elif ctrl and key is KeyboardKey.H:
-            self.on_hide(None)
+            self.on_hide()
         elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
             self.on_rename(view)
         elif ctrl and key is KeyboardKey.E:
@@ -1319,10 +1326,10 @@ class Application(Gtk.Application):
             for elem in self._FAV_ENIGMA_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
 
-    def on_hide(self, item):
+    def on_hide(self, action=None, value=None):
         self.set_service_flags(Flag.HIDE)
 
-    def on_locked(self, item):
+    def on_locked(self, action=None, value=None):
         self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
@@ -1741,13 +1748,13 @@ class Application(Gtk.Application):
 
     # ***************** Filter and search *********************#
 
-    def on_filter_toggled(self, toggle_button: Gtk.ToggleToolButton):
-        active = toggle_button.get_active()
-        if active:
+    def on_filter_toggled(self, action, value):
+        action.set_state(value)
+        if value:
             self.update_filter_sat_positions()
 
-        self._filter_bar.set_search_mode(active)
-        self._filter_bar.set_visible(active)
+        self._filter_bar.set_search_mode(value)
+        self._filter_bar.set_visible(value)
 
     def init_sat_positions(self):
         self._sat_positions.clear()
@@ -1823,8 +1830,9 @@ class Application(Gtk.Application):
 
             return txt and free
 
-    def on_search_toggled(self, toggle_button: Gtk.ToggleToolButton):
-        self._search_bar.set_search_mode(toggle_button.get_active())
+    def on_search_toggled(self, action, value):
+        action.set_state(value)
+        self._search_bar.set_search_mode(value)
 
     def on_search_down(self, item):
         self._search_provider.on_search_down()
