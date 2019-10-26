@@ -200,6 +200,7 @@ class Application(Gtk.Application):
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
         self._app_info_box.bind_property("visible", self._main_data_box, "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_item"), "visible", 4)
         # Status bar
         self._ip_label = builder.get_object("ip_label")
         self._ip_label.set_text(self._options.get(self._profile).get("host"))
