@@ -2298,44 +2298,54 @@ Author: Dmitriy Yefremov
             <property name="halign">center</property>
             <property name="valign">center</property>
             <child>
-              <object class="GtkToolButton" id="open_tool_button">
+              <object class="GtkToolItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Open</property>
-                <property name="action_name">app.on_data_open</property>
-                <property name="label" translatable="yes">Open</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-open</property>
-                <accelerator key="o" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparatorToolItem" id="toolbar_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">2</property>
+                    <child>
+                      <object class="GtkToolButton" id="open_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Open</property>
+                        <property name="margin_right">5</property>
+                        <property name="action_name">app.on_data_open</property>
+                        <property name="label" translatable="yes">Open</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-open</property>
+                        <accelerator key="o" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="download_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">FTP-transfer</property>
+                        <property name="action_name">app.on_download</property>
+                        <property name="label" translatable="yes">FTP-transfer</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-connect</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="download_tool_button">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">FTP-transfer</property>
-                <property name="action_name">app.on_download</property>
-                <property name="label" translatable="yes">FTP-transfer</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-connect</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
@@ -2345,11 +2355,13 @@ Author: Dmitriy Yefremov
                   <object class="GtkBox" id="toolbar_extra_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="spacing">2</property>
                     <child>
                       <object class="GtkToolButton" id="save_tool_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Save</property>
+                        <property name="margin_right">5</property>
                         <property name="action_name">app.on_data_save</property>
                         <property name="label" translatable="yes">Save</property>
                         <property name="use_underline">True</property>
@@ -2360,17 +2372,6 @@ Author: Dmitriy Yefremov
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorToolItem" id="toolbar_separator2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -2394,6 +2395,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Filter</property>
+                        <property name="margin_right">5</property>
                         <property name="action_name">win.filter</property>
                         <property name="label" translatable="yes">Filter</property>
                         <property name="use_underline">True</property>
@@ -2403,17 +2405,6 @@ Author: Dmitriy Yefremov
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorToolItem" id="toolbar_separator3">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -2461,7 +2452,7 @@ Author: Dmitriy Yefremov
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
+            <property name="fill">False</property>
             <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>
