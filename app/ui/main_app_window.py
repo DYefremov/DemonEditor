@@ -17,7 +17,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
-from app.tools.media import Player
+from app.tools.media import Player, MediaException
 from app.ui.epg_dialog import EpgDialog
 from .backup import BackupDialog, backup_data, clear_data_path
 from .imports import ImportDialog, import_bouquet
@@ -1580,15 +1580,14 @@ class Application(Gtk.Application):
     def play(self, url):
         if not self._player:
             try:
-                self._player = Player(rewind_callback=self.on_player_duration_changed,
-                                      position_callback=self.on_player_time_changed)
-            except (NameError, AttributeError, ImportError) as e:
-                if type(e) is ImportError:
-                    self.show_error_dialog(str(e))
-                else:
-                    self.show_error_dialog("No VLC is found. Check that it is installed!")
-                log(str(e))
+                self._player = Player()
+            except MediaException as e:
+                msg = str(e)
+                self.show_error_dialog(msg)
+                log(msg)
                 return
+            else:
+                self._player.new_instance()
 
         self._player_box.set_visible(True)
         GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
