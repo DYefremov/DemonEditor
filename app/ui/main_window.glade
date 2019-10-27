@@ -2797,7 +2797,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
-            <property name="height_request">24</property>
+            <property name="height_request">35</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
@@ -2906,14 +2906,28 @@ Author: Dmitriy Yefremov
                 <property name="margin_right">10</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkEventBox" id="play_current_event_box">
+                  <object class="GtkLabel" id="service_epg_label">
+                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <signal name="button-press-event" handler="on_play_current_service" swapped="no"/>
+                    <property name="justify">center</property>
+                    <property name="lines">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="play_current_service_button">
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Play</property>
+                    <signal name="clicked" handler="on_watch" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="play_current_service_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Play</property>
                         <property name="halign">center</property>
                         <property name="valign">center</property>
                         <property name="stock">gtk-media-play</property>
@@ -2923,7 +2937,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -2932,6 +2946,7 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Current service</property>
                     <property name="justify">fill</property>
+                    <property name="ellipsize">end</property>
                     <property name="xalign">1</property>
                     <attributes>
                       <attribute name="size" value="8000"/>
@@ -2940,7 +2955,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -2954,8 +2969,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="pack_type">end</property>
-                    <property name="position">2</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>

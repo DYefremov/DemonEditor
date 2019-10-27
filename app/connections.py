@@ -36,6 +36,7 @@ class HttpRequestType(Enum):
     INFO = "about"
     SIGNAL = "tunersignal"
     STREAM = "streamcurrentm3u"
+    STATUS = "statusinfo"
 
 
 class TestException(Exception):
@@ -285,6 +286,8 @@ def http_request(host, port, user, password):
             url = base_url + HttpRequestType.SIGNAL.value
         elif req_type is HttpRequestType.STREAM:
             url = base_url + HttpRequestType.STREAM.value
+        elif req_type is HttpRequestType.STATUS:
+            url = base_url + HttpRequestType.STATUS.value
 
         yield from get_json(req_type, url)
 
