@@ -128,7 +128,7 @@ class Application(Gtk.Application):
                           "on_epg_list_configuration": self.on_epg_list_configuration,
                           "on_iptv_list_configuration": self.on_iptv_list_configuration,
                           "on_play_stream": self.on_play_stream,
-                          "on_play_current_service": self.on_play_current_service,
+                          "on_watch": self.on_watch,
                           "on_player_play": self.on_player_play,
                           "on_player_stop": self.on_player_stop,
                           "on_player_previous": self.on_player_previous,
@@ -208,6 +208,7 @@ class Application(Gtk.Application):
         self._receiver_info_label = builder.get_object("receiver_info_label")
         self._signal_box = builder.get_object("signal_box")
         self._service_name_label = builder.get_object("service_name_label")
+        self._service_epg_label = builder.get_object("service_epg_label")
         self._signal_level_bar = builder.get_object("signal_level_bar")
         self._cas_label = builder.get_object("cas_label")
         self._fav_count_label = builder.get_object("fav_count_label")
@@ -244,7 +245,7 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
-        self._signal_level_bar.bind_property("visible", builder.get_object("play_current_event_box"), "visible")
+        self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
@@ -1558,10 +1559,6 @@ class Application(Gtk.Application):
     def on_play_stream(self, item=None):
         self.on_player_play()
 
-    def on_play_current_service(self, item, event):
-        if event.button == Gdk.BUTTON_PRIMARY and event.type == Gdk.EventType.BUTTON_PRESS:
-            self.on_watch()
-
     @run_idle
     def on_player_play(self, item=None):
         path, column = self._fav_view.get_cursor()
@@ -1667,7 +1664,7 @@ class Application(Gtk.Application):
             next(self._http_api)
             GLib.timeout_add_seconds(1, self.update_receiver_info)
 
-    def on_watch(self):
+    def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
         m3u = self._http_api.send((HttpRequestType.STREAM, None))
         next(self._http_api)
@@ -1734,6 +1731,16 @@ class Application(Gtk.Application):
         self._signal_level_bar.set_value(val if val else 0)
         self._signal_level_bar.set_visible(val)
 
+    def update_status(self):
+        status = self._http_api.send((HttpRequestType.STATUS, None))
+        next(self._http_api)
+        if status:
+            dsc = "{} {} - {}".format(status.get("currservice_name", ""),
+                                      status.get("currservice_begin", ""),
+                                      status.get("currservice_end", ""))
+            self._service_epg_label.set_text(dsc)
+            self._service_epg_label.set_tooltip_text(status.get("currservice_description", ""))
+
     def update_service_info(self):
         while self._http_api:
             info = self._http_api.send((HttpRequestType.INFO, None))
@@ -1744,6 +1751,7 @@ class Application(Gtk.Application):
                     GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
                     if service_info.get("onid", None):
                         self.update_signal()
+                        GLib.idle_add(self.update_status, priority=GLib.PRIORITY_LOW)
             yield self._http_api
 
     # ***************** Filter and search *********************#
