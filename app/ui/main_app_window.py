@@ -1748,8 +1748,10 @@ class Application(Gtk.Application):
         status = self._http_api.send((HttpRequestType.STATUS, None))
         next(self._http_api)
         if status:
-            dsc = status.get("currservice_fulldescription", "")
-            self._service_epg_label.set_text(dsc.strip().replace("\n", " ") if dsc and dsc != "N/A" else "")
+            dsc = "{} {} - {}".format(status.get("currservice_name", ""),
+                                      status.get("currservice_begin", ""),
+                                      status.get("currservice_end", ""))
+            self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(status.get("currservice_description", ""))
 
     def update_service_info(self):
