@@ -255,6 +255,11 @@ class Application(Gtk.Application):
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
                       self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
+        # Style
+        self._style_provider = Gtk.CssProvider()
+        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                                         Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)

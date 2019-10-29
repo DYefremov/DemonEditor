@@ -1,3 +1,8 @@
 #digit-entry {
     border-color: Red;
 }
+
+#status-bar-button {
+  padding: 1px;
+  margin: 1px;
+}

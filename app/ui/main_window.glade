@@ -28,6 +28,7 @@ Author: Dmitriy Yefremov
 -->
 <interface>
   <requires lib="gtk+" version="3.16"/>
+  <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
@@ -2276,7 +2277,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
-            <property name="height_request">35</property>
+            <property name="height_request">30</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
@@ -2400,9 +2401,13 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkButton" id="play_current_service_button">
+                    <property name="name">status-bar-button</property>
                     <property name="can_focus">False</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Play</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
                     <signal name="clicked" handler="on_watch" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="play_current_service_image">
