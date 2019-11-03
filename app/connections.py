@@ -37,6 +37,7 @@ class HttpRequestType(Enum):
     SIGNAL = "tunersignal"
     STREAM = "streamcurrentm3u"
     STATUS = "statusinfo"
+    PLAY = "mediaplayerplay?file=4097:0:1:0:0:0:0:0:0:0:"
 
 
 class TestException(Exception):
@@ -269,25 +270,21 @@ def telnet(host, port=23, user="", password="", timeout=5):
         yield
 
 
-# ***************** http api *******************#
+# ***************** HTTP API *******************#
 
 def http_request(host, port, user, password):
+    print(host, port, user, password)
     base_url = "http://{}:{}/api/".format(host, port)
     init_auth(user, password, base_url)
 
     while True:
         req_type, ref = yield
-        url = base_url
+        url = base_url + req_type.value
+
         if req_type is HttpRequestType.ZAP:
-            url = base_url + "zap?sRef={}".format(urllib.parse.quote(ref))
-        elif req_type is HttpRequestType.INFO:
-            url = base_url + HttpRequestType.INFO.value
-        elif req_type is HttpRequestType.SIGNAL:
-            url = base_url + HttpRequestType.SIGNAL.value
-        elif req_type is HttpRequestType.STREAM:
-            url = base_url + HttpRequestType.STREAM.value
-        elif req_type is HttpRequestType.STATUS:
-            url = base_url + HttpRequestType.STATUS.value
+            url += urllib.parse.quote(ref)
+        elif req_type is HttpRequestType.PLAY:
+            url += urllib.parse.quote(ref).replace("%3A", "%253A")
 
         yield from get_json(req_type, url)
 
