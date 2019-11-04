@@ -27,7 +27,9 @@ class SettingsDialog:
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_set_color_switch_state": self.on_set_color_switch_state,
-                    "on_http_mode_switch_state": self.on_http_mode_switch_state}
+                    "on_http_mode_switch_state": self.on_http_mode_switch_state,
+                    "on_yt_dl_switch_state": self.on_yt_dl_switch_state,
+                    "on_send_to_switch_state": self.on_send_to_switch_state}
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -65,8 +67,7 @@ class SettingsDialog:
         # Profile
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
-        self._support_ver5_check_button = builder.get_object("support_ver5_check_button")
-        self._support_http_api_check_button = builder.get_object("support_http_api_check_button")
+        self._support_ver5_switch = builder.get_object("support_ver5_switch")
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
@@ -76,10 +77,17 @@ class SettingsDialog:
         self._set_color_switch = builder.get_object("set_color_switch")
         self._new_color_button = builder.get_object("new_color_button")
         self._extra_color_button = builder.get_object("extra_color_button")
+        # HTTP API
+        self._support_http_api_switch = builder.get_object("support_http_api_switch")
+        self._enable_y_dl_switch = builder.get_object("enable_y_dl_switch")
+        self._enable_send_to_switch = builder.get_object("enable_send_to_switch")
         self._click_mode_disabled_button = builder.get_object("click_mode_disabled_button")
         self._click_mode_stream_button = builder.get_object("click_mode_stream_button")
         self._click_mode_play_button = builder.get_object("click_mode_play_button")
         self._click_mode_zap_button = builder.get_object("click_mode_zap_button")
+        self._click_mode_zap_button.bind_property("sensitive", self._click_mode_play_button, "sensitive")
+        self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
+        self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
         # Options
         self._options = options
         self._active_profile = options.get("profile")
@@ -92,9 +100,11 @@ class SettingsDialog:
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
         self._program_frame.set_sensitive(is_enigma_profile)
         self._extra_support_grid.set_sensitive(is_enigma_profile)
-        http_active = self._support_http_api_check_button.get_active()
+        http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
-        self._click_mode_play_button.set_sensitive(is_enigma_profile and http_active)
+        if not is_enigma_profile:
+            self.show_info_message("The Neutrino has only experimental support. Not all features are supported!",
+                                   Gtk.MessageType.WARNING)
 
     def show(self):
         response = self._dialog.run()
@@ -156,8 +166,10 @@ class SettingsDialog:
         self.set_fav_click_mode(options.get("fav_click_mode", def_settings["fav_click_mode"]))
 
         if Profile(self._active_profile) is Profile.ENIGMA_2:
-            self._support_ver5_check_button.set_active(options.get("v5_support", False))
-            self._support_http_api_check_button.set_active(options.get("http_api_support", False))
+            self._support_ver5_switch.set_active(options.get("v5_support", False))
+            self._support_http_api_switch.set_active(options.get("http_api_support", False))
+            self._enable_y_dl_switch.set_active(options.get("enable_yt_dl", False))
+            self._enable_send_to_switch.set_active(options.get("enable_send_to", False))
             self._set_color_switch.set_active(options.get("use_colors", False))
             new_rgb = Gdk.RGBA()
             new_rgb.parse(options.get("new_color", NEW_COLOR))
@@ -194,11 +206,13 @@ class SettingsDialog:
         options["fav_click_mode"] = self.get_fav_click_mode()
 
         if profile is Profile.ENIGMA_2:
-            options["v5_support"] = self._support_ver5_check_button.get_active()
-            options["http_api_support"] = self._support_http_api_check_button.get_active()
             options["use_colors"] = self._set_color_switch.get_active()
             options["new_color"] = self._new_color_button.get_rgba().to_string()
             options["extra_color"] = self._extra_color_button.get_rgba().to_string()
+            options["v5_support"] = self._support_ver5_switch.get_active()
+            options["http_api_support"] = self._support_http_api_switch.get_active()
+            options["enable_yt_dl"] = self._enable_y_dl_switch.get_active()
+            options["enable_send_to"] = self._enable_send_to_switch.get_active()
 
         write_config(self._options)
 
@@ -264,10 +278,15 @@ class SettingsDialog:
         self._colors_grid.set_sensitive(state)
 
     def on_http_mode_switch_state(self, switch, state):
-        self._click_mode_play_button.set_sensitive(state)
         self._click_mode_zap_button.set_sensitive(state)
         if self._click_mode_play_button.get_active() or self._click_mode_zap_button.get_active():
             self._click_mode_disabled_button.set_active(True)
+
+    def on_yt_dl_switch_state(self, switch, state):
+        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+
+    def on_send_to_switch_state(self, switch, state):
+        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
 
     @run_idle
     def set_fav_click_mode(self, mode):
