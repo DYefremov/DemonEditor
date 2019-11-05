@@ -19,6 +19,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.properties import get_config, write_config, Profile
 from app.tools.media import Player
 from app.ui.epg_dialog import EpgDialog
+from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
 from .imports import ImportDialog, import_bouquet
 from .download_dialog import DownloadDialog
@@ -180,6 +181,7 @@ class Application(Gtk.Application):
         # http api
         self._http_api = None
         self._fav_click_mode = None
+        self._links_transmitter = None
         # Colors
         self._use_colors = False
         self._NEW_COLOR = None  # Color for new services in the main list
@@ -1667,12 +1669,14 @@ class Application(Gtk.Application):
     def init_http_api(self):
         prp = self._options.get(self._profile)
         self._fav_click_mode = FavClickMode(prp.get("fav_click_mode", FavClickMode.DISABLED))
+        http_api_enable = prp.get("http_api_support", False)
 
-        if prp is Profile.NEUTRINO_MP or not prp.get("http_api_support", False):
+        if prp is Profile.NEUTRINO_MP or not http_api_enable:
             self.update_info_boxes_visible(False)
             if self._http_api:
                 self._http_api.close()
                 self._http_api = None
+            self.init_send_to(False)
             return
 
         if not self._http_api:
@@ -1680,6 +1684,15 @@ class Application(Gtk.Application):
                                           prp.get("http_user", ""), prp.get("http_password", ""))
             next(self._http_api)
             GLib.timeout_add_seconds(1, self.update_receiver_info)
+
+        self.init_send_to(http_api_enable and prp.get("enable_send_to", False))
+
+    @run_idle
+    def init_send_to(self, enable):
+        if enable and not self._links_transmitter:
+            self._links_transmitter = LinksTransmitter(self._http_api)
+        elif self._links_transmitter:
+            self._links_transmitter.show(enable)
 
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
@@ -1712,7 +1725,6 @@ class Application(Gtk.Application):
                 if callback is not None:
                     callback()
 
-    @run_task
     def update_receiver_info(self):
         info = self._http_api.send((HttpRequestType.INFO, None))
         next(self._http_api)

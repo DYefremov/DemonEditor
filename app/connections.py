@@ -273,7 +273,7 @@ def telnet(host, port=23, user="", password="", timeout=5):
 # ***************** HTTP API *******************#
 
 def http_request(host, port, user, password):
-    print(host, port, user, password)
+    # TODO: Think About ProcessPoolExecutor!
     base_url = "http://{}:{}/api/".format(host, port)
     init_auth(user, password, base_url)
 
@@ -291,7 +291,8 @@ def http_request(host, port, user, password):
 
 def get_json(req_type, url):
     try:
-        with urlopen(url, timeout=5) as f:
+        # timeout=10 maybe temporarily!
+        with urlopen(url, timeout=10) as f:
             if req_type is HttpRequestType.STREAM:
                 yield f.read().decode("utf-8")
             else:
