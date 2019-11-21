@@ -49,9 +49,7 @@ class LinksTransmitter:
     def activate_url(self, url):
         result = urlparse(url)
         if result.scheme and result.netloc:
-            res = self._http_api.send((HttpRequestType.PLAY, url))
-            next(self._http_api)
-            print(res)
+            self._http_api.send(HttpRequestType.PLAY, url, print)
 
     def on_exit(self, item=None):
         self.show(False)

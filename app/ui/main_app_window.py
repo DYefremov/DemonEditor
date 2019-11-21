@@ -8,7 +8,7 @@ from itertools import chain
 from gi.repository import GLib, Gio
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
-from app.connections import http_request, HttpRequestType, download_data, DownloadType, upload_data, test_http, \
+from app.connections import HttpAPI, HttpRequestType, download_data, DownloadType, upload_data, test_http, \
     TestException
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
@@ -1680,10 +1680,9 @@ class Application(Gtk.Application):
             return
 
         if not self._http_api:
-            self._http_api = http_request(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
-                                          prp.get("http_user", ""), prp.get("http_password", ""))
-            next(self._http_api)
-            GLib.timeout_add_seconds(1, self.update_receiver_info)
+            self._http_api = HttpAPI(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
+                                     prp.get("http_user", ""), prp.get("http_password", ""))
+            self._http_api.send(HttpRequestType.INFO, None, self.update_receiver_info)
 
         self.init_send_to(http_api_enable and prp.get("enable_send_to", False))
 
@@ -1696,8 +1695,9 @@ class Application(Gtk.Application):
 
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
-        m3u = self._http_api.send((HttpRequestType.STREAM, None))
-        next(self._http_api)
+        self._http_api.send(HttpRequestType.STREAM, None, self.watch)
+
+    def watch(self, m3u):
         if m3u:
             url = [s for s in m3u.split("\n") if not s.startswith("#")]
             if url:
@@ -1718,20 +1718,19 @@ class Application(Gtk.Application):
         if srv and srv.transponder:
             ref = srv.picon_id.rstrip(".png").replace("_", ":")
 
-            req = self._http_api.send((HttpRequestType.ZAP, ref))
-            next(self._http_api)
-            if req and req.get("result", False):
-                GLib.idle_add(scroll_to, path, self._fav_view)
-                if callback is not None:
-                    callback()
+            def zap(rq):
+                if rq and rq.get("result", False):
+                    GLib.idle_add(scroll_to, path, self._fav_view)
+                    if callback is not None:
+                        callback()
 
-    def update_receiver_info(self):
-        info = self._http_api.send((HttpRequestType.INFO, None))
-        next(self._http_api)
+            self._http_api.send(HttpRequestType.ZAP, ref, zap)
+
+    def update_receiver_info(self, info):
         if not info:
             self._http_api.close()
             self._http_api = None
-            GLib.idle_add(self.update_info_boxes_visible, False)
+            GLib.idle_add(self.update_info_boxes_visible, info)
             return
 
         service_info = info.get("service", None)
@@ -1746,43 +1745,37 @@ class Application(Gtk.Application):
         GLib.idle_add(self._receiver_info_box.set_visible, res_info)
 
         if service_info:
-            gen = self.update_service_info()
-            GLib.timeout_add_seconds(3, lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            def update():
+                if not self._http_api:
+                    return False
+
+                self._http_api.send(HttpRequestType.INFO, None, self.update_service_info)
+                return True
+
+            GLib.timeout_add_seconds(3, update, priority=GLib.PRIORITY_LOW)
 
         GLib.idle_add(self._signal_box.set_visible, service_info)
 
-    def update_signal(self):
-        if not self._http_api:
-            return
+    def update_service_info(self, info):
+        service_info = info.get("service", None) if info else None
+        if service_info:
+            GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
+            if service_info.get("onid", None):
+                self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
+                self._http_api.send(HttpRequestType.STATUS, None, self.update_status)
 
-        sig = self._http_api.send((HttpRequestType.SIGNAL, None))
-        next(self._http_api)
-        val = sig.get("snr", 0)
-        self._signal_level_bar.set_value(val if val else 0)
+    def update_signal(self, sig):
+        val = sig.get("snr", 0) if sig else 0
+        self._signal_level_bar.set_value(val)
         self._signal_level_bar.set_visible(val)
 
-    def update_status(self):
-        status = self._http_api.send((HttpRequestType.STATUS, None))
-        next(self._http_api)
+    def update_status(self, status):
         if status:
             dsc = "{} {} - {}".format(status.get("currservice_name", ""),
                                       status.get("currservice_begin", ""),
                                       status.get("currservice_end", ""))
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(status.get("currservice_description", ""))
-
-    def update_service_info(self):
-        while self._http_api:
-            info = self._http_api.send((HttpRequestType.INFO, None))
-            next(self._http_api)
-            if info:
-                service_info = info.get("service", None)
-                if service_info:
-                    GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
-                    if service_info.get("onid", None):
-                        self.update_signal()
-                        GLib.idle_add(self.update_status, priority=GLib.PRIORITY_LOW)
-            yield self._http_api
 
     # ***************** Filter and search *********************#
 
