@@ -223,6 +223,7 @@ class Application(Gtk.Application):
         self._service_name_label = builder.get_object("service_name_label")
         self._service_epg_label = builder.get_object("service_epg_label")
         self._signal_level_bar = builder.get_object("signal_level_bar")
+        self._http_status_image = builder.get_object("http_status_image")
         self._cas_label = builder.get_object("cas_label")
         self._fav_count_label = builder.get_object("fav_count_label")
         self._bouquets_count_label = builder.get_object("bouquets_count_label")
@@ -232,6 +233,7 @@ class Application(Gtk.Application):
         self._save_header_button = builder.get_object("save_header_button")
         self._save_header_button.bind_property("sensitive", builder.get_object("save_menu_button"), "sensitive")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
+        self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -1664,14 +1666,16 @@ class Application(Gtk.Application):
         self._status_bar_box.set_visible(full and not self._app_info_box.get_visible())
 
     # ************************ HTTP API ****************************#
-
     @run_task
     def init_http_api(self):
         prp = self._options.get(self._profile)
+        profile = Profile(self._profile)
         self._fav_click_mode = FavClickMode(prp.get("fav_click_mode", FavClickMode.DISABLED))
         http_api_enable = prp.get("http_api_support", False)
+        status = all((http_api_enable, profile is Profile.ENIGMA_2, not self._receiver_info_box.get_visible()))
+        GLib.idle_add(self._http_status_image.set_visible, status)
 
-        if prp is Profile.NEUTRINO_MP or not http_api_enable:
+        if profile is Profile.NEUTRINO_MP or not http_api_enable:
             self.update_info_boxes_visible(False)
             if self._http_api:
                 self._http_api.close()
@@ -1682,7 +1686,8 @@ class Application(Gtk.Application):
         if not self._http_api:
             self._http_api = HttpAPI(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
                                      prp.get("http_user", ""), prp.get("http_password", ""))
-            self._http_api.send(HttpRequestType.INFO, None, self.update_receiver_info)
+
+            GLib.timeout_add_seconds(3, self.update_info, priority=GLib.PRIORITY_LOW)
 
         self.init_send_to(http_api_enable and prp.get("enable_send_to", False))
 
@@ -1726,15 +1731,18 @@ class Application(Gtk.Application):
 
             self._http_api.send(HttpRequestType.ZAP, ref, zap)
 
-    def update_receiver_info(self, info):
-        if not info:
-            self._http_api.close()
-            self._http_api = None
-            GLib.idle_add(self.update_info_boxes_visible, info)
-            return
+    def update_info(self):
+        """ Updating current info over HTTP API """
+        if not self._http_api:
+            GLib.idle_add(self._http_status_image.set_visible, False)
+            return False
 
-        service_info = info.get("service", None)
-        res_info = info.get("info", None)
+        self._http_api.send(HttpRequestType.INFO, None, self.update_receiver_info)
+        self._http_api.send(HttpRequestType.INFO, None, self.update_service_info)
+        return True
+
+    def update_receiver_info(self, info):
+        res_info = info.get("info", None) if info else None
         if res_info:
             image = res_info.get("friendlyimagedistro", "")
             image_ver = res_info.get("imagever", "")
@@ -1742,27 +1750,16 @@ class Application(Gtk.Application):
             model = res_info.get("model", "")
             info_text = "{} {}  Image: {} {}".format(brand, model, image, image_ver)
             GLib.idle_add(self._receiver_info_label.set_text, info_text)
-        GLib.idle_add(self._receiver_info_box.set_visible, res_info)
-
-        if service_info:
-            def update():
-                if not self._http_api:
-                    return False
-
-                self._http_api.send(HttpRequestType.INFO, None, self.update_service_info)
-                return True
-
-            GLib.timeout_add_seconds(3, update, priority=GLib.PRIORITY_LOW)
-
-        GLib.idle_add(self._signal_box.set_visible, service_info)
+        GLib.idle_add(self._receiver_info_box.set_visible, bool(res_info))
 
     def update_service_info(self, info):
         service_info = info.get("service", None) if info else None
         if service_info:
             GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
-            if service_info.get("onid", None):
+            if service_info.get("onid", None) and self._http_api:
                 self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
                 self._http_api.send(HttpRequestType.STATUS, None, self.update_status)
+        GLib.idle_add(self._signal_box.set_visible, bool(service_info))
 
     def update_signal(self, sig):
         val = sig.get("snr", 0) if sig else 0
