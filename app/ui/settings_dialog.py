@@ -88,6 +88,7 @@ class SettingsDialog:
         self._click_mode_zap_button.bind_property("sensitive", self._click_mode_play_button, "sensitive")
         self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
         self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
+        self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
         # Options
         self._options = options
         self._active_profile = options.get("profile")
@@ -102,9 +103,8 @@ class SettingsDialog:
         self._extra_support_grid.set_sensitive(is_enigma_profile)
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
-        if not is_enigma_profile:
-            self.show_info_message("The Neutrino has only experimental support. Not all features are supported!",
-                                   Gtk.MessageType.WARNING)
+        self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
+            "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
 
     def show(self):
         response = self._dialog.run()
