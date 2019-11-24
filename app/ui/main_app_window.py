@@ -382,6 +382,8 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_close_app(self, *args):
+        if self._http_api:
+            self._http_api.close()
         self.quit()
 
     def on_resize(self, window):
@@ -1660,10 +1662,13 @@ class Application(Gtk.Application):
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
 
     def on_main_window_state(self, window, event):
-        full = not event.new_window_state & Gdk.WindowState.FULLSCREEN
+        state = event.new_window_state
+        full = not state & Gdk.WindowState.FULLSCREEN
         self._main_data_box.set_visible(full)
         self._player_tool_bar.set_visible(full)
         self._status_bar_box.set_visible(full and not self._app_info_box.get_visible())
+        if not state & Gdk.WindowState.ICONIFIED and self._links_transmitter:
+            self._links_transmitter.hide()
 
     # ************************ HTTP API ****************************#
     @run_task
@@ -1694,7 +1699,7 @@ class Application(Gtk.Application):
     @run_idle
     def init_send_to(self, enable):
         if enable and not self._links_transmitter:
-            self._links_transmitter = LinksTransmitter(self._http_api)
+            self._links_transmitter = LinksTransmitter(self._http_api, self._main_window)
         elif self._links_transmitter:
             self._links_transmitter.show(enable)
 
@@ -1762,8 +1767,11 @@ class Application(Gtk.Application):
         GLib.idle_add(self._signal_box.set_visible, bool(service_info))
 
     def update_signal(self, sig):
-        val = sig.get("snr", 0) if sig else 0
-        self._signal_level_bar.set_value(val)
+        self.set_signal(sig.get("snr", 0) if sig else 0)
+
+    @lru_cache(maxsize=2)
+    def set_signal(self, val):
+        self._signal_level_bar.set_value(val if isinstance(val, int) else 0)
         self._signal_level_bar.set_visible(val)
 
     def update_status(self, status):
