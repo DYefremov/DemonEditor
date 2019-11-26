@@ -673,10 +673,8 @@ Author: Dmitriy Yefremov
     <property name="model">services_model_filter</property>
   </object>
   <object class="GtkApplicationWindow" id="main_window">
-    <property name="width_request">480</property>
-    <property name="height_request">240</property>
+    <property name="width_request">640</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">DemonEditor</property>
     <property name="window_position">center</property>
     <property name="icon_name">accessories-text-editor</property>
     <property name="gravity">center</property>
@@ -2277,7 +2275,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
-            <property name="height_request">30</property>
+            <property name="height_request">24</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
@@ -2463,6 +2461,21 @@ Author: Dmitriy Yefremov
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="http_status_image">
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">No connection to the receiver</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="icon_name">network-offline</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <style>

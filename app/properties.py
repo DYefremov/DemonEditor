@@ -47,7 +47,7 @@ def get_default_settings():
             "picons_path": "/usr/share/enigma2/picon", "picons_dir_path": DATA_PATH + "enigma2/picons/",
             "backup_dir_path": DATA_PATH + "enigma2/backup/",
             "backup_before_save": True, "backup_before_downloading": True,
-            "v5_support": False, "http_api_support": False,
+            "v5_support": False, "http_api_support": False, "enable_yt_dl": False, "enable_send_to": False,
             "use_colors": True, "new_color": "rgb(255,230,204)", "extra_color": "rgb(179,230,204)",
             "fav_click_mode": 0},
         Profile.NEUTRINO_MP.value: {

@@ -37,6 +37,7 @@ class HttpRequestType(Enum):
     SIGNAL = "tunersignal"
     STREAM = "streamcurrentm3u"
     STATUS = "statusinfo"
+    PLAY = "mediaplayerplay?file=4097:0:1:0:0:0:0:0:0:0:"
 
 
 class TestException(Exception):
@@ -269,38 +270,41 @@ def telnet(host, port=23, user="", password="", timeout=5):
         yield
 
 
-# ***************** http api *******************#
+# ***************** HTTP API *******************#
 
-def http_request(host, port, user, password):
-    base_url = "http://{}:{}/api/".format(host, port)
-    init_auth(user, password, base_url)
+class HttpAPI:
 
-    while True:
-        req_type, ref = yield
-        url = base_url
+    def __init__(self, host, port, user, password):
+        self._base_url = "http://{}:{}/api/".format(host, port)
+        init_auth(user, password, self._base_url)
+
+        from concurrent.futures import ProcessPoolExecutor as PoolExecutor
+        self._executor = PoolExecutor(max_workers=1)
+
+    def send(self, req_type, ref, callback=print):
+        url = self._base_url + req_type.value
+
         if req_type is HttpRequestType.ZAP:
-            url = base_url + "zap?sRef={}".format(urllib.parse.quote(ref))
-        elif req_type is HttpRequestType.INFO:
-            url = base_url + HttpRequestType.INFO.value
-        elif req_type is HttpRequestType.SIGNAL:
-            url = base_url + HttpRequestType.SIGNAL.value
-        elif req_type is HttpRequestType.STREAM:
-            url = base_url + HttpRequestType.STREAM.value
-        elif req_type is HttpRequestType.STATUS:
-            url = base_url + HttpRequestType.STATUS.value
+            url += urllib.parse.quote(ref)
+        elif req_type is HttpRequestType.PLAY:
+            url += urllib.parse.quote(ref).replace("%3A", "%253A")
 
-        yield from get_json(req_type, url)
+        future = self._executor.submit(get_json, req_type, url)
+        future.add_done_callback(lambda f: callback(f.result()))
+
+    def close(self):
+        self._executor.shutdown(False)
 
 
 def get_json(req_type, url):
     try:
-        with urlopen(url, timeout=5) as f:
+        with urlopen(url, timeout=10) as f:
             if req_type is HttpRequestType.STREAM:
-                yield f.read().decode("utf-8")
+                return f.read().decode("utf-8")
             else:
-                yield json.loads(f.read().decode("utf-8"))
+                return json.loads(f.read().decode("utf-8"))
     except (URLError, HTTPError):
-        yield None
+        pass
 
 
 # ***************** Connections testing *******************#
