@@ -3,7 +3,7 @@ from gi.repository import GLib
 from app.connections import HttpRequestType
 from app.tools.yt import YouTube
 from app.ui.iptv import get_yt_icon
-from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
 class LinksTransmitter:
@@ -27,6 +27,11 @@ class LinksTransmitter:
         self._main_window = builder.get_object("main_window")
         self._url_entry = builder.get_object("url_entry")
 
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
+                                                                    Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
     def show(self, show):
         self._tray.set_visible(show)
         if not show:
@@ -44,18 +49,22 @@ class LinksTransmitter:
         self._app_window.present() if visible else self._app_window.iconify()
 
     def on_query_tooltip(self, icon, g, x, y, tooltip: Gtk.Tooltip):
-        if self._main_window.get_visible():
+        if self._main_window.get_visible() or not self._url_entry.get_text():
             return False
 
-        tooltip.set_text("Test")
+        tooltip.set_text(self._url_entry.get_text())
         return True
 
-    def on_drag_data_received(self, widget, drag_context, x, y, data, info, time):
-        gen = self.activate_url(data.get_text())
+    def on_drag_data_received(self, entry, drag_context, x, y, data, info, time):
+        url = data.get_text()
+        GLib.idle_add(entry.set_text, url)
+        gen = self.activate_url(url)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def activate_url(self, url):
+        self._url_entry.set_name("GtkEntry")
         result = urlparse(url)
+
         if result.scheme and result.netloc:
             self._url_entry.set_sensitive(False)
             yt_id = YouTube.get_yt_id(url)
@@ -67,6 +76,9 @@ class LinksTransmitter:
                 yield True
                 if links:
                     url = links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
+                else:
+                    self.on_play(links)
+                    return
             else:
                 self._url_entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
 
@@ -75,9 +87,9 @@ class LinksTransmitter:
 
     def on_play(self, res):
         """ Play callback """
-        self._url_entry.set_sensitive(True)
-        if res:
-            print(res)
+        GLib.idle_add(self._url_entry.set_sensitive, True)
+        res = res.get("result", None) if res else res
+        self._url_entry.set_name("GtkEntry" if res else "digit-entry")
 
     def on_exit(self, item=None):
         self.show(False)

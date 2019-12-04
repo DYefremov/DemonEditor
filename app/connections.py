@@ -278,8 +278,8 @@ class HttpAPI:
         self._base_url = "http://{}:{}/api/".format(host, port)
         init_auth(user, password, self._base_url)
 
-        from concurrent.futures import ProcessPoolExecutor as PoolExecutor
-        self._executor = PoolExecutor(max_workers=1)
+        from concurrent.futures import ThreadPoolExecutor as PoolExecutor
+        self._executor = PoolExecutor(max_workers=2)
 
     def send(self, req_type, ref, callback=print):
         url = self._base_url + req_type.value
