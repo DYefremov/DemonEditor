@@ -5,7 +5,7 @@ from pathlib import Path
 
 CONFIG_PATH = str(Path.home()) + "/.config/demon-editor/"
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = "data/"
+DATA_PATH = os.path.expanduser("~") + "/data/"
 
 
 class Profile(Enum):
