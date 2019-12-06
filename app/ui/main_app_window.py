@@ -219,6 +219,7 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
+        self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)

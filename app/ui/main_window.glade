@@ -2275,7 +2275,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
-            <property name="height_request">24</property>
+            <property name="height_request">30</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
