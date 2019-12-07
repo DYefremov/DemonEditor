@@ -1,92 +1,87 @@
-import concurrent.futures
-import os
-import shutil
-import signal
-import subprocess
+import ctypes
 import sys
-import urllib
-from enum import Enum
 
-from urllib.request import Request, urlopen
 from app.commons import run_task
-
-
-class MediaException(Exception):
-    pass
-
-
-class Commands(Enum):
-    STATUS = "http://127.0.0.1:{}/requests/status.xml"
-    PLAY = "http://127.0.0.1:{}/requests/status.xml?command=in_play&input={}"
-    STOP = "http://127.0.0.1:{}/requests/status.xml?command=pl_stop"
+from app.tools import vlc
+from app.tools.vlc import EventType
 
 
 class Player:
-    is_darwin = sys.platform.startswith("darwin")
-    _VLC_EXEC = "/Applications/VLC.app/Contents/MacOS/VLC" if is_darwin else "vlc"
-    _START_COMMAND = [_VLC_EXEC, "--extraintf", "http", "--intf", "dummy", "--quiet"]
-    if not is_darwin:
-        _START_COMMAND.append("--no-xlib")
+    _VLC_INSTANCE = None
 
-    _current_process = None
+    def __init__(self, rewind_callback=None, position_callback=None):
+        self._is_playing = False
+        self._player = self.get_vlc_instance()
+        ev_mgr = self._player.event_manager()
 
-    def __init__(self, port="8080"):
-        if shutil.which(self._VLC_EXEC) is None:
-            raise MediaException("No VLC is found. Check that it is installed!")
+        if rewind_callback:
+            # TODO look other EventType options
+            ev_mgr.event_attach(EventType.MediaPlayerBuffering,
+                                lambda e, p: rewind_callback(p.get_media().get_duration()),
+                                self._player)
+        if position_callback:
+            ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
+                                lambda e, p: position_callback(p.get_time()),
+                                self._player)
 
-        self._port = port
-        self._state = Commands.STOP
-        self._player = None
-        self._mrl = None
-        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    @staticmethod
+    def get_vlc_instance():
+        if Player._VLC_INSTANCE:
+            return Player._VLC_INSTANCE
+        args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+        _VLC_INSTANCE = vlc.Instance(args).media_player_new()
+        return _VLC_INSTANCE
 
     @run_task
-    def new_instance(self):
-        if not self._current_process:
-            self._current_process = subprocess.Popen(self._START_COMMAND, preexec_fn=os.setsid)
-            self._current_process.communicate()
-
     def play(self, mrl=None):
         if mrl:
-            self.set_mrl(mrl)
-        self._executor.submit(self.open_command, Commands.PLAY)
+            self._player.set_mrl(mrl)
+        self._player.play()
+        self._is_playing = True
 
-    def open_command(self, command):
-        url = Commands.STOP.value.format(self._port)
-        if command is Commands.PLAY:
-            url = Commands.PLAY.value.format(self._port, self._mrl)
-        try:
-            with urlopen(url, timeout=5) as f:
-                self._state = command
-        except Exception:
-            pass
-        else:
-            print("Opening url: {}".format(url))
-
+    @run_task
     def stop(self):
-        if self._state is Commands.PLAY:
-            self._executor.submit(self.open_command, Commands.STOP)
+        if self._is_playing:
+            self._player.stop()
+            self._is_playing = False
 
     def pause(self):
-        pass
+        self._player.pause()
 
     def set_time(self, time):
-        pass
+        self._player.set_time(time)
 
     @run_task
     def release(self):
-        if self._current_process and self._current_process.poll() is None:
-            # Good explanation here: https://stackoverflow.com/a/4791612
-            os.killpg(os.getpgid(self._current_process.pid), signal.SIGTERM)
+        if self._player:
+            self._is_playing = False
+            self._player.stop()
+            self._player.release()
+
+    def set_xwindow(self, xid):
+        self._player.set_xwindow(xid)
+
+    def set_nso(self, widget):
+        """ Used on MacOS to set NSObject.
+
+            Based on gtkvlc.py[get_window_pointer] example from here:
+            https://github.com/oaubert/python-vlc/tree/master/examples
+        """
+        g_dll = ctypes.CDLL("libgdk-3.0.dylib")
+        get_nsview = g_dll.gdk_quaerz_window_get_nsview
+        get_nsview.restype, get_nsview.argtypes = [ctypes.c_void_p], ctypes.c_void_p
+        ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+        ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+        self._player.set_nsobject(ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None))
 
     def set_mrl(self, mrl):
-        self._mrl = urllib.request.quote(mrl)
+        self._player.set_mrl(mrl)
 
     def is_playing(self):
-        return self._state
+        return self._is_playing
 
     def set_full_screen(self, full):
-        pass
+        self._player.set_fullscreen(full)
 
 
 if __name__ == "__main__":
