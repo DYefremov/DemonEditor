@@ -1,7 +1,7 @@
 import ctypes
 import sys
 
-from app.commons import run_task
+from app.commons import run_task, log
 from app.tools import vlc
 from app.tools.vlc import EventType
 
@@ -67,12 +67,18 @@ class Player:
             Based on gtkvlc.py[get_window_pointer] example from here:
             https://github.com/oaubert/python-vlc/tree/master/examples
         """
-        g_dll = ctypes.CDLL("libgdk-3.0.dylib")
-        get_nsview = g_dll.gdk_quaerz_window_get_nsview
-        get_nsview.restype, get_nsview.argtypes = [ctypes.c_void_p], ctypes.c_void_p
-        ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
-        ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-        self._player.set_nsobject(ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None))
+        try:
+            g_dll = ctypes.CDLL("libgdk-3.0.dylib")
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+        else:
+            get_nsview = g_dll.gdk_quartz_window_get_nsview
+            get_nsview.restype, get_nsview.argtypes = ctypes.c_void_p, [ctypes.c_void_p]
+            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+            # Get the C void* pointer to the window
+            pointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
+            self._player.set_nsobject(get_nsview(pointer))
 
     def set_mrl(self, mrl):
         self._player.set_mrl(mrl)
