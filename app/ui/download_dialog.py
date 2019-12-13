@@ -2,7 +2,7 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType, upload_data
-from app.properties import Profile, get_config
+from app.settings import Profile
 from app.ui.backup import backup_data, restore_data
 from app.ui.main_helper import append_text_to_tview
 from app.ui.settings_dialog import show_settings_dialog
@@ -11,12 +11,11 @@ from .dialogs import show_dialog, DialogType, get_message
 
 
 class DownloadDialog:
-    def __init__(self, transient, properties, open_data_callback, update_settings_callback, profile=Profile.ENIGMA_2):
-        self._profile_properties = properties.get(profile.value)
-        self._properties = properties
+    def __init__(self, transient, settings, open_data_callback, update_settings_callback):
+        self._profile = settings.profile
+        self._settings = settings
         self._open_data_callback = open_data_callback
         self._update_settings_callback = update_settings_callback
-        self._profile = profile
 
         handlers = {"on_receive": self.on_receive,
                     "on_send": self.on_send,
@@ -53,14 +52,14 @@ class DownloadDialog:
         self._use_http_switch = builder.get_object("use_http_switch")
         self._http_radio_button = builder.get_object("http_radio_button")
         self._use_http_box = builder.get_object("use_http_box")
-        self.init_properties()
+        self.init_settings()
 
     def show(self):
         self._dialog_window.show()
 
-    def init_properties(self):
-        self._host_entry.set_text(self._profile_properties["host"])
-        self._data_path_entry.set_text(self._profile_properties["data_dir_path"])
+    def init_settings(self):
+        self._host_entry.set_text(self._settings.host)
+        self._data_path_entry.set_text(self._settings.data_dir_path)
         is_enigma = self._profile is Profile.ENIGMA_2
         self._webtv_radio_button.set_visible(not is_enigma)
         self._http_radio_button.set_visible(is_enigma)
@@ -93,33 +92,34 @@ class DownloadDialog:
         if button.get_active():
             label = button.get_label()
             if label == "Telnet":
-                self._login_entry.set_text(self._profile_properties.get("telnet_user", ""))
-                self._password_entry.set_text(self._profile_properties.get("telnet_password", ""))
-                self._port_entry.set_text(self._profile_properties.get("telnet_port", ""))
-                self._timeout_entry.set_text(str(self._profile_properties.get("telnet_timeout", 0)))
+                self._login_entry.set_text(self._settings.telnet_user)
+                self._password_entry.set_text(self._settings.telnet_password)
+                self._port_entry.set_text(self._settings.telnet_port)
+                self._timeout_entry.set_text(str(self._settings.telnet_timeout))
             elif label == "HTTP":
-                self._login_entry.set_text(self._profile_properties.get("http_user", "root"))
-                self._password_entry.set_text(self._profile_properties.get("http_password", ""))
-                self._port_entry.set_text(self._profile_properties.get("http_port", ""))
-                self._timeout_entry.set_text(str(self._profile_properties.get("http_timeout", 0)))
+                self._login_entry.set_text(self._settings.http_user)
+                self._password_entry.set_text(self._settings.http_password)
+                self._port_entry.set_text(self._settings.http_port)
+                self._timeout_entry.set_text(str(self._settings.http_timeout))
             elif label == "FTP":
-                self._login_entry.set_text(self._profile_properties.get("user", ""))
-                self._password_entry.set_text(self._profile_properties.get("password", ""))
-                self._port_entry.set_text(self._profile_properties.get("port", ""))
+                self._login_entry.set_text(self._settings.user)
+                self._password_entry.set_text(self._settings.password)
+                self._port_entry.set_text(self._settings.port)
                 self._timeout_entry.set_text("")
             self._current_property = label
 
     def on_preferences(self, item):
-        show_settings_dialog(self._dialog_window, self._properties)
-        self._profile = Profile(self._properties.get("profile", Profile.ENIGMA_2.value))
-        self._profile_properties = get_config().get(self._profile.value)
-        self.init_properties()
-        self._update_settings_callback()
+        response = show_settings_dialog(self._dialog_window, self._settings)
+        if response != Gtk.ResponseType.CANCEL:
+            self._profile = self._settings.profile
+            self.init_settings()
+            gen = self._update_settings_callback()
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-        for button in self._settings_buttons_box.get_children():
-            if button.get_active():
-                self.on_settings_button(button)
-                break
+            for button in self._settings_buttons_box.get_children():
+                if button.get_active():
+                    self.on_settings_button(button)
+                    break
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -129,21 +129,20 @@ class DownloadDialog:
         """ Download/upload data from/to receiver """
         self._expander.set_expanded(True)
         self.clear_output()
-        backup, backup_src, data_path = self._profile_properties.get("backup_before_downloading", True), None, None
+        backup, backup_src, data_path = self._settings.backup_before_downloading, None, None
 
         try:
             if download:
                 if backup and d_type is not DownloadType.SATELLITES:
-                    data_path = self._profile_properties.get("data_dir_path", self._data_path_entry.get_text())
-                    backup_path = self._profile_properties.get("backup_dir_path", data_path + "backup/")
+                    data_path = self._settings.data_dir_path or self._data_path_entry.get_text()
+                    backup_path = self._settings.backup_dir_path or data_path + "backup/"
                     backup_src = backup_data(data_path, backup_path, d_type is DownloadType.ALL)
-                download_data(properties=self._profile_properties, download_type=d_type, callback=self.append_output)
+                download_data(settings=self._settings, download_type=d_type, callback=self.append_output)
             else:
                 self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
-                upload_data(properties=self._profile_properties,
+                upload_data(settings=self._settings,
                             download_type=d_type,
                             remove_unused=self._remove_unused_check_button.get_active(),
-                            profile=self._profile,
                             callback=self.append_output,
                             done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO),
                             use_http=self._use_http_switch.get_active())

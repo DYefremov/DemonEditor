@@ -9,7 +9,7 @@ from app.commons import run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.properties import Profile
+from app.settings import Profile
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
@@ -552,7 +552,7 @@ def get_bouquets_names(model):
 
 def update_entry_data(entry, dialog, options):
     """ Updates value in text entry from chooser dialog """
-    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, options=options)
+    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, settings=options)
     if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
         entry.set_text(response)
         return response

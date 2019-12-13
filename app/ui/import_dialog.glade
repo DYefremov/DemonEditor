@@ -89,6 +89,7 @@ Author: Dmitriy Yefremov
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="gravity">center</property>
+    <signal name="check-resize" handler="on_resize" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>

@@ -24,9 +24,9 @@ def show_satellites_dialog(transient, options):
 class SatellitesDialog:
     _aggr = [None for x in range(9)]  # aggregate
 
-    def __init__(self, transient, options):
-        self._data_path = options.get("data_dir_path") + "satellites.xml"
-        self._options = options
+    def __init__(self, transient, settings):
+        self._data_path = settings.data_dir_path + "satellites.xml"
+        self._settings = settings
 
         handlers = {"on_open": self.on_open,
                     "on_remove": self.on_remove,
@@ -55,7 +55,7 @@ class SatellitesDialog:
         self._window.set_transient_for(transient)
         self._sat_view = builder.get_object("satellites_editor_tree_view")
         # Setting the last size of the dialog window if it was saved
-        window_size = self._options.get("sat_editor_window_size", None)
+        window_size = self._settings.get("sat_editor_window_size")
         if window_size:
             self._window.resize(*window_size)
 
@@ -75,8 +75,8 @@ class SatellitesDialog:
 
     def on_resize(self, window):
         """ Stores new size properties for dialog window after resize """
-        if self._options:
-            self._options["sat_editor_window_size"] = window.get_size()
+        if self._settings:
+            self._settings.add("sat_editor_window_size", window.get_size())
 
     @run_idle
     def on_quit(self, *args):
@@ -100,7 +100,7 @@ class SatellitesDialog:
         file_filter.set_name("satellites.xml")
         response = show_dialog(dialog_type=DialogType.CHOOSER,
                                transient=self._window,
-                               options=self._options,
+                               settings=self._settings,
                                action_type=action,
                                file_filter=file_filter)
         return response

@@ -25,7 +25,7 @@ class RefsSource(Enum):
 
 class EpgDialog:
 
-    def __init__(self, transient, options, services, bouquet, fav_model, bouquet_name):
+    def __init__(self, transient, settings, services, bouquet, fav_model, bouquet_name):
 
         handlers = {"on_close_dialog": self.on_close_dialog,
                     "on_apply": self.on_apply,
@@ -56,7 +56,7 @@ class EpgDialog:
         self._services = {}
         self._ex_services = services
         self._ex_fav_model = fav_model
-        self._options = options
+        self._settings = settings
         self._bouquet = bouquet
         self._bouquet_name = bouquet_name
         self._current_ref = []
@@ -106,7 +106,7 @@ class EpgDialog:
         self._update_on_start_switch = builder.get_object("update_on_start_switch")
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
         # Setting the last size of the dialog window
-        window_size = self._options.get("epg_tool_window_size", None)
+        window_size = self._settings.get("epg_tool_window_size")
         if window_size:
             self._dialog.resize(*window_size)
 
@@ -288,7 +288,7 @@ class EpgDialog:
 
     @run_idle
     def on_save_to_xml(self, item):
-        response = show_dialog(DialogType.CHOOSER, self._dialog, options=self._options)
+        response = show_dialog(DialogType.CHOOSER, self._dialog, settings=self._settings)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -483,10 +483,10 @@ class EpgDialog:
     # ***************** Options *********************#
 
     def init_options(self):
-        epg_dat_path = self._options.get("data_dir_path", "") + "epg/"
+        epg_dat_path = self._settings.data_dir_path + "epg/"
         self._epg_dat_path_entry.set_text(epg_dat_path)
         default_epg_data_stb_path = "/etc/enigma2"
-        epg_options = self._options.get("epg_options", None)
+        epg_options = self._settings.get("epg_options")
         if epg_options:
             self._refs_source = RefsSource.XML if epg_options.get("xml_source", False) else RefsSource.SERVICES
             self._xml_radiobutton.set_active(self._refs_source is RefsSource.XML)
@@ -514,11 +514,11 @@ class EpgDialog:
                        "epg_dat_path": self._epg_dat_path_entry.get_text(),
                        "epg_dat_stb_path": self._epg_dat_stb_path_entry.get_text(),
                        "epg_data_update_on_start": self._update_on_start_switch.get_active()}
-        self._options["epg_options"] = epg_options
+        self._settings.add("epg_options", epg_options)
 
     def on_resize(self, window):
-        if self._options:
-            self._options["epg_tool_window_size"] = window.get_size()
+        if self._settings:
+            self._settings.add("epg_tool_window_size", window.get_size())
 
     def on_names_source_changed(self, button):
         self._refs_source = RefsSource.XML if button.get_active() else RefsSource.SERVICES
@@ -536,13 +536,13 @@ class EpgDialog:
         self._xml_chooser_button.set_sensitive(not state)
 
     def on_field_icon_press(self, entry, icon, event_button):
-        update_entry_data(entry, self._dialog, self._options)
+        update_entry_data(entry, self._dialog, self._settings)
 
     # ***************** Downloads *********************#
 
     def download_epg_from_stb(self):
         """ Download the epg.dat file via ftp from the receiver. """
-        download_data(properties=self._options, download_type=DownloadType.EPG, callback=print)
+        download_data(settings=self._settings, download_type=DownloadType.EPG, callback=print)
 
 
 if __name__ == "__main__":
