@@ -57,16 +57,16 @@ msgid "Assign"
 msgstr "Assignar"
 
 msgid "Bouquet details"
-msgstr "Detalles Ramo"
+msgstr "Detalles bouquet"
 
 msgid "Bouquets"
-msgstr "Ramos"
+msgstr "Bouquets"
 
 msgid "Copy"
 msgstr "Copiar"
 
 msgid "Copy reference"
-msgstr "Copia de Referencia"
+msgstr "Copia de referencia"
 
 msgid "Download"
 msgstr "Descargar"
@@ -78,7 +78,7 @@ msgid "Edit mаrker text"
 msgstr "Editar texto del mаrcador"
 
 msgid "FTP-transfer"
-msgstr "Transferencia-FTP"
+msgstr "Transferencia FTP"
 
 msgid "Global search"
 msgstr "Búsqueda Global"
@@ -99,10 +99,10 @@ msgid "Import m3u file"
 msgstr "Importar fichero m3u"
 
 msgid "List configuration"
-msgstr "Lista configuración"
+msgstr "Listar configuración"
 
 msgid "Rename for this bouquet"
-msgstr "Renombrar para este ramo"
+msgstr "Renombrar para este bouquet"
 
 msgid "Set default name"
 msgstr "Establecer nombre predeterminado"
@@ -114,7 +114,7 @@ msgid "Locate in services"
 msgstr "Buscar en servicios"
 
 msgid "Locked"
-msgstr "Cerrado"
+msgstr "Bloqueado"
 
 msgid "Move"
 msgstr "Mover"
@@ -123,13 +123,13 @@ msgid "New"
 msgstr "Nuevo"
 
 msgid "New bouquet"
-msgstr "Ramo nuevo"
+msgstr "Bouquet nuevo"
 
 msgid "Create bouquet"
-msgstr "Crear ramo"
+msgstr "Crear bouquet"
 
 msgid "For current satellite"
-msgstr "Para el Satélite actual"
+msgstr "Para el satélite actual"
 
 msgid "For current package"
 msgstr "Para el paquete actual"
@@ -138,7 +138,7 @@ msgid "For current type"
 msgstr "Para el tipo actual"
 
 msgid "For each satellite"
-msgstr "Para cada Satélite"
+msgstr "Para cada satélite"
 
 msgid "For each package"
 msgstr "Para cada paquete"
@@ -150,25 +150,25 @@ msgid "Open"
 msgstr "Abrir"
 
 msgid "Parent lock On/Off     Ctrl + L"
-msgstr "Bloqueo parentesco Encender/Apagar     Ctrl + L"
+msgstr "Bloqueo parental Encender/Apagar     Ctrl + L"
 
 msgid "Picons"
 msgstr "Picons"
 
 msgid "Picons downloader"
-msgstr "Picons descargar"
+msgstr "Descargar picons"
 
 msgid "Satellites downloader"
-msgstr "Satélites descargar"
+msgstr "Descargar satélites"
 
 msgid "Remove"
-msgstr "Remover"
+msgstr "Quitar"
 
 msgid "Remove all unavailable"
-msgstr "Remover todo lo indisponible"
+msgstr "Quitar todo lo indisponible"
 
 msgid "Satellites editor"
-msgstr "Editor Satélites"
+msgstr "Editor de satélites"
 
 msgid "Save"
 msgstr "Guardar"
@@ -183,7 +183,7 @@ msgid "Services filter"
 msgstr "Filtro servicios"
 
 msgid "Settings"
-msgstr "Configuraciones"
+msgstr "Configuración"
 
 msgid "Up"
 msgstr "Arriba"
@@ -198,7 +198,7 @@ msgid "All"
 msgstr "Todo"
 
 msgid "Are you sure?"
-msgstr "Estás seguro?"
+msgstr "¿Estás seguro?"
 
 msgid "Current data path:"
 msgstr "Ruta de datos actual:"
@@ -207,13 +207,13 @@ msgid "Data:"
 msgstr "Datos:"
 
 msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Editor de Canales y Satélites Enigma2 para GNU/Linux"
+msgstr "Editor de canales y satélites Enigma2 para GNU/Linux"
 
 msgid "Host:"
 msgstr "Anfitrión:"
 
 msgid "Loading data..."
-msgstr "Cargar datos..."
+msgstr "Cargando datos..."
 
 msgid "Receive"
 msgstr "Recibir"
@@ -222,10 +222,10 @@ msgid "Receive files from receiver"
 msgstr "Recibir ficheros de su receptor"
 
 msgid "Receiver IP:"
-msgstr "Receptor IP:"
+msgstr "IP del receptor:"
 
 msgid "Remove unused bouquets"
-msgstr "Remover ramos sin usar"
+msgstr "Quitar bouquets sin usar"
 
 msgid "Reset profile"
 msgstr "Restablecer perfil"
@@ -234,7 +234,7 @@ msgid "Satellites"
 msgstr "Satélites"
 
 msgid "Satellites.xml file:"
-msgstr "Fichero Satellites.xml:"
+msgstr "Fichero satellites.xml:"
 
 msgid "Selected"
 msgstr "Seleccionado"
@@ -246,10 +246,10 @@ msgid "Send files to receiver"
 msgstr "Enviar ficheros al receptor"
 
 msgid "Services and Bouquets files:"
-msgstr "Ficheros de Servicios y ramos:"
+msgstr "Ficheros de servicios y bouquets:"
 
 msgid "User bouquet files:"
-msgstr "Importar ficheros de ramos:"
+msgstr "Importar ficheros de bouquets:"
 
 msgid "Extra:"
 msgstr "Extra:"
@@ -266,16 +266,16 @@ msgstr "Todos los tipos"
 
 # Streams player
 msgid "Play"
-msgstr "Play"
+msgstr "Reproducir"
 
 msgid "Stop playback"
 msgstr "Detener la reproducción"
 
 msgid "Previous stream in the list"
-msgstr "Secuencia anterior en la lista"
+msgstr "Anterior flujo en la lista"
 
 msgid "Next stream in the list"
-msgstr "Secuencia siguiente en la lista"
+msgstr "Siguiente flujo en la lista"
 
 msgid "Toggle in fullscreen"
 msgstr "Cambiar a pantalla completa"
@@ -285,7 +285,7 @@ msgstr "Cerrar"
 
 # Picons dialog
 msgid "Load providers"
-msgstr "Cargar Proveedores"
+msgstr "Cargar proveedores"
 
 msgid "Providers"
 msgstr "Proveedores"
@@ -300,19 +300,19 @@ msgid "Resize:"
 msgstr "Redimensionar:"
 
 msgid "Current picons path:"
-msgstr "Ruta actual Picons:"
+msgstr "Ruta actual picons:"
 
 msgid "Receiver picons path:"
 msgstr "Ruta picons receptor:"
 
 msgid "Picons download tool"
-msgstr "Picons herramiento de descarga"
+msgstr "Herramienta de descarga de picons"
 
 msgid "Transfer to receiver"
 msgstr "Transferir al receptor"
 
 msgid "Downloader"
-msgstr "Descargador"
+msgstr "Programa de descarga"
 
 msgid "Converter"
 msgstr "Convertidor"
@@ -324,31 +324,31 @@ msgid "Path to save:"
 msgstr "Ruta para guardar:"
 
 msgid "Path to Enigma2 picons:"
-msgstr "Ruta a picons Enigma2:"
+msgstr "Ruta a picons de Enigma2:"
 
 msgid "Specify the correct position value for the provider!"
-msgstr "Especifique la posición correcta para el proveedor!"
+msgstr "¡Especifique el valor correcto de la posición del proveedor!"
 
 msgid "Converter between name formats"
 msgstr "Conversor entre formatos de nombre"
 
 msgid "Receive picons for providers"
-msgstr "Recibir picons para proovedor"
+msgstr "Recibir picons de proveedores"
 
 msgid "Load satellite providers."
-msgstr "Cargar proovedores Satélite."
+msgstr "Cargar proveedores de satélite."
 
 msgid ""
 "To automatically set the identifiers for picons,\n"
 "first load the required services list into the main application window."
 
 msgstr ""
-"Para configurar automáticamente los identificadores para picons, \n"
-"primero cargue la lista de serviços requeridos en la ventana principal."
+"Para configurar automáticamente los identificadores para picons,\n"
+"cargue primero la lista de servicios requeridos en la ventana principal."
 
 # Satellites editor
 msgid "Satellites edit tool"
-msgstr "Editor de Satélites"
+msgstr "Editor de satélites"
 
 msgid "Add"
 msgstr "Añadir"
@@ -360,10 +360,10 @@ msgid "Transponder"
 msgstr "Transpondedor"
 
 msgid "Satellite properties:"
-msgstr "Propiedades del Satélite:"
+msgstr "Propiedades del satélite:"
 
 msgid "Transponder properties:"
-msgstr "Propiedades  del Transpondedor:"
+msgstr "Propiedades del transpondedor:"
 
 msgid "Name"
 msgstr "Nombre"
@@ -373,30 +373,30 @@ msgstr "Posición"
 
 # Satellites update dialog
 msgid "Satellites update"
-msgstr "Actualisar Satélite"
+msgstr "Actualizar satélites"
 
 msgid "Remove selection"
-msgstr "Remover selección"
+msgstr "Quitar selección"
 
 # Service details dialog
 msgid "Service data:"
 msgstr "Datos servicio:"
 
 msgid "Transponder data:"
-msgstr "Datos Transpondedor:"
+msgstr "Datos transpondedor:"
 
 msgid "Service data"
 msgstr "Datos servicio"
 
 msgid "Transponder details"
-msgstr "Detalles Transpondedor"
+msgstr "Detalles transpondedor"
 
 msgid ""
 "Changes will be applied to all services of this transponder!\n"
 "Continue?"
 msgstr ""
 "Los cambios se aplicarán a todos los servicios de este transpondedor!\n"
-"Continuar?"
+"¿Continuar?"
 
 msgid "Reference"
 msgstr "Referencia"
@@ -408,10 +408,10 @@ msgid "Flags:"
 msgstr "Flags:"
 
 msgid "Delays (ms):"
-msgstr "Retraso (mc)"
+msgstr "Retraso (ms)"
 
 msgid "Bitstream"
-msgstr "Secuencia de Bits"
+msgstr "Secuencia de bits"
 
 msgid "Description"
 msgstr "Descripción"
@@ -420,10 +420,10 @@ msgid "Source:"
 msgstr "Fuente:"
 
 msgid "Cancel"
-msgstr "Annular"
+msgstr "Cancelar"
 
 msgid "Update"
-msgstr "Actualisar"
+msgstr "Actualizar"
 
 msgid "Filter"
 msgstr "Filtrar"
@@ -433,7 +433,7 @@ msgstr "Buscar"
 
 # IPTV dialog
 msgid "Stream data"
-msgstr "Datos de la Secuencia"
+msgstr "Transmitir flujo"
 
 # IPTV list configuration dialog
 msgid "Starting values"
@@ -443,7 +443,7 @@ msgid "Reset to default"
 msgstr "Restablecer a predeterminado"
 
 msgid "IPTV streams list configuration"
-msgstr "Configurar lista de Secuencias IPTV"
+msgstr "Configurar lista de flujos IPTV"
 
 # Settings dialog
 msgid "Preferences"
@@ -456,7 +456,7 @@ msgid "Timeout between commands in seconds"
 msgstr "Tiempo de espera entre comandos en segundos"
 
 msgid "Timeout:"
-msgstr "Time-out:"
+msgstr "Tiempo de espera:"
 
 msgid "Login:"
 msgstr "Usuario:"
@@ -471,68 +471,68 @@ msgid "Picons:"
 msgstr "Picons:"
 
 msgid "Port:"
-msgstr "Puerta:"
+msgstr "Puerto:"
 
 msgid "Data path:"
 msgstr "Ruta de datos:"
 
 msgid "Picons path:"
-msgstr "Ruta de Picons:"
+msgstr "Ruta de picons:"
 
 msgid "Network settings:"
 msgstr "Configuración de red:"
 
 msgid "STB file paths:"
-msgstr "Ruta de ficherors STB:"
+msgstr "Rutas de ficheros del receptor:"
 
 msgid "Local file paths:"
-msgstr "Ruta de ficheros local:"
+msgstr "Rutas de ficheros local:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
-msgstr "Error. Ningún ramo está seleccionado!"
+msgstr "Error. ¡Ningún bouquet seleccionado!"
 
 msgid "This item is not allowed to be removed!"
-msgstr "Este artículo no puede ser eliminado!"
+msgstr "¡Este elemento no puede ser quitado!"
 
 msgid "This item is not allowed to edit!"
-msgstr "Este artículo no puede ser editado!"
+msgstr "¡Este elemento no puede ser editado!"
 
 msgid "Not allowed in this context!"
-msgstr "No permitido en este contexto!"
+msgstr "¡No permitido en este contexto!"
 
 msgid "Please, download files from receiver or setup your path for read data!"
-msgstr "Por favor, descargue archivos desde el receptor o configure su ruta para leer los datos!"
+msgstr "Por favor, descargue ficheros desde el receptor o configure la ruta para leer los datos!"
 
 msgid "Reading data error!"
-msgstr "Error de lectura de datos!"
+msgstr "¡Error de lectura de datos!"
 
 msgid "No m3u file is selected!"
-msgstr "Ningún archivo m3u ha sido seleccionado!"
+msgstr "¡No se ha seleccionado ningún fichero m3u!"
 
 msgid "Not implemented yet!"
-msgstr "Aun no implementado!"
+msgstr "¡Aún sin implementar!"
 
 msgid "The text of marker is empty, please try again!"
-msgstr "El texto del marcador está vacío, inténtalo de nuevo!"
+msgstr "¡El texto del marcador está vacío, inténtalo de nuevo!"
 
 msgid "Please, select only one item!"
-msgstr "Por favor, seleccione solo un elemento!"
+msgstr "¡Por favor, seleccione sólo un elemento!"
 
 msgid "No png file is selected!"
-msgstr "Ningún fichero png seleccionado!"
+msgstr "¡No se ha seleccionado ningún fichero png!"
 
 msgid "No reference is present!"
-msgstr "Ninguna referencia presente!"
+msgstr "¡Ninguna referencia presente!"
 
 msgid "No selected item!"
-msgstr "Ningún elemento seleccionado!"
+msgstr "¡Ningún elemento seleccionado!"
 
 msgid "The task is already running!"
-msgstr "La tarea ya se está ejecutando!"
+msgstr "¡La tarea ya se está ejecutando!"
 
 msgid "Done!"
-msgstr "Hecho!"
+msgstr "¡Hecho!"
 
 msgid "Please, wait..."
 msgstr "Por favor, espere..."
@@ -541,50 +541,50 @@ msgid "Resizing..."
 msgstr "Redimensionando..."
 
 msgid "Select paths!"
-msgstr "Seleccione rutas!"
+msgstr "¡Seleccione rutas!"
 
 msgid "No satellite is selected!"
-msgstr "Ningún Satélite seleccionado!"
+msgstr "¡Ningún satélite seleccionado!"
 
 msgid "Please, select only one satellite!"
-msgstr "Seleccione solo un Satélite!"
+msgstr "¡Seleccione sólo un Satélite!"
 
 msgid "Please check your parameters and try again."
-msgstr "Por favor revise sus parámetros y vuelva a intentar!"
+msgstr "¡Por favor revise sus parámetros y vuelva a intentarlo!"
 
 msgid "No satellites.xml file is selected!"
-msgstr "Ningún satellites.xml seleccionado!"
+msgstr "¡Ningún satellites.xml seleccionado!"
 
 msgid "Error. Verify the data!"
-msgstr "Error. Revise sus datos!"
+msgstr "Error. ¡Revise los datos!"
 
 msgid "Operation not allowed in this context!"
-msgstr "Operación no permitida en este contexto!"
+msgstr "¡Operación no permitida en este contexto!"
 
 msgid "No VLC is found. Check that it is installed!"
-msgstr "VLC no encontrado. Verifica si está instalado!"
+msgstr "VLC no encontrado. ¡Verifique que está instalado!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Por favor espera una prueba de las secuencias..."
+msgstr "Por favor espere, hay una prueba de flujo en progreso..."
 
 msgid "Found"
 msgstr "Encontrado"
 
 msgid "unavailable streams."
-msgstr "Secuencias no presentes"
+msgstr "Flujos no presentes."
 
 msgid "No changes required!"
-msgstr "ningún cambio requerido!"
+msgstr "¡Ningún cambio requerido!"
 
 msgid "This list does not contains IPTV streams!"
-msgstr "La lista no contiene secuencias IPTV!"
+msgstr "¡La lista no contiene flujos IPTV!"
 
 msgid "New empty configuration"
 msgstr "Nueva configuración vacía"
 
 msgid "No data to save!"
-msgstr "No hay datos para guardar!"
+msgstr "¡No hay datos que guardar!"
 
 msgid "Network"
 msgstr "Red"
@@ -596,19 +596,19 @@ msgid "Program"
 msgstr "Programa"
 
 msgid "Backup:"
-msgstr "Backup:"
+msgstr "Copia de seguridad:"
 
 msgid "Backup"
-msgstr "Backup"
+msgstr "Copia de seguridad"
 
 msgid "Backups"
-msgstr "Backups"
+msgstr "Copias de seguridad"
 
 msgid "Backup path:"
-msgstr "Ruta del backup:"
+msgstr "Ruta de la copia de seguridad:"
 
 msgid "Restore bouquets"
-msgstr "Restaurar ramos"
+msgstr "Restaurar bouquets"
 
 msgid "Restore all"
 msgstr "Restaurar todo"
@@ -620,19 +620,19 @@ msgid "Before downloading from the receiver"
 msgstr "Antes de recibir del receptor"
 
 msgid "Set background color for the services"
-msgstr "Determinar color de fondo para servicios"
+msgstr "Determinar color de fondo de los servicios"
 
 msgid "Marked as new:"
 msgstr "Marcado como nuevo:"
 
 msgid "With an extra name in the bouquet:"
-msgstr "Con nombre adicional en ramo:"
+msgstr "Con nombre adicional en bouquet:"
 
 msgid "Select"
 msgstr "Seleccione"
 
 msgid "About"
-msgstr "Sobre"
+msgstr "Acerca de"
 
 msgid "Exit"
 msgstr "Salir"
@@ -645,19 +645,19 @@ msgid "Import"
 msgstr "Importar"
 
 msgid "Bouquet"
-msgstr "Ramo"
+msgstr "Bouquet"
 
 msgid "Bouquets and services"
-msgstr "Ramos y servicios"
+msgstr "Bouquets y servicios"
 
 msgid "The main list does not contain services for this bouquet!"
-msgstr "La lista principal no contiene servicios para este ramo!"
+msgstr "¡La lista principal no contiene servicios para este bouquet!"
 
 msgid "No bouquet file is selected!"
-msgstr "Nigún fichero de ramo ha sido seleccionado!"
+msgstr "¡No se ha seleccionado nigún fichero de bouquet!"
 
 msgid "Remove all unused"
-msgstr "Quite todos los"
+msgstr "Quitar todos sin usar"
 
 msgid "Test"
 msgstr "Prueba"
@@ -672,7 +672,7 @@ msgid "Zap"
 msgstr "Zapear"
 
 msgid "Play  stream"
-msgstr "Reproducir secuencia"
+msgstr "Reproducir flujo"
 
 msgid "Disabled"
 msgstr "Desactivado"
@@ -684,16 +684,16 @@ msgid "Enable HTTP API (experimental)"
 msgstr "Habilitar API HTTP (experimental)"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
-msgstr "Cambiar (ZAP) el canal (Ctrl + Z)"
+msgstr "Poner el canal (Ctrl + Z)"
 
 msgid "Switch the channel and watch in the program(Ctrl + W)"
-msgstr "Cambiar el canal y ver en el programa (Ctrl + W)"
+msgstr "Poner el canal y ver en el programa (Ctrl + W)"
 
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Reproducir IPTV u otro flujo en el programa (Ctrl + P)"
 
 msgid "Export to m3u"
-msgstr "Exportar hacia m3u"
+msgstr "Exportar a m3u"
 
 msgid "EPG configuration"
 msgstr "Configuración EPG"
@@ -705,61 +705,61 @@ msgid "EPG source"
 msgstr "Fuente EPG"
 
 msgid "Service names source:"
-msgstr "Nombre de servicio fuente:"
+msgstr "Origen nombres de servicio:"
 
 msgid "Main service list"
 msgstr "Lista principal de servicios:"
 
 msgid "XML file"
-msgstr "Archivo XML"
+msgstr "Fichero XML"
 
 msgid "Use web source"
 msgstr "Usar fuente web"
 
 msgid "Url to *.xml.gz file:"
-msgstr "URL del archivo *.xml.gz:"
+msgstr "URL del fichero *.xml.gz:"
 
 msgid "Enable filtering"
-msgstr "Habilitar filtrar"
+msgstr "Habilitar filtrado"
 
 msgid "Filter by presence in the epg.dat file."
-msgstr "Filtrar por presencia del archivo epg.dat."
+msgstr "Filtrar según presencia del fichero epg.dat."
 
 msgid "Paths to the epg.dat file:"
-msgstr "Ruta al archivo epg.dat:"
+msgstr "Ruta al fichero epg.dat:"
 
 msgid "Local path:"
 msgstr "Ruta local:"
 
 msgid "STB path:"
-msgstr "Ruta STB:"
+msgstr "Ruta receptor:"
 
 msgid "Update on start"
-msgstr "Actualisar al iniciar"
+msgstr "Actualizar al inicio"
 
 msgid "Auto configuration by service names."
-msgstr "Auto configuración por nombres de servicios."
+msgstr "Auto configuración según nombres de servicios."
 
 msgid "Save list to xml."
 msgstr "Guardar como XML."
 
 msgid "Download XML file error."
-msgstr "Error bajando archivo XML."
+msgstr "Error bajando fichero XML."
 
 msgid "Unsupported file type:"
-msgstr "Archivo no supportado:"
+msgstr "Fichero no soportado:"
 
 msgid "Unpacking data error."
-msgstr "Error abriende datos."
+msgstr "Error abriendo datos."
 
 msgid "XML parsing error:"
-msgstr "Error analisando XML:"
+msgstr "Error analizando XML:"
 
 msgid "Count of successfully configured services:"
 msgstr "Número de servicios configurados con éxito:"
 
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
-msgstr "Archivo epg.dat actual no tiene referencias a servicios de este ramo!"
+msgstr "¡El fichero epg.dat actual no tiene referencias a servicios de este bouquet!"
 
 msgid "Use HTTP"
 msgstr "Utilizar HTTP"
@@ -771,10 +771,10 @@ msgid "Import YouTube playlist"
 msgstr "Importar lista de reproducción de YouTube"
 
 msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-msgstr "Encontré un enlace al recurso de YouTube!\nIntentar obtener un enlace directo al video?"
+msgstr "¡Encontrado enlace al recurso de YouTube!\n¿Intentar obtener un enlace directo al vídeo?"
 
 msgid "Playlist import"
 msgstr "Importar lista de reproducción"
 
 msgid "Getting link error:"
-msgstr "Recibido Link error:"
+msgstr "Error en el enlace:"
