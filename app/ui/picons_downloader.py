@@ -294,7 +294,7 @@ class PiconsDialog:
         self._message_label.set_text(text)
 
     def on_picons_dir_open(self, entry, icon, event_button):
-        update_entry_data(entry, self._dialog, options={"data_dir_path": self._picons_path})
+        update_entry_data(entry, self._dialog, settings=self._settings)
 
     @run_idle
     def on_selected_toggled(self, toggle, path):

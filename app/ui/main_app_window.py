@@ -2016,14 +2016,14 @@ class Application(Gtk.Application):
                      self._fav_view,
                      self._main_window,
                      self._picons,
-                     self._settings.get(self._profile),
+                     self._settings,
                      self._services)
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view),
                      self._services_view,
                      self._fav_view, self._picons,
-                     self._settings.get(self._profile))
+                     self._settings)
 
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
@@ -2033,7 +2033,7 @@ class Application(Gtk.Application):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        remove_all_unused_picons(self._settings.get(self._profile), self._picons, self._services.values())
+        remove_all_unused_picons(self._settings, self._picons, self._services.values())
 
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV

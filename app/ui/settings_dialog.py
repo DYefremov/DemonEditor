@@ -115,7 +115,7 @@ class SettingsDialog:
         return response
 
     def on_field_icon_press(self, entry, icon, event_button):
-        update_entry_data(entry, self._dialog, self._settings.get(self._settings.get("profile")))
+        update_entry_data(entry, self._dialog, self._settings)
 
     def on_profile_changed(self, item):
         profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
