@@ -184,7 +184,7 @@ class Application(Gtk.Application):
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
-        builder.connect_signals(handlers)
+        builder.connect_signals(self._handlers)
         self._main_window = builder.get_object("main_window")
         main_window_size = self._settings.get("window_size")
         # Setting the last size of the window if it was saved
@@ -875,7 +875,7 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
 
     def on_data_open(self, action, param=None):
-        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self.open_data(response)
@@ -2101,9 +2101,10 @@ class Application(Gtk.Application):
 
     def update_profile_label(self):
         if self._profile is Profile.ENIGMA_2:
-            self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
+            ver = self.get_format_version()
+            self._main_window.set_title("DemonEditor [{} Enigma2 v.{}]".format(get_message("Profile:"), ver))
         elif self._profile is Profile.NEUTRINO_MP:
-            self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
+            self._main_window.set_title("DemonEditor [{} Neutrino-MP]".format(get_message("Profile:")))
 
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4
