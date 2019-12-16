@@ -1556,7 +1556,7 @@ class Application(Gtk.Application):
             try:
                 self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
                                                    position_callback=self.on_player_time_changed)
-            except (NameError, AttributeError):
+            except (ImportError, NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
             else:
@@ -1618,7 +1618,6 @@ class Application(Gtk.Application):
             self._player.set_nso(widget)
         else:
             self._drawing_area_xid = widget.get_window().get_xid()
-            print(self._drawing_area_xid)
             self._player.set_xwindow(self._drawing_area_xid)
 
     def on_player_drawing_area_draw(self, widget, cr):

@@ -11,6 +11,7 @@ class Player:
             from app.tools.vlc import EventType
         except OSError as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
+            raise ImportError
         else:
             self._is_playing = False
             args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
