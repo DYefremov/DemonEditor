@@ -9,7 +9,7 @@ from gi.repository import GLib, GdkPixbuf
 from app.commons import run_idle, run_task
 from app.connections import upload_data, DownloadType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
-from app.properties import Profile
+from app.settings import Profile
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 from .dialogs import show_dialog, DialogType, get_message
@@ -17,7 +17,7 @@ from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_
 
 
 class PiconsDialog:
-    def __init__(self, transient, options, picon_ids, sat_positions, profile=Profile.ENIGMA_2):
+    def __init__(self, transient, settings, picon_ids, sat_positions):
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
         self._TMP_DIR = tempfile.gettempdir() + "/"
@@ -85,16 +85,13 @@ class PiconsDialog:
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self._properties = options.get(profile.value)
-        self._profile = profile
-        self._ip_entry.set_text(self._properties.get("host", ""))
-        self._picons_entry.set_text(self._properties.get("picons_path", ""))
-        self._picons_path = self._properties.get("picons_dir_path", "")
+        self._settings = settings
+        self._profile = settings.profile
+        self._ip_entry.set_text(self._settings.host)
+        self._picons_entry.set_text(self._settings.picons_path)
+        self._picons_path = self._settings.picons_dir_path
         self._picons_dir_entry.set_text(self._picons_path)
-        self._enigma2_picons_path = self._picons_path
 
-        if profile is Profile.NEUTRINO_MP:
-            self._enigma2_picons_path = options.get(Profile.ENIGMA_2.value).get("picons_dir_path", "")
         if not len(self._picon_ids) and self._profile is Profile.ENIGMA_2:
             message = get_message("To automatically set the identifiers for picons,\n"
                                   "first load the required services list into the main application window.")
@@ -280,9 +277,8 @@ class PiconsDialog:
 
         try:
             GLib.idle_add(self._expander.set_expanded, True)
-            upload_data(properties=self._properties,
+            upload_data(settings=self._settings,
                         download_type=DownloadType.PICONS,
-                        profile=self._profile,
                         callback=self.append_output,
                         done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
         except OSError as e:
@@ -298,7 +294,7 @@ class PiconsDialog:
         self._message_label.set_text(text)
 
     def on_picons_dir_open(self, entry, icon, event_button):
-        update_entry_data(entry, self._dialog, options={"data_dir_path": self._picons_path})
+        update_entry_data(entry, self._dialog, settings=self._settings)
 
     @run_idle
     def on_selected_toggled(self, toggle, path):
@@ -331,9 +327,6 @@ class PiconsDialog:
         self._receive_button.set_visible(not tab_num)
         self._convert_button.set_visible(tab_num)
         self._send_button.set_visible(not tab_num)
-
-        if self._enigma2_path_button.get_filename() is None:
-            self._enigma2_path_button.set_current_folder(self._enigma2_picons_path)
 
     @run_idle
     def on_convert(self, item):

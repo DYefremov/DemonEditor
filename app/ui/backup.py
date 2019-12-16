@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from app.commons import run_idle
-from app.properties import Profile
+from app.settings import Profile
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import append_text_to_tview
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey
@@ -19,7 +19,7 @@ class RestoreType(Enum):
 
 
 class BackupDialog:
-    def __init__(self, transient, options, profile, callback):
+    def __init__(self, transient, settings, callback):
         handlers = {"on_restore_bouquets": self.on_restore_bouquets,
                     "on_restore_all": self.on_restore_all,
                     "on_remove": self.on_remove,
@@ -35,10 +35,10 @@ class BackupDialog:
         builder.add_from_file(UI_RESOURCES_PATH + "backup_dialog.glade")
         builder.connect_signals(handlers)
 
-        self._options = options.get(profile.value)
-        self._data_path = self._options.get("data_dir_path", "")
-        self._backup_path = self._options.get("backup_dir_path", self._data_path + "backup/")
-        self._profile = profile
+        self._settings = settings
+        self._profile = settings.profile
+        self._data_path = self._settings.data_dir_path
+        self._backup_path = self._settings.backup_dir_path or self._data_path + "backup/"
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -50,7 +50,7 @@ class BackupDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
         # Setting the last size of the dialog window if it was saved
-        window_size = self._options.get("backup_tool_window_size", None)
+        window_size = self._settings.get("backup_tool_window_size")
         if window_size:
             self._dialog_window.resize(*window_size)
 
@@ -166,8 +166,8 @@ class BackupDialog:
             self._open_data_callback(self._data_path)
 
     def on_resize(self, window):
-        if self._options:
-            self._options["backup_tool_window_size"] = window.get_size()
+        if self._settings:
+            self._settings.add("backup_tool_window_size", window.get_size())
 
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """

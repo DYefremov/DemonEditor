@@ -9,7 +9,7 @@ from app.commons import run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.properties import Profile
+from app.settings import Profile
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
@@ -360,13 +360,13 @@ def append_picons(picons, model):
     GLib.idle_add(lambda: next(app, False), priority=GLib.PRIORITY_LOW)
 
 
-def assign_picon(target, srv_view, fav_view, transient, picons, options, services):
+def assign_picon(target, srv_view, fav_view, transient, picons, settings, services):
     view = srv_view if target is ViewTarget.SERVICES else fav_view
     model, paths = view.get_selection().get_selected_rows()
     if not is_only_one_item_selected(paths, transient):
         return
 
-    response = get_chooser_dialog(transient, options, "*.png", "png files")
+    response = get_chooser_dialog(transient, settings, "*.png", "png files")
     if response == Gtk.ResponseType.CANCEL:
         return
 
@@ -381,8 +381,10 @@ def assign_picon(target, srv_view, fav_view, transient, picons, options, service
     picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
 
     if picon_id:
-        picon_file = options.get("picons_dir_path") + picon_id
         if os.path.isfile(response):
+            picons_path = settings.picons_dir_path
+            os.makedirs(os.path.dirname(picons_path), exist_ok=True)
+            picon_file = picons_path + picon_id
             shutil.copy(response, picon_file)
             picon = get_picon_pixbuf(picon_file)
             picons[picon_id] = picon
@@ -400,7 +402,7 @@ def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):
             break
 
 
-def remove_picon(target, srv_view, fav_view, picons, options):
+def remove_picon(target, srv_view, fav_view, picons, settings):
     view = srv_view if target is ViewTarget.SERVICES else fav_view
     model, paths = view.get_selection().get_selected_rows()
     model = get_base_model(model)
@@ -431,7 +433,7 @@ def remove_picon(target, srv_view, fav_view, picons, options):
     fav_view.get_model().foreach(remove) if target is ViewTarget.SERVICES else get_base_model(
         srv_view.get_model()).foreach(remove)
 
-    remove_picons(options, picon_ids, picons)
+    remove_picons(settings, picon_ids, picons)
 
 
 def copy_picon_reference(target, view, services, clipboard, transient):
@@ -455,15 +457,15 @@ def copy_picon_reference(target, view, services, clipboard, transient):
             show_dialog(DialogType.ERROR, transient, "No reference is present!")
 
 
-def remove_all_unused_picons(options, picons, services):
+def remove_all_unused_picons(settings, picons, services):
     ids = {s.picon_id for s in services}
     pcs = list(filter(lambda x: x not in ids, picons))
-    remove_picons(options, pcs, picons)
+    remove_picons(settings, pcs, picons)
 
 
-def remove_picons(options, picon_ids, picons):
-    pions_path = options.get("picons_dir_path")
-    backup_path = options.get("backup_dir_path") + "picons/"
+def remove_picons(settings, picon_ids, picons):
+    pions_path = settings.picons_dir_path
+    backup_path = settings.backup_dir_path + "picons/"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     for p_id in picon_ids:
         picons[p_id] = None
@@ -550,9 +552,9 @@ def get_bouquets_names(model):
 
 # ***************** Others *********************#
 
-def update_entry_data(entry, dialog, options):
+def update_entry_data(entry, dialog, settings):
     """ Updates value in text entry from chooser dialog """
-    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, options=options)
+    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, settings=settings)
     if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
         entry.set_text(response)
         return response

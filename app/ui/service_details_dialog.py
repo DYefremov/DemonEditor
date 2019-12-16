@@ -6,7 +6,7 @@ from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType, \
     SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, HIERARCHY, T_FEC
-from app.properties import Profile
+from app.settings import Profile
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, IS_GNOME_SESSION
 from .dialogs import show_dialog, DialogType, Action, get_dialogs_string
 from .main_helper import get_base_model
@@ -34,7 +34,7 @@ class ServiceDetailsDialog:
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
-    def __init__(self, transient, options, srv_view, fav_view, services, bouquets, new_color, action=Action.EDIT):
+    def __init__(self, transient, settings, srv_view, fav_view, services, bouquets, new_color, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
@@ -52,10 +52,10 @@ class ServiceDetailsDialog:
 
         self._dialog = builder.get_object("service_details_dialog")
         self._dialog.set_transient_for(transient)
-        self._profile = Profile(options["profile"])
+        self._profile = settings.profile
         self._tr_type = None
-        self._satellites_xml_path = options.get(self._profile.value)["data_dir_path"] + "satellites.xml"
-        self._picons_dir_path = options.get(self._profile.value)["picons_dir_path"]
+        self._satellites_xml_path = settings.data_dir_path + "satellites.xml"
+        self._picons_dir_path = settings.picons_dir_path
         self._services_view = srv_view
         self._fav_view = fav_view
         self._action = action

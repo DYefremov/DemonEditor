@@ -1,36 +1,37 @@
-import ctypes
 import sys
-
 from app.commons import run_task, log
-from app.tools import vlc
-from app.tools.vlc import EventType
 
 
 class Player:
-    _VLC_INSTANCE = None
+    __VLC_INSTANCE = None
 
-    def __init__(self, rewind_callback=None, position_callback=None):
-        self._is_playing = False
-        self._player = self.get_vlc_instance()
-        ev_mgr = self._player.event_manager()
+    def __init__(self, rewind_callback, position_callback):
+        try:
+            from app.tools import vlc
+            from app.tools.vlc import EventType
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+        else:
+            self._is_playing = False
+            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+            self._player = vlc.Instance(args).media_player_new()
+            ev_mgr = self._player.event_manager()
 
-        if rewind_callback:
-            # TODO look other EventType options
-            ev_mgr.event_attach(EventType.MediaPlayerBuffering,
-                                lambda e, p: rewind_callback(p.get_media().get_duration()),
-                                self._player)
-        if position_callback:
-            ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
-                                lambda e, p: position_callback(p.get_time()),
-                                self._player)
+            if rewind_callback:
+                # TODO look other EventType options
+                ev_mgr.event_attach(EventType.MediaPlayerBuffering,
+                                    lambda et, p: rewind_callback(p.get_media().get_duration()),
+                                    self._player)
+            if position_callback:
+                ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
+                                    lambda et, p: position_callback(p.get_time()),
+                                    self._player)
 
-    @staticmethod
-    def get_vlc_instance():
-        if Player._VLC_INSTANCE:
-            return Player._VLC_INSTANCE
-        args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
-        _VLC_INSTANCE = vlc.Instance(args).media_player_new()
-        return _VLC_INSTANCE
+    @classmethod
+    def get_instance(cls, rewind_callback=None, position_callback=None):
+        if not cls.__VLC_INSTANCE:
+            cls.__VLC_INSTANCE = Player(rewind_callback, position_callback)
+        return cls.__VLC_INSTANCE
 
     @run_task
     def play(self, mrl=None):
@@ -68,6 +69,7 @@ class Player:
             https://github.com/oaubert/python-vlc/tree/master/examples
         """
         try:
+            import ctypes
             g_dll = ctypes.CDLL("libgdk-3.0.dylib")
         except OSError as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))

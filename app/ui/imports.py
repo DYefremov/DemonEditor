@@ -6,17 +6,18 @@ from app.eparser import get_bouquets, get_services
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.enigma.bouquets import get_bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
-from app.properties import Profile
+from app.settings import Profile
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
 
 
-def import_bouquet(transient, profile, model, path, options, services, appender):
+def import_bouquet(transient, model, path, settings, services, appender):
     """ Import of single bouquet """
     itr = model.get_iter(path)
     bq_type = BqType(model.get(itr, Column.BQ_TYPE)[0])
     pattern, f_pattern = None, None
+    profile = settings.profile
 
     if profile is Profile.ENIGMA_2:
         pattern = ".{}".format(bq_type.value)
@@ -29,7 +30,7 @@ def import_bouquet(transient, profile, model, path, options, services, appender)
         elif bq_type is BqType.WEBTV:
             f_pattern = "webtv.xml"
 
-    file_path = get_chooser_dialog(transient, options, f_pattern, "bouquet files")
+    file_path = get_chooser_dialog(transient, settings, f_pattern, "bouquet files")
     if file_path == Gtk.ResponseType.CANCEL:
         return
 
@@ -56,7 +57,7 @@ def import_bouquet(transient, profile, model, path, options, services, appender)
         else:
             bqs = get_neutrino_bouquets(file_path, "", bq_type.value)
         file_path = "{}/".format(Path(file_path).parent)
-        ImportDialog(transient, file_path, profile, services.keys(), lambda b, s: appender(b), (bqs,)).show()
+        ImportDialog(transient, file_path, settings, services.keys(), lambda b, s: appender(b), (bqs,)).show()
 
 
 def get_enigma2_bouquet(path):
@@ -68,7 +69,7 @@ def get_enigma2_bouquet(path):
 
 
 class ImportDialog:
-    def __init__(self, transient, path, profile, service_ids, appender, bouquets=None):
+    def __init__(self, transient, path, settings, service_ids, appender, bouquets=None):
         handlers = {"on_import": self.on_import,
                     "on_cursor_changed": self.on_cursor_changed,
                     "on_info_button_toggled": self.on_info_button_toggled,
@@ -77,6 +78,7 @@ class ImportDialog:
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
                     "on_popup_menu": on_popup_menu,
+                    "on_resize": self.on_resize,
                     "on_key_press": self.on_key_press}
 
         builder = Gtk.Builder()
@@ -88,7 +90,8 @@ class ImportDialog:
         self._services = {}
         self._service_ids = service_ids
         self._append = appender
-        self._profile = profile
+        self._profile = settings.profile
+        self._settings = settings
         self._bouquets = bouquets
 
         self._dialog_window = builder.get_object("dialog_window")
@@ -101,6 +104,9 @@ class ImportDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        window_size = self._settings.get("import_dialog_window_size")
+        if window_size:
+            self._dialog_window.resize(*window_size)
 
         self.init_data(path)
 
@@ -205,6 +211,10 @@ class ImportDialog:
 
     def update_selection(self, view, select):
         view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 2, select))
+
+    def on_resize(self, window):
+        if self._settings:
+            self._settings.add("import_dialog_window_size", window.get_size())
 
     def on_key_press(self, view, event):
         """  Handling  keystrokes  """

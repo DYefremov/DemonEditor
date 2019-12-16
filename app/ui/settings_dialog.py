@@ -2,8 +2,8 @@ from enum import Enum
 
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http
-from app.properties import write_config, Profile, get_default_settings
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, NEW_COLOR, EXTRA_COLOR, FavClickMode
+from app.settings import Profile
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, FavClickMode
 from .main_helper import update_entry_data
 
 
@@ -19,7 +19,7 @@ class Property(Enum):
 
 class SettingsDialog:
 
-    def __init__(self, transient, options):
+    def __init__(self, transient, settings):
         handlers = {"on_field_icon_press": self.on_field_icon_press,
                     "on_profile_changed": self.on_profile_changed,
                     "on_reset": self.on_reset,
@@ -89,11 +89,11 @@ class SettingsDialog:
         self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
         self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
         self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
-        # Options
-        self._options = options
-        self._active_profile = options.get("profile")
+        # Settings
+        self._settings = settings
+        self._active_profile = settings.profile
         self.set_settings()
-        self.init_ui_elements(Profile(self._active_profile))
+        self.init_ui_elements(self._active_profile)
 
     def init_ui_elements(self, profile):
         is_enigma_profile = profile is Profile.ENIGMA_2
@@ -115,106 +115,90 @@ class SettingsDialog:
         return response
 
     def on_field_icon_press(self, entry, icon, event_button):
-        update_entry_data(entry, self._dialog, self._options.get(self._options.get("profile")))
+        update_entry_data(entry, self._dialog, self._settings)
 
     def on_profile_changed(self, item):
         profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
-        self._active_profile = profile.value
+        self._active_profile = profile
+        self._settings.profile = profile
         self.set_settings()
         self.init_ui_elements(profile)
 
-    def set_profile(self, profile):
-        self._active_profile = profile.value
-        self.set_settings()
-
     def on_reset(self, item):
-        def_settings = get_default_settings()
-        for key in def_settings:
-            current = self._options.get(key)
-            if type(current) is str:
-                continue
-            default = def_settings.get(key)
-            for k in default:
-                current[k] = default.get(k)
+        self._settings.reset()
         self.set_settings()
 
     def set_settings(self):
-        def_settings = get_default_settings().get(self._active_profile)
-        options = self._options.get(self._active_profile)
+        self._host_field.set_text(self._settings.host)
+        self._port_field.set_text(self._settings.port)
+        self._login_field.set_text(self._settings.user)
+        self._password_field.set_text(self._settings.password)
+        self._http_login_field.set_text(self._settings.http_user)
+        self._http_password_field.set_text(self._settings.http_password)
+        self._http_port_field.set_text(self._settings.http_port)
+        self._telnet_login_field.set_text(self._settings.telnet_user)
+        self._telnet_password_field.set_text(self._settings.telnet_password)
+        self._telnet_port_field.set_text(self._settings.telnet_port)
+        self._telnet_timeout_spin_button.set_value(self._settings.telnet_timeout)
+        self._services_field.set_text(self._settings.services_path)
+        self._user_bouquet_field.set_text(self._settings.user_bouquet_path)
+        self._satellites_xml_field.set_text(self._settings.satellites_xml_path)
+        self._picons_field.set_text(self._settings.picons_path)
+        self._data_dir_field.set_text(self._settings.data_dir_path)
+        self._picons_dir_field.set_text(self._settings.picons_dir_path)
+        self._backup_dir_field.set_text(self._settings.backup_dir_path)
+        self._before_save_switch.set_active(self._settings.backup_before_save)
+        self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
+        self.set_fav_click_mode(self._settings.fav_click_mode)
 
-        self._host_field.set_text(options.get("host", def_settings["host"]))
-        self._port_field.set_text(options.get("port", def_settings["port"]))
-        self._login_field.set_text(options.get("user", def_settings["user"]))
-        self._password_field.set_text(options.get("password", def_settings["password"]))
-        self._http_login_field.set_text(options.get("http_user", def_settings["http_user"]))
-        self._http_password_field.set_text(options.get("http_password", def_settings["http_password"]))
-        self._http_port_field.set_text(options.get("http_port", def_settings["http_port"]))
-        self._telnet_login_field.set_text(options.get("telnet_user", def_settings["telnet_user"]))
-        self._telnet_password_field.set_text(options.get("telnet_password", def_settings["telnet_password"]))
-        self._telnet_port_field.set_text(options.get("telnet_port", def_settings["telnet_port"]))
-        self._telnet_timeout_spin_button.set_value(options.get("telnet_timeout", def_settings["telnet_timeout"]))
-        self._services_field.set_text(options.get("services_path", def_settings["services_path"]))
-        self._user_bouquet_field.set_text(options.get("user_bouquet_path", def_settings["user_bouquet_path"]))
-        self._satellites_xml_field.set_text(options.get("satellites_xml_path", def_settings["satellites_xml_path"]))
-        self._picons_field.set_text(options.get("picons_path", def_settings["picons_path"]))
-        self._data_dir_field.set_text(options.get("data_dir_path", def_settings["data_dir_path"]))
-        self._picons_dir_field.set_text(options.get("picons_dir_path", def_settings["picons_dir_path"]))
-        self._backup_dir_field.set_text(options.get("backup_dir_path", def_settings["backup_dir_path"]))
-        self._before_save_switch.set_active(options.get("backup_before_save", def_settings["backup_before_save"]))
-        self._before_downloading_switch.set_active(options.get("backup_before_downloading",
-                                                               def_settings["backup_before_downloading"]))
-        self.set_fav_click_mode(options.get("fav_click_mode", def_settings["fav_click_mode"]))
-
-        if Profile(self._active_profile) is Profile.ENIGMA_2:
-            self._support_ver5_switch.set_active(options.get("v5_support", False))
-            self._support_http_api_switch.set_active(options.get("http_api_support", False))
-            self._enable_y_dl_switch.set_active(options.get("enable_yt_dl", False))
-            self._enable_send_to_switch.set_active(options.get("enable_send_to", False))
-            self._set_color_switch.set_active(options.get("use_colors", False))
+        if self._active_profile is Profile.ENIGMA_2:
+            self._support_ver5_switch.set_active(self._settings.v5_support)
+            self._support_http_api_switch.set_active(self._settings.http_api_support)
+            self._enable_y_dl_switch.set_active(self._settings.enable_yt_dl)
+            self._enable_send_to_switch.set_active(self._settings.enable_send_to)
+            self._set_color_switch.set_active(self._settings.use_colors)
             new_rgb = Gdk.RGBA()
-            new_rgb.parse(options.get("new_color", NEW_COLOR))
+            new_rgb.parse(self._settings.new_color)
             extra_rgb = Gdk.RGBA()
-            extra_rgb.parse(options.get("extra_color", EXTRA_COLOR))
+            extra_rgb.parse(self._settings.extra_color)
             self._new_color_button.set_rgba(new_rgb)
             self._extra_color_button.set_rgba(extra_rgb)
 
     def apply_settings(self, item=None):
-        profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
-        self._active_profile = profile.value
-        self._options["profile"] = self._active_profile
-        options = self._options.get(self._active_profile)
-        options["host"] = self._host_field.get_text()
-        options["port"] = self._port_field.get_text()
-        options["user"] = self._login_field.get_text()
-        options["password"] = self._password_field.get_text()
-        options["http_user"] = self._http_login_field.get_text()
-        options["http_password"] = self._http_password_field.get_text()
-        options["http_port"] = self._http_port_field.get_text()
-        options["telnet_user"] = self._telnet_login_field.get_text()
-        options["telnet_password"] = self._telnet_password_field.get_text()
-        options["telnet_port"] = self._telnet_port_field.get_text()
-        options["telnet_timeout"] = int(self._telnet_timeout_spin_button.get_value())
-        options["services_path"] = self._services_field.get_text()
-        options["user_bouquet_path"] = self._user_bouquet_field.get_text()
-        options["satellites_xml_path"] = self._satellites_xml_field.get_text()
-        options["picons_path"] = self._picons_field.get_text()
-        options["data_dir_path"] = self._data_dir_field.get_text()
-        options["picons_dir_path"] = self._picons_dir_field.get_text()
-        options["backup_dir_path"] = self._backup_dir_field.get_text()
-        options["backup_before_save"] = self._before_save_switch.get_active()
-        options["backup_before_downloading"] = self._before_downloading_switch.get_active()
-        options["fav_click_mode"] = self.get_fav_click_mode()
+        self._active_profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
+        self._settings.profile = self._active_profile
+        self._settings.host = self._host_field.get_text()
+        self._settings.port = self._port_field.get_text()
+        self._settings.user = self._login_field.get_text()
+        self._settings.password = self._password_field.get_text()
+        self._settings.http_user = self._http_login_field.get_text()
+        self._settings.http_password = self._http_password_field.get_text()
+        self._settings.http_port = self._http_port_field.get_text()
+        self._settings.telnet_user = self._telnet_login_field.get_text()
+        self._settings.telnet_password = self._telnet_password_field.get_text()
+        self._settings.telnet_port = self._telnet_port_field.get_text()
+        self._settings.telnet_timeout = int(self._telnet_timeout_spin_button.get_value())
+        self._settings.services_path = self._services_field.get_text()
+        self._settings.user_bouquet_path = self._user_bouquet_field.get_text()
+        self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
+        self._settings.picons_path = self._picons_field.get_text()
+        self._settings.data_dir_path = self._data_dir_field.get_text()
+        self._settings.picons_dir_path = self._picons_dir_field.get_text()
+        self._settings.backup_dir_path = self._backup_dir_field.get_text()
+        self._settings.backup_before_save = self._before_save_switch.get_active()
+        self._settings.backup_before_downloading = self._before_downloading_switch.get_active()
+        self._settings.fav_click_mode = self.get_fav_click_mode()
 
-        if profile is Profile.ENIGMA_2:
-            options["use_colors"] = self._set_color_switch.get_active()
-            options["new_color"] = self._new_color_button.get_rgba().to_string()
-            options["extra_color"] = self._extra_color_button.get_rgba().to_string()
-            options["v5_support"] = self._support_ver5_switch.get_active()
-            options["http_api_support"] = self._support_http_api_switch.get_active()
-            options["enable_yt_dl"] = self._enable_y_dl_switch.get_active()
-            options["enable_send_to"] = self._enable_send_to_switch.get_active()
+        if self._active_profile is Profile.ENIGMA_2:
+            self._settings.use_colors = self._set_color_switch.get_active()
+            self._settings.new_color = self._new_color_button.get_rgba().to_string()
+            self._settings.extra_color = self._extra_color_button.get_rgba().to_string()
+            self._settings.v5_support = self._support_ver5_switch.get_active()
+            self._settings.http_api_support = self._support_http_api_switch.get_active()
+            self._settings.enable_yt_dl = self._enable_y_dl_switch.get_active()
+            self._settings.enable_send_to = self._enable_send_to_switch.get_active()
 
-        write_config(self._options)
+        self._settings.save()
 
     @run_task
     def on_connection_test(self, item):

@@ -7,7 +7,7 @@ from collections import namedtuple
 from html.parser import HTMLParser
 
 from app.commons import run_task
-from app.properties import Profile
+from app.settings import Profile
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"

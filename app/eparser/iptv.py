@@ -3,7 +3,7 @@ import re
 import urllib.request
 from enum import Enum
 
-from app.properties import Profile
+from app.settings import Profile
 from app.ui.uicommons import IPTV_ICON
 from .ecommons import BqServiceType, Service
 

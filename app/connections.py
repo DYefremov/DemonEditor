@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
 
 from app.commons import log
-from app.properties import Profile
+from app.settings import Profile
 
 _BQ_FILES_LIST = ("tv", "radio",  # enigma 2
                   "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
@@ -44,16 +44,16 @@ class TestException(Exception):
     pass
 
 
-def download_data(*, properties, download_type=DownloadType.ALL, callback=print):
-    with FTP(host=properties["host"], user=properties["user"], passwd=properties["password"]) as ftp:
+def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
+    with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
-        save_path = properties["data_dir_path"]
+        save_path = settings.data_dir_path
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
         # bouquets
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
-            ftp.cwd(properties["services_path"])
+            ftp.cwd(settings.services_path)
             ftp.dir(files.append)
             file_list = _BQ_FILES_LIST + _DATA_FILES_LIST if download_type is DownloadType.ALL else _BQ_FILES_LIST
             for file in files:
@@ -63,7 +63,7 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=print)
                     download_file(ftp, name, save_path, callback)
         # satellites.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES, DownloadType.WEBTV):
-            ftp.cwd(properties["satellites_xml_path"])
+            ftp.cwd(settings.satellites_xml_path)
             files.clear()
             ftp.dir(files.append)
 
@@ -75,11 +75,11 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=print)
                     download_file(ftp, _WEBTV_XML_FILE, save_path, callback)
         # epg.dat
         if download_type is DownloadType.EPG:
-            stb_path = properties["services_path"]
-            epg_options = properties.get("epg_options", None)
+            stb_path = settings.services_path
+            epg_options = settings.epg_options
             if epg_options:
-                stb_path = epg_options.get("epg_dat_stb_path", stb_path)
-                save_path = epg_options.get("epg_dat_path", save_path)
+                stb_path = epg_options.epg_dat_stb_path or stb_path
+                save_path = epg_options.epg_dat_path or save_path
             ftp.cwd(stb_path)
             ftp.dir(files.append)
             for file in files:
@@ -91,16 +91,17 @@ def download_data(*, properties, download_type=DownloadType.ALL, callback=print)
         callback("\nDone.\n")
 
 
-def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=False, profile=Profile.ENIGMA_2,
+def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
                 callback=print, done_callback=None, use_http=False):
-    data_path = properties["data_dir_path"]
-    host = properties["host"]
-    base_url = "http://{}:{}/api/".format(host, properties.get("http_port", "80"))
+    profile = settings.profile
+    data_path = settings.data_dir_path
+    host = settings.host
+    base_url = "http://{}:{}/api/".format(host, settings.http_port)
     tn, ht = None, None  # telnet, http
 
     try:
         if profile is Profile.ENIGMA_2 and use_http:
-            ht = http(properties.get("http_user", ""), properties.get("http_password", ""), base_url, callback)
+            ht = http(settings.http_user, settings.http_password, base_url, callback)
             next(ht)
             message = ""
             if download_type is DownloadType.BOUQUETS:
@@ -120,18 +121,19 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                 time.sleep(2)
         else:
             # telnet
-            tn = telnet(host=host, user=properties.get("telnet_user", "root"),
-                        password=properties.get("telnet_password", ""),
-                        timeout=properties.get("telnet_timeout", 5))
+            tn = telnet(host=host,
+                        user=settings.telnet_user,
+                        password=settings.telnet_password,
+                        timeout=settings.telnet_timeout)
             next(tn)
             # terminate enigma or neutrino
             tn.send("init 4")
 
-        with FTP(host=host, user=properties["user"], passwd=properties["password"]) as ftp:
+        with FTP(host=host, user=settings.user, passwd=settings.password) as ftp:
             ftp.encoding = "utf-8"
             callback("FTP OK.\n")
-            sat_xml_path = properties["satellites_xml_path"]
-            services_path = properties["services_path"]
+            sat_xml_path = settings.satellites_xml_path
+            services_path = settings.services_path
 
             if download_type is DownloadType.SATELLITES:
                 upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
@@ -153,7 +155,7 @@ def upload_data(*, properties, download_type=DownloadType.ALL, remove_unused=Fal
                 upload_files(ftp, data_path, _DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                upload_picons(ftp, properties.get("picons_dir_path"), properties.get("picons_path"), callback)
+                upload_picons(ftp, settings.picons_dir_path, settings.picons_path, callback)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino
@@ -362,7 +364,7 @@ def telnet_test(host, port, user, password, timeout):
     time.sleep(timeout)
     yield tn.read_very_eager()
     tn.close()
-    yield "Done"
+    yield "Done!"
 
 
 if __name__ == "__main__":

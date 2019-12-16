@@ -16,7 +16,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.properties import get_config, write_config, Profile
+from app.settings import Profile, Settings
 from app.tools.media import Player
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -26,7 +26,7 @@ from .download_dialog import DownloadDialog
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
-    EXTRA_COLOR, NEW_COLOR, FavClickMode
+    FavClickMode
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
@@ -151,9 +151,9 @@ class Application(Gtk.Application):
                           "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
                           "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
 
-        self._options = get_config()
-        self._profile = self._options.get("profile")
-        os.makedirs(os.path.dirname(self._options.get(self._profile).get("data_dir_path")), exist_ok=True)
+        self._settings = Settings.get_instance()
+        self._profile = self._settings.profile
+        os.makedirs(os.path.dirname(self._settings.data_dir_path), exist_ok=True)
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -184,12 +184,12 @@ class Application(Gtk.Application):
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
-        builder.connect_signals(self._handlers)
+        builder.connect_signals(handlers)
         self._main_window = builder.get_object("main_window")
-        self._main_window_size = self._options.get("window_size", None)
+        main_window_size = self._settings.get("window_size")
         # Setting the last size of the window if it was saved
-        if self._main_window_size:
-            self._main_window.resize(*self._main_window_size)
+        if main_window_size:
+            self._main_window.resize(*main_window_size)
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")
@@ -211,7 +211,7 @@ class Application(Gtk.Application):
         self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_item"), "visible", 4)
         # Status bar
         self._ip_label = builder.get_object("ip_label")
-        self._ip_label.set_text(self._options.get(self._profile).get("host"))
+        self._ip_label.set_text(self._settings.host)
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
         self._signal_box = builder.get_object("signal_box")
@@ -332,7 +332,7 @@ class Application(Gtk.Application):
 
     def do_shutdown(self):
         """  Performs shutdown tasks """
-        write_config(self._options)  # storing current config
+        self._settings.save()  # storing current config
         if self._player:
             self._player.release()
         Gtk.Application.do_shutdown(self)
@@ -374,15 +374,12 @@ class Application(Gtk.Application):
 
             If update=False - first call on program start, else - after options changes!
         """
-        profile = Profile(self._profile)
-        if profile is Profile.ENIGMA_2:
-            opts = self._options.get(self._profile)
-            self._use_colors = opts.get("use_colors", False)
-            if self._use_colors:
+        if self._profile is Profile.ENIGMA_2:
+            if self._settings.use_colors:
                 new_rgb = Gdk.RGBA()
                 extra_rgb = Gdk.RGBA()
-                new_rgb = new_rgb if new_rgb.parse(opts.get("new_color", NEW_COLOR)) else None
-                extra_rgb = extra_rgb if extra_rgb.parse(opts.get("extra_color", EXTRA_COLOR)) else None
+                new_rgb = new_rgb if new_rgb.parse(self._settings.new_color) else None
+                extra_rgb = extra_rgb if extra_rgb.parse(self._settings.extra_color) else None
                 if update:
                     gen = self.update_background_colors(new_rgb, extra_rgb)
                     GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
@@ -419,7 +416,7 @@ class Application(Gtk.Application):
 
     def on_resize(self, window):
         """ Stores new size properties for app window after resize """
-        self._options["window_size"] = window.get_size()
+        self._settings.add("window_size", window.get_size())
 
     @run_idle
     def on_about_app(self, action, value=None):
@@ -608,7 +605,7 @@ class Application(Gtk.Application):
     # ***************** ####### *********************#
 
     def get_bouquet_file_name(self, bouquet):
-        bouquet_file_name = "{}userbouquet.{}.{}".format(self._options.get(self._profile).get("data_dir_path"),
+        bouquet_file_name = "{}userbouquet.{}.{}".format(self._settings.get(self._profile).get("data_dir_path"),
                                                          *bouquet.split(":"))
         return bouquet_file_name
 
@@ -836,19 +833,18 @@ class Application(Gtk.Application):
     @run_idle
     def on_satellite_editor_show(self, action, value):
         """ Shows satellites editor dialog """
-        show_satellites_dialog(self._main_window, self._options.get(self._profile))
+        show_satellites_dialog(self._main_window, self._settings)
 
     def on_download(self, action, value):
         DownloadDialog(transient=self._main_window,
-                       properties=self._options,
+                       settings=self._settings,
                        open_data_callback=self.open_data,
-                       update_settings_callback=self.update_options,
-                       profile=Profile(self._profile)).show()
+                       update_settings_callback=self.update_options).show()
 
     @run_task
     def on_download_data(self):
         try:
-            download_data(properties=self._options.get(self._profile),
+            download_data(settings=self._settings,
                           download_type=DownloadType.ALL,
                           callback=lambda x: print(x, end=""))
         except Exception as e:
@@ -859,22 +855,20 @@ class Application(Gtk.Application):
     @run_task
     def on_upload_data(self, download_type):
         try:
-            profile = Profile(self._profile)
-            opts = self._options.get(self._profile)
+            profile = self._profile
+            opts = self._settings
             use_http = profile is Profile.ENIGMA_2
 
             if profile is Profile.ENIGMA_2:
-                host, port = opts.get("host", "127.0.0.1"), opts.get("http_port")
-                user, password = opts.get("http_user", "root"), opts.get("http_password", "")
+                host, port, user, password = opts.host, opts.http_port, opts.http_user, opts.http_password
                 try:
                     test_http(host, port, user, password, skip_message=True)
                 except TestException:
                     use_http = False
 
-            upload_data(properties=opts,
+            upload_data(settings=opts,
                         download_type=download_type,
                         remove_unused=True,
-                        profile=profile,
                         callback=lambda x: print(x, end=""),
                         use_http=use_http)
         except Exception as e:
@@ -895,18 +889,17 @@ class Application(Gtk.Application):
         self._wait_dialog.show()
         yield True
 
-        profile = Profile(self._profile)
-        data_path = self._options.get(self._profile).get("data_dir_path") if data_path is None else data_path
-
+        data_path = self._settings.data_dir_path if data_path is None else data_path
         yield from self.clear_current_data()
 
         try:
+            prf = self._profile
             black_list = get_blacklist(data_path)
-            bouquets = get_bouquets(data_path, Profile(self._profile))
+            bouquets = get_bouquets(data_path, prf)
             yield True
-            services = get_services(data_path, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
+            services = get_services(data_path, prf, self.get_format_version() if prf is Profile.ENIGMA_2 else 0)
             yield True
-            update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
+            update_picons_data(self._settings.picons_dir_path, self._picons)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
@@ -1046,12 +1039,12 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def save_data(self):
-        profile = Profile(self._profile)
-        options = self._options.get(self._profile)
-        path = options.get("data_dir_path")
-        backup_path = options.get("backup_dir_path", path + "backup/")
+        self._save_header_button.set_sensitive(False)
+        profile = self._profile
+        path = self._settings.data_dir_path
+        backup_path = self._settings.backup_dir_path
         # Backup data or clearing data path
-        backup_data(path, backup_path) if options.get("backup_before_save", True) else clear_data_path(path)
+        backup_data(path, backup_path) if self._settings.backup_before_save else clear_data_path(path)
         yield True
 
         bouquets = []
@@ -1096,7 +1089,7 @@ class Application(Gtk.Application):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        gen = self.create_new_configuration(Profile(self._profile))
+        gen = self.create_new_configuration(self._profile)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def create_new_configuration(self, profile):
@@ -1179,7 +1172,7 @@ class Application(Gtk.Application):
             self.show_error_dialog("Error. No bouquet is selected!")
             return
 
-        if Profile(self._profile) is Profile.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
+        if self._profile is Profile.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
             self.show_error_dialog("Operation not allowed in this context!")
             return
 
@@ -1205,14 +1198,14 @@ class Application(Gtk.Application):
             v.get_selection().unselect_all()
 
     def on_preferences(self, action, value):
-        response = show_settings_dialog(self._main_window, self._options)
+        response = show_settings_dialog(self._main_window, self._settings)
         if response != Gtk.ResponseType.CANCEL:
             gen = self.update_options()
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_options(self):
-        profile = self._options.get("profile")
-        self._ip_label.set_text(self._options.get(profile).get("host"))
+        profile = self._settings.profile
+        self._ip_label.set_text(self._settings.host)
         if profile != self._profile:
             yield from self.show_app_info(True)
             self._profile = profile
@@ -1309,7 +1302,6 @@ class Application(Gtk.Application):
                 self.update_bouquet_list()
 
     def on_view_focus(self, view, focus_event=None):
-        profile = Profile(self._profile)
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0  # if  > 0 model has items
         is_service = model_name == self._SERVICE_LIST_NAME
@@ -1321,7 +1313,7 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty)
                 if elem == "bouquets_paste_popup_item":
                     self._tool_elements[elem].set_sensitive(not_empty and self._bouquets_buffer)
-            if profile is Profile.NEUTRINO_MP:
+            if self._profile is Profile.NEUTRINO_MP:
                 for elem in self._LOCK_HIDE_ELEMENTS:
                     self._tool_elements[elem].set_sensitive(not_empty)
         else:
@@ -1337,17 +1329,17 @@ class Application(Gtk.Application):
             for elem in self._BOUQUET_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
             for elem in self._LOCK_HIDE_ELEMENTS:
-                self._tool_elements[elem].set_sensitive(not_empty and profile is Profile.ENIGMA_2)
+                self._tool_elements[elem].set_sensitive(not_empty and self._profile is Profile.ENIGMA_2)
 
         for elem in self._FAV_IPTV_ELEMENTS:
             is_iptv = self._bq_selected and not is_service
-            if profile is Profile.NEUTRINO_MP:
+            if self._profile is Profile.NEUTRINO_MP:
                 is_iptv = is_iptv and BqType(self._bq_selected.split(":")[1]) is BqType.WEBTV
             self._tool_elements[elem].set_sensitive(is_iptv)
         for elem in self._COMMONS_ELEMENTS:
             self._tool_elements[elem].set_sensitive(not_empty)
 
-        if profile is not Profile.ENIGMA_2:
+        if self._profile is not Profile.ENIGMA_2:
             for elem in self._FAV_ENIGMA_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
 
@@ -1358,11 +1350,9 @@ class Application(Gtk.Application):
         self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
-        profile = Profile(self._profile)
-
-        if profile is Profile.ENIGMA_2:
+        if self._profile is Profile.ENIGMA_2:
             set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
-        elif profile is Profile.NEUTRINO_MP and self._bq_selected:
+        elif self._profile is Profile.NEUTRINO_MP and self._bq_selected:
             model, paths = self._bouquets_view.get_selection().get_selected_rows()
             itr = model.get_iter(paths[0])
             value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
@@ -1425,15 +1415,14 @@ class Application(Gtk.Application):
                               self._fav_view,
                               self._services,
                               self._bouquets.get(self._bq_selected, None),
-                              Profile(self._profile),
+                              self._profile,
                               Action.ADD).show()
         if response != Gtk.ResponseType.CANCEL:
             self.update_fav_num_column(self._fav_model)
 
     @run_idle
-    def on_iptv_list_configuration(self, action, value=None):
-        profile = Profile(self._profile)
-        if profile is Profile.NEUTRINO_MP:
+    def on_iptv_list_configuration(self, action, value):
+        if self._profile is Profile.NEUTRINO_MP:
             self.show_error_dialog("Neutrino at the moment not supported!")
             return
 
@@ -1446,7 +1435,8 @@ class Application(Gtk.Application):
             return
 
         bq = self._bouquets.get(self._bq_selected, [])
-        IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bq, self._fav_model, profile).show()
+        IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bq,
+                                    self._fav_model, self._profile).show()
 
     @run_idle
     def on_remove_all_unavailable(self, action, value=None):
@@ -1462,8 +1452,7 @@ class Application(Gtk.Application):
             return
 
         fav_bqt = self._bouquets.get(self._bq_selected, None)
-        prf = Profile(self._profile)
-        response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, prf).show()
+        response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, self._profile).show()
         if response:
             next(self.remove_favs(response, self._fav_model), False)
 
@@ -1471,7 +1460,7 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_epg_list_configuration(self, action, value=None):
-        if Profile(self._profile) is not Profile.ENIGMA_2:
+        if self._profile is not Profile.ENIGMA_2:
             self.show_error_dialog("Only Enigma2 is supported!")
             return
 
@@ -1480,8 +1469,7 @@ class Application(Gtk.Application):
             return
 
         bq = self._bouquets.get(self._bq_selected)
-        profile = self._options.get(self._profile)
-        EpgDialog(self._main_window, profile, self._services, bq, self._fav_model, self._current_bq_name).show()
+        EpgDialog(self._main_window, self._settings, self._services, bq, self._fav_model, self._current_bq_name).show()
 
     # ***************** Import  ********************#
 
@@ -1490,11 +1478,11 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        YtListImportDialog(self._main_window, Profile(self._profile), self.append_imported_services).show()
+        YtListImportDialog(self._main_window, self._profile, self.append_imported_services).show()
 
     def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
-        response = get_chooser_dialog(self._main_window, self._options.get(self._profile), "*.m3u", "m3u files")
+        response = get_chooser_dialog(self._main_window, self._settings, "*.m3u", "m3u files")
         if response == Gtk.ResponseType.CANCEL:
             return
 
@@ -1502,7 +1490,7 @@ class Application(Gtk.Application):
             self.show_error_dialog("No m3u file is selected!")
             return
 
-        channels = parse_m3u(response, Profile(self._profile))
+        channels = parse_m3u(response, self._profile)
 
         if channels and self._bq_selected:
             self.append_imported_services(channels)
@@ -1527,31 +1515,29 @@ class Application(Gtk.Application):
             self.show_error_dialog("This list does not contains IPTV streams!")
             return
 
-        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
         try:
             bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
-            export_to_m3u(response, bq, Profile(self._profile))
+            export_to_m3u(response, bq, self._profile)
         except Exception as e:
             self.show_error_dialog(str(e))
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
     def on_import_bouquet(self, action, value=None):
-        profile = Profile(self._profile)
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
             self.show_error_dialog("No selected item!")
             return
 
-        opts = self._options.get(self._profile)
-        appender = self.append_bouquet if profile is Profile.ENIGMA_2 else self.append_bouquets
-        import_bouquet(self._main_window, profile, model, paths[0], opts, self._services, appender)
+        appender = self.append_bouquet if self._profile is Profile.ENIGMA_2 else self.append_bouquets
+        import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender)
 
     def on_import_bouquets(self, action, value=None):
-        response = show_dialog(DialogType.CHOOSER, self._main_window, options=self._options.get(self._profile))
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -1559,7 +1545,7 @@ class Application(Gtk.Application):
             gen = self.append_imported_data(b, s)
             GLib.idle_add(lambda: next(gen, False))
 
-        ImportDialog(self._main_window, response, Profile(self._profile), self._services.keys(), append).show()
+        ImportDialog(self._main_window, response, self._settings, self._services.keys(), append).show()
 
     def append_imported_data(self, bouquets, services):
         try:
@@ -1570,12 +1556,9 @@ class Application(Gtk.Application):
 
     # ***************** Backup  ********************#
 
-    def on_backup_tool_show(self, action, value=None):
+    def on_backup_tool_show(self, item):
         """ Shows backup tool dialog """
-        BackupDialog(self._main_window,
-                     self._options,
-                     Profile(self._profile),
-                     self.open_data).show()
+        BackupDialog(self._main_window, self._settings, self.open_data).show()
 
     # ***************** Player *********************#
 
@@ -1591,7 +1574,7 @@ class Application(Gtk.Application):
                 self.show_error_dialog("Not allowed in this context!")
                 return
 
-            url = get_iptv_url(row, Profile(self._profile))
+            url = get_iptv_url(row, self._profile)
             self.update_player_buttons()
             if not url:
                 return
@@ -1600,8 +1583,8 @@ class Application(Gtk.Application):
     def play(self, url):
         if not self._player:
             try:
-                self._player = Player(rewind_callback=self.on_player_duration_changed,
-                                      position_callback=self.on_player_time_changed)
+                self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
+                                                   position_callback=self.on_player_time_changed)
             except (NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
@@ -1638,8 +1621,7 @@ class Application(Gtk.Application):
 
     def on_player_close(self, item=None):
         if self._player:
-            self._player.release()
-            self._player = None
+            self._player.stop()
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
 
     @lru_cache(maxsize=1)
@@ -1670,6 +1652,7 @@ class Application(Gtk.Application):
 
     def on_player_drawing_area_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area.
+
             Required for Gtk >= 3.20.
             More info: https://developer.gnome.org/gtk3/stable/ch32s10.html,
             https://developer.gnome.org/gtk3/stable/GtkStyleContext.html#gtk-render-background
@@ -1706,14 +1689,12 @@ class Application(Gtk.Application):
 
     @run_task
     def init_http_api(self):
-        prp = self._options.get(self._profile)
-        profile = Profile(self._profile)
-        self._fav_click_mode = FavClickMode(prp.get("fav_click_mode", FavClickMode.DISABLED))
-        http_api_enable = prp.get("http_api_support", False)
-        status = all((http_api_enable, profile is Profile.ENIGMA_2, not self._receiver_info_box.get_visible()))
+        self._fav_click_mode = FavClickMode(self._settings.fav_click_mode)
+        http_api_enable = self._settings.http_api_support
+        status = all((http_api_enable, self._profile is Profile.ENIGMA_2, not self._receiver_info_box.get_visible()))
         GLib.idle_add(self._http_status_image.set_visible, status)
 
-        if profile is Profile.NEUTRINO_MP or not http_api_enable:
+        if self._profile is Profile.NEUTRINO_MP or not http_api_enable:
             self.update_info_boxes_visible(False)
             if self._http_api:
                 self._http_api.close()
@@ -1722,12 +1703,12 @@ class Application(Gtk.Application):
             return
 
         if not self._http_api:
-            self._http_api = HttpAPI(prp.get("host", "127.0.0.1"), prp.get("http_port", "80"),
-                                     prp.get("http_user", ""), prp.get("http_password", ""))
+            self._http_api = HttpAPI(self._settings.host, self._settings.http_port,
+                                     self._settings.http_user, self._settings.http_password)
 
             GLib.timeout_add_seconds(3, self.update_info, priority=GLib.PRIORITY_LOW)
 
-        self.init_send_to(http_api_enable and prp.get("enable_send_to", False))
+        self.init_send_to(http_api_enable and self._settings.enable_send_to)
 
     @run_idle
     def init_send_to(self, enable):
@@ -1836,22 +1817,26 @@ class Application(Gtk.Application):
         """ Updates positions values for the filtering function """
         self._sat_positions.clear()
         sat_positions = set()
-        terrestrial = False
-        cable = False
 
-        for srv in self._services.values():
-            tr_type = srv.transponder_type
-            if tr_type == "s" and srv.pos:
-                sat_positions.add(float(srv.pos))
-            elif tr_type == "t":
-                terrestrial = True
-            elif tr_type == "c":
-                cable = True
+        if self._profile is Profile.ENIGMA_2:
+            terrestrial = False
+            cable = False
 
-        if terrestrial:
-            self._sat_positions.append("T")
-        if cable:
-            self._sat_positions.append("C")
+            for srv in self._services.values():
+                tr_type = srv.transponder_type
+                if tr_type == "s" and srv.pos:
+                    sat_positions.add(float(srv.pos))
+                elif tr_type == "t":
+                    terrestrial = True
+                elif tr_type == "c":
+                    cable = True
+
+            if terrestrial:
+                self._sat_positions.append("T")
+            if cable:
+                self._sat_positions.append("C")
+        elif self._profile is Profile.NEUTRINO_MP:
+            list(map(lambda s: sat_positions.add(float(s.pos)), filter(lambda s: s.pos, self._services.values())))
 
         self._sat_positions.extend(map(str, sorted(sat_positions)))
         if self._filter_bar.is_visible():
@@ -1929,12 +1914,12 @@ class Application(Gtk.Application):
                                       self._fav_view,
                                       self._services,
                                       self._bouquets.get(self._bq_selected, None),
-                                      Profile(self._profile),
+                                      self._profile,
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)
 
             dialog = ServiceDetailsDialog(self._main_window,
-                                          self._options,
+                                          self._settings,
                                           self._services_view,
                                           self._fav_view,
                                           self._services,
@@ -1944,7 +1929,7 @@ class Application(Gtk.Application):
 
     def on_services_add_new(self, item):
         dialog = ServiceDetailsDialog(self._main_window,
-                                      self._options,
+                                      self._settings,
                                       self._services_view,
                                       self._fav_view,
                                       self._services,
@@ -2047,18 +2032,17 @@ class Application(Gtk.Application):
     @run_idle
     def on_picons_loader_show(self, action, value):
         ids = {}
-        if Profile(self._profile) is Profile.ENIGMA_2:
+        if self._profile is Profile.ENIGMA_2:
             for r in self._services_model:
                 data = r[Column.SRV_PICON_ID].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
 
-        dialog = PiconsDialog(self._main_window, self._options, ids, self._sat_positions, Profile(self._profile))
-        dialog.show()
+        PiconsDialog(self._main_window, self._settings, ids, self._sat_positions).show()
         self.update_picons()
 
     @run_task
     def update_picons(self):
-        update_picons_data(self._options.get(self._profile).get("picons_dir_path"), self._picons)
+        update_picons_data(self._settings.picons_dir_path, self._picons)
         append_picons(self._picons, self._services_model)
 
     def on_assign_picon(self, view):
@@ -2067,14 +2051,14 @@ class Application(Gtk.Application):
                      self._fav_view,
                      self._main_window,
                      self._picons,
-                     self._options.get(self._profile),
+                     self._settings,
                      self._services)
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view),
                      self._services_view,
                      self._fav_view, self._picons,
-                     self._options.get(self._profile))
+                     self._settings)
 
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
@@ -2084,7 +2068,7 @@ class Application(Gtk.Application):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        remove_all_unused_picons(self._options.get(self._profile), self._picons, self._services.values())
+        remove_all_unused_picons(self._settings, self._picons, self._services.values())
 
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
@@ -2111,20 +2095,18 @@ class Application(Gtk.Application):
 
     def create_bouquets(self, g_type):
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
-                     Profile(self._profile), self.append_bouquet)
+                     self._profile, self.append_bouquet)
 
     # ***************** Profile label *********************#
 
     def update_profile_label(self):
-        profile = Profile(self._profile)
-        if profile is Profile.ENIGMA_2:
-            ver = self.get_format_version()
-            self._main_window.set_title("DemonEditor [{} Enigma2 v.{}]".format(get_message("Profile:"), ver))
-        elif profile is Profile.NEUTRINO_MP:
-            self._main_window.set_title("DemonEditor [{} Neutrino-MP]".format(get_message("Profile:")))
+        if self._profile is Profile.ENIGMA_2:
+            self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
+        elif self._profile is Profile.NEUTRINO_MP:
+            self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
 
     def get_format_version(self):
-        return 5 if self._options.get(self._profile).get("v5_support", False) else 4
+        return 5 if self._settings.v5_support else 4
 
     @run_idle
     def update_info_boxes_visible(self, visible):
