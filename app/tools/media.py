@@ -1,32 +1,37 @@
-from app.commons import run_task
-from app.tools import vlc
-from app.tools.vlc import EventType
+import sys
+from app.commons import run_task, log
 
 
 class Player:
-    _VLC_INSTANCE = None
+    __VLC_INSTANCE = None
 
-    def __init__(self, rewind_callback=None, position_callback=None):
-        self._is_playing = False
-        self._player = self.get_vlc_instance()
-        ev_mgr = self._player.event_manager()
+    def __init__(self, rewind_callback, position_callback):
+        try:
+            from app.tools import vlc
+            from app.tools.vlc import EventType
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+        else:
+            self._is_playing = False
+            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+            self._player = vlc.Instance(args).media_player_new()
+            ev_mgr = self._player.event_manager()
 
-        if rewind_callback:
-            # TODO look other EventType options
-            ev_mgr.event_attach(EventType.MediaPlayerBuffering,
-                                lambda e, p: rewind_callback(p.get_media().get_duration()),
-                                self._player)
-        if position_callback:
-            ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
-                                lambda e, p: position_callback(p.get_time()),
-                                self._player)
+            if rewind_callback:
+                # TODO look other EventType options
+                ev_mgr.event_attach(EventType.MediaPlayerBuffering,
+                                    lambda et, p: rewind_callback(p.get_media().get_duration()),
+                                    self._player)
+            if position_callback:
+                ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
+                                    lambda et, p: position_callback(p.get_time()),
+                                    self._player)
 
-    @staticmethod
-    def get_vlc_instance():
-        if Player._VLC_INSTANCE:
-            return Player._VLC_INSTANCE
-        _VLC_INSTANCE = vlc.Instance("--quiet --no-xlib").media_player_new()
-        return _VLC_INSTANCE
+    @classmethod
+    def get_instance(cls, rewind_callback=None, position_callback=None):
+        if not cls.__VLC_INSTANCE:
+            cls.__VLC_INSTANCE = Player(rewind_callback, position_callback)
+        return cls.__VLC_INSTANCE
 
     @run_task
     def play(self, mrl=None):
@@ -56,6 +61,26 @@ class Player:
 
     def set_xwindow(self, xid):
         self._player.set_xwindow(xid)
+
+    def set_nso(self, widget):
+        """ Used on MacOS to set NSObject.
+
+            Based on gtkvlc.py[get_window_pointer] example from here:
+            https://github.com/oaubert/python-vlc/tree/master/examples
+        """
+        try:
+            import ctypes
+            g_dll = ctypes.CDLL("libgdk-3.0.dylib")
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+        else:
+            get_nsview = g_dll.gdk_quartz_window_get_nsview
+            get_nsview.restype, get_nsview.argtypes = ctypes.c_void_p, [ctypes.c_void_p]
+            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+            # Get the C void* pointer to the window
+            pointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
+            self._player.set_nsobject(get_nsview(pointer))
 
     def set_mrl(self, mrl):
         self._player.set_mrl(mrl)

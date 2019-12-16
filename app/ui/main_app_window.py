@@ -1554,8 +1554,8 @@ class Application(Gtk.Application):
     def play(self, url):
         if not self._player:
             try:
-                self._player = Player(rewind_callback=self.on_player_duration_changed,
-                                      position_callback=self.on_player_time_changed)
+                self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
+                                                   position_callback=self.on_player_time_changed)
             except (NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
@@ -1592,8 +1592,7 @@ class Application(Gtk.Application):
 
     def on_player_close(self, item=None):
         if self._player:
-            self._player.release()
-            self._player = None
+            self._player.stop()
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
 
     @lru_cache(maxsize=1)
@@ -1615,8 +1614,12 @@ class Application(Gtk.Application):
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
     def on_drawing_area_realize(self, widget):
-        self._drawing_area_xid = widget.get_window().get_xid()
-        self._player.set_xwindow(self._drawing_area_xid)
+        if sys.platform == "darwin":
+            self._player.set_nso(widget)
+        else:
+            self._drawing_area_xid = widget.get_window().get_xid()
+            print(self._drawing_area_xid)
+            self._player.set_xwindow(self._drawing_area_xid)
 
     def on_player_drawing_area_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area.
