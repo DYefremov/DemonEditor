@@ -5,6 +5,7 @@ import time
 import urllib
 from enum import Enum
 from ftplib import FTP, error_perm
+from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -329,7 +330,7 @@ def test_http(host, port, user, password, timeout=5, skip_message=False):
 
         with urlopen(url, timeout=5) as f:
             return json.loads(f.read().decode("utf-8")).get("message", "")
-    except (URLError, HTTPError) as e:
+    except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
 
 
