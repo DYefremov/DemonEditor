@@ -1039,7 +1039,6 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def save_data(self):
-        self._save_header_button.set_sensitive(False)
         profile = self._profile
         path = self._settings.data_dir_path
         backup_path = self._settings.backup_dir_path
