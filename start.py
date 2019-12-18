@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-import os
-
-# For launching from the bundle.
-if os.getcwd() == "/":
-    os.chdir("/Applications/DemonEditor.app/Contents/MacOS/")
 
 try:
     from Cocoa import NSBundle
