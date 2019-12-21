@@ -6,7 +6,14 @@ from enum import Enum, IntEnum
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
-# path to *.glade files
+# For launching from the bundle.
+if os.getcwd() == "/":
+    try:
+        os.chdir(os.environ["GTK_PATH"])
+    except KeyError:
+        pass
+
+    # path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
