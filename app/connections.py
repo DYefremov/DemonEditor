@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
 
 from app.commons import log
-from app.settings import Profile
+from app.settings import SettingsType
 
 _BQ_FILES_LIST = ("tv", "radio",  # enigma 2
                   "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
@@ -49,7 +49,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
     with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
-        save_path = settings.data_dir_path
+        save_path = settings.data_local_path
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
         # bouquets
@@ -94,14 +94,14 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
 
 def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
                 callback=print, done_callback=None, use_http=False):
-    profile = settings.profile
-    data_path = settings.data_dir_path
+    s_type = settings.setting_type
+    data_path = settings.data_local_path
     host = settings.host
     base_url = "http://{}:{}/api/".format(host, settings.http_port)
     tn, ht = None, None  # telnet, http
 
     try:
-        if profile is Profile.ENIGMA_2 and use_http:
+        if s_type is SettingsType.ENIGMA_2 and use_http:
             ht = http(settings.http_user, settings.http_password, base_url, callback)
             next(ht)
             message = ""
@@ -139,7 +139,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             if download_type is DownloadType.SATELLITES:
                 upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
 
-            if profile is Profile.NEUTRINO_MP and download_type is DownloadType.WEBTV:
+            if s_type is SettingsType.NEUTRINO_MP and download_type is DownloadType.WEBTV:
                 upload_xml(ftp, data_path, sat_xml_path, _WEBTV_XML_FILE, callback)
 
             if download_type is DownloadType.BOUQUETS:
@@ -148,7 +148,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
             if download_type is DownloadType.ALL:
                 upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
-                if profile is Profile.NEUTRINO_MP:
+                if s_type is SettingsType.NEUTRINO_MP:
                     upload_xml(ftp, data_path, sat_xml_path, _WEBTV_XML_FILE, callback)
 
                 ftp.cwd(services_path)
@@ -156,11 +156,11 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 upload_files(ftp, data_path, _DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                upload_picons(ftp, settings.picons_dir_path, settings.picons_path, callback)
+                upload_picons(ftp, settings.picons_local_path, settings.picons_path, callback)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino
-                tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
+                tn.send("init 3" if s_type is SettingsType.ENIGMA_2 else "init 6")
             elif ht and use_http:
                 if download_type is DownloadType.BOUQUETS:
                     ht.send(base_url + "/servicelistreload?mode=2")

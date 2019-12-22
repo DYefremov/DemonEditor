@@ -3,7 +3,7 @@ import re
 import urllib.request
 from enum import Enum
 
-from app.settings import Profile
+from app.settings import SettingsType
 from app.ui.uicommons import IPTV_ICON
 from .ecommons import BqServiceType, Service
 
@@ -20,18 +20,18 @@ class StreamType(Enum):
     NONE_REC_2 = "5002"
 
 
-def parse_m3u(path, profile):
+def parse_m3u(path, s_type):
     with open(path) as file:
         aggr = [None] * 10
         services = []
         groups = set()
         counter = 0
         name = None
-        
+
         for line in file.readlines():
             if line.startswith("#EXTINF"):
                 name = line[1 + line.index(","):].strip()
-            elif line.startswith("#EXTGRP") and profile is Profile.ENIGMA_2:
+            elif line.startswith("#EXTGRP") and s_type is SettingsType.ENIGMA_2:
                 grp_name = line.strip("#EXTGRP:").strip()
                 if grp_name not in groups:
                     groups.add(grp_name)
@@ -41,7 +41,7 @@ def parse_m3u(path, profile):
                     services.append(mr)
             elif not line.startswith("#"):
                 url = line.strip()
-                fav_id = get_fav_id(url, name, profile)
+                fav_id = get_fav_id(url, name, s_type)
                 if name and url:
                     srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], BqServiceType.IPTV.name, *aggr, fav_id, None)
                     services.append(srv)
@@ -49,8 +49,8 @@ def parse_m3u(path, profile):
     return services
 
 
-def export_to_m3u(path, bouquet, profile):
-    pattern = re.compile(".*:(http.*):.*") if profile is Profile.ENIGMA_2 else re.compile("(http.*?)::::.*")
+def export_to_m3u(path, bouquet, s_type):
+    pattern = re.compile(".*:(http.*):.*") if s_type is SettingsType.ENIGMA_2 else re.compile("(http.*?)::::.*")
     lines = ["#EXTM3U\n"]
     current_grp = None
 
@@ -72,13 +72,13 @@ def export_to_m3u(path, bouquet, profile):
         file.writelines(lines)
 
 
-def get_fav_id(url, service_name, profile):
+def get_fav_id(url, service_name, s_type):
     """ Returns fav id depending on the profile. """
-    if profile is Profile.ENIGMA_2:
+    if s_type is SettingsType.ENIGMA_2:
         url = urllib.request.quote(url)
         stream_type = StreamType.NONE_TS.value
         return ENIGMA2_FAV_ID_FORMAT.format(stream_type, 1, 0, 0, 0, 0, url, service_name, service_name, None)
-    elif profile is Profile.NEUTRINO_MP:
+    elif s_type is SettingsType.NEUTRINO_MP:
         return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
 
 

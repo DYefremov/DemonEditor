@@ -26,7 +26,7 @@ THE SOFTWARE.
 Author: Dmitriy Yefremov
 
 -->
-<interface>
+<interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
@@ -961,6 +961,7 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="width_request">640</property>
+    <property name="height_request">480</property>
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
     <property name="icon_name">accessories-text-editor</property>
@@ -2798,7 +2799,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
-            <property name="height_request">30</property>
+            <property name="height_request">35</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
@@ -2842,60 +2843,54 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child type="center">
-              <object class="GtkBox" id="ip_status_box">
-                <property name="visible">True</property>
+              <object class="GtkComboBoxText" id="profile_combo_box">
                 <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
+                <property name="tooltip_text" translatable="yes">Current IP:</property>
                 <property name="halign">center</property>
-                <property name="spacing">2</property>
-                <child>
-                  <object class="GtkImage" id="ip_status_image">
-                    <property name="visible">True</property>
+                <property name="valign">center</property>
+                <property name="margin_top">1</property>
+                <property name="margin_bottom">1</property>
+                <property name="active">0</property>
+                <property name="has_frame">False</property>
+                <property name="has_entry">True</property>
+                <items>
+                  <item translatable="yes">default</item>
+                </items>
+                <child internal-child="entry">
+                  <object class="GtkEntry">
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-connect</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="ip_status_label">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="has_tooltip">True</property>
                     <property name="halign">center</property>
-                    <property name="label" translatable="yes">Current IP:</property>
-                    <attributes>
-                      <attribute name="size" value="8000"/>
-                    </attributes>
+                    <property name="margin_top">1</property>
+                    <property name="margin_bottom">1</property>
+                    <property name="editable">False</property>
+                    <property name="has_frame">False</property>
+                    <property name="max_width_chars">9</property>
+                    <property name="text" translatable="yes">default</property>
+                    <property name="primary_icon_stock">gtk-connect</property>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="ip_label">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">127.0.0.1</property>
-                    <attributes>
-                      <attribute name="size" value="8000"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
                 </child>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="padding">5</property>
                 <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="http_status_image">
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">No connection to the receiver</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="icon_name">network-offline</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -2984,21 +2979,6 @@ Author: Dmitriy Yefremov
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
                 <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkImage" id="http_status_image">
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">No connection to the receiver</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="icon_name">network-offline</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">3</property>
               </packing>
             </child>
             <style>

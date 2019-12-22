@@ -6,7 +6,7 @@ from app.eparser import Service
 from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
     get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType, \
     SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, HIERARCHY, T_FEC
-from app.settings import Profile
+from app.settings import SettingsType
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, IS_GNOME_SESSION
 from .dialogs import show_dialog, DialogType, Action, get_dialogs_string
 from .main_helper import get_base_model
@@ -52,10 +52,10 @@ class ServiceDetailsDialog:
 
         self._dialog = builder.get_object("service_details_dialog")
         self._dialog.set_transient_for(transient)
-        self._profile = settings.profile
+        self._s_type = settings.setting_type
         self._tr_type = None
-        self._satellites_xml_path = settings.data_dir_path + "satellites.xml"
-        self._picons_dir_path = settings.picons_dir_path
+        self._satellites_xml_path = settings.data_local_path + "satellites.xml"
+        self._picons_dir_path = settings.picons_local_path
         self._services_view = srv_view
         self._fav_view = fav_view
         self._action = action
@@ -197,7 +197,7 @@ class ServiceDetailsDialog:
         self._package_entry.set_text(srv.package)
         self._sid_entry.set_text(str(int(srv.ssid, 16)))
         # Transponder
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             self._tr_type = TrType(srv.transponder_type)
         self._freq_entry.set_text(srv.freq)
         self._rate_entry.set_text(srv.rate)
@@ -211,10 +211,10 @@ class ServiceDetailsDialog:
         else:
             self.set_sat_positions(srv.pos)
 
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             self.init_enigma2_service_data(srv)
             self.init_enigma2_transponder_data(srv)
-        elif self._profile is Profile.NEUTRINO_MP:
+        elif self._s_type is SettingsType.NEUTRINO_MP:
             self.init_neutrino_data(srv)
             self.init_neutrino_ui_elements()
 
@@ -484,9 +484,9 @@ class ServiceDetailsDialog:
                        transponder=transponder)
 
     def get_flags(self):
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             return self.get_enigma2_flags()
-        elif self._profile is Profile.NEUTRINO_MP:
+        elif self._s_type is SettingsType.NEUTRINO_MP:
             return self._old_service.flags_cas
 
     def get_enigma2_flags(self):
@@ -532,12 +532,12 @@ class ServiceDetailsDialog:
         net_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
         service_type = self._srv_type_entry.get_text()
 
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             namespace = int(self._namespace_entry.get_text())
             data_id = self._ENIGMA2_DATA_ID.format(ssid, namespace, tr_id, net_id, service_type, 0)
             fav_id = self._ENIGMA2_FAV_ID.format(ssid, tr_id, net_id, namespace)
             return fav_id, data_id
-        elif self._profile is Profile.NEUTRINO_MP:
+        elif self._s_type is SettingsType.NEUTRINO_MP:
             fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
             return fav_id, self._old_service.data_id
 
@@ -548,7 +548,7 @@ class ServiceDetailsDialog:
         fec = self._fec_combo_box.get_active_id()
         system = self._sys_combo_box.get_active_id()
 
-        if self._tr_type is TrType.Satellite or self._profile is Profile.NEUTRINO_MP:
+        if self._tr_type is TrType.Satellite or self._s_type is SettingsType.NEUTRINO_MP:
             freq = self._freq_entry.get_text()
             rate = self._rate_entry.get_text()
             pol = self._pol_combo_box.get_active_id()
@@ -571,7 +571,7 @@ class ServiceDetailsDialog:
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         srv_sys = "0"  # !!!
 
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             dvb_s_tr = self._ENIGMA2_TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
             if sys == "DVB-S":
                 return dvb_s_tr
@@ -585,7 +585,7 @@ class ServiceDetailsDialog:
                 st_id = self._stream_id_entry.get_text()
                 pls = ":{}:{}:{}".format(st_id, pls_code, pls_mode) if pls_mode and pls_code and st_id else ""
                 return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
-        elif self._profile is Profile.NEUTRINO_MP:
+        elif self._s_type is SettingsType.NEUTRINO_MP:
             on_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
             mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION) if sys == "DVB-S2" else None
             srv_sys = None
@@ -682,7 +682,7 @@ class ServiceDetailsDialog:
         return True
 
     def update_reference(self, entry, event=None):
-        if not self.is_data_correct() or (event is None and self._profile is Profile.NEUTRINO_MP):
+        if not self.is_data_correct() or (event is None and self._s_type is SettingsType.NEUTRINO_MP):
             return
         self.update_reference_entry()
 
@@ -691,7 +691,7 @@ class ServiceDetailsDialog:
         ssid = int(self._sid_entry.get_text())
         tid = int(self._transponder_id_entry.get_text())
         nid = int(self._network_id_entry.get_text())
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             on_id = int(self._namespace_entry.get_text())
             ref = "1:0:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0".format(srv_type, ssid, tid, nid, on_id)
             self._reference_entry.set_text(ref)

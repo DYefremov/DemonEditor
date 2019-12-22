@@ -9,7 +9,7 @@ from app.commons import run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.settings import Profile
+from app.settings import SettingsType
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
 
@@ -382,7 +382,7 @@ def assign_picon(target, srv_view, fav_view, transient, picons, settings, servic
 
     if picon_id:
         if os.path.isfile(response):
-            picons_path = settings.picons_dir_path
+            picons_path = settings.picons_local_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
             shutil.copy(response, picon_file)
@@ -464,8 +464,8 @@ def remove_all_unused_picons(settings, picons, services):
 
 
 def remove_picons(settings, picon_ids, picons):
-    pions_path = settings.picons_dir_path
-    backup_path = settings.backup_dir_path + "picons/"
+    pions_path = settings.picons_local_path
+    backup_path = settings.backup_local_path + "picons/"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     for p_id in picon_ids:
         picons[p_id] = None
@@ -492,7 +492,7 @@ def get_picon_pixbuf(path):
 
 # ***************** Bouquets *********************#
 
-def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback):
+def gen_bouquets(view, bq_view, transient, gen_type, tv_types, s_type, callback):
     """ Auto-generate and append list of bouquets """
     fav_id_index = Column.SRV_FAV_ID
     index = Column.SRV_TYPE
@@ -502,7 +502,7 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback
         index = Column.SRV_POS
 
     model, paths = view.get_selection().get_selected_rows()
-    bq_type = BqType.BOUQUET.value if profile is Profile.NEUTRINO_MP else BqType.TV.value
+    bq_type = BqType.BOUQUET.value if s_type is SettingsType.NEUTRINO_MP else BqType.TV.value
     if gen_type in (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE):
         if not is_only_one_item_selected(paths, transient):
             return
@@ -511,17 +511,17 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, profile, callback
             bq_type = BqType.RADIO.value
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
                         [service.package if gen_type is BqGenType.PACKAGE else
-                         service.pos if gen_type is BqGenType.SAT else service.service_type], profile)
+                         service.pos if gen_type is BqGenType.SAT else service.service_type], s_type)
     else:
         wait_dialog = WaitDialog(transient)
         wait_dialog.show()
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
-                        {row[index] for row in model}, profile, wait_dialog)
+                        {row[index] for row in model}, s_type, wait_dialog)
 
 
 @run_task
-def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names, profile, wait_dialog=None):
-    bq_index = 0 if profile is Profile.ENIGMA_2 else 1
+def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names, s_type, wait_dialog=None):
+    bq_index = 0 if s_type is SettingsType.ENIGMA_2 else 1
     bq_view.expand_row(Gtk.TreePath(bq_index), 0)
     bqs_model = bq_view.get_model()
     bouquets_names = get_bouquets_names(bqs_model)
@@ -583,14 +583,14 @@ def append_text_to_tview(char, view):
     view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
 
 
-def get_iptv_url(row, profile):
+def get_iptv_url(row, s_type):
     """ Returns url from iptv type row """
-    data = row[Column.FAV_ID].split(":" if profile is Profile.ENIGMA_2 else "::")
-    if profile is Profile.ENIGMA_2:
+    data = row[Column.FAV_ID].split(":" if s_type is SettingsType.ENIGMA_2 else "::")
+    if s_type is SettingsType.ENIGMA_2:
         data = list(filter(lambda x: "http" in x, data))
     if data:
         url = data[0]
-        return urllib.request.unquote(url) if profile is Profile.ENIGMA_2 else url
+        return urllib.request.unquote(url) if s_type is SettingsType.ENIGMA_2 else url
 
 
 def on_popup_menu(menu, event):

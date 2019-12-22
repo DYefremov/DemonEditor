@@ -2,7 +2,7 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType, upload_data
-from app.settings import Profile
+from app.settings import SettingsType
 from app.ui.backup import backup_data, restore_data
 from app.ui.main_helper import append_text_to_tview
 from app.ui.settings_dialog import show_settings_dialog
@@ -12,7 +12,7 @@ from .dialogs import show_dialog, DialogType, get_message
 
 class DownloadDialog:
     def __init__(self, transient, settings, open_data_callback, update_settings_callback):
-        self._profile = settings.profile
+        self._s_type = settings.setting_type
         self._settings = settings
         self._open_data_callback = open_data_callback
         self._update_settings_callback = update_settings_callback
@@ -59,8 +59,8 @@ class DownloadDialog:
 
     def init_settings(self):
         self._host_entry.set_text(self._settings.host)
-        self._data_path_entry.set_text(self._settings.data_dir_path)
-        is_enigma = self._profile is Profile.ENIGMA_2
+        self._data_path_entry.set_text(self._settings.data_local_path)
+        is_enigma = self._s_type is SettingsType.ENIGMA_2
         self._webtv_radio_button.set_visible(not is_enigma)
         self._http_radio_button.set_visible(is_enigma)
         self._use_http_box.set_visible(is_enigma)
@@ -111,7 +111,7 @@ class DownloadDialog:
     def on_preferences(self, item):
         response = show_settings_dialog(self._dialog_window, self._settings)
         if response != Gtk.ResponseType.CANCEL:
-            self._profile = self._settings.profile
+            self._s_type = self._settings.setting_type
             self.init_settings()
             gen = self._update_settings_callback()
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
@@ -134,8 +134,8 @@ class DownloadDialog:
         try:
             if download:
                 if backup and d_type is not DownloadType.SATELLITES:
-                    data_path = self._settings.data_dir_path or self._data_path_entry.get_text()
-                    backup_path = self._settings.backup_dir_path or data_path + "backup/"
+                    data_path = self._settings.data_local_path or self._data_path_entry.get_text()
+                    backup_path = self._settings.backup_local_path or data_path + "backup/"
                     backup_src = backup_data(data_path, backup_path, d_type is DownloadType.ALL)
                 download_data(settings=self._settings, download_type=d_type, callback=self.append_output)
             else:

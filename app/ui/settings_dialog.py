@@ -2,8 +2,8 @@ from enum import Enum
 
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http
-from app.settings import Profile
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, FavClickMode
+from app.settings import SettingsType
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
 from .main_helper import update_entry_data
 
 
@@ -21,7 +21,7 @@ class SettingsDialog:
 
     def __init__(self, transient, settings):
         handlers = {"on_field_icon_press": self.on_field_icon_press,
-                    "on_profile_changed": self.on_profile_changed,
+                    "on_settings_type_changed": self.on_settings_type_changed,
                     "on_reset": self.on_reset,
                     "apply_settings": self.apply_settings,
                     "on_connection_test": self.on_connection_test,
@@ -29,10 +29,16 @@ class SettingsDialog:
                     "on_set_color_switch_state": self.on_set_color_switch_state,
                     "on_http_mode_switch_state": self.on_http_mode_switch_state,
                     "on_yt_dl_switch_state": self.on_yt_dl_switch_state,
-                    "on_send_to_switch_state": self.on_send_to_switch_state}
+                    "on_send_to_switch_state": self.on_send_to_switch_state,
+                    "on_profile_add": self.on_profile_add,
+                    "on_profile_edit": self.on_profile_edit,
+                    "on_profile_remove": self.on_profile_remove,
+                    "on_profile_deleted": self.on_profile_deleted,
+                    "on_profile_inserted": self.on_profile_inserted,
+                    "on_profile_edited": self.on_profile_edited,
+                    "on_profile_set_default": self.on_profile_set_default}
 
         builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_from_file(UI_RESOURCES_PATH + "settings_dialog.glade")
         builder.connect_signals(handlers)
 
@@ -89,22 +95,37 @@ class SettingsDialog:
         self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
         self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
         self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
+        # Profiles
+        self._profile_view = builder.get_object("profile_tree_view")
+        self._profile_remove_button = builder.get_object("profile_remove_button")
+        self._profile_view.get_model().append(("default", DEFAULT_ICON))
         # Settings
         self._settings = settings
-        self._active_profile = settings.profile
+        self._profiles = settings.profiles
+        self._s_type = settings.setting_type
         self.set_settings()
-        self.init_ui_elements(self._active_profile)
+        self.init_ui_elements(self._s_type)
 
-    def init_ui_elements(self, profile):
-        is_enigma_profile = profile is Profile.ENIGMA_2
-        self._neutrino_radio_button.set_active(profile is Profile.NEUTRINO_MP)
+    @run_idle
+    def init_ui_elements(self, s_type):
+        is_enigma_profile = s_type is SettingsType.ENIGMA_2
+        self._neutrino_radio_button.set_active(s_type is SettingsType.NEUTRINO_MP)
+        self.update_header_bar()
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
         self._program_frame.set_sensitive(is_enigma_profile)
         self._extra_support_grid.set_sensitive(is_enigma_profile)
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
+        self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
         self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
             "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
+
+    def update_header_bar(self):
+        label, sep, st = self._header_bar.get_subtitle().partition(":")
+        if self._s_type is SettingsType.ENIGMA_2:
+            self._header_bar.set_subtitle("{}: {}".format(label, self._enigma_radio_button.get_label()))
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            self._header_bar.set_subtitle("{}: {}".format(label, self._neutrino_radio_button.get_label()))
 
     def show(self):
         response = self._dialog.run()
@@ -117,10 +138,10 @@ class SettingsDialog:
     def on_field_icon_press(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, self._settings)
 
-    def on_profile_changed(self, item):
-        profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
-        self._active_profile = profile
-        self._settings.profile = profile
+    def on_settings_type_changed(self, item):
+        profile = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
+        self._s_type = profile
+        self._settings.setting_type = profile
         self.set_settings()
         self.init_ui_elements(profile)
 
@@ -144,14 +165,14 @@ class SettingsDialog:
         self._user_bouquet_field.set_text(self._settings.user_bouquet_path)
         self._satellites_xml_field.set_text(self._settings.satellites_xml_path)
         self._picons_field.set_text(self._settings.picons_path)
-        self._data_dir_field.set_text(self._settings.data_dir_path)
-        self._picons_dir_field.set_text(self._settings.picons_dir_path)
-        self._backup_dir_field.set_text(self._settings.backup_dir_path)
+        self._data_dir_field.set_text(self._settings.data_local_path)
+        self._picons_dir_field.set_text(self._settings.picons_local_path)
+        self._backup_dir_field.set_text(self._settings.backup_local_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
 
-        if self._active_profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             self._support_ver5_switch.set_active(self._settings.v5_support)
             self._support_http_api_switch.set_active(self._settings.http_api_support)
             self._enable_y_dl_switch.set_active(self._settings.enable_yt_dl)
@@ -165,8 +186,8 @@ class SettingsDialog:
             self._extra_color_button.set_rgba(extra_rgb)
 
     def apply_settings(self, item=None):
-        self._active_profile = Profile.ENIGMA_2 if self._enigma_radio_button.get_active() else Profile.NEUTRINO_MP
-        self._settings.profile = self._active_profile
+        self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
+        self._settings.setting_type = self._s_type
         self._settings.host = self._host_field.get_text()
         self._settings.port = self._port_field.get_text()
         self._settings.user = self._login_field.get_text()
@@ -182,14 +203,14 @@ class SettingsDialog:
         self._settings.user_bouquet_path = self._user_bouquet_field.get_text()
         self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
         self._settings.picons_path = self._picons_field.get_text()
-        self._settings.data_dir_path = self._data_dir_field.get_text()
-        self._settings.picons_dir_path = self._picons_dir_field.get_text()
-        self._settings.backup_dir_path = self._backup_dir_field.get_text()
+        self._settings.data_local_path = self._data_dir_field.get_text()
+        self._settings.picons_local_path = self._picons_dir_field.get_text()
+        self._settings.backup_local_path = self._backup_dir_field.get_text()
         self._settings.backup_before_save = self._before_save_switch.get_active()
         self._settings.backup_before_downloading = self._before_downloading_switch.get_active()
         self._settings.fav_click_mode = self.get_fav_click_mode()
 
-        if self._active_profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             self._settings.use_colors = self._set_color_switch.get_active()
             self._settings.new_color = self._new_color_button.get_rgba().to_string()
             self._settings.extra_color = self._extra_color_button.get_rgba().to_string()
@@ -271,6 +292,42 @@ class SettingsDialog:
 
     def on_send_to_switch_state(self, switch, state):
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+
+    def on_profile_add(self, item):
+        model = self._profile_view.get_model()
+        count = 0
+        name = "profile"
+        while name in self._profiles:
+            count += 1
+            name = "profile{}".format(count)
+        self._profiles[name] = {"host": self._host_field.get_text()}
+        itr = model.append((name, None))
+
+    def on_profile_edit(self, item):
+        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+
+    def on_profile_remove(self, item):
+        model, paths = self._profile_view.get_selection().get_selected_rows()
+        if paths:
+            row = model[paths]
+            self._profiles.pop(row[0], None)
+            del model[paths]
+
+    def on_profile_deleted(self, model, paths):
+        self._profile_remove_button.set_sensitive(len(model) > 1)
+
+    def on_profile_edited(self, render, path, new_text):
+        p_name = render.get_property("text")
+        p_data = self._profiles.pop(p_name, None)
+        row = self._profile_view.get_model()[path]
+        row[0] = new_text
+        self._profiles[new_text] = p_data
+
+    def on_profile_set_default(self, item):
+        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+
+    def on_profile_inserted(self, model, path, itr):
+        self._profile_remove_button.set_sensitive(len(model) > 1)
 
     @run_idle
     def set_fav_click_mode(self, mode):

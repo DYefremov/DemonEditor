@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from app.commons import run_idle
-from app.settings import Profile
+from app.settings import SettingsType
 from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import append_text_to_tview
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey
@@ -36,9 +36,9 @@ class BackupDialog:
         builder.connect_signals(handlers)
 
         self._settings = settings
-        self._profile = settings.profile
-        self._data_path = self._settings.data_dir_path
-        self._backup_path = self._settings.backup_dir_path or self._data_path + "backup/"
+        self._s_type = settings.setting_type
+        self._data_path = self._settings.data_local_path
+        self._backup_path = self._settings.backup_local_path or self._data_path + "backup/"
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -152,7 +152,7 @@ class BackupDialog:
                 shutil.unpack_archive(full_file_name, self._data_path)
             elif restore_type is RestoreType.BOUQUETS:
                 tmp_dir = tempfile.gettempdir() + "/" + file_name
-                cond = (".tv", ".radio") if self._profile is Profile.ENIGMA_2 else "bouquets.xml"
+                cond = (".tv", ".radio") if self._s_type is SettingsType.ENIGMA_2 else "bouquets.xml"
                 shutil.unpack_archive(full_file_name, tmp_dir)
                 for file in filter(lambda f: f.endswith(cond), os.listdir(self._data_path)):
                     os.remove(os.path.join(self._data_path, file))

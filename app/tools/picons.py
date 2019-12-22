@@ -7,7 +7,7 @@ from collections import namedtuple
 from html.parser import HTMLParser
 
 from app.commons import run_task
-from app.settings import Profile
+from app.settings import SettingsType
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
@@ -79,7 +79,7 @@ class PiconsParser(HTMLParser):
         pass
 
     @staticmethod
-    def parse(open_path, picons_path, tmp_path, provider, picon_ids, profile=Profile.ENIGMA_2):
+    def parse(open_path, picons_path, tmp_path, provider, picon_ids, s_type=SettingsType.ENIGMA_2):
         with open(open_path, encoding="utf-8", errors="replace") as f:
             on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
             neg_pos = pos.endswith("W")
@@ -100,7 +100,7 @@ class PiconsParser(HTMLParser):
                             namespace = "{:X}{:X}".format(int(pos), int(freq))
                         else:
                             namespace = "{:X}0000".format(int(pos))
-                        name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, profile)
+                        name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, s_type)
                         p_name = picons_path + (name if name else os.path.basename(p.ref))
                         shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
                     except (TypeError, ValueError) as e:
@@ -109,10 +109,10 @@ class PiconsParser(HTMLParser):
                         print(msg)
 
     @staticmethod
-    def format(ssid, on_id, namespace, picon_ids, profile: Profile):
-        if profile is Profile.ENIGMA_2:
+    def format(ssid, on_id, namespace, picon_ids, s_type):
+        if s_type is SettingsType.ENIGMA_2:
             return picon_ids.get(_ENIGMA2_PICON_KEY.format(int(ssid), int(on_id), namespace), None)
-        elif profile is Profile.NEUTRINO_MP:
+        elif s_type is SettingsType.NEUTRINO_MP:
             tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
             return _NEUTRINO_PICON_KEY.format(tr_id, int(on_id), int(ssid))
         else:
@@ -249,12 +249,12 @@ def parse_providers(open_path):
 
 
 @run_task
-def convert_to(src_path, dest_path, profile, callback, done_callback):
+def convert_to(src_path, dest_path, s_type, callback, done_callback):
     """ Converts names format of picons.
 
         Copies resulting files from src to dest and writes state to callback.
     """
-    pattern = "/*_0_0_0.png" if profile is Profile.ENIGMA_2 else "/*.png"
+    pattern = "/*_0_0_0.png" if s_type is SettingsType.ENIGMA_2 else "/*.png"
     for file in glob.glob(src_path + pattern):
         base_name = os.path.basename(file)
         pic_data = base_name.rstrip(".png").split("_")

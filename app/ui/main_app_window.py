@@ -16,7 +16,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import Profile, Settings
+from app.settings import SettingsType, Settings, SettingsException
 from app.tools.media import Player
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -158,8 +158,8 @@ class Application(Gtk.Application):
                     "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
 
         self._settings = Settings.get_instance()
-        self._profile = self._settings.profile
-        os.makedirs(os.path.dirname(self._settings.data_dir_path), exist_ok=True)
+        self._s_type = self._settings.setting_type
+        os.makedirs(os.path.dirname(self._settings.data_local_path), exist_ok=True)
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -188,7 +188,6 @@ class Application(Gtk.Application):
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
 
         builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
         builder.connect_signals(handlers)
         self._main_window = builder.get_object("main_window")
@@ -215,8 +214,8 @@ class Application(Gtk.Application):
         self._app_info_box.bind_property("visible", builder.get_object("right_header_box"), "sensitive", 4)
         self._app_info_box.bind_property("visible", builder.get_object("left_header_box"), "sensitive", 4)
         # Status bar
-        self._ip_label = builder.get_object("ip_label")
-        self._ip_label.set_text(self._settings.host)
+        self._profile_combo_box = builder.get_object("profile_combo_box")
+        self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
         self._signal_box = builder.get_object("signal_box")
@@ -343,7 +342,7 @@ class Application(Gtk.Application):
 
             If update=False - first call on program start, else - after options changes!
         """
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             if self._settings.use_colors:
                 new_rgb = Gdk.RGBA()
                 extra_rgb = Gdk.RGBA()
@@ -574,7 +573,7 @@ class Application(Gtk.Application):
     # ***************** ####### *********************#
 
     def get_bouquet_file_name(self, bouquet):
-        bouquet_file_name = "{}userbouquet.{}.{}".format(self._settings.get(self._profile).get("data_dir_path"),
+        bouquet_file_name = "{}userbouquet.{}.{}".format(self._settings.get(self._s_type).get("data_dir_path"),
                                                          *bouquet.split(":"))
         return bouquet_file_name
 
@@ -824,11 +823,11 @@ class Application(Gtk.Application):
     @run_task
     def on_upload_data(self, download_type):
         try:
-            profile = self._profile
+            profile = self._s_type
             opts = self._settings
-            use_http = profile is Profile.ENIGMA_2
+            use_http = profile is SettingsType.ENIGMA_2
 
-            if profile is Profile.ENIGMA_2:
+            if profile is SettingsType.ENIGMA_2:
                 host, port, user, password = opts.host, opts.http_port, opts.http_user, opts.http_password
                 try:
                     test_http(host, port, user, password, skip_message=True)
@@ -858,17 +857,17 @@ class Application(Gtk.Application):
         self._wait_dialog.show()
         yield True
 
-        data_path = self._settings.data_dir_path if data_path is None else data_path
+        data_path = self._settings.data_local_path if data_path is None else data_path
         yield from self.clear_current_data()
 
         try:
-            prf = self._profile
+            prf = self._s_type
             black_list = get_blacklist(data_path)
             bouquets = get_bouquets(data_path, prf)
             yield True
-            services = get_services(data_path, prf, self.get_format_version() if prf is Profile.ENIGMA_2 else 0)
+            services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
             yield True
-            update_picons_data(self._settings.picons_dir_path, self._picons)
+            update_picons_data(self._settings.picons_local_path, self._picons)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
@@ -1009,9 +1008,9 @@ class Application(Gtk.Application):
 
     def save_data(self):
         self._save_header_button.set_sensitive(False)
-        profile = self._profile
-        path = self._settings.data_dir_path
-        backup_path = self._settings.backup_dir_path
+        profile = self._s_type
+        path = self._settings.data_local_path
+        backup_path = self._settings.backup_local_path
         # Backup data or clearing data path
         backup_data(path, backup_path) if self._settings.backup_before_save else clear_data_path(path)
         yield True
@@ -1031,7 +1030,7 @@ class Application(Gtk.Application):
                     favs = self._bouquets[bq_id]
                     ex_s = self._extra_bouquets.get(bq_id)
                     bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
-                    if profile is Profile.ENIGMA_2:
+                    if profile is SettingsType.ENIGMA_2:
                         bq_s = list(map(lambda s: s._replace(service=ex_s.get(s.fav_id, None) if ex_s else None), bq_s))
                     bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden)
                     bqs.append(bq)
@@ -1045,10 +1044,10 @@ class Application(Gtk.Application):
         # Getting services
         services_model = get_base_model(self._services_view.get_model())
         services = [Service(*row[: Column.SRV_TOOLTIP]) for row in services_model]
-        write_services(path, services, profile, self.get_format_version() if profile is Profile.ENIGMA_2 else 0)
+        write_services(path, services, profile, self.get_format_version() if profile is SettingsType.ENIGMA_2 else 0)
         yield True
         # removing bouquet files
-        if profile is Profile.ENIGMA_2:
+        if profile is SettingsType.ENIGMA_2:
             # blacklist
             write_blacklist(path, self._blacklist)
 
@@ -1060,7 +1059,7 @@ class Application(Gtk.Application):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        gen = self.create_new_configuration(self._profile)
+        gen = self.create_new_configuration(self._s_type)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def create_new_configuration(self, profile):
@@ -1070,12 +1069,12 @@ class Application(Gtk.Application):
         c_gen = self.clear_current_data()
         yield from c_gen
 
-        if profile is Profile.ENIGMA_2:
+        if profile is SettingsType.ENIGMA_2:
             parent = self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
             self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None), parent)
             parent = self._bouquets_model.append(None, ["Favourites (Radio)", None, None, BqType.RADIO.value])
             self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None), parent)
-        elif profile is Profile.NEUTRINO_MP:
+        elif profile is SettingsType.NEUTRINO_MP:
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
             self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
             self._bouquets_model.append(None, ["WEBTV", None, None, BqType.WEBTV.value])
@@ -1143,7 +1142,7 @@ class Application(Gtk.Application):
             self.show_error_dialog("Error. No bouquet is selected!")
             return
 
-        if self._profile is Profile.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
+        if self._s_type is SettingsType.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
             self.show_error_dialog("Operation not allowed in this context!")
             return
 
@@ -1175,11 +1174,11 @@ class Application(Gtk.Application):
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_options(self):
-        profile = self._settings.profile
-        self._ip_label.set_text(self._settings.host)
-        if profile != self._profile:
+        profile = self._settings.setting_type
+
+        if profile != self._s_type:
             yield from self.show_app_info(True)
-            self._profile = profile
+            self._s_type = profile
             c_gen = self.clear_current_data()
             yield from c_gen
         self.update_profile_label()
@@ -1284,7 +1283,7 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty)
                 if elem == "bouquets_paste_popup_item":
                     self._tool_elements[elem].set_sensitive(not_empty and self._bouquets_buffer)
-            if self._profile is Profile.NEUTRINO_MP:
+            if self._s_type is SettingsType.NEUTRINO_MP:
                 for elem in self._LOCK_HIDE_ELEMENTS:
                     self._tool_elements[elem].set_sensitive(not_empty)
         else:
@@ -1300,17 +1299,17 @@ class Application(Gtk.Application):
             for elem in self._BOUQUET_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
             for elem in self._LOCK_HIDE_ELEMENTS:
-                self._tool_elements[elem].set_sensitive(not_empty and self._profile is Profile.ENIGMA_2)
+                self._tool_elements[elem].set_sensitive(not_empty and self._s_type is SettingsType.ENIGMA_2)
 
         for elem in self._FAV_IPTV_ELEMENTS:
             is_iptv = self._bq_selected and not is_service
-            if self._profile is Profile.NEUTRINO_MP:
+            if self._s_type is SettingsType.NEUTRINO_MP:
                 is_iptv = is_iptv and BqType(self._bq_selected.split(":")[1]) is BqType.WEBTV
             self._tool_elements[elem].set_sensitive(is_iptv)
         for elem in self._COMMONS_ELEMENTS:
             self._tool_elements[elem].set_sensitive(not_empty)
 
-        if self._profile is not Profile.ENIGMA_2:
+        if self._s_type is not SettingsType.ENIGMA_2:
             for elem in self._FAV_ENIGMA_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
 
@@ -1321,9 +1320,9 @@ class Application(Gtk.Application):
         self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
-        elif self._profile is Profile.NEUTRINO_MP and self._bq_selected:
+        elif self._s_type is SettingsType.NEUTRINO_MP and self._bq_selected:
             model, paths = self._bouquets_view.get_selection().get_selected_rows()
             itr = model.get_iter(paths[0])
             value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
@@ -1386,14 +1385,14 @@ class Application(Gtk.Application):
                               self._fav_view,
                               self._services,
                               self._bouquets.get(self._bq_selected, None),
-                              self._profile,
+                              self._s_type,
                               Action.ADD).show()
         if response != Gtk.ResponseType.CANCEL:
             self.update_fav_num_column(self._fav_model)
 
     @run_idle
     def on_iptv_list_configuration(self, item):
-        if self._profile is Profile.NEUTRINO_MP:
+        if self._s_type is SettingsType.NEUTRINO_MP:
             self.show_error_dialog("Neutrino at the moment not supported!")
             return
 
@@ -1407,7 +1406,7 @@ class Application(Gtk.Application):
 
         bq = self._bouquets.get(self._bq_selected, [])
         IptvListConfigurationDialog(self._main_window, self._services, iptv_rows, bq,
-                                    self._fav_model, self._profile).show()
+                                    self._fav_model, self._s_type).show()
 
     @run_idle
     def on_remove_all_unavailable(self, item):
@@ -1423,7 +1422,7 @@ class Application(Gtk.Application):
             return
 
         fav_bqt = self._bouquets.get(self._bq_selected, None)
-        response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, self._profile).show()
+        response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, self._s_type).show()
         if response:
             next(self.remove_favs(response, self._fav_model), False)
 
@@ -1431,7 +1430,7 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_epg_list_configuration(self, item):
-        if self._profile is not Profile.ENIGMA_2:
+        if self._s_type is not SettingsType.ENIGMA_2:
             self.show_error_dialog("Only Enigma2 is supported!")
             return
 
@@ -1449,7 +1448,7 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        YtListImportDialog(self._main_window, self._profile, self.append_imported_services).show()
+        YtListImportDialog(self._main_window, self._s_type, self.append_imported_services).show()
 
     def on_import_m3u(self, item):
         """ Imports iptv from m3u files. """
@@ -1461,7 +1460,7 @@ class Application(Gtk.Application):
             self.show_error_dialog("No m3u file is selected!")
             return
 
-        channels = parse_m3u(response, self._profile)
+        channels = parse_m3u(response, self._s_type)
 
         if channels and self._bq_selected:
             self.append_imported_services(channels)
@@ -1492,7 +1491,7 @@ class Application(Gtk.Application):
 
         try:
             bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
-            export_to_m3u(response, bq, self._profile)
+            export_to_m3u(response, bq, self._s_type)
         except Exception as e:
             self.show_error_dialog(str(e))
         else:
@@ -1504,7 +1503,7 @@ class Application(Gtk.Application):
             self.show_error_dialog("No selected item!")
             return
 
-        appender = self.append_bouquet if self._profile is Profile.ENIGMA_2 else self.append_bouquets
+        appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
         import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender)
 
     def on_import_bouquets(self, item):
@@ -1545,7 +1544,7 @@ class Application(Gtk.Application):
                 self.show_error_dialog("Not allowed in this context!")
                 return
 
-            url = get_iptv_url(row, self._profile)
+            url = get_iptv_url(row, self._s_type)
             self.update_player_buttons()
             if not url:
                 return
@@ -1659,10 +1658,11 @@ class Application(Gtk.Application):
     def init_http_api(self):
         self._fav_click_mode = FavClickMode(self._settings.fav_click_mode)
         http_api_enable = self._settings.http_api_support
-        status = all((http_api_enable, self._profile is Profile.ENIGMA_2, not self._receiver_info_box.get_visible()))
+        status = all(
+            (http_api_enable, self._s_type is SettingsType.ENIGMA_2, not self._receiver_info_box.get_visible()))
         GLib.idle_add(self._http_status_image.set_visible, status)
 
-        if self._profile is Profile.NEUTRINO_MP or not http_api_enable:
+        if self._s_type is SettingsType.NEUTRINO_MP or not http_api_enable:
             self.update_info_boxes_visible(False)
             if self._http_api:
                 self._http_api.close()
@@ -1786,7 +1786,7 @@ class Application(Gtk.Application):
         self._sat_positions.clear()
         sat_positions = set()
 
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             terrestrial = False
             cable = False
 
@@ -1803,7 +1803,7 @@ class Application(Gtk.Application):
                 self._sat_positions.append("T")
             if cable:
                 self._sat_positions.append("C")
-        elif self._profile is Profile.NEUTRINO_MP:
+        elif self._s_type is SettingsType.NEUTRINO_MP:
             list(map(lambda s: sat_positions.add(float(s.pos)), filter(lambda s: s.pos, self._services.values())))
 
         self._sat_positions.extend(map(str, sorted(sat_positions)))
@@ -1881,7 +1881,7 @@ class Application(Gtk.Application):
                                       self._fav_view,
                                       self._services,
                                       self._bouquets.get(self._bq_selected, None),
-                                      self._profile,
+                                      self._s_type,
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)
 
@@ -1999,7 +1999,7 @@ class Application(Gtk.Application):
     @run_idle
     def on_picons_loader_show(self, item):
         ids = {}
-        if self._profile is Profile.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             for r in self._services_model:
                 data = r[Column.SRV_PICON_ID].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
@@ -2009,7 +2009,7 @@ class Application(Gtk.Application):
 
     @run_task
     def update_picons(self):
-        update_picons_data(self._settings.picons_dir_path, self._picons)
+        update_picons_data(self._settings.picons_local_path, self._picons)
         append_picons(self._picons, self._services_model)
 
     def on_assign_picon(self, view):
@@ -2062,15 +2062,20 @@ class Application(Gtk.Application):
 
     def create_bouquets(self, g_type):
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
-                     self._profile, self.append_bouquet)
+                     self._s_type, self.append_bouquet)
 
     # ***************** Profile label *********************#
 
     def update_profile_label(self):
-        if self._profile is Profile.ENIGMA_2:
-            self._header_bar.set_subtitle("{} Enigma2 v.{}".format(get_message("Profile:"), self.get_format_version()))
-        elif self._profile is Profile.NEUTRINO_MP:
-            self._header_bar.set_subtitle("{} Neutrino-MP".format(get_message("Profile:")))
+        label, sep, ip = self._profile_combo_box.get_tooltip_text().partition(":")
+        profile_name = self._profile_combo_box.get_active_text()
+        self._profile_combo_box.set_tooltip_text("{}: {}".format(label, self._settings.host))
+        msg = get_message("Profile:")
+
+        if self._s_type is SettingsType.ENIGMA_2:
+            self._header_bar.set_subtitle("{} {} [Enigma2 v.{}]".format(msg, profile_name, self.get_format_version()))
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            self._header_bar.set_subtitle("{} {} [Neutrino-MP]".format(msg, profile_name))
 
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4
@@ -2086,8 +2091,14 @@ class Application(Gtk.Application):
 
 
 def start_app():
-    app = Application()
-    app.run(sys.argv)
+    try:
+        Settings.get_instance()
+    except SettingsException as e:
+        msg = "{} \n{}".format(e, "All setting were reset. Restart the program!")
+        show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
+    else:
+        app = Application()
+        app.run(sys.argv)
 
 
 if __name__ == "__main__":
