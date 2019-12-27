@@ -192,6 +192,7 @@ def backup_data(path, backup_path, move=True):
     """
     backup_path = "{}{}/".format(backup_path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     # backup files in data dir(skipping dirs and satellites.xml)
     for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         src, dst = os.path.join(path, file), backup_path + file

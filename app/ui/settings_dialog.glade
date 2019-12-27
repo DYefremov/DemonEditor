@@ -64,6 +64,7 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
+    <signal name="response" handler="on_response" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
@@ -185,6 +186,7 @@ Author: Dmitriy Yefremov
                     <property name="wide_handle">True</property>
                     <child>
                       <object class="GtkFrame" id="profile_frame">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
@@ -195,7 +197,6 @@ Author: Dmitriy Yefremov
                             <property name="width_request">155</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="tooltip_text" translatable="yes">Set as default</property>
                             <property name="orientation">vertical</property>
                             <property name="spacing">2</property>
                             <child>
@@ -212,6 +213,7 @@ Author: Dmitriy Yefremov
                                     <property name="model">profile_lists_tore</property>
                                     <property name="headers_visible">False</property>
                                     <property name="search_column">0</property>
+                                    <signal name="cursor-changed" handler="on_profile_selected" swapped="no"/>
                                     <child internal-child="selection">
                                       <object class="GtkTreeSelection"/>
                                     </child>
@@ -265,7 +267,6 @@ Author: Dmitriy Yefremov
                                 <child>
                                   <object class="GtkToolButton" id="profile_add_button">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="tooltip_text" translatable="yes">Add</property>
                                     <property name="label" translatable="yes">Add</property>
@@ -280,7 +281,6 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkToolButton" id="profile_edit_button">
-                                    <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="tooltip_text" translatable="yes">Edit</property>
                                     <property name="label" translatable="yes">Edit</property>
@@ -988,7 +988,6 @@ Author: Dmitriy Yefremov
                                   <object class="GtkEntry" id="picons_dir_field">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="text">/data/picons</property>
                                     <property name="primary_icon_stock">gtk-edit</property>
                                     <property name="secondary_icon_name">folder-open</property>
                                     <property name="primary_icon_activatable">False</property>
@@ -1018,7 +1017,6 @@ Author: Dmitriy Yefremov
                                   <object class="GtkEntry" id="data_dir_field">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="text">/data</property>
                                     <property name="primary_icon_stock">gtk-edit</property>
                                     <property name="secondary_icon_name">folder-open</property>
                                     <property name="primary_icon_activatable">False</property>
@@ -1047,7 +1045,6 @@ Author: Dmitriy Yefremov
                                   <object class="GtkEntry" id="backup_dir_field">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="text" translatable="yes">/data/backup</property>
                                     <property name="primary_icon_stock">gtk-edit</property>
                                     <property name="secondary_icon_name">folder-open</property>
                                     <property name="primary_icon_activatable">False</property>

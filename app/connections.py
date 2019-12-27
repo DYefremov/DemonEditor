@@ -11,7 +11,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
 
-from app.commons import log
+from app.commons import log, run_idle
 from app.settings import SettingsType
 
 _BQ_FILES_LIST = ("tv", "radio",  # enigma 2
@@ -277,12 +277,15 @@ def telnet(host, port=23, user="", password="", timeout=5):
 
 class HttpAPI:
 
-    def __init__(self, host, port, user, password):
-        self._base_url = "http://{}:{}/api/".format(host, port)
-        init_auth(user, password, self._base_url)
+    __MAX_WORKERS = 4
+
+    def __init__(self, settings):
+        self._settings = settings
+        self._base_url = None
+        self.init()
 
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
-        self._executor = PoolExecutor(max_workers=2)
+        self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
 
     def send(self, req_type, ref, callback=print):
         url = self._base_url + req_type.value
@@ -294,6 +297,10 @@ class HttpAPI:
 
         future = self._executor.submit(get_json, req_type, url)
         future.add_done_callback(lambda f: callback(f.result()))
+
+    def init(self):
+        self._base_url = "http://{}:{}/api/".format(self._settings.host, self._settings.http_port)
+        init_auth(self._settings.http_user, self._settings.http_password, self._base_url)
 
     def close(self):
         self._executor.shutdown(False)

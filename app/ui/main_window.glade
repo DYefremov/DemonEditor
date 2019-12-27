@@ -512,7 +512,7 @@ Author: Dmitriy Yefremov
                 <property name="receives_default">True</property>
                 <property name="margin_bottom">2</property>
                 <property name="text" translatable="yes">Settings</property>
-                <signal name="clicked" handler="on_preferences" swapped="no"/>
+                <signal name="clicked" handler="on_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -2718,7 +2718,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkSeparator" id="bottom_separator">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_bottom">2</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2799,7 +2798,6 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
-            <property name="height_request">35</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
@@ -2844,6 +2842,7 @@ Author: Dmitriy Yefremov
             </child>
             <child type="center">
               <object class="GtkComboBoxText" id="profile_combo_box">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="focus_on_click">False</property>
                 <property name="tooltip_text" translatable="yes">Current IP:</property>
@@ -2852,22 +2851,21 @@ Author: Dmitriy Yefremov
                 <property name="margin_top">1</property>
                 <property name="margin_bottom">1</property>
                 <property name="active">0</property>
-                <property name="has_frame">False</property>
                 <property name="has_entry">True</property>
-                <items>
-                  <item translatable="yes">default</item>
-                </items>
+                <signal name="changed" handler="on_profile_changed" swapped="no"/>
                 <child internal-child="entry">
-                  <object class="GtkEntry">
+                  <object class="GtkEntry" id="profile_entry">
                     <property name="can_focus">False</property>
                     <property name="has_tooltip">True</property>
-                    <property name="halign">center</property>
+                    <property name="halign">baseline</property>
+                    <property name="valign">baseline</property>
                     <property name="margin_top">1</property>
                     <property name="margin_bottom">1</property>
                     <property name="editable">False</property>
                     <property name="has_frame">False</property>
                     <property name="max_width_chars">9</property>
-                    <property name="text" translatable="yes">default</property>
+                    <property name="overwrite_mode">True</property>
+                    <property name="caps_lock_warning">False</property>
                     <property name="primary_icon_stock">gtk-connect</property>
                   </object>
                 </child>

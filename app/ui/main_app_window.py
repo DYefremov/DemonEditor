@@ -1,6 +1,5 @@
 import os
 import sys
-
 from contextlib import suppress
 from functools import lru_cache
 from itertools import chain
@@ -21,21 +20,21 @@ from app.tools.media import Player
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
-from .imports import ImportDialog, import_bouquet
-from .download_dialog import DownloadDialog
-from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
-from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
-    FavClickMode
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
+from .download_dialog import DownloadDialog
+from .imports import ImportDialog, import_bouquet
+from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
 from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
     scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
     is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data, \
     remove_all_unused_picons
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
-from .settings_dialog import show_settings_dialog
+from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
+from .settings_dialog import show_settings_dialog
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
+    FavClickMode
 
 
 class Application(Gtk.Application):
@@ -75,7 +74,8 @@ class Application(Gtk.Application):
         handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
                     "on_about_app": self.on_about_app,
-                    "on_preferences": self.on_preferences,
+                    "on_settings": self.on_settings,
+                    "on_profile_changed": self.on_profile_changed,
                     "on_download": self.on_download,
                     "on_data_open": self.on_data_open,
                     "on_data_save": self.on_data_save,
@@ -215,7 +215,6 @@ class Application(Gtk.Application):
         self._app_info_box.bind_property("visible", builder.get_object("left_header_box"), "sensitive", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
-        self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
         self._signal_box = builder.get_object("signal_box")
@@ -288,10 +287,11 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.update_profile_label()
+        self.init_profiles()
         self.init_drag_and_drop()
         self.init_colors()
-        self.init_http_api()
+        gen = self.init_http_api()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def do_activate(self):
         self._main_window.set_application(self)
@@ -314,6 +314,11 @@ class Application(Gtk.Application):
 
         self.activate()
         return 0
+
+    @run_idle
+    def init_profiles(self):
+        self.update_profiles()
+        self._profile_combo_box.set_active_id(self._settings.default_profile)
 
     def init_drag_and_drop(self):
         """ Enable drag-and-drop """
@@ -807,7 +812,7 @@ class Application(Gtk.Application):
         DownloadDialog(transient=self._main_window,
                        settings=self._settings,
                        open_data_callback=self.open_data,
-                       update_settings_callback=self.update_options).show()
+                       update_settings_callback=self.update_settings).show()
 
     @run_task
     def on_download_data(self):
@@ -1167,25 +1172,46 @@ class Application(Gtk.Application):
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
-    def on_preferences(self, item):
+    def on_settings(self, item):
         response = show_settings_dialog(self._main_window, self._settings)
         if response != Gtk.ResponseType.CANCEL:
-            gen = self.update_options()
+            gen = self.update_settings()
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def update_options(self):
-        profile = self._settings.setting_type
+    def update_settings(self):
+        s_type = self._settings.setting_type
 
-        if profile != self._s_type:
+        if s_type != self._s_type:
             yield from self.show_app_info(True)
-            self._s_type = profile
+            self._s_type = s_type
             c_gen = self.clear_current_data()
             yield from c_gen
-        self.update_profile_label()
+
         self.init_colors(True)
+        self.init_profiles()
         yield True
-        self.init_http_api()
-        yield True
+        gen = self.init_http_api()
+        yield from gen
+
+    def on_profile_changed(self, box):
+        if self._app_info_box.get_visible():
+            self.update_profile_label()
+            return
+
+        active = box.get_active_text()
+        if active in self._settings.profiles:
+            self._settings.current_profile = active
+            self._s_type = self._settings.setting_type
+            self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
+            self.update_profile_label()
+
+            if self._http_api and self._settings.http_api_support:
+                self._http_api.init()
+
+    def update_profiles(self):
+        self._profile_combo_box.remove_all()
+        for p in self._settings.profiles:
+            self._profile_combo_box.append(p, p)
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
@@ -1654,7 +1680,7 @@ class Application(Gtk.Application):
             self._links_transmitter.hide()
 
     # ************************ HTTP API ****************************#
-    @run_task
+
     def init_http_api(self):
         self._fav_click_mode = FavClickMode(self._settings.fav_click_mode)
         http_api_enable = self._settings.http_api_support
@@ -1663,20 +1689,20 @@ class Application(Gtk.Application):
         GLib.idle_add(self._http_status_image.set_visible, status)
 
         if self._s_type is SettingsType.NEUTRINO_MP or not http_api_enable:
-            self.update_info_boxes_visible(False)
+            GLib.idle_add(self.update_info_boxes_visible, False)
             if self._http_api:
                 self._http_api.close()
+                yield True
                 self._http_api = None
             self.init_send_to(False)
             return
 
         if not self._http_api:
-            self._http_api = HttpAPI(self._settings.host, self._settings.http_port,
-                                     self._settings.http_user, self._settings.http_password)
-
+            self._http_api = HttpAPI(self._settings)
             GLib.timeout_add_seconds(3, self.update_info, priority=GLib.PRIORITY_LOW)
 
         self.init_send_to(http_api_enable and self._settings.enable_send_to)
+        yield True
 
     @run_idle
     def init_send_to(self, enable):
@@ -2066,6 +2092,7 @@ class Application(Gtk.Application):
 
     # ***************** Profile label *********************#
 
+    @run_idle
     def update_profile_label(self):
         label, sep, ip = self._profile_combo_box.get_tooltip_text().partition(":")
         profile_name = self._profile_combo_box.get_active_text()

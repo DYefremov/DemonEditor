@@ -1,10 +1,13 @@
+import os
 from enum import Enum
+from pathlib import Path
 
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http
-from app.settings import SettingsType
+from app.settings import SettingsType, Settings
+from app.ui.dialogs import show_dialog, DialogType
+from .main_helper import update_entry_data, scroll_to
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
-from .main_helper import update_entry_data
 
 
 def show_settings_dialog(transient, options):
@@ -19,10 +22,11 @@ class Property(Enum):
 
 class SettingsDialog:
 
-    def __init__(self, transient, settings):
+    def __init__(self, transient, settings: Settings):
         handlers = {"on_field_icon_press": self.on_field_icon_press,
                     "on_settings_type_changed": self.on_settings_type_changed,
                     "on_reset": self.on_reset,
+                    "on_response": self.on_response,
                     "apply_settings": self.apply_settings,
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
@@ -36,6 +40,7 @@ class SettingsDialog:
                     "on_profile_deleted": self.on_profile_deleted,
                     "on_profile_inserted": self.on_profile_inserted,
                     "on_profile_edited": self.on_profile_edited,
+                    "on_profile_selected": self.on_profile_selected,
                     "on_profile_set_default": self.on_profile_set_default}
 
         builder = Gtk.Builder()
@@ -70,7 +75,7 @@ class SettingsDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._test_spinner = builder.get_object("test_spinner")
-        # Profile
+        # Settings type
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
@@ -97,14 +102,15 @@ class SettingsDialog:
         self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
         # Profiles
         self._profile_view = builder.get_object("profile_tree_view")
+        self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
-        self._profile_view.get_model().append(("default", DEFAULT_ICON))
         # Settings
         self._settings = settings
-        self._profiles = settings.profiles
-        self._s_type = settings.setting_type
+        self._profiles = self._settings.profiles
+        self._s_type = self._settings.setting_type
         self.set_settings()
         self.init_ui_elements(self._s_type)
+        self.init_profiles()
 
     @run_idle
     def init_ui_elements(self, s_type):
@@ -116,9 +122,14 @@ class SettingsDialog:
         self._extra_support_grid.set_sensitive(is_enigma_profile)
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
-        self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
         self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
             "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
+
+    def init_profiles(self):
+        p_def = self._settings.default_profile
+        for p in self._profiles:
+            self._profile_view.get_model().append((p, DEFAULT_ICON if p == p_def else None))
+        self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
 
     def update_header_bar(self):
         label, sep, st = self._header_bar.get_subtitle().partition(":")
@@ -128,12 +139,14 @@ class SettingsDialog:
             self._header_bar.set_subtitle("{}: {}".format(label, self._neutrino_radio_button.get_label()))
 
     def show(self):
-        response = self._dialog.run()
-        if response == Gtk.ResponseType.OK:
-            self.apply_settings()
-        self._dialog.destroy()
+        self._dialog.run()
 
-        return response
+    def on_response(self, dialog, resp):
+        if resp == Gtk.ResponseType.OK and not self.apply_settings():
+            return
+
+        self._dialog.destroy()
+        return resp
 
     def on_field_icon_press(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, self._settings)
@@ -149,6 +162,7 @@ class SettingsDialog:
         self._settings.reset()
         self.set_settings()
 
+    @run_idle
     def set_settings(self):
         self._host_field.set_text(self._settings.host)
         self._port_field.set_text(self._settings.port)
@@ -186,6 +200,9 @@ class SettingsDialog:
             self._extra_color_button.set_rgba(extra_rgb)
 
     def apply_settings(self, item=None):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
         self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
         self._settings.setting_type = self._s_type
         self._settings.host = self._host_field.get_text()
@@ -219,7 +236,9 @@ class SettingsDialog:
             self._settings.enable_yt_dl = self._enable_y_dl_switch.get_active()
             self._settings.enable_send_to = self._enable_send_to_switch.get_active()
 
+        self._settings.default_profile = list(filter(lambda r: r[1], self._profile_view.get_model()))[0][0]
         self._settings.save()
+        return True
 
     @run_task
     def on_connection_test(self, item):
@@ -300,8 +319,15 @@ class SettingsDialog:
         while name in self._profiles:
             count += 1
             name = "profile{}".format(count)
-        self._profiles[name] = {"host": self._host_field.get_text()}
-        itr = model.append((name, None))
+
+        self._profiles[name] = self._s_type.get_default_settings()
+        model.append((name, None))
+        scroll_to(len(model) - 1, self._profile_view)
+        self.on_profile_selected(self._profile_view)
+        p = name + "/"
+        self._settings.data_local_path += p
+        self._settings.picons_local_path += p
+        self._settings.backup_local_path += p
 
     def on_profile_edit(self, item):
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
@@ -310,21 +336,61 @@ class SettingsDialog:
         model, paths = self._profile_view.get_selection().get_selected_rows()
         if paths:
             row = model[paths]
+            is_default = row[1]
             self._profiles.pop(row[0], None)
             del model[paths]
+            if is_default:
+                model.set_value(model.get_iter_first(), 1, DEFAULT_ICON)
 
     def on_profile_deleted(self, model, paths):
         self._profile_remove_button.set_sensitive(len(model) > 1)
 
-    def on_profile_edited(self, render, path, new_text):
+    def on_profile_edited(self, render, path, new_value):
         p_name = render.get_property("text")
-        p_data = self._profiles.pop(p_name, None)
-        row = self._profile_view.get_model()[path]
-        row[0] = new_text
-        self._profiles[new_text] = p_data
+        p_name = self._profiles.pop(p_name, None)
+        if p_name:
+            row = self._profile_view.get_model()[path]
+            row[0] = new_value
+            self._profiles[new_value] = p_name
+            if p_name == self._settings.current_profile:
+                self._settings.current_profile = new_value
+            if p_name == self._settings.default_profile:
+                self._settings.default_profile = new_value
+
+        if p_name != new_value:
+            self.update_local_paths(new_value)
+        self.on_profile_selected(self._profile_view)
+
+    def update_local_paths(self, profile_name):
+        data_path = self._settings.data_local_path
+        self._settings.data_local_path = "{}/{}/".format(Path(data_path).parent, profile_name)
+        if os.path.isdir(data_path):
+            os.rename(data_path, self._settings.data_local_path)
+
+        picons_path = self._settings.picons_local_path
+        self._settings.picons_local_path = "{}/{}/".format(Path(picons_path).parent, profile_name)
+        if os.path.isdir(picons_path):
+            os.rename(picons_path, self._settings.picons_local_path)
+
+        backup_path = self._settings.backup_local_path
+        self._settings.backup_local_path = "{}/{}/".format(Path(self._settings.backup_local_path).parent, profile_name)
+        if os.path.isdir(backup_path):
+            os.rename(backup_path, self._settings.backup_local_path)
+
+    def on_profile_selected(self, view):
+        model, paths = self._profile_view.get_selection().get_selected_rows()
+        if paths:
+            profile = model.get_value(model.get_iter(paths), 0)
+            self._settings.current_profile = profile
+            self.set_settings()
 
     def on_profile_set_default(self, item):
-        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+        model, paths = self._profile_view.get_selection().get_selected_rows()
+        if paths:
+            itr = model.get_iter(paths)
+            model.foreach(lambda m, p, i: model.set_value(i, 1, None))
+            model.set_value(itr, 1, DEFAULT_ICON)
+            self._settings.default_profile = model.get_value(itr, 0)
 
     def on_profile_inserted(self, model, path, itr):
         self._profile_remove_button.set_sensitive(len(model) > 1)

@@ -1,9 +1,10 @@
+import copy
 import json
 import os
-from pprint import pformat
-from textwrap import dedent
 from enum import Enum, IntEnum
 from pathlib import Path
+from pprint import pformat
+from textwrap import dedent
 
 CONFIG_PATH = str(Path.home()) + "/.config/demon-editor/"
 CONFIG_FILE = CONFIG_PATH + "config.json"
@@ -25,11 +26,14 @@ class Defaults(Enum):
     FAV_CLICK_MODE = 0
 
 
-def get_default_settings():
+def get_default_settings(profile_name="default"):
+    def_settings = SettingsType.ENIGMA_2.get_default_settings()
+    set_local_paths(def_settings, profile_name)
+
     return {
         "version": 1,
         "default_profile": Defaults.DEFAULT_PROFILE.value,
-        "profiles": {"default": SettingsType.ENIGMA_2.get_default_settings()},
+        "profiles": {profile_name: def_settings},
         "v5_support": Defaults.V5_SUPPORT.value,
         "http_api_support": Defaults.HTTP_API_SUPPORT.value,
         "enable_yt_dl": Defaults.ENABLE_YT_DL.value,
@@ -41,6 +45,12 @@ def get_default_settings():
     }
 
 
+def set_local_paths(settings, profile_name):
+    settings["data_local_path"] = "{}{}/".format(settings["data_local_path"], profile_name)
+    settings["picons_local_path"] = "{}{}/".format(settings["picons_local_path"], profile_name)
+    settings["backup_local_path"] = "{}{}/".format(settings["backup_local_path"], profile_name)
+
+
 class SettingsType(IntEnum):
     """ Profiles for settings """
     ENIGMA_2 = 0
@@ -49,13 +59,13 @@ class SettingsType(IntEnum):
     def get_default_settings(self):
         """ Returns default settings for current type """
         if self is self.ENIGMA_2:
-            return {"setting_type": self,
+            return {"setting_type": self.value,
                     "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
                     "http_user": "root", "http_password": "", "http_port": "80", "http_timeout": 5,
                     "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 5,
                     "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
                     "satellites_xml_path": "/etc/tuxbox/", "data_local_path": DATA_PATH + "enigma2/",
-                    "picons_path": "/usr/share/enigma2/picon",
+                    "picons_path": "/usr/share/enigma2/picon/",
                     "picons_local_path": DATA_PATH + "enigma2/picons/",
                     "backup_local_path": DATA_PATH + "enigma2/backup/"}
         elif self is self.NEUTRINO_MP:
@@ -78,8 +88,8 @@ class Settings:
     __INSTANCE = None
     __VERSION = 1
 
-    def __init__(self):
-        settings = get_settings()
+    def __init__(self, ext_settings=None):
+        settings = ext_settings or get_settings()
 
         if self.__VERSION > settings.get("version", 0):
             write_settings(get_default_settings())
@@ -112,6 +122,7 @@ class Settings:
     def reset(self, force_write=False):
         for k, v in self.setting_type.get_default_settings().items():
             self._cp_settings[k] = v
+        set_local_paths(self._cp_settings, self._current_profile)
 
         if force_write:
             self.save()
@@ -127,6 +138,33 @@ class Settings:
     def get(self, name):
         """ Returns extra options or None """
         return self._settings.get(name, None)
+
+    @property
+    def settings(self):
+        """ Returns copy of the current settings! """
+        return copy.deepcopy(self._settings)
+
+    @settings.setter
+    def settings(self, value):
+        """ Sets copy of the settings! """
+        self._settings = copy.deepcopy(value)
+
+    @property
+    def current_profile(self):
+        return self._current_profile
+
+    @current_profile.setter
+    def current_profile(self, value):
+        self._current_profile = value
+        self._cp_settings = self._profiles.get(self._current_profile)
+
+    @property
+    def default_profile(self):
+        return self._settings.get("default_profile", "default")
+
+    @default_profile.setter
+    def default_profile(self, value):
+        self._settings["default_profile"] = value
 
     @property
     def profiles(self):
