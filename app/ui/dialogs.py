@@ -94,17 +94,21 @@ def get_chooser_dialog(transient, settings, pattern, name):
 
 
 def get_file_chooser_dialog(transient, text, settings, action_type, file_filter):
-    dialog = Gtk.FileChooserDialog(get_message(text) if text else "", transient,
-                                   action_type if action_type is not None else Gtk.FileChooserAction.SELECT_FOLDER,
-                                   (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
-                                   use_header_bar=IS_GNOME_SESSION)
+    dialog = Gtk.FileChooserNative()
+    dialog.set_title(get_message(text) if text else "")
+    dialog.set_transient_for(transient)
+    dialog.set_action(action_type if action_type is not None else Gtk.FileChooserAction.SELECT_FOLDER)
+    dialog.set_create_folders(False)
+    dialog.set_modal(True)
+
     if file_filter is not None:
         dialog.add_filter(file_filter)
 
     path = settings.data_dir_path
     dialog.set_current_folder(path)
     response = dialog.run()
-    if response == Gtk.ResponseType.OK:
+
+    if response == Gtk.ResponseType.ACCEPT:
         if dialog.get_filename():
             path = dialog.get_filename()
             if action_type is not Gtk.FileChooserAction.OPEN:

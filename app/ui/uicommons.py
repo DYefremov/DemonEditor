@@ -1,4 +1,7 @@
+import gettext
+import locale
 import os
+import sys
 
 import gi
 from enum import Enum, IntEnum
@@ -6,19 +9,22 @@ from enum import Enum, IntEnum
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
+GTK_PATH = os.environ.get("GTK_PATH", None)
 # For launching from the bundle.
-if os.getcwd() == "/":
-    try:
-        os.chdir(os.environ["GTK_PATH"])
-    except KeyError:
-        pass
+if os.getcwd() == "/" and GTK_PATH:
+    os.chdir(GTK_PATH)
 
-    # path to *.glade files
+# path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # translation
+os.environ["LANG"] = "{}.{}".format(*locale.getlocale())
 TEXT_DOMAIN = "demon-editor"
+LANG_PATH = GTK_PATH + "/share/locale" if GTK_PATH else UI_RESOURCES_PATH + "lang"
+gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+if sys.platform != "darwin":
+    locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
 
 theme = Gtk.IconTheme.get_default()
 _IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None
