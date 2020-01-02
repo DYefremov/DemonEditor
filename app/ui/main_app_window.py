@@ -2123,6 +2123,7 @@ def start_app():
     except SettingsException as e:
         msg = "{} \n{}".format(e, "All setting were reset. Restart the program!")
         show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
+        Settings.reset_to_default()
     else:
         app = Application()
         app.run(sys.argv)

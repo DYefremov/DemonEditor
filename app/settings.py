@@ -1,5 +1,6 @@
 import copy
 import json
+import locale
 import os
 from enum import Enum, IntEnum
 from pathlib import Path
@@ -92,7 +93,6 @@ class Settings:
         settings = ext_settings or get_settings()
 
         if self.__VERSION > settings.get("version", 0):
-            write_settings(get_default_settings())
             raise SettingsException("Outdated version of the settings format!")
 
         self._settings = settings
@@ -126,6 +126,10 @@ class Settings:
 
         if force_write:
             self.save()
+
+    @staticmethod
+    def reset_to_default():
+        write_settings(get_default_settings())
 
     def get_default(self, p_name):
         """ Returns default value for current settings type """
@@ -184,6 +188,14 @@ class Settings:
         self._cp_settings["setting_type"] = s_type
         for k, v in s_type.get_default_settings().items():
             self._cp_settings[k] = v
+
+    @property
+    def language(self):
+        return self._settings.get("language", locale.getlocale()[0] or "en_US")
+
+    @language.setter
+    def language(self, value):
+        self._settings["language"] = value
 
     @property
     def host(self):

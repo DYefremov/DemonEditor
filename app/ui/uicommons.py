@@ -1,9 +1,9 @@
 import locale
 import os
+from enum import Enum, IntEnum
+from app.settings import Settings, SettingsException
 
 import gi
-from enum import Enum, IntEnum
-
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -11,12 +11,16 @@ from gi.repository import Gtk, Gdk
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/demoneditor/app/ui/"
 
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
-
 # translation
 TEXT_DOMAIN = "demon-editor"
-if UI_RESOURCES_PATH == "app/ui/":
-    LANG_DIR = UI_RESOURCES_PATH + "lang"
-    locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
+try:
+    settings = Settings.get_instance()
+except SettingsException:
+    pass
+else:
+    os.environ["LANGUAGE"] = settings.language
+    if UI_RESOURCES_PATH == "app/ui/":
+        locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
 
 theme = Gtk.IconTheme.get_default()
 _IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None
