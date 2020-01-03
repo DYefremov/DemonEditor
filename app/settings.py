@@ -62,7 +62,8 @@ class SettingsType(IntEnum):
         if self is self.ENIGMA_2:
             return {"setting_type": self.value,
                     "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
-                    "http_user": "root", "http_password": "", "http_port": "80", "http_timeout": 5,
+                    "http_user": "root", "http_password": "", "http_port": "80",
+                    "http_timeout": 5, "http_use_ssl": False,
                     "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 5,
                     "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
                     "satellites_xml_path": "/etc/tuxbox/", "data_local_path": DATA_PATH + "enigma2/",
@@ -72,7 +73,7 @@ class SettingsType(IntEnum):
         elif self is self.NEUTRINO_MP:
             return {"setting_type": self,
                     "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
-                    "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2,
+                    "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2, "http_use_ssl": False,
                     "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 1,
                     "services_path": "/var/tuxbox/config/zapit/", "user_bouquet_path": "/var/tuxbox/config/zapit/",
                     "satellites_xml_path": "/var/tuxbox/config/", "data_local_path": DATA_PATH + "neutrino/",
@@ -260,6 +261,14 @@ class Settings:
     @http_timeout.setter
     def http_timeout(self, value):
         self._cp_settings["http_timeout"] = value
+
+    @property
+    def http_use_ssl(self):
+        return self._cp_settings.get("http_use_ssl", self.get_default("http_use_ssl"))
+
+    @http_use_ssl.setter
+    def http_use_ssl(self, value):
+        self._cp_settings["http_use_ssl"] = value
 
     @property
     def telnet_user(self):

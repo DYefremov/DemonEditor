@@ -11,7 +11,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
 
-from app.commons import log, run_idle
+from app.commons import log
 from app.settings import SettingsType
 
 _BQ_FILES_LIST = ("tv", "radio",  # enigma 2
@@ -97,7 +97,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
     s_type = settings.setting_type
     data_path = settings.data_local_path
     host = settings.host
-    base_url = "http://{}:{}/api/".format(host, settings.http_port)
+    base_url = "http{}://{}:{}/api/".format("s" if settings.http_use_ssl else "", host, settings.http_port)
     tn, ht = None, None  # telnet, http
 
     try:
@@ -276,7 +276,6 @@ def telnet(host, port=23, user="", password="", timeout=5):
 # ***************** HTTP API *******************#
 
 class HttpAPI:
-
     __MAX_WORKERS = 4
 
     def __init__(self, settings):
@@ -299,8 +298,10 @@ class HttpAPI:
         future.add_done_callback(lambda f: callback(f.result()))
 
     def init(self):
-        self._base_url = "http://{}:{}/api/".format(self._settings.host, self._settings.http_port)
-        init_auth(self._settings.http_user, self._settings.http_password, self._base_url)
+        use_ssl = self._settings.http_use_ssl
+        url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
+        self._base_url = "{}/api/".format(url)
+        init_auth(self._settings.http_user, self._settings.http_password, url, use_ssl)
 
     def close(self):
         self._executor.shutdown(False)
@@ -313,7 +314,7 @@ def get_json(req_type, url):
                 return f.read().decode("utf-8")
             else:
                 return json.loads(f.read().decode("utf-8"))
-    except (URLError, HTTPError):
+    except (URLError, HTTPError, RemoteDisconnected):
         pass
 
 
@@ -327,26 +328,35 @@ def test_ftp(host, port, user, password, timeout=5):
         raise TestException(e)
 
 
-def test_http(host, port, user, password, timeout=5, skip_message=False):
+def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message=False):
     try:
         params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
         params = "statusinfo" if skip_message else "message?{}".format(params)
-        url = "http://{}:{}/api/{}".format(host, port, params)
+        url = "http{}://{}:{}/api/".format("s" if use_ssl else "", host, port)
         # authentication
-        init_auth(user, password, url)
+        init_auth(user, password, url, use_ssl)
 
-        with urlopen(url, timeout=5) as f:
+        with urlopen("{}{}".format(url, params), timeout=5) as f:
             return json.loads(f.read().decode("utf-8")).get("message", "")
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
 
 
-def init_auth(user, password, url):
+def init_auth(user, password, url, use_ssl=False):
     """ Init authentication """
     pass_mgr = HTTPPasswordMgrWithDefaultRealm()
     pass_mgr.add_password(None, url, user, password)
     auth_handler = HTTPBasicAuthHandler(pass_mgr)
-    opener = build_opener(auth_handler)
+
+    if use_ssl:
+        import ssl
+        from urllib.request import HTTPSHandler
+        # https://stackoverflow.com/a/28052583
+        context = ssl._create_unverified_context()
+        opener = build_opener(auth_handler, HTTPSHandler(context=context))
+    else:
+        opener = build_opener(auth_handler)
+
     install_opener(opener)
 
 

@@ -42,7 +42,9 @@ class SettingsDialog:
                     "on_profile_edited": self.on_profile_edited,
                     "on_profile_selected": self.on_profile_selected,
                     "on_profile_set_default": self.on_profile_set_default,
-                    "on_lang_changed": self.on_lang_changed}
+                    "on_lang_changed": self.on_lang_changed,
+                    "on_current_settings_visible": self.on_current_settings_visible,
+                    "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled}
 
         builder = Gtk.Builder()
         builder.add_from_file(UI_RESOURCES_PATH + "settings_dialog.glade")
@@ -59,6 +61,7 @@ class SettingsDialog:
         self._http_login_field = builder.get_object("http_login_field")
         self._http_password_field = builder.get_object("http_password_field")
         self._http_port_field = builder.get_object("http_port_field")
+        self._http_use_ssl_check_button = builder.get_object("http_use_ssl_check_button")
         self._telnet_login_field = builder.get_object("telnet_login_field")
         self._telnet_password_field = builder.get_object("telnet_password_field")
         self._telnet_port_field = builder.get_object("telnet_port_field")
@@ -175,6 +178,7 @@ class SettingsDialog:
         self._http_login_field.set_text(self._settings.http_user)
         self._http_password_field.set_text(self._settings.http_password)
         self._http_port_field.set_text(self._settings.http_port)
+        self._http_use_ssl_check_button.set_active(self._settings.http_use_ssl)
         self._telnet_login_field.set_text(self._settings.telnet_user)
         self._telnet_password_field.set_text(self._settings.telnet_password)
         self._telnet_port_field.set_text(self._settings.telnet_port)
@@ -216,6 +220,7 @@ class SettingsDialog:
         self._settings.http_user = self._http_login_field.get_text()
         self._settings.http_password = self._http_password_field.get_text()
         self._settings.http_port = self._http_port_field.get_text()
+        self._settings.http_use_ssl = self._http_use_ssl_check_button.get_active()
         self._settings.telnet_user = self._telnet_login_field.get_text()
         self._settings.telnet_password = self._telnet_password_field.get_text()
         self._settings.telnet_port = self._telnet_port_field.get_text()
@@ -261,8 +266,9 @@ class SettingsDialog:
     def test_http(self):
         user, password = self._http_login_field.get_text(), self._http_password_field.get_text()
         host, port = self._host_field.get_text(), self._http_port_field.get_text()
+        use_ssl = self._http_use_ssl_check_button.get_active()
         try:
-            self.show_info_message(test_http(host, port, user, password), Gtk.MessageType.INFO)
+            self.show_info_message(test_http(host, port, user, password, use_ssl=use_ssl), Gtk.MessageType.INFO)
         except TestException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         finally:
@@ -407,6 +413,16 @@ class SettingsDialog:
     def on_lang_changed(self, box):
         if box.get_active_id() != self._settings.language:
             self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
+
+    def on_current_settings_visible(self, stack: Gtk.Stack, param):
+        self._http_use_ssl_check_button.set_visible(Property(stack.get_visible_child_name()) is Property.HTTP)
+
+    def on_http_use_ssl_toggled(self, button):
+        active = button.get_active()
+        self._settings.http_use_ssl = active
+        port = "443" if active else "80"
+        self._http_port_field.set_text(port)
+        self._settings.http_port = port
 
     @run_idle
     def set_fav_click_mode(self, mode):

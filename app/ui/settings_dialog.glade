@@ -162,7 +162,7 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkStackSidebar" id="satack_sidebar">
+              <object class="GtkStackSidebar" id="stack_sidebar">
                 <property name="width_request">150</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -378,7 +378,6 @@ Author: Dmitriy Yefremov
                                 <property name="can_focus">False</property>
                                 <property name="margin_left">5</property>
                                 <property name="margin_right">5</property>
-                                <property name="margin_bottom">5</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
@@ -390,19 +389,6 @@ Author: Dmitriy Yefremov
                                     <property name="column_spacing">2</property>
                                     <property name="column_homogeneous">True</property>
                                     <child>
-                                      <object class="GtkLabel" id="label4">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="halign">center</property>
-                                        <property name="margin_left">5</property>
-                                        <property name="label" translatable="yes">Host:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
                                       <object class="GtkEntry" id="host_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -412,6 +398,48 @@ Author: Dmitriy Yefremov
                                       <packing>
                                         <property name="left_attach">0</property>
                                         <property name="top_attach">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="height_request">22</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="spacing">2</property>
+                                        <child>
+                                          <object class="GtkLabel" id="label4">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="valign">end</property>
+                                            <property name="margin_left">5</property>
+                                            <property name="label" translatable="yes">Host:</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCheckButton" id="http_use_ssl_check_button">
+                                            <property name="label" translatable="yes">SSL/TSL</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="valign">end</property>
+                                            <property name="draw_indicator">True</property>
+                                            <signal name="toggled" handler="on_http_use_ssl_toggled" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">False</property>
+                                            <property name="pack_type">end</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">0</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -425,6 +453,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkBox" id="stack_switcher_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="margin_bottom">5</property>
                                     <child>
                                       <object class="GtkStackSwitcher" id="stack_switcher">
                                         <property name="visible">True</property>
@@ -507,12 +536,12 @@ Author: Dmitriy Yefremov
                                   <object class="GtkStack" id="settings_stack">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="margin_bottom">5</property>
+                                    <signal name="notify::visible-child" handler="on_current_settings_visible" swapped="no"/>
                                     <child>
                                       <object class="GtkGrid" id="ftp_grid">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="margin_top">2</property>
-                                        <property name="margin_bottom">5</property>
                                         <property name="row_spacing">2</property>
                                         <property name="column_spacing">2</property>
                                         <child>
@@ -583,7 +612,15 @@ Author: Dmitriy Yefremov
                                           </packing>
                                         </child>
                                         <child>
-                                          <placeholder/>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Port:</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
                                         </child>
                                       </object>
                                       <packing>
@@ -595,8 +632,6 @@ Author: Dmitriy Yefremov
                                       <object class="GtkGrid" id="http_grid">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="margin_top">2</property>
-                                        <property name="margin_bottom">5</property>
                                         <property name="row_spacing">2</property>
                                         <property name="column_spacing">2</property>
                                         <child>
@@ -687,8 +722,6 @@ Author: Dmitriy Yefremov
                                       <object class="GtkGrid" id="telnet_grid">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="margin_top">2</property>
-                                        <property name="margin_bottom">5</property>
                                         <property name="row_spacing">2</property>
                                         <property name="column_spacing">2</property>
                                         <child>
@@ -808,7 +841,7 @@ Author: Dmitriy Yefremov
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
