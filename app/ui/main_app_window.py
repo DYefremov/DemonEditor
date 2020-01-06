@@ -8,7 +8,7 @@ from gi.repository import GLib, Gio
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
 from app.connections import HttpAPI, HttpRequestType, download_data, DownloadType, upload_data, test_http, \
-    TestException
+    TestException, HttpApiException
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
@@ -836,7 +836,7 @@ class Application(Gtk.Application):
                 host, port, user, password = opts.host, opts.http_port, opts.http_user, opts.http_password
                 try:
                     test_http(host, port, user, password, use_ssl=opts.http_use_ssl, skip_message=True)
-                except TestException:
+                except (TestException, HttpApiException):
                     use_http = False
 
             upload_data(settings=opts,

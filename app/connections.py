@@ -45,6 +45,10 @@ class TestException(Exception):
     pass
 
 
+class HttpApiException(Exception):
+    pass
+
+
 def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
     with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
@@ -329,17 +333,30 @@ def test_ftp(host, port, user, password, timeout=5):
 
 
 def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message=False):
+    params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
+    params = "statusinfo" if skip_message else "message?{}".format(params)
+    base_url = "http{}://{}:{}".format("s" if use_ssl else "", host, port)
+    # authentication
+    init_auth(user, password, base_url, use_ssl)
     try:
-        params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
-        params = "statusinfo" if skip_message else "message?{}".format(params)
-        url = "http{}://{}:{}/api/".format("s" if use_ssl else "", host, port)
-        # authentication
-        init_auth(user, password, url, use_ssl)
-
-        with urlopen("{}{}".format(url, params), timeout=5) as f:
+        with urlopen("{}/api/{}".format(base_url, params), timeout=5) as f:
             return json.loads(f.read().decode("utf-8")).get("message", "")
+    except HTTPError as e:
+        if e.code == 404:
+            return test_api("{}/web/{}".format(base_url, params))
+        raise TestException(e)
+    except (RemoteDisconnected, URLError) as e:
+        raise TestException(e)
+
+
+def test_api(url):
+    """ Additional HTTP API compatibility test. """
+    try:
+        with urlopen(url, timeout=5) as f:
+            pass  # NOP
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
+    raise HttpApiException("HTTP API is not supported yet for this receiver!")
 
 
 def init_auth(user, password, url, use_ssl=False):
