@@ -315,7 +315,6 @@ class Application(Gtk.Application):
         self.activate()
         return 0
 
-    @run_idle
     def init_profiles(self):
         self.update_profiles()
         self._profile_combo_box.set_active_id(self._settings.default_profile)
@@ -1193,12 +1192,12 @@ class Application(Gtk.Application):
         gen = self.init_http_api()
         yield from gen
 
-    def on_profile_changed(self, box):
+    def on_profile_changed(self, entry):
         if self._app_info_box.get_visible():
             self.update_profile_label()
             return
 
-        active = box.get_active_text()
+        active = self._profile_combo_box.get_active_text()
         if active in self._settings.profiles:
             self._settings.current_profile = active
             self._s_type = self._settings.setting_type
@@ -1207,6 +1206,8 @@ class Application(Gtk.Application):
 
             if self._http_api and self._settings.http_api_support:
                 self._http_api.init()
+
+            self.open_data()
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()

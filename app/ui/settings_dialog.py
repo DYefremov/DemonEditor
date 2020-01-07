@@ -28,6 +28,7 @@ class SettingsDialog:
                     "on_reset": self.on_reset,
                     "on_response": self.on_response,
                     "apply_settings": self.apply_settings,
+                    "on_apply_profile_settings": self.on_apply_profile_settings,
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_set_color_switch_state": self.on_set_color_switch_state,
@@ -43,8 +44,10 @@ class SettingsDialog:
                     "on_profile_selected": self.on_profile_selected,
                     "on_profile_set_default": self.on_profile_set_default,
                     "on_lang_changed": self.on_lang_changed,
-                    "on_current_settings_visible": self.on_current_settings_visible,
-                    "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled}
+                    "on_main_settings_visible": self.on_main_settings_visible,
+                    "on_network_settings_visible": self.on_network_settings_visible,
+                    "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
+                    "on_view_popup_menu": self.on_view_popup_menu}
 
         builder = Gtk.Builder()
         builder.add_from_file(UI_RESOURCES_PATH + "settings_dialog.glade")
@@ -108,10 +111,13 @@ class SettingsDialog:
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
+        self._apply_profile_button = builder.get_object("apply_profile_button")
+        self._apply_profile_button.bind_property("visible", builder.get_object("header_separator"), "visible")
         # Language
         self._lang_combo_box = builder.get_object("lang_combo_box")
         # Settings
-        self._settings = settings
+        self._ext_settings = settings
+        self._settings = Settings(settings.settings)
         self._profiles = self._settings.profiles
         self._s_type = self._settings.setting_type
         self.set_settings()
@@ -169,7 +175,6 @@ class SettingsDialog:
         self._settings.reset()
         self.set_settings()
 
-    @run_idle
     def set_settings(self):
         self._host_field.set_text(self._settings.host)
         self._port_field.set_text(self._settings.port)
@@ -207,10 +212,7 @@ class SettingsDialog:
             self._new_color_button.set_rgba(new_rgb)
             self._extra_color_button.set_rgba(extra_rgb)
 
-    def apply_settings(self, item=None):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
+    def on_apply_profile_settings(self, item):
         self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
         self._settings.setting_type = self._s_type
         self._settings.host = self._host_field.get_text()
@@ -232,22 +234,28 @@ class SettingsDialog:
         self._settings.data_local_path = self._data_dir_field.get_text()
         self._settings.picons_local_path = self._picons_dir_field.get_text()
         self._settings.backup_local_path = self._backup_dir_field.get_text()
-        self._settings.backup_before_save = self._before_save_switch.get_active()
-        self._settings.backup_before_downloading = self._before_downloading_switch.get_active()
-        self._settings.fav_click_mode = self.get_fav_click_mode()
-        self._settings.language = self._lang_combo_box.get_active_id()
+
+    def apply_settings(self, item=None):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        self._ext_settings.profiles = self._settings.profiles
+        self._ext_settings.backup_before_save = self._before_save_switch.get_active()
+        self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
+        self._ext_settings.fav_click_mode = self.get_fav_click_mode()
+        self._ext_settings.language = self._lang_combo_box.get_active_id()
 
         if self._s_type is SettingsType.ENIGMA_2:
-            self._settings.use_colors = self._set_color_switch.get_active()
-            self._settings.new_color = self._new_color_button.get_rgba().to_string()
-            self._settings.extra_color = self._extra_color_button.get_rgba().to_string()
-            self._settings.v5_support = self._support_ver5_switch.get_active()
-            self._settings.http_api_support = self._support_http_api_switch.get_active()
-            self._settings.enable_yt_dl = self._enable_y_dl_switch.get_active()
-            self._settings.enable_send_to = self._enable_send_to_switch.get_active()
+            self._ext_settings.use_colors = self._set_color_switch.get_active()
+            self._ext_settings.new_color = self._new_color_button.get_rgba().to_string()
+            self._ext_settings.extra_color = self._extra_color_button.get_rgba().to_string()
+            self._ext_settings.v5_support = self._support_ver5_switch.get_active()
+            self._ext_settings.http_api_support = self._support_http_api_switch.get_active()
+            self._ext_settings.enable_yt_dl = self._enable_y_dl_switch.get_active()
+            self._ext_settings.enable_send_to = self._enable_send_to_switch.get_active()
 
-        self._settings.default_profile = list(filter(lambda r: r[1], self._profile_view.get_model()))[0][0]
-        self._settings.save()
+        self._ext_settings.default_profile = list(filter(lambda r: r[1], self._profile_view.get_model()))[0][0]
+        self._ext_settings.save()
         return True
 
     @run_task
@@ -342,8 +350,9 @@ class SettingsDialog:
         self._settings.picons_local_path += p
         self._settings.backup_local_path += p
 
-    def on_profile_edit(self, item):
-        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+    def on_profile_edit(self, item=None):
+        model, paths = self._profile_view.get_selection().get_selected_rows()
+        self._profile_view.set_cursor(paths, self._profile_view.get_column(0), True)
 
     def on_profile_remove(self, item):
         model, paths = self._profile_view.get_selection().get_selected_rows()
@@ -366,33 +375,30 @@ class SettingsDialog:
             row = self._profile_view.get_model()[path]
             row[0] = new_value
             self._profiles[new_value] = p_name
-            if p_name == self._settings.current_profile:
-                self._settings.current_profile = new_value
-            if p_name == self._settings.default_profile:
-                self._settings.default_profile = new_value
 
         if p_name != new_value:
             self.update_local_paths(new_value)
         self.on_profile_selected(self._profile_view)
 
-    def update_local_paths(self, p_name):
+    def update_local_paths(self, p_name, force_rename=False):
         data_path = self._settings.data_local_path
         picons_path = self._settings.picons_local_path
         backup_path = self._settings.backup_local_path
 
-        try:
-            if os.path.isdir(picons_path):
-                os.rename(picons_path, self._settings.picons_local_path)
-            if os.path.isdir(data_path):
-                os.rename(data_path, self._settings.data_local_path)
-            if os.path.isdir(backup_path):
-                os.rename(backup_path, self._settings.backup_local_path)
-        except OSError as e:
-            self.show_info_message(str(e), Gtk.MessageType.ERROR)
-        else:
-            self._settings.data_local_path = "{}/{}/".format(Path(data_path).parent, p_name)
-            self._settings.picons_local_path = "{}/{}/".format(Path(picons_path).parent, p_name)
-            self._settings.backup_local_path = "{}/{}/".format(Path(self._settings.backup_local_path).parent, p_name)
+        self._settings.data_local_path = "{}/{}/".format(Path(data_path).parent, p_name)
+        self._settings.picons_local_path = "{}/{}/".format(Path(picons_path).parent, p_name)
+        self._settings.backup_local_path = "{}/{}/".format(Path(backup_path).parent, p_name)
+
+        if force_rename:
+            try:
+                if os.path.isdir(picons_path):
+                    os.rename(picons_path, self._settings.picons_local_path)
+                if os.path.isdir(data_path):
+                    os.rename(data_path, self._settings.data_local_path)
+                if os.path.isdir(backup_path):
+                    os.rename(backup_path, self._settings.backup_local_path)
+            except OSError as e:
+                self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_profile_selected(self, view):
         model, paths = self._profile_view.get_selection().get_selected_rows()
@@ -416,7 +422,10 @@ class SettingsDialog:
         if box.get_active_id() != self._settings.language:
             self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
 
-    def on_current_settings_visible(self, stack: Gtk.Stack, param):
+    def on_main_settings_visible(self, stack, param):
+        self._apply_profile_button.set_visible(stack.get_visible_child_name() == "profiles")
+
+    def on_network_settings_visible(self, stack, param):
         self._http_use_ssl_check_button.set_visible(Property(stack.get_visible_child_name()) is Property.HTTP)
 
     def on_http_use_ssl_toggled(self, button):
@@ -443,6 +452,10 @@ class SettingsDialog:
             return FavClickMode.STREAM
 
         return FavClickMode.DISABLED
+
+    def on_view_popup_menu(self, menu, event):
+        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+            menu.popup(None, None, None, None, event.button, event.time)
 
 
 if __name__ == "__main__":

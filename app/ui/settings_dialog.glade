@@ -43,6 +43,71 @@ Author: Dmitriy Yefremov
     <signal name="row-deleted" handler="on_profile_deleted" swapped="no"/>
     <signal name="row-inserted" handler="on_profile_inserted" swapped="no"/>
   </object>
+  <object class="GtkImage" id="set_default_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">emblem-default</property>
+  </object>
+  <object class="GtkMenu" id="profiles_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="add_profile_menu_item">
+        <property name="label">gtk-add</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_profile_add" swapped="no"/>
+        <accelerator key="Insert" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="edit_menu_item">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_profile_edit" swapped="no"/>
+        <accelerator key="F2" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="set_default_menu_item">
+        <property name="label" translatable="yes">Set default</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">set_default_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_profile_set_default" swapped="no"/>
+        <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="remove_menu_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_profile_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkAdjustment" id="telnet_timeout_adjustment">
     <property name="lower">1</property>
     <property name="upper">10</property>
@@ -85,7 +150,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="ok_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-apply</property>
+                <property name="stock">gtk-ok</property>
               </object>
             </child>
           </object>
@@ -108,6 +173,37 @@ Author: Dmitriy Yefremov
           </object>
           <packing>
             <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="header_separator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="apply_profile_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Apply profile settings</property>
+            <signal name="clicked" handler="on_apply_profile_settings" swapped="no"/>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-apply</property>
+              </object>
+            </child>
+            <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+          </object>
+          <packing>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -179,6 +275,7 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_bottom">5</property>
+                <signal name="notify::visible-child" handler="on_main_settings_visible" swapped="no"/>
                 <child>
                   <object class="GtkPaned" id="profile_paned">
                     <property name="visible">True</property>
@@ -213,6 +310,7 @@ Author: Dmitriy Yefremov
                                     <property name="model">profile_lists_tore</property>
                                     <property name="headers_visible">False</property>
                                     <property name="search_column">0</property>
+                                    <signal name="button-press-event" handler="on_view_popup_menu" object="profiles_popup_menu" swapped="no"/>
                                     <signal name="cursor-changed" handler="on_profile_selected" swapped="no"/>
                                     <child internal-child="selection">
                                       <object class="GtkTreeSelection"/>
@@ -273,6 +371,7 @@ Author: Dmitriy Yefremov
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-add</property>
                                     <signal name="clicked" handler="on_profile_add" swapped="no"/>
+                                    <accelerator key="Insert" signal="clicked"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -281,12 +380,14 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkToolButton" id="profile_edit_button">
+                                    <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="tooltip_text" translatable="yes">Edit</property>
                                     <property name="label" translatable="yes">Edit</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-edit</property>
                                     <signal name="clicked" handler="on_profile_edit" swapped="no"/>
+                                    <accelerator key="F2" signal="clicked"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -302,6 +403,7 @@ Author: Dmitriy Yefremov
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-remove</property>
                                     <signal name="clicked" handler="on_profile_remove" swapped="no"/>
+                                    <accelerator key="Delete" signal="clicked"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -330,6 +432,7 @@ Author: Dmitriy Yefremov
                                     <property name="use_underline">True</property>
                                     <property name="icon_name">emblem-default</property>
                                     <signal name="clicked" handler="on_profile_set_default" swapped="no"/>
+                                    <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -537,7 +640,7 @@ Author: Dmitriy Yefremov
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_bottom">5</property>
-                                    <signal name="notify::visible-child" handler="on_current_settings_visible" swapped="no"/>
+                                    <signal name="notify::visible-child" handler="on_network_settings_visible" swapped="no"/>
                                     <child>
                                       <object class="GtkGrid" id="ftp_grid">
                                         <property name="visible">True</property>
