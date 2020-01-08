@@ -1,6 +1,7 @@
 import os
 import sys
 from contextlib import suppress
+from datetime import datetime
 from functools import lru_cache
 from itertools import chain
 
@@ -232,6 +233,7 @@ class Application(Gtk.Application):
         self._save_header_button.bind_property("sensitive", builder.get_object("save_menu_button"), "sensitive")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
+        self._receiver_info_box.bind_property("visible", builder.get_object("signal_box"), "visible")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -267,6 +269,7 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("download_header_button"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
+        self._player_box.bind_property("visible", self._profile_combo_box, "sensitive", 4)
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
@@ -1203,11 +1206,9 @@ class Application(Gtk.Application):
             self._s_type = self._settings.setting_type
             self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
             self.update_profile_label()
-
-            if self._http_api and self._settings.http_api_support:
-                self._http_api.init()
-
-            self.open_data()
+        gen = self.init_http_api()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        self.open_data()
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()
@@ -1600,11 +1601,11 @@ class Application(Gtk.Application):
 
     def on_player_previous(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
-            self.on_play_stream()
+            self.on_zap(self.on_watch) if self._fav_click_mode is FavClickMode.PLAY else self.on_play_stream()
 
     def on_player_next(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
-            self.on_play_stream()
+            self.on_zap(self.on_watch) if self._fav_click_mode is FavClickMode.PLAY else self.on_play_stream()
 
     def on_player_rewind(self, scale, scroll_type, value):
         self._player.set_time(int(value))
@@ -1680,17 +1681,16 @@ class Application(Gtk.Application):
         if not state & Gdk.WindowState.ICONIFIED and self._links_transmitter:
             self._links_transmitter.hide()
 
-    # ************************ HTTP API ****************************#
+    # ************************ HTTP API **************************** #
 
     def init_http_api(self):
         self._fav_click_mode = FavClickMode(self._settings.fav_click_mode)
         http_api_enable = self._settings.http_api_support
-        status = all(
-            (http_api_enable, self._s_type is SettingsType.ENIGMA_2, not self._receiver_info_box.get_visible()))
-        GLib.idle_add(self._http_status_image.set_visible, status)
+        st = all((http_api_enable, self._s_type is SettingsType.ENIGMA_2, not self._receiver_info_box.get_visible()))
+        GLib.idle_add(self._http_status_image.set_visible, st)
 
         if self._s_type is SettingsType.NEUTRINO_MP or not http_api_enable:
-            GLib.idle_add(self.update_info_boxes_visible, False)
+            GLib.idle_add(self._receiver_info_box.set_visible, False)
             if self._http_api:
                 self._http_api.close()
                 yield True
@@ -1701,6 +1701,8 @@ class Application(Gtk.Application):
         if not self._http_api:
             self._http_api = HttpAPI(self._settings)
             GLib.timeout_add_seconds(3, self.update_info, priority=GLib.PRIORITY_LOW)
+        else:
+            self._http_api.init()
 
         self.init_send_to(http_api_enable and self._settings.enable_send_to)
         yield True
@@ -1738,7 +1740,7 @@ class Application(Gtk.Application):
             ref = srv.picon_id.rstrip(".png").replace("_", ":")
 
             def zap(rq):
-                if rq and rq.get("result", False):
+                if rq and rq.get("e2state", False):
                     GLib.idle_add(scroll_to, path, self._fav_view)
                     if callback is not None:
                         callback()
@@ -1747,49 +1749,51 @@ class Application(Gtk.Application):
 
     def update_info(self):
         """ Updating current info over HTTP API """
-        if not self._http_api:
+        if not self._http_api or self._s_type is SettingsType.NEUTRINO_MP:
             GLib.idle_add(self._http_status_image.set_visible, False)
+            GLib.idle_add(self._receiver_info_box.set_visible, False)
             return False
 
         self._http_api.send(HttpRequestType.INFO, None, self.update_receiver_info)
-        self._http_api.send(HttpRequestType.INFO, None, self.update_service_info)
         return True
 
     def update_receiver_info(self, info):
-        res_info = info.get("info", None) if info else None
+        res_info = info.get("e2about", None) if info else None
         if res_info:
-            image = res_info.get("friendlyimagedistro", "")
-            image_ver = res_info.get("imagever", "")
-            brand = res_info.get("brand", "")
-            model = res_info.get("model", "")
-            info_text = "{} {}  Image: {} {}".format(brand, model, image, image_ver)
+            image = info.get("e2distroversion", "")
+            image_ver = info.get("e2imageversion", "")
+            model = info.get("e2model", "")
+            info_text = "{} Image: {} {}".format(model, image, image_ver)
             GLib.idle_add(self._receiver_info_label.set_text, info_text)
+            GLib.idle_add(self._service_name_label.set_text, info.get("e2servicename", None) or "")
+            self.update_service_info(info)
         GLib.idle_add(self._receiver_info_box.set_visible, bool(res_info))
 
+    @run_idle
     def update_service_info(self, info):
-        service_info = info.get("service", None) if info else None
-        if service_info:
-            GLib.idle_add(self._service_name_label.set_text, service_info.get("name", ""))
-            if service_info.get("onid", None) and self._http_api:
-                self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
-                self._http_api.send(HttpRequestType.STATUS, None, self.update_status)
-        GLib.idle_add(self._signal_box.set_visible, bool(service_info))
+        has_onid = info.get("e2onid", "N/A") != "N/A"
+        if has_onid and self._http_api:
+            self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
+            self._http_api.send(HttpRequestType.CURRENT, None, self.update_status)
+        self._signal_level_bar.set_visible(has_onid)
 
     def update_signal(self, sig):
-        self.set_signal(sig.get("snr", 0) if sig else 0)
+        self.set_signal(sig.get("e2snr", "0 %") if sig else "0 %")
 
     @lru_cache(maxsize=2)
     def set_signal(self, val):
-        self._signal_level_bar.set_value(val if isinstance(val, int) else 0)
-        self._signal_level_bar.set_visible(val)
+        self._signal_level_bar.set_value(int(val.rstrip("%").strip() or 0))
 
-    def update_status(self, status):
-        if status:
-            dsc = "{} {} - {}".format(status.get("currservice_name", ""),
-                                      status.get("currservice_begin", ""),
-                                      status.get("currservice_end", ""))
+    def update_status(self, evn):
+        if evn:
+            s_duration = int(evn.get("e2eventstart", "0"))
+            s_time = datetime.fromtimestamp(s_duration)
+            end_time = datetime.fromtimestamp(s_duration + int(evn.get("e2eventduration", "0")))
+            dsc = "{} {}:{} - {}:{}".format(evn.get("e2eventtitle", ""),
+                                            s_time.hour, s_time.minute,
+                                            end_time.hour, end_time.minute)
             self._service_epg_label.set_text(dsc)
-            self._service_epg_label.set_tooltip_text(status.get("currservice_description", ""))
+            self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
 
     # ***************** Filter and search *********************#
 
@@ -2107,11 +2111,6 @@ class Application(Gtk.Application):
 
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4
-
-    @run_idle
-    def update_info_boxes_visible(self, visible):
-        self._signal_box.set_visible(visible)
-        self._receiver_info_box.set_visible(visible)
 
     @run_idle
     def show_error_dialog(self, message):

@@ -88,7 +88,7 @@ class LinksTransmitter:
     def on_play(self, res):
         """ Play callback """
         GLib.idle_add(self._url_entry.set_sensitive, True)
-        res = res.get("result", None) if res else res
+        res = res.get("e2state", None) if res else res
         self._url_entry.set_name("GtkEntry" if res else "digit-entry")
 
     def on_exit(self, item=None):

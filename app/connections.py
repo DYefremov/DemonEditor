@@ -1,15 +1,17 @@
-import json
 import os
+import re
 import socket
 import time
 import urllib
+import xml.etree.ElementTree as ETree
 from enum import Enum
 from ftplib import FTP, error_perm
 from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
+from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, \
+    build_opener, install_opener, Request
 
 from app.commons import log
 from app.settings import SettingsType
@@ -21,6 +23,8 @@ _DATA_FILES_LIST = ("lamedb", "lamedb5", "services.xml", "blacklist", "whitelist
 
 _SAT_XML_FILE = "satellites.xml"
 _WEBTV_XML_FILE = "webtv.xml"
+
+_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/71.0"}
 
 
 class DownloadType(Enum):
@@ -37,8 +41,9 @@ class HttpRequestType(Enum):
     INFO = "about"
     SIGNAL = "tunersignal"
     STREAM = "streamcurrentm3u"
-    STATUS = "statusinfo"
+    CURRENT = "getcurrent"
     PLAY = "mediaplayerplay?file=4097:0:1:0:0:0:0:0:0:0:"
+    TEST = None
 
 
 class TestException(Exception):
@@ -101,7 +106,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
     s_type = settings.setting_type
     data_path = settings.data_local_path
     host = settings.host
-    base_url = "http{}://{}:{}/api/".format("s" if settings.http_use_ssl else "", host, settings.http_port)
+    base_url = "http{}://{}:{}/web/".format("s" if settings.http_use_ssl else "", host, settings.http_port)
     tn, ht = None, None  # telnet, http
 
     try:
@@ -122,7 +127,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
             if download_type is DownloadType.ALL:
                 time.sleep(5)
-                ht.send(base_url + "/powerstate?newstate=0")
+                ht.send(base_url + "powerstate?newstate=0")
                 time.sleep(2)
         else:
             # telnet
@@ -167,10 +172,10 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 tn.send("init 3" if s_type is SettingsType.ENIGMA_2 else "init 6")
             elif ht and use_http:
                 if download_type is DownloadType.BOUQUETS:
-                    ht.send(base_url + "/servicelistreload?mode=2")
+                    ht.send(base_url + "servicelistreload?mode=2")
                 elif download_type is DownloadType.ALL:
-                    ht.send(base_url + "/servicelistreload?mode=0")
-                    ht.send(base_url + "/powerstate?newstate=4")
+                    ht.send(base_url + "servicelistreload?mode=0")
+                    ht.send(base_url + "powerstate?newstate=4")
 
             if done_callback is not None:
                 done_callback()
@@ -246,10 +251,9 @@ def http(user, password, url, callback):
     init_auth(user, password, url)
     while True:
         url = yield
-        with urlopen(url, timeout=5) as f:
-            msg = json.loads(f.read().decode("utf-8")).get("message", None)
-            if msg:
-                callback("HTTP: {}\n".format(msg))
+        msg = get_response(HttpRequestType.TEST, url).get("e2statetext", None)
+        if msg:
+            callback("HTTP: {}\n".format(msg))
 
 
 def telnet(host, port=23, user="", password="", timeout=5):
@@ -298,28 +302,36 @@ class HttpAPI:
         elif req_type is HttpRequestType.PLAY:
             url += urllib.parse.quote(ref).replace("%3A", "%253A")
 
-        future = self._executor.submit(get_json, req_type, url)
+        future = self._executor.submit(get_response, req_type, url)
         future.add_done_callback(lambda f: callback(f.result()))
 
     def init(self):
         use_ssl = self._settings.http_use_ssl
         url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
-        self._base_url = "{}/api/".format(url)
+        self._base_url = "{}/web/".format(url)
         init_auth(self._settings.http_user, self._settings.http_password, url, use_ssl)
 
     def close(self):
         self._executor.shutdown(False)
 
 
-def get_json(req_type, url):
+def get_response(req_type, url):
     try:
-        with urlopen(url, timeout=10) as f:
+        with urlopen(Request(url, headers=_HEADERS), timeout=10) as f:
             if req_type is HttpRequestType.STREAM:
                 return f.read().decode("utf-8")
+            elif req_type is HttpRequestType.CURRENT:
+                for e in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
+                    return {e.tag: e.text for e in e.iter()}  # return first[current] event from the list
             else:
-                return json.loads(f.read().decode("utf-8"))
-    except (URLError, HTTPError, RemoteDisconnected):
-        pass
+                return {e.tag: e.text for e in ETree.fromstring(f.read().decode("utf-8")).iter()}
+    except (URLError, HTTPError, RemoteDisconnected, ConnectionResetError) as e:
+        if req_type is HttpRequestType.TEST:
+            raise e
+    except ETree.ParseError as e:
+        log("Parsing response error: {}".format(e))
+
+    return {}
 
 
 # ***************** Connections testing *******************#
@@ -339,24 +351,9 @@ def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message
     # authentication
     init_auth(user, password, base_url, use_ssl)
     try:
-        with urlopen("{}/api/{}".format(base_url, params), timeout=5) as f:
-            return json.loads(f.read().decode("utf-8")).get("message", "")
-    except HTTPError as e:
-        if e.code == 404:
-            return test_api("{}/web/{}".format(base_url, params))
-        raise TestException(e)
-    except (RemoteDisconnected, URLError) as e:
-        raise TestException(e)
-
-
-def test_api(url):
-    """ Additional HTTP API compatibility test. """
-    try:
-        with urlopen(url, timeout=5) as f:
-            pass  # NOP
+        return get_response(HttpRequestType.TEST, "{}/web/{}".format(base_url, params)).get("e2statetext", "")
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
-    raise HttpApiException("HTTP API is not supported yet for this receiver!")
 
 
 def init_auth(user, password, url, use_ssl=False):
@@ -381,9 +378,12 @@ def test_telnet(host, port, user, password, timeout=5):
     try:
         gen = telnet_test(host, port, user, password, timeout)
         res = next(gen)
-        print(res)
-        res = next(gen)
-        return res
+        msg = str(res, encoding="utf8").strip()
+        log(msg)
+        next(gen)
+        if re.search("password", msg, re.IGNORECASE):
+            raise TestException(msg)
+        return msg
     except (socket.timeout, OSError) as e:
         raise TestException(e)
 
@@ -392,14 +392,14 @@ def telnet_test(host, port, user, password, timeout):
     tn = Telnet(host=host, port=port, timeout=timeout)
     time.sleep(1)
     tn.read_until(b"login: ", timeout=2)
-    tn.write(user.encode("utf-8") + b"\n")
+    tn.write(user.encode("utf-8") + b"\r")
     time.sleep(timeout)
     tn.read_until(b"Password: ", timeout=2)
-    tn.write(password.encode("utf-8") + b"\n")
+    tn.write(password.encode("utf-8") + b"\r")
     time.sleep(timeout)
     yield tn.read_very_eager()
     tn.close()
-    yield "Done!"
+    yield
 
 
 if __name__ == "__main__":
