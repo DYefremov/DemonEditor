@@ -186,9 +186,7 @@ class Settings:
 
     @setting_type.setter
     def setting_type(self, s_type):
-        self._cp_settings["setting_type"] = s_type
-        for k, v in s_type.get_default_settings().items():
-            self._cp_settings[k] = v
+        self._cp_settings["setting_type"] = s_type.value
 
     @property
     def language(self):

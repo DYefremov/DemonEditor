@@ -405,6 +405,10 @@ class SettingsDialog:
         if paths:
             profile = model.get_value(model.get_iter(paths), 0)
             self._settings.current_profile = profile
+            if self._settings.setting_type is SettingsType.ENIGMA_2:
+                self._enigma_radio_button.activate()
+            else:
+                self._neutrino_radio_button.activate()
             self.set_settings()
 
     def on_profile_set_default(self, item):
