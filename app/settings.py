@@ -197,6 +197,14 @@ class Settings:
         self._settings["language"] = value
 
     @property
+    def load_last_config(self):
+        return self._settings.get("load_last_config", False)
+
+    @load_last_config.setter
+    def load_last_config(self, value):
+        self._settings["load_last_config"] = value
+
+    @property
     def host(self):
         return self._cp_settings.get("host", self.get_default("host"))
 

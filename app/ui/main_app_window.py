@@ -290,9 +290,15 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        self.init_profiles()
         self.init_drag_and_drop()
         self.init_colors()
+        if self._settings.load_last_config:
+            config = self._settings.get("last_config") or {}
+            self.init_profiles(config.get("last_profile", None))
+            last_bouquet = config.get("last_bouquet", None)
+            self.open_data(callback=lambda: self.open_bouquet(last_bouquet))
+        else:
+            self.init_profiles()
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
@@ -303,7 +309,11 @@ class Application(Gtk.Application):
 
     def do_shutdown(self):
         """  Performs shutdown tasks """
-        self._settings.save()  # storing current config
+        if self._settings.load_last_config:
+            self._settings.add("last_config", {"last_profile": self._settings.current_profile,
+                                               "last_bouquet": self._current_bq_name})
+        self._settings.save()  # storing current settings
+
         if self._player:
             self._player.release()
         Gtk.Application.do_shutdown(self)
@@ -318,9 +328,11 @@ class Application(Gtk.Application):
         self.activate()
         return 0
 
-    def init_profiles(self):
+    def init_profiles(self, profile=None):
         self.update_profiles()
-        self._profile_combo_box.set_active_id(self._settings.default_profile)
+        self._profile_combo_box.set_active_id(profile if profile else self._settings.default_profile)
+        if profile:
+            self.set_profile(profile)
 
     def init_drag_and_drop(self):
         """ Enable drag-and-drop """
@@ -855,12 +867,12 @@ class Application(Gtk.Application):
             return
         self.open_data(response)
 
-    def open_data(self, data_path=None):
+    def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
-        gen = self.update_data(data_path)
+        gen = self.update_data(data_path, callback)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_DEFAULT_IDLE)
 
-    def update_data(self, data_path):
+    def update_data(self, data_path, callback=None):
         self._wait_dialog.show()
         yield True
 
@@ -892,6 +904,8 @@ class Application(Gtk.Application):
             yield from self.append_data(bouquets, services)
         finally:
             self._wait_dialog.hide()
+            if callback:
+                callback()
             yield True
 
     def append_data(self, bouquets, services):
@@ -955,6 +969,17 @@ class Application(Gtk.Application):
         self._bouquets[bq_id] = services
         if extra_services:
             self._extra_bouquets[bq_id] = extra_services
+
+    @run_idle
+    def open_bouquet(self, name):
+        """ Find and open bouquet by name """
+        for r in self._bouquets_model:
+            for i in r.iterchildren():
+                if i[Column.BQ_NAME] == name:
+                    self._bouquets_view.expand_row(self._bouquets_model.get_path(r.iter), Column.BQ_NAME)
+                    self._bouquets_view.set_cursor(i.path)
+                    self._bouquets_view.row_activated(i.path, self._bouquets_view.get_column(Column.BQ_NAME))
+                    break
 
     def append_services(self, services):
         for srv in services:
@@ -1202,13 +1227,16 @@ class Application(Gtk.Application):
 
         active = self._profile_combo_box.get_active_text()
         if active in self._settings.profiles:
-            self._settings.current_profile = active
-            self._s_type = self._settings.setting_type
-            self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
-            self.update_profile_label()
+            self.set_profile(active)
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         self.open_data()
+
+    def set_profile(self, active):
+        self._settings.current_profile = active
+        self._s_type = self._settings.setting_type
+        self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
+        self.update_profile_label()
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()

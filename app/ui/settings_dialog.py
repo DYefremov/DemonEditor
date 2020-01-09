@@ -95,6 +95,7 @@ class SettingsDialog:
         self._set_color_switch = builder.get_object("set_color_switch")
         self._new_color_button = builder.get_object("new_color_button")
         self._extra_color_button = builder.get_object("extra_color_button")
+        self._load_on_startup_switch = builder.get_object("load_on_startup_switch")
         # HTTP API
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
         self._enable_y_dl_switch = builder.get_object("enable_y_dl_switch")
@@ -198,6 +199,7 @@ class SettingsDialog:
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
+        self._load_on_startup_switch.set_active(self._settings.load_last_config)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._support_ver5_switch.set_active(self._settings.v5_support)
@@ -244,6 +246,7 @@ class SettingsDialog:
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
         self._ext_settings.fav_click_mode = self.get_fav_click_mode()
         self._ext_settings.language = self._lang_combo_box.get_active_id()
+        self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._ext_settings.use_colors = self._set_color_switch.get_active()
