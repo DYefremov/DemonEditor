@@ -1803,7 +1803,7 @@ class Application(Gtk.Application):
         if has_onid and self._http_api:
             self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
             self._http_api.send(HttpRequestType.CURRENT, None, self.update_status)
-        self._signal_level_bar.set_visible(has_onid)
+        GLib.idle_add(self._signal_level_bar.set_visible, has_onid)
 
     def update_signal(self, sig):
         self.set_signal(sig.get("e2snr", "0 %") if sig else "0 %")
@@ -1814,12 +1814,14 @@ class Application(Gtk.Application):
 
     def update_status(self, evn):
         if evn:
-            s_duration = int(evn.get("e2eventstart", "0"))
+            s_duration = evn.get("e2eventstart", 0)
+            if not s_duration:
+                return
+            s_duration = int(s_duration)
             s_time = datetime.fromtimestamp(s_duration)
-            end_time = datetime.fromtimestamp(s_duration + int(evn.get("e2eventduration", "0")))
-            dsc = "{} {}:{} - {}:{}".format(evn.get("e2eventtitle", ""),
-                                            s_time.hour, s_time.minute,
-                                            end_time.hour, end_time.minute)
+            end_time = datetime.fromtimestamp(s_duration + int(evn.get("e2eventduration", "0") or "0"))
+            title = evn.get("e2eventtitle", "")
+            dsc = "{} {}:{} - {}:{}".format(title, s_time.hour, s_time.minute, end_time.hour, end_time.minute)
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
 
