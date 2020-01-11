@@ -10,8 +10,8 @@ from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.settings import SettingsType
-from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
+from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
 
 # ***************** Markers *******************#
@@ -347,7 +347,9 @@ def update_picons_data(path, picons):
         return
 
     for file in os.listdir(path):
-        picons[file] = get_picon_pixbuf(path + file)
+        pf = get_picon_pixbuf(path + file)
+        if pf:
+            picons[file] = pf
 
 
 def append_picons(picons, model):
@@ -487,7 +489,10 @@ def is_only_one_item_selected(paths, transient):
 
 
 def get_picon_pixbuf(path):
-    return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=path, width=32, height=32, preserve_aspect_ratio=True)
+    try:
+        return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=path, width=32, height=32, preserve_aspect_ratio=True)
+    except GLib.GError as e:
+        pass
 
 
 # ***************** Bouquets *********************#

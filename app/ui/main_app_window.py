@@ -873,6 +873,7 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_DEFAULT_IDLE)
 
     def update_data(self, data_path, callback=None):
+        self._profile_combo_box.set_sensitive(False)
         self._wait_dialog.show()
         yield True
 
@@ -904,6 +905,7 @@ class Application(Gtk.Application):
             yield from self.append_data(bouquets, services)
         finally:
             self._wait_dialog.hide()
+            self._profile_combo_box.set_sensitive(True)
             if callback:
                 callback()
             yield True
@@ -1019,6 +1021,7 @@ class Application(Gtk.Application):
         self._blacklist.clear()
         self._services.clear()
         self._rows_buffer.clear()
+        self._picons.clear()
         self._bouquets.clear()
         self._extra_bouquets.clear()
         self._current_bq_name = None
