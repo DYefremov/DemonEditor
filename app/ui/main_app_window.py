@@ -1430,10 +1430,12 @@ class Application(Gtk.Application):
                 return
             elif self._fav_click_mode is FavClickMode.STREAM:
                 self.on_play_stream()
-            elif self._fav_click_mode is FavClickMode.PLAY:
+            elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
                 self.on_zap(self.on_watch)
             elif self._fav_click_mode is FavClickMode.ZAP:
                 self.on_zap()
+            elif self._fav_click_mode is FavClickMode.PLAY:
+                self.on_stream()
         else:
             return self.on_view_popup_menu(menu, event)
 
@@ -1632,11 +1634,19 @@ class Application(Gtk.Application):
 
     def on_player_previous(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
-            self.on_zap(self.on_watch) if self._fav_click_mode is FavClickMode.PLAY else self.on_play_stream()
+            self.set_player_action()
 
     def on_player_next(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
-            self.on_zap(self.on_watch) if self._fav_click_mode is FavClickMode.PLAY else self.on_play_stream()
+            self.set_player_action()
+
+    def set_player_action(self):
+        if self._fav_click_mode is FavClickMode.PLAY:
+            self.on_stream()
+        elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
+            self.on_zap(self.on_watch)
+        elif self._fav_click_mode is FavClickMode.STREAM:
+            self.on_play_stream()
 
     def on_player_rewind(self, scale, scroll_type, value):
         self._player.set_time(int(value))
@@ -1745,9 +1755,23 @@ class Application(Gtk.Application):
         elif self._links_transmitter:
             self._links_transmitter.show(enable)
 
+    def on_stream(self, item=None):
+        path, column = self._fav_view.get_cursor()
+        if not path or not self._http_api:
+            return
+
+        ref = self.get_service_ref(path)
+        if not ref:
+            return
+
+        if self._player and self._player.is_playing():
+            self._player.stop()
+
+        self._http_api.send(HttpRequestType.STREAM, ref, self.watch)
+
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
-        self._http_api.send(HttpRequestType.STREAM, None, self.watch)
+        self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.watch)
 
     def watch(self, m3u):
         if m3u:
@@ -1762,21 +1786,32 @@ class Application(Gtk.Application):
         if not path or not self._http_api:
             return
 
+        ref = self.get_service_ref(path)
+        if not ref:
+            return
+
         if self._player and self._player.is_playing():
             self._player.stop()
 
+        def zap(rq):
+            if rq and rq.get("e2state", False):
+                GLib.idle_add(scroll_to, path, self._fav_view)
+                if callback:
+                    callback()
+
+        self._http_api.send(HttpRequestType.ZAP, ref, zap)
+
+    def get_service_ref(self, path):
         row = self._fav_model[path][:]
-        srv = self._services.get(row[Column.FAV_ID], None)
+        srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
+
+        if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
+            self.show_error_dialog("Not allowed in this context!")
+            return
+
+        srv = self._services.get(fav_id, None)
         if srv and srv.transponder:
-            ref = srv.picon_id.rstrip(".png").replace("_", ":")
-
-            def zap(rq):
-                if rq and rq.get("e2state", False):
-                    GLib.idle_add(scroll_to, path, self._fav_view)
-                    if callback is not None:
-                        callback()
-
-            self._http_api.send(HttpRequestType.ZAP, ref, zap)
+            return srv.picon_id.rstrip(".png").replace("_", ":")
 
     def update_info(self):
         """ Updating current info over HTTP API """
@@ -1795,10 +1830,13 @@ class Application(Gtk.Application):
             image_ver = info.get("e2imageversion", "")
             model = info.get("e2model", "")
             info_text = "{} Image: {} {}".format(model, image, image_ver)
-            GLib.idle_add(self._receiver_info_label.set_text, info_text)
-            GLib.idle_add(self._service_name_label.set_text, info.get("e2servicename", None) or "")
-            self.update_service_info(info)
-        GLib.idle_add(self._receiver_info_box.set_visible, bool(res_info))
+            GLib.idle_add(self._receiver_info_label.set_text, info_text, priority=GLib.PRIORITY_LOW)
+            service_name = info.get("e2servicename", None) or ""
+            GLib.idle_add(self._service_name_label.set_text, service_name, priority=GLib.PRIORITY_LOW)
+            GLib.idle_add(self._signal_box.set_visible, bool(service_name), priority=GLib.PRIORITY_LOW)
+            if service_name:
+                self.update_service_info(info)
+        GLib.idle_add(self._receiver_info_box.set_visible, bool(res_info), priority=GLib.PRIORITY_LOW)
 
     @run_idle
     def update_service_info(self, info):

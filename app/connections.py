@@ -38,7 +38,8 @@ class HttpRequestType(Enum):
     ZAP = "zap?sRef="
     INFO = "about"
     SIGNAL = "tunersignal"
-    STREAM = "streamcurrent.m3u"
+    STREAM = "stream.m3u?ref="
+    STREAM_CURRENT = "streamcurrent.m3u"
     CURRENT = "getcurrent"
     PLAY = "mediaplayerplay?file=4097:0:1:0:0:0:0:0:0:0:"
     TEST = None
@@ -299,7 +300,7 @@ class HttpAPI:
     def send(self, req_type, ref, callback=print):
         url = self._base_url + req_type.value
 
-        if req_type is HttpRequestType.ZAP:
+        if req_type is HttpRequestType.ZAP or req_type is HttpRequestType.STREAM:
             url += urllib.parse.quote(ref)
         elif req_type is HttpRequestType.PLAY:
             url += urllib.parse.quote(ref).replace("%3A", "%253A")
@@ -325,7 +326,7 @@ class HttpAPI:
 def get_response(req_type, url, data=None):
     try:
         with urlopen(Request(url, data=data), timeout=10) as f:
-            if req_type is HttpRequestType.STREAM:
+            if req_type is HttpRequestType.STREAM or req_type is HttpRequestType.STREAM_CURRENT:
                 return f.read().decode("utf-8")
             elif req_type is HttpRequestType.CURRENT:
                 for e in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):

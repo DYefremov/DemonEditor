@@ -47,6 +47,7 @@ class SettingsDialog:
                     "on_main_settings_visible": self.on_main_settings_visible,
                     "on_network_settings_visible": self.on_network_settings_visible,
                     "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
+                    "on_click_mode_togged": self.on_click_mode_togged,
                     "on_view_popup_menu": self.on_view_popup_menu}
 
         builder = Gtk.Builder()
@@ -56,6 +57,7 @@ class SettingsDialog:
         self._dialog = builder.get_object("settings_dialog")
         self._dialog.set_transient_for(transient)
         self._header_bar = builder.get_object("header_bar")
+        self._main_stack = builder.get_object("main_stack")
         # Network
         self._host_field = builder.get_object("host_field")
         self._port_field = builder.get_object("port_field")
@@ -104,7 +106,9 @@ class SettingsDialog:
         self._click_mode_stream_button = builder.get_object("click_mode_stream_button")
         self._click_mode_play_button = builder.get_object("click_mode_play_button")
         self._click_mode_zap_button = builder.get_object("click_mode_zap_button")
+        self._click_mode_zap_and_play_button = builder.get_object("click_mode_zap_and_play_button")
         self._click_mode_zap_button.bind_property("sensitive", self._click_mode_play_button, "sensitive")
+        self._click_mode_zap_button.bind_property("sensitive", self._click_mode_zap_and_play_button, "sensitive")
         self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
         self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
         self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
@@ -169,10 +173,10 @@ class SettingsDialog:
         profile = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
         self._s_type = profile
         self._settings.setting_type = profile
-        self.set_settings()
+        self.on_reset()
         self.init_ui_elements(profile)
 
-    def on_reset(self, item):
+    def on_reset(self, item=None):
         self._settings.reset()
         self.set_settings()
 
@@ -327,7 +331,9 @@ class SettingsDialog:
 
     def on_http_mode_switch_state(self, switch, state):
         self._click_mode_zap_button.set_sensitive(state)
-        if self._click_mode_play_button.get_active() or self._click_mode_zap_button.get_active():
+        if any((self._click_mode_play_button.get_active(),
+                self._click_mode_zap_button.get_active(),
+                self._click_mode_zap_and_play_button.get_active())):
             self._click_mode_disabled_button.set_active(True)
 
     def on_yt_dl_switch_state(self, switch, state):
@@ -352,6 +358,7 @@ class SettingsDialog:
         self._settings.data_local_path += p
         self._settings.picons_local_path += p
         self._settings.backup_local_path += p
+        self.on_reset()
 
     def on_profile_edit(self, item=None):
         model, paths = self._profile_view.get_selection().get_selected_rows()
@@ -442,6 +449,16 @@ class SettingsDialog:
         self._http_port_field.set_text(port)
         self._settings.http_port = port
 
+    def on_click_mode_togged(self, button):
+        if self._main_stack.get_visible_child_name() != "extra":
+            return
+
+        mode = self.get_fav_click_mode()
+        if mode is FavClickMode.PLAY:
+            self.show_info_message("Operates in standby mode or current active transponder!", Gtk.MessageType.WARNING)
+        else:
+            self.on_info_bar_close()
+
     @run_idle
     def set_fav_click_mode(self, mode):
         mode = FavClickMode(mode)
@@ -449,12 +466,15 @@ class SettingsDialog:
         self._click_mode_stream_button.set_active(mode is FavClickMode.STREAM)
         self._click_mode_play_button.set_active(mode is FavClickMode.PLAY)
         self._click_mode_zap_button.set_active(mode is FavClickMode.ZAP)
+        self._click_mode_zap_and_play_button.set_active(mode is FavClickMode.ZAP_PLAY)
 
     def get_fav_click_mode(self):
         if self._click_mode_zap_button.get_active():
             return FavClickMode.ZAP
         if self._click_mode_play_button.get_active():
             return FavClickMode.PLAY
+        if self._click_mode_zap_and_play_button.get_active():
+            return FavClickMode.ZAP_PLAY
         if self._click_mode_stream_button.get_active():
             return FavClickMode.STREAM
 

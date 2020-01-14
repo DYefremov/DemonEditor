@@ -1,9 +1,11 @@
 import locale
 import os
 from enum import Enum, IntEnum
-from app.settings import Settings, SettingsException
 
 import gi
+
+from app.settings import Settings, SettingsException
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -91,6 +93,7 @@ class FavClickMode(IntEnum):
     STREAM = 1
     PLAY = 2
     ZAP = 3
+    ZAP_PLAY = 4
 
 
 class ViewTarget(Enum):

@@ -1874,41 +1874,10 @@ Author: Dmitriy Yefremov
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Switch(zap) the channel(Ctrl + Z)</property>
                                     <property name="draw_indicator">True</property>
-                                    <property name="group">click_mode_disabled_button</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkRadioButton" id="click_mode_play_button">
-                                    <property name="label" translatable="yes">Play</property>
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">Switch the channel and watch in the program(Ctrl + W)</property>
-                                    <property name="draw_indicator">True</property>
-                                    <property name="group">click_mode_stream_button</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkRadioButton" id="click_mode_stream_button">
-                                    <property name="label" translatable="yes">Play  stream</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">Play IPTV or other stream in the program(Ctrl + P)</property>
-                                    <property name="draw_indicator">True</property>
                                     <property name="group">click_mode_play_button</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">2</property>
+                                    <property name="left_attach">0</property>
                                     <property name="top_attach">0</property>
                                   </packing>
                                 </child>
@@ -1920,10 +1889,59 @@ Author: Dmitriy Yefremov
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Disabled</property>
                                     <property name="draw_indicator">True</property>
-                                    <property name="group">click_mode_play_button</property>
+                                    <property name="group">click_mode_zap_button</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">4</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="click_mode_stream_button">
+                                    <property name="label" translatable="yes">Play  stream</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Play IPTV or other stream in the program(Ctrl + P)</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">click_mode_disabled_button</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">3</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="click_mode_zap_and_play_button">
+                                    <property name="label" translatable="yes">Zap and Play</property>
+                                    <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Switch the channel and watch in the program(Ctrl + W)</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">click_mode_stream_button</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">2</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="click_mode_play_button">
+                                    <property name="label" translatable="yes">Play</property>
+                                    <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Watch the channel in the program</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">click_mode_zap_and_play_button</property>
+                                    <signal name="toggled" handler="on_click_mode_togged" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
                                     <property name="top_attach">0</property>
                                   </packing>
                                 </child>
