@@ -25,6 +25,8 @@ else:
         locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
 
 theme = Gtk.IconTheme.get_default()
+theme.append_search_path(UI_RESOURCES_PATH + "icons")
+
 _IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None
 CODED_ICON = theme.load_icon("emblem-readonly", 16, 0) if theme.lookup_icon(
     "emblem-readonly", 16, 0) else _IMAGE_MISSING
