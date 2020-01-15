@@ -962,7 +962,7 @@ Author: Dmitriy Yefremov
     <property name="width_request">640</property>
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
-    <property name="icon_name">accessories-text-editor</property>
+    <property name="icon_name">demon-editor</property>
     <property name="gravity">center</property>
     <property name="startup_id">DemonEditor</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
@@ -2729,7 +2729,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="app_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-edit</property>
+                <property name="icon_name">demon-editor</property>
                 <property name="icon_size">6</property>
               </object>
               <packing>
