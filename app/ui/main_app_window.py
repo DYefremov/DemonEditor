@@ -270,6 +270,8 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", builder.get_object("download_header_button"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
         self._player_box.bind_property("visible", self._profile_combo_box, "sensitive", 4)
+        self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
+        self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
@@ -1615,7 +1617,9 @@ class Application(Gtk.Application):
         if not self._player:
             try:
                 self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
-                                                   position_callback=self.on_player_time_changed)
+                                                   position_callback=self.on_player_time_changed,
+                                                   error_callback=self.on_player_error,
+                                                   playing_callback=self.set_playback_elms_active)
             except (ImportError, NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
@@ -1626,6 +1630,7 @@ class Application(Gtk.Application):
                 self._player_box.set_size_request(w * 0.6, -1)
 
         self._player_box.set_visible(True)
+        self._fav_view.set_sensitive(False)
         GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
 
     def on_player_stop(self, item=None):
@@ -1661,6 +1666,8 @@ class Application(Gtk.Application):
     def on_player_close(self, item=None):
         if self._player:
             self._player.stop()
+
+        self.set_playback_elms_active()
         GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
 
     @lru_cache(maxsize=1)
@@ -1674,6 +1681,15 @@ class Application(Gtk.Application):
     def on_player_time_changed(self, t):
         if not self._full_screen and self._player_rewind_box.get_visible():
             GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
+
+    def on_player_error(self):
+        self.set_playback_elms_active()
+        self.show_error_dialog("Can't Playback!")
+
+    @run_idle
+    def set_playback_elms_active(self):
+        self._fav_view.set_sensitive(True)
+        self._fav_view.do_grab_focus(self._fav_view)
 
     def get_time_str(self, duration):
         """ returns a string representation of time from duration in milliseconds """
