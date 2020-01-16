@@ -318,6 +318,10 @@ class Application(Gtk.Application):
 
         if self._player:
             self._player.release()
+
+        if self._http_api:
+            self._http_api.close()
+
         Gtk.Application.do_shutdown(self)
 
     def do_command_line(self, command_line):
@@ -399,8 +403,6 @@ class Application(Gtk.Application):
 
     @run_idle
     def on_close_app(self, *args):
-        if self._http_api:
-            self._http_api.close()
         self.quit()
 
     def on_resize(self, window):
@@ -1645,6 +1647,7 @@ class Application(Gtk.Application):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
             self.set_player_action()
 
+    @run_with_delay(1)
     def set_player_action(self):
         if self._fav_click_mode is FavClickMode.PLAY:
             self.on_stream()
@@ -1755,6 +1758,10 @@ class Application(Gtk.Application):
             self.init_send_to(False)
             return
 
+        current_profile = self._profile_combo_box.get_active_text()
+        if current_profile in self._settings.profiles:
+            self._settings.current_profile = current_profile
+
         if not self._http_api:
             self._http_api = HttpAPI(self._settings)
             GLib.timeout_add_seconds(3, self.update_info, priority=GLib.PRIORITY_LOW)
@@ -1840,6 +1847,15 @@ class Application(Gtk.Application):
         return True
 
     def update_receiver_info(self, info):
+        error_code = info.get("error_code", 0) if info else 0
+        GLib.idle_add(self._receiver_info_box.set_visible, error_code == 0, priority=GLib.PRIORITY_LOW)
+
+        if error_code < 0:
+            return
+        elif error_code == 412:
+            self._http_api.init()
+            return
+
         res_info = info.get("e2about", None) if info else None
         if res_info:
             image = info.get("e2distroversion", "")
@@ -1849,29 +1865,29 @@ class Application(Gtk.Application):
             GLib.idle_add(self._receiver_info_label.set_text, info_text, priority=GLib.PRIORITY_LOW)
             service_name = info.get("e2servicename", None) or ""
             GLib.idle_add(self._service_name_label.set_text, service_name, priority=GLib.PRIORITY_LOW)
-            GLib.idle_add(self._signal_box.set_visible, bool(service_name), priority=GLib.PRIORITY_LOW)
             if service_name:
-                self.update_service_info(info)
-        GLib.idle_add(self._receiver_info_box.set_visible, bool(res_info), priority=GLib.PRIORITY_LOW)
+                self.update_service_info()
 
-    @run_idle
-    def update_service_info(self, info):
-        has_onid = info.get("e2onid", "N/A") != "N/A"
-        if has_onid and self._http_api:
+    def update_service_info(self):
+        if self._http_api:
             self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
             self._http_api.send(HttpRequestType.CURRENT, None, self.update_status)
-        GLib.idle_add(self._signal_level_bar.set_visible, has_onid)
 
     def update_signal(self, sig):
         self.set_signal(sig.get("e2snr", "0 %") if sig else "0 %")
 
     @lru_cache(maxsize=2)
     def set_signal(self, val):
-        self._signal_level_bar.set_value(int(val.rstrip("%").strip() or 0))
+        val = val.strip().rstrip("%") or 0
+        with suppress(ValueError):
+            self._signal_level_bar.set_value(int(val))
+        GLib.idle_add(self._signal_level_bar.set_visible, val != "N/A")
 
+    @run_idle
     def update_status(self, evn):
         if evn:
             s_duration = evn.get("e2eventstart", 0)
+            self._service_epg_label.set_visible(bool(s_duration))
             if not s_duration:
                 return
             s_duration = int(s_duration)

@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, \
     build_opener, install_opener, Request
 
-from app.commons import log
+from app.commons import log, run_task
 from app.settings import SettingsType
 
 _BQ_FILES_LIST = ("tv", "radio",  # enigma 2
@@ -37,7 +37,7 @@ class DownloadType(Enum):
 class HttpRequestType(Enum):
     ZAP = "zap?sRef="
     INFO = "about"
-    SIGNAL = "tunersignal"
+    SIGNAL = "signal"
     STREAM = "stream.m3u?ref="
     STREAM_CURRENT = "streamcurrent.m3u"
     CURRENT = "getcurrent"
@@ -308,6 +308,7 @@ class HttpAPI:
         future = self._executor.submit(get_response, req_type, url, self._data)
         future.add_done_callback(lambda f: callback(f.result()))
 
+    @run_task
     def init(self):
         user, password = self._settings.http_user, self._settings.http_password
         use_ssl = self._settings.http_use_ssl
@@ -329,17 +330,21 @@ def get_response(req_type, url, data=None):
             if req_type is HttpRequestType.STREAM or req_type is HttpRequestType.STREAM_CURRENT:
                 return f.read().decode("utf-8")
             elif req_type is HttpRequestType.CURRENT:
-                for e in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
-                    return {e.tag: e.text for e in e.iter()}  # return first[current] event from the list
+                for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
+                    return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
             else:
-                return {e.tag: e.text for e in ETree.fromstring(f.read().decode("utf-8")).iter()}
-    except (URLError, HTTPError, RemoteDisconnected, ConnectionResetError) as e:
+                return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
+    except HTTPError as e:
+        if req_type is HttpRequestType.TEST:
+            raise e
+        return {"error_code": e.code}
+    except (URLError, RemoteDisconnected, ConnectionResetError) as e:
         if req_type is HttpRequestType.TEST:
             raise e
     except ETree.ParseError as e:
         log("Parsing response error: {}".format(e))
 
-    return {}
+    return {"error_code": -1}
 
 
 def init_auth(user, password, url, use_ssl=False):
