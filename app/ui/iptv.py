@@ -10,7 +10,7 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
-from app.settings import Profile
+from app.settings import SettingsType
 from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
@@ -42,7 +42,7 @@ def get_stream_type(box):
 
 class IptvDialog:
 
-    def __init__(self, transient, view, services, bouquet, profile=Profile.ENIGMA_2, action=Action.ADD):
+    def __init__(self, transient, view, services, bouquet, profile=SettingsType.ENIGMA_2, action=Action.ADD):
         handlers = {"on_response": self.on_response,
                     "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
@@ -90,7 +90,7 @@ class IptvDialog:
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        if profile is Profile.NEUTRINO_MP:
+        if profile is SettingsType.NEUTRINO_MP:
             builder.get_object("iptv_dialog_ts_data_frame").set_visible(False)
             builder.get_object("iptv_type_label").set_visible(False)
             builder.get_object("reference_entry").set_visible(False)
@@ -103,7 +103,7 @@ class IptvDialog:
         if self._action is Action.ADD:
             self._save_button.set_visible(False)
             self._add_button.set_visible(True)
-            if self._profile is Profile.ENIGMA_2:
+            if self._profile is SettingsType.ENIGMA_2:
                 self._update_reference_entry()
                 self._stream_type_combobox.set_active(1)
         elif self._action is Action.EDIT:
@@ -128,13 +128,13 @@ class IptvDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
-        self.save_enigma2_data() if self._profile is Profile.ENIGMA_2 else self.save_neutrino_data()
+        self.save_enigma2_data() if self._profile is SettingsType.ENIGMA_2 else self.save_neutrino_data()
         self._dialog.destroy()
 
     def init_data(self, srv):
         name, fav_id = srv[2], srv[7]
         self._name_entry.set_text(name)
-        self.init_enigma2_data(fav_id) if self._profile is Profile.ENIGMA_2 else self.init_neutrino_data(fav_id)
+        self.init_enigma2_data(fav_id) if self._profile is SettingsType.ENIGMA_2 else self.init_neutrino_data(fav_id)
 
     def init_enigma2_data(self, fav_id):
         data, sep, desc = fav_id.partition("#DESCRIPTION")
@@ -171,7 +171,7 @@ class IptvDialog:
         self._description_entry.set_text(data[1])
 
     def _update_reference_entry(self):
-        if self._profile is Profile.ENIGMA_2:
+        if self._profile is SettingsType.ENIGMA_2:
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_type_entry.get_text(),
                                                                      int(self._sid_entry.get_text()),
@@ -486,7 +486,7 @@ class IptvListConfigurationDialog:
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
 
-        if self._profile is Profile.ENIGMA_2:
+        if self._profile is SettingsType.ENIGMA_2:
             reset = self._reset_to_default_switch.get_active()
             type_default = self._type_check_button.get_active()
             tid_default = self._tid_check_button.get_active()

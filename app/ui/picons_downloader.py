@@ -9,7 +9,7 @@ from gi.repository import GLib, GdkPixbuf
 from app.commons import run_idle, run_task
 from app.connections import upload_data, DownloadType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
-from app.settings import Profile
+from app.settings import SettingsType
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 from .dialogs import show_dialog, DialogType, get_message
@@ -86,13 +86,13 @@ class PiconsDialog:
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self._settings = settings
-        self._profile = settings.profile
+        self._s_type = settings.setting_type
         self._ip_entry.set_text(self._settings.host)
         self._picons_entry.set_text(self._settings.picons_path)
-        self._picons_path = self._settings.picons_dir_path
+        self._picons_path = self._settings.picons_local_path
         self._picons_dir_entry.set_text(self._picons_path)
 
-        if not len(self._picon_ids) and self._profile is Profile.ENIGMA_2:
+        if not len(self._picon_ids) and self._s_type is SettingsType.ENIGMA_2:
             message = get_message("To automatically set the identifiers for picons,\n"
                                   "first load the required services list into the main application window.")
             self.show_info_message(message, Gtk.MessageType.WARNING)
@@ -342,7 +342,7 @@ class PiconsDialog:
         self._expander.set_expanded(True)
         convert_to(src_path=picons_path,
                    dest_path=save_path,
-                   profile=Profile.ENIGMA_2,
+                   s_type=SettingsType.ENIGMA_2,
                    callback=self.append_output,
                    done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
 
@@ -362,10 +362,10 @@ class PiconsDialog:
         show_dialog(dialog_type, self._dialog, message)
 
     def get_picons_format(self):
-        picon_format = Profile.ENIGMA_2
+        picon_format = SettingsType.ENIGMA_2
 
         if self._neutrino_mp_radio_button.get_active():
-            picon_format = Profile.NEUTRINO_MP
+            picon_format = SettingsType.NEUTRINO_MP
 
         return picon_format
 

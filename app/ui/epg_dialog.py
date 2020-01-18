@@ -483,7 +483,7 @@ class EpgDialog:
     # ***************** Options *********************#
 
     def init_options(self):
-        epg_dat_path = self._settings.data_dir_path + "epg/"
+        epg_dat_path = self._settings.data_local_path + "epg/"
         self._epg_dat_path_entry.set_text(epg_dat_path)
         default_epg_data_stb_path = "/etc/enigma2"
         epg_options = self._settings.get("epg_options")

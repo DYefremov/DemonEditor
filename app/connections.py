@@ -1,18 +1,20 @@
-import json
 import os
+import re
 import socket
 import time
 import urllib
+import xml.etree.ElementTree as ETree
 from enum import Enum
 from ftplib import FTP, error_perm
 from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener, install_opener
+from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, \
+    build_opener, install_opener, Request
 
-from app.commons import log
-from app.settings import Profile
+from app.commons import log, run_task
+from app.settings import SettingsType
 
 _BQ_FILES_LIST = ("tv", "radio",  # enigma 2
                   "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
@@ -35,13 +37,20 @@ class DownloadType(Enum):
 class HttpRequestType(Enum):
     ZAP = "zap?sRef="
     INFO = "about"
-    SIGNAL = "tunersignal"
-    STREAM = "streamcurrentm3u"
-    STATUS = "statusinfo"
+    SIGNAL = "signal"
+    STREAM = "stream.m3u?ref="
+    STREAM_CURRENT = "streamcurrent.m3u"
+    CURRENT = "getcurrent"
     PLAY = "mediaplayerplay?file=4097:0:1:0:0:0:0:0:0:0:"
+    TEST = None
+    TOKEN = "session"
 
 
 class TestException(Exception):
+    pass
+
+
+class HttpApiException(Exception):
     pass
 
 
@@ -49,7 +58,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
     with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
-        save_path = settings.data_dir_path
+        save_path = settings.data_local_path
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         files = []
         # bouquets
@@ -94,15 +103,16 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
 
 def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
                 callback=print, done_callback=None, use_http=False):
-    profile = settings.profile
-    data_path = settings.data_dir_path
+    s_type = settings.setting_type
+    data_path = settings.data_local_path
     host = settings.host
-    base_url = "http://{}:{}/api/".format(host, settings.http_port)
+    base_url = "http{}://{}:{}".format("s" if settings.http_use_ssl else "", host, settings.http_port)
+    url = "{}/web/".format(base_url)
     tn, ht = None, None  # telnet, http
 
     try:
-        if profile is Profile.ENIGMA_2 and use_http:
-            ht = http(settings.http_user, settings.http_password, base_url, callback)
+        if s_type is SettingsType.ENIGMA_2 and use_http:
+            ht = http(settings.http_user, settings.http_password, base_url, callback, settings.http_use_ssl)
             next(ht)
             message = ""
             if download_type is DownloadType.BOUQUETS:
@@ -113,12 +123,11 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 message = "Satellites.xml file will be updated!"
 
             params = urlencode({"text": message, "type": 2, "timeout": 5})
-            url = base_url + "message?{}".format(params)
-            ht.send(url)
+            ht.send((url + "message?{}".format(params), "Sending info message... "))
 
             if download_type is DownloadType.ALL:
                 time.sleep(5)
-                ht.send(base_url + "/powerstate?newstate=0")
+                ht.send((url + "powerstate?newstate=0", "Toggle Standby "))
                 time.sleep(2)
         else:
             # telnet
@@ -139,7 +148,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             if download_type is DownloadType.SATELLITES:
                 upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
 
-            if profile is Profile.NEUTRINO_MP and download_type is DownloadType.WEBTV:
+            if s_type is SettingsType.NEUTRINO_MP and download_type is DownloadType.WEBTV:
                 upload_xml(ftp, data_path, sat_xml_path, _WEBTV_XML_FILE, callback)
 
             if download_type is DownloadType.BOUQUETS:
@@ -148,7 +157,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
             if download_type is DownloadType.ALL:
                 upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
-                if profile is Profile.NEUTRINO_MP:
+                if s_type is SettingsType.NEUTRINO_MP:
                     upload_xml(ftp, data_path, sat_xml_path, _WEBTV_XML_FILE, callback)
 
                 ftp.cwd(services_path)
@@ -156,17 +165,17 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 upload_files(ftp, data_path, _DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                upload_picons(ftp, settings.picons_dir_path, settings.picons_path, callback)
+                upload_picons(ftp, settings.picons_local_path, settings.picons_path, callback)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino
-                tn.send("init 3" if profile is Profile.ENIGMA_2 else "init 6")
+                tn.send("init 3" if s_type is SettingsType.ENIGMA_2 else "init 6")
             elif ht and use_http:
                 if download_type is DownloadType.BOUQUETS:
-                    ht.send(base_url + "/servicelistreload?mode=2")
+                    ht.send((url + "servicelistreload?mode=2", "Reloading Userbouquets."))
                 elif download_type is DownloadType.ALL:
-                    ht.send(base_url + "/servicelistreload?mode=0")
-                    ht.send(base_url + "/powerstate?newstate=4")
+                    ht.send((url + "servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
+                    ht.send((url + "powerstate?newstate=4", "Wakeup from Standby."))
 
             if done_callback is not None:
                 done_callback()
@@ -238,14 +247,14 @@ def send_file(file_name, path, ftp, callback):
         callback("Uploading file: {}.   Status: {}\n".format(file_name, str(ftp.storbinary("STOR " + file_name, f))))
 
 
-def http(user, password, url, callback):
-    init_auth(user, password, url)
+def http(user, password, url, callback, use_ssl=False):
+    init_auth(user, password, url, use_ssl)
+    data = get_post_data(url, password, url)
+
     while True:
-        url = yield
-        with urlopen(url, timeout=5) as f:
-            msg = json.loads(f.read().decode("utf-8")).get("message", None)
-            if msg:
-                callback("HTTP: {}\n".format(msg))
+        url, message = yield
+        resp = get_response(HttpRequestType.TEST, url, data).get("e2statetext", None)
+        callback("HTTP: {} {}\n".format(message, "Successful." if resp and message else ""))
 
 
 def telnet(host, port=23, user="", password="", timeout=5):
@@ -276,38 +285,102 @@ def telnet(host, port=23, user="", password="", timeout=5):
 # ***************** HTTP API *******************#
 
 class HttpAPI:
+    __MAX_WORKERS = 4
 
-    def __init__(self, host, port, user, password):
-        self._base_url = "http://{}:{}/api/".format(host, port)
-        init_auth(user, password, self._base_url)
+    def __init__(self, settings):
+        self._settings = settings
+        self._shutdown = False
+        self._session_id = 0
+        self._base_url = None
+        self._data = None
+        self.init()
 
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
-        self._executor = PoolExecutor(max_workers=2)
+        self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
 
     def send(self, req_type, ref, callback=print):
+        if self._shutdown:
+            return
+
         url = self._base_url + req_type.value
 
-        if req_type is HttpRequestType.ZAP:
+        if req_type is HttpRequestType.ZAP or req_type is HttpRequestType.STREAM:
             url += urllib.parse.quote(ref)
         elif req_type is HttpRequestType.PLAY:
             url += urllib.parse.quote(ref).replace("%3A", "%253A")
 
-        future = self._executor.submit(get_json, req_type, url)
+        future = self._executor.submit(get_response, req_type, url, self._data)
         future.add_done_callback(lambda f: callback(f.result()))
 
+    @run_task
+    def init(self):
+        user, password = self._settings.http_user, self._settings.http_password
+        use_ssl = self._settings.http_use_ssl
+        url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
+        self._base_url = "{}/web/".format(url)
+        init_auth(user, password, url, use_ssl)
+        url = "{}/web/{}".format(url, HttpRequestType.TOKEN.value)
+        s_id = get_session_id(user, password, url)
+        if s_id != "0":
+            self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
+
+    @run_task
     def close(self):
-        self._executor.shutdown(False)
+        self._shutdown = True
+        self._executor.shutdown()
 
 
-def get_json(req_type, url):
+def get_response(req_type, url, data=None):
     try:
-        with urlopen(url, timeout=10) as f:
-            if req_type is HttpRequestType.STREAM:
+        with urlopen(Request(url, data=data), timeout=10) as f:
+            if req_type is HttpRequestType.STREAM or req_type is HttpRequestType.STREAM_CURRENT:
                 return f.read().decode("utf-8")
+            elif req_type is HttpRequestType.CURRENT:
+                for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
+                    return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
             else:
-                return json.loads(f.read().decode("utf-8"))
-    except (URLError, HTTPError):
-        pass
+                return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
+    except HTTPError as e:
+        if req_type is HttpRequestType.TEST:
+            raise e
+        return {"error_code": e.code}
+    except (URLError, RemoteDisconnected, ConnectionResetError) as e:
+        if req_type is HttpRequestType.TEST:
+            raise e
+    except ETree.ParseError as e:
+        log("Parsing response error: {}".format(e))
+
+    return {"error_code": -1}
+
+
+def init_auth(user, password, url, use_ssl=False):
+    """ Init authentication """
+    pass_mgr = HTTPPasswordMgrWithDefaultRealm()
+    pass_mgr.add_password(None, url, user, password)
+    auth_handler = HTTPBasicAuthHandler(pass_mgr)
+
+    if use_ssl:
+        import ssl
+        from urllib.request import HTTPSHandler
+
+        opener = build_opener(auth_handler, HTTPSHandler(context=ssl._create_unverified_context()))
+    else:
+        opener = build_opener(auth_handler)
+
+    install_opener(opener)
+
+
+def get_session_id(user, password, url):
+    data = urllib.parse.urlencode(dict(user=user, password=password)).encode("utf-8")
+    return get_response(HttpRequestType.TOKEN, url, data=data).get("e2sessionid", "0")
+
+
+def get_post_data(base_url, password, user):
+    s_id = get_session_id(user, password, "{}/web/{}".format(base_url, HttpRequestType.TOKEN.value))
+    data = None
+    if s_id != "0":
+        data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
+    return data
 
 
 # ***************** Connections testing *******************#
@@ -320,36 +393,30 @@ def test_ftp(host, port, user, password, timeout=5):
         raise TestException(e)
 
 
-def test_http(host, port, user, password, timeout=5, skip_message=False):
-    try:
-        params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
-        params = "statusinfo" if skip_message else "message?{}".format(params)
-        url = "http://{}:{}/api/{}".format(host, port, params)
-        # authentication
-        init_auth(user, password, url)
+def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message=False):
+    params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
+    params = "statusinfo" if skip_message else "message?{}".format(params)
+    base_url = "http{}://{}:{}".format("s" if use_ssl else "", host, port)
+    # authentication
+    init_auth(user, password, base_url, use_ssl)
+    data = get_post_data(base_url, password, user)
 
-        with urlopen(url, timeout=5) as f:
-            return json.loads(f.read().decode("utf-8")).get("message", "")
+    try:
+        return get_response(HttpRequestType.TEST, "{}/web/{}".format(base_url, params), data).get("e2statetext", "")
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
-
-
-def init_auth(user, password, url):
-    """ Init authentication """
-    pass_mgr = HTTPPasswordMgrWithDefaultRealm()
-    pass_mgr.add_password(None, url, user, password)
-    auth_handler = HTTPBasicAuthHandler(pass_mgr)
-    opener = build_opener(auth_handler)
-    install_opener(opener)
 
 
 def test_telnet(host, port, user, password, timeout=5):
     try:
         gen = telnet_test(host, port, user, password, timeout)
         res = next(gen)
-        print(res)
-        res = next(gen)
-        return res
+        msg = str(res, encoding="utf8").strip()
+        log(msg)
+        next(gen)
+        if re.search("password", msg, re.IGNORECASE):
+            raise TestException(msg)
+        return msg
     except (socket.timeout, OSError) as e:
         raise TestException(e)
 
@@ -358,14 +425,14 @@ def telnet_test(host, port, user, password, timeout):
     tn = Telnet(host=host, port=port, timeout=timeout)
     time.sleep(1)
     tn.read_until(b"login: ", timeout=2)
-    tn.write(user.encode("utf-8") + b"\n")
+    tn.write(user.encode("utf-8") + b"\r")
     time.sleep(timeout)
     tn.read_until(b"Password: ", timeout=2)
-    tn.write(password.encode("utf-8") + b"\n")
+    tn.write(password.encode("utf-8") + b"\r")
     time.sleep(timeout)
     yield tn.read_very_eager()
     tn.close()
-    yield "Done!"
+    yield
 
 
 if __name__ == "__main__":

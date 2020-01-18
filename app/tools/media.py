@@ -1,11 +1,12 @@
 import sys
+
 from app.commons import run_task, log
 
 
 class Player:
     __VLC_INSTANCE = None
 
-    def __init__(self, rewind_callback, position_callback):
+    def __init__(self, rewind_callback, position_callback, error_callback, playing_callback):
         try:
             from app.tools import vlc
             from app.tools.vlc import EventType
@@ -28,10 +29,19 @@ class Player:
                                     lambda et, p: position_callback(p.get_time()),
                                     self._player)
 
+            if error_callback:
+                ev_mgr.event_attach(EventType.MediaPlayerEncounteredError,
+                                    lambda et, p: error_callback(),
+                                    self._player)
+            if playing_callback:
+                ev_mgr.event_attach(EventType.MediaPlayerPlaying,
+                                    lambda et, p: playing_callback(),
+                                    self._player)
+
     @classmethod
-    def get_instance(cls, rewind_callback=None, position_callback=None):
+    def get_instance(cls, rewind_callback=None, position_callback=None, error_callback=None, playing_callback=None):
         if not cls.__VLC_INSTANCE:
-            cls.__VLC_INSTANCE = Player(rewind_callback, position_callback)
+            cls.__VLC_INSTANCE = Player(rewind_callback, position_callback, error_callback, playing_callback)
         return cls.__VLC_INSTANCE
 
     @run_task

@@ -6,7 +6,7 @@ from app.eparser import get_bouquets, get_services
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.enigma.bouquets import get_bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
-from app.settings import Profile
+from app.settings import SettingsType
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
@@ -17,12 +17,12 @@ def import_bouquet(transient, model, path, settings, services, appender):
     itr = model.get_iter(path)
     bq_type = BqType(model.get(itr, Column.BQ_TYPE)[0])
     pattern, f_pattern = None, None
-    profile = settings.profile
+    profile = settings.setting_type
 
-    if profile is Profile.ENIGMA_2:
+    if profile is SettingsType.ENIGMA_2:
         pattern = ".{}".format(bq_type.value)
         f_pattern = "userbouquet.*{}".format(pattern)
-    elif profile is Profile.NEUTRINO_MP:
+    elif profile is SettingsType.NEUTRINO_MP:
         pattern = "webtv.xml" if bq_type is BqType.WEBTV else "bouquets.xml"
         f_pattern = "bouquets.xml"
         if bq_type is BqType.TV:
@@ -38,7 +38,7 @@ def import_bouquet(transient, model, path, settings, services, appender):
         show_dialog(DialogType.ERROR, transient, text="No bouquet file is selected!")
         return
 
-    if profile is Profile.ENIGMA_2:
+    if profile is SettingsType.ENIGMA_2:
         bq = get_enigma2_bouquet(file_path)
         imported = list(filter(lambda x: x.data in services or x.type is BqServiceType.IPTV, bq.services))
 
@@ -51,7 +51,7 @@ def import_bouquet(transient, model, path, settings, services, appender):
         else:
             p_itr = model.iter_parent(itr)
             appender(bq, p_itr) if p_itr else appender(bq, itr)
-    elif profile is Profile.NEUTRINO_MP:
+    elif profile is SettingsType.NEUTRINO_MP:
         if bq_type is BqType.WEBTV:
             bqs = parse_webtv(file_path, "WEBTV", bq_type.value)
         else:
@@ -90,7 +90,7 @@ class ImportDialog:
         self._services = {}
         self._service_ids = service_ids
         self._append = appender
-        self._profile = settings.profile
+        self._profile = settings.setting_type
         self._settings = settings
         self._bouquets = bouquets
 
@@ -125,7 +125,7 @@ class ImportDialog:
                     self._main_model.append((bq.name, bq.type, True))
                     self._bq_services[(bq.name, bq.type)] = bq.services
             # Note! Getting default format ver. 4
-            services = get_services(path, self._profile, 4 if self._profile is Profile.ENIGMA_2 else 0)
+            services = get_services(path, self._profile, 4 if self._profile is SettingsType.ENIGMA_2 else 0)
             for srv in services:
                 self._services[srv.fav_id] = srv
         except FileNotFoundError as e:

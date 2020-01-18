@@ -104,7 +104,7 @@ def get_file_chooser_dialog(transient, text, settings, action_type, file_filter)
     if file_filter is not None:
         dialog.add_filter(file_filter)
 
-    path = settings.data_dir_path
+    path = settings.data_local_path
     dialog.set_current_folder(path)
     response = dialog.run()
 

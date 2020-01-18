@@ -6,6 +6,10 @@ import sys
 import gi
 from enum import Enum, IntEnum
 
+import gi
+
+from app.settings import Settings, SettingsException
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -21,12 +25,22 @@ IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # translation
 os.environ["LANG"] = "{}.{}".format(*locale.getlocale())
 TEXT_DOMAIN = "demon-editor"
+try:
+    settings = Settings.get_instance()
+except SettingsException:
+    pass
+else:
+    os.environ["LANGUAGE"] = settings.language
+    if UI_RESOURCES_PATH == "app/ui/":
+        locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
 LANG_PATH = GTK_PATH + "/share/locale" if GTK_PATH else UI_RESOURCES_PATH + "lang"
 gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
 if sys.platform != "darwin":
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
 
 theme = Gtk.IconTheme.get_default()
+theme.append_search_path(UI_RESOURCES_PATH + "icons")
+
 _IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None
 CODED_ICON = theme.load_icon("emblem-readonly", 16, 0) if theme.lookup_icon(
     "emblem-readonly", 16, 0) else _IMAGE_MISSING
@@ -36,6 +50,7 @@ HIDE_ICON = theme.load_icon("go-jump", 16, 0) if theme.lookup_icon("go-jump", 16
 TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symbolic", 16, 0) else _IMAGE_MISSING
 IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.lookup_icon("emblem-shared", 16, 0) else None
 EPG_ICON = theme.load_icon("gtk-index", 16, 0) if theme.lookup_icon("gtk-index", 16, 0) else None
+DEFAULT_ICON = theme.load_icon("emblem-default", 16, 0) if theme.lookup_icon("emblem-default", 16, 0) else None
 
 
 class KeyboardKey(Enum):
@@ -94,6 +109,7 @@ class FavClickMode(IntEnum):
     STREAM = 1
     PLAY = 2
     ZAP = 3
+    ZAP_PLAY = 4
 
 
 class ViewTarget(Enum):
