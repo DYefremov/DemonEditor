@@ -69,7 +69,7 @@ class ServiceDetailsDialog:
         # Patterns
         self._DIGIT_PATTERN = re.compile("\\D")
         self._NON_EMPTY_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
-        self._CAID_PATTERN = re.compile("(?:^[\\s]*$)|(C:[0-9a-z]{4})(,C:[0-9a-z]{4})*")
+        self._CAID_PATTERN = re.compile("(?:^[\\s]*$)|(C:[0-9a-fA-F]{1,4})(,C:[0-9a-fA-F]{1,4})*")
         # Buttons
         self._apply_button = builder.get_object("apply_button")
         self._create_button = builder.get_object("create_button")

@@ -1677,9 +1677,9 @@ class Application(Gtk.Application):
     def on_player_duration_changed(self, duration):
         self._player_scale.set_value(0)
         self._player_scale.get_adjustment().set_upper(duration)
-        GLib.idle_add(self._player_rewind_box.set_visible, duration > 0)
-        GLib.idle_add(self._player_current_time_label.set_text, "0")
-        GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration))
+        GLib.idle_add(self._player_rewind_box.set_visible, duration > 0, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._player_current_time_label.set_text, "0", priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration), priority=GLib.PRIORITY_LOW)
 
     def on_player_time_changed(self, t):
         if not self._full_screen and self._player_rewind_box.get_visible():

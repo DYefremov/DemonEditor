@@ -1455,7 +1455,7 @@ Author: Dmitriy Yefremov
                             <child>
                               <object class="GtkScale" id="player_scale">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="margin_left">5</property>
                                 <property name="margin_right">5</property>
                                 <property name="adjustment">player_scale_adjustment</property>

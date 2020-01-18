@@ -289,8 +289,9 @@ class HttpAPI:
 
     def __init__(self, settings):
         self._settings = settings
-        self._base_url = None
+        self._shutdown = False
         self._session_id = 0
+        self._base_url = None
         self._data = None
         self.init()
 
@@ -298,6 +299,9 @@ class HttpAPI:
         self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
 
     def send(self, req_type, ref, callback=print):
+        if self._shutdown:
+            return
+
         url = self._base_url + req_type.value
 
         if req_type is HttpRequestType.ZAP or req_type is HttpRequestType.STREAM:
@@ -320,8 +324,10 @@ class HttpAPI:
         if s_id != "0":
             self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
 
+    @run_task
     def close(self):
-        self._executor.shutdown(False)
+        self._shutdown = True
+        self._executor.shutdown()
 
 
 def get_response(req_type, url, data=None):
