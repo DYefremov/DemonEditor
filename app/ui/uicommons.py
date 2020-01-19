@@ -1,29 +1,18 @@
-import gettext
-import locale
 import os
 import sys
-
-import gi
 from enum import Enum, IntEnum
+from app.settings import Settings, SettingsException
 
 import gi
-
-from app.settings import Settings, SettingsException
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
-
-GTK_PATH = os.environ.get("GTK_PATH", None)
-# For launching from the bundle.
-if os.getcwd() == "/" and GTK_PATH:
-    os.chdir(GTK_PATH)
 
 # path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # translation
-os.environ["LANG"] = "{}.{}".format(*locale.getlocale())
 TEXT_DOMAIN = "demon-editor"
 try:
     settings = Settings.get_instance()
@@ -31,11 +20,22 @@ except SettingsException:
     pass
 else:
     os.environ["LANGUAGE"] = settings.language
-    if UI_RESOURCES_PATH == "app/ui/":
-        locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
-LANG_PATH = GTK_PATH + "/share/locale" if GTK_PATH else UI_RESOURCES_PATH + "lang"
-gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
-if sys.platform != "darwin":
+
+LANG_PATH = UI_RESOURCES_PATH + "lang"
+
+if sys.platform == "darwin":
+    import gettext
+
+    GTK_PATH = os.environ.get("GTK_PATH", None)
+    if GTK_PATH:
+        LANG_PATH = GTK_PATH + "/share/locale"
+    gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+    # For launching from the bundle.
+    if os.getcwd() == "/" and GTK_PATH:
+        os.chdir(GTK_PATH)
+else:
+    import locale
+
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
 
 theme = Gtk.IconTheme.get_default()

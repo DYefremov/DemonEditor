@@ -73,7 +73,8 @@ class Application(Gtk.Application):
         self._handlers = {"on_close_app": self.on_close_app,
                           "on_resize": self.on_resize,
                           "on_about_app": self.on_about_app,
-                          "on_preferences": self.on_preferences,
+                          "on_settings": self.on_settings,
+                          "on_profile_changed": self.on_profile_changed,
                           "on_download": self.on_download,
                           "on_data_open": self.on_data_open,
                           "on_data_save": self.on_data_save,
@@ -279,7 +280,7 @@ class Application(Gtk.Application):
     def do_startup(self):
         Gtk.Application.do_startup(self)
         # Init app menu bar handlers
-        main_handlers = ("on_new_configuration", "on_data_open", "on_data_save", "on_download", "on_preferences",
+        main_handlers = ("on_new_configuration", "on_data_open", "on_data_save", "on_download", "on_settings",
                          "on_close_app", "on_import_bouquet", "on_import_bouquets", "on_satellite_editor_show",
                          "on_picons_loader_show", "on_backup_tool_show", "on_about_app")
         iptv_handlers = ("on_iptv", "on_import_yt_list", "on_import_m3u", "on_export_to_m3u",
@@ -1616,7 +1617,7 @@ class Application(Gtk.Application):
 
     # ***************** Backup  ********************#
 
-    def on_backup_tool_show(self, item):
+    def on_backup_tool_show(self, action, value=None):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window, self._settings, self.open_data).show()
 
@@ -2234,9 +2235,8 @@ class Application(Gtk.Application):
         profile_name = self._profile_combo_box.get_active_text()
         self._profile_combo_box.set_tooltip_text("{}: {}".format(label, self._settings.host))
         msg = get_message("Profile:")
-
         if self._s_type is SettingsType.ENIGMA_2:
-            self._main_window.set_title.set_subtitle("DemonEditor [{} {} Enigma2 v.{}]".format(msg, profile_name, self.get_format_version()))
+            self._main_window.set_title("DemonEditor [{} {} Enigma2 v.{}]".format(msg, profile_name, self.get_format_version()))
         elif self._s_type is SettingsType.NEUTRINO_MP:
             self._main_window.set_title("DemonEditor [{} {} Neutrino-MP]".format(msg, profile_name))
 
