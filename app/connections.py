@@ -23,6 +23,7 @@ _DATA_FILES_LIST = ("lamedb", "lamedb5", "services.xml", "blacklist", "whitelist
 
 _SAT_XML_FILE = "satellites.xml"
 _WEBTV_XML_FILE = "webtv.xml"
+_PICONS_SUF = (".jpg", ".png")
 
 
 class DownloadType(Enum):
@@ -83,6 +84,11 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
                     download_file(ftp, _SAT_XML_FILE, save_path, callback)
                 if download_type in (DownloadType.ALL, DownloadType.WEBTV) and name.endswith(_WEBTV_XML_FILE):
                     download_file(ftp, _WEBTV_XML_FILE, save_path, callback)
+
+        if download_type is DownloadType.PICONS:
+            picons_path = settings.picons_local_path
+            os.makedirs(os.path.dirname(picons_path), exist_ok=True)
+            download_picons(ftp, settings.picons_path, picons_path, callback)
         # epg.dat
         if download_type is DownloadType.EPG:
             stb_path = settings.services_path
@@ -216,6 +222,8 @@ def upload_xml(ftp, data_path, xml_path, xml_file, callback):
     send_file(xml_file, data_path, ftp, callback)
 
 
+# ***************** Picons *******************#
+
 def upload_picons(ftp, src, dest, callback):
     try:
         ftp.cwd(dest)
@@ -223,17 +231,55 @@ def upload_picons(ftp, src, dest, callback):
         if str(e).startswith("550"):
             ftp.mkd(dest)  # if not exist
             ftp.cwd(dest)
+
+    delete_picons(ftp, callback)
+
+    for file_name in os.listdir(src):
+        if file_name.endswith(_PICONS_SUF):
+            send_file(file_name, src, ftp, callback)
+
+
+def download_picons(ftp, src, dest, callback):
+    try:
+        ftp.cwd(src)
+    except error_perm as e:
+        callback(str(e))
+        return
+
     files = []
     ftp.dir(files.append)
-    picons_suf = (".jpg", ".png")
+
     for file in files:
         name = str(file).strip()
-        if name.endswith(picons_suf):
+        if name.endswith(_PICONS_SUF):
             name = name.split()[-1]
-            ftp.delete(name)
-    for file_name in os.listdir(src):
-        if file_name.endswith(picons_suf):
-            send_file(file_name, src, ftp, callback)
+            download_file(ftp, name, dest, callback)
+
+
+def delete_picons(ftp, callback, dest=None):
+    if dest:
+        try:
+            ftp.cwd(dest)
+        except error_perm as e:
+            callback(str(e))
+            return
+
+    files = []
+    ftp.dir(files.append)
+    for file in files:
+        name = str(file).strip()
+        if name.endswith(_PICONS_SUF):
+            name = name.split()[-1]
+            callback("Delete file: {}.   Status: {}\n".format(name, ftp.delete(name)))
+
+
+def remove_picons(*, settings, callback, done_callback=None):
+    with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+        ftp.encoding = "utf-8"
+        callback("FTP OK.\n")
+        delete_picons(ftp, callback, settings.picons_path)
+        if done_callback:
+            done_callback()
 
 
 def download_file(ftp, name, save_path, callback):

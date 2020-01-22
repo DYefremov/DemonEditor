@@ -7,13 +7,13 @@ import tempfile
 from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task
-from app.connections import upload_data, DownloadType
-from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
+from app.connections import upload_data, DownloadType, download_data, remove_picons
 from app.settings import SettingsType
+from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
 
 
 class PiconsDialog:
@@ -32,6 +32,8 @@ class PiconsDialog:
                     "on_cancel": self.on_cancel,
                     "on_close": self.on_close,
                     "on_send": self.on_send,
+                    "on_download": self.on_download,
+                    "on_remove": self.on_remove,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_picons_dir_open": self.on_picons_dir_open,
                     "on_selected_toggled": self.on_selected_toggled,
@@ -77,9 +79,11 @@ class PiconsDialog:
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
         self._satellite_label = builder.get_object("satellite_label")
+        self._header_download_box = builder.get_object("header_download_box")
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_label"), "visible", 4)
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_spinner"), "visible", 4)
-        self._cancel_button.bind_property("visible", builder.get_object("header_download_box"), "visible", 4)
+        self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
+        self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -91,6 +95,10 @@ class PiconsDialog:
         self._picons_entry.set_text(self._settings.picons_path)
         self._picons_path = self._settings.picons_local_path
         self._picons_dir_entry.set_text(self._picons_path)
+
+        window_size = self._settings.get("picons_downloader_window_size")
+        if window_size:
+            self._dialog.resize(*window_size)
 
         if not len(self._picon_ids) and self._s_type is SettingsType.ENIGMA_2:
             message = get_message("To automatically set the identifiers for picons,\n"
@@ -135,14 +143,19 @@ class PiconsDialog:
         self._cancel_button.show()
         url = self._url_entry.get_text()
 
-        self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
-                                                 stdout=subprocess.PIPE,
-                                                 stderr=subprocess.PIPE,
-                                                 universal_newlines=True)
-        GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
-        model = self._providers_tree_view.get_model()
-        model.clear()
-        self.append_providers(url, model)
+        try:
+            self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
+                                                     stdout=subprocess.PIPE,
+                                                     stderr=subprocess.PIPE,
+                                                     universal_newlines=True)
+        except FileNotFoundError as e:
+            self._cancel_button.hide()
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
+            model = self._providers_tree_view.get_model()
+            model.clear()
+            self.append_providers(url, model)
 
     @run_task
     def append_providers(self, url, model):
@@ -253,8 +266,15 @@ class PiconsDialog:
         if self.on_cancel():
             return True
 
+        self.save_window_size(window)
         self.clean_data()
         GLib.idle_add(self._dialog.destroy)
+
+    def save_window_size(self, window):
+        t, _ = self._text_view.get_allocated_size()
+        b, _ = self._info_bar.get_allocated_size()
+        size = window.get_size()
+        self._settings.add("picons_downloader_window_size", (size.width, size.height - t.height - b.height))
 
     @run_task
     def clean_data(self):
@@ -267,22 +287,38 @@ class PiconsDialog:
             return
 
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
-        self.upload_picons()
+        self.run_func(lambda: upload_data(settings=self._settings,
+                                          download_type=DownloadType.PICONS,
+                                          callback=self.append_output,
+                                          done_callback=lambda: self.show_info_message(get_message("Done!"),
+                                                                                       Gtk.MessageType.INFO)))
 
-    @run_task
-    def upload_picons(self):
-        if self.is_task_running():
-            self.show_dialog("The task is already running!", DialogType.ERROR)
+    def on_download(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
+        self.run_func(lambda: download_data(settings=self._settings,
+                                            download_type=DownloadType.PICONS,
+                                            callback=self.append_output))
+
+    def on_remove(self, item):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        self.run_func(lambda: remove_picons(settings=self._settings,
+                                            callback=self.append_output,
+                                            done_callback=lambda: self.show_info_message(get_message("Done!"),
+                                                                                         Gtk.MessageType.INFO)))
+
+    @run_task
+    def run_func(self, func):
         try:
             GLib.idle_add(self._expander.set_expanded, True)
-            upload_data(settings=self._settings,
-                        download_type=DownloadType.PICONS,
-                        callback=self.append_output,
-                        done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+            GLib.idle_add(self._header_download_box.set_sensitive, False)
+            func()
         except OSError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        GLib.idle_add(self._header_download_box.set_sensitive, True)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -323,10 +359,7 @@ class PiconsDialog:
 
     @run_idle
     def on_notebook_switch_page(self, nb, box, tab_num):
-        self._load_providers_button.set_visible(not tab_num)
-        self._receive_button.set_visible(not tab_num)
         self._convert_button.set_visible(tab_num)
-        self._send_button.set_visible(not tab_num)
 
     @run_idle
     def on_convert(self, item):
