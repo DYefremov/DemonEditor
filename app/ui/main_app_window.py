@@ -152,6 +152,7 @@ class Application(Gtk.Application):
                           "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
                           "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
 
+        self._is_darwin = sys.platform == "darwin"
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
         os.makedirs(os.path.dirname(self._settings.data_local_path), exist_ok=True)
@@ -258,6 +259,9 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
+        self._player_box.bind_property("visible", self._profile_combo_box, "sensitive", 4)
+        self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
+        self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
@@ -1728,7 +1732,7 @@ class Application(Gtk.Application):
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
     def on_drawing_area_realize(self, widget):
-        if sys.platform == "darwin":
+        if self._is_darwin:
             self._player.set_nso(widget)
         else:
             self._drawing_area_xid = widget.get_window().get_xid()
@@ -1757,17 +1761,25 @@ class Application(Gtk.Application):
 
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
+        if self._is_darwin:
+            self.update_state_on_full_screen(not self._full_screen)
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
 
     def on_main_window_state(self, window, event):
+        if self._is_darwin:
+            return
         state = event.new_window_state
         full = not state & Gdk.WindowState.FULLSCREEN
-        self._main_data_box.set_visible(full)
-        self._player_tool_bar.set_visible(full)
         window.set_show_menubar(full)
-        self._status_bar_box.set_visible(full and not self._app_info_box.get_visible())
+        self.update_state_on_full_screen(full)
         if not state & Gdk.WindowState.ICONIFIED and self._links_transmitter:
             self._links_transmitter.hide()
+
+    @run_idle
+    def update_state_on_full_screen(self, visible):
+        self._main_data_box.set_visible(visible)
+        self._player_tool_bar.set_visible(visible)
+        self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
 
     # ************************ HTTP API **************************** #
 
@@ -2236,9 +2248,10 @@ class Application(Gtk.Application):
         self._profile_combo_box.set_tooltip_text("{}: {}".format(label, self._settings.host))
         msg = get_message("Profile:")
         if self._s_type is SettingsType.ENIGMA_2:
-            self._main_window.set_title("DemonEditor [{} {} Enigma2 v.{}]".format(msg, profile_name, self.get_format_version()))
+            title = "DemonEditor [{} {} - Enigma2 v.{}]".format(msg, profile_name, self.get_format_version())
+            self._main_window.set_title(title)
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._main_window.set_title("DemonEditor [{} {} Neutrino-MP]".format(msg, profile_name))
+            self._main_window.set_title("DemonEditor [{} {} - Neutrino-MP]".format(msg, profile_name))
 
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4
@@ -2252,7 +2265,7 @@ def start_app():
     try:
         Settings.get_instance()
     except SettingsException as e:
-        msg = "{} \n{}".format(e, "All setting were reset. Restart the program!")
+        msg = "{} \n{}".format(e, get_message("All setting were reset. Restart the program!"))
         show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
         Settings.reset_to_default()
     else:
