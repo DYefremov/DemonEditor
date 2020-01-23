@@ -10,6 +10,8 @@ from gi.repository import Gtk, Gdk
 
 # path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
+LANG_PATH = UI_RESOURCES_PATH + "lang"
+GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # translation
@@ -21,12 +23,9 @@ except SettingsException:
 else:
     os.environ["LANGUAGE"] = settings.language
 
-LANG_PATH = UI_RESOURCES_PATH + "lang"
-
 if sys.platform == "darwin":
     import gettext
 
-    GTK_PATH = os.environ.get("GTK_PATH", None)
     if GTK_PATH:
         LANG_PATH = GTK_PATH + "/share/locale"
     gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)

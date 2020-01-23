@@ -13,7 +13,7 @@ from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON, GTK_PATH
 
 
 class PiconsDialog:
@@ -144,7 +144,8 @@ class PiconsDialog:
         url = self._url_entry.get_text()
 
         try:
-            self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
+            exe = "{}wget".format("./" if GTK_PATH else "")
+            self._current_process = subprocess.Popen([exe, "-pkP", self._TMP_DIR, url],
                                                      stdout=subprocess.PIPE,
                                                      stderr=subprocess.PIPE,
                                                      universal_newlines=True)
@@ -240,8 +241,9 @@ class PiconsDialog:
 
     def resize(self, path):
         self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
-        command = "mogrify -resize {}! *.png".format(
-            "320x240" if self._resize_220_132_radio_button.get_active() else "100x60").split()
+        exe = "{}mogrify".format("./" if GTK_PATH else "")
+        is_220_132 = self._resize_220_132_radio_button.get_active()
+        command = "{} -resize {}! *.png".format(exe, "220x132" if is_220_132 else "100x60").split()
         try:
             self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
             self._current_process.wait()
