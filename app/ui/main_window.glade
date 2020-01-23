@@ -2293,6 +2293,8 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkBox" id="status_bar_box">
             <property name="can_focus">False</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
             <child>
               <object class="GtkBox" id="receiver_info_box">
                 <property name="can_focus">False</property>
@@ -2340,20 +2342,12 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="focus_on_click">False</property>
                 <property name="tooltip_text" translatable="yes">Current IP:</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="margin_top">1</property>
-                <property name="margin_bottom">1</property>
                 <property name="active">0</property>
                 <property name="has_entry">True</property>
                 <child internal-child="entry">
                   <object class="GtkEntry" id="profile_entry">
                     <property name="can_focus">False</property>
                     <property name="has_tooltip">True</property>
-                    <property name="halign">baseline</property>
-                    <property name="valign">baseline</property>
-                    <property name="margin_top">1</property>
-                    <property name="margin_bottom">1</property>
                     <property name="editable">False</property>
                     <property name="has_frame">False</property>
                     <property name="max_width_chars">9</property>
@@ -2473,9 +2467,6 @@ Author: Dmitriy Yefremov
                 <property name="position">2</property>
               </packing>
             </child>
-            <style>
-              <class name="primary-toolbar"/>
-            </style>
           </object>
           <packing>
             <property name="expand">False</property>
