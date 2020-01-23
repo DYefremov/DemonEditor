@@ -241,7 +241,7 @@ class PiconsDialog:
     def resize(self, path):
         self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
         command = "mogrify -resize {}! *.png".format(
-            "320x240" if self._resize_220_132_radio_button.get_active() else "100x60").split()
+            "220x132" if self._resize_220_132_radio_button.get_active() else "100x60").split()
         try:
             self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
             self._current_process.wait()
