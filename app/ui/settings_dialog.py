@@ -118,6 +118,7 @@ class SettingsDialog:
         self._profile_remove_button = builder.get_object("profile_remove_button")
         self._apply_profile_button = builder.get_object("apply_profile_button")
         self._apply_profile_button.bind_property("visible", builder.get_object("header_separator"), "visible")
+        self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
         # Language
         self._lang_combo_box = builder.get_object("lang_combo_box")
         # Settings
