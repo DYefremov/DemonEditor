@@ -42,9 +42,15 @@ class HttpRequestType(Enum):
     STREAM = "stream.m3u?ref="
     STREAM_CURRENT = "streamcurrent.m3u"
     CURRENT = "getcurrent"
-    PLAY = "mediaplayerplay?file=4097:0:1:0:0:0:0:0:0:0:"
     TEST = None
     TOKEN = "session"
+    PLAY = "mediaplayerplay?file="
+    PLAYER_LIST = "mediaplayerlist?path=playlist"
+    PLAYER_PLAY = "mediaplayercmd?command=play"
+    PLAYER_NEXT = "mediaplayercmd?command=next"
+    PLAYER_PREV = "mediaplayercmd?command=previous"
+    PLAYER_STOP = "mediaplayercmd?command=stop"
+    PLAYER_REMOVE = "mediaplayerremove?file="
 
 
 class TestException(Exception):
@@ -344,7 +350,7 @@ class HttpAPI:
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
         self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
 
-    def send(self, req_type, ref, callback=print):
+    def send(self, req_type, ref, callback=print, ref_prefix=""):
         if self._shutdown:
             return
 
@@ -352,8 +358,8 @@ class HttpAPI:
 
         if req_type is HttpRequestType.ZAP or req_type is HttpRequestType.STREAM:
             url += urllib.parse.quote(ref)
-        elif req_type is HttpRequestType.PLAY:
-            url += urllib.parse.quote(ref).replace("%3A", "%253A")
+        elif req_type is HttpRequestType.PLAY or req_type is HttpRequestType.PLAYER_REMOVE:
+            url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
 
         future = self._executor.submit(get_response, req_type, url, self._data)
         future.add_done_callback(lambda f: callback(f.result()))
@@ -384,6 +390,9 @@ def get_response(req_type, url, data=None):
             elif req_type is HttpRequestType.CURRENT:
                 for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
                     return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
+            elif req_type is HttpRequestType.PLAYER_LIST:
+                return [{el.tag: el.text for el in el.iter()} for el in
+                        ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
             else:
                 return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
     except HTTPError as e:
