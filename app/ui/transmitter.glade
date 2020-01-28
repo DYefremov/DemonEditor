@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2019 Dmitriy Yefremov
+Copyright (c) 2018-2020 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,13 @@ THE SOFTWARE.
 Author: Dmitriy Yefremov
 
 -->
-<interface>
+<interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2019 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
@@ -49,35 +49,127 @@ Author: Dmitriy Yefremov
       <placeholder/>
     </child>
     <child>
-      <object class="GtkBox" id="main_box">
+      <object class="GtkToolbar" id="tool_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
         <child>
-          <object class="GtkEntry" id="url_entry">
+          <object class="GtkToolButton" id="previous_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
-            <property name="margin_top">2</property>
-            <property name="margin_bottom">2</property>
-            <property name="primary_icon_stock">gtk-dnd-multiple</property>
-            <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Previous</property>
+            <property name="label" translatable="yes">Previous</property>
+            <property name="use_underline">True</property>
+            <property name="stock_id">gtk-media-previous</property>
+            <signal name="clicked" handler="on_previous" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="homogeneous">True</property>
           </packing>
         </child>
-        <style>
-          <class name="primary-toolbar"/>
-        </style>
+        <child>
+          <object class="GtkToolButton" id="next_button">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Next</property>
+            <property name="label" translatable="yes">Next</property>
+            <property name="use_underline">True</property>
+            <property name="stock_id">gtk-media-next</property>
+            <signal name="clicked" handler="on_next" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolItem">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkEntry" id="url_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Drag  the link here</property>
+                <property name="margin_left">2</property>
+                <property name="margin_right">2</property>
+                <property name="margin_top">2</property>
+                <property name="margin_bottom">2</property>
+                <property name="primary_icon_stock">gtk-paste</property>
+                <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolButton" id="play_button">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Play</property>
+            <property name="label" translatable="yes">Play</property>
+            <property name="use_underline">True</property>
+            <property name="stock_id">gtk-media-play</property>
+            <signal name="clicked" handler="on_play" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolButton" id="stop_button">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Stop playback</property>
+            <property name="label" translatable="yes">Stop</property>
+            <property name="use_underline">True</property>
+            <property name="stock_id">gtk-media-stop</property>
+            <signal name="clicked" handler="on_stop" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparatorToolItem">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolButton" id="clear_button">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Remove added links in the playlist</property>
+            <property name="label" translatable="yes">Clear</property>
+            <property name="use_underline">True</property>
+            <property name="stock_id">gtk-clear</property>
+            <signal name="clicked" handler="on_clear" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
       </object>
     </child>
+    <style>
+      <class name="primary-toolbar"/>
+    </style>
   </object>
   <object class="GtkStatusIcon" id="status_icon">
-    <property name="icon_name">insert-link</property>
+    <property name="icon_name">demon-editor</property>
     <property name="has_tooltip">True</property>
     <signal name="activate" handler="on_status_icon_activate" object="main_window" swapped="no"/>
     <signal name="popup-menu" handler="on_popup_menu" object="staus_popup_menu" swapped="no"/>
