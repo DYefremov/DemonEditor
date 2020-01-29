@@ -587,6 +587,16 @@ class Application(Gtk.Application):
 
             bq = response, None, None, bq_type
             key = "{}:{}".format(response, bq_type)
+
+            while key in self._bouquets:
+                self.show_error_dialog(get_message("A bouquet with that name exists!"))
+                response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
+                if response == Gtk.ResponseType.CANCEL:
+                    return
+
+                key = "{}:{}".format(response, bq_type)
+                bq = response, None, None, bq_type
+
             self._current_bq_name = response
 
             if model.iter_n_children(itr):  # parent
@@ -1901,8 +1911,13 @@ class Application(Gtk.Application):
             if response == Gtk.ResponseType.CANCEL:
                 return
 
+            bq = "{}:{}".format(response, bq_type)
+            if bq in self._bouquets:
+                self.show_error_dialog(get_message("A bouquet with that name exists!"))
+                return
+
             model.set_value(itr, 0, response)
-            self._bouquets["{}:{}".format(response, bq_type)] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
+            self._bouquets[bq] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
             self._current_bq_name = response
             self._bq_name_label.set_text(self._current_bq_name)
             self._bq_selected = "{}:{}".format(response, bq_type)

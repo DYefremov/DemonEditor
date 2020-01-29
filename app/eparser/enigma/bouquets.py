@@ -98,6 +98,8 @@ def parse_bouquets(path, bq_name, bq_type):
         bouquets = None
         nm_sep = "#NAME"
         bq_pattern = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
+        b_names = set()
+        real_b_names = set()
 
         for line in lines:
             if nm_sep in line:
@@ -106,7 +108,18 @@ def parse_bouquets(path, bq_name, bq_type):
             if bouquets and "#SERVICE" in line:
                 name = re.match(bq_pattern, line)
                 if name:
-                    b_name, services = get_bouquet(path, name.group(1), bq_type)
+                    b_name = name.group(1)
+                    if b_name in b_names:
+                        raise ValueError("The list of bouquets contains duplicate [{}] names!".format(b_name))
+                    else:
+                        b_names.add(b_name)
+
+                    b_name, services = get_bouquet(path, b_name, bq_type)
+                    if b_name in real_b_names:
+                        raise ValueError("The list of bouquets contains duplicate [{}] names!".format(b_name))
+                    else:
+                        real_b_names.add(b_name)
+
                     bouquets[2].append(Bouquet(name=b_name,
                                                type=bq_type,
                                                services=services,
