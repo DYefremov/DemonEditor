@@ -1,6 +1,8 @@
 """ Module for parsing bouquets """
 import re
+from collections import Counter
 
+from app.commons import log
 from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet, BqType
 
 _TV_ROOT_FILE_NAME = "bouquets.tv"
@@ -99,7 +101,7 @@ def parse_bouquets(path, bq_name, bq_type):
         nm_sep = "#NAME"
         bq_pattern = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
         b_names = set()
-        real_b_names = set()
+        real_b_names = Counter()
 
         for line in lines:
             if nm_sep in line:
@@ -114,13 +116,15 @@ def parse_bouquets(path, bq_name, bq_type):
                     else:
                         b_names.add(b_name)
 
-                    b_name, services = get_bouquet(path, b_name, bq_type)
-                    if b_name in real_b_names:
-                        raise ValueError("The list of bouquets contains duplicate [{}] names!".format(b_name))
+                    rb_name, services = get_bouquet(path, b_name, bq_type)
+                    if rb_name in real_b_names:
+                        log("Bouquet file 'userbouquet.{}.{}' has duplicate name: {}".format(b_name, bq_type, rb_name))
+                        real_b_names[rb_name] += 1
+                        rb_name = "{} {}".format(rb_name, real_b_names[rb_name])
                     else:
-                        real_b_names.add(b_name)
+                        real_b_names[rb_name] = 0
 
-                    bouquets[2].append(Bouquet(name=b_name,
+                    bouquets[2].append(Bouquet(name=rb_name,
                                                type=bq_type,
                                                services=services,
                                                locked=None,
