@@ -87,7 +87,7 @@ Author: Dmitriy Yefremov
         <property name="image">set_default_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_profile_set_default" swapped="no"/>
-        <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+        <accelerator key="d" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
@@ -200,7 +200,7 @@ Author: Dmitriy Yefremov
                 <property name="stock">gtk-apply</property>
               </object>
             </child>
-            <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+            <accelerator key="s" signal="clicked" modifiers="Primary"/>
           </object>
           <packing>
             <property name="position">4</property>
@@ -432,7 +432,7 @@ Author: Dmitriy Yefremov
                                     <property name="use_underline">True</property>
                                     <property name="icon_name">emblem-default</property>
                                     <signal name="clicked" handler="on_profile_set_default" swapped="no"/>
-                                    <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                                    <accelerator key="d" signal="clicked" modifiers="Primary"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>

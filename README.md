@@ -3,8 +3,28 @@
 ## Enigma2 channel and satellites list editor for macOS (experimental).
 This version is only for users those who wish to try running this program on **macOS**.                                
 The functionality and performance of this version may be very different from the main version!                                                     
-**Not all features are supported and tested!**                                                                    
-                                             
+**Not all features are supported and tested!**    
+
+#### Keyboard shortcuts:                                                                                                                                                                                            
+* **&#8984; + X** - only in bouquet list.
+* **&#8984; + C** - only in services list.                                                                                                                                                    
+Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                              
+* **&#8984; + E** - edit. 
+* **&#8984; + R, F2** - rename.
+* **&#8984; + S, T** in Satellites edit tool for create satellite or transponder.
+* **&#8984; + L** - parental lock.
+* **&#8984; + H** - hide/skip.                                                                                                                                                                                                 
+* **&#8984; + P** - start play IPTV or other stream in the bouquet list.
+* **&#8984; + Z** - switch(**zap**) the channel(works when the HTTP API is enabled, Enigma2 only).                         
+* **&#8984; + W** - switch to the channel and watch in the program.
+* **&#8984; + Up/Down** - move selected items in the list. 
+* **&#8984; + O** - (re)load user data from current dir. 
+* **&#8984; + D** - load data from receiver. 
+* **&#8984; + U/B** - upload data/bouquets to receiver.
+* **&#8984; + F** - show/hide search bar.
+* **&#8679; + &#8984; + F** - show/hide filter bar.
+* **Left/Right** - remove selection.
+
 ### Minimum requirements:
 Python >= **3.5**, GTK+ >= **3.16**, pygobject3, adwaita-icon-theme, python3-requests.                                  
 #### Installation:                                                                             

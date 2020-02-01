@@ -15,7 +15,7 @@ from app.eparser.ecommons import BouquetService, BqServiceType
 from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message, show_dialog, DialogType
 from .main_helper import on_popup_menu, update_entry_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON, KeyboardKey, MOD_MASK
 
 
 class RefsSource(Enum):
@@ -279,7 +279,7 @@ class EpgDialog:
         if not KeyboardKey.value_exist(key_code):
             return
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
 
         if ctrl and key is KeyboardKey.C:
             self.on_copy_ref()

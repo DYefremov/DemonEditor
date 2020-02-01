@@ -1313,7 +1313,7 @@ Author: Dmitriy Yefremov
                 <property name="stock">gtk-goto-bottom</property>
               </object>
             </child>
-            <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+            <accelerator key="d" signal="clicked" modifiers="Primary"/>
           </object>
           <packing>
             <property name="position">1</property>
@@ -1333,7 +1333,7 @@ Author: Dmitriy Yefremov
                 <property name="icon_name">insert-link</property>
               </object>
             </child>
-            <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+            <accelerator key="i" signal="clicked" modifiers="Primary"/>
           </object>
           <packing>
             <property name="pack_type">end</property>

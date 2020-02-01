@@ -8,6 +8,9 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
+IS_DARWIN = sys.platform == "darwin"
+# setting mod mask for keyboard depending on platform
+MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
 # path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 LANG_PATH = UI_RESOURCES_PATH + "lang"
@@ -23,7 +26,7 @@ except SettingsException:
 else:
     os.environ["LANGUAGE"] = settings.language
 
-if sys.platform == "darwin":
+if IS_DARWIN:
     import gettext
 
     if GTK_PATH:
@@ -54,38 +57,34 @@ DEFAULT_ICON = theme.load_icon("emblem-default", 16, 0) if theme.lookup_icon("em
 
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys. """
-    Q = 24
-    E = 26
-    R = 27
-    T = 28
-    U = 30
-    O = 32
-    P = 33
-    S = 39
-    D = 40
-    H = 43
-    L = 46
-    X = 53
-    C = 54
-    V = 55
-    B = 56
-    W = 25
-    Z = 52
-    INSERT = 118
-    HOME = 110
-    END = 115
-    UP = 111
-    DOWN = 116
-    PAGE_UP = 112
-    PAGE_DOWN = 117
-    LEFT = 113
-    RIGHT = 114
-    F2 = 68
-    SPACE = 65
-    DELETE = 119
-    BACK_SPACE = 22
-    CTRL_L = 37
-    CTRL_R = 105
+    F = 3 if IS_DARWIN else 41
+    E = 14 if IS_DARWIN else 26
+    R = 15 if IS_DARWIN else 27
+    T = 17 if IS_DARWIN else 28
+    P = 35 if IS_DARWIN else 33
+    S = 1 if IS_DARWIN else 39
+    H = 4 if IS_DARWIN else 43
+    L = 37 if IS_DARWIN else 46
+    X = 7 if IS_DARWIN else 53
+    C = 8 if IS_DARWIN else 54
+    V = 9 if IS_DARWIN else 55
+    W = 13 if IS_DARWIN else 25
+    Z = 6 if IS_DARWIN else 52
+    INSERT = -1 if IS_DARWIN else 118
+    HOME = -1 if IS_DARWIN else 110
+    END = -1 if IS_DARWIN else 115
+    UP = 126 if IS_DARWIN else 111
+    DOWN = 125 if IS_DARWIN else 116
+    PAGE_UP = -1 if IS_DARWIN else 112
+    PAGE_DOWN = -1 if IS_DARWIN else 117
+    LEFT = 123 if IS_DARWIN else 113
+    RIGHT = 123 if IS_DARWIN else 114
+    F2 = 120 if IS_DARWIN else 68
+    SPACE = 49 if IS_DARWIN else 65
+    DELETE = 51 if IS_DARWIN else 119
+    BACK_SPACE = 76 if IS_DARWIN else 22
+    CTRL_L = 55 if IS_DARWIN else 37
+    CTRL_R = 55 if IS_DARWIN else 105
     # Laptop codes
     HOME_KP = 79
     END_KP = 87

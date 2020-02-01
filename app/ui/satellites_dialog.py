@@ -10,7 +10,7 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION, MOD_MASK
 from .dialogs import show_dialog, DialogType, get_dialogs_string
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 
@@ -124,7 +124,7 @@ class SatellitesDialog:
         if not KeyboardKey.value_exist(key_code):
             return
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:
             self.on_remove(view)

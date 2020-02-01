@@ -35,7 +35,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
-    FavClickMode
+    FavClickMode, MOD_MASK
 
 
 class Application(Gtk.Application):
@@ -91,13 +91,11 @@ class Application(Gtk.Application):
                           "on_bouquets_copy": self.on_bouquets_copy,
                           "on_fav_paste": self.on_fav_paste,
                           "on_bouquets_paste": self.on_bouquets_paste,
-                          "on_edit": self.on_rename,
                           "on_rename_for_bouquet": self.on_rename_for_bouquet,
                           "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
-                          "on_service_edit": self.on_service_edit,
                           "on_services_add_new": self.on_services_add_new,
+                          "on_edit": self.on_edit,
                           "on_delete": self.on_delete,
-                          "on_tool_edit": self.on_header_edit,
                           "on_to_fav_copy": self.on_to_fav_copy,
                           "on_to_fav_end_copy": self.on_to_fav_end_copy,
                           "on_view_drag_begin": self.on_view_drag_begin,
@@ -144,7 +142,6 @@ class Application(Gtk.Application):
                           "on_main_window_state": self.on_main_window_state,
                           "on_remove_all_unavailable": self.on_remove_all_unavailable,
                           "on_new_bouquet": self.on_new_bouquet,
-                          "on_bouquets_edit": self.on_bouquets_edit,
                           "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
                           "on_create_bouquet_for_each_satellite": self.on_create_bouquet_for_each_satellite,
                           "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
@@ -268,6 +265,7 @@ class Application(Gtk.Application):
         self._player_frame = builder.get_object("player_frame")
         # Search
         self._search_bar = builder.get_object("search_bar")
+        self._search_entry = builder.get_object("search_entry")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
                                                builder.get_object("search_up_button"))
@@ -306,7 +304,6 @@ class Application(Gtk.Application):
         for h in iptv_handlers:
             action = set_action(h, self._handlers.get(h), False)
             iptv_elem.bind_property("sensitive", action, "enabled")
-
         # Search, Filter
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
         search_action.connect("change-state", self.on_search_toggled)
@@ -315,14 +312,22 @@ class Application(Gtk.Application):
         filter_action.connect("change-state", self.on_filter_toggled)
         self._main_window.add_action(filter_action)
         # Lock, Hide
-        self.add_action(set_action("on_hide", self.on_hide))
-        self.add_action(set_action("on_locked", self.on_locked))
+        set_action("on_hide", self.on_hide)
+        set_action("on_locked", self.on_locked)
+        # Open and download/upload data
+        set_action("open_data", lambda a, v: self.open_data())
+        set_action("on_download_data", self.on_download_data)
+        set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
+        set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
+        # Edit
+        set_action("on_edit", self.on_edit)
 
         builder = Gtk.Builder()
         builder.set_translation_domain("demon-editor")
         builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
         self.set_menubar(builder.get_object("menu_bar"))
         self.set_app_menu(builder.get_object("app-menu"))
+        self.set_accels()
 
         self.update_profile_label()
         self.init_drag_and_drop()
@@ -336,6 +341,20 @@ class Application(Gtk.Application):
             self.init_profiles()
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def set_accels(self):
+        """ Setting accelerators for the actions. """
+        self.set_accels_for_action("app.on_data_save", ["<primary>s"])
+        self.set_accels_for_action("app.on_download_data", ["<primary>d"])
+        self.set_accels_for_action("app.upload_all", ["<primary>u"])
+        self.set_accels_for_action("app.upload_bouquets", ["<primary>b"])
+        self.set_accels_for_action("app.open_data", ["<primary>o"])
+        self.set_accels_for_action("app.on_hide", ["<primary>h"])
+        self.set_accels_for_action("app.on_locked", ["<primary>l"])
+        self.set_accels_for_action("app.on_close_app", ["<primary>q"])
+        self.set_accels_for_action("app.on_edit", ["<primary>e"])
+        self.set_accels_for_action("win.search", ["<primary>f"])
+        self.set_accels_for_action("win.filter", ["<shift><primary>f"])
 
     def do_activate(self):
         self._main_window.set_application(self)
@@ -432,7 +451,7 @@ class Application(Gtk.Application):
 
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
-        event.state |= Gdk.ModifierType.CONTROL_MASK
+        event.state |= MOD_MASK
 
     @run_idle
     def on_close_app(self, *args):
@@ -676,7 +695,7 @@ class Application(Gtk.Application):
                 scroll_to(model.get_path(it), view, paths)
             self._bouquets[key] = []
 
-    def on_header_edit(self, item):
+    def on_edit(self, *args):
         """ Edit header bar button """
         if self._services_view.is_focus():
             self.on_service_edit(self._services_view)
@@ -864,7 +883,6 @@ class Application(Gtk.Application):
             menu.popup(None, None, None, None, event.button, event.time)
             return True
 
-    @run_idle
     def on_satellite_editor_show(self, action, value):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self._main_window, self._settings)
@@ -876,7 +894,7 @@ class Application(Gtk.Application):
                        update_settings_callback=self.update_settings).show()
 
     @run_task
-    def on_download_data(self):
+    def on_download_data(self, *args):
         try:
             download_data(settings=self._settings,
                           download_type=DownloadType.ALL,
@@ -1297,14 +1315,13 @@ class Application(Gtk.Application):
             return
 
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        if key is KeyboardKey.F:
+            return True
+
+        ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key is KeyboardKey.O:
-            self.open_data()
-        elif ctrl and key is KeyboardKey.Q:
-            self.quit()
-        elif ctrl and key in MOVE_KEYS:
+        if ctrl and key in MOVE_KEYS:
             self.move_items(key)
         elif ctrl and key is KeyboardKey.C:
             if model_name == self._SERVICE_LIST_NAME:
@@ -1333,16 +1350,10 @@ class Application(Gtk.Application):
             return
 
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key is KeyboardKey.D:
-            self.on_download_data()
-        elif ctrl and key is KeyboardKey.U:
-            self.on_upload_data(DownloadType.ALL)
-        elif ctrl and key is KeyboardKey.B:
-            self.on_upload_data(DownloadType.BOUQUETS)
-        elif ctrl and key is KeyboardKey.INSERT:
+        if ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
             if model_name == self._SERVICE_LIST_NAME:
                 self.on_to_fav_copy(view)
@@ -1350,17 +1361,8 @@ class Application(Gtk.Application):
                 self.on_new_bouquet(view)
         elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self._SERVICE_LIST_NAME:
             self.on_to_fav_end_copy(view)
-        elif ctrl and key is KeyboardKey.L:
-            self.on_locked()
-        elif ctrl and key is KeyboardKey.H:
-            self.on_hide()
         elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
             self.on_rename(view)
-        elif ctrl and key is KeyboardKey.E:
-            if model_name == self._BOUQUETS_LIST_NAME:
-                self.on_rename(view)
-                return
-            self.on_service_edit(view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
         elif ctrl and model_name == self._FAV_LIST_NAME:
@@ -1533,7 +1535,6 @@ class Application(Gtk.Application):
 
     # ****************** EPG  **********************#
 
-    @run_idle
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
             self.show_error_dialog("Only Enigma2 is supported!")
@@ -1954,6 +1955,7 @@ class Application(Gtk.Application):
         action.set_state(value)
         if value:
             self.update_filter_sat_positions()
+            self._filter_entry.grab_focus()
 
         self._filter_bar.set_search_mode(value)
         self._filter_bar.set_visible(value)
@@ -2039,6 +2041,8 @@ class Application(Gtk.Application):
     def on_search_toggled(self, action, value):
         action.set_state(value)
         self._search_bar.set_search_mode(value)
+        if value:
+            self._search_entry.grab_focus()
 
     def on_search_down(self, item):
         self._search_provider.on_search_down()
@@ -2186,7 +2190,6 @@ class Application(Gtk.Application):
 
     # ***************** Picons *********************#
 
-    @run_idle
     def on_picons_loader_show(self, action, value):
         ids = {}
         if self._s_type is SettingsType.ENIGMA_2:
