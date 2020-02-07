@@ -4,8 +4,7 @@ from gi.repository import GLib
 
 from app.connections import HttpRequestType
 from app.tools.yt import YouTube
-from app.ui.iptv import get_yt_icon
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, get_yt_icon
 
 
 class LinksTransmitter:

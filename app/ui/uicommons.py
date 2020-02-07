@@ -1,12 +1,14 @@
 import locale
 import os
 from enum import Enum, IntEnum
+from functools import lru_cache
 
 import gi
 
 from app.settings import Settings, SettingsException
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "3.0")
 from gi.repository import Gtk, Gdk
 
 # path to *.glade files
@@ -37,6 +39,24 @@ TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symboli
 IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.lookup_icon("emblem-shared", 16, 0) else None
 EPG_ICON = theme.load_icon("gtk-index", 16, 0) if theme.lookup_icon("gtk-index", 16, 0) else None
 DEFAULT_ICON = theme.load_icon("emblem-default", 16, 0) if theme.lookup_icon("emblem-default", 16, 0) else None
+
+
+@lru_cache(maxsize=1)
+def get_yt_icon(icon_name, size=24):
+    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "Info" icon is returned by default! """
+    default_theme = Gtk.IconTheme.get_default()
+    if default_theme.has_icon(icon_name):
+        return default_theme.load_icon(icon_name, size, 0)
+
+    theme = Gtk.IconTheme.new()
+    import glob
+
+    for theme_name in map(os.path.basename, filter(os.path.isdir, glob.glob("/usr/share/icons/*"))):
+        theme.set_custom_theme(theme_name)
+        if theme.has_icon(icon_name):
+            return theme.load_icon(icon_name, size, 0)
+
+    return default_theme.load_icon("info", size, 0)
 
 
 class KeyboardKey(Enum):
