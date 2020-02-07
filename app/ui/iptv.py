@@ -7,14 +7,15 @@ from urllib.request import Request, urlopen
 
 from gi.repository import GLib
 
-from app.commons import run_idle, run_task, log
+from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.settings import SettingsType
 from app.tools.yt import YouTube, PlayListParser
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
-from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey
+from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey, \
+    get_yt_icon
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
