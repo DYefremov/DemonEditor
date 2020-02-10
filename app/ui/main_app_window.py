@@ -946,6 +946,10 @@ class Application(Gtk.Application):
         yield from self.clear_current_data()
 
         try:
+            current_profile = self._profile_combo_box.get_active_text()
+            if current_profile != self._settings.current_profile:
+                self.init_profiles(self._settings.current_profile)
+
             prf = self._s_type
             black_list = get_blacklist(data_path)
             bouquets = get_bouquets(data_path, prf)

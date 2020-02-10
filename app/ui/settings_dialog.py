@@ -175,12 +175,12 @@ class SettingsDialog:
         update_entry_data(entry, self._dialog, self._settings)
 
     def on_settings_type_changed(self, item):
-        profile = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
-        self._s_type = profile
-        self._settings.setting_type = profile
-        if profile is not self._s_type:
+        s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
+        if s_type is not self._s_type:
+            self._settings.setting_type = s_type
+            self._s_type = s_type
             self.on_reset()
-        self.init_ui_elements(profile)
+        self.init_ui_elements(s_type)
 
     def on_reset(self, item=None):
         self._settings.reset()

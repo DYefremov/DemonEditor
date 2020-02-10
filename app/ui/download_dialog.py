@@ -140,6 +140,7 @@ class DownloadDialog:
         if active in self._settings.profiles:
             self._settings.current_profile = active
             self._profile_combo_box.set_active_id(active)
+            self._s_type = self._settings.setting_type
             self.init_ui_settings()
 
     def on_info_bar_close(self, bar=None, resp=None):
