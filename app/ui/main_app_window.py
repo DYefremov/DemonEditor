@@ -591,6 +591,8 @@ class Application(Gtk.Application):
                 continue
 
             self._fav_model.clear()
+            b_row = self._bouquets_model[itr][:]
+            self._bouquets.pop("{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE]), None)
             self._bouquets_model.remove(itr)
 
     # ***************** ####### *********************#
