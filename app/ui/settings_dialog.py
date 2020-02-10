@@ -146,8 +146,12 @@ class SettingsDialog:
 
     def init_profiles(self):
         p_def = self._settings.default_profile
-        for p in self._profiles:
-            self._profile_view.get_model().append((p, DEFAULT_ICON if p == p_def else None))
+        model = self._profile_view.get_model()
+        for ind, p in enumerate(self._profiles):
+            icon = DEFAULT_ICON if p == p_def else None
+            model.append((p, icon))
+            if icon:
+                scroll_to(ind, self._profile_view)
         self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
 
     def update_header_bar(self):
@@ -174,7 +178,8 @@ class SettingsDialog:
         profile = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
         self._s_type = profile
         self._settings.setting_type = profile
-        self.on_reset()
+        if profile is not self._s_type:
+            self.on_reset()
         self.init_ui_elements(profile)
 
     def on_reset(self, item=None):
@@ -182,6 +187,7 @@ class SettingsDialog:
         self.set_settings()
 
     def set_settings(self):
+        self._s_type = self._settings.setting_type
         self._host_field.set_text(self._settings.host)
         self._port_field.set_text(self._settings.port)
         self._login_field.set_text(self._settings.user)
@@ -218,6 +224,11 @@ class SettingsDialog:
             extra_rgb.parse(self._settings.extra_color)
             self._new_color_button.set_rgba(new_rgb)
             self._extra_color_button.set_rgba(extra_rgb)
+
+        if self._s_type is SettingsType.ENIGMA_2:
+            self._enigma_radio_button.activate()
+        else:
+            self._neutrino_radio_button.activate()
 
     def on_apply_profile_settings(self, item):
         self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
@@ -380,14 +391,19 @@ class SettingsDialog:
         self._profile_remove_button.set_sensitive(len(model) > 1)
 
     def on_profile_edited(self, render, path, new_value):
-        p_name = render.get_property("text")
+        row = self._profile_view.get_model()[path]
+        p_name = row[0]
+        if p_name == new_value:
+            return
+
+        if new_value in self._profiles:
+            show_dialog(DialogType.ERROR, self._dialog, "A profile with that name exists!")
+            return
+
         p_name = self._profiles.pop(p_name, None)
         if p_name:
-            row = self._profile_view.get_model()[path]
             row[0] = new_value
             self._profiles[new_value] = p_name
-
-        if p_name != new_value:
             self.update_local_paths(new_value)
         self.on_profile_selected(self._profile_view)
 
@@ -416,10 +432,6 @@ class SettingsDialog:
         if paths:
             profile = model.get_value(model.get_iter(paths), 0)
             self._settings.current_profile = profile
-            if self._settings.setting_type is SettingsType.ENIGMA_2:
-                self._enigma_radio_button.activate()
-            else:
-                self._neutrino_radio_button.activate()
             self.set_settings()
 
     def on_profile_set_default(self, item):

@@ -99,7 +99,9 @@ class Settings:
         self._settings = settings
         self._current_profile = self._settings.get("default_profile", "default")
         self._profiles = self._settings.get("profiles", {"default": SettingsType.ENIGMA_2.get_default_settings()})
-        self._cp_settings = self._profiles.get(self._current_profile)  # Current profile settings
+        self._cp_settings = self._profiles.get(self._current_profile, None)  # Current profile settings
+        if not self._cp_settings:
+            raise SettingsException("Error reading settings [current profile].")
 
     def __str__(self):
         return dedent("""        Current profile: {}

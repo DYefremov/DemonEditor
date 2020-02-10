@@ -96,7 +96,7 @@ class DownloadDialog:
         elif self._satellites_radio_button.get_active():
             download_type = DownloadType.SATELLITES
         elif self._webtv_radio_button.get_active():
-            download_type = DownloadType.WEB_TV
+            download_type = DownloadType.WEBTV
         return download_type
 
     def destroy(self):
