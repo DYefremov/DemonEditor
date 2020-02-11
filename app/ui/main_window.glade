@@ -264,7 +264,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_bouquets_edit" object="bouquets_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
@@ -444,8 +444,8 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="action_name">app.on_data_open</property>
                 <property name="text" translatable="yes">Open</property>
-                <signal name="clicked" handler="on_data_open" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -458,8 +458,8 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="action_name">app.on_data_save</property>
                 <property name="text" translatable="yes">Save</property>
-                <signal name="clicked" handler="on_data_save" swapped="no"/>
                 <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
@@ -485,8 +485,8 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="action_name">app.on_download</property>
                 <property name="text" translatable="yes">FTP-transfer</property>
-                <signal name="clicked" handler="on_download" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -800,7 +800,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_service_edit" object="services_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
@@ -1010,7 +1010,7 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">FTP-transfer</property>
-            <signal name="clicked" handler="on_download" swapped="no"/>
+            <property name="action_name">app.on_download</property>
             <child>
               <object class="GtkImage" id="download_header_button_image">
                 <property name="visible">True</property>
@@ -1032,10 +1032,11 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton" id="save_header_button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Save</property>
-                <signal name="clicked" handler="on_data_save" swapped="no"/>
+                <property name="action_name">app.on_data_save</property>
                 <child>
                   <object class="GtkImage" id="save_header_button_image">
                     <property name="visible">True</property>
@@ -1066,10 +1067,11 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkToggleButton" id="filter_header_button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Filter</property>
-                <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
+                <property name="action_name">win.filter</property>
                 <child>
                   <object class="GtkImage" id="filter_header_button_image">
                     <property name="visible">True</property>
@@ -1087,10 +1089,11 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkToggleButton" id="search_header_button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Search</property>
-                <signal name="toggled" handler="on_search_toggled" swapped="no"/>
+                <property name="action_name">win.search</property>
                 <child>
                   <object class="GtkImage" id="search_header_button_image">
                     <property name="visible">True</property>
@@ -1124,7 +1127,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
-                <signal name="clicked" handler="on_locked" swapped="no"/>
+                <property name="action_name">app.on_locked</property>
                 <child>
                   <object class="GtkImage" id="locked_tool_button_image">
                     <property name="visible">True</property>
@@ -1146,7 +1149,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
-                <signal name="clicked" handler="on_hide" swapped="no"/>
+                <property name="action_name">app.on_hide</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
@@ -1758,6 +1761,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="model">services_model_tree_model_sort</property>
+                                <property name="enable_search">False</property>
                                 <property name="search_column">3</property>
                                 <property name="rubber_banding">True</property>
                                 <property name="enable_grid_lines">both</property>
@@ -2307,6 +2311,7 @@ Author: Dmitriy Yefremov
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="model">fav_list_store</property>
+                                    <property name="enable_search">False</property>
                                     <property name="search_column">2</property>
                                     <property name="rubber_banding">True</property>
                                     <property name="enable_grid_lines">both</property>
@@ -3041,7 +3046,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_service_edit" object="fav_tree_view" swapped="no"/>
+        <signal name="activate" handler="on_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>

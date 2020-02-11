@@ -10,18 +10,19 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Backup function.
 * Extended support of IPTV.
 * Support of picons.
-* Downloading of picons and updating of satellites (transponders) from the Internet.
+* Downloading of picons and updating of satellites (transponders) from the web.
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
 * Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
                                                                                                  
-### Keyboard shortcuts:                                                                                                                
+### Keyboard shortcuts:
+* **Ctrl + X** - only in bouquet list.
+* **Ctrl + C** - only in services list.                                                                 
+Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                                                                                     
 * **Ctrl + Insert** - copies the selected channels from the main list to the the bouquet beginning                                                           
  or inserts (creates) a new bouquet.                                                                                    
-* **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.                                                                                
-* **Ctrl + X** - only in bouquet list. **Ctrl + C** - only in services list.                                                                 
-Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                              
+* **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.
 * **Ctrl + E** - edit.                                                                                                                                                                                                                                                                                                                    
 * **Ctrl + R, F2** - rename.                                                                                                                                                                                                                                                                                                                     
 * **Ctrl + S, T** in Satellites edit tool for create satellite or transponder.                                                                 
@@ -36,6 +37,8 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **Ctrl + O** - (re)load user data from current dir.                                                                   
 * **Ctrl + D** - load data from receiver.                                                                                                                                                         
 * **Ctrl + U/B** upload data/bouquets to receiver.
+* **Ctrl + F** - show/hide search bar.
+* **Ctrl + Shift + F** - show/hide filter bar.
                                                                                                                                                                                                                                                                        
 ### Minimum requirements:
 Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings, python3-requests. 

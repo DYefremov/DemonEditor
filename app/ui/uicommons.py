@@ -48,34 +48,27 @@ def get_yt_icon(icon_name, size=24):
     if default_theme.has_icon(icon_name):
         return default_theme.load_icon(icon_name, size, 0)
 
-    theme = Gtk.IconTheme.new()
+    n_theme = Gtk.IconTheme.new()
     import glob
 
     for theme_name in map(os.path.basename, filter(os.path.isdir, glob.glob("/usr/share/icons/*"))):
-        theme.set_custom_theme(theme_name)
-        if theme.has_icon(icon_name):
-            return theme.load_icon(icon_name, size, 0)
+        n_theme.set_custom_theme(theme_name)
+        if n_theme.has_icon(icon_name):
+            return n_theme.load_icon(icon_name, size, 0)
 
     return default_theme.load_icon("info", size, 0)
 
 
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys. """
-    Q = 24
-    E = 26
     R = 27
     T = 28
-    U = 30
-    O = 32
     P = 33
     S = 39
-    D = 40
-    H = 43
-    L = 46
+    F = 41
     X = 53
     C = 54
     V = 55
-    B = 56
     W = 25
     Z = 52
     INSERT = 118
