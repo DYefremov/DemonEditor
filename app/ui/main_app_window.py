@@ -211,6 +211,7 @@ class Application(Gtk.Application):
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
+        self._current_ip_label = builder.get_object("current_ip_label")
         self._signal_box = builder.get_object("signal_box")
         self._service_name_label = builder.get_object("service_name_label")
         self._service_epg_label = builder.get_object("service_epg_label")
@@ -388,7 +389,7 @@ class Application(Gtk.Application):
 
     def init_profiles(self, profile=None):
         self.update_profiles()
-        self._profile_combo_box.set_active_id(profile if profile else self._settings.default_profile)
+        self._profile_combo_box.set_active_id(profile if profile else self._settings.current_profile)
         if profile:
             self.set_profile(profile)
 
@@ -1292,21 +1293,26 @@ class Application(Gtk.Application):
         yield from gen
 
     def on_profile_changed(self, entry):
-        if self._app_info_box.get_visible():
-            self.update_profile_label()
+        active = self._profile_combo_box.get_active_text()
+        if not active:
             return
 
-        active = self._profile_combo_box.get_active_text()
+        changed = self._settings.current_profile != active
+
         if active in self._settings.profiles:
             self.set_profile(active)
+
+        if self._app_info_box.get_visible():
+            return
+
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-        self.open_data()
+        if changed:
+            self.open_data()
 
     def set_profile(self, active):
         self._settings.current_profile = active
         self._s_type = self._settings.setting_type
-        self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
         self.update_profile_label()
 
     def update_profiles(self):
@@ -1958,6 +1964,9 @@ class Application(Gtk.Application):
     # ***************** Filter and search *********************#
 
     def on_filter_toggled(self, action, value):
+        if self._app_info_box.get_visible():
+            return True
+
         action.set_state(value)
         if value:
             self.update_filter_sat_positions()
@@ -2045,6 +2054,9 @@ class Application(Gtk.Application):
             return txt and free
 
     def on_search_toggled(self, action, value):
+        if self._app_info_box.get_visible():
+            return True
+
         action.set_state(value)
         self._search_bar.set_search_mode(value)
         if value:
@@ -2267,9 +2279,10 @@ class Application(Gtk.Application):
 
     @run_idle
     def update_profile_label(self):
-        label, sep, ip = self._profile_combo_box.get_tooltip_text().partition(":")
+        label, sep, ip = self._current_ip_label.get_text().partition(":")
+        self._current_ip_label.set_text("{}: {}".format(label, self._settings.host))
+
         profile_name = self._profile_combo_box.get_active_text()
-        self._profile_combo_box.set_tooltip_text("{}: {}".format(label, self._settings.host))
         msg = get_message("Profile:")
         if self._s_type is SettingsType.ENIGMA_2:
             title = "DemonEditor [{} {} - Enigma2 v.{}]".format(msg, profile_name, self.get_format_version())

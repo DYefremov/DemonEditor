@@ -697,6 +697,7 @@ Author: Dmitriy Yefremov
               <object class="GtkToolItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_right">10</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -707,7 +708,6 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Open</property>
-                        <property name="margin_right">5</property>
                         <property name="action_name">app.on_data_open</property>
                         <property name="label" translatable="yes">Open</property>
                         <property name="use_underline">True</property>
@@ -732,7 +732,53 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="profile_combo_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="tooltip_text" translatable="yes">Profile</property>
+                        <property name="active">0</property>
+                        <signal name="changed" handler="on_profile_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="save_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Save</property>
+                        <property name="action_name">app.on_data_save</property>
+                        <property name="label" translatable="yes">Save</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-save</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="backup_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="action_name">app.on_backup_tool_show</property>
+                        <property name="label" translatable="yes">Backup</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-revert-to-saved</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
@@ -751,23 +797,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">2</property>
-                    <child>
-                      <object class="GtkToolButton" id="save_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Save</property>
-                        <property name="margin_right">5</property>
-                        <property name="action_name">app.on_data_save</property>
-                        <property name="label" translatable="yes">Save</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-save</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkToggleToolButton" id="search_tool_button">
                         <property name="visible">True</property>
@@ -806,6 +835,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
+                        <property name="margin_left">5</property>
                         <property name="action_name">app.on_locked</property>
                         <property name="label" translatable="yes">Parent lock</property>
                         <property name="use_underline">True</property>
@@ -2286,6 +2316,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
+            <property name="height_request">28</property>
             <property name="can_focus">False</property>
             <property name="margin_top">1</property>
             <property name="margin_bottom">1</property>
@@ -2331,26 +2362,13 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child type="center">
-              <object class="GtkComboBoxText" id="profile_combo_box">
+              <object class="GtkLabel" id="current_ip_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="focus_on_click">False</property>
-                <property name="tooltip_text" translatable="yes">Current IP:</property>
-                <property name="active">0</property>
-                <property name="has_entry">True</property>
-                <child internal-child="entry">
-                  <object class="GtkEntry" id="profile_entry">
-                    <property name="can_focus">False</property>
-                    <property name="has_tooltip">True</property>
-                    <property name="editable">False</property>
-                    <property name="has_frame">False</property>
-                    <property name="max_width_chars">9</property>
-                    <property name="overwrite_mode">True</property>
-                    <property name="caps_lock_warning">False</property>
-                    <property name="primary_icon_stock">gtk-connect</property>
-                    <signal name="changed" handler="on_profile_changed" swapped="no"/>
-                  </object>
-                </child>
+                <property name="label" translatable="yes">Current IP:</property>
+                <attributes>
+                  <attribute name="size" value="8000"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>
