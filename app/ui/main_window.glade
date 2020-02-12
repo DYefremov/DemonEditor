@@ -455,7 +455,6 @@ Author: Dmitriy Yefremov
             </child>
             <child>
               <object class="GtkModelButton" id="save_menu_button">
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">app.on_data_save</property>
@@ -976,7 +975,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">DemonEditor</property>
         <property name="subtitle" translatable="yes">Profile:</property>
-        <property name="spacing">1</property>
+        <property name="spacing">0</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkMenuButton" id="file_header_button">
@@ -1005,34 +1004,60 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="download_header_button">
+          <object class="GtkComboBoxText" id="profile_combo_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">FTP-transfer</property>
-            <property name="action_name">app.on_download</property>
-            <child>
-              <object class="GtkImage" id="download_header_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">network-wired</property>
-              </object>
-            </child>
+            <property name="focus_on_click">False</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
+            <property name="active">0</property>
+            <signal name="changed" handler="on_profile_changed" swapped="no"/>
           </object>
           <packing>
             <property name="position">3</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="left_header_box">
+          <object class="GtkBox" id="main_header_box">
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="spacing">1</property>
             <child>
-              <object class="GtkButton" id="save_header_button">
+              <object class="GtkSeparator" id="main_header_box_separator">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">1</property>
+                <property name="margin_right">1</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="download_header_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">FTP-transfer</property>
+                <property name="action_name">app.on_download</property>
+                <child>
+                  <object class="GtkImage" id="download_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">network-wired</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="save_header_button">
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Save</property>
@@ -1053,9 +1078,40 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="backup_tool_header_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Backup</property>
+                <signal name="clicked" handler="on_backup_tool_show" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="backup_tool_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-revert-to-saved</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="left_header_box">
+            <property name="can_focus">False</property>
+            <property name="spacing">1</property>
+            <child>
               <object class="GtkSeparator" id="left_header_box_separator">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">1</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1112,6 +1168,8 @@ Author: Dmitriy Yefremov
               <object class="GtkSeparator" id="left_header_box_separator_2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">1</property>
+                <property name="margin_right">1</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1166,13 +1224,11 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="position">4</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox" id="right_header_box">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="spacing">1</property>
             <child>
@@ -1218,30 +1274,11 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="backup_tool_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Backup</property>
-                <signal name="clicked" handler="on_backup_tool_show" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="backup_tool_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-revert-to-saved</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkSeparator" id="right_header_box_separator">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">2</property>
+                <property name="margin_right">2</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2803,6 +2840,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="status_bar_box">
+            <property name="height_request">28</property>
             <property name="can_focus">False</property>
             <property name="margin_top">1</property>
             <property name="margin_bottom">1</property>
@@ -2848,26 +2886,13 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child type="center">
-              <object class="GtkComboBoxText" id="profile_combo_box">
+              <object class="GtkLabel" id="current_ip_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="focus_on_click">False</property>
-                <property name="tooltip_text" translatable="yes">Current IP:</property>
-                <property name="active">0</property>
-                <property name="has_entry">True</property>
-                <child internal-child="entry">
-                  <object class="GtkEntry" id="profile_entry">
-                    <property name="can_focus">False</property>
-                    <property name="has_tooltip">True</property>
-                    <property name="editable">False</property>
-                    <property name="has_frame">False</property>
-                    <property name="max_width_chars">9</property>
-                    <property name="overwrite_mode">True</property>
-                    <property name="caps_lock_warning">False</property>
-                    <property name="primary_icon_stock">gtk-connect</property>
-                    <signal name="changed" handler="on_profile_changed" swapped="no"/>
-                  </object>
-                </child>
+                <property name="label" translatable="yes">Current IP:</property>
+                <attributes>
+                  <attribute name="size" value="8000"/>
+                </attributes>
               </object>
               <packing>
                 <property name="expand">False</property>

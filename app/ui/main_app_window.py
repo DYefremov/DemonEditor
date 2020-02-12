@@ -90,7 +90,6 @@ class Application(Gtk.Application):
                     "on_bouquets_copy": self.on_bouquets_copy,
                     "on_fav_paste": self.on_fav_paste,
                     "on_bouquets_paste": self.on_bouquets_paste,
-                    "on_edit": self.on_edit,
                     "on_rename_for_bouquet": self.on_rename_for_bouquet,
                     "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
                     "on_services_add_new": self.on_services_add_new,
@@ -203,12 +202,13 @@ class Application(Gtk.Application):
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("right_header_box"), "sensitive", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("left_header_box"), "sensitive", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("right_header_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("left_header_box"), "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
+        self._current_ip_label = builder.get_object("current_ip_label")
         self._signal_box = builder.get_object("signal_box")
         self._service_name_label = builder.get_object("service_name_label")
         self._service_epg_label = builder.get_object("service_epg_label")
@@ -221,7 +221,8 @@ class Application(Gtk.Application):
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
         self._save_header_button = builder.get_object("save_header_button")
-        self._save_header_button.bind_property("sensitive", builder.get_object("save_menu_button"), "sensitive")
+        self._app_info_box.bind_property("visible", self._save_header_button, "visible", 4)
+        self._save_header_button.bind_property("visible", builder.get_object("save_menu_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", builder.get_object("signal_box"), "visible")
@@ -258,9 +259,9 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", builder.get_object("left_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("right_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
-        self._player_box.bind_property("visible", builder.get_object("download_header_button"), "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("main_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
-        self._player_box.bind_property("visible", self._profile_combo_box, "sensitive", 4)
+        self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         # Enabling events for the drawing area
@@ -1092,6 +1093,9 @@ class Application(Gtk.Application):
         yield True
 
     def on_data_save(self, *args):
+        if self._app_info_box.get_visible():
+            return
+
         if len(self._bouquets_model) == 0:
             self.show_error_dialog("No data to save!")
             return
@@ -1285,21 +1289,26 @@ class Application(Gtk.Application):
         yield from gen
 
     def on_profile_changed(self, entry):
-        if self._app_info_box.get_visible():
-            self.update_profile_label()
+        active = self._profile_combo_box.get_active_text()
+        if not active:
             return
 
-        active = self._profile_combo_box.get_active_text()
+        changed = self._settings.current_profile != active
+
         if active in self._settings.profiles:
             self.set_profile(active)
+
+        if self._app_info_box.get_visible():
+            return
+
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-        self.open_data()
+        if changed:
+            self.open_data()
 
     def set_profile(self, active):
         self._settings.current_profile = active
         self._s_type = self._settings.setting_type
-        self._profile_combo_box.set_tooltip_text(self._profile_combo_box.get_tooltip_text() + self._settings.host)
         self.update_profile_label()
 
     def update_profiles(self):
@@ -1944,7 +1953,7 @@ class Application(Gtk.Application):
     def on_filter_toggled(self, action, value):
         if self._app_info_box.get_visible():
             return True
-        
+
         action.set_state(value)
         if value:
             self.update_filter_sat_positions()
@@ -2257,9 +2266,10 @@ class Application(Gtk.Application):
 
     @run_idle
     def update_profile_label(self):
-        label, sep, ip = self._profile_combo_box.get_tooltip_text().partition(":")
+        label, sep, ip = self._current_ip_label.get_text().partition(":")
+        self._current_ip_label.set_text("{}: {}".format(label, self._settings.host))
+
         profile_name = self._profile_combo_box.get_active_text()
-        self._profile_combo_box.set_tooltip_text("{}: {}".format(label, self._settings.host))
         msg = get_message("Profile:")
 
         if self._s_type is SettingsType.ENIGMA_2:
