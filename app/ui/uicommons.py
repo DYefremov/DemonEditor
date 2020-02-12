@@ -59,7 +59,7 @@ DEFAULT_ICON = theme.load_icon("emblem-default", 16, 0) if theme.lookup_icon("em
 
 @lru_cache(maxsize=1)
 def get_yt_icon(icon_name, size=24):
-    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "Info" icon is returned by default! """
+    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "APPLY" icon is returned by default! """
     default_theme = Gtk.IconTheme.get_default()
     if default_theme.has_icon(icon_name):
         return default_theme.load_icon(icon_name, size, 0)
@@ -72,7 +72,8 @@ def get_yt_icon(icon_name, size=24):
         if n_theme.has_icon(icon_name):
             return n_theme.load_icon(icon_name, size, 0)
 
-    return default_theme.load_icon("info", size, 0)
+    if default_theme.lookup_icon(Gtk.STOCK_APPLY, size, 0):
+        return default_theme.load_icon(Gtk.STOCK_APPLY, size, 0)
 
 
 class KeyboardKey(Enum):
