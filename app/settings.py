@@ -7,9 +7,10 @@ from pathlib import Path
 from pprint import pformat
 from textwrap import dedent
 
-CONFIG_PATH = str(Path.home()) + "/.config/demon-editor/"
+HOME_PATH = str(Path.home())
+CONFIG_PATH = HOME_PATH + "/.config/demon-editor/"
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = "data/"
+DATA_PATH = HOME_PATH + "/DemonEditor/data/"
 
 
 class Defaults(Enum):
