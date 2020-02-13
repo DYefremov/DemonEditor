@@ -377,7 +377,7 @@ class Application(Gtk.Application):
 
     def init_profiles(self, profile=None):
         self.update_profiles()
-        self._profile_combo_box.set_active_id(profile if profile else self._settings.default_profile)
+        self._profile_combo_box.set_active_id(profile if profile else self._settings.current_profile)
         if profile:
             self.set_profile(profile)
 

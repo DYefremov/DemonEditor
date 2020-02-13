@@ -61,6 +61,7 @@ def get_yt_icon(icon_name, size=24):
 
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys. """
+    E = 26
     R = 27
     T = 28
     P = 33
