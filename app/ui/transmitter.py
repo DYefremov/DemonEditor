@@ -4,7 +4,7 @@ from gi.repository import GLib
 
 from app.connections import HttpRequestType
 from app.tools.yt import YouTube
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, get_yt_icon
 
 
 class LinksTransmitter:
@@ -82,7 +82,7 @@ class LinksTransmitter:
             yield True
 
             if yt_id:
-                self._url_entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, Gtk.STOCK_INFO)
+                self._url_entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
                 links, title = YouTube.get_yt_link(yt_id)
                 yield True
                 if links:

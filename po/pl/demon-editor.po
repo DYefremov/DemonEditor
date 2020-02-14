@@ -5,12 +5,11 @@
 msgid ""
 msgstr ""
 "Last-Translator: wwns\n"
-"Language: pl_PL\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
-"Project-Id-Version: DemonEditor\n"
+"Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Language-Team: \n"
@@ -21,7 +20,7 @@ msgstr "wwns"
 
 # Main
 msgid "Service"
-msgstr "Serwis\t"
+msgstr "Service"
 
 msgid "Package"
 msgstr "Pakiet"
@@ -54,10 +53,10 @@ msgid "Current IP:"
 msgstr "Adres IP:"
 
 msgid "Assign"
-msgstr "Przypisz"
+msgstr "Przypisz zakładkę"
 
 msgid "Bouquet details"
-msgstr "Bukiet szczegóły"
+msgstr "Bukiet-szczegóły"
 
 msgid "Bouquets"
 msgstr "Bukiety"
@@ -78,7 +77,7 @@ msgid "Edit mаrker text"
 msgstr "Edytuj tekst znacznika"
 
 msgid "FTP-transfer"
-msgstr "Transfer FTP"
+msgstr "Transfer-FTP"
 
 msgid "Global search"
 msgstr "Globalne wyszukiwanie"
@@ -90,19 +89,19 @@ msgid "Hide/Skip On/Off     Ctrl + H"
 msgstr "Ukryj/Pomiń Wł./Wył     Ctrl + H"
 
 msgid "Add IPTV or stream service"
-msgstr "Dodaj strumień IPTV "
+msgstr "Dodaj IPTV strumień"
 
 msgid "Import m3u"
 msgstr "Importuj m3u"
 
 msgid "Import m3u file"
-msgstr "Importuj plik m3u"
+msgstr "Importuj listy m3u"
 
 msgid "List configuration"
 msgstr "Konfiguracja listy"
 
 msgid "Rename for this bouquet"
-msgstr "Zmień nazwę tego serwisu"
+msgstr "Zmień nazwę tego bukietu"
 
 msgid "Set default name"
 msgstr "Ustaw domyślną nazwę"
@@ -156,7 +155,7 @@ msgid "Picons"
 msgstr "Pikony"
 
 msgid "Picons downloader"
-msgstr "Pobieranie pikonów"
+msgstr "Pobieranie picon"
 
 msgid "Satellites downloader"
 msgstr "Pobierania satelitów"
@@ -168,7 +167,7 @@ msgid "Remove all unavailable"
 msgstr "Usuń wszystkie niedostępne"
 
 msgid "Satellites editor"
-msgstr "Edytor satelitów"
+msgstr "Edytor satelit "
 
 msgid "Save"
 msgstr "Zapisz"
@@ -195,7 +194,7 @@ msgid "Active profile:"
 msgstr "Aktywny Profil:"
 
 msgid "All"
-msgstr "Wszystko"
+msgstr "Wszystkie"
 
 msgid "Are you sure?"
 msgstr "Czy na pewno?"
@@ -252,11 +251,11 @@ msgid "User bouquet files:"
 msgstr "Pliki bukietu użytkownika:"
 
 msgid "Extra:"
-msgstr "Ekstra:"
+msgstr "Extra:"
 
 # Filter bar
 msgid "Only free"
-msgstr "Tylko FTA"
+msgstr "Tylko za darmo"
 
 msgid "All positions"
 msgstr "Wszystkie pozycje"
@@ -285,28 +284,28 @@ msgstr "Zamknij"
 
 # Picons dialog
 msgid "Load providers"
-msgstr "Załaduj dostawców"
+msgstr "Załaduj nadawców"
 
 msgid "Providers"
-msgstr "Dostawca"
+msgstr "Nadawcy"
 
 msgid "Receive picons"
-msgstr "Pobierz pikony"
+msgstr "Pobierz ikony"
 
 msgid "Picons name format:"
-msgstr "Format nazw pikon:"
+msgstr "Nazwy picon format:"
 
 msgid "Resize:"
 msgstr "Zmień rozmiar:"
 
 msgid "Current picons path:"
-msgstr "Aktualna ścieżka pikon:"
+msgstr "Aktualna ścieżka picon:"
 
 msgid "Receiver picons path:"
-msgstr "Ścieżka pikon odbiornika:"
+msgstr "Ścieżka picon odbiornika:"
 
 msgid "Picons download tool"
-msgstr "Narzędzie pobierania pikon"
+msgstr "Narzędzie pobierania picon"
 
 msgid "Transfer to receiver"
 msgstr "Wyślij do odbiornika"
@@ -315,7 +314,7 @@ msgid "Downloader"
 msgstr "Pobieranie"
 
 msgid "Converter"
-msgstr "Konwerter"
+msgstr "Konwertowanie"
 
 msgid "Convert"
 msgstr "Konwertuj"
@@ -324,7 +323,7 @@ msgid "Path to save:"
 msgstr "Zapisz do:"
 
 msgid "Path to Enigma2 picons:"
-msgstr "Ścieżka do pikon Enigma2:"
+msgstr "Ścieżka do Enigma2 picon:"
 
 msgid "Specify the correct position value for the provider!"
 msgstr "Podaj poprawną wartość pozycji dla dostawcy!"
@@ -342,7 +341,7 @@ msgid ""
 "To automatically set the identifiers for picons,\n"
 "first load the required services list into the main application window."
 msgstr ""
-"Aby automatycznie ustawić identyfikatory pikon,\n"
+"Aby automatycznie ustawić identyfikatory picon,\n"
 "najpierw załaduj listę wymaganych usług do głównego okna aplikacji."
 
 # Satellites editor
@@ -382,7 +381,7 @@ msgid "Service data:"
 msgstr "Dane usług:"
 
 msgid "Transponder data:"
-msgstr "Данные транспондера:"
+msgstr "Dane transpondera:"
 
 msgid "Service data"
 msgstr "Dane usług"
@@ -395,7 +394,7 @@ msgid ""
 "Continue?"
 msgstr ""
 "Zmiany zostaną zastosowane do wszystkich usług transpondera!\n"
-"kontynuować?"
+"Kontyntynuj?"
 
 msgid "Reference"
 msgstr "Odniesienie"
@@ -432,7 +431,7 @@ msgstr "Znajdź"
 
 # IPTV dialog
 msgid "Stream data"
-msgstr "Przesyłanie danych"
+msgstr "Przesyłanie danych strumieniowo"
 
 # IPTV list configuration dialog
 msgid "Starting values"
@@ -467,7 +466,7 @@ msgid "Password:"
 msgstr "Hasło:"
 
 msgid "Picons:"
-msgstr "Pikony"
+msgstr "Picons:"
 
 msgid "Port:"
 msgstr "Port:"
@@ -476,16 +475,16 @@ msgid "Data path:"
 msgstr "Ścieżka danych:"
 
 msgid "Picons path:"
-msgstr "Ścieżka pikon:"
+msgstr "Ścieżka picon:"
 
 msgid "Network settings:"
 msgstr "Ustawienia sieci:"
 
 msgid "STB file paths:"
-msgstr "Ścieżki do plików w STB:"
+msgstr "Pliki zapisane w STB:"
 
 msgid "Local file paths:"
-msgstr "Lokalne ścieżki plików:"
+msgstr "Pliki zapisane lokalnie:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
@@ -598,7 +597,7 @@ msgid "Backup:"
 msgstr "Kopia:"
 
 msgid "Backup"
-msgstr "Kopia"
+msgstr "Kopia zapasowa"
 
 msgid "Backups"
 msgstr "Kopie zapasowe"
@@ -641,16 +640,16 @@ msgstr "Narzędzia"
 
 # Import
 msgid "Import"
-msgstr "Importuj"
+msgstr "Import"
 
 msgid "Bouquet"
 msgstr "Bukiet"
 
 msgid "Bouquets and services"
-msgstr "Bukiety i kanały"
+msgstr "Bukiety i usługi"
 
 msgid "The main list does not contain services for this bouquet!"
-msgstr "Główna lista nie zawiera kanałów dla tego bukietu!"
+msgstr "Główna lista nie zawiera usług dla tego bukietu!"
 
 msgid "No bouquet file is selected!"
 msgstr "Nie wybrano pliku bukietu!"
@@ -677,13 +676,13 @@ msgid "Disabled"
 msgstr "Wyłączone"
 
 msgid "Enable ver. 5 support (experimental)"
-msgstr "Włącz wer. 5 wsparcie (eksperymentalne)"
+msgstr "Włącz wer. Wsparcie 5(eksperymentalne)"
 
 msgid "Enable HTTP API (experimental)"
-msgstr "Włącz API HTTP (eksperymentalne)"
+msgstr "Włącz interfejs API HTTP(eksperymentalny)"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
-msgstr "Przełącz(zap) kanał(Ctrl + Z)"
+msgstr "Przełącz (zap) kanał(Ctrl + Z)"
 
 msgid "Switch the channel and watch in the program(Ctrl + W)"
 msgstr "Przełącz kanał i oglądaj w programie(Ctrl + W)"

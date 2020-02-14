@@ -12,7 +12,8 @@ block_cipher = None
 ui_files = [('app/ui/*.glade', 'ui'),
             ('app/ui/*.css', 'ui'),
             ('app/ui/*.ui', 'ui'),
-            ('app/ui/lang*', 'share/locale')
+            ('app/ui/lang*', 'share/locale'),
+            ('app/ui/icons*', 'share/icons')
             ]
 
 a = Analysis([EXE_NAME],
