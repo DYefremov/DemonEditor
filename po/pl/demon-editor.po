@@ -20,7 +20,7 @@ msgstr "wwns"
 
 # Main
 msgid "Service"
-msgstr "Service\t"
+msgstr "Service"
 
 msgid "Package"
 msgstr "Pakiet"
@@ -689,3 +689,94 @@ msgstr "Przełącz kanał i oglądaj w programie(Ctrl + W)"
 
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Odtwórz IPTV lub inny strumień w programie(Ctrl + P)"
+
+msgid "Export to m3u"
+msgstr "Eksportuj do m3u"
+
+msgid "EPG configuration"
+msgstr "Koniguruj EPG"
+
+msgid "Apply"
+msgstr "Zatwierdź"
+
+msgid "EPG source"
+msgstr "Źródło EPG"
+
+msgid "Service names source:"
+msgstr "Źródło nazw usług:"
+
+msgid "Main service list"
+msgstr "Główna lista usług"
+
+msgid "XML file"
+msgstr "Plik XML"
+
+msgid "Use web source"
+msgstr "Użyj źródła internetowego"
+
+msgid "Url to *.xml.gz file:"
+msgstr "URL do pliku *.xml.gz:"
+
+msgid "Enable filtering"
+msgstr "Włącz filtrowanie"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Filtruj według ustawień w pliku epg.dat."
+
+msgid "Paths to the epg.dat file:"
+msgstr "Ścieżka do pliku epg.dat:"
+
+msgid "Local path:"
+msgstr "Ścieżka lokalna:"
+
+msgid "STB path:"
+msgstr "Ścieżka STB:"
+
+msgid "Update on start"
+msgstr "Aktualizuj przy starcie"
+
+msgid "Auto configuration by service names."
+msgstr "Automatyczna konfiguracja serwisu według nazw."
+
+msgid "Save list to xml."
+msgstr "Zapisz listę do XML."
+
+msgid "Download XML file error."
+msgstr "Błąd pobierania pliku XML."
+
+msgid "Unsupported file type:"
+msgstr "Nieobsługiwany typ pliku:"
+
+msgid "Unpacking data error."
+msgstr "Błąd rozpakowywania danych."
+
+msgid "XML parsing error:"
+msgstr "Błąd analizy XML:"
+
+msgid "Count of successfully configured services:"
+msgstr "Liczba pomyślnie skonfigurowanych usług:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Bieżący plik epg.dat nie zawiera odniesień do usług tego bukietu!"
+
+msgid "Use HTTP"
+msgstr "Użyj HTTP"
+
+msgid "Close playback"
+msgstr "Zamknij odtwarzanie"
+
+msgid "Import YouTube playlist"
+msgstr "Importuj listę odtwarzania YouTube"
+
+msgid ""
+"Found a link to the YouTube resource!\n"
+"Try to get a direct link to the video?"
+msgstr ""
+"Znaleziono link do zasobu YouTube!\n"
+"Chcesz uzyskać bezpośredni link do filmu?"
+
+msgid "Playlist import"
+msgstr "Import listy odtwarzania"
+
+msgid "Getting link error:"
+msgstr "Błąd pobierania łącza:"
