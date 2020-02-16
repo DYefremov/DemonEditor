@@ -536,7 +536,7 @@ msgid "Please, wait..."
 msgstr "Proszę czekać ..."
 
 msgid "Resizing..."
-msgstr "Zmiana rozmiaru…."
+msgstr "Zmiana rozmiaru..."
 
 msgid "Select paths!"
 msgstr "Wybierz ścieżki!"
@@ -564,7 +564,7 @@ msgstr "Nie znaleziono VLC. Sprawdź, czy jest zainstalowany!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Proszę czekać, trwa testowanie strumieni…."
+msgstr "Proszę czekać, trwa testowanie strumieni..."
 
 msgid "Found"
 msgstr "Znaleziono"
