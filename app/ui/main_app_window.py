@@ -77,7 +77,6 @@ class Application(Gtk.Application):
                           "on_profile_changed": self.on_profile_changed,
                           "on_download": self.on_download,
                           "on_data_open": self.on_data_open,
-                          "on_data_save": self.on_data_save,
                           "on_new_configuration": self.on_new_configuration,
                           "on_tree_view_key_press": self.on_tree_view_key_press,
                           "on_tree_view_key_release": self.on_tree_view_key_release,
@@ -207,6 +206,8 @@ class Application(Gtk.Application):
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_item"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_item"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("save_tool_button"), "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
@@ -282,8 +283,31 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        # Init app menu bar handlers
-        main_handlers = ("on_new_configuration", "on_data_open", "on_data_save", "on_download", "on_settings",
+
+        self.init_keys()
+        self.set_accels()
+
+        builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
+        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
+        self.set_menubar(builder.get_object("menu_bar"))
+        self.set_app_menu(builder.get_object("app-menu"))
+
+        self.update_profile_label()
+        self.init_drag_and_drop()
+        self.init_colors()
+        if self._settings.load_last_config:
+            config = self._settings.get("last_config") or {}
+            self.init_profiles(config.get("last_profile", None))
+            last_bouquet = config.get("last_bouquet", None)
+            self.open_data(callback=lambda: self.open_bouquet(last_bouquet))
+        else:
+            self.init_profiles()
+        gen = self.init_http_api()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def init_keys(self):
+        main_handlers = ("on_new_configuration", "on_data_open", "on_download", "on_settings",
                          "on_close_app", "on_import_bouquet", "on_import_bouquets", "on_satellite_editor_show",
                          "on_picons_loader_show", "on_backup_tool_show", "on_about_app")
         iptv_handlers = ("on_iptv", "on_import_yt_list", "on_import_m3u", "on_export_to_m3u",
@@ -308,13 +332,17 @@ class Application(Gtk.Application):
         # Search, Filter
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
         search_action.connect("change-state", self.on_search_toggled)
+        search_action.set_enabled(False)
+        self._app_info_box.bind_property("visible", search_action, "enabled", 4)
         self._main_window.add_action(search_action)  # For "win.*" actions!
         filter_action = Gio.SimpleAction.new_stateful("filter", None, GLib.Variant.new_boolean(False))
         filter_action.connect("change-state", self.on_filter_toggled)
+        filter_action.set_enabled(False)
+        self._app_info_box.bind_property("visible", filter_action, "enabled", 4)
         self._main_window.add_action(filter_action)
         # Lock, Hide
-        set_action("on_hide", self.on_hide)
-        set_action("on_locked", self.on_locked)
+        self._app_info_box.bind_property("visible", set_action("on_hide", self.on_hide, False), "enabled", 4)
+        self._app_info_box.bind_property("visible", set_action("on_locked", self.on_locked, False), "enabled", 4)
         # Open and download/upload data
         set_action("open_data", lambda a, v: self.open_data())
         set_action("on_download_data", self.on_download_data)
@@ -322,26 +350,8 @@ class Application(Gtk.Application):
         set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
         # Edit
         set_action("on_edit", self.on_edit)
-
-        builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
-        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
-        self.set_menubar(builder.get_object("menu_bar"))
-        self.set_app_menu(builder.get_object("app-menu"))
-        self.set_accels()
-
-        self.update_profile_label()
-        self.init_drag_and_drop()
-        self.init_colors()
-        if self._settings.load_last_config:
-            config = self._settings.get("last_config") or {}
-            self.init_profiles(config.get("last_profile", None))
-            last_bouquet = config.get("last_bouquet", None)
-            self.open_data(callback=lambda: self.open_bouquet(last_bouquet))
-        else:
-            self.init_profiles()
-        gen = self.init_http_api()
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        # Save
+        self._app_info_box.bind_property("visible", set_action("on_data_save", self.on_data_save, False), "enabled", 4)
 
     def set_accels(self):
         """ Setting accelerators for the actions. """
@@ -1103,6 +1113,9 @@ class Application(Gtk.Application):
         yield True
 
     def on_data_save(self, *args):
+        if self._app_info_box.get_visible():
+            return
+
         if len(self._bouquets_model) == 0:
             self.show_error_dialog("No data to save!")
             return

@@ -691,15 +691,16 @@ Author: Dmitriy Yefremov
           <object class="GtkToolbar" id="top_toolbar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">center</property>
             <property name="valign">center</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <child>
-              <object class="GtkToolItem">
+              <object class="GtkToolItem" id="toolbar_main_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_right">10</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="toolbar_main_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">2</property>
@@ -720,6 +721,23 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkComboBoxText" id="profile_combo_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="focus_on_click">False</property>
+                        <property name="tooltip_text" translatable="yes">Profile</property>
+                        <property name="margin_left">2</property>
+                        <property name="margin_right">2</property>
+                        <property name="active">0</property>
+                        <signal name="changed" handler="on_profile_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkToolButton" id="download_tool_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -732,27 +750,11 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="profile_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="focus_on_click">False</property>
-                        <property name="tooltip_text" translatable="yes">Profile</property>
-                        <property name="active">0</property>
-                        <signal name="changed" handler="on_profile_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkToolButton" id="save_tool_button">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Save</property>
                         <property name="action_name">app.on_data_save</property>
@@ -792,6 +794,8 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkToolItem" id="toolbar_extra_item">
                 <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
                 <child>
                   <object class="GtkBox" id="toolbar_extra_box">
                     <property name="visible">True</property>
@@ -869,6 +873,106 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="toolbar_tools_item">
+                <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <child>
+                  <object class="GtkBox" id="toolbar_tools_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">2</property>
+                    <child>
+                      <object class="GtkToolButton" id="sat_editor_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Satellites editor</property>
+                        <property name="action_name">app.on_satellite_editor_show</property>
+                        <property name="label" translatable="yes">Satellites</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-select-all</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="picons_downloader_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Picons downloader</property>
+                        <property name="margin_right">5</property>
+                        <property name="action_name">app.on_picons_loader_show</property>
+                        <property name="label" translatable="yes">Picons</property>
+                        <property name="use_underline">True</property>
+                        <property name="icon_name">insert-image</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="import_m3u_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Import m3u file</property>
+                        <property name="margin_left">5</property>
+                        <property name="action_name">app.on_import_m3u</property>
+                        <property name="label" translatable="yes">Import m3u</property>
+                        <property name="use_underline">True</property>
+                        <property name="icon_name">insert-link</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="export_to_m3u_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Export to m3u</property>
+                        <property name="action_name">app.on_export_to_m3u</property>
+                        <property name="label" translatable="yes">Export to m3u</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-save-as</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="epg_config_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">EPG configuration</property>
+                        <property name="action_name">app.on_epg_list_configuration</property>
+                        <property name="label" translatable="yes">EPG configuration</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-index</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
           </object>
