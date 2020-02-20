@@ -763,3 +763,42 @@ msgstr "Импорт плейлиста"
 
 msgid "Getting link error:"
 msgstr "Ошибка получения ссылки:"
+
+msgid "Extra"
+msgstr "Дополнительно"
+
+msgid "Apply profile settings"
+msgstr "Применить настройки профиля"
+
+msgid "Settings type:"
+msgstr "Тип настроек:"
+
+msgid "Set default"
+msgstr "Установить по умолчанию"
+
+msgid "Language:"
+msgstr "Язык:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Загружать последнюю открытую конфигурацию при запуске программы"
+
+msgid "Enable direct playback bar (experimental)"
+msgstr "Включить панель прямого воспроизведения (экспериментально)"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Включает прямую отправку и воспроизведение медиа-ссылок на ресивере"
+
+msgid "Watch the channel in the program"
+msgstr "Просмотр канала в программе"
+
+msgid "Zap and Play"
+msgstr "Перекл. и просмотр"
+
+msgid "Drag  or paste the link here"
+msgstr "Перетащите или вставьте ссылку здесь"
+
+msgid "Remove added links in the playlist"
+msgstr "Удалить добавленные ссылки из плейлиста"
+
+msgid "A bouquet with that name exists!"
+msgstr "Букет с таким именем существует!"
