@@ -427,6 +427,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkToolButton" id="profile_set_default_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="tooltip_text" translatable="yes">Set default</property>
                                     <property name="halign">end</property>
                                     <property name="label" translatable="yes">Set default</property>
                                     <property name="use_underline">True</property>
@@ -1810,7 +1811,7 @@ Author: Dmitriy Yefremov
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
                                 <property name="hexpand">True</property>
-                                <property name="label" translatable="yes">Enable send to receiver (experimental)</property>
+                                <property name="label" translatable="yes">Enable direct playback bar (experimental)</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -1822,7 +1823,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Enables direct sending of media links to the receiver</property>
+                                <property name="tooltip_text" translatable="yes">Enables direct sending and playback of media links on the receiver</property>
                                 <property name="halign">end</property>
                               </object>
                               <packing>
