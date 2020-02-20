@@ -39,7 +39,6 @@ Author: Dmitriy Yefremov
     <property name="resizable">False</property>
     <property name="window_position">mouse</property>
     <property name="destroy_with_parent">True</property>
-    <property name="type_hint">splashscreen</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
@@ -49,126 +48,162 @@ Author: Dmitriy Yefremov
       <placeholder/>
     </child>
     <child>
-      <object class="GtkToolbar" id="tool_bar">
+      <object class="GtkBox" id="tool_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="halign">center</property>
-        <property name="valign">center</property>
+        <property name="spacing">1</property>
         <child>
-          <object class="GtkToolButton" id="previous_button">
+          <object class="GtkButton" id="previous_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Previous</property>
-            <property name="label" translatable="yes">Previous</property>
-            <property name="use_underline">True</property>
-            <property name="stock_id">gtk-media-previous</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Previous stream in the list</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_left">1</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
             <signal name="clicked" handler="on_previous" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolButton" id="next_button">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Next</property>
-            <property name="label" translatable="yes">Next</property>
-            <property name="use_underline">True</property>
-            <property name="stock_id">gtk-media-next</property>
-            <signal name="clicked" handler="on_next" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolItem">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
-              <object class="GtkEntry" id="url_entry">
+              <object class="GtkImage" id="previous_button_image">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Drag  or paste the link here</property>
-                <property name="margin_left">2</property>
-                <property name="margin_right">2</property>
-                <property name="margin_top">2</property>
-                <property name="margin_bottom">2</property>
-                <property name="primary_icon_stock">gtk-paste</property>
-                <signal name="activate" handler="on_url_activate" swapped="no"/>
-                <signal name="changed" handler="on_url_changed" swapped="no"/>
-                <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-media-previous</property>
               </object>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkToolButton" id="play_button">
+          <object class="GtkButton" id="next_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Next stream in the list</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
+            <signal name="clicked" handler="on_next" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="next_button_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-media-next</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="url_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">Drag  or paste the link here</property>
+            <property name="margin_left">2</property>
+            <property name="margin_right">2</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
+            <property name="primary_icon_stock">gtk-paste</property>
+            <signal name="activate" handler="on_url_activate" swapped="no"/>
+            <signal name="changed" handler="on_url_changed" swapped="no"/>
+            <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="play_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Play</property>
-            <property name="label" translatable="yes">Play</property>
-            <property name="use_underline">True</property>
-            <property name="stock_id">gtk-media-play</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
             <signal name="clicked" handler="on_play" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="play_button_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-media-play</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">True</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
-          <object class="GtkToolButton" id="stop_button">
+          <object class="GtkButton" id="stop_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Stop playback</property>
-            <property name="label" translatable="yes">Stop</property>
-            <property name="use_underline">True</property>
-            <property name="stock_id">gtk-media-stop</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
             <signal name="clicked" handler="on_stop" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="stop_button_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-media-stop</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">True</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
-          <object class="GtkSeparatorToolItem">
+          <object class="GtkButton" id="clear_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">False</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolButton" id="clear_button">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Remove added links in the playlist</property>
-            <property name="label" translatable="yes">Clear</property>
-            <property name="use_underline">True</property>
-            <property name="stock_id">gtk-clear</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_right">1</property>
+            <property name="margin_top">1</property>
+            <property name="margin_bottom">1</property>
             <signal name="clicked" handler="on_clear" swapped="no"/>
+            <child>
+              <object class="GtkImage" id="clear_button_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-clear</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="homogeneous">True</property>
+            <property name="fill">True</property>
+            <property name="position">6</property>
           </packing>
         </child>
+        <style>
+          <class name="primary-toolbar"/>
+        </style>
       </object>
     </child>
-    <style>
-      <class name="primary-toolbar"/>
-    </style>
   </object>
   <object class="GtkImage" id="show_image">
     <property name="visible">True</property>
