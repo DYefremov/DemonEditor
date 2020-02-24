@@ -38,7 +38,9 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **Ctrl + D** - load data from receiver.                                                                                                                                                         
 * **Ctrl + U/B** upload data/bouquets to receiver.
 * **Ctrl + F** - show/hide search bar.
-* **Ctrl + Shift + F** - show/hide filter bar.
+* **Ctrl + Shift + F** - show/hide filter bar.                                                                          
+
+For multiple mouse selection (including Drag and Drop), press and hold the **Ctrl** key!
                                                                                                                                                                                                                                                                        
 ### Minimum requirements:
 Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings, python3-requests. 
