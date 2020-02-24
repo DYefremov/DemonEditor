@@ -25,6 +25,8 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 * **&#8679; + &#8984; + F** - show/hide filter bar.
 * **Left/Right** - remove selection.
 
+For multiple mouse selection (including Drag and Drop), press and hold the **&#8984;** key!
+
 ### Minimum requirements:
 Python >= **3.5**, GTK+ >= **3.16**, pygobject3, adwaita-icon-theme, python3-requests.                                  
 #### Installation:                                                                             
