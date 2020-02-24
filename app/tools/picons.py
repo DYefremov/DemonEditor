@@ -125,7 +125,7 @@ class ProviderParser(HTMLParser):
     _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
     _ONID_TID_PATTERN = re.compile("^\d+-\d+.*")
     _TRANSPONDER_FREQUENCY_PATTERN = re.compile("^\d+ [HVLR]+")
-    _DOMAIN = "https://www.lyngsat.com"
+    _DOMAIN = "http://www.lyngsat.com"
     _TV_DOMAIN = _DOMAIN + "/tvchannels/"
     _RADIO_DOMAIN = _DOMAIN + "/radiochannels/"
     _PKG_DOMAIN = _DOMAIN + "/packages/"
