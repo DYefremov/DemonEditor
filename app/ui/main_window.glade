@@ -1175,7 +1175,6 @@ Author: Dmitriy Yefremov
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkSearchBar" id="search_bar">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkBox" id="search_bar_box">
@@ -1343,24 +1342,13 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSeparator" id="top_separator">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkPaned" id="main_data_paned">
                     <property name="height_request">250</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin_left">1</property>
                     <property name="margin_right">1</property>
+                    <property name="margin_top">2</property>
                     <property name="wide_handle">True</property>
                     <child>
                       <object class="GtkBox" id="services_main_box">
@@ -1371,6 +1359,8 @@ Author: Dmitriy Yefremov
                           <object class="GtkLabel" id="services_header_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="margin_top">2</property>
+                            <property name="margin_bottom">2</property>
                             <property name="label" translatable="yes">Services</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
@@ -1402,6 +1392,8 @@ Author: Dmitriy Yefremov
                                 <signal name="button-press-event" handler="on_view_press" swapped="no"/>
                                 <signal name="drag-begin" handler="on_view_drag_begin" swapped="no"/>
                                 <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
+                                <signal name="drag-data-received" handler="on_services_view_drag_data_received" swapped="no"/>
+                                <signal name="drag-drop" handler="on_services_view_drag_drop" swapped="no"/>
                                 <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                 <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
@@ -1489,6 +1481,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">50</property>
                                     <property name="title" translatable="yes">Package</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">6</property>
                                     <child>
@@ -1509,6 +1502,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Type</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">7</property>
                                     <child>
@@ -1524,7 +1518,10 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="picon_column">
+                                    <property name="resizable">True</property>
+                                    <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Picon</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">9</property>
                                     <child>
@@ -1541,6 +1538,7 @@ Author: Dmitriy Yefremov
                                     <property name="visible">False</property>
                                     <property name="sizing">fixed</property>
                                     <property name="title">Picon ID</property>
+                                    <property name="alignment">0.5</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="picon_id_cellrenderertext"/>
                                       <attributes>
@@ -1555,6 +1553,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title">SID</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">10</property>
                                     <child>
@@ -1574,6 +1573,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Freq</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">11</property>
                                     <child>
@@ -1593,6 +1593,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Rate</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">12</property>
                                     <child>
@@ -1612,6 +1613,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Pol</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">13</property>
                                     <child>
@@ -1631,6 +1633,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title">FEC</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">14</property>
                                     <child>
@@ -1650,6 +1653,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">System</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_column_id">15</property>
                                     <child>
@@ -1669,6 +1673,7 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Pos</property>
                                     <property name="expand">True</property>
+                                    <property name="alignment">0.5</property>
                                     <property name="sort_column_id">16</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="pos_cellrenderertext1">
@@ -1907,6 +1912,8 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="fav_header_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_top">2</property>
+                                <property name="margin_bottom">2</property>
                                 <property name="label" translatable="yes">Bouquet details</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -1952,6 +1959,7 @@ Author: Dmitriy Yefremov
                                         <property name="resizable">True</property>
                                         <property name="min_width">25</property>
                                         <property name="title" translatable="yes">Num</property>
+                                        <property name="alignment">0.5</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="num_cellrenderertext">
                                             <property name="xalign">0.20000000298023224</property>
@@ -2023,8 +2031,9 @@ Author: Dmitriy Yefremov
                                     <child>
                                       <object class="GtkTreeViewColumn" id="fav_type_column">
                                         <property name="resizable">True</property>
-                                        <property name="min_width">70</property>
+                                        <property name="min_width">25</property>
                                         <property name="title" translatable="yes">Type</property>
+                                        <property name="expand">True</property>
                                         <property name="alignment">0.5</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="type_cellrenderertext">
@@ -2039,8 +2048,9 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="fav_pos_column">
-                                        <property name="min_width">70</property>
+                                        <property name="min_width">25</property>
                                         <property name="title" translatable="yes">Pos</property>
+                                        <property name="expand">True</property>
                                         <property name="alignment">0.5</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="pos_cellrenderertext">
@@ -2177,6 +2187,8 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="bouquets_header_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_top">2</property>
+                                <property name="margin_bottom">2</property>
                                 <property name="label" translatable="yes">Bouquets</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -2332,7 +2344,7 @@ Author: Dmitriy Yefremov
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="padding">1</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -2348,7 +2360,7 @@ Author: Dmitriy Yefremov
                 </child>
               </object>
               <packing>
-                <property name="resize">False</property>
+                <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
@@ -2356,14 +2368,13 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child type="center">
           <object class="GtkBox" id="app_info_box">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
             <property name="orientation">vertical</property>
             <signal name="key-press-event" handler="on_tree_view_key_press" object="services_tree_view" swapped="no"/>
             <signal name="key-release-event" handler="on_tree_view_key_release" object="services_tree_view" swapped="no"/>
@@ -2391,7 +2402,7 @@ Author: Dmitriy Yefremov
                 </attributes>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
@@ -2588,7 +2599,7 @@ Author: Dmitriy Yefremov
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">3</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>

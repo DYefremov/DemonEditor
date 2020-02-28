@@ -99,6 +99,8 @@ class Application(Gtk.Application):
                           "on_to_fav_end_copy": self.on_to_fav_end_copy,
                           "on_view_drag_begin": self.on_view_drag_begin,
                           "on_view_drag_data_get": self.on_view_drag_data_get,
+                          "on_services_view_drag_drop": self.on_services_view_drag_drop,
+                          "on_services_view_drag_data_received": self.on_services_view_drag_data_received,
                           "on_view_drag_data_received": self.on_view_drag_data_received,
                           "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
                           "on_view_press": self.on_view_press,
@@ -243,6 +245,7 @@ class Application(Gtk.Application):
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_positions_model = builder.get_object("filter_sat_positions_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
+        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Player
         self._player_box = builder.get_object("player_box")
         self._player_scale = builder.get_object("player_scale")
@@ -267,6 +270,7 @@ class Application(Gtk.Application):
         self._player_frame = builder.get_object("player_frame")
         # Search
         self._search_bar = builder.get_object("search_bar")
+        self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
         self._search_entry = builder.get_object("search_entry")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
@@ -407,19 +411,25 @@ class Application(Gtk.Application):
         """ Enable drag-and-drop """
         target = []
         bq_target = []
+
         self._services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
+        self._services_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target,
                                                 Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._fav_view.enable_model_drag_dest(target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._bouquets_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, bq_target,
                                                      Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._bouquets_view.enable_model_drag_dest(bq_target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
-        self._fav_view.drag_dest_set_target_list(None)
+
         self._fav_view.drag_source_set_target_list(None)
         self._fav_view.drag_dest_add_text_targets()
         self._fav_view.drag_source_add_text_targets()
+        self._fav_view.drag_dest_add_uri_targets()
+
         self._services_view.drag_source_set_target_list(None)
         self._services_view.drag_source_add_text_targets()
+        self._services_view.drag_dest_add_uri_targets()
+
         self._bouquets_view.drag_dest_set_target_list(None)
         self._bouquets_view.drag_source_set_target_list(None)
         self._bouquets_view.drag_dest_add_text_targets()
@@ -771,9 +781,24 @@ class Application(Gtk.Application):
         if selection:
             data.set_text(selection, -1)
 
+    def on_services_view_drag_drop(self, view, drag_context, x, y, time):
+        view.stop_emission_by_name("drag_drop")
+        # https://stackoverflow.com/q/7661016  [Some data was dropped, get the data!]
+        view.drag_get_data(drag_context, drag_context.list_targets()[-1], time)
+
+    def on_services_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+        #  Needs for the GtkTreeView when using models [filter, sort]
+        #  that don't support the GtkTreeDragDest interface.
+        view.stop_emission_by_name("drag_data_received")
+        self.on_view_drag_data_received(view, drag_context, x, y, data, info, time)
+
     def on_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
-        self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=data.get_text())
-        return False
+        txt = data.get_text()
+        uris = data.get_uris()
+        if txt:
+            self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
+        elif len(uris) == 1:
+            self.on_assign_picon(view, uris[0])
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
@@ -939,7 +964,7 @@ class Application(Gtk.Application):
         except Exception as e:
             self.show_error_dialog(str(e))
 
-    def on_data_open(self, action, param=None):
+    def on_data_open(self, action=None, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
@@ -990,6 +1015,8 @@ class Application(Gtk.Application):
             self._profile_combo_box.set_sensitive(True)
             if callback:
                 callback()
+            yield True
+            self.on_view_focus(self._services_view)
             yield True
 
     def append_data(self, bouquets, services):
@@ -1749,8 +1776,7 @@ class Application(Gtk.Application):
 
     def on_player_time_changed(self, t):
         if not self._full_screen and self._player_rewind_box.get_visible():
-            GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t),
-                          priority=GLib.PRIORITY_LOW)
+            GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
 
     def on_player_error(self):
         self.set_playback_elms_active()
@@ -1984,9 +2010,10 @@ class Application(Gtk.Application):
         if value:
             self.update_filter_sat_positions()
             self._filter_entry.grab_focus()
+        else:
+            self._filter_entry.set_text("")
 
         self._filter_bar.set_search_mode(value)
-        self._filter_bar.set_visible(value)
 
     def init_sat_positions(self):
         self._sat_positions.clear()
@@ -2228,27 +2255,28 @@ class Application(Gtk.Application):
                 data = r[Column.SRV_PICON_ID].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
 
-        PiconsDialog(self._main_window, self._settings, ids, self._sat_positions).show()
-        self.update_picons()
+        PiconsDialog(self._main_window, self._settings, ids, self._sat_positions, self.update_picons).show()
 
     @run_task
     def update_picons(self):
         update_picons_data(self._settings.picons_local_path, self._picons)
         append_picons(self._picons, self._services_model)
 
-    def on_assign_picon(self, view):
+    def on_assign_picon(self, view, path=None):
         assign_picon(self.get_target_view(view),
                      self._services_view,
                      self._fav_view,
                      self._main_window,
                      self._picons,
                      self._settings,
-                     self._services)
+                     self._services,
+                     path)
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view),
                      self._services_view,
-                     self._fav_view, self._picons,
+                     self._fav_view,
+                     self._picons,
                      self._settings)
 
     def on_reference_picon(self, view):

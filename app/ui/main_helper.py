@@ -362,39 +362,44 @@ def append_picons(picons, model):
     GLib.idle_add(lambda: next(app, False), priority=GLib.PRIORITY_LOW)
 
 
-def assign_picon(target, srv_view, fav_view, transient, picons, settings, services):
+def assign_picon(target, srv_view, fav_view, transient, picons, settings, services, p_path=None):
     view = srv_view if target is ViewTarget.SERVICES else fav_view
     model, paths = view.get_selection().get_selected_rows()
-    if not is_only_one_item_selected(paths, transient):
-        return
 
-    response = get_chooser_dialog(transient, settings, "*.png", "png files")
-    if response == Gtk.ResponseType.CANCEL:
-        return
+    if not p_path:
+        p_path = get_chooser_dialog(transient, settings, "*.png", "png files")
+        if p_path == Gtk.ResponseType.CANCEL:
+            return
 
-    if not str(response).endswith(".png"):
+    if not str(p_path).endswith(".png") or not os.path.isfile(p_path):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
         return
 
-    picon_pos = Column.SRV_PICON
-    model = get_base_model(model)
-    itr = model.get_iter(paths)
-    fav_id = model.get_value(itr, Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID)
-    picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
+    p_pos = Column.SRV_PICON
+    col_num = Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID
+    itrs = [model.get_iter(p) for p in paths]
 
-    if picon_id:
-        if os.path.isfile(response):
+    if target is ViewTarget.SERVICES:
+        f_model = model.get_model()
+        itrs = [f_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr)) for itr in itrs]
+        model = get_base_model(model)
+
+    for itr in itrs:
+        fav_id = model.get_value(itr, col_num)
+        picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
+
+        if picon_id:
             picons_path = settings.picons_local_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
-            shutil.copy(response, picon_file)
+            shutil.copy(p_path, picon_file)
             picon = get_picon_pixbuf(picon_file)
             picons[picon_id] = picon
-            model.set_value(itr, picon_pos, picon)
+            model.set_value(itr, p_pos, picon)
             if target is ViewTarget.SERVICES:
-                set_picon(fav_id, fav_view.get_model(), picon, Column.FAV_ID, picon_pos)
+                set_picon(fav_id, fav_view.get_model(), picon, Column.FAV_ID, p_pos)
             else:
-                set_picon(fav_id, get_base_model(srv_view.get_model()), picon, Column.SRV_FAV_ID, picon_pos)
+                set_picon(fav_id, get_base_model(srv_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
 
 
 def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):
@@ -407,14 +412,19 @@ def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):
 def remove_picon(target, srv_view, fav_view, picons, settings):
     view = srv_view if target is ViewTarget.SERVICES else fav_view
     model, paths = view.get_selection().get_selected_rows()
-    model = get_base_model(model)
 
     fav_ids = []
     picon_ids = []
     picon_pos = Column.SRV_PICON  # picon position is equal for services and fav
 
-    for path in paths:
-        itr = model.get_iter(path)
+    itrs = [model.get_iter(p) for p in paths]
+
+    if target is ViewTarget.SERVICES:
+        f_model = model.get_model()
+        itrs = [f_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr)) for itr in itrs]
+        model = get_base_model(model)
+
+    for itr in itrs:
         model.set_value(itr, picon_pos, None)
         if target is ViewTarget.SERVICES:
             fav_ids.append(model.get_value(itr, Column.SRV_FAV_ID))
@@ -426,8 +436,10 @@ def remove_picon(target, srv_view, fav_view, picons, settings):
             else:
                 fav_ids.append(fav_id)
 
+    fav_id_column = Column.FAV_ID if target is ViewTarget.SERVICES else Column.SRV_FAV_ID
+
     def remove(md, path, it):
-        if md.get_value(it, Column.FAV_ID if target is ViewTarget.SERVICES else Column.SRV_FAV_ID) in fav_ids:
+        if md.get_value(it, fav_id_column) in fav_ids:
             md.set_value(it, picon_pos, None)
             if target is ViewTarget.FAV:
                 picon_ids.append(md.get_value(it, Column.SRV_PICON_ID))
