@@ -1242,7 +1242,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="sat_editor_header_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-select-all</property>
+                    <property name="stock">gtk-edit</property>
                   </object>
                 </child>
               </object>
@@ -1581,7 +1581,6 @@ Author: Dmitriy Yefremov
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkSearchBar" id="search_bar">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkBox" id="search_bar_box">
@@ -1749,24 +1748,13 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSeparator" id="top_separator">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkPaned" id="main_data_paned">
                     <property name="height_request">250</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin_left">1</property>
                     <property name="margin_right">1</property>
+                    <property name="margin_top">2</property>
                     <property name="wide_handle">True</property>
                     <child>
                       <object class="GtkBox" id="services_main_box">
@@ -1777,6 +1765,8 @@ Author: Dmitriy Yefremov
                           <object class="GtkLabel" id="services_header_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="margin_top">2</property>
+                            <property name="margin_bottom">2</property>
                             <property name="label" translatable="yes">Services</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
@@ -1808,6 +1798,8 @@ Author: Dmitriy Yefremov
                                 <signal name="button-press-event" handler="on_view_press" swapped="no"/>
                                 <signal name="drag-begin" handler="on_view_drag_begin" swapped="no"/>
                                 <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
+                                <signal name="drag-data-received" handler="on_services_view_drag_data_received" swapped="no"/>
+                                <signal name="drag-drop" handler="on_services_view_drag_drop" swapped="no"/>
                                 <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                 <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
@@ -2326,6 +2318,8 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="fav_header_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_top">2</property>
+                                <property name="margin_bottom">2</property>
                                 <property name="label" translatable="yes">Bouquet details</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
@@ -2599,6 +2593,8 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="bouquets_header_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_top">2</property>
+                                <property name="margin_bottom">2</property>
                                 <property name="label" translatable="yes">Bouquets</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
