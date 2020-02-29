@@ -2966,6 +2966,7 @@ Author: Dmitriy Yefremov
                     <property name="tooltip_text" translatable="yes">Current service</property>
                     <property name="justify">fill</property>
                     <property name="ellipsize">end</property>
+                    <property name="max_width_chars">35</property>
                     <property name="xalign">1</property>
                     <attributes>
                       <attribute name="size" value="8000"/>
