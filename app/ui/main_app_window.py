@@ -227,7 +227,7 @@ class Application(Gtk.Application):
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
-        self._receiver_info_box.bind_property("visible", builder.get_object("signal_box"), "visible")
+        self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -1951,24 +1951,25 @@ class Application(Gtk.Application):
     def update_receiver_info(self, info):
         error_code = info.get("error_code", 0) if info else 0
         GLib.idle_add(self._receiver_info_box.set_visible, error_code == 0, priority=GLib.PRIORITY_LOW)
-
         if error_code < 0:
             return
         elif error_code == 412:
             self._http_api.init()
             return
 
-        res_info = info.get("e2about", None) if info else None
-        if res_info:
+        srv_name = info.get("e2servicename", None) if info else None
+        if srv_name:
             image = info.get("e2distroversion", "")
             image_ver = info.get("e2imageversion", "")
             model = info.get("e2model", "")
             info_text = "{} Image: {} {}".format(model, image, image_ver)
             GLib.idle_add(self._receiver_info_label.set_text, info_text, priority=GLib.PRIORITY_LOW)
-            service_name = info.get("e2servicename", None) or ""
+            service_name = srv_name or ""
             GLib.idle_add(self._service_name_label.set_text, service_name, priority=GLib.PRIORITY_LOW)
             if service_name:
                 self.update_service_info()
+
+        GLib.idle_add(self._signal_box.set_visible, bool(srv_name), priority=GLib.PRIORITY_LOW)
 
     def update_service_info(self):
         if self._http_api:
@@ -1981,18 +1982,22 @@ class Application(Gtk.Application):
     @lru_cache(maxsize=2)
     def set_signal(self, val):
         val = val.strip().rstrip("%") or 0
-        with suppress(ValueError):
-            self._signal_level_bar.set_value(int(val))
-        GLib.idle_add(self._signal_level_bar.set_visible, val != "N/A")
+        try:
+            val = int(val)
+            self._signal_level_bar.set_value(val)
+        except ValueError:
+            pass  # NOP
+        finally:
+            GLib.idle_add(self._signal_level_bar.set_visible, val != 0 and val != "N/A")
 
     @run_idle
     def update_status(self, evn):
         if evn:
-            s_duration = evn.get("e2eventstart", 0)
-            self._service_epg_label.set_visible(bool(s_duration))
+            s_duration = int(evn.get("e2eventstart", 0) or 0)
+            self._service_epg_label.set_visible(s_duration > 0)
             if not s_duration:
                 return
-            s_duration = int(s_duration)
+
             s_time = datetime.fromtimestamp(s_duration)
             end_time = datetime.fromtimestamp(s_duration + int(evn.get("e2eventduration", "0") or "0"))
             title = evn.get("e2eventtitle", "")
