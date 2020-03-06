@@ -1287,6 +1287,185 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkBox" id="paths_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">2</property>
+                    <child>
+                      <object class="GtkFrame" id="default_data_paths_frame">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="label_xalign">0.019999999552965164</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkBox" id="default_data_paths_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Sets the profile folder as default to store picons, backups, etc.</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_top">3</property>
+                            <property name="margin_bottom">3</property>
+                            <child>
+                              <object class="GtkLabel" id="default_data_paths_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Make profile folder as default for the additional data.</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="default_data_paths_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <signal name="state-set" handler="on_default_path_mode_switch" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkGrid" id="local_paths_grid1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="row_spacing">2</property>
+                        <property name="column_homogeneous">True</property>
+                        <child>
+                          <object class="GtkLabel" id="default_data_dir_labe">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Default data path:</property>
+                            <property name="lines">0</property>
+                            <property name="xalign">0.019999999552965164</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="default_data_dir_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="secondary_icon_name">folder-open</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
+                            <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
+                            <signal name="changed" handler="on_default_data_path_changed" swapped="no"/>
+                            <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="record_frame">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="label_xalign">0.019999999552965164</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkGrid" id="record_grid">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
+                            <property name="row_spacing">2</property>
+                            <property name="column_homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel" id="record_dir_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Streams record path:</property>
+                                <property name="xalign">0.019999999552965164</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="record_data_dir_field">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="primary_icon_stock">gtk-edit</property>
+                                <property name="secondary_icon_name">folder-open</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
+                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
+                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="record_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Record:</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">paths</property>
+                    <property name="title" translatable="yes">Paths</property>
+                    <property name="icon_name">gtk-open</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkBox" id="program_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -1458,7 +1637,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkSwitch" id="set_color_switch">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <signal name="state-set" handler="on_set_color_switch_state" swapped="no"/>
+                                    <signal name="state-set" handler="on_set_color_switch" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1639,7 +1818,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="name">program</property>
                     <property name="title" translatable="yes">Program</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -1797,7 +1976,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="halign">end</property>
-                                <signal name="state-set" handler="on_http_mode_switch_state" swapped="no"/>
+                                <signal name="state-set" handler="on_http_mode_switch" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1969,7 +2148,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="name">extra</property>
                     <property name="title" translatable="yes">Extra</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
