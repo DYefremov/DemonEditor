@@ -1,6 +1,5 @@
 import os
 from enum import Enum
-from pathlib import Path
 
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
@@ -31,10 +30,12 @@ class SettingsDialog:
                     "on_apply_profile_settings": self.on_apply_profile_settings,
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
-                    "on_set_color_switch_state": self.on_set_color_switch_state,
-                    "on_http_mode_switch_state": self.on_http_mode_switch_state,
-                    "on_yt_dl_switch_state": self.on_yt_dl_switch_state,
-                    "on_send_to_switch_state": self.on_send_to_switch_state,
+                    "on_set_color_switch": self.on_set_color_switch,
+                    "on_http_mode_switch": self.on_http_mode_switch,
+                    "on_yt_dl_switch": self.on_yt_dl_switch,
+                    "on_send_to_switch": self.on_send_to_switch,
+                    "on_default_path_mode_switch": self.on_default_path_mode_switch,
+                    "on_default_data_path_changed": self.on_default_data_path_changed,
                     "on_profile_add": self.on_profile_add,
                     "on_profile_edit": self.on_profile_edit,
                     "on_profile_remove": self.on_profile_remove,
@@ -80,6 +81,9 @@ class SettingsDialog:
         self._picons_field = builder.get_object("picons_field")
         self._picons_dir_field = builder.get_object("picons_dir_field")
         self._backup_dir_field = builder.get_object("backup_dir_field")
+        self._default_data_dir_field = builder.get_object("default_data_dir_field")
+        self._record_data_dir_field = builder.get_object("record_data_dir_field")
+        self._default_data_paths_switch = builder.get_object("default_data_paths_switch")
         # Info bar
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
@@ -207,10 +211,13 @@ class SettingsDialog:
         self._data_dir_field.set_text(self._settings.data_local_path)
         self._picons_dir_field.set_text(self._settings.picons_local_path)
         self._backup_dir_field.set_text(self._settings.backup_local_path)
+        self._default_data_dir_field.set_text(self._settings.default_data_path)
+        self._record_data_dir_field.set_text(self._settings.records_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
+        self._default_data_paths_switch.set_active(self._settings.profile_folder_is_default)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._support_ver5_switch.set_active(self._settings.v5_support)
@@ -263,6 +270,9 @@ class SettingsDialog:
         self._ext_settings.fav_click_mode = self.get_fav_click_mode()
         self._ext_settings.language = self._lang_combo_box.get_active_id()
         self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
+        self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
+        self._ext_settings.default_data_path = self._default_data_dir_field.get_text()
+        self._ext_settings.records_path = self._record_data_dir_field.get_text()
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._ext_settings.use_colors = self._set_color_switch.get_active()
@@ -338,21 +348,27 @@ class SettingsDialog:
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
 
-    def on_set_color_switch_state(self, switch, state):
+    def on_set_color_switch(self, switch, state):
         self._colors_grid.set_sensitive(state)
 
-    def on_http_mode_switch_state(self, switch, state):
+    def on_http_mode_switch(self, switch, state):
         self._click_mode_zap_button.set_sensitive(state)
         if any((self._click_mode_play_button.get_active(),
                 self._click_mode_zap_button.get_active(),
                 self._click_mode_zap_and_play_button.get_active())):
             self._click_mode_disabled_button.set_active(True)
 
-    def on_yt_dl_switch_state(self, switch, state):
+    def on_yt_dl_switch(self, switch, state):
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
 
-    def on_send_to_switch_state(self, switch, state):
+    def on_send_to_switch(self, switch, state):
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+
+    def on_default_path_mode_switch(self, switch, state):
+        self._settings.profile_folder_is_default = state
+
+    def on_default_data_path_changed(self, entry):
+        self._settings.default_data_path = entry.get_text()
 
     def on_profile_add(self, item):
         model = self._profile_view.get_model()
@@ -366,10 +382,6 @@ class SettingsDialog:
         model.append((name, None))
         scroll_to(len(model) - 1, self._profile_view)
         self.on_profile_selected(self._profile_view)
-        p = name + "/"
-        self._settings.data_local_path += p
-        self._settings.picons_local_path += p
-        self._settings.backup_local_path += p
         self.on_reset()
 
     def on_profile_edit(self, item=None):
@@ -392,29 +404,29 @@ class SettingsDialog:
 
     def on_profile_edited(self, render, path, new_value):
         row = self._profile_view.get_model()[path]
-        p_name = row[0]
-        if p_name == new_value:
+        old_name = row[0]
+        if old_name == new_value:
             return
 
         if new_value in self._profiles:
             show_dialog(DialogType.ERROR, self._dialog, "A profile with that name exists!")
             return
 
-        p_name = self._profiles.pop(p_name, None)
-        if p_name:
+        p_settings = self._profiles.pop(old_name, None)
+        if p_settings:
             row[0] = new_value
-            self._profiles[new_value] = p_name
-            self.update_local_paths(new_value)
+            self._profiles[new_value] = p_settings
+            self.update_local_paths(new_value, old_name)
         self.on_profile_selected(self._profile_view)
 
-    def update_local_paths(self, p_name, force_rename=False):
+    def update_local_paths(self, p_name, old_name, force_rename=False):
         data_path = self._settings.data_local_path
         picons_path = self._settings.picons_local_path
         backup_path = self._settings.backup_local_path
 
-        self._settings.data_local_path = "{}/{}/".format(Path(data_path).parent, p_name)
-        self._settings.picons_local_path = "{}/{}/".format(Path(picons_path).parent, p_name)
-        self._settings.backup_local_path = "{}/{}/".format(Path(backup_path).parent, p_name)
+        self._settings.data_local_path = p_name.join(data_path.rsplit(old_name, 1))
+        self._settings.picons_local_path = p_name.join(picons_path.rsplit(old_name, 1))
+        self._settings.backup_local_path = p_name.join(backup_path.rsplit(old_name, 1))
 
         if force_rename:
             try:

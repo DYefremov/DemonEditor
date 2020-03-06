@@ -26,6 +26,8 @@ class Defaults(Enum):
     NEW_COLOR = "rgb(255,230,204)"
     EXTRA_COLOR = "rgb(179,230,204)"
     FAV_CLICK_MODE = 0
+    PROFILE_FOLDER_DEFAULT = False
+    RECORDS_PATH = DATA_PATH + "records/"
 
 
 def get_default_settings(profile_name="default"):
@@ -43,14 +45,20 @@ def get_default_settings(profile_name="default"):
         "use_colors": Defaults.USE_COLORS.value,
         "new_color": Defaults.NEW_COLOR.value,
         "extra_color": Defaults.EXTRA_COLOR.value,
-        "fav_click_mode": Defaults.FAV_CLICK_MODE.value
+        "fav_click_mode": Defaults.FAV_CLICK_MODE.value,
+        "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
+        "records_path": Defaults.RECORDS_PATH.value
     }
 
 
-def set_local_paths(settings, profile_name):
-    settings["data_local_path"] = "{}{}/".format(settings["data_local_path"], profile_name)
-    settings["picons_local_path"] = "{}{}/".format(settings["picons_local_path"], profile_name)
-    settings["backup_local_path"] = "{}{}/".format(settings["backup_local_path"], profile_name)
+def set_local_paths(settings, profile_name, data_path=DATA_PATH, use_profile_folder=False):
+    settings["data_local_path"] = "{}{}/".format(data_path, profile_name)
+    if use_profile_folder:
+        settings["picons_local_path"] = "{}{}/{}/".format(data_path, profile_name, "picons")
+        settings["backup_local_path"] = "{}{}/{}/".format(data_path, profile_name, "backup")
+    else:
+        settings["picons_local_path"] = "{}{}/{}/".format(data_path, "picons", profile_name)
+        settings["backup_local_path"] = "{}{}/{}/".format(data_path, "backup", profile_name)
 
 
 class SettingsType(IntEnum):
@@ -126,7 +134,10 @@ class Settings:
     def reset(self, force_write=False):
         for k, v in self.setting_type.get_default_settings().items():
             self._cp_settings[k] = v
-        set_local_paths(self._cp_settings, self._current_profile)
+
+        def_path = self.default_data_path
+        def_path += "enigma2/" if self.setting_type is SettingsType.ENIGMA_2 else "neutrino/"
+        set_local_paths(self._cp_settings, self._current_profile, def_path, self.profile_folder_is_default)
 
         if force_write:
             self.save()
@@ -336,20 +347,38 @@ class Settings:
         self._cp_settings["satellites_xml_path"] = value
 
     @property
-    def data_local_path(self):
-        return self._cp_settings.get("data_local_path", self.get_default("data_local_path"))
-
-    @data_local_path.setter
-    def data_local_path(self, value):
-        self._cp_settings["data_local_path"] = value
-
-    @property
     def picons_path(self):
         return self._cp_settings.get("picons_path", self.get_default("picons_path"))
 
     @picons_path.setter
     def picons_path(self, value):
         self._cp_settings["picons_path"] = value
+
+    # ***** Local paths ***** #
+
+    @property
+    def profile_folder_is_default(self):
+        return self._settings.get("profile_folder_is_default", Defaults.PROFILE_FOLDER_DEFAULT.value)
+
+    @profile_folder_is_default.setter
+    def profile_folder_is_default(self, value):
+        self._settings["profile_folder_is_default"] = value
+
+    @property
+    def default_data_path(self):
+        return self._settings.get("default_data_path", DATA_PATH)
+
+    @default_data_path.setter
+    def default_data_path(self, value):
+        self._settings["default_data_path"] = value
+
+    @property
+    def data_local_path(self):
+        return self._cp_settings.get("data_local_path", self.get_default("data_local_path"))
+
+    @data_local_path.setter
+    def data_local_path(self, value):
+        self._cp_settings["data_local_path"] = value
 
     @property
     def picons_local_path(self):
@@ -366,6 +395,14 @@ class Settings:
     @backup_local_path.setter
     def backup_local_path(self, value):
         self._cp_settings["backup_local_path"] = value
+
+    @property
+    def records_path(self):
+        return self._settings.get("records_path", Defaults.RECORDS_PATH.value)
+
+    @records_path.setter
+    def records_path(self, value):
+        self._settings["records_path"] = value
 
     # ***** Program settings *****
 
@@ -451,8 +488,7 @@ class Settings:
 
 
 def get_settings():
-    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)  # create dir if not exist
-    os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
 
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         write_settings(get_default_settings())
