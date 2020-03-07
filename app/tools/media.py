@@ -1,6 +1,8 @@
+import os
 import sys
+from datetime import datetime
 
-from app.commons import run_task, log
+from app.commons import run_task, log, _DATE_FORMAT
 
 
 class Player:
@@ -101,6 +103,62 @@ class Player:
 
     def set_full_screen(self, full):
         self._player.set_fullscreen(full)
+
+
+class Recorder:
+    __VLC_REC_INSTANCE = None
+
+    _CMD = "sout=#std{{access=file,mux=ts,dst={}{}_{}.ts}}"
+
+    def __init__(self):
+        try:
+            from app.tools import vlc
+            from app.tools.vlc import EventType
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+            raise ImportError
+        else:
+            self._is_record = False
+            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+            self._recorder = vlc.Instance(args).media_player_new()
+
+    @classmethod
+    def get_instance(cls):
+        if not cls.__VLC_REC_INSTANCE:
+            cls.__VLC_REC_INSTANCE = Recorder()
+        return cls.__VLC_REC_INSTANCE
+
+    @run_task
+    def record(self, url, path, name):
+        if self._recorder:
+            self._recorder.stop()
+
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        d_now = datetime.now().strftime(_DATE_FORMAT)
+        media = self._recorder.get_instance().media_new(url, self._CMD.format(path, name, d_now))
+        media.get_mrl()
+
+        self._recorder.set_media(media)
+        self._is_record = True
+        self._recorder.play()
+        log("Record started {}".format(d_now))
+
+    @run_task
+    def stop(self):
+        self._recorder.stop()
+        self._is_record = False
+        log("Recording stopped.")
+
+    def is_record(self):
+        return self._is_record
+
+    @run_task
+    def release(self):
+        if self._recorder:
+            self._recorder.stop()
+            self._recorder.release()
+            self._is_record = False
+            log("Recording stopped. Releasing...")
 
 
 if __name__ == "__main__":
