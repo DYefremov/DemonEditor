@@ -17,7 +17,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import SettingsType, Settings, SettingsException
-from app.tools.media import Player
+from app.tools.media import Player, Recorder
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
@@ -71,6 +71,7 @@ class Application(Gtk.Application):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
         # Adding command line options
         self.add_main_option("log", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
+        self.add_main_option("record", ord("r"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
 
         handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
@@ -141,6 +142,7 @@ class Application(Gtk.Application):
                     "on_drawing_area_realize": self.on_drawing_area_realize,
                     "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
                     "on_main_window_state": self.on_main_window_state,
+                    "on_record": self.on_record,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
@@ -171,6 +173,8 @@ class Application(Gtk.Application):
         self._player = None
         self._full_screen = False
         self._drawing_area_xid = None
+        # Record
+        self._recorder = None
         # http api
         self._http_api = None
         self._fav_click_mode = None
@@ -226,6 +230,7 @@ class Application(Gtk.Application):
         self._app_info_box.bind_property("visible", self._save_header_button, "visible", 4)
         self._save_header_button.bind_property("visible", builder.get_object("save_menu_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
+        self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
@@ -267,6 +272,8 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
+        # Record
+        self._record_image = builder.get_object("record_button_image")
         # Enabling events for the drawing area
         self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
         self._player_frame = builder.get_object("player_frame")
@@ -373,8 +380,13 @@ class Application(Gtk.Application):
         """ Processing command line parameters. """
         options = command_line.get_options_dict()
         options = options.end().unpack()
+
         if "log" in options:
             init_logger()
+
+        if "record" in options:
+            log("Starting record of current stream...")
+            log("Not implemented yet!")
 
         self.activate()
         return 0
@@ -452,9 +464,15 @@ class Application(Gtk.Application):
         """ Function for force ctrl press event for view """
         event.state |= Gdk.ModifierType.CONTROL_MASK
 
-    @run_idle
     def on_close_app(self, *args):
-        self.quit()
+        if self._recorder:
+            if self._recorder.is_record():
+                msg = "{}\n\n\t{}".format(get_message("Recording in progress!"), get_message("Are you sure?"))
+                if show_dialog(DialogType.QUESTION, self._main_window, msg) == Gtk.ResponseType.CANCEL:
+                    return True
+            self._recorder.release()
+
+        GLib.idle_add(self.quit)
 
     def on_resize(self, window):
         """ Stores new size properties for app window after resize """
@@ -1815,6 +1833,41 @@ class Application(Gtk.Application):
         self._status_bar_box.set_visible(full and not self._app_info_box.get_visible())
         if not state & Gdk.WindowState.ICONIFIED and self._links_transmitter:
             self._links_transmitter.hide()
+
+    # ************************* Record ***************************** #
+
+    def on_record(self, button):
+        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
+            return True
+
+        if not self._recorder:
+            try:
+                self._recorder = Recorder.get_instance()
+            except (ImportError, NameError, AttributeError):
+                self.show_error_dialog("No VLC is found. Check that it is installed!")
+                return
+
+        is_record = self._recorder.is_record()
+
+        if is_record:
+            self._recorder.stop()
+        else:
+            self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.record)
+
+    def record(self, m3u):
+        if m3u:
+            url = [s for s in m3u.split("\n") if not s.startswith("#")]
+            if url:
+                self._recorder.record(url[0], self._settings.records_path, self._service_name_label.get_text())
+                GLib.timeout_add_seconds(1, self.update_record_button, priority=GLib.PRIORITY_LOW)
+
+    def update_record_button(self):
+        is_rec = self._recorder.is_record()
+        if not is_rec:
+            self._record_image.set_visible(True)
+        else:
+            self._record_image.set_visible(not self._record_image.get_visible())
+        return is_rec
 
     # ************************ HTTP API **************************** #
 

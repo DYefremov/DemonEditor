@@ -1749,6 +1749,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkPaned" id="main_data_paned">
+                    <property name="width_request">320</property>
                     <property name="height_request">250</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2930,7 +2931,28 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="record_button">
+                    <property name="name">status-bar-button</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Record</property>
+                    <signal name="clicked" handler="on_record" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="record_button_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-media-record</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -2956,7 +2978,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -2975,7 +2997,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -2989,7 +3011,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </object>
