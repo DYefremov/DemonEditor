@@ -1869,7 +1869,7 @@ class Application(Gtk.Application):
 
         if not self._recorder:
             try:
-                self._recorder = Recorder.get_instance()
+                self._recorder = Recorder.get_instance(self._settings)
             except (ImportError, NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return
@@ -1885,7 +1885,7 @@ class Application(Gtk.Application):
         if m3u:
             url = [s for s in m3u.split("\n") if not s.startswith("#")]
             if url:
-                self._recorder.record(url[0], self._settings.records_path, self._service_name_label.get_text())
+                self._recorder.record(url[0], self._service_name_label.get_text())
                 GLib.timeout_add_seconds(1, self.update_record_button, priority=GLib.PRIORITY_LOW)
 
     def update_record_button(self):
