@@ -108,9 +108,10 @@ class Player:
 class Recorder:
     __VLC_REC_INSTANCE = None
 
-    _CMD = "sout=#std{{access=file,mux=ts,dst={}{}_{}.ts}}"
+    _CMD = "sout=#std{{access=file,mux=ts,dst={}.ts}}"
+    _TR_CMD = "sout=#transcode{{{}}}:file{{mux=mp4,dst={}.mp4}}"
 
-    def __init__(self):
+    def __init__(self, settings):
         try:
             from app.tools import vlc
             from app.tools.vlc import EventType
@@ -118,24 +119,28 @@ class Recorder:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError
         else:
+            self._settings = settings
             self._is_record = False
             args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
             self._recorder = vlc.Instance(args).media_player_new()
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls, settings):
         if not cls.__VLC_REC_INSTANCE:
-            cls.__VLC_REC_INSTANCE = Recorder()
+            cls.__VLC_REC_INSTANCE = Recorder(settings)
         return cls.__VLC_REC_INSTANCE
 
     @run_task
-    def record(self, url, path, name):
+    def record(self, url, name):
         if self._recorder:
             self._recorder.stop()
 
+        path = self._settings.records_path
         os.makedirs(os.path.dirname(path), exist_ok=True)
         d_now = datetime.now().strftime(_DATE_FORMAT)
-        media = self._recorder.get_instance().media_new(url, self._CMD.format(path, name, d_now))
+        path = "{}{}_{}".format(path, name.replace(" ", "_"), d_now.replace(" ", "_"))
+        cmd = self.get_transcoding_cmd(path) if self._settings.activate_transcoding else self._CMD.format(path)
+        media = self._recorder.get_instance().media_new(url, cmd)
         media.get_mrl()
 
         self._recorder.set_media(media)
@@ -159,6 +164,11 @@ class Recorder:
             self._recorder.release()
             self._is_record = False
             log("Recording stopped. Releasing...")
+
+    def get_transcoding_cmd(self, path):
+        presets = self._settings.transcoding_presets
+        prs = presets.get(self._settings.active_preset)
+        return self._TR_CMD.format(",".join("{}={}".format(k, v) for k, v in prs.items()), path)
 
 
 if __name__ == "__main__":

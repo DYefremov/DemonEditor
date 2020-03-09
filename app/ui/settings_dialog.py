@@ -1,4 +1,5 @@
 import os
+import re
 from enum import Enum
 
 from app.commons import run_task, run_idle
@@ -20,6 +21,8 @@ class Property(Enum):
 
 
 class SettingsDialog:
+    _DIGIT_ENTRY_NAME = "digit-entry"
+    _DIGIT_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 
     def __init__(self, transient, settings: Settings):
         handlers = {"on_field_icon_press": self.on_field_icon_press,
@@ -33,7 +36,6 @@ class SettingsDialog:
                     "on_set_color_switch": self.on_set_color_switch,
                     "on_http_mode_switch": self.on_http_mode_switch,
                     "on_yt_dl_switch": self.on_yt_dl_switch,
-                    "on_send_to_switch": self.on_send_to_switch,
                     "on_default_path_mode_switch": self.on_default_path_mode_switch,
                     "on_default_data_path_changed": self.on_default_data_path_changed,
                     "on_profile_add": self.on_profile_add,
@@ -49,6 +51,9 @@ class SettingsDialog:
                     "on_network_settings_visible": self.on_network_settings_visible,
                     "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
                     "on_click_mode_togged": self.on_click_mode_togged,
+                    "on_transcoding_preset_changed": self.on_transcoding_preset_changed,
+                    "on_apply_presets": self.on_apply_presets,
+                    "on_digit_entry_changed": self.on_digit_entry_changed,
                     "on_view_popup_menu": self.on_view_popup_menu}
 
         builder = Gtk.Builder()
@@ -92,6 +97,23 @@ class SettingsDialog:
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
+        # Streaming
+        header_separator = builder.get_object("header_separator")
+        self._apply_presets_button = builder.get_object("apply_presets_button")
+        self._transcoding_switch = builder.get_object("transcoding_switch")
+        self._edit_preset_switch = builder.get_object("edit_preset_switch")
+        self._presets_combo_box = builder.get_object("presets_combo_box")
+        self._video_bitrate_field = builder.get_object("video_bitrate_field")
+        self._video_width_field = builder.get_object("video_width_field")
+        self._video_height_field = builder.get_object("video_height_field")
+        self._audio_bitrate_field = builder.get_object("audio_bitrate_field")
+        self._audio_channels_combo_box = builder.get_object("audio_channels_combo_box")
+        self._audio_sample_rate_combo_box = builder.get_object("audio_sample_rate_combo_box")
+        self._apply_presets_button.bind_property("visible", header_separator, "visible")
+        self._transcoding_switch.bind_property("active", builder.get_object("record_box"), "sensitive")
+        self._edit_preset_switch.bind_property("active", self._apply_presets_button, "sensitive")
+        self._edit_preset_switch.bind_property("active", builder.get_object("video_options_frame"), "sensitive")
+        self._edit_preset_switch.bind_property("active", builder.get_object("audio_options_frame"), "sensitive")
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
@@ -121,10 +143,18 @@ class SettingsDialog:
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
         self._apply_profile_button = builder.get_object("apply_profile_button")
-        self._apply_profile_button.bind_property("visible", builder.get_object("header_separator"), "visible")
+        self._apply_profile_button.bind_property("visible", header_separator, "visible")
         self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
         # Language
         self._lang_combo_box = builder.get_object("lang_combo_box")
+        # Style
+        self._style_provider = Gtk.CssProvider()
+        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._digit_elems = (self._port_field, self._http_port_field, self._telnet_port_field, self._video_width_field,
+                             self._video_bitrate_field, self._video_height_field, self._audio_bitrate_field)
+        for el in self._digit_elems:
+            el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+                                                           Gtk.STYLE_PROVIDER_PRIORITY_USER)
         # Settings
         self._ext_settings = settings
         self._settings = Settings(settings.settings)
@@ -218,6 +248,9 @@ class SettingsDialog:
         self.set_fav_click_mode(self._settings.fav_click_mode)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
         self._default_data_paths_switch.set_active(self._settings.profile_folder_is_default)
+        self._transcoding_switch.set_active(self._settings.activate_transcoding)
+        self._presets_combo_box.set_active_id(self._settings.active_preset)
+        self.on_transcoding_preset_changed(self._presets_combo_box)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._support_ver5_switch.set_active(self._settings.v5_support)
@@ -238,6 +271,10 @@ class SettingsDialog:
             self._neutrino_radio_button.activate()
 
     def on_apply_profile_settings(self, item):
+        if not self.is_data_correct(self._digit_elems):
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
         self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
         self._settings.setting_type = self._s_type
         self._settings.host = self._host_field.get_text()
@@ -273,6 +310,8 @@ class SettingsDialog:
         self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
         self._ext_settings.default_data_path = self._default_data_dir_field.get_text()
         self._ext_settings.records_path = self._record_data_dir_field.get_text()
+        self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
+        self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._ext_settings.use_colors = self._set_color_switch.get_active()
@@ -359,9 +398,6 @@ class SettingsDialog:
             self._click_mode_disabled_button.set_active(True)
 
     def on_yt_dl_switch(self, switch, state):
-        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
-
-    def on_send_to_switch(self, switch, state):
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
 
     def on_default_path_mode_switch(self, switch, state):
@@ -462,7 +498,9 @@ class SettingsDialog:
             self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
 
     def on_main_settings_visible(self, stack, param):
-        self._apply_profile_button.set_visible(stack.get_visible_child_name() == "profiles")
+        name = stack.get_visible_child_name()
+        self._apply_profile_button.set_visible(name == "profiles")
+        self._apply_presets_button.set_visible(name == "streaming")
 
     def on_network_settings_visible(self, stack, param):
         self._http_use_ssl_check_button.set_visible(Property(stack.get_visible_child_name()) is Property.HTTP)
@@ -504,6 +542,44 @@ class SettingsDialog:
             return FavClickMode.STREAM
 
         return FavClickMode.DISABLED
+
+    def on_transcoding_preset_changed(self, button):
+        presets = self._settings.transcoding_presets
+        prs = presets.get(button.get_active_id())
+        self._video_bitrate_field.set_text(prs.get("vb", "0"))
+        self._video_width_field.set_text(prs.get("width", "0"))
+        self._video_height_field.set_text(prs.get("height", "0"))
+        self._audio_bitrate_field.set_text(prs.get("ab", "0"))
+        self._audio_channels_combo_box.set_active_id(prs.get("channels", "2"))
+        self._audio_sample_rate_combo_box.set_active_id(prs.get("samplerate", "44100"))
+
+    def on_apply_presets(self, item):
+        if not self.is_data_correct(self._digit_elems):
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        presets = self._settings.transcoding_presets
+        prs = presets.get(self._presets_combo_box.get_active_id())
+        prs["vb"] = self._video_bitrate_field.get_text()
+        prs["width"] = self._video_width_field.get_text()
+        prs["height"] = self._video_height_field.get_text()
+        prs["ab"] = self._audio_bitrate_field.get_text()
+        prs["channels"] = self._audio_channels_combo_box.get_active_id()
+        prs["samplerate"] = self._audio_sample_rate_combo_box.get_active_id()
+        self._ext_settings.transcoding_presets = presets
+        self._edit_preset_switch.set_active(False)
+
+    def on_digit_entry_changed(self, entry):
+        if self._DIGIT_PATTERN.search(entry.get_text()):
+            entry.set_name(self._DIGIT_ENTRY_NAME)
+        else:
+            entry.set_name("GtkEntry")
+
+    def is_data_correct(self, elems):
+        return not any(elem.get_name() == self._DIGIT_ENTRY_NAME for elem in elems)
 
     def on_view_popup_menu(self, menu, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:

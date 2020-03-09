@@ -28,6 +28,18 @@ class Defaults(Enum):
     FAV_CLICK_MODE = 0
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records/"
+    ACTIVATE_TRANSCODING = False
+    ACTIVE_TRANSCODING_PRESET = "720p TV/device"
+
+
+def get_settings():
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+
+    if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
+        write_settings(get_default_settings())
+
+    with open(CONFIG_FILE, "r") as config_file:
+        return json.load(config_file)
 
 
 def get_default_settings(profile_name="default"):
@@ -49,6 +61,18 @@ def get_default_settings(profile_name="default"):
         "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
         "records_path": Defaults.RECORDS_PATH.value
     }
+
+
+def get_default_transcoding_presets():
+    return {"720p TV/device": {"vcodec": "h264", "vb": "1500", "width": "1280", "height": "720", "acodec": "mp3",
+                               "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"},
+            "1080p TV/device": {"vcodec": "h264", "vb": "3500", "width": "1920", "height": "1080", "acodec": "mp3",
+                                "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"}}
+
+
+def write_settings(config):
+    with open(CONFIG_FILE, "w") as config_file:
+        json.dump(config, config_file, indent="    ")
 
 
 def set_local_paths(settings, profile_name, data_path=DATA_PATH, use_profile_folder=False):
@@ -404,7 +428,33 @@ class Settings:
     def records_path(self, value):
         self._settings["records_path"] = value
 
-    # ***** Program settings *****
+    # ******** Streaming ********* #
+
+    @property
+    def activate_transcoding(self):
+        return self._settings.get("activate_transcoding", Defaults.ACTIVATE_TRANSCODING.value)
+
+    @activate_transcoding.setter
+    def activate_transcoding(self, value):
+        self._settings["activate_transcoding"] = value
+
+    @property
+    def active_preset(self):
+        return self._settings.get("active_preset", Defaults.ACTIVE_TRANSCODING_PRESET.value)
+
+    @active_preset.setter
+    def active_preset(self, value):
+        self._settings["active_preset"] = value
+
+    @property
+    def transcoding_presets(self):
+        return self._settings.get("transcoding_presets", get_default_transcoding_presets())
+
+    @transcoding_presets.setter
+    def transcoding_presets(self, value):
+        self._settings["transcoding_presets"] = value
+
+    # ***** Program settings ***** #
 
     @property
     def backup_before_save(self):
@@ -485,21 +535,6 @@ class Settings:
     @fav_click_mode.setter
     def fav_click_mode(self, value):
         self._settings["fav_click_mode"] = value
-
-
-def get_settings():
-    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-
-    if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
-        write_settings(get_default_settings())
-
-    with open(CONFIG_FILE, "r") as config_file:
-        return json.load(config_file)
-
-
-def write_settings(config):
-    with open(CONFIG_FILE, "w") as config_file:
-        json.dump(config, config_file, indent="    ")
 
 
 if __name__ == "__main__":
