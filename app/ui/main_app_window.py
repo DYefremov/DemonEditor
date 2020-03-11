@@ -54,7 +54,8 @@ class Application(Gtk.Application):
                      "fav_picon_popup_item", "fav_copy_popup_item", "fav_epg_configuration_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
-                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "bouquet_import_popup_item")
+                         "bouquets_copy_popup_item", "bouquets_paste_popup_item", "bouquet_import_popup_item",
+                         "add_bouquet_tool_button")
 
     _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item")
 
@@ -142,6 +143,7 @@ class Application(Gtk.Application):
                           "on_drawing_area_realize": self.on_drawing_area_realize,
                           "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
                           "on_main_window_state": self.on_main_window_state,
+                          "on_record": self.on_record,
                           "on_remove_all_unavailable": self.on_remove_all_unavailable,
                           "on_new_bouquet": self.on_new_bouquet,
                           "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
@@ -229,7 +231,6 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
-        self._app_info_box.bind_property("visible", self._save_header_button, "visible", 4)
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
