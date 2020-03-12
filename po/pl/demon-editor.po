@@ -19,8 +19,47 @@ msgid "translator-credits"
 msgstr "wwns"
 
 # Main
+msgid "File"
+msgstr "Plik"
+
+msgid "View"
+msgstr "Widok"
+
+msgid "Lock"
+msgstr "Zablokuj"
+
 msgid "Service"
 msgstr "Serwis"
+
+msgid "Settings type:"
+msgstr "Ustawienia dla:"
+
+msgid "Language:"
+msgstr "Język:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Załaduj ostatnią otwartą konfigurację podczas uruchamiania programu"
+
+msgid "Enable send to receiver (experimental)"
+msgstr "Włącz wysyłanie do odbiornika (eksperymentalne)"
+
+msgid "Watch the channel in the program"
+msgstr "Obejrzyj kanał w programie"
+
+msgid "Receiver info"
+msgstr "Informacje o odbiorniku"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Działa w trybie gotowości lub aktualnie jest aktywny transponder!"
+
+msgid "Download picons from the receiver"
+msgstr "Pobierz pikony z odbiornika"
+
+msgid "Remove picons from the receiver"
+msgstr "Usuń pikony z odbiornika"
+
+msgid "Use http to reload data in the receiver."
+msgstr "Użyj http aby ponownie załadować dane do odbiornika."
 
 msgid "Package"
 msgstr "Pakiet"
@@ -86,7 +125,7 @@ msgid "Hide"
 msgstr "Ukryj"
 
 msgid "Hide/Skip On/Off     Ctrl + H"
-msgstr "Ukryj/Pomiń Wł./Wył     Ctrl + H"
+msgstr "Ukryj/Pomiń wł./wył     Ctrl + H"
 
 msgid "Add IPTV or stream service"
 msgstr "Dodaj strumień IPTV"
@@ -149,7 +188,7 @@ msgid "Open"
 msgstr "Otwórz"
 
 msgid "Parent lock On/Off     Ctrl + L"
-msgstr "Blokada rodzicielska On/Off     Ctrl + L"
+msgstr "Blokada rodzicielska wł./wył     Ctrl + L"
 
 msgid "Picons"
 msgstr "Pikony"
@@ -212,10 +251,10 @@ msgid "Host:"
 msgstr "Host:"
 
 msgid "Loading data..."
-msgstr "Ładowanie danych…."
+msgstr "Ładowanie danych…"
 
 msgid "Receive"
-msgstr "Pobieranie"
+msgstr "Pobierz"
 
 msgid "Receive files from receiver"
 msgstr "Pobieranie plików z odbiornika"
@@ -250,8 +289,8 @@ msgstr "Usługi i bukiety plików:"
 msgid "User bouquet files:"
 msgstr "Pliki bukietu użytkownika:"
 
-msgid "Extra:"
-msgstr "Ekstra:"
+msgid "Extra"
+msgstr "Dodatkowe"
 
 # Filter bar
 msgid "Only free"
@@ -533,10 +572,10 @@ msgid "Done!"
 msgstr "Zrobione!"
 
 msgid "Please, wait..."
-msgstr "Proszę czekać ..."
+msgstr "Proszę czekać…"
 
 msgid "Resizing..."
-msgstr "Zmiana rozmiaru..."
+msgstr "Zmiana rozmiaru…"
 
 msgid "Select paths!"
 msgstr "Wybierz ścieżki!"
@@ -564,7 +603,7 @@ msgstr "Nie znaleziono VLC. Sprawdź, czy jest zainstalowany!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Proszę czekać, trwa testowanie strumieni..."
+msgstr "Proszę czekać, trwa testowanie strumieni…"
 
 msgid "Found"
 msgstr "Znaleziono"
