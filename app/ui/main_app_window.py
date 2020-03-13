@@ -1892,9 +1892,9 @@ class Application(Gtk.Application):
     def update_record_button(self):
         is_rec = self._recorder.is_record()
         if not is_rec:
-            self._record_image.set_visible(True)
+            self._record_image.set_opacity(1.0)
         else:
-            self._record_image.set_visible(not self._record_image.get_visible())
+            self._record_image.set_opacity(0 if self._record_image.get_opacity() else 1.0)
         return is_rec
 
     # ************************ HTTP API **************************** #
