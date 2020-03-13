@@ -37,33 +37,6 @@ msgstr "Ustawienia dla:"
 msgid "Language:"
 msgstr "Język:"
 
-msgid "Load the last open configuration at program startup"
-msgstr "Załaduj ostatnią otwartą konfigurację podczas uruchamiania programu"
-
-msgid "Enable send to receiver (experimental)"
-msgstr "Włącz wysyłanie do odbiornika (eksperymentalne)"
-
-msgid "Watch the channel in the program"
-msgstr "Obejrzyj kanał w programie"
-
-msgid "Receiver info"
-msgstr "Informacje o odbiorniku"
-
-msgid "Operates in standby mode or current active transponder!"
-msgstr "Działa w trybie gotowości lub aktualnie jest aktywny transponder!"
-
-msgid "Download picons from the receiver"
-msgstr "Pobierz pikony z odbiornika"
-
-msgid "Remove picons from the receiver"
-msgstr "Usuń pikony z odbiornika"
-
-msgid "Use http to reload data in the receiver."
-msgstr "Użyj http aby ponownie załadować dane do odbiornika."
-
-msgid "Apply profile settings"
-msgstr "Zastosuj ustawienia profilu"
-
 msgid "Package"
 msgstr "Pakiet"
 
@@ -822,3 +795,30 @@ msgstr "Import listy odtwarzania"
 
 msgid "Getting link error:"
 msgstr "Błąd pobierania łącza:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Załaduj ostatnią otwartą konfigurację podczas uruchamiania programu"
+
+msgid "Enable send to receiver (experimental)"
+msgstr "Włącz wysyłanie do odbiornika (eksperymentalne)"
+
+msgid "Watch the channel in the program"
+msgstr "Obejrzyj kanał w programie"
+
+msgid "Receiver info"
+msgstr "Informacje o odbiorniku"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Działa w trybie gotowości lub aktualnie jest aktywny transponder!"
+
+msgid "Download picons from the receiver"
+msgstr "Pobierz pikony z odbiornika"
+
+msgid "Remove picons from the receiver"
+msgstr "Usuń pikony z odbiornika"
+
+msgid "Use http to reload data in the receiver."
+msgstr "Użyj http aby ponownie załadować dane do odbiornika."
+
+msgid "Apply profile settings"
+msgstr "Zastosuj ustawienia profilu"
