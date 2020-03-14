@@ -8,11 +8,11 @@ from app.commons import log
 from app.connections import HttpRequestType
 from app.tools.yt import YouTube
 from app.ui.iptv import get_yt_icon
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, IS_DARWIN
 
 
 class LinksTransmitter:
-    """ The main class for the "send to" function.
+    """ The main media bar class for the "send to" function..
 
          It used for direct playback of media links by the enigma2 media player.
     """
@@ -46,24 +46,27 @@ class LinksTransmitter:
         self._status_active = None
         self._status_passive = None
 
-        try:
-            gi.require_version("AppIndicator3", "0.1")
-            from gi.repository import AppIndicator3
-        except (ImportError, ValueError) as e:
-            log("{}: Load library error: {}".format(__class__.__name__, e))
+        if IS_DARWIN:
             self._tray = builder.get_object("status_icon")
         else:
-            self._is_status_icon = False
-            self._status_active = AppIndicator3.IndicatorStatus.ACTIVE
-            self._status_passive = AppIndicator3.IndicatorStatus.PASSIVE
+            try:
+                gi.require_version("AppIndicator3", "0.1")
+                from gi.repository import AppIndicator3
+            except (ImportError, ValueError) as e:
+                log("{}: Load library error: {}".format(__class__.__name__, e))
+                self._tray = builder.get_object("status_icon")
+            else:
+                self._is_status_icon = False
+                self._status_active = AppIndicator3.IndicatorStatus.ACTIVE
+                self._status_passive = AppIndicator3.IndicatorStatus.PASSIVE
 
-            category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
-            path = Path(UI_RESOURCES_PATH + "/icons/hicolor/scalable/apps/demon-editor.svg").resolve()
-            path = str(path) if path.is_file() else "demon-editor"
-            self._tray = AppIndicator3.Indicator.new("DemonEditor", path, category)
-            self._tray.set_status(self._status_active)
-            self._tray.set_secondary_activate_target(builder.get_object("show_menu_item"))
-            self._tray.set_menu(self._popup_menu)
+                category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
+                path = Path(UI_RESOURCES_PATH + "/icons/hicolor/scalable/apps/demon-editor.svg").resolve()
+                path = str(path) if path.is_file() else "demon-editor"
+                self._tray = AppIndicator3.Indicator.new("DemonEditor", path, category)
+                self._tray.set_status(self._status_active)
+                self._tray.set_secondary_activate_target(builder.get_object("show_menu_item"))
+                self._tray.set_menu(self._popup_menu)
 
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
