@@ -2597,6 +2597,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="record_button">
                     <property name="name">status-bar-button</property>
+                    <property name="width_request">28</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Record</property>
@@ -2618,6 +2619,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="play_current_service_button">
                     <property name="name">status-bar-button</property>
+                    <property name="width_request">28</property>
                     <property name="can_focus">False</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>

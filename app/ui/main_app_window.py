@@ -71,6 +71,7 @@ class Application(Gtk.Application):
         # Adding command line options
         self.add_main_option("log", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
         self.add_main_option("record", ord("r"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
+        self.add_main_option("telnet", ord("t"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING, "", None)
 
         self._handlers = {"on_close_app": self.on_close_app,
                           "on_resize": self.on_resize,
@@ -305,9 +306,13 @@ class Application(Gtk.Application):
         self.set_menubar(builder.get_object("menu_bar"))
         self.set_app_menu(builder.get_object("app-menu"))
 
+        if self._settings.get("telnet"):
+            self.init_telnet(builder)
+
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_colors()
+
         if self._settings.load_last_config:
             config = self._settings.get("last_config") or {}
             self.init_profiles(config.get("last_profile", None))
@@ -317,6 +322,14 @@ class Application(Gtk.Application):
             self.init_profiles()
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def init_telnet(self, builder):
+        t_section = builder.get_object("telnet_section")
+        t_section.append_item(Gio.MenuItem.new("Telnet", "app.on_telnet_client_show"))
+        ac = Gio.SimpleAction.new("on_telnet_client_show", None)
+        ac.connect("activate", self.on_telnet_client_show)
+        self.add_action(ac)
+        self.set_accels_for_action("app.on_telnet_client_show", ["<primary>t"])
 
     def init_keys(self):
         main_handlers = ("on_new_configuration", "on_data_open", "on_download", "on_settings",
@@ -410,6 +423,17 @@ class Application(Gtk.Application):
         if "record" in options:
             log("Starting record of current stream...")
             log("Not implemented yet!")
+
+        if "telnet" in options:
+            t_op = options.get("telnet", "off")
+            if t_op == "on":
+                self._settings.add("telnet", True)
+            elif t_op == "off":
+                self._settings.add("telnet", False)
+            else:
+                log("No valid [on, off] arguments for -t found!")
+                return 1
+            log("Telnet support is {}. Restart the program to apply the settings!".format(t_op))
 
         self.activate()
         return 0
@@ -1706,6 +1730,12 @@ class Application(Gtk.Application):
     def on_backup_tool_show(self, action, value=None):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window, self._settings, self.open_data).show()
+
+    # ***************** Telnet *********************#
+
+    def on_telnet_client_show(self, action, value=None):
+        from app.ui.telnet import TelnetDialog
+        TelnetDialog(self._main_window, self._settings).show()
 
     # ***************** Player *********************#
 

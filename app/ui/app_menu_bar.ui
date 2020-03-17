@@ -87,18 +87,22 @@
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">Tools</attribute>
-      <item>
-        <attribute name="label" translatable="yes">Satellites editor</attribute>
-        <attribute name="action">app.on_satellite_editor_show</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Picons downloader</attribute>
-        <attribute name="action">app.on_picons_loader_show</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Backups</attribute>
-        <attribute name="action">app.on_backup_tool_show</attribute>
-      </item>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Satellites editor</attribute>
+          <attribute name="action">app.on_satellite_editor_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Picons downloader</attribute>
+          <attribute name="action">app.on_picons_loader_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Backups</attribute>
+          <attribute name="action">app.on_backup_tool_show</attribute>
+        </item>
+      </section>
+      <section id="telnet_section">
+      </section>
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">IPTV</attribute>
