@@ -798,7 +798,7 @@ msgid "Load the last open configuration at program startup"
 msgstr "Cargar la última configuración abierta al iniciar el programa"
 
 msgid "Enable direct playback bar (experimental)"
-msgstr "Habilitar le barra de reproducción directa (experimental)"
+msgstr "Habilitar la barra de reproducción directa (experimental)"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Habilita el envío directo y la reproducción de enlaces de medios en el receptor"
