@@ -486,7 +486,7 @@ msgid "STB file paths:"
 msgstr "Rutas de ficheros del receptor:"
 
 msgid "Local file paths:"
-msgstr "Rutas de ficheros local:"
+msgstr "Rutas de ficheros locales:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
@@ -620,7 +620,7 @@ msgid "Before downloading from the receiver"
 msgstr "Antes de recibir del receptor"
 
 msgid "Set background color for the services"
-msgstr "Determinar color de fondo de los servicios"
+msgstr "Fijar color de fondo de los servicios"
 
 msgid "Marked as new:"
 msgstr "Marcado como nuevo:"
@@ -666,7 +666,7 @@ msgid "Test connection"
 msgstr "Probar conexión"
 
 msgid "Double click on the service in the bouquet list:"
-msgstr "Haga doble clic en el servicio en la lista de bouquet:"
+msgstr "Al hacer doble clic en el servicio en la lista de bouquet:"
 
 msgid "Zap"
 msgstr "Zapear"
@@ -771,10 +771,49 @@ msgid "Import YouTube playlist"
 msgstr "Importar lista de reproducción de YouTube"
 
 msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-msgstr "¡Encontrado enlace al recurso de YouTube!\n¿Intentar obtener un enlace directo al vídeo?"
+msgstr "¡Se ha encontrado enlace al recurso de YouTube!\n¿Intentar obtener un enlace directo al vídeo?"
 
 msgid "Playlist import"
 msgstr "Importar lista de reproducción"
 
 msgid "Getting link error:"
 msgstr "Error en el enlace:"
+
+msgid "Extra"
+msgstr "Extra"
+
+msgid "Apply profile settings"
+msgstr "Aplicar ajustes de perfil"
+
+msgid "Settings type:"
+msgstr "Tipo de ajustes:"
+
+msgid "Set default"
+msgstr "Por defecto"
+
+msgid "Language:"
+msgstr "Idioma:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Cargar la última configuración abierta al iniciar el programa"
+
+msgid "Enable direct playback bar (experimental)"
+msgstr "Habilitar le barra de reproducción directa (experimental)"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Habilita el envío directo y la reproducción de enlaces de medios en el receptor"
+
+msgid "Watch the channel in the program"
+msgstr "Ver el canal en el programa"
+
+msgid "Zap and Play"
+msgstr "Zapear y reproducir"
+
+msgid "Drag  or paste the link here"
+msgstr "Soltar o pegar en enlace aquí"
+
+msgid "Remove added links in the playlist"
+msgstr "Quitar los enlaces añadidos en la lista de reproducción"
+
+msgid "A bouquet with that name exists!"
+msgstr "¡Ya existe un bouquet con ese nombre!"
