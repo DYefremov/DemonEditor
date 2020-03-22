@@ -2,6 +2,7 @@ import copy
 import json
 import locale
 import os
+import sys
 from enum import Enum, IntEnum
 from pathlib import Path
 from pprint import pformat
@@ -11,6 +12,8 @@ HOME_PATH = str(Path.home())
 CONFIG_PATH = HOME_PATH + "/.config/demon-editor/"
 CONFIG_FILE = CONFIG_PATH + "config.json"
 DATA_PATH = HOME_PATH + "/DemonEditor/data/"
+
+IS_DARWIN = sys.platform == "darwin"
 
 
 class Defaults(Enum):
@@ -26,6 +29,7 @@ class Defaults(Enum):
     NEW_COLOR = "rgb(255,230,204)"
     EXTRA_COLOR = "rgb(179,230,204)"
     FAV_CLICK_MODE = 0
+    PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records/"
     ACTIVATE_TRANSCODING = False
@@ -117,6 +121,13 @@ class SettingsType(IntEnum):
 
 class SettingsException(Exception):
     pass
+
+
+class PlayStreamsMode(IntEnum):
+    """ Behavior mode when opening streams. """
+    BUILT_IN = 0
+    VLC = 1
+    M3U = 2
 
 
 class Settings:
@@ -454,6 +465,14 @@ class Settings:
     def transcoding_presets(self, value):
         self._settings["transcoding_presets"] = value
 
+    @property
+    def play_streams_mode(self):
+        return PlayStreamsMode(self._settings.get("play_streams_mode", Defaults.PLAY_STREAMS_MODE.value))
+
+    @play_streams_mode.setter
+    def play_streams_mode(self, value):
+        self._settings["play_streams_mode"] = value
+
     # ***** Program settings ***** #
 
     @property
@@ -535,6 +554,10 @@ class Settings:
     @fav_click_mode.setter
     def fav_click_mode(self, value):
         self._settings["fav_click_mode"] = value
+
+    @property
+    def is_darwin(self):
+        return IS_DARWIN
 
 
 if __name__ == "__main__":

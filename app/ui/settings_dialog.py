@@ -4,7 +4,7 @@ from enum import Enum
 
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings
+from app.settings import SettingsType, Settings, PlayStreamsMode
 from app.ui.dialogs import show_dialog, DialogType
 from .main_helper import update_entry_data, scroll_to
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
@@ -114,6 +114,9 @@ class SettingsDialog:
         self._edit_preset_switch.bind_property("active", self._apply_presets_button, "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("video_options_frame"), "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("audio_options_frame"), "sensitive")
+        self._play_in_built_radio_button = builder.get_object("play_in_built_radio_button")
+        self._play_in_vlc_radio_button = builder.get_object("play_in_vlc_radio_button")
+        self._get_m3u_radio_button = builder.get_object("get_m3u_radio_button")
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
@@ -160,7 +163,6 @@ class SettingsDialog:
         self._settings = Settings(settings.settings)
         self._profiles = self._settings.profiles
         self._s_type = self._settings.setting_type
-        self.set_settings()
         self.init_ui_elements(self._s_type)
         self.init_profiles()
 
@@ -246,6 +248,7 @@ class SettingsDialog:
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
+        self.set_play_stream_mode(self._settings.play_streams_mode)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
         self._default_data_paths_switch.set_active(self._settings.profile_folder_is_default)
         self._transcoding_switch.set_active(self._settings.activate_transcoding)
@@ -305,6 +308,7 @@ class SettingsDialog:
         self._ext_settings.backup_before_save = self._before_save_switch.get_active()
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
         self._ext_settings.fav_click_mode = self.get_fav_click_mode()
+        self._ext_settings.play_streams_mode = self.get_play_stream_mode()
         self._ext_settings.language = self._lang_combo_box.get_active_id()
         self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
         self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
@@ -542,6 +546,23 @@ class SettingsDialog:
             return FavClickMode.STREAM
 
         return FavClickMode.DISABLED
+
+    @run_idle
+    def set_play_stream_mode(self, mode):
+        self._play_in_built_radio_button.set_sensitive(not self._settings.is_darwin)
+        self._play_in_built_radio_button.set_active(mode is PlayStreamsMode.BUILT_IN)
+        self._play_in_vlc_radio_button.set_active(mode is PlayStreamsMode.VLC)
+        self._get_m3u_radio_button.set_active(mode is PlayStreamsMode.M3U)
+
+    def get_play_stream_mode(self):
+        if self._play_in_built_radio_button.get_active():
+            return PlayStreamsMode.BUILT_IN
+        if self._play_in_vlc_radio_button.get_active():
+            return PlayStreamsMode.VLC
+        if self._get_m3u_radio_button.get_active():
+            return PlayStreamsMode.M3U
+
+        return self._settings.play_streams_mode
 
     def on_transcoding_preset_changed(self, button):
         presets = self._settings.transcoding_presets
