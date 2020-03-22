@@ -1854,12 +1854,11 @@ class Application(Gtk.Application):
         else:
             self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.record)
 
-    def record(self, m3u):
-        if m3u:
-            url = [s for s in m3u.split("\n") if not s.startswith("#")]
-            if url:
-                self._recorder.record(url[0], self._service_name_label.get_text())
-                GLib.timeout_add_seconds(1, self.update_record_button, priority=GLib.PRIORITY_LOW)
+    def record(self, data):
+        url = self.get_url_from_m3u(data)
+        if url:
+            self._recorder.record(url, self._service_name_label.get_text())
+            GLib.timeout_add_seconds(1, self.update_record_button, priority=GLib.PRIORITY_LOW)
 
     def update_record_button(self):
         is_rec = self._recorder.is_record()
@@ -1924,11 +1923,20 @@ class Application(Gtk.Application):
         """ Switch to the channel and watch in the player """
         self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.watch)
 
-    def watch(self, m3u):
+    def watch(self, data):
+        url = self.get_url_from_m3u(data)
+        if url:
+            GLib.timeout_add_seconds(1, self.play, url)
+
+    def get_url_from_m3u(self, data):
+        error_code = data.get("error_code", 0)
+        if error_code or self._http_status_image.get_visible():
+            self.show_error_dialog("No connection to the receiver!")
+            return
+
+        m3u = data.get("m3u", None)
         if m3u:
-            url = [s for s in m3u.split("\n") if not s.startswith("#")]
-            if url:
-                GLib.timeout_add_seconds(1, self.play, url[0])
+            return [s for s in m3u.split("\n") if not s.startswith("#")][0]
 
     @run_idle
     def on_zap(self, callback=None):
