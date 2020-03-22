@@ -361,8 +361,11 @@ class HttpAPI:
         elif req_type is HttpRequestType.PLAY or req_type is HttpRequestType.PLAYER_REMOVE:
             url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
 
+        def done_callback(f):
+            callback(f.result())
+
         future = self._executor.submit(get_response, req_type, url, self._data)
-        future.add_done_callback(lambda f: callback(f.result()))
+        future.add_done_callback(done_callback)
 
     @run_task
     def init(self):
@@ -386,7 +389,7 @@ def get_response(req_type, url, data=None):
     try:
         with urlopen(Request(url, data=data), timeout=10) as f:
             if req_type is HttpRequestType.STREAM or req_type is HttpRequestType.STREAM_CURRENT:
-                return f.read().decode("utf-8")
+                return {"m3u": f.read().decode("utf-8")}
             elif req_type is HttpRequestType.CURRENT:
                 for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
                     return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
