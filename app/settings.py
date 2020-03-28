@@ -451,8 +451,7 @@ class Settings:
 
 
 def get_settings():
-    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)  # create dir if not exist
-    os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
 
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         write_settings(get_default_settings())

@@ -957,7 +957,8 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
             return
         except Exception as e:
-            log("Append services error: " + str(e))
+            from traceback import format_exc
+            log("Reading data error: {}".format(format_exc()))
             self.show_error_dialog(get_message("Reading data error!") + "\n" + str(e))
             return
         else:
