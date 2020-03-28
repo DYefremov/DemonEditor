@@ -691,6 +691,7 @@ Author: Dmitriy Yefremov
           <object class="GtkToolbar" id="top_toolbar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">center</property>
             <property name="valign">center</property>
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
@@ -792,29 +793,10 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkToolItem">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkAlignment" id="left_alignment_toolbarl_item">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkToolItem" id="toolbar_extra_item">
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="margin_left">15</property>
+                <property name="margin_right">15</property>
                 <child>
                   <object class="GtkBox" id="toolbar_extra_box">
                     <property name="visible">True</property>
@@ -891,25 +873,6 @@ Author: Dmitriy Yefremov
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolItem">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkAlignment" id="right_alignment_toolbarl_item">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
                 <property name="homogeneous">False</property>
               </packing>
             </child>
