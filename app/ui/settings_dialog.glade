@@ -1953,6 +1953,7 @@ Author: Dmitriy Yefremov
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">get_m3u_radio_button</property>
+                                <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1984,7 +1985,6 @@ Author: Dmitriy Yefremov
                                 <property name="receives_default">False</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
-                                <property name="group">play_in_built_radio_button</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1998,7 +1998,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkLabel" id="play_streams_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Play streams in:</property>
+                            <property name="label" translatable="yes">Play streams mode:</property>
                           </object>
                         </child>
                       </object>
