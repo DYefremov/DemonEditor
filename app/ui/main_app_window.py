@@ -8,16 +8,16 @@ from itertools import chain
 from gi.repository import GLib, Gio
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
-from app.connections import HttpAPI, HttpRequestType, download_data, DownloadType, upload_data, test_http, \
-    TestException, HttpApiException
+from app.connections import (HttpAPI, HttpRequestType, download_data, DownloadType, upload_data, test_http,
+                             TestException, HttpApiException)
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException
-from app.tools.media import Player, Recorder
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode
+from app.tools.media import Player, Recorder, HttpPlayer
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
@@ -25,17 +25,17 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
-from .main_helper import insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services, \
-    scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon, remove_picon, \
-    is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons, get_selection, get_model_data, \
-    remove_all_unused_picons
+from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
+                          scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon,
+                          remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
+                          get_selection, get_model_data, remove_all_unused_picons)
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column, \
-    FavClickMode
+from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
+                        FavClickMode)
 
 
 class Application(Gtk.Application):
@@ -172,7 +172,7 @@ class Application(Gtk.Application):
         # Player
         self._player = None
         self._full_screen = False
-        self._drawing_area_xid = None
+        self._current_mrl = None
         # Record
         self._recorder = None
         # http api
@@ -1000,7 +1000,8 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
             return
         except Exception as e:
-            log("Append services error: " + str(e))
+            from traceback import format_exc
+            log("Reading data error: {}".format(format_exc()))
             self.show_error_dialog(get_message("Reading data error!") + "\n" + str(e))
             return
         else:
@@ -1525,7 +1526,10 @@ class Application(Gtk.Application):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             if self._fav_click_mode is FavClickMode.DISABLED:
                 return
-            elif self._fav_click_mode is FavClickMode.STREAM:
+
+            self._fav_view.set_sensitive(False)
+
+            if self._fav_click_mode is FavClickMode.STREAM:
                 self.on_play_stream()
             elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
                 self.on_zap(self.on_watch)
@@ -1700,6 +1704,7 @@ class Application(Gtk.Application):
             row = self._fav_model[path][:]
             if row[Column.FAV_TYPE] != BqServiceType.IPTV.name:
                 self.show_error_dialog("Not allowed in this context!")
+                self.set_playback_elms_active()
                 return
 
             url = get_iptv_url(row, self._s_type)
@@ -1709,24 +1714,36 @@ class Application(Gtk.Application):
             self.play(url)
 
     def play(self, url):
-        if not self._player:
+        mode = self._settings.play_streams_mode
+        if mode is PlayStreamsMode.M3U:
+            self.save_stream_to_m3u(url)
+            return
+
+        if mode is PlayStreamsMode.VLC:
             try:
-                self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
-                                                   position_callback=self.on_player_time_changed,
-                                                   error_callback=self.on_player_error,
-                                                   playing_callback=self.set_playback_elms_active)
-            except (ImportError, NameError, AttributeError):
+                if self._player and self._player.get_play_mode() is not mode:
+                    self._player.release()
+                    self._player = None
+                if not self._player:
+                    self._player = HttpPlayer.get_instance(self._settings)
+            except ImportError:
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
-                return
             else:
-                if self._drawing_area_xid:
-                    self._player.set_xwindow(self._drawing_area_xid)
+                self._player.play(url)
+            finally:
+                self.set_playback_elms_active()
+        else:
+            if not self._player_box.get_visible():
                 w, h = self._main_window.get_size()
                 self._player_box.set_size_request(w * 0.6, -1)
+                self._current_mrl = url
+            self._player_box.set_visible(True)
 
-        self._player_box.set_visible(True)
-        self._fav_view.set_sensitive(False)
-        GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+            if self._player and self._player.get_play_mode() is PlayStreamsMode.BUILT_IN:
+                GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+            elif self._player:
+                self.show_error_dialog("Play mode has been changed!\nRestart the program to apply the settings.")
+                self.set_playback_elms_active()
 
     def on_player_stop(self, item=None):
         if self._player:
@@ -1794,11 +1811,26 @@ class Application(Gtk.Application):
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
     def on_drawing_area_realize(self, widget):
-        if sys.platform == "darwin":
-            self._player.set_nso(widget)
-        else:
-            self._drawing_area_xid = widget.get_window().get_xid()
-            self._player.set_xwindow(self._drawing_area_xid)
+        w, h = self._main_window.get_size()
+        widget.set_size_request(w * 0.6, -1)
+
+        if not self._player:
+            try:
+                self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
+                                                   position_callback=self.on_player_time_changed,
+                                                   error_callback=self.on_player_error,
+                                                   playing_callback=self.set_playback_elms_active)
+            except (ImportError, NameError, AttributeError):
+                self.show_error_dialog("No VLC is found. Check that it is installed!")
+                return True
+            else:
+                if self._settings.is_darwin:
+                    self._player.set_nso(widget)
+                else:
+                    self._player.set_xwindow(widget.get_window().get_xid())
+                self._player.play(self._current_mrl)
+            finally:
+                self.set_playback_elms_active()
 
     def on_player_drawing_area_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area.
@@ -1932,17 +1964,37 @@ class Application(Gtk.Application):
         error_code = data.get("error_code", 0)
         if error_code or self._http_status_image.get_visible():
             self.show_error_dialog("No connection to the receiver!")
+            self.set_playback_elms_active()
             return
 
         m3u = data.get("m3u", None)
         if m3u:
             return [s for s in m3u.split("\n") if not s.startswith("#")][0]
 
+    def save_stream_to_m3u(self, url):
+        path, column = self._fav_view.get_cursor()
+        s_name = self._fav_model.get_value(self._fav_model.get_iter(path), Column.FAV_SERVICE) if path else "stream"
+
+        try:
+            response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
+            if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+                return
+
+            with open("{}{}.m3u".format(response, s_name), "w", encoding="utf-8") as file:
+                file.writelines("#EXTM3U\n#EXTVLCOPT--http-reconnect=true\n#EXTINF:-1,{}\n{}\n".format(s_name, url))
+        except IOError as e:
+            self.show_error_dialog(str(e))
+        else:
+            show_dialog(DialogType.INFO, self._main_window, "Done!")
+        finally:
+            GLib.idle_add(self._fav_view.set_sensitive, True)
+
     @run_idle
     def on_zap(self, callback=None):
         """ Switch(zap) the channel """
         path, column = self._fav_view.get_cursor()
         if not path or not self._http_api:
+            self.set_playback_elms_active()
             return
 
         ref = self.get_service_ref(path)
@@ -1957,6 +2009,9 @@ class Application(Gtk.Application):
                 GLib.idle_add(scroll_to, path, self._fav_view)
                 if callback:
                     callback()
+            else:
+                self.show_error_dialog("No connection to the receiver!")
+                self.set_playback_elms_active()
 
         self._http_api.send(HttpRequestType.ZAP, ref, zap)
 
@@ -1966,6 +2021,7 @@ class Application(Gtk.Application):
 
         if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
             self.show_error_dialog("Not allowed in this context!")
+            self.set_playback_elms_active()
             return
 
         srv = self._services.get(fav_id, None)

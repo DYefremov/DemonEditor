@@ -5,7 +5,7 @@ from enum import Enum
 from app.commons import run_task, run_idle
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
 from app.settings import SettingsType, Settings, PlayStreamsMode
-from app.ui.dialogs import show_dialog, DialogType
+from app.ui.dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, scroll_to
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
 
@@ -51,6 +51,7 @@ class SettingsDialog:
                     "on_network_settings_visible": self.on_network_settings_visible,
                     "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
                     "on_click_mode_togged": self.on_click_mode_togged,
+                    "on_play_mode_changed": self.on_play_mode_changed,
                     "on_transcoding_preset_changed": self.on_transcoding_preset_changed,
                     "on_apply_presets": self.on_apply_presets,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
@@ -381,7 +382,7 @@ class SettingsDialog:
     def show_info_message(self, text, message_type):
         self._info_bar.set_visible(True)
         self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(text)
+        self._message_label.set_text(get_message(text))
 
     @run_idle
     def show_spinner(self, show):
@@ -546,6 +547,13 @@ class SettingsDialog:
             return FavClickMode.STREAM
 
         return FavClickMode.DISABLED
+
+    def on_play_mode_changed(self, button):
+        if self._main_stack.get_visible_child_name() != "streaming":
+            return
+
+        if button.get_active():
+            self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
 
     @run_idle
     def set_play_stream_mode(self, mode):
