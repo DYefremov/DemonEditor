@@ -126,12 +126,14 @@ class HttpPlayer:
         STOP = "http://127.0.0.1:{}/requests/status.xml?command=pl_stop"
         CLEAR = "http://127.0.0.1:{}/requests/status.xml?command=pl_empty"
 
-    def __init__(self, exe, port):
+    def __init__(self, exe, port, is_darwin):
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
 
         self._executor = PoolExecutor(max_workers=1)
-        self._cmd = [exe, "--no-stats", "--verbose=-1", "--extraintf", "http", "--http-port", port,
-                     "--no-playlist-skip-ads", "--one-instance", "--quiet"]
+        self._cmd = [exe, "--no-stats", "--verbose=-1", "--extraintf", "http", "--http-port", port, "--quiet"]
+        if not is_darwin:
+            self._cmd.append("--one-instance")
+
         self._p = None
         self._state = None
         self._port = port
@@ -146,7 +148,7 @@ class HttpPlayer:
             exe = "/Applications/VLC.app/Contents/MacOS/VLC" if is_darwin else "/usr/bin/vlc"
             if shutil.which(exe) is None:
                 raise ImportError
-            cls.__VLC_INSTANCE = HttpPlayer(exe=exe, port=str(9090))
+            cls.__VLC_INSTANCE = HttpPlayer(exe=exe, port=str(9090), is_darwin=is_darwin)
         return cls.__VLC_INSTANCE
 
     @staticmethod
