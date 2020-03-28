@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import tempfile
 
-from gi.repository import GLib, GdkPixbuf, Gio
+from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
@@ -12,9 +12,8 @@ from app.settings import SettingsType
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
-from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, update_picons_data, \
-    get_base_model
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, TV_ICON, GTK_PATH
+from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, GTK_PATH
 
 
 class PiconsDialog:
