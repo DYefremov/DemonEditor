@@ -237,21 +237,7 @@ class Settings:
     def setting_type(self, s_type):
         self._cp_settings["setting_type"] = s_type.value
 
-    @property
-    def language(self):
-        return self._settings.get("language", locale.getlocale()[0] or "en_US")
-
-    @language.setter
-    def language(self, value):
-        self._settings["language"] = value
-
-    @property
-    def load_last_config(self):
-        return self._settings.get("load_last_config", False)
-
-    @load_last_config.setter
-    def load_last_config(self, value):
-        self._settings["load_last_config"] = value
+    # ******* Network ******** #
 
     @property
     def host(self):
@@ -473,6 +459,17 @@ class Settings:
     def play_streams_mode(self, value):
         self._settings["play_streams_mode"] = value
 
+    # *********** EPG ************ #
+
+    @property
+    def epg_options(self):
+        """ Options used by the EPG dialog. """
+        return self._cp_settings.get("epg_options", None)
+
+    @epg_options.setter
+    def epg_options(self, value):
+        self._cp_settings["epg_options"] = value
+
     # ***** Program settings ***** #
 
     @property
@@ -554,6 +551,22 @@ class Settings:
     @fav_click_mode.setter
     def fav_click_mode(self, value):
         self._settings["fav_click_mode"] = value
+
+    @property
+    def language(self):
+        return self._settings.get("language", locale.getlocale()[0] or "en_US")
+
+    @language.setter
+    def language(self, value):
+        self._settings["language"] = value
+
+    @property
+    def load_last_config(self):
+        return self._settings.get("load_last_config", False)
+
+    @load_last_config.setter
+    def load_last_config(self, value):
+        self._settings["load_last_config"] = value
 
     @property
     def is_darwin(self):

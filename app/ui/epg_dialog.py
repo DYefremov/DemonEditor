@@ -486,7 +486,7 @@ class EpgDialog:
         epg_dat_path = self._settings.data_local_path + "epg/"
         self._epg_dat_path_entry.set_text(epg_dat_path)
         default_epg_data_stb_path = "/etc/enigma2"
-        epg_options = self._settings.get("epg_options")
+        epg_options = self._settings.epg_options
         if epg_options:
             self._refs_source = RefsSource.XML if epg_options.get("xml_source", False) else RefsSource.SERVICES
             self._xml_radiobutton.set_active(self._refs_source is RefsSource.XML)
@@ -506,15 +506,14 @@ class EpgDialog:
         os.makedirs(os.path.dirname(self._epg_dat_path_entry.get_text()), exist_ok=True)
 
     def on_options_save(self, item=None):
-        epg_options = {"xml_source": self._xml_radiobutton.get_active(),
-                       "use_web_source": self._use_web_source_switch.get_active(),
-                       "local_path_to_xml": self._xml_chooser_button.get_filename(),
-                       "url_to_xml": self._url_to_xml_entry.get_text(),
-                       "enable_filtering": self._enable_filtering_switch.get_active(),
-                       "epg_dat_path": self._epg_dat_path_entry.get_text(),
-                       "epg_dat_stb_path": self._epg_dat_stb_path_entry.get_text(),
-                       "epg_data_update_on_start": self._update_on_start_switch.get_active()}
-        self._settings.add("epg_options", epg_options)
+        self._settings.epg_options = {"xml_source": self._xml_radiobutton.get_active(),
+                                      "use_web_source": self._use_web_source_switch.get_active(),
+                                      "local_path_to_xml": self._xml_chooser_button.get_filename(),
+                                      "url_to_xml": self._url_to_xml_entry.get_text(),
+                                      "enable_filtering": self._enable_filtering_switch.get_active(),
+                                      "epg_dat_path": self._epg_dat_path_entry.get_text(),
+                                      "epg_dat_stb_path": self._epg_dat_stb_path_entry.get_text(),
+                                      "epg_data_update_on_start": self._update_on_start_switch.get_active()}
 
     def on_resize(self, window):
         if self._settings:
