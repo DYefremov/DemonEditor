@@ -100,8 +100,9 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
             stb_path = settings.services_path
             epg_options = settings.epg_options
             if epg_options:
-                stb_path = epg_options.epg_dat_stb_path or stb_path
-                save_path = epg_options.epg_dat_path or save_path
+                stb_path = epg_options.get("epg_dat_stb_path", stb_path)
+                save_path = epg_options.get("epg_dat_path", save_path)
+
             ftp.cwd(stb_path)
             ftp.dir(files.append)
             for file in files:
