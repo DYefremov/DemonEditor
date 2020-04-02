@@ -367,6 +367,17 @@ class Settings:
     def backup_local_path(self, value):
         self._cp_settings["backup_local_path"] = value
 
+    # *********** EPG ************ #
+
+    @property
+    def epg_options(self):
+        """ Options used by the EPG dialog. """
+        return self._cp_settings.get("epg_options", None)
+
+    @epg_options.setter
+    def epg_options(self, value):
+        self._cp_settings["epg_options"] = value
+
     # ***** Program settings *****
 
     @property
