@@ -569,6 +569,15 @@ class Settings:
         self._settings["load_last_config"] = value
 
     @property
+    def show_bq_hints(self):
+        """ Show detailed info as hints in the bouquet list. """
+        return self._settings.get("show_bq_hints", True)
+
+    @show_bq_hints.setter
+    def show_bq_hints(self, value):
+        self._settings["show_bq_hints"] = value
+
+    @property
     def is_darwin(self):
         return IS_DARWIN
 
