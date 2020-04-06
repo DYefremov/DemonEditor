@@ -500,9 +500,9 @@ def is_only_one_item_selected(paths, transient):
     return True
 
 
-def get_picon_pixbuf(path):
+def get_picon_pixbuf(path, size=32):
     try:
-        return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=path, width=32, height=32, preserve_aspect_ratio=True)
+        return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width=size, height=size, preserve_aspect_ratio=True)
     except GLib.GError as e:
         pass
 
