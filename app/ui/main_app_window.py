@@ -28,7 +28,7 @@ from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDial
 from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
-                          get_selection, get_model_data, remove_all_unused_picons)
+                          get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf)
 from .picons_downloader import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .search import SearchProvider
@@ -100,6 +100,7 @@ class Application(Gtk.Application):
                           "on_delete": self.on_delete,
                           "on_to_fav_copy": self.on_to_fav_copy,
                           "on_to_fav_end_copy": self.on_to_fav_end_copy,
+                          "on_fav_view_query_tooltip": self.on_fav_view_query_tooltip,
                           "on_view_drag_begin": self.on_view_drag_begin,
                           "on_view_drag_data_get": self.on_view_drag_data_get,
                           "on_services_view_drag_drop": self.on_services_view_drag_drop,
@@ -811,6 +812,43 @@ class Application(Gtk.Application):
             for row in self._fav_model:
                 fav_bouquet.append(row[Column.FAV_ID])
 
+    # ********************* Hints *************************#
+
+    def on_fav_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip: Gtk.Tooltip):
+        """  Sets detailed info about service in the tooltip. """
+        result = view.get_dest_row_at_pos(x, y)
+        if not result or not self._settings.show_bq_hints:
+            return False
+
+        path, pos = result
+        model = view.get_model()
+
+        srv = self._services.get(model[path][Column.FAV_ID], None)
+        if srv and srv.picon_id:
+            tooltip.set_icon(get_picon_pixbuf(self._settings.picons_local_path + srv.picon_id, size=96))
+            tooltip.set_text(self.get_hint_for_bq_list(srv))
+            view.set_tooltip_row(tooltip, path)
+            return True
+        return False
+
+    def get_hint_for_bq_list(self, srv: Service):
+        """ Returns detailed info about service as formatted string for using as hint. """
+        header = "{}: {}\n{}: {}\n".format(get_message("Name"), srv.service, get_message("Type"), srv.service_type)
+        ref = "{}: {}".format(get_message("Service reference"), srv.picon_id.rstrip(".png"))
+
+        if srv.service_type == "IPTV":
+            return "{}{}".format(header, ref)
+
+        pol = ", {}: {},".format(get_message("Pol"), srv.pol) if srv.pol else ","
+        fec = "{}: {}".format("FEC", srv.fec) if srv.fec else ","
+        ht = "{}{}: {}\n{}: {}\n{}: {}\n{}: {}{} {}, {}: {}\n{}"
+        return ht.format(header,
+                         get_message("Package"), srv.package,
+                         get_message("System"), srv.system,
+                         get_message("Freq"), srv.freq,
+                         get_message("Rate"), srv.rate, pol, fec, "SID", srv.ssid,
+                         ref)
+
     # ***************** Drag-and-drop *********************#
 
     def on_view_drag_begin(self, view, context):
@@ -1318,14 +1356,14 @@ class Application(Gtk.Application):
             if ex_services:
                 ex_srv_name = ex_services.get(srv_id)
             if srv:
-                tooltip, background = None, self._EXTRA_COLOR if self._use_colors and ex_srv_name else None
+                background = self._EXTRA_COLOR if self._use_colors and ex_srv_name else None
                 self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
                                         srv.hide, srv.service_type, srv.pos, srv.fav_id,
-                                        self._picons.get(srv.picon_id, None), tooltip, background))
+                                        self._picons.get(srv.picon_id, None), None, background))
         yield True
 
     def check_bouquet_selection(self):
-        """ checks and returns bouquet if selected """
+        """ Checks and returns bouquet if selected """
         if not self._bq_selected:
             self.show_error_dialog("Error. No bouquet is selected!")
             return

@@ -1969,6 +1969,7 @@ Author: Dmitriy Yefremov
                                     <property name="search_column">2</property>
                                     <property name="rubber_banding">True</property>
                                     <property name="enable_grid_lines">both</property>
+                                    <property name="tooltip_column">9</property>
                                     <property name="activate_on_single_click">True</property>
                                     <signal name="button-press-event" handler="on_fav_press" object="fav_popup_menu" swapped="no"/>
                                     <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
@@ -1978,6 +1979,7 @@ Author: Dmitriy Yefremov
                                     <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                     <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                     <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
+                                    <signal name="query-tooltip" handler="on_fav_view_query_tooltip" swapped="no"/>
                                     <child internal-child="selection">
                                       <object class="GtkTreeSelection" id="fav_selection">
                                         <property name="mode">multiple</property>
