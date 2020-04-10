@@ -1635,7 +1635,7 @@ class Application(Gtk.Application):
             self.update_fav_num_column(self._fav_model)
 
     @run_idle
-    def on_iptv_list_configuration(self, action, value):
+    def on_iptv_list_configuration(self, action, value=None):
         if self._s_type is SettingsType.NEUTRINO_MP:
             self.show_error_dialog("Neutrino at the moment not supported!")
             return

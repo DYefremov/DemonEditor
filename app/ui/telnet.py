@@ -68,10 +68,9 @@ class TelnetDialog:
         self._end_tag = builder.get_object("end_tag")
         self._connect_button = builder.get_object("connect_button")
         self._connect_button.bind_property("visible", builder.get_object("disconnect_button"), "visible", 4)
-        # Font style
         provider = Gtk.CssProvider()
-        provider.load_from_data(b"textview {font-size: 14px;}")
-        self._text_view.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        builder.get_object("main_box").get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         window_size = settings.get("telnet_dialog_window_size")
         if window_size:

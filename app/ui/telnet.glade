@@ -69,6 +69,7 @@ Author: Dmitriy Yefremov
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkTextView" id="text_view">
+                <property name="name">textview-large</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="wrap_mode">char</property>

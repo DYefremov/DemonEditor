@@ -1211,7 +1211,6 @@ Author: Dmitriy Yefremov
                         <property name="spacing">1</property>
                         <child>
                           <object class="GtkSearchEntry" id="search_entry">
-                            <property name="height_request">32</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="primary_icon_stock">gtk-find</property>
@@ -1304,7 +1303,6 @@ Author: Dmitriy Yefremov
                         </child>
                         <child>
                           <object class="GtkSearchEntry" id="filter_entry">
-                            <property name="height_request">32</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="primary_icon_stock">gtk-spell-check</property>
