@@ -4,6 +4,7 @@ import locale
 import os
 import sys
 from enum import Enum, IntEnum
+from functools import lru_cache
 from pathlib import Path
 from pprint import pformat
 from textwrap import dedent
@@ -576,6 +577,42 @@ class Settings:
     @show_bq_hints.setter
     def show_bq_hints(self, value):
         self._settings["show_bq_hints"] = value
+
+    # *********** Appearance *********** #
+
+    @property
+    def is_themes_support(self):
+        return self._settings.get("is_themes_support", False)
+
+    @is_themes_support.setter
+    def is_themes_support(self, value):
+        self._settings["is_themes_support"] = value
+
+    @property
+    def theme(self):
+        return self._settings.get("theme", "Default")
+
+    @theme.setter
+    def theme(self, value):
+        self._settings["theme"] = value
+
+    @property
+    @lru_cache(1)
+    def themes_path(self):
+        return "{}/.themes/".format(HOME_PATH)
+
+    @property
+    def icon_theme(self):
+        return self._settings.get("icon_theme", "Adwaita")
+
+    @icon_theme.setter
+    def icon_theme(self, value):
+        self._settings["icon_theme"] = value
+
+    @property
+    @lru_cache(1)
+    def icon_themes_path(self):
+        return "{}/.icons/".format(HOME_PATH)
 
     @property
     def is_darwin(self):

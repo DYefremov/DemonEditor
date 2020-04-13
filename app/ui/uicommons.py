@@ -3,6 +3,7 @@ import sys
 from enum import Enum, IntEnum
 from app.settings import Settings, SettingsException
 from functools import lru_cache
+from app.settings import Settings, SettingsException
 
 import gi
 
@@ -41,6 +42,11 @@ else:
     import locale
 
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+
+    if settings.is_themes_support:
+        st = Gtk.Settings().get_default()
+        st.set_property("gtk-theme-name", settings.theme)
+        st.set_property("gtk-icon-theme-name", settings.icon_theme)
 
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(GTK_PATH + "/share/icons" if GTK_PATH else UI_RESOURCES_PATH + "icons")
