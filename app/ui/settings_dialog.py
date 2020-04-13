@@ -671,7 +671,7 @@ class SettingsDialog:
 
     @run_idle
     def add_theme(self, path, button):
-        response = get_chooser_dialog(self._dialog, self._settings, "*.tar.*", "")
+        response = get_chooser_dialog(self._dialog, self._settings, "*.xz", "Themes Archive [*.tar.xz]")
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self._appearance_box.set_sensitive(False)
@@ -683,7 +683,7 @@ class SettingsDialog:
             from shutil import unpack_archive
 
             unpack_archive(src, dst)
-        except (KeyError, EOFError) as e:
+        except (KeyError, OSError) as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             self.update_theme_button(button, dst)
