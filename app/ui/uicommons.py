@@ -1,7 +1,6 @@
 import os
 import sys
 from enum import Enum, IntEnum
-from app.settings import Settings, SettingsException
 from functools import lru_cache
 from app.settings import Settings, SettingsException
 
@@ -29,6 +28,17 @@ except SettingsException:
 else:
     os.environ["LANGUAGE"] = settings.language
 
+    if settings.is_themes_support:
+        st = Gtk.Settings().get_default()
+        st.set_property("gtk-theme-name", settings.theme)
+        st.set_property("gtk-icon-theme-name", settings.icon_theme)
+    else:
+        style_provider = Gtk.CssProvider()
+        s_path = "{}default_style.css".format(GTK_PATH + "/" + UI_RESOURCES_PATH if GTK_PATH else UI_RESOURCES_PATH)
+        style_provider.load_from_path(s_path)
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
+                                                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
 if IS_DARWIN:
     import gettext
 
@@ -42,11 +52,6 @@ else:
     import locale
 
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
-
-    if settings.is_themes_support:
-        st = Gtk.Settings().get_default()
-        st.set_property("gtk-theme-name", settings.theme)
-        st.set_property("gtk-icon-theme-name", settings.icon_theme)
 
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(GTK_PATH + "/share/icons" if GTK_PATH else UI_RESOURCES_PATH + "icons")
