@@ -2,11 +2,11 @@ import os
 import re
 from enum import Enum
 
-from app.commons import run_task, run_idle
+from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
 from app.settings import SettingsType, Settings, PlayStreamsMode
-from app.ui.dialogs import show_dialog, DialogType, get_message
-from .main_helper import update_entry_data, scroll_to
+from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog
+from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
 
 
@@ -55,7 +55,19 @@ class SettingsDialog:
                     "on_transcoding_preset_changed": self.on_transcoding_preset_changed,
                     "on_apply_presets": self.on_apply_presets,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
-                    "on_view_popup_menu": self.on_view_popup_menu}
+                    "on_view_popup_menu": self.on_view_popup_menu,
+                    "on_theme_changed": self.on_theme_changed,
+                    "on_theme_add": self.on_theme_add,
+                    "on_theme_remove": self.on_theme_remove,
+                    "on_icon_theme_changed": self.on_icon_theme_changed,
+                    "on_icon_theme_add": self.on_icon_theme_add,
+                    "on_icon_theme_remove": self.on_icon_theme_remove}
+
+        # Settings
+        self._ext_settings = settings
+        self._settings = Settings(settings.settings)
+        self._profiles = self._settings.profiles
+        self._s_type = self._settings.setting_type
 
         builder = Gtk.Builder()
         builder.add_from_file(UI_RESOURCES_PATH + "settings_dialog.glade")
@@ -129,6 +141,7 @@ class SettingsDialog:
         self._extra_color_button = builder.get_object("extra_color_button")
         self._load_on_startup_switch = builder.get_object("load_on_startup_switch")
         self._bouquet_hints_switch = builder.get_object("bouquet_hints_switch")
+        self._lang_combo_box = builder.get_object("lang_combo_box")
         # HTTP API
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
         self._enable_y_dl_switch = builder.get_object("enable_y_dl_switch")
@@ -150,8 +163,6 @@ class SettingsDialog:
         self._apply_profile_button = builder.get_object("apply_profile_button")
         self._apply_profile_button.bind_property("visible", header_separator, "visible")
         self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
-        # Language
-        self._lang_combo_box = builder.get_object("lang_combo_box")
         # Style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -160,13 +171,20 @@ class SettingsDialog:
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        # Settings
-        self._ext_settings = settings
-        self._settings = Settings(settings.settings)
-        self._profiles = self._settings.profiles
-        self._s_type = self._settings.setting_type
         self.init_ui_elements(self._s_type)
         self.init_profiles()
+
+        if self._settings.is_darwin:
+            # Appearance
+            self._appearance_box = builder.get_object("appearance_box")
+            self._appearance_box.set_visible(True)
+            self._theme_thumbnail_image = builder.get_object("theme_thumbnail_image")
+            self._theme_combo_box = builder.get_object("theme_combo_box")
+            self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
+            self._themes_support_switch = builder.get_object("themes_support_switch")
+            self._themes_support_switch.bind_property("active", builder.get_object("gtk_theme_frame"), "sensitive")
+            self._themes_support_switch.bind_property("active", builder.get_object("icon_theme_frame"), "sensitive")
+            self.init_appearance()
 
     @run_idle
     def init_ui_elements(self, s_type):
@@ -178,7 +196,7 @@ class SettingsDialog:
         self._extra_support_grid.set_sensitive(is_enigma_profile)
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
-        self._lang_combo_box.set_active_id(self._settings.language)
+        self._lang_combo_box.set_active_id(self._ext_settings.language)
         self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
             "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
 
@@ -320,6 +338,11 @@ class SettingsDialog:
         self._ext_settings.records_path = self._record_data_dir_field.get_text()
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
+
+        if self._ext_settings.is_darwin or True:
+            self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
+            self._ext_settings.theme = self._theme_combo_box.get_active_id()
+            self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._ext_settings.use_colors = self._set_color_switch.get_active()
@@ -616,6 +639,113 @@ class SettingsDialog:
     def on_view_popup_menu(self, menu, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
             menu.popup(None, None, None, None, event.button, event.time)
+
+    def on_theme_changed(self, button):
+        if self._main_stack.get_visible_child_name() != "appearance":
+            return
+
+        self.set_theme_thumbnail_image(button.get_active_id())
+        self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
+
+    @run_idle
+    def set_theme_thumbnail_image(self, theme_name):
+        img_path = "{}{}/gtk-3.0/thumbnail.png".format(self._ext_settings.themes_path, theme_name)
+        self._theme_thumbnail_image.set_from_pixbuf(get_picon_pixbuf(img_path, 96))
+
+    def on_theme_add(self, button):
+        self.add_theme(self._ext_settings.themes_path, self._theme_combo_box)
+
+    def on_theme_remove(self, button):
+        self.remove_theme(self._theme_combo_box, self._ext_settings.themes_path)
+
+    def on_icon_theme_changed(self, button, state=False):
+        if self._main_stack.get_visible_child_name() != "appearance":
+            return
+        self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
+
+    def on_icon_theme_add(self, button):
+        self.add_theme(self._ext_settings.icon_themes_path, self._icon_theme_combo_box)
+
+    def on_icon_theme_remove(self, button):
+        self.remove_theme(self._icon_theme_combo_box, self._ext_settings.icon_themes_path)
+
+    @run_idle
+    def add_theme(self, path, button):
+        response = get_chooser_dialog(self._dialog, self._settings, "*.tar.*", "")
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+        self._appearance_box.set_sensitive(False)
+        self.unpack_theme(response, path, button)
+
+    @run_task
+    def unpack_theme(self, src, dst, button):
+        try:
+            from shutil import unpack_archive
+
+            unpack_archive(src, dst)
+        except (KeyError, EOFError) as e:
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self.update_theme_button(button, dst)
+        finally:
+            self._appearance_box.set_sensitive(True)
+
+    @run_idle
+    def update_theme_button(self, button, dst):
+        exist = set(os.listdir(dst))
+        current = {r[0] for r in button.get_model()}
+        added = exist - current
+        if added:
+            theme = added.pop()
+            if theme not in current:
+                button.append(theme, theme)
+                button.set_active_id(theme)
+        self.show_info_message("Done!", Gtk.MessageType.INFO)
+
+    @run_idle
+    def remove_theme(self, button, path):
+        theme = button.get_active_id()
+        if not theme:
+            self.show_info_message("No selected item!", Gtk.MessageType.ERROR)
+            return
+
+        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
+            return
+
+        from shutil import rmtree
+
+        try:
+            rmtree(path + theme, ignore_errors=True)
+        except OSError as e:
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            button.remove(button.get_active())
+            button.set_active(0)
+
+    @run_idle
+    def init_appearance(self):
+        t_support = self._ext_settings.is_themes_support
+        self._themes_support_switch.set_active(t_support)
+        if t_support or True:
+            # GTK
+            try:
+                for t in os.listdir(self._ext_settings.themes_path):
+                    self._theme_combo_box.append(t, t)
+                self._theme_combo_box.set_active_id(self._ext_settings.theme)
+                self.set_theme_thumbnail_image(self._ext_settings.theme)
+            except FileNotFoundError:
+                pass
+            except PermissionError as e:
+                log("{}".format(e))
+            # Icons
+            try:
+                for t in os.listdir(self._ext_settings.icon_themes_path):
+                    self._icon_theme_combo_box.append(t, t)
+                self._icon_theme_combo_box.set_active_id(self._ext_settings.icon_theme)
+            except FileNotFoundError:
+                pass
+            except PermissionError as e:
+                log("{}".format(e))
 
 
 if __name__ == "__main__":

@@ -2,10 +2,9 @@ import locale
 import os
 from enum import Enum, IntEnum
 from functools import lru_cache
+from app.settings import Settings, SettingsException
 
 import gi
-
-from app.settings import Settings, SettingsException
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
@@ -25,6 +24,11 @@ else:
     os.environ["LANGUAGE"] = settings.language
     if UI_RESOURCES_PATH == "app/ui/":
         locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
+
+    if settings.is_themes_support:
+        st = Gtk.Settings().get_default()
+        st.set_property("gtk-theme-name", settings.theme)
+        st.set_property("gtk-icon-theme-name", settings.icon_theme)
 
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(UI_RESOURCES_PATH + "icons")
