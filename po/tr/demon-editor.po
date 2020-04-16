@@ -1,0 +1,812 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: DemonEditor\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-16 15:59+0300\n"
+"PO-Revision-Date: 2020-04-16 17:20+0300\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.2.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: tr\n"
+
+msgid "translator-credits"
+msgstr "çevirmen-kredisi"
+
+# Main
+msgid "Service"
+msgstr "Hizmet"
+
+msgid "Package"
+msgstr "Paket"
+
+msgid "Type"
+msgstr "Tür"
+
+msgid "Picon"
+msgstr "Picon"
+
+msgid "Freq"
+msgstr "Frek"
+
+msgid "Rate"
+msgstr "Oran"
+
+msgid "Pol"
+msgstr "Pol"
+
+msgid "System"
+msgstr "Sistem"
+
+msgid "Pos"
+msgstr "Pos"
+
+msgid "Num"
+msgstr "Num"
+
+msgid "Current IP:"
+msgstr "Geçerli IP:"
+
+msgid "Assign"
+msgstr "Ata"
+
+msgid "Bouquet details"
+msgstr "Buket detayları"
+
+msgid "Bouquets"
+msgstr "Buketler"
+
+msgid "Copy"
+msgstr "Kopya"
+
+msgid "Copy reference"
+msgstr "Referansı kopyala"
+
+msgid "Download"
+msgstr "İndir"
+
+msgid "Edit"
+msgstr "Düzelt"
+
+msgid "Edit mаrker text"
+msgstr "Marker metnini Düzenle"
+
+msgid "FTP-transfer"
+msgstr "FTP aktarımı"
+
+msgid "Global search"
+msgstr "Global arama"
+
+msgid "Hide"
+msgstr "Gizle"
+
+msgid "Hide/Skip On/Off     Ctrl + H"
+msgstr "Gizle/Atla Açık/Kapalı     Ctrl + H"
+
+msgid "Add IPTV or stream service"
+msgstr "IPTV veya akış hizmeti ekle"
+
+msgid "Import m3u"
+msgstr "M3u aktar"
+
+msgid "Import m3u file"
+msgstr "İçe aktar M3U"
+
+msgid "List configuration"
+msgstr "Liste yapılandırması"
+
+msgid "Rename for this bouquet"
+msgstr "Bu buketi yeniden adlandır"
+
+msgid "Set default name"
+msgstr "Varsayılan adı ayarla"
+
+msgid "Insert marker"
+msgstr "İşaretçi ekle"
+
+msgid "Locate in services"
+msgstr "Hizmetlerde bulun"
+
+msgid "Locked"
+msgstr "Kilitli"
+
+msgid "Move"
+msgstr "Taçı"
+
+msgid "New"
+msgstr "Yeni"
+
+msgid "New bouquet"
+msgstr "Yeni buket"
+
+msgid "Create bouquet"
+msgstr "Buket oluştur"
+
+msgid "For current satellite"
+msgstr "Mevcut uydu için"
+
+msgid "For current package"
+msgstr "Mevcut paket için"
+
+msgid "For current type"
+msgstr "Mevcut tip için"
+
+msgid "For each satellite"
+msgstr "Her uydu için"
+
+msgid "For each package"
+msgstr "Her paket için"
+
+msgid "For each type"
+msgstr "Her tip için"
+
+msgid "Open"
+msgstr "Aç"
+
+msgid "Parent lock On/Off     Ctrl + L"
+msgstr "Ebeveyn kilidi Açık/Kapalı     Ctrl + L"
+
+msgid "Picons"
+msgstr "Piconlar"
+
+msgid "Picons downloader"
+msgstr "Piconları Güncelle/indir"
+
+msgid "Satellites downloader"
+msgstr "Satellites Güncelle/indir"
+
+msgid "Remove"
+msgstr "Kaldır"
+
+msgid "Remove all unavailable"
+msgstr "Tüm mevcut olmayanları kaldır"
+
+msgid "Satellites editor"
+msgstr "Uydular editörü"
+
+msgid "Save"
+msgstr "Kaydet"
+
+msgid "Search"
+msgstr "Arama"
+
+msgid "Services"
+msgstr "Hizmetler"
+
+msgid "Services filter"
+msgstr "Hizmet filtresi"
+
+msgid "Settings"
+msgstr "Ayarlar"
+
+msgid "Up"
+msgstr "Yukarı"
+
+msgid "Down"
+msgstr "Aşağı"
+
+msgid "Active profile:"
+msgstr "Etkin profil:"
+
+msgid "All"
+msgstr "Tümü"
+
+msgid "Are you sure?"
+msgstr "Emin misin?"
+
+msgid "Current data path:"
+msgstr "Mevcut veri yolu:"
+
+msgid "Data:"
+msgstr "Veri:"
+
+msgid "Enigma2 channel and satellites list editor for GNU/Linux"
+msgstr "GNU/Linux için Enigma2 kanalı ve uydu listesi editörü"
+
+msgid "Host:"
+msgstr "Ana bilgisayar:"
+
+msgid "Loading data..."
+msgstr "Veriler yükleniyor ..."
+
+msgid "Receive"
+msgstr "Al"
+
+msgid "Receive files from receiver"
+msgstr "Alıcıdan dosya al"
+
+msgid "Receiver IP:"
+msgstr "Alıcı IP'si:"
+
+msgid "Remove unused bouquets"
+msgstr "Kullanılmayan buketleri kaldır"
+
+msgid "Reset profile"
+msgstr "Profili sıfırla"
+
+msgid "Satellites"
+msgstr "Uydular"
+
+msgid "Satellites.xml file:"
+msgstr "Satellites.xml dosyası:"
+
+msgid "Selected"
+msgstr "Seçildi"
+
+msgid "Send"
+msgstr "Gönder"
+
+msgid "Send files to receiver"
+msgstr "Alıcıya dosya gönder"
+
+msgid "Services and Bouquets files:"
+msgstr "Hizmetler ve Buketler dosyaları:"
+
+msgid "User bouquet files:"
+msgstr "Kullanıcı buketi dosyaları:"
+
+msgid "Extra:"
+msgstr "Ekstra:"
+
+# Filter bar
+msgid "Only free"
+msgstr "Sadece ücretsiz"
+
+msgid "All positions"
+msgstr "Tüm pozisyonlar"
+
+msgid "All types"
+msgstr "Tüm türler"
+
+# Streams player
+msgid "Play"
+msgstr "Oynat"
+
+msgid "Stop playback"
+msgstr "Oynatmayı durdur"
+
+msgid "Previous stream in the list"
+msgstr "Listedeki önceki akış"
+
+msgid "Next stream in the list"
+msgstr "Listedeki sonraki akış"
+
+msgid "Toggle in fullscreen"
+msgstr "Tam ekranda geçiş yap"
+
+msgid "Close"
+msgstr "Kapat"
+
+# Picons dialog
+msgid "Load providers"
+msgstr "Yük sağlayıcılar"
+
+msgid "Providers"
+msgstr "Yayıncılar"
+
+msgid "Receive picons"
+msgstr "Piconları al"
+
+msgid "Picons name format:"
+msgstr "Piconların adı biçimi:"
+
+msgid "Resize:"
+msgstr "Yeniden boyutlandır:"
+
+msgid "Current picons path:"
+msgstr "Geçerli picon yolları:"
+
+msgid "Receiver picons path:"
+msgstr "Alıcı picon yolu:"
+
+msgid "Picons download tool"
+msgstr "Picon indirme aracı"
+
+msgid "Transfer to receiver"
+msgstr "Alıcıya aktar"
+
+msgid "Downloader"
+msgstr "İndirici"
+
+msgid "Converter"
+msgstr "Dönüştürücü"
+
+msgid "Convert"
+msgstr "Dönüştür"
+
+msgid "Path to save:"
+msgstr "Kaydetme yolu:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Enigma2 piconların yolu:"
+
+msgid "Specify the correct position value for the provider!"
+msgstr "Sağlayıcı için doğru pozisyon değerini belirtin!"
+
+msgid "Converter between name formats"
+msgstr "İsim formatları arasında dönüştürücü"
+
+msgid "Receive picons for providers"
+msgstr "Sağlayıcılar için picon alma"
+
+msgid "Load satellite providers."
+msgstr "Uydu sağlayıcılarını yükle."
+
+msgid ""
+"To automatically set the identifiers for picons,\n"
+"first load the required services list into the main application window."
+msgstr ""
+"Picon tanımlayıcılarını otomatik olarak ayarlamak için \n"
+"önce gerekli uygulama listesini ana uygulama penceresine yükleyin."
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "Uydular düzenleme aracı"
+
+msgid "Add"
+msgstr "Ekle"
+
+msgid "Satellite"
+msgstr "Uydu"
+
+msgid "Transponder"
+msgstr "Transponder"
+
+msgid "Satellite properties:"
+msgstr "Uydu özellikleri:"
+
+msgid "Transponder properties:"
+msgstr "Transponder özellikleri:"
+
+msgid "Name"
+msgstr "Ad"
+
+msgid "Position"
+msgstr "Konum"
+
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "Uydular güncelleme"
+
+msgid "Remove selection"
+msgstr "Seçimi kaldır"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "Servis verileri:"
+
+msgid "Transponder data:"
+msgstr "Transponder verileri:"
+
+msgid "Service data"
+msgstr "Servis verileri"
+
+msgid "Transponder details"
+msgstr "Transponder detayları"
+
+msgid ""
+"Changes will be applied to all services of this transponder!\n"
+"Continue?"
+msgstr ""
+"Değişiklikler bu transponderin tüm servislerine uygulanacak!\n"
+"Devam edilsinmi?"
+
+msgid "Reference"
+msgstr "Referans"
+
+msgid "Namespace"
+msgstr "Ad alanı"
+
+msgid "Flags:"
+msgstr "Bayraklar:"
+
+msgid "Delays (ms):"
+msgstr "Gecikmeler (ms):"
+
+msgid "Bitstream"
+msgstr "Bit akımı"
+
+msgid "Description"
+msgstr "Açıklama"
+
+msgid "Source:"
+msgstr "Kaynak:"
+
+msgid "Cancel"
+msgstr "İptal"
+
+msgid "Update"
+msgstr "Güncelle"
+
+msgid "Filter"
+msgstr "Filtre"
+
+msgid "Find"
+msgstr "Bul"
+
+# IPTV dialog
+msgid "Stream data"
+msgstr "Veri akışı"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "Başlangıç ​​değerleri"
+
+msgid "Reset to default"
+msgstr "Varsayılana sıfırla"
+
+msgid "IPTV streams list configuration"
+msgstr "IPTV akış listesi yapılandırması"
+
+# Settings dialog
+msgid "Preferences"
+msgstr "Tercihler"
+
+msgid "Profile:"
+msgstr "Profil:"
+
+msgid "Timeout between commands in seconds"
+msgstr "Komutlar arasında saniye cinsinden zaman aşımı"
+
+msgid "Timeout:"
+msgstr "Zaman aşımı:"
+
+msgid "Login:"
+msgstr "Giriş:"
+
+msgid "Options"
+msgstr "Seçenekler"
+
+msgid "Password:"
+msgstr "Parola:"
+
+msgid "Picons:"
+msgstr "Piconlar:"
+
+msgid "Port:"
+msgstr "Port:"
+
+msgid "Data path:"
+msgstr "Veri yolu:"
+
+msgid "Picons path:"
+msgstr "Picon yolu:"
+
+msgid "Network settings:"
+msgstr "Ağ ayarları:"
+
+msgid "STB file paths:"
+msgstr "STB dosya yolları:"
+
+msgid "Local file paths:"
+msgstr "Yerel dosya yolları:"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "Hata. Buket seçilmedi!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "Bu öğenin kaldırılmasına izin verilmiyor!"
+
+msgid "This item is not allowed to edit!"
+msgstr "Bu öğenin düzenlenmesine izin verilmiyor!"
+
+msgid "Not allowed in this context!"
+msgstr "Bu bağlamda izin verilmiyor!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "Lütfen, alıcıdan dosya indirin veya veri okumak için yolunuzu ayarlayın!"
+
+msgid "Reading data error!"
+msgstr "Veri hatası okunuyor!"
+
+msgid "No m3u file is selected!"
+msgstr "Hiçbir m3u dosyası seçilmedi!"
+
+msgid "Not implemented yet!"
+msgstr "Henüz uygulanmadı!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "İşaretçi metni boş, lütfen tekrar deneyin!"
+
+msgid "Please, select only one item!"
+msgstr "Lütfen sadece bir ürün seçiniz!"
+
+msgid "No png file is selected!"
+msgstr "Hiçbir png dosyası seçilmedi!"
+
+msgid "No reference is present!"
+msgstr "Referans yok!"
+
+msgid "No selected item!"
+msgstr "Seçili öğe yok!"
+
+msgid "The task is already running!"
+msgstr "Görev zaten çalışıyor!"
+
+msgid "Done!"
+msgstr "Bitti!"
+
+msgid "Please, wait..."
+msgstr "Lütfen bekleyin ..."
+
+msgid "Resizing..."
+msgstr "Yeniden boyutlandırılıyor ..."
+
+msgid "Select paths!"
+msgstr "Yolları seç!"
+
+msgid "No satellite is selected!"
+msgstr "Uydu seçilmedi!"
+
+msgid "Please, select only one satellite!"
+msgstr "Lütfen sadece bir uydu seçin!"
+
+msgid "Please check your parameters and try again."
+msgstr "Lütfen parametrelerinizi kontrol edip tekrar deneyin."
+
+msgid "No satellites.xml file is selected!"
+msgstr "Hiçbir satellites.xml dosyası seçilmedi!"
+
+msgid "Error. Verify the data!"
+msgstr "Hata. Verileri doğrulayın!"
+
+msgid "Operation not allowed in this context!"
+msgstr "Bu bağlamda işleme izin verilmiyor!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "VLC bulunamadı. Yüklü olduğundan emin olun!"
+
+# Search unavailable streams dialog / # Kullanılamayan akışlar ara iletişim kutusu
+msgid "Please wait,  streams testing  in progress..."
+msgstr "Lütfen bekleyin, akış testi devam ediyor ..."
+
+msgid "Found"
+msgstr "Bulundu"
+
+msgid "unavailable streams."
+msgstr "mevcut olmayan akışlar."
+
+msgid "No changes required!"
+msgstr "Hiçbir değişiklik gerekli!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "Bu liste IPTV akışı içermiyor!"
+
+msgid "New empty configuration"
+msgstr "Yeni boş yapılandırma"
+
+msgid "No data to save!"
+msgstr "Kaydedilecek veri yok!"
+
+msgid "Network"
+msgstr "Ağ"
+
+msgid "Paths"
+msgstr "Yollar"
+
+msgid "Program"
+msgstr "Program"
+
+msgid "Backup:"
+msgstr "Yedekleme:"
+
+msgid "Backup"
+msgstr "Yedekleme"
+
+msgid "Backups"
+msgstr "Yedeklemeler"
+
+msgid "Backup path:"
+msgstr "Yedekleme yolu:"
+
+msgid "Restore bouquets"
+msgstr "Buketleri geri yükle"
+
+msgid "Restore all"
+msgstr "Tümünü geri yükle"
+
+msgid "Before saving"
+msgstr "Kaydetmeden önce"
+
+msgid "Before downloading from the receiver"
+msgstr "Alıcıdan indirmeden önce"
+
+msgid "Set background color for the services"
+msgstr "Hizmetler için arka plan rengini ayarla"
+
+msgid "Marked as new:"
+msgstr "Yeni olarak işaretlendi:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "Bukette fazladan bir isim ile:"
+
+msgid "Select"
+msgstr "Seç"
+
+msgid "About"
+msgstr "Hakkında"
+
+msgid "Exit"
+msgstr "Çıkış"
+
+msgid "Tools"
+msgstr "Araçlar"
+
+# Import
+msgid "Import"
+msgstr "İçe aktar"
+
+msgid "Bouquet"
+msgstr "Buket"
+
+msgid "Bouquets and services"
+msgstr "Buketler ve hizmetler"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "Ana liste bu buket için hizmet içermiyor!"
+
+msgid "No bouquet file is selected!"
+msgstr "Hiçbir buket dosyası seçilmedi!"
+
+msgid "Remove all unused"
+msgstr "Kullanılmayanların tümünü kaldır"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Test connection"
+msgstr "Bağlantıyı test et"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Buket listesindeki hizmete çift tıklayın:"
+
+msgid "Zap"
+msgstr "Zap"
+
+msgid "Play  stream"
+msgstr "Akışı oynat"
+
+msgid "Disabled"
+msgstr "Devre dışı"
+
+msgid "Enable ver. 5 support (experimental)"
+msgstr "Sürüm 5 desteğini etkinleştir (deneysel)"
+
+msgid "Enable HTTP API (experimental)"
+msgstr "HTTP API'sini etkinleştir (deneysel)"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Kanalı değiştir (zap) (Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Kanal değiştirme ve programda izleme (Ctrl + W)"
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Programdaki IPTV veya diğer akışları oynat (Ctrl + P)"
+
+msgid "Export to m3u"
+msgstr "Dışa aktar M3U"
+
+msgid "EPG configuration"
+msgstr "EPG yapılandırması"
+
+msgid "Apply"
+msgstr "Uygula"
+
+msgid "EPG source"
+msgstr "EPG kaynağı"
+
+msgid "Service names source:"
+msgstr "Hizmet adları kaynağı:"
+
+msgid "Main service list"
+msgstr "Ana hizmet listesi"
+
+msgid "XML file"
+msgstr "XML dosyası"
+
+msgid "Use web source"
+msgstr "Web kaynağını kullan"
+
+msgid "Url to *.xml.gz file:"
+msgstr "URL. * .xml.gz dosyasına:"
+
+msgid "Enable filtering"
+msgstr "Filtrelemeyi etkinleştir"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Epg.dat dosyasındaki varlığına göre filtreleyin."
+
+msgid "Paths to the epg.dat file:"
+msgstr "Epg.dat dosyasının yolları:"
+
+msgid "Local path:"
+msgstr "Yerel yol:"
+
+msgid "STB path:"
+msgstr "STB yolu:"
+
+msgid "Update on start"
+msgstr "Başlangıçta güncelleme"
+
+msgid "Auto configuration by service names."
+msgstr "Hizmet adlarına göre otomatik yapılandırma."
+
+msgid "Save list to xml."
+msgstr "Listeyi xml'ye kaydet."
+
+msgid "Download XML file error."
+msgstr "XML dosyası indir hatası."
+
+msgid "Unsupported file type:"
+msgstr "Desteklenmeyen dosya türü:"
+
+msgid "Unpacking data error."
+msgstr "Veri paketi açılırken hata oluştu."
+
+msgid "XML parsing error:"
+msgstr "XML ayrıştırma hatası:"
+
+msgid "Count of successfully configured services:"
+msgstr "Başarılı bir şekilde yapılandırılmış hizmetlerin sayısı:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Şu anki epg.dat dosyası bu buketin hizmetleri için referans içermiyor!"
+
+msgid "Use HTTP"
+msgstr "HTTP kullan"
+
+msgid "Close playback"
+msgstr "Oynatmayı kapat"
+
+msgid "Import YouTube playlist"
+msgstr "YouTube oynatma listesini içe aktar"
+
+msgid "Playlist import"
+msgstr "Oynatma listesi içe aktarma"
+
+msgid "Getting link error:"
+msgstr "Bağlantı hatası alınıyor:"
+
+msgid "Extra"
+msgstr "Ekstra"
+
+msgid "Apply profile settings"
+msgstr "Profil ayarlarını uygula"
+
+msgid "Settings type:"
+msgstr "Ayarlar türü:"
+
+msgid "Set default"
+msgstr "Varsayılanı ayarla"
+
+msgid "Language:"
+msgstr "Dil:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Program açılışında son açık yapılandırmayı yükle"
+
+msgid "Enable direct playback bar (experimental)"
+msgstr "Doğrudan oynatma çubuğunu etkinleştir (deneysel)"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Alıcıdaki medya bağlantılarının doğrudan gönderilmesini ve oynatılmasını sağlar"
+
+msgid "Watch the channel in the program"
+msgstr "Programdaki kanalı izle"
+
+msgid "Zap and Play"
+msgstr "Zap ve Oyna"
+
+msgid "Drag  or paste the link here"
+msgstr "Bağlantıyı buraya sürükleyin veya yapıştırın"
+
+msgid "Remove added links in the playlist"
+msgstr "Oynatma listesine eklenen bağlantıları kaldır"
+
+msgid "A bouquet with that name exists!"
+msgstr "Bu isimli bir buket var!"
