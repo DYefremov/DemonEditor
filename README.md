@@ -1,9 +1,8 @@
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
 
-## Enigma2 channel and satellites list editor for macOS (experimental).
-This version is only for users those who wish to try running this program on **macOS**.                                
-The functionality and performance of this version may be very different from the main version!                                                     
-**Not all features are supported and tested!**    
+## Enigma2 channel and satellites list editor for macOS (experimental).                                
+**The functionality and performance of this version may be different from the Linux version!                                                     
+Not all features can be supported and tested!**    
 
 #### Keyboard shortcuts:                                                                                                                                                                                            
 * **&#8984; + X** - only in bouquet list.
@@ -43,11 +42,17 @@ Install [PyInstaller](https://www.pyinstaller.org/) with the command from the te
 ```pip3 install pyinstaller```                                                                                          
 and in th root dir run command:                                                                                         
 ```pyinstaller DemonEditor.spec``` 
-                                                                                                                                              
+### Standalone package:                                                                                                                                 
 Users of the **64-bit version of the OS** can download a ready-made package from [here](https://github.com/DYefremov/DemonEditor/raw/experimental-mac/dist/DemonEditor.app.zip).                                     
 Just unpack and run. Recommended copy the bundle to the **Application** directory.                                      
 Perhaps in the security settings it will be necessary to allow the launch of this application!
+### Note:
+THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY.                                                                        
+AUTHOR IS NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY CONNECTION WITH THIS SOFTWARE.                           
+This package may contain components distributed under the GPL [v3](http://www.gnu.org/licenses/gpl-3.0.html) or lower license.
+By downloading this package you agree to the terms of this [license](http://www.gnu.org/licenses/gpl-3.0.html) and the possible inconvenience associated with this!
 
-**Note. The package may not contain all the latest changes!**                                                            
+**The package may not contain all the latest changes!**
+                                                            
                                                                        
                                                                                                                                                                                                                                             
