@@ -1,4 +1,4 @@
-""" Module for parsing bouquets """
+""" Module for working with Enigma2 bouquets. """
 import re
 from collections import Counter
 
@@ -15,7 +15,12 @@ def get_bouquets(path):
                                                                                 BqType.RADIO.value)
 
 
-def write_bouquets(path, bouquets):
+def write_bouquets(path, bouquets, force_bq_names=False):
+    """ Creating and writing bouquets files.
+
+        If "force_bq_names" then naming the files using the name of the bouquet.
+        Some images may have problems displaying the favorites list!
+     """
     srv_line = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     line = []
     pattern = re.compile("[^\\w_()]+")
@@ -25,12 +30,12 @@ def write_bouquets(path, bouquets):
         line.clear()
         line.append("#NAME {}\n".format(bqs.name))
 
-        for bq in bqs.bouquets:
+        for index, bq in enumerate(bqs.bouquets):
             bq_name = bq.name
             if bq_name == "Favourites (TV)" or bq_name == "Favourites (Radio)":
                 bq_name = _DEFAULT_BOUQUET_NAME
             else:
-                bq_name = re.sub(pattern, "_", bq.name)
+                bq_name = re.sub(pattern, "_", bq.name) if force_bq_names else "de{0:02d}".format(index)
             line.append(srv_line.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
             write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services, current_marker)
 
@@ -62,7 +67,7 @@ def write_bouquet(path, name, services, current_marker):
 
 
 def to_bouquet_id(srv):
-    """ Creates bouquet channel id """
+    """ Creates bouquet channel id. """
     data_type = srv.data_id
     if data_type and len(data_type) > 4:
         data_type = int(srv.data_id.split(":")[4])
@@ -71,7 +76,7 @@ def to_bouquet_id(srv):
 
 
 def get_bouquet(path, name, bq_type):
-    """ Parsing services ids from bouquet file """
+    """ Parsing services ids from bouquet file. """
     with open(path + "userbouquet.{}.{}".format(name, bq_type), encoding="utf-8", errors="replace") as file:
         chs_list = file.read()
         services = []

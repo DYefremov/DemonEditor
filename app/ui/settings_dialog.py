@@ -34,6 +34,7 @@ class SettingsDialog:
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_set_color_switch": self.on_set_color_switch,
+                    "on_force_bq_name": self.on_force_bq_name,
                     "on_http_mode_switch": self.on_http_mode_switch,
                     "on_yt_dl_switch": self.on_yt_dl_switch,
                     "on_default_path_mode_switch": self.on_default_path_mode_switch,
@@ -110,6 +111,7 @@ class SettingsDialog:
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
+        self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
         # Streaming
         header_separator = builder.get_object("header_separator")
         self._apply_presets_button = builder.get_object("apply_presets_button")
@@ -156,6 +158,7 @@ class SettingsDialog:
         self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
         self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
         self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
+        self._extra_support_grid.bind_property("sensitive", builder.get_object("bq_naming_grid"), "sensitive")
         # Profiles
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
@@ -278,6 +281,7 @@ class SettingsDialog:
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._support_ver5_switch.set_active(self._settings.v5_support)
+            self._force_bq_name_switch.set_active(self._settings.force_bq_names)
             self._support_http_api_switch.set_active(self._settings.http_api_support)
             self._enable_y_dl_switch.set_active(self._settings.enable_yt_dl)
             self._enable_send_to_switch.set_active(self._settings.enable_send_to)
@@ -339,7 +343,7 @@ class SettingsDialog:
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
 
-        if self._ext_settings.is_darwin or True:
+        if self._ext_settings.is_darwin:
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
@@ -349,6 +353,7 @@ class SettingsDialog:
             self._ext_settings.new_color = self._new_color_button.get_rgba().to_string()
             self._ext_settings.extra_color = self._extra_color_button.get_rgba().to_string()
             self._ext_settings.v5_support = self._support_ver5_switch.get_active()
+            self._ext_settings.force_bq_names = self._force_bq_name_switch.get_active()
             self._ext_settings.http_api_support = self._support_http_api_switch.get_active()
             self._ext_settings.enable_yt_dl = self._enable_y_dl_switch.get_active()
             self._ext_settings.enable_send_to = self._enable_send_to_switch.get_active()
@@ -427,6 +432,16 @@ class SettingsDialog:
                 self._click_mode_zap_button.get_active(),
                 self._click_mode_zap_and_play_button.get_active())):
             self._click_mode_disabled_button.set_active(True)
+
+    def on_force_bq_name(self, switch, state):
+        if self._main_stack.get_visible_child_name() != "extra":
+            return
+
+        if state:
+            msg = "Some images may have problems displaying the favorites list!"
+            self.show_info_message(msg, Gtk.MessageType.WARNING)
+        else:
+            self.on_info_bar_close()
 
     def on_yt_dl_switch(self, switch, state):
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)

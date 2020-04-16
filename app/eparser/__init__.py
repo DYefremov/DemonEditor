@@ -33,9 +33,9 @@ def get_bouquets(path, s_type):
 
 
 @run_task
-def write_bouquets(path, bouquets, s_type):
+def write_bouquets(path, bouquets, s_type, force_bq_names=False):
     if s_type is SettingsType.ENIGMA_2:
-        write_enigma_bouquets(path, bouquets)
+        write_enigma_bouquets(path, bouquets, force_bq_names)
     elif s_type is SettingsType.NEUTRINO_MP:
         write_neutrino_bouquets(path, bouquets)
 

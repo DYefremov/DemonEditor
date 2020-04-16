@@ -1069,6 +1069,12 @@ class Application(Gtk.Application):
             if current_profile != self._settings.current_profile:
                 self.init_profiles(self._settings.current_profile)
 
+            if data_path != self._settings.data_local_path:
+                xml_src = data_path + "satellites.xml"
+                if os.path.isfile(xml_src):
+                    from shutil import copyfile
+                    copyfile(xml_src, self._settings.data_local_path + "satellites.xml")
+
             prf = self._s_type
             black_list = get_blacklist(data_path)
             bouquets = get_bouquets(data_path, prf)
@@ -1267,7 +1273,7 @@ class Application(Gtk.Application):
 
         # Getting bouquets
         self._bouquets_view.get_model().foreach(parse_bouquets)
-        write_bouquets(path, bouquets, profile)
+        write_bouquets(path, bouquets, profile, self._settings.force_bq_names)
         yield True
         # Getting services
         services_model = get_base_model(self._services_view.get_model())
