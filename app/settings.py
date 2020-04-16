@@ -23,6 +23,7 @@ class Defaults(Enum):
     BACKUP_BEFORE_DOWNLOADING = True
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
+    FORCE_BQ_NAMES = False
     HTTP_API_SUPPORT = False
     ENABLE_YT_DL = False
     ENABLE_SEND_TO = False
@@ -496,6 +497,14 @@ class Settings:
     @v5_support.setter
     def v5_support(self, value):
         self._settings["v5_support"] = value
+
+    @property
+    def force_bq_names(self):
+        return self._settings.get("force_bq_names", Defaults.FORCE_BQ_NAMES.value)
+
+    @force_bq_names.setter
+    def force_bq_names(self, value):
+        self._settings["force_bq_names"] = value
 
     @property
     def http_api_support(self):
