@@ -14,7 +14,7 @@ msgstr ""
 "Language: tr\n"
 
 msgid "translator-credits"
-msgstr "çevirmen-kredisi"
+msgstr "audi06_19 <info@dreamosat-forum.com>"
 
 # Main
 msgid "Service"
