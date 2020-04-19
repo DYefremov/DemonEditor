@@ -16,7 +16,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, IS_DARWIN
 from app.tools.media import Player, Recorder, HttpPlayer
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -39,11 +39,12 @@ from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPT
 
 
 class Application(Gtk.Application):
+    SERVICE_MODEL_NAME = "services_list_store"
+    FAV_MODEL_NAME = "fav_list_store"
+    BQ_MODEL_NAME = "bouquets_tree_store"
+
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
-    _SERVICE_LIST_NAME = "services_list_store"
-    _FAV_LIST_NAME = "fav_list_store"
-    _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
                          "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
@@ -155,7 +156,6 @@ class Application(Gtk.Application):
                           "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
                           "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
 
-        self._is_darwin = sys.platform == "darwin"
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
         os.makedirs(os.path.dirname(self._settings.data_local_path), exist_ok=True)
@@ -611,7 +611,7 @@ class Application(Gtk.Application):
             model.insert(dest_index, row)
             fav_bouquet.insert(dest_index, row[Column.FAV_ID])
 
-        if model.get_name() == self._FAV_LIST_NAME:
+        if model.get_name() == self.FAV_MODEL_NAME:
             self.update_fav_num_column(model)
 
         self._rows_buffer.clear()
@@ -649,11 +649,11 @@ class Application(Gtk.Application):
         itrs = [model.get_iter(path) for path in paths]
         rows = [model[in_itr][:] for in_itr in itrs]
 
-        if model_name == self._FAV_LIST_NAME:
+        if model_name == self.FAV_MODEL_NAME:
             next(self.remove_favs(itrs, model), False)
-        elif model_name == self._BOUQUETS_LIST_NAME:
+        elif model_name == self.BQ_MODEL_NAME:
             self.delete_bouquets(itrs, model)
-        elif model_name == self._SERVICE_LIST_NAME:
+        elif model_name == self.SERVICE_MODEL_NAME:
             next(self.delete_services(itrs, model, rows), False)
 
         self.on_view_focus(view)
@@ -888,7 +888,7 @@ class Application(Gtk.Application):
         if not data:
             return
         itr_str, sep, source = data.partition("::::")
-        if source != self._BOUQUETS_LIST_NAME:
+        if source != self.BQ_MODEL_NAME:
             return
 
         if drop_info:
@@ -930,7 +930,7 @@ class Application(Gtk.Application):
         """  Update fav view  after data received  """
         try:
             itr_str, sep, source = data.partition("::::")
-            if source == self._BOUQUETS_LIST_NAME:
+            if source == self.BQ_MODEL_NAME:
                 return
 
             bq_selected = self.check_bouquet_selection()
@@ -947,7 +947,7 @@ class Application(Gtk.Application):
             fav_bouquet = self._bouquets[bq_selected]
             itrs = itr_str.split(",")
 
-            if source == self._SERVICE_LIST_NAME:
+            if source == self.SERVICE_MODEL_NAME:
                 ext_model = self._services_view.get_model()
                 ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
                 ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
@@ -959,7 +959,7 @@ class Application(Gtk.Application):
                     model.insert(dest_index, (0, ch.coded, ch.service, ch.locked, ch.hide, ch.service_type, ch.pos,
                                               ch.fav_id, self._picons.get(ch.picon_id, None), None, None))
                     fav_bouquet.insert(dest_index, ch.fav_id)
-            elif source == self._FAV_LIST_NAME:
+            elif source == self.FAV_MODEL_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
                 in_rows = [model[in_itr][:] for in_itr in in_itrs]
                 for row in in_rows:
@@ -978,11 +978,11 @@ class Application(Gtk.Application):
             self.delete_views_selection(name)
 
     def delete_views_selection(self, name):
-        if name == self._SERVICE_LIST_NAME:
+        if name == self.SERVICE_MODEL_NAME:
             self.delete_selection(self._fav_view)
-        elif name == self._FAV_LIST_NAME:
+        elif name == self.FAV_MODEL_NAME:
             self.delete_selection(self._services_view)
-        elif name == self._BOUQUETS_LIST_NAME:
+        elif name == self.BQ_MODEL_NAME:
             self.delete_selection(self._services_view, self._fav_view)
 
     def on_view_popup_menu(self, menu, event):
@@ -1002,7 +1002,7 @@ class Application(Gtk.Application):
             menu.popup(None, None, None, None, event.button, event.time)
             return True
 
-    def on_satellite_editor_show(self, action, value):
+    def on_satellite_editor_show(self, action, value=None):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self._main_window, self._settings)
 
@@ -1286,7 +1286,7 @@ class Application(Gtk.Application):
             write_blacklist(path, self._blacklist)
         yield True
 
-    def on_new_configuration(self, action, value):
+    def on_new_configuration(self, action, value=None):
         """ Creates new empty configuration """
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
@@ -1399,7 +1399,7 @@ class Application(Gtk.Application):
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
-    def on_settings(self, action, value):
+    def on_settings(self, action, value=None):
         response = show_settings_dialog(self._main_window, self._settings)
         if response != Gtk.ResponseType.CANCEL:
             gen = self.update_settings()
@@ -1464,21 +1464,21 @@ class Application(Gtk.Application):
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
         elif ctrl and key is KeyboardKey.C:
-            if model_name == self._SERVICE_LIST_NAME:
+            if model_name == self.SERVICE_MODEL_NAME:
                 self.on_copy(view, ViewTarget.FAV)
-            elif model_name == self._FAV_LIST_NAME:
+            elif model_name == self.FAV_MODEL_NAME:
                 self.on_copy(view, ViewTarget.SERVICES)
             else:
                 self.on_copy(view, ViewTarget.BOUQUET)
         elif ctrl and key is KeyboardKey.X:
-            if model_name == self._FAV_LIST_NAME:
+            if model_name == self.FAV_MODEL_NAME:
                 self.on_cut(view, ViewTarget.FAV)
-            elif model_name == self._BOUQUETS_LIST_NAME:
+            elif model_name == self.BQ_MODEL_NAME:
                 self.on_cut(view, ViewTarget.BOUQUET)
         elif ctrl and key is KeyboardKey.V:
-            if model_name == self._FAV_LIST_NAME:
+            if model_name == self.FAV_MODEL_NAME:
                 self.on_paste(view, ViewTarget.FAV)
-            elif model_name == self._BOUQUETS_LIST_NAME:
+            elif model_name == self.BQ_MODEL_NAME:
                 self.on_paste(view, ViewTarget.BOUQUET)
         elif key is KeyboardKey.DELETE:
             self.on_delete(view)
@@ -1495,17 +1495,17 @@ class Application(Gtk.Application):
 
         if ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
-            if model_name == self._SERVICE_LIST_NAME:
+            if model_name == self.SERVICE_MODEL_NAME:
                 self.on_to_fav_copy(view)
-            elif model_name == self._BOUQUETS_LIST_NAME:
+            elif model_name == self.BQ_MODEL_NAME:
                 self.on_new_bouquet(view)
-        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self._SERVICE_LIST_NAME:
+        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self.SERVICE_MODEL_NAME:
             self.on_to_fav_end_copy(view)
         elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
             self.on_rename(view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-        elif ctrl and model_name == self._FAV_LIST_NAME:
+        elif ctrl and model_name == self.FAV_MODEL_NAME:
             if key is KeyboardKey.P:
                 self.on_play_stream()
             if key is KeyboardKey.W:
@@ -1519,9 +1519,9 @@ class Application(Gtk.Application):
     def on_view_focus(self, view, focus_event=None):
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0  # if  > 0 model has items
-        is_service = model_name == self._SERVICE_LIST_NAME
+        is_service = model_name == self.SERVICE_MODEL_NAME
 
-        if model_name == self._BOUQUETS_LIST_NAME:
+        if model_name == self.BQ_MODEL_NAME:
             for elem in self._tool_elements:
                 self._tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
@@ -1578,11 +1578,11 @@ class Application(Gtk.Application):
     def on_model_changed(self, model, path, itr=None):
         model_name = model.get_name()
 
-        if model_name == self._FAV_LIST_NAME:
+        if model_name == self.FAV_MODEL_NAME:
             self._fav_count_label.set_text(str(len(model)))
-        elif model_name == self._SERVICE_LIST_NAME:
+        elif model_name == self.SERVICE_MODEL_NAME:
             self.update_services_counts(len(model))
-        elif model_name == self._BOUQUETS_LIST_NAME:
+        elif model_name == self.BQ_MODEL_NAME:
             self._bouquets_count_label.set_text(str(len(self._bouquets.keys())))
 
     @lru_cache(maxsize=1)
@@ -1948,12 +1948,12 @@ class Application(Gtk.Application):
 
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
-        if self._is_darwin:
+        if IS_DARWIN:
             self.update_state_on_full_screen(not self._full_screen)
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
 
     def on_main_window_state(self, window, event):
-        if self._is_darwin:
+        if IS_DARWIN:
             return
         state = event.new_window_state
         full = not state & Gdk.WindowState.FULLSCREEN
@@ -2316,7 +2316,7 @@ class Application(Gtk.Application):
         model, paths = view.get_selection().get_selected_rows()
         if is_only_one_item_selected(paths, self._main_window):
             model_name = get_base_model(model).get_name()
-            if model_name == self._FAV_LIST_NAME:
+            if model_name == self.FAV_MODEL_NAME:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
                 if srv_type == BqServiceType.MARKER.name:
                     return self.on_rename(view)
@@ -2376,12 +2376,12 @@ class Application(Gtk.Application):
 
     def on_rename(self, view):
         name, model = get_model_data(view)
-        if name == self._BOUQUETS_LIST_NAME:
+        if name == self.BQ_MODEL_NAME:
             self.on_bouquets_edit(view)
-        elif name == self._FAV_LIST_NAME:
+        elif name == self.FAV_MODEL_NAME:
             rename(view, self._main_window, ViewTarget.FAV, service_view=self._services_view,
                    services=self._services)
-        elif name == self._SERVICE_LIST_NAME:
+        elif name == self.SERVICE_MODEL_NAME:
             rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, services=self._services)
 
     def on_rename_for_bouquet(self, item):
@@ -2445,7 +2445,7 @@ class Application(Gtk.Application):
 
     # ***************** Picons *********************#
 
-    def on_picons_loader_show(self, action, value):
+    def on_picons_loader_show(self, action, value=None):
         ids = {}
         if self._s_type is SettingsType.ENIGMA_2:
             for r in self._services_model:
@@ -2534,6 +2534,24 @@ class Application(Gtk.Application):
     @run_idle
     def show_error_dialog(self, message):
         show_dialog(DialogType.ERROR, self._main_window, message)
+
+    # ******************* Properties ***********************#
+
+    @property
+    def fav_view(self):
+        return self._fav_view
+
+    @property
+    def services_view(self):
+        return self._services_view
+
+    @property
+    def bouquets_view(self):
+        return self._bouquets_view
+
+    @property
+    def current_services(self):
+        return self._services
 
 
 def start_app():

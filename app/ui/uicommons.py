@@ -1,8 +1,7 @@
 import os
-import sys
 from enum import Enum, IntEnum
 from functools import lru_cache
-from app.settings import Settings, SettingsException
+from app.settings import Settings, SettingsException, IS_DARWIN
 
 import gi
 
@@ -10,17 +9,17 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gtk, Gdk
 
-IS_DARWIN = sys.platform == "darwin"
-# setting mod mask for keyboard depending on platform
+# Setting mod mask for keyboard depending on platform
 MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
-# path to *.glade files
+# Path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 LANG_PATH = UI_RESOURCES_PATH + "lang"
 GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
-# translation
+# Translation.
 TEXT_DOMAIN = "demon-editor"
+
 try:
     settings = Settings.get_instance()
 except SettingsException:
