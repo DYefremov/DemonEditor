@@ -579,6 +579,15 @@ class Settings:
         self._settings["load_last_config"] = value
 
     @property
+    def show_srv_hints(self):
+        """ Show short info as hints in the main services list. """
+        return self._settings.get("show_srv_hints", True)
+
+    @show_srv_hints.setter
+    def show_srv_hints(self, value):
+        self._settings["show_srv_hints"] = value
+
+    @property
     def show_bq_hints(self):
         """ Show detailed info as hints in the bouquet list. """
         return self._settings.get("show_bq_hints", True)

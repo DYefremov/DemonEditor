@@ -143,6 +143,7 @@ class SettingsDialog:
         self._extra_color_button = builder.get_object("extra_color_button")
         self._load_on_startup_switch = builder.get_object("load_on_startup_switch")
         self._bouquet_hints_switch = builder.get_object("bouquet_hints_switch")
+        self._services_hints_switch = builder.get_object("services_hints_switch")
         self._lang_combo_box = builder.get_object("lang_combo_box")
         # HTTP API
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
@@ -274,6 +275,7 @@ class SettingsDialog:
         self.set_play_stream_mode(self._settings.play_streams_mode)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
         self._bouquet_hints_switch.set_active(self._settings.show_bq_hints)
+        self._services_hints_switch.set_active(self._settings.show_srv_hints)
         self._default_data_paths_switch.set_active(self._settings.profile_folder_is_default)
         self._transcoding_switch.set_active(self._settings.activate_transcoding)
         self._presets_combo_box.set_active_id(self._settings.active_preset)
@@ -337,6 +339,7 @@ class SettingsDialog:
         self._ext_settings.language = self._lang_combo_box.get_active_id()
         self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
+        self._ext_settings.show_srv_hints = self._services_hints_switch.get_active()
         self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
         self._ext_settings.default_data_path = self._default_data_dir_field.get_text()
         self._ext_settings.records_path = self._record_data_dir_field.get_text()

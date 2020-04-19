@@ -64,7 +64,6 @@ class Application(Gtk.Application):
 
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item",)
 
-    # _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
     _LOCK_HIDE_ELEMENTS = ()
 
     def __init__(self, **kwargs):
@@ -102,6 +101,7 @@ class Application(Gtk.Application):
                           "on_to_fav_copy": self.on_to_fav_copy,
                           "on_to_fav_end_copy": self.on_to_fav_end_copy,
                           "on_fav_view_query_tooltip": self.on_fav_view_query_tooltip,
+                          "on_services_view_query_tooltip": self.on_services_view_query_tooltip,
                           "on_view_drag_begin": self.on_view_drag_begin,
                           "on_view_drag_data_get": self.on_view_drag_data_get,
                           "on_services_view_drag_drop": self.on_services_view_drag_drop,
@@ -814,27 +814,39 @@ class Application(Gtk.Application):
 
     # ********************* Hints *************************#
 
-    def on_fav_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip: Gtk.Tooltip):
-        """  Sets detailed info about service in the tooltip. """
+    def on_fav_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        """  Sets detailed info about service in the tooltip [fav view]. """
         result = view.get_dest_row_at_pos(x, y)
         if not result or not self._settings.show_bq_hints:
             return False
 
-        path, pos = result
+        return self.get_tooltip(view, result, tooltip)
+
+    def on_services_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        """  Sets short info about service in the tooltip [main services view]. """
+        result = view.get_dest_row_at_pos(x, y)
+        if not result or not self._settings.show_srv_hints:
+            return False
+
+        return self.get_tooltip(view, result, tooltip, target=ViewTarget.SERVICES)
+
+    def get_tooltip(self, view, dest_row, tooltip, target=ViewTarget.FAV):
+        path, pos = dest_row
         model = view.get_model()
 
-        srv = self._services.get(model[path][Column.FAV_ID], None)
+        target_column = Column.FAV_ID if target is ViewTarget.FAV else Column.SRV_FAV_ID
+        srv = self._services.get(model[path][target_column], None)
         if srv and srv.picon_id:
             tooltip.set_icon(get_picon_pixbuf(self._settings.picons_local_path + srv.picon_id, size=96))
-            tooltip.set_text(self.get_hint_for_bq_list(srv))
+            tooltip.set_text(
+                self.get_hint_for_bq_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv))
             view.set_tooltip_row(tooltip, path)
             return True
         return False
 
-    def get_hint_for_bq_list(self, srv: Service):
+    def get_hint_for_bq_list(self, srv):
         """ Returns detailed info about service as formatted string for using as hint. """
-        header = "{}: {}\n{}: {}\n".format(get_message("Name"), srv.service, get_message("Type"), srv.service_type)
-        ref = "{}: {}".format(get_message("Service reference"), srv.picon_id.rstrip(".png"))
+        header, ref = self.get_hint_header_info(srv)
 
         if srv.service_type == "IPTV":
             return "{}{}".format(header, ref)
@@ -848,6 +860,15 @@ class Application(Gtk.Application):
                          get_message("Freq"), srv.freq,
                          get_message("Rate"), srv.rate, pol, fec, "SID", srv.ssid,
                          ref)
+
+    def get_hint_for_srv_list(self, srv):
+        """ Returns short info about service as formatted string for using as hint. """
+        return "{}{}".format(*self.get_hint_header_info(srv))
+
+    def get_hint_header_info(self, srv):
+        header = "{}: {}\n{}: {}\n".format(get_message("Name"), srv.service, get_message("Type"), srv.service_type)
+        ref = "{}: {}".format(get_message("Service reference"), srv.picon_id.rstrip(".png"))
+        return header, ref
 
     # ***************** Drag-and-drop *********************#
 
@@ -2452,7 +2473,7 @@ class Application(Gtk.Application):
                 data = r[Column.SRV_PICON_ID].split("_")
                 ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
 
-        PiconsDialog(self._main_window, self._settings, ids, self._sat_positions, self.update_picons).show()
+        PiconsDialog(self._main_window, self._settings, ids, self._sat_positions, self).show()
 
     @run_task
     def update_picons(self):

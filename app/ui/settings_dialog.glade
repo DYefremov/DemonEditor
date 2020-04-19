@@ -2157,38 +2157,61 @@ Author: Dmitriy Yefremov
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkBox" id="hints_box">
+                          <object class="GtkGrid" id="hints_grid">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="margin_left">5</property>
                             <property name="margin_right">5</property>
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
+                            <property name="row_spacing">5</property>
+                            <property name="column_spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="fav_hints_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="margin_top">5</property>
-                                <property name="margin_bottom">5</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
                                 <property name="label" translatable="yes">Show detailed info as hints in the bouquet list</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkSwitch" id="bouquet_hints_switch">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="halign">end</property>
                                 <property name="valign">center</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="pack_type">end</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="services_hints_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="label" translatable="yes">Show short info as hints in the main services list</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="services_hints_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                           </object>
