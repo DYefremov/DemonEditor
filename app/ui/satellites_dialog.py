@@ -10,8 +10,8 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION
-from .dialogs import show_dialog, DialogType, get_dialogs_string
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION, MOD_MASK
+from .dialogs import show_dialog, DialogType, get_dialogs_string, get_chooser_dialog
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 
 _UI_PATH = UI_RESOURCES_PATH + "satellites_dialog.glade"
@@ -84,26 +84,16 @@ class SatellitesDialog:
 
     @run_idle
     def on_open(self, model):
-        response = self.get_file_dialog_response(Gtk.FileChooserAction.OPEN)
-        if response == Gtk.ResponseType.CANCEL:
+        response = get_chooser_dialog(self._window, self._settings, "*.xml", "satellites.xml")
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
         if not str(response).endswith("satellites.xml"):
             show_dialog(DialogType.ERROR, self._window, text="No satellites.xml file is selected!")
             return
+
         self._data_path = response
         self.load_satellites_list(model)
-
-    def get_file_dialog_response(self, action: Gtk.FileChooserAction):
-        file_filter = Gtk.FileFilter()
-        file_filter.add_pattern("satellites.xml")
-        file_filter.set_name("satellites.xml")
-        response = show_dialog(dialog_type=DialogType.CHOOSER,
-                               transient=self._window,
-                               settings=self._settings,
-                               action_type=action,
-                               file_filter=file_filter)
-        return response
 
     @staticmethod
     def on_row_activated(view, path, column):
@@ -124,7 +114,7 @@ class SatellitesDialog:
         if not KeyboardKey.value_exist(key_code):
             return
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:
             self.on_remove(view)

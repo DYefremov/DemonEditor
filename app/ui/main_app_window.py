@@ -35,15 +35,16 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode)
+                        FavClickMode, MOD_MASK)
 
 
 class Application(Gtk.Application):
+    SERVICE_MODEL_NAME = "services_list_store"
+    FAV_MODEL_NAME = "fav_list_store"
+    BQ_MODEL_NAME = "bouquets_tree_store"
+
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
-    _SERVICE_LIST_NAME = "services_list_store"
-    _FAV_LIST_NAME = "fav_list_store"
-    _BOUQUETS_LIST_NAME = "bouquets_tree_store"
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
                          "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
@@ -303,6 +304,7 @@ class Application(Gtk.Application):
 
         self.init_drag_and_drop()
         self.init_colors()
+
         if self._settings.load_last_config:
             config = self._settings.get("last_config") or {}
             self.init_profiles(config.get("last_profile", None))
@@ -463,7 +465,7 @@ class Application(Gtk.Application):
 
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
-        event.state |= Gdk.ModifierType.CONTROL_MASK
+        event.state |= MOD_MASK
 
     def on_close_app(self, *args):
         if self._recorder:
@@ -480,7 +482,7 @@ class Application(Gtk.Application):
         self._settings.add("window_size", window.get_size())
 
     @run_idle
-    def on_about_app(self, item):
+    def on_about_app(self, action, value=None):
         show_dialog(DialogType.ABOUT, self._main_window)
 
     @run_idle
@@ -564,7 +566,7 @@ class Application(Gtk.Application):
             model.insert(dest_index, row)
             fav_bouquet.insert(dest_index, row[Column.FAV_ID])
 
-        if model.get_name() == self._FAV_LIST_NAME:
+        if model.get_name() == self.FAV_MODEL_NAME:
             self.update_fav_num_column(model)
 
         self._rows_buffer.clear()
@@ -602,11 +604,11 @@ class Application(Gtk.Application):
         itrs = [model.get_iter(path) for path in paths]
         rows = [model[in_itr][:] for in_itr in itrs]
 
-        if model_name == self._FAV_LIST_NAME:
+        if model_name == self.FAV_MODEL_NAME:
             next(self.remove_favs(itrs, model), False)
-        elif model_name == self._BOUQUETS_LIST_NAME:
+        elif model_name == self.BQ_MODEL_NAME:
             self.delete_bouquets(itrs, model)
-        elif model_name == self._SERVICE_LIST_NAME:
+        elif model_name == self.SERVICE_MODEL_NAME:
             next(self.delete_services(itrs, model, rows), False)
 
         self.on_view_focus(view)
@@ -841,7 +843,7 @@ class Application(Gtk.Application):
         if not data:
             return
         itr_str, sep, source = data.partition("::::")
-        if source != self._BOUQUETS_LIST_NAME:
+        if source != self.BQ_MODEL_NAME:
             return
 
         if drop_info:
@@ -883,7 +885,7 @@ class Application(Gtk.Application):
         """  Update fav view  after data received  """
         try:
             itr_str, sep, source = data.partition("::::")
-            if source == self._BOUQUETS_LIST_NAME:
+            if source == self.BQ_MODEL_NAME:
                 return
 
             bq_selected = self.check_bouquet_selection()
@@ -900,7 +902,7 @@ class Application(Gtk.Application):
             fav_bouquet = self._bouquets[bq_selected]
             itrs = itr_str.split(",")
 
-            if source == self._SERVICE_LIST_NAME:
+            if source == self.SERVICE_MODEL_NAME:
                 ext_model = self._services_view.get_model()
                 ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
                 ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
@@ -912,7 +914,7 @@ class Application(Gtk.Application):
                     model.insert(dest_index, (0, ch.coded, ch.service, ch.locked, ch.hide, ch.service_type, ch.pos,
                                               ch.fav_id, self._picons.get(ch.picon_id, None), None, None))
                     fav_bouquet.insert(dest_index, ch.fav_id)
-            elif source == self._FAV_LIST_NAME:
+            elif source == self.FAV_MODEL_NAME:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
                 in_rows = [model[in_itr][:] for in_itr in in_itrs]
                 for row in in_rows:
@@ -931,11 +933,11 @@ class Application(Gtk.Application):
             self.delete_views_selection(name)
 
     def delete_views_selection(self, name):
-        if name == self._SERVICE_LIST_NAME:
+        if name == self.SERVICE_MODEL_NAME:
             self.delete_selection(self._fav_view)
-        elif name == self._FAV_LIST_NAME:
+        elif name == self.FAV_MODEL_NAME:
             self.delete_selection(self._services_view)
-        elif name == self._BOUQUETS_LIST_NAME:
+        elif name == self.BQ_MODEL_NAME:
             self.delete_selection(self._services_view, self._fav_view)
 
     def on_view_popup_menu(self, menu, event):
@@ -955,7 +957,7 @@ class Application(Gtk.Application):
             menu.popup(None, None, None, None, event.button, event.time)
             return True
 
-    def on_satellite_editor_show(self, model):
+    def on_satellite_editor_show(self, action, value=None):
         """ Shows satellites editor dialog """
         show_satellites_dialog(self._main_window, self._settings)
 
@@ -1242,7 +1244,7 @@ class Application(Gtk.Application):
         self._save_header_button.set_sensitive(True)
         yield True
 
-    def on_new_configuration(self, item):
+    def on_new_configuration(self, action, value=None):
         """ Creates new empty configuration """
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
@@ -1355,7 +1357,7 @@ class Application(Gtk.Application):
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
-    def on_settings(self, item):
+    def on_settings(self, action, value=None):
         response = show_settings_dialog(self._main_window, self._settings)
         if response != Gtk.ResponseType.CANCEL:
             gen = self.update_settings()
@@ -1414,27 +1416,27 @@ class Application(Gtk.Application):
         if key is KeyboardKey.F:
             return True
 
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
         if ctrl and key in MOVE_KEYS:
             self.move_items(key)
         elif ctrl and key is KeyboardKey.C:
-            if model_name == self._SERVICE_LIST_NAME:
+            if model_name == self.SERVICE_MODEL_NAME:
                 self.on_copy(view, ViewTarget.FAV)
-            elif model_name == self._FAV_LIST_NAME:
+            elif model_name == self.FAV_MODEL_NAME:
                 self.on_copy(view, ViewTarget.SERVICES)
             else:
                 self.on_copy(view, ViewTarget.BOUQUET)
         elif ctrl and key is KeyboardKey.X:
-            if model_name == self._FAV_LIST_NAME:
+            if model_name == self.FAV_MODEL_NAME:
                 self.on_cut(view, ViewTarget.FAV)
-            elif model_name == self._BOUQUETS_LIST_NAME:
+            elif model_name == self.BQ_MODEL_NAME:
                 self.on_cut(view, ViewTarget.BOUQUET)
         elif ctrl and key is KeyboardKey.V:
-            if model_name == self._FAV_LIST_NAME:
+            if model_name == self.FAV_MODEL_NAME:
                 self.on_paste(view, ViewTarget.FAV)
-            elif model_name == self._BOUQUETS_LIST_NAME:
+            elif model_name == self.BQ_MODEL_NAME:
                 self.on_paste(view, ViewTarget.BOUQUET)
         elif key is KeyboardKey.DELETE:
             self.on_delete(view)
@@ -1446,22 +1448,22 @@ class Application(Gtk.Application):
             return
 
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
         if ctrl and key is KeyboardKey.INSERT:
             # Move items from app to fav list
-            if model_name == self._SERVICE_LIST_NAME:
+            if model_name == self.SERVICE_MODEL_NAME:
                 self.on_to_fav_copy(view)
-            elif model_name == self._BOUQUETS_LIST_NAME:
+            elif model_name == self.BQ_MODEL_NAME:
                 self.on_new_bouquet(view)
-        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self._SERVICE_LIST_NAME:
+        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self.SERVICE_MODEL_NAME:
             self.on_to_fav_end_copy(view)
         elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
             self.on_rename(view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-        elif ctrl and model_name == self._FAV_LIST_NAME:
+        elif ctrl and model_name == self.FAV_MODEL_NAME:
             if key is KeyboardKey.P:
                 self.on_play_stream()
             if key is KeyboardKey.W:
@@ -1475,9 +1477,9 @@ class Application(Gtk.Application):
     def on_view_focus(self, view, focus_event=None):
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0  # if  > 0 model has items
-        is_service = model_name == self._SERVICE_LIST_NAME
+        is_service = model_name == self.SERVICE_MODEL_NAME
 
-        if model_name == self._BOUQUETS_LIST_NAME:
+        if model_name == self.BQ_MODEL_NAME:
             for elem in self._tool_elements:
                 self._tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
@@ -1534,11 +1536,11 @@ class Application(Gtk.Application):
     def on_model_changed(self, model, path, itr=None):
         model_name = model.get_name()
 
-        if model_name == self._FAV_LIST_NAME:
+        if model_name == self.FAV_MODEL_NAME:
             self._fav_count_label.set_text(str(len(model)))
-        elif model_name == self._SERVICE_LIST_NAME:
+        elif model_name == self.SERVICE_MODEL_NAME:
             self.update_services_counts(len(model))
-        elif model_name == self._BOUQUETS_LIST_NAME:
+        elif model_name == self.BQ_MODEL_NAME:
             self._bouquets_count_label.set_text(str(len(self._bouquets.keys())))
 
     @lru_cache(maxsize=1)
@@ -1586,7 +1588,7 @@ class Application(Gtk.Application):
 
     # ***************** IPTV *********************#
 
-    def on_iptv(self, item):
+    def on_iptv(self, action, value=None):
         response = IptvDialog(self._main_window,
                               self._fav_view,
                               self._services,
@@ -1597,7 +1599,7 @@ class Application(Gtk.Application):
             self.update_fav_num_column(self._fav_model)
 
     @run_idle
-    def on_iptv_list_configuration(self, item):
+    def on_iptv_list_configuration(self, action, value=None):
         if self._s_type is SettingsType.NEUTRINO_MP:
             self.show_error_dialog("Neutrino at the moment not supported!")
             return
@@ -1615,7 +1617,7 @@ class Application(Gtk.Application):
                                     self._fav_model, self._s_type).show()
 
     @run_idle
-    def on_remove_all_unavailable(self, item):
+    def on_remove_all_unavailable(self, action, value=None):
         iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
             self.show_error_dialog("This list does not contains IPTV streams!")
@@ -1634,8 +1636,7 @@ class Application(Gtk.Application):
 
     # ****************** EPG  **********************#
 
-    @run_idle
-    def on_epg_list_configuration(self, item):
+    def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
             self.show_error_dialog("Only Enigma2 is supported!")
             return
@@ -1649,14 +1650,14 @@ class Application(Gtk.Application):
 
     # ***************** Import  ********************#
 
-    def on_import_yt_list(self, item):
+    def on_import_yt_list(self, action, value=None):
         """ Import playlist from YouTube """
         if not self._bq_selected:
             return
 
         YtListImportDialog(self._main_window, self._s_type, self.append_imported_services).show()
 
-    def on_import_m3u(self, item):
+    def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
         response = get_chooser_dialog(self._main_window, self._settings, "*.m3u", "m3u files")
         if response == Gtk.ResponseType.CANCEL:
@@ -1680,7 +1681,7 @@ class Application(Gtk.Application):
         next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
 
     @run_idle
-    def on_export_to_m3u(self, item):
+    def on_export_to_m3u(self, action, value=None):
         i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
         bq_services = [BouquetService(r[Column.FAV_SERVICE],
                                       BqServiceType(r[Column.FAV_TYPE]),
@@ -1703,7 +1704,7 @@ class Application(Gtk.Application):
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
-    def on_import_bouquet(self, item):
+    def on_import_bouquet(self, action, value=None):
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
             self.show_error_dialog("No selected item!")
@@ -1712,7 +1713,7 @@ class Application(Gtk.Application):
         appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
         import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender)
 
-    def on_import_bouquets(self, item):
+    def on_import_bouquets(self, action, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
@@ -1732,7 +1733,7 @@ class Application(Gtk.Application):
 
     # ***************** Backup  ********************#
 
-    def on_backup_tool_show(self, item):
+    def on_backup_tool_show(self, action, value=None):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window, self._settings, self.open_data).show()
 
@@ -2258,7 +2259,7 @@ class Application(Gtk.Application):
         model, paths = view.get_selection().get_selected_rows()
         if is_only_one_item_selected(paths, self._main_window):
             model_name = get_base_model(model).get_name()
-            if model_name == self._FAV_LIST_NAME:
+            if model_name == self.FAV_MODEL_NAME:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
                 if srv_type == BqServiceType.MARKER.name:
                     return self.on_rename(view)
@@ -2318,12 +2319,12 @@ class Application(Gtk.Application):
 
     def on_rename(self, view):
         name, model = get_model_data(view)
-        if name == self._BOUQUETS_LIST_NAME:
+        if name == self.BQ_MODEL_NAME:
             self.on_bouquets_edit(view)
-        elif name == self._FAV_LIST_NAME:
+        elif name == self.FAV_MODEL_NAME:
             rename(view, self._main_window, ViewTarget.FAV, service_view=self._services_view,
                    services=self._services)
-        elif name == self._SERVICE_LIST_NAME:
+        elif name == self.SERVICE_MODEL_NAME:
             rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, services=self._services)
 
     def on_rename_for_bouquet(self, item):
@@ -2387,7 +2388,7 @@ class Application(Gtk.Application):
 
     # ***************** Picons *********************#
 
-    def on_picons_loader_show(self, item):
+    def on_picons_loader_show(self, action, value=None):
         ids = {}
         if self._s_type is SettingsType.ENIGMA_2:
             for r in self._services_model:
@@ -2477,12 +2478,30 @@ class Application(Gtk.Application):
     def show_error_dialog(self, message):
         show_dialog(DialogType.ERROR, self._main_window, message)
 
+    # ******************* Properties ***********************#
+
+    @property
+    def fav_view(self):
+        return self._fav_view
+
+    @property
+    def services_view(self):
+        return self._services_view
+
+    @property
+    def bouquets_view(self):
+        return self._bouquets_view
+
+    @property
+    def current_services(self):
+        return self._services
+
 
 def start_app():
     try:
         Settings.get_instance()
     except SettingsException as e:
-        msg = "{} \n{}".format(e, "All setting were reset. Restart the program!")
+        msg = "{} \n{}".format(e, get_message("All setting were reset. Restart the program!"))
         show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
         Settings.reset_to_default()
     else:
