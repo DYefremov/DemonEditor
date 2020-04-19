@@ -13,14 +13,14 @@ from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, GTK_PATH
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, GTK_PATH, Column
 
 
 class PiconsDialog:
-    def __init__(self, transient, settings, picon_ids, sat_positions, callback):
+    def __init__(self, transient, settings, picon_ids, sat_positions, app):
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
-        self._callback = callback
+        self._app = app
         self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile(r"^https://www\.lyngsat\.com/[\w-]+\.html$")
@@ -44,7 +44,9 @@ class PiconsDialog:
                     "on_notebook_switch_page": self.on_notebook_switch_page,
                     "on_convert": self.on_convert,
                     "on_picons_folder_changed": self.on_picons_folder_changed,
-                    "on_view_drag_data_get": self.on_view_drag_data_get,
+                    "on_picons_view_drag_drop": self.on_picons_view_drag_drop,
+                    "on_picons_view_drag_data_received": self.on_picons_view_drag_data_received,
+                    "on_picons_view_drag_data_get": self.on_picons_view_drag_data_get,
                     "on_picons_view_realize": self.on_picons_view_realize,
                     "on_satellites_view_realize": self.on_satellites_view_realize,
                     "on_satellite_selection": self.on_satellite_selection,
@@ -164,8 +166,51 @@ class PiconsDialog:
     def init_drag_and_drop(self):
         self._picons_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY)
         self._picons_view.drag_source_add_uri_targets()
+        self._picons_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._picons_view.drag_dest_add_text_targets()
 
-    def on_view_drag_data_get(self, view, drag_context, data, info, time):
+    def on_picons_view_drag_drop(self, view, drag_context, x, y, time):
+        view.stop_emission_by_name("drag_drop")
+        view.drag_get_data(drag_context, drag_context.list_targets()[-1], time)
+
+    def on_picons_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+        view.stop_emission_by_name("drag_data_received")
+        txt = data.get_text()
+        if not txt:
+            return
+
+        itr_str, sep, src = txt.partition("::::")
+        if src == self._app.BQ_MODEL_NAME:
+            return
+
+        path, pos = view.get_dest_item_at_pos(x, y)
+        if not path:
+            return
+
+        model = view.get_model()
+        p_path = "{}/{}".format(self._explorer_path_button.get_filename(), model.get_value(model.get_iter(path), 1))
+        if src == self._app.FAV_MODEL_NAME:
+            target_view = self._app.fav_view
+            c_id = Column.FAV_ID
+        else:
+            target_view = self._app.services_view
+            c_id = Column.SRV_FAV_ID
+
+        t_mod = target_view.get_model()
+        self._app.on_assign_picon(target_view, p_path)
+        self.show_assign_info([t_mod.get_value(t_mod.get_iter_from_string(itr), c_id) for itr in itr_str.split(",")])
+
+    @run_idle
+    def show_assign_info(self, fav_ids):
+        self._expander.set_expanded(True)
+        self._text_view.get_buffer().set_text("")
+        for i in fav_ids:
+            srv = self._app.current_services.get(i, None)
+            if srv:
+                info = self._app.get_hint_for_srv_list(srv)
+                self.append_output("Picon assignment for the service:\n{}\n{}\n".format(info, " * " * 30))
+
+    def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
         model = view.get_model()
         path = view.get_selected_items()[0]
         p_path = "{}/{}".format(self._explorer_path_button.get_filename(), model.get_value(model.get_iter(path), 1))
@@ -336,7 +381,7 @@ class PiconsDialog:
         self._terminate = True
         self.save_window_size(window)
         self.clean_data()
-        self._callback()
+        self._app.update_picons()
         GLib.idle_add(self._dialog.destroy)
 
     def save_window_size(self, window):
