@@ -400,11 +400,11 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkScrolledWindow" id="picons_view_scrolled_window">
+                          <object class="GtkScrolledWindow" id="picons_view_sw">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="shadow_type">in</property>
@@ -418,7 +418,9 @@ Author: Dmitriy Yefremov
                                 <property name="column_spacing">5</property>
                                 <property name="tooltip_column">1</property>
                                 <property name="item_padding">5</property>
-                                <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
+                                <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
+                                <signal name="drag-data-received" handler="on_picons_view_drag_data_received" swapped="no"/>
+                                <signal name="drag-drop" handler="on_picons_view_drag_drop" swapped="no"/>
                                 <signal name="realize" handler="on_picons_view_realize" swapped="no"/>
                                 <child>
                                   <object class="GtkCellRendererPixbuf" id="picon_renderer">
@@ -442,7 +444,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
