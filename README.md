@@ -1,9 +1,20 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
 
 ## Enigma2 channel and satellites list editor for macOS (experimental).                                
 **The functionality and performance of this version may be different from the Linux version!                                                     
 Not all features can be supported and tested!**    
-
+### Main features of the program:
+* Editing bouquets, channels, satellites.
+* Import function.
+* Backup function.
+* Extended support of IPTV.
+* Support of picons.
+* Downloading of picons and updating of satellites (transponders) from the web.
+* Import to bouquet(Neutrino WEBTV) from m3u.
+* Export of bouquets with IPTV services in m3u.
+* Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
+* Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
 #### Keyboard shortcuts:                                                                                                                                                                                            
 * **&#8984; + X** - only in bouquet list.
 * **&#8984; + C** - only in services list.                                                                                                                                                    
@@ -36,7 +47,6 @@ Python >= **3.5**, GTK+ >= **3.16**, pygobject3, adwaita-icon-theme, python3-req
 ```pip3 install pyobjc```                                                                                                
 #### Launching:                                                                                                                                                                                                                     
 To start the program, just download the archive, unpack and run it from the terminal with the command: ```./start.py``` 
-
 ### Building standalone application:                                                                                     
 Install [PyInstaller](https://www.pyinstaller.org/) with the command from the terminal:                                                                    
 ```pip3 install pyinstaller```                                                                                          
@@ -52,7 +62,13 @@ AUTHOR IS NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY CONNECTION WITH T
 This package may contain components distributed under the GPL [v3](http://www.gnu.org/licenses/gpl-3.0.html) or lower license.
 By downloading this package you agree to the terms of this [license](http://www.gnu.org/licenses/gpl-3.0.html) and the possible inconvenience associated with this!
 
-**The package may not contain all the latest changes!**
-                                                            
-                                                                       
-                                                                                                                                                                                                                                            
+**The package may not contain all the latest changes!**                                                                                                                                                                                                                                      
+### Important: 
+Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!                                                                                                
+Main supported *lamedb* format is version **4**. Versions **3** and **5** has only **experimental** support!                                                                                                                                                        
+For version **3** is only read mode available. When saving, version **4** format is used instead!   
+
+When using the multiple import feature, from *lamedb* will be taken data **only for channels that are in the            
+selected bouquets!** If you need full set of the data (including satellites.xml, current file will be overwritten),     
+just load your data via *"File/Open"* and press *"Save"*. When importing separate bouquet files, only those services    
+(excluding IPTV) that are in the **current open lamedb** (main list of services) will be imported.
