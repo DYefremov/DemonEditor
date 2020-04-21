@@ -1681,11 +1681,11 @@ class Application(Gtk.Application):
 
     def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
-        response = get_chooser_dialog(self._main_window, self._settings, "*.m3u", "m3u files")
+        response = get_chooser_dialog(self._main_window, self._settings, "*.m3u* files", ("*.m3u", "*.m3u8"))
         if response == Gtk.ResponseType.CANCEL:
             return
 
-        if not str(response).endswith("m3u"):
+        if not str(response).endswith(("m3u", "m3u8")):
             self.show_error_dialog("No m3u file is selected!")
             return
 

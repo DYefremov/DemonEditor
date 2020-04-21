@@ -30,7 +30,7 @@ def import_bouquet(transient, model, path, settings, services, appender):
         elif bq_type is BqType.WEBTV:
             f_pattern = "webtv.xml"
 
-    file_path = get_chooser_dialog(transient, settings, f_pattern, "bouquet files")
+    file_path = get_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
     if file_path == Gtk.ResponseType.CANCEL:
         return
 

@@ -9,10 +9,10 @@ from app.commons import run_idle, run_task
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION, MOD_MASK
 from .dialogs import show_dialog, DialogType, get_dialogs_string, get_chooser_dialog
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
+from .search import SearchProvider
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION, MOD_MASK
 
 _UI_PATH = UI_RESOURCES_PATH + "satellites_dialog.glade"
 
@@ -84,7 +84,7 @@ class SatellitesDialog:
 
     @run_idle
     def on_open(self, model):
-        response = get_chooser_dialog(self._window, self._settings, "*.xml", "satellites.xml")
+        response = get_chooser_dialog(self._window, self._settings, "satellites.xml", ("*.xml",))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 

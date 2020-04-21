@@ -367,7 +367,7 @@ def assign_picon(target, srv_view, fav_view, transient, picons, settings, servic
     model, paths = view.get_selection().get_selected_rows()
 
     if not p_path:
-        p_path = get_chooser_dialog(transient, settings, "*.png", "png files")
+        p_path = get_chooser_dialog(transient, settings, "*.png files", ("*.png",))
         if p_path == Gtk.ResponseType.CANCEL:
             return
 
