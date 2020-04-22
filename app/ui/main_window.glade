@@ -1586,7 +1586,6 @@ Author: Dmitriy Yefremov
                       <object class="GtkBox" id="search_bar_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">1</property>
                         <child>
                           <object class="GtkSearchEntry" id="search_entry">
                             <property name="height_request">32</property>
@@ -1649,6 +1648,9 @@ Author: Dmitriy Yefremov
                             <property name="position">2</property>
                           </packing>
                         </child>
+                        <style>
+                          <class name="group"/>
+                        </style>
                       </object>
                     </child>
                   </object>
