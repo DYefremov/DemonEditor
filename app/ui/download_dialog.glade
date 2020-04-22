@@ -243,17 +243,7 @@ Author: Dmitriy Yefremov
                 <property name="focus_on_click">False</property>
                 <property name="active">0</property>
                 <property name="has_frame">False</property>
-                <property name="has_entry">True</property>
                 <signal name="changed" handler="on_profile_changed" swapped="no"/>
-                <child internal-child="entry">
-                  <object class="GtkEntry">
-                    <property name="can_focus">True</property>
-                    <property name="has_tooltip">True</property>
-                    <property name="editable">False</property>
-                    <property name="has_frame">False</property>
-                    <property name="max_width_chars">9</property>
-                  </object>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -614,6 +604,9 @@ Author: Dmitriy Yefremov
                     <property name="position">2</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="group"/>
+                </style>
               </object>
             </child>
           </object>
@@ -723,5 +716,12 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkSizeGroup" id="settings_size_group">
+    <widgets>
+      <widget name="ftp_radio_button"/>
+      <widget name="http_radio_button"/>
+      <widget name="telnet_radio_button"/>
+    </widgets>
   </object>
 </interface>

@@ -744,7 +744,7 @@ class SettingsDialog:
     def init_appearance(self):
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
-        if t_support or True:
+        if t_support:
             # GTK
             try:
                 for t in os.listdir(self._ext_settings.themes_path):
