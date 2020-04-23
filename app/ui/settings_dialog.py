@@ -674,7 +674,9 @@ class SettingsDialog:
         self.add_theme(self._ext_settings.themes_path, self._theme_combo_box)
 
     def on_theme_remove(self, button):
-        self.remove_theme(self._theme_combo_box, self._ext_settings.themes_path)
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.OK:
+            Gtk.Settings().get_default().set_property("gtk-theme-name", "")
+            self.remove_theme(self._theme_combo_box, self._ext_settings.themes_path)
 
     def on_icon_theme_changed(self, button, state=False):
         if self._main_stack.get_visible_child_name() != "appearance":
@@ -685,7 +687,9 @@ class SettingsDialog:
         self.add_theme(self._ext_settings.icon_themes_path, self._icon_theme_combo_box)
 
     def on_icon_theme_remove(self, button):
-        self.remove_theme(self._icon_theme_combo_box, self._ext_settings.icon_themes_path)
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.OK:
+            Gtk.Settings().get_default().set_property("gtk-icon-theme-name", "")
+            self.remove_theme(self._icon_theme_combo_box, self._ext_settings.icon_themes_path)
 
     @run_idle
     def add_theme(self, path, button):
@@ -698,14 +702,17 @@ class SettingsDialog:
     @run_task
     def unpack_theme(self, src, dst, button):
         try:
-            from shutil import unpack_archive
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
 
-            unpack_archive(src, dst)
-        except (KeyError, OSError) as e:
-            self.show_info_message(str(e), Gtk.MessageType.ERROR)
-        else:
-            self.update_theme_button(button, dst)
+            import subprocess
+            log("Unpacking '{}' started...".format(src))
+            p = subprocess.Popen(["tar", "-xvf", src, "-C", dst],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
+            p.communicate()
+            log("Unpacking end.")
         finally:
+            self.update_theme_button(button, dst)
             self._appearance_box.set_sensitive(True)
 
     @run_idle
@@ -727,9 +734,6 @@ class SettingsDialog:
             self.show_info_message("No selected item!", Gtk.MessageType.ERROR)
             return
 
-        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
-            return
-
         from shutil import rmtree
 
         try:
@@ -737,8 +741,12 @@ class SettingsDialog:
         except OSError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
-            button.remove(button.get_active())
-            button.set_active(0)
+            self.theme_button_remove_active(button)
+
+    @run_idle
+    def theme_button_remove_active(self, button):
+        button.remove(button.get_active())
+        button.set_active(0)
 
     @run_idle
     def init_appearance(self):

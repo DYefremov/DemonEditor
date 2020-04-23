@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018 Dmitriy Yefremov
+Copyright (c) 2018-2020 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for MacOS. -->
-  <!-- interface-copyright 2018 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
@@ -45,7 +45,7 @@ Author: Dmitriy Yefremov
 </property>
     <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for MacOS.
     (Experimental)</property>
-    <property name="website">https://dyefremov.github.io/DemonEditor/</property>
+    <property name="website">https://github.com/DYefremov/DemonEditor/tree/experimental-mac</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
 Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
     <property name="authors">Dmitriy Yefremov
