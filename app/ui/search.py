@@ -31,6 +31,8 @@ class SearchProvider:
         if self._max_indexes > 0:
             self.on_search_down()
 
+        self.update_navigation_buttons()
+
     def scroll_to(self, index):
         view, path = self._paths[index]
         view.scroll_to_cell(path, None)
