@@ -2173,9 +2173,16 @@ class Application(Gtk.Application):
             self.update_filter_sat_positions()
             self._filter_entry.grab_focus()
         else:
-            self._filter_entry.set_text("")
+            self.filter_set_default()
 
         self._filter_bar.set_search_mode(value)
+
+    def filter_set_default(self):
+        """ Setting defaults for filter elements. """
+        self._filter_entry.set_text("")
+        self._filter_sat_positions_box.set_active(0)
+        self._filter_types_box.set_active(0)
+        self._filter_only_free_button.set_active(False)
 
     def init_sat_positions(self):
         self._sat_positions.clear()
@@ -2263,6 +2270,8 @@ class Application(Gtk.Application):
         self._search_bar.set_search_mode(value)
         if value:
             self._search_entry.grab_focus()
+        else:
+            self._search_entry.set_text("")
 
     def on_search_down(self, item):
         self._search_provider.on_search_down()
