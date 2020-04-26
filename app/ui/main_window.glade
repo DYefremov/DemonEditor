@@ -1257,8 +1257,8 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Picons downloader</property>
-                <signal name="clicked" handler="on_picons_loader_show" swapped="no"/>
+                <property name="tooltip_text" translatable="yes">Picons manager</property>
+                <signal name="clicked" handler="on_picons_manager_show" swapped="no"/>
                 <child>
                   <object class="GtkImage" id="picons_downloader_header_button_image">
                     <property name="visible">True</property>

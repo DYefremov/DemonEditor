@@ -29,7 +29,7 @@ from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_fla
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
                           get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf)
-from .picons_downloader import PiconsDialog
+from .picons_manager import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
@@ -120,7 +120,7 @@ class Application(Gtk.Application):
                     "on_insert_marker": self.on_insert_marker,
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
-                    "on_picons_loader_show": self.on_picons_loader_show,
+                    "on_picons_manager_show": self.on_picons_manager_show,
                     "on_filter_changed": self.on_filter_changed,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
@@ -842,7 +842,8 @@ class Application(Gtk.Application):
     def on_services_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
         # https://stackoverflow.com/q/7661016  [Some data was dropped, get the data!]
-        view.drag_get_data(drag_context, drag_context.list_targets()[-1], time)
+        targets = drag_context.list_targets()
+        view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/plain", False), time)
 
     def on_services_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         #  Needs for the GtkTreeView when using models [filter, sort]
@@ -2419,7 +2420,7 @@ class Application(Gtk.Application):
 
     # ***************** Picons *********************#
 
-    def on_picons_loader_show(self, action, value=None):
+    def on_picons_manager_show(self, action, value=None):
         ids = {}
         if self._s_type is SettingsType.ENIGMA_2:
             for r in self._services_model:
