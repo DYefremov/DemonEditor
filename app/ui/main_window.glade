@@ -903,12 +903,12 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="picons_downloader_tool_button">
+                      <object class="GtkToolButton" id="picons_manager_tool_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Picons downloader</property>
                         <property name="margin_right">5</property>
-                        <property name="action_name">app.on_picons_loader_show</property>
+                        <property name="action_name">app.on_picons_manager_show</property>
                         <property name="label" translatable="yes">Picons</property>
                         <property name="use_underline">True</property>
                         <property name="icon_name">insert-image</property>

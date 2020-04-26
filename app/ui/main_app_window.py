@@ -29,7 +29,7 @@ from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_fla
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
                           get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf)
-from .picons_downloader import PiconsDialog
+from .picons_manager import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
@@ -121,7 +121,7 @@ class Application(Gtk.Application):
                           "on_insert_marker": self.on_insert_marker,
                           "on_fav_press": self.on_fav_press,
                           "on_locate_in_services": self.on_locate_in_services,
-                          "on_picons_loader_show": self.on_picons_loader_show,
+                          "on_picons_manager_show": self.on_picons_manager_show,
                           "on_filter_changed": self.on_filter_changed,
                           "on_assign_picon": self.on_assign_picon,
                           "on_remove_picon": self.on_remove_picon,
@@ -158,7 +158,6 @@ class Application(Gtk.Application):
 
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
-        os.makedirs(os.path.dirname(self._settings.data_local_path), exist_ok=True)
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -335,7 +334,7 @@ class Application(Gtk.Application):
     def init_keys(self):
         main_handlers = ("on_new_configuration", "on_data_open", "on_download", "on_settings",
                          "on_close_app", "on_import_bouquet", "on_import_bouquets", "on_satellite_editor_show",
-                         "on_picons_loader_show", "on_backup_tool_show", "on_about_app")
+                         "on_picons_manager_show", "on_backup_tool_show", "on_about_app")
         iptv_handlers = ("on_iptv", "on_import_yt_list", "on_import_m3u", "on_export_to_m3u",
                          "on_epg_list_configuration", "on_iptv_list_configuration", "on_remove_all_unavailable")
 
@@ -886,7 +885,8 @@ class Application(Gtk.Application):
     def on_services_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
         # https://stackoverflow.com/q/7661016  [Some data was dropped, get the data!]
-        view.drag_get_data(drag_context, drag_context.list_targets()[-1], time)
+        targets = drag_context.list_targets()
+        view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/plain", False), time)
 
     def on_services_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         #  Needs for the GtkTreeView when using models [filter, sort]
@@ -1969,13 +1969,14 @@ class Application(Gtk.Application):
 
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
-        if IS_DARWIN:
+        if self._settings.is_darwin:
             self.update_state_on_full_screen(not self._full_screen)
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
 
     def on_main_window_state(self, window, event):
-        if IS_DARWIN:
+        if self._settings.is_darwin:
             return
+
         state = event.new_window_state
         full = not state & Gdk.WindowState.FULLSCREEN
         window.set_show_menubar(full)
@@ -2475,7 +2476,7 @@ class Application(Gtk.Application):
 
     # ***************** Picons *********************#
 
-    def on_picons_loader_show(self, action, value=None):
+    def on_picons_manager_show(self, action, value=None):
         ids = {}
         if self._s_type is SettingsType.ENIGMA_2:
             for r in self._services_model:

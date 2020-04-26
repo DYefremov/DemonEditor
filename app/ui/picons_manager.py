@@ -8,7 +8,7 @@ from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
-from app.settings import SettingsType
+from app.settings import SettingsType, Settings
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
@@ -41,7 +41,7 @@ class PiconsDialog:
                     "on_url_changed": self.on_url_changed,
                     "on_picons_filter_changed": self.on_picons_filter_changed,
                     "on_position_edited": self.on_position_edited,
-                    "on_notebook_switch_page": self.on_notebook_switch_page,
+                    "on_visible_page": self.on_visible_page,
                     "on_convert": self.on_convert,
                     "on_picons_folder_changed": self.on_picons_folder_changed,
                     "on_picons_view_drag_drop": self.on_picons_view_drag_drop,
@@ -56,7 +56,7 @@ class PiconsDialog:
                     "on_popup_menu": on_popup_menu}
 
         builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "picons_dialog.glade")
+        builder.add_from_file(UI_RESOURCES_PATH + "picons_manager.glade")
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("picons_dialog")
@@ -101,6 +101,7 @@ class PiconsDialog:
         self._load_providers_button.bind_property("visible", self._receive_button, "visible")
         self._load_providers_button.bind_property("visible", builder.get_object("download_box_separator"), "visible")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
+        self._explorer_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Style
@@ -112,8 +113,7 @@ class PiconsDialog:
         self._s_type = settings.setting_type
         self._ip_entry.set_text(self._settings.host)
         self._picons_entry.set_text(self._settings.picons_path)
-        self._picons_path = self._settings.picons_local_path
-        self._picons_dir_entry.set_text(self._picons_path)
+        self._picons_dir_entry.set_text(self._settings.picons_local_path)
 
         window_size = self._settings.get("picons_downloader_window_size")
         if window_size:
@@ -129,7 +129,7 @@ class PiconsDialog:
         self._dialog.show()
 
     def on_picons_view_realize(self, view):
-        self._explorer_path_button.set_current_folder(self._picons_path)
+        self._explorer_path_button.set_current_folder(self._settings.picons_local_path)
 
     def on_picons_folder_changed(self, button):
         path = button.get_filename()
@@ -142,10 +142,13 @@ class PiconsDialog:
 
     def update_picons(self, path):
         p_model = self._picons_view.get_model()
-        self._picons_view.set_model(None)
         model = get_base_model(p_model)
-        model.clear()
-        self._picons_view.set_model(p_model)
+        self._picons_view.set_model(None)
+
+        for index, itr in enumerate([row.iter for row in model]):
+            model.remove(itr)
+            if index % 50 == 0:
+                yield True
 
         for file in os.listdir(path):
             if self._terminate:
@@ -158,6 +161,7 @@ class PiconsDialog:
             else:
                 yield model.append((p, file))
 
+        self._picons_view.set_model(p_model)
         self._explorer_path_button.set_sensitive(True)
         yield True
 
@@ -171,7 +175,8 @@ class PiconsDialog:
 
     def on_picons_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
-        view.drag_get_data(drag_context, drag_context.list_targets()[-1], time)
+        targets = drag_context.list_targets()
+        view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/plain", False), time)
 
     def on_picons_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         view.stop_emission_by_name("drag_data_received")
@@ -318,7 +323,7 @@ class PiconsDialog:
                 self.process_provider(Provider(*prv))
 
             if self._resize_no_radio_button.get_active():
-                self.resize(self._picons_path)
+                self.resize(self._picons_dir_entry.get_text())
 
             self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
         finally:
@@ -336,7 +341,8 @@ class PiconsDialog:
         GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
         self._current_process.wait()
         path = self._TMP_DIR + (url[url.find("//") + 2:] if prv.single else self._BASE_URL + url[url.rfind("/") + 1:])
-        PiconsParser.parse(path, self._picons_path, self._TMP_DIR, prv, self._picon_ids, self.get_picons_format())
+        PiconsParser.parse(path, self._picons_dir_entry.get_text(),
+                           self._TMP_DIR, prv, self._picon_ids, self.get_picons_format())
 
     def write_to_buffer(self, fd, condition):
         if condition == GLib.IO_IN:
@@ -385,10 +391,9 @@ class PiconsDialog:
         GLib.idle_add(self._dialog.destroy)
 
     def save_window_size(self, window):
-        t, _ = self._text_view.get_allocated_size()
-        b, _ = self._info_bar.get_allocated_size()
         size = window.get_size()
-        self._settings.add("picons_downloader_window_size", (size.width, size.height - t.height - b.height))
+        height = size.height - self._text_view.get_allocated_height() - self._info_bar.get_allocated_height()
+        self._settings.add("picons_downloader_window_size", (size.width, height))
 
     @run_task
     def clean_data(self):
@@ -400,8 +405,10 @@ class PiconsDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
+        settings = Settings(self._settings.settings)
+        settings.picons_local_path = self._explorer_path_button.get_filename() + "/"
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
-        self.run_func(lambda: upload_data(settings=self._settings,
+        self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
                                           callback=self.append_output,
                                           done_callback=lambda: self.show_info_message(get_message("Done!"),
@@ -411,9 +418,11 @@ class PiconsDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
-        self.run_func(lambda: download_data(settings=self._settings,
+        settings = Settings(self._settings.settings)
+        settings.picons_local_path = self._explorer_path_button.get_filename() + "/"
+        self.run_func(lambda: download_data(settings=settings,
                                             download_type=DownloadType.PICONS,
-                                            callback=self.append_output))
+                                            callback=self.append_output), True)
 
     def on_remove(self, item):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
@@ -425,14 +434,17 @@ class PiconsDialog:
                                                                                          Gtk.MessageType.INFO)))
 
     @run_task
-    def run_func(self, func):
+    def run_func(self, func, update=False):
         try:
             GLib.idle_add(self._expander.set_expanded, True)
             GLib.idle_add(self._header_download_box.set_sensitive, False)
             func()
         except OSError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
-        GLib.idle_add(self._header_download_box.set_sensitive, True)
+        finally:
+            GLib.idle_add(self._header_download_box.set_sensitive, True)
+            if update:
+                self.on_picons_folder_changed(self._explorer_path_button)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -489,10 +501,11 @@ class PiconsDialog:
         model.set_value(model.get_iter(path), 2, value)
 
     @run_idle
-    def on_notebook_switch_page(self, nb, box, tab_num):
-        self._convert_button.set_visible(tab_num > 1)
-        self._load_providers_button.set_visible(tab_num == 1)
-        is_explorer = tab_num == 0
+    def on_visible_page(self, stack: Gtk.Stack, param):
+        name = stack.get_visible_child_name()
+        self._convert_button.set_visible(name == "converter")
+        self._load_providers_button.set_visible(name == "downloader")
+        is_explorer = name == "explorer"
         self._filter_button.set_visible(is_explorer)
         if is_explorer:
             self.on_picons_folder_changed(self._explorer_path_button)
