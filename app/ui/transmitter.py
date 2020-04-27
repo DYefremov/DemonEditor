@@ -5,10 +5,11 @@ import gi
 from gi.repository import GLib
 
 from app.commons import log
+from app.settings import IS_DARWIN
 from app.connections import HttpRequestType
 from app.tools.yt import YouTube
 from app.ui.iptv import get_yt_icon
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, IS_DARWIN
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
 
 
 class LinksTransmitter:
@@ -60,13 +61,13 @@ class LinksTransmitter:
                 self._status_active = AppIndicator3.IndicatorStatus.ACTIVE
                 self._status_passive = AppIndicator3.IndicatorStatus.PASSIVE
 
-                category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
-                path = Path(UI_RESOURCES_PATH + "/icons/hicolor/scalable/apps/demon-editor.svg").resolve()
-                path = str(path) if path.is_file() else "demon-editor"
-                self._tray = AppIndicator3.Indicator.new("DemonEditor", path, category)
-                self._tray.set_status(self._status_active)
-                self._tray.set_secondary_activate_target(builder.get_object("show_menu_item"))
-                self._tray.set_menu(self._popup_menu)
+            category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
+            path = Path(UI_RESOURCES_PATH + "/icons/hicolor/scalable/apps/demon-editor.svg")
+            path = str(path.resolve()) if path.is_file() else "demon-editor"
+            self._tray = AppIndicator3.Indicator.new("DemonEditor", path, category)
+            self._tray.set_status(self._status_active)
+            self._tray.set_secondary_activate_target(builder.get_object("show_menu_item"))
+            self._tray.set_menu(self._popup_menu)
 
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
