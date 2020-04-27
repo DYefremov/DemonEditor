@@ -58,8 +58,8 @@ class LinksTransmitter:
             self._status_passive = AppIndicator3.IndicatorStatus.PASSIVE
 
             category = AppIndicator3.IndicatorCategory.APPLICATION_STATUS
-            path = Path(UI_RESOURCES_PATH + "/icons/hicolor/scalable/apps/demon-editor.svg").resolve()
-            path = str(path) if path.is_file() else "demon-editor"
+            path = Path(UI_RESOURCES_PATH + "/icons/hicolor/scalable/apps/demon-editor.svg")
+            path = str(path.resolve()) if path.is_file() else "demon-editor"
             self._tray = AppIndicator3.Indicator.new("DemonEditor", path, category)
             self._tray.set_status(self._status_active)
             self._tray.set_secondary_activate_target(builder.get_object("show_menu_item"))
