@@ -26,11 +26,11 @@ THE SOFTWARE.
 Author: Dmitriy Yefremov
 
 -->
-<interface>
+<interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-description Enigma2 channel and satellites list editor for MacOS. -->
+  <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAboutDialog" id="about_dialog">
@@ -195,6 +195,8 @@ Author: Dmitriy Yefremov
               <object class="GtkLabel" id="wait_dialog_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
                 <property name="label" translatable="yes">Loading data...</property>
               </object>
               <packing>
