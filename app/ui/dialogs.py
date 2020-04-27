@@ -52,11 +52,16 @@ class WaitDialog:
         builder, dialog = get_dialog_from_xml(DialogType.WAIT, transient)
         self._dialog = dialog
         self._dialog.set_transient_for(transient)
-        if text is not None:
-            builder.get_object("wait_dialog_label").set_text(text)
+        self._label = builder.get_object("wait_dialog_label")
+        self._default_text = text or self._label.get_text()
 
-    def show(self):
+    def show(self, text=None):
+        self.set_text(text)
         self._dialog.show()
+
+    @run_idle
+    def set_text(self, text):
+        self._label.set_text(get_message(text or self._default_text))
 
     @run_idle
     def hide(self):
