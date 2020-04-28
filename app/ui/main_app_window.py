@@ -43,6 +43,9 @@ class Application(Gtk.Application):
     FAV_MODEL_NAME = "fav_list_store"
     BQ_MODEL_NAME = "bouquets_tree_store"
 
+    DEL_FACTOR = 50  # Batch size to delete in one pass.
+    FAV_FACTOR = DEL_FACTOR * 2
+
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
     # Dynamically active elements depending on the selected view
@@ -648,13 +651,17 @@ class Application(Gtk.Application):
         itrs = [model.get_iter(path) for path in paths]
         rows = [model[in_itr][:] for in_itr in itrs]
 
-        if model_name == self.FAV_MODEL_NAME:
-            next(self.remove_favs(itrs, model), False)
-        elif model_name == self.BQ_MODEL_NAME:
-            self.delete_bouquets(itrs, model)
-        elif model_name == self.SERVICE_MODEL_NAME:
-            next(self.delete_services(itrs, model, rows), False)
+        if len(itrs) > self.DEL_FACTOR:
+            self._wait_dialog.show("Deleting data...")
 
+        if model_name == self.FAV_MODEL_NAME:
+            gen = self.remove_favs(itrs, model)
+        elif model_name == self.BQ_MODEL_NAME:
+            gen = self.delete_bouquets(itrs, model)
+        elif model_name == self.SERVICE_MODEL_NAME:
+            gen = self.delete_services(itrs, model, rows)
+
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         self.on_view_focus(view)
 
         return rows
@@ -664,18 +671,23 @@ class Application(Gtk.Application):
         if self._bq_selected:
             fav_bouquet = self._bouquets.get(self._bq_selected, None)
             if fav_bouquet:
-                for itr in itrs:
+                for index, itr in enumerate(itrs):
                     del fav_bouquet[int(model.get_path(itr)[0])]
                     self._fav_model.remove(itr)
+                    if index % self.DEL_FACTOR == 0:
+                        yield True
                 self.update_fav_num_column(model)
+
+        self._wait_dialog.hide()
         yield True
 
     def delete_services(self, itrs, model, rows):
         """ Deleting services """
-        srv_itrs = [self._services_model_filter.convert_iter_to_child_iter(
-            model.convert_iter_to_child_iter(itr)) for itr in itrs]
-        for s_itr in srv_itrs:
+        for index, s_itr in enumerate([self._services_model_filter.convert_iter_to_child_iter(
+                model.convert_iter_to_child_iter(itr)) for itr in itrs]):
             self._services_model.remove(s_itr)
+            if index % self.DEL_FACTOR == 0:
+                yield True
 
         srv_ids_to_delete = set()
         for row in rows:
@@ -692,8 +704,10 @@ class Application(Gtk.Application):
 
         for f_itr in filter(lambda r: r[Column.FAV_ID] in srv_ids_to_delete, self._fav_model):
             self._fav_model.remove(f_itr.iter)
+
         self.update_fav_num_column(self._fav_model)
         self.update_sat_positions()
+        self._wait_dialog.hide()
         yield True
 
     def delete_bouquets(self, itrs, model):
@@ -710,6 +724,9 @@ class Application(Gtk.Application):
             b_row = self._bouquets_model[itr][:]
             self._bouquets.pop("{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE]), None)
             self._bouquets_model.remove(itr)
+
+        self._wait_dialog.hide()
+        yield True
 
     # ***************** ####### *********************#
 
@@ -1075,7 +1092,7 @@ class Application(Gtk.Application):
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
         gen = self.update_data(data_path, callback)
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_DEFAULT_IDLE)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_data(self, data_path, callback=None):
         self._profile_combo_box.set_sensitive(False)
@@ -1203,11 +1220,12 @@ class Application(Gtk.Application):
 
     def append_services(self, services):
         for srv in services:
-            #  adding channels to dict with fav_id as keys
+            #  Adding channels to dict with fav_id as keys.
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
+        factor = self.DEL_FACTOR * 2
 
-        for srv in services:
+        for index, srv in enumerate(services):
             tooltip, background = None, None
             if self._use_colors:
                 flags = srv.flags_cas
@@ -1216,13 +1234,17 @@ class Application(Gtk.Application):
                     if f_flags and Flag.is_new(int(f_flags[0][2:])):
                         background = self._NEW_COLOR
 
-            s = srv + (tooltip, background)
-            itr = self._services_model.append(s)
-            self._services_model.set_value(itr, Column.SRV_PICON, self._picons.get(srv.picon_id, None))
-            yield True
+            s = srv._replace(picon=self._picons.get(srv.picon_id, None)) + (tooltip, background)
+            self._services_model.append(s)
+            if index % factor == 0:
+                yield True
+        yield True
 
     def clear_current_data(self):
         """ Clearing current data from lists """
+        if len(self._services_model) > self.DEL_FACTOR * 100:
+            self._wait_dialog.set_text("Deleting data...")
+
         self._bouquets_model.clear()
         yield True
         self._fav_model.clear()
@@ -1232,7 +1254,7 @@ class Application(Gtk.Application):
         yield True
         for index, itr in enumerate([row.iter for row in self._services_model]):
             self._services_model.remove(itr)
-            if index % 25 == 0:
+            if index % self.DEL_FACTOR == 0:
                 yield True
         yield True
         self._services_view.set_model(s_model)
@@ -1246,6 +1268,7 @@ class Application(Gtk.Application):
         self._bq_name_label.set_text("")
         self.init_sat_positions()
         self.update_services_counts()
+        self._wait_dialog.set_text(None)
         yield True
 
     def on_data_save(self, *args):
@@ -1347,7 +1370,6 @@ class Application(Gtk.Application):
     def on_bouquets_selection(self, model, path, column):
         self._current_bq_name = model[path][0] if len(path) > 1 else None
         self._bq_name_label.set_text(self._current_bq_name if self._current_bq_name else "")
-        self._fav_model.clear()
 
         if self._current_bq_name:
             ch_row = model[model.get_iter(path)][:]
@@ -1361,9 +1383,8 @@ class Application(Gtk.Application):
             self._bouquets_view.expand_row(path, column)
 
         if len(path) > 1:
-            next(self.update_bouquet_services(model, path), False)
-
-        self.on_view_focus(self._bouquets_view)
+            gen = self.update_bouquet_services(model, path)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_bouquet_services(self, model, path, bq_key=None):
         """ Updates list of bouquet services """
@@ -1372,10 +1393,15 @@ class Application(Gtk.Application):
             tree_iter = model.get_iter(path)
 
         key = bq_key if bq_key else "{}:{}".format(*model.get(tree_iter, Column.BQ_NAME, Column.BQ_TYPE))
-        services = self._bouquets.get(key, None)
+        services = self._bouquets.get(key, [])
         ex_services = self._extra_bouquets.get(key, None)
-        if not services:
-            return
+
+        factor = self.FAV_FACTOR * 5
+        if len(services) > factor or len(self._fav_model) > factor:
+            GLib.idle_add(self._bouquets_view.set_sensitive, False)
+
+        self._fav_model.clear()
+        yield True
 
         for num, srv_id in enumerate(services):
             srv = self._services.get(srv_id, None)
@@ -1387,6 +1413,11 @@ class Application(Gtk.Application):
                 self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
                                         srv.hide, srv.service_type, srv.pos, srv.fav_id,
                                         self._picons.get(srv.picon_id, None), None, background))
+            if num % self.FAV_FACTOR == 0:
+                yield True
+
+        GLib.idle_add(self._bouquets_view.set_sensitive, True)
+        GLib.idle_add(self._bouquets_view.grab_focus)
         yield True
 
     def check_bouquet_selection(self):
@@ -1741,7 +1772,9 @@ class Application(Gtk.Application):
         for srv in services:
             self._services[srv.fav_id] = srv
             bq_services.append(srv.fav_id)
-        next(self.update_bouquet_services(self._fav_model, None, self._bq_selected), False)
+
+        gen = self.update_bouquet_services(self._fav_model, None, self._bq_selected)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     @run_idle
     def on_export_to_m3u(self, action, value=None):
