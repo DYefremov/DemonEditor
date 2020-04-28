@@ -10,20 +10,20 @@ from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, \
-    build_opener, install_opener, Request
+from urllib.request import (urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener,
+                            install_opener, Request)
 
 from app.commons import log, run_task
 from app.settings import SettingsType
 
-_BQ_FILES_LIST = ("tv", "radio",  # enigma 2
-                  "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
+BQ_FILES_LIST = ("tv", "radio",  # enigma 2
+                 "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
-_DATA_FILES_LIST = ("lamedb", "lamedb5", "services.xml", "blacklist", "whitelist",)
+DATA_FILES_LIST = ("lamedb", "lamedb5", "blacklist", "whitelist",)
 
-_SAT_XML_FILE = "satellites.xml"
-_WEBTV_XML_FILE = "webtv.xml"
-_PICONS_SUF = (".jpg", ".png")
+STC_XML_FILE = ("satellites.xml", "terrestrial.xml", "cables.xml")
+WEB_TV_XML_FILE = ("webtv.xml",)
+PICONS_SUF = (".jpg", ".png")
 
 
 class DownloadType(Enum):
@@ -72,24 +72,17 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(settings.services_path)
             ftp.dir(files.append)
-            file_list = _BQ_FILES_LIST + _DATA_FILES_LIST if download_type is DownloadType.ALL else _BQ_FILES_LIST
+            file_list = BQ_FILES_LIST + DATA_FILES_LIST if download_type is DownloadType.ALL else BQ_FILES_LIST
             for file in files:
                 name = str(file).strip()
                 if name.endswith(file_list):
                     name = name.split()[-1]
                     download_file(ftp, name, save_path, callback)
-        # satellites.xml and webtv
-        if download_type in (DownloadType.ALL, DownloadType.SATELLITES, DownloadType.WEBTV):
-            ftp.cwd(settings.satellites_xml_path)
-            files.clear()
-            ftp.dir(files.append)
-
-            for file in files:
-                name = str(file).strip()
-                if download_type in (DownloadType.ALL, DownloadType.SATELLITES) and name.endswith(_SAT_XML_FILE):
-                    download_file(ftp, _SAT_XML_FILE, save_path, callback)
-                if download_type in (DownloadType.ALL, DownloadType.WEBTV) and name.endswith(_WEBTV_XML_FILE):
-                    download_file(ftp, _WEBTV_XML_FILE, save_path, callback)
+        # *.xml and webtv
+        if download_type in (DownloadType.ALL, DownloadType.SATELLITES):
+            download_xml(ftp, save_path, settings.satellites_xml_path, STC_XML_FILE, callback)
+        if download_type in (DownloadType.ALL, DownloadType.WEBTV):
+            download_xml(ftp, save_path, settings.satellites_xml_path, WEB_TV_XML_FILE, callback)
 
         if download_type is DownloadType.PICONS:
             picons_path = settings.picons_local_path
@@ -159,23 +152,23 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             services_path = settings.services_path
 
             if download_type is DownloadType.SATELLITES:
-                upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
+                upload_xml(ftp, data_path, sat_xml_path, STC_XML_FILE, callback)
 
             if s_type is SettingsType.NEUTRINO_MP and download_type is DownloadType.WEBTV:
-                upload_xml(ftp, data_path, sat_xml_path, _WEBTV_XML_FILE, callback)
+                upload_xml(ftp, data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
 
             if download_type is DownloadType.BOUQUETS:
                 ftp.cwd(services_path)
                 upload_bouquets(ftp, data_path, remove_unused, callback)
 
             if download_type is DownloadType.ALL:
-                upload_xml(ftp, data_path, sat_xml_path, _SAT_XML_FILE, callback)
+                upload_xml(ftp, data_path, sat_xml_path, STC_XML_FILE, callback)
                 if s_type is SettingsType.NEUTRINO_MP:
-                    upload_xml(ftp, data_path, sat_xml_path, _WEBTV_XML_FILE, callback)
+                    upload_xml(ftp, data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
 
                 ftp.cwd(services_path)
                 upload_bouquets(ftp, data_path, remove_unused, callback)
-                upload_files(ftp, data_path, _DATA_FILES_LIST, callback)
+                upload_files(ftp, data_path, DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
                 upload_picons(ftp, settings.picons_local_path, settings.picons_path, callback)
@@ -202,12 +195,12 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 def upload_bouquets(ftp, data_path, remove_unused, callback):
     if remove_unused:
         remove_unused_bouquets(ftp, callback)
-    upload_files(ftp, data_path, _BQ_FILES_LIST, callback)
+    upload_files(ftp, data_path, BQ_FILES_LIST, callback)
 
 
 def upload_files(ftp, data_path, file_list, callback):
     for file_name in os.listdir(data_path):
-        if file_name == _SAT_XML_FILE or file_name == _WEBTV_XML_FILE:
+        if file_name in STC_XML_FILE or file_name in WEB_TV_XML_FILE:
             continue
         if file_name.endswith(file_list):
             send_file(file_name, data_path, ftp, callback)
@@ -223,10 +216,17 @@ def remove_unused_bouquets(ftp, callback):
             callback("Deleting file: {}.   Status: {}\n".format(name, ftp.delete(name)))
 
 
-def upload_xml(ftp, data_path, xml_path, xml_file, callback):
-    """ Used for transfer satellites.xml or webtv.xml files """
+def upload_xml(ftp, data_path, xml_path, xml_files, callback):
+    """ Used for transfer *.xml files. """
     ftp.cwd(xml_path)
-    send_file(xml_file, data_path, ftp, callback)
+    for xml_file in xml_files:
+        send_file(xml_file, data_path, ftp, callback)
+
+
+def download_xml(ftp, data_path, xml_path, xml_files, callback):
+    """ Used for download *.xml files. """
+    ftp.cwd(xml_path)
+    list(map(lambda f: download_file(ftp, f, data_path, callback), (f for f in ftp.nlst() if f.endswith(xml_files))))
 
 
 # ***************** Picons *******************#
@@ -242,7 +242,7 @@ def upload_picons(ftp, src, dest, callback):
     delete_picons(ftp, callback)
 
     for file_name in os.listdir(src):
-        if file_name.endswith(_PICONS_SUF):
+        if file_name.endswith(PICONS_SUF):
             send_file(file_name, src, ftp, callback)
 
 
@@ -258,7 +258,7 @@ def download_picons(ftp, src, dest, callback):
 
     for file in files:
         name = str(file).strip()
-        if name.endswith(_PICONS_SUF):
+        if name.endswith(PICONS_SUF):
             name = name.split()[-1]
             download_file(ftp, name, dest, callback)
 
@@ -275,7 +275,7 @@ def delete_picons(ftp, callback, dest=None):
     ftp.dir(files.append)
     for file in files:
         name = str(file).strip()
-        if name.endswith(_PICONS_SUF):
+        if name.endswith(PICONS_SUF):
             name = name.split()[-1]
             callback("Delete file: {}.   Status: {}\n".format(name, ftp.delete(name)))
 

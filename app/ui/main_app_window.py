@@ -9,7 +9,7 @@ from gi.repository import GLib, Gio
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
 from app.connections import (HttpAPI, HttpRequestType, download_data, DownloadType, upload_data, test_http,
-                             TestException, HttpApiException)
+                             TestException, HttpApiException, STC_XML_FILE)
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
@@ -1108,10 +1108,12 @@ class Application(Gtk.Application):
                 self.init_profiles(self._settings.current_profile)
 
             if data_path != self._settings.data_local_path:
-                xml_src = data_path + "satellites.xml"
-                if os.path.isfile(xml_src):
-                    from shutil import copyfile
-                    copyfile(xml_src, self._settings.data_local_path + "satellites.xml")
+                from shutil import copyfile
+
+                for f in STC_XML_FILE:
+                    xml_src = data_path + f
+                    if os.path.isfile(xml_src):
+                        copyfile(xml_src, self._settings.data_local_path + f)
 
             prf = self._s_type
             black_list = get_blacklist(data_path)
