@@ -1,6 +1,6 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
-## Enigma2 channel and satellites list editor for GNU/Linux.                                                                          
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## Enigma2 channel and satellites list editor for GNU/Linux.                                                                       
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).                                                   
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc)
 
@@ -55,7 +55,7 @@ Extra folders can be deleted, excluding the *app* folder and root files like *De
 To create a simple **debian package**, you can use the *build-deb.sh.*                                                   
 Users of **LTS** versions of [Ubuntu](https://ubuntu.com/) or those based on them can use [PPA](https://launchpad.net/~dmitriy-yefremov/+archive/ubuntu/demon-editor) repository.
 
-The program is tested only with [openATV](https://www.opena.tv/) image and **Formuler F1** receiver in my favourite Linux distributions                                                            
+The program is tested only with [openATV](https://www.opena.tv/) image and **Formuler F1** receiver in my favourite Linux distributions  
 (the latest versions of [Linux Mint](https://linuxmint.com/) 18.* and 19* MATE 64-bit)!                                                                                                                                                                                                                                                                             
 
 ### Important: 
@@ -63,7 +63,7 @@ Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!
 Main supported *lamedb* format is version **4**. Versions **3** and **5** has only **experimental** support!                                                                                                                                                        
 For version **3** is only read mode available. When saving, version **4** format is used instead!   
 
-When using the multiple import feature, from *lamedb* will be taken data **only for channels that are in the            
-selected bouquets!** If you need full set of the data (including satellites.xml, current file will be overwritten),     
-just load your data via *"File/Open"* and press *"Save"*. When importing separate bouquet files, only those services    
+When using the multiple import feature, from *lamedb* will be taken data **only for channels that are in the  
+selected bouquets!** If you need full set of the data, including *[satellites, terrestrial, cables].xml* (current files will be overwritten),  
+just load your data via *"File/Open"* and press *"Save"*. When importing separate bouquet files, only those services  
 (excluding IPTV) that are in the **current open lamedb** (main list of services) will be imported.                      
