@@ -144,10 +144,11 @@ class PiconsDialog:
         p_model = self._picons_view.get_model()
         model = get_base_model(p_model)
         self._picons_view.set_model(None)
+        factor = self._app.DEL_FACTOR
 
         for index, itr in enumerate([row.iter for row in model]):
             model.remove(itr)
-            if index % 50 == 0:
+            if index % factor == 0:
                 yield True
 
         for file in os.listdir(path):
