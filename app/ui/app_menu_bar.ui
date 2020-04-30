@@ -93,8 +93,8 @@
           <attribute name="action">app.on_satellite_editor_show</attribute>
         </item>
         <item>
-          <attribute name="label" translatable="yes">Picons downloader</attribute>
-          <attribute name="action">app.on_picons_loader_show</attribute>
+          <attribute name="label" translatable="yes">Picons manager</attribute>
+          <attribute name="action">app.on_picons_manager_show</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Backups</attribute>
