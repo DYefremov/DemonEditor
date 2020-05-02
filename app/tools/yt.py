@@ -67,7 +67,7 @@ class YouTube:
 
                     if fmts:
                         urls = {Quality[i["itag"]]: i["url"] for i in
-                                filter(lambda i: i.get("itag", -1) in Quality, fmts)}
+                                filter(lambda i: i.get("itag", -1) in Quality, fmts) if "url" in i}
 
                         if urls and title:
                             return urls, title.replace("+", " ")
@@ -121,7 +121,8 @@ class PlayListParser(HTMLParser):
 
                     ct = resp.get("contents", None)
                     if ct:
-                        for d in [(d["title"]["simpleText"], d["videoId"]) for d in flat("playlistVideoRenderer", ct)]:
+                        for d in [(d.get("title", {}).get("simpleText", ""),
+                                   d.get("videoId", "")) for d in flat("playlistVideoRenderer", ct)]:
                             self._playlist.append(d)
             self._is_script = False
 
