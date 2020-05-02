@@ -1097,23 +1097,29 @@ class Application(Gtk.Application):
     def update_data(self, data_path, callback=None):
         self._profile_combo_box.set_sensitive(False)
         self._wait_dialog.show()
-        yield True
 
-        data_path = self._settings.data_local_path if data_path is None else data_path
         yield from self.clear_current_data()
 
         try:
             current_profile = self._profile_combo_box.get_active_text()
+            if not current_profile:
+                self.show_error_dialog("No profile selected!")
+                return
+
             if current_profile != self._settings.current_profile:
                 self.init_profiles(self._settings.current_profile)
 
-            if data_path != self._settings.data_local_path:
+            data_path = self._settings.data_local_path if data_path is None else data_path
+            local_path = self._settings.data_local_path
+            os.makedirs(os.path.dirname(local_path), exist_ok=True)
+
+            if data_path != local_path:
                 from shutil import copyfile
 
                 for f in STC_XML_FILE:
                     xml_src = data_path + f
                     if os.path.isfile(xml_src):
-                        copyfile(xml_src, self._settings.data_local_path + f)
+                        copyfile(xml_src, local_path + f)
 
             prf = self._s_type
             black_list = get_blacklist(data_path)
