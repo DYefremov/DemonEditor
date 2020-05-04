@@ -93,7 +93,7 @@ def get_bouquet(path, name, bq_type):
                 fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
                 name = None
                 if len(ch_data) == 12:
-                    name, desc = str(ch_data[-1]).split("\n#DESCRIPTION")
+                    name, sep, desc = str(ch_data[-1]).partition("\n#DESCRIPTION")
                 services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), 0))
 
     return srvs[0].lstrip("#NAME").strip(), services
