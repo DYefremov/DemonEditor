@@ -28,11 +28,33 @@ Author: Dmitriy Yefremov
 -->
 <interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
-  <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage" id="cancel_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">cancel</property>
+  </object>
+  <object class="GtkImage" id="convert_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-redo-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="filter_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-find-replace-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="load_providers">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-server-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
   <object class="GtkListStore" id="picons_list_store">
     <columns>
       <!-- column-name picon -->
@@ -67,10 +89,28 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkImage" id="receive_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-receive-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="receive_picons_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-receive-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="remove_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">user-trash-symbolic</property>
+  </object>
   <object class="GtkImage" id="remove_selection_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">edit-undo</property>
+    <property name="icon_size">1</property>
   </object>
   <object class="GtkMenu" id="providers_popup_menu">
     <property name="visible">True</property>
@@ -106,212 +146,23 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkImage" id="send_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-transmit-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
   <object class="GtkWindow" id="picons_dialog">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Picons manager</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Picons manager</property>
-        <property name="spacing">2</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButton" id="cancel_button">
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Cancel</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_cancel" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="cancel_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-cancel</property>
-              </object>
-            </child>
-            <accelerator key="z" signal="clicked" modifiers="Primary"/>
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox" id="header_download_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="spacing">2</property>
-            <child>
-              <object class="GtkButton" id="load_providers_button">
-                <property name="sensitive">False</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Load providers</property>
-                <property name="halign">center</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_load_providers" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="load_providers_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">network-server-symbolic</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="receive_button">
-                <property name="sensitive">False</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Receive picons</property>
-                <property name="halign">center</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_receive" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="receive_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-goto-bottom</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="download_box_separator">
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="send_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Transfer to receiver</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_send" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="send_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-goto-top</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="download_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Download from the receiver</property>
-                <signal name="clicked" handler="on_download" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="download_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-go-down</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="remove_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Remove all picons from the receiver</property>
-                <signal name="clicked" handler="on_remove" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="remove_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-delete</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">6</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">6</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="convert_button">
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Convert</property>
-            <property name="halign">center</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_convert" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="convert_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-execute</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleButton" id="filter_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Filter</property>
-            <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="filter_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Filter</property>
-                <property name="stock">gtk-select-all</property>
-              </object>
-            </child>
-            <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
+    <child>
+      <placeholder/>
     </child>
     <child>
       <object class="GtkBox" id="main_box">
@@ -332,7 +183,6 @@ Author: Dmitriy Yefremov
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
                 <property name="margin_top">10</property>
-                <property name="margin_bottom">5</property>
                 <signal name="notify::visible-child" handler="on_visible_page" swapped="no"/>
                 <child>
                   <object class="GtkFrame" id="explorer_frame">
@@ -351,49 +201,6 @@ Author: Dmitriy Yefremov
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
-                          <object class="GtkSearchBar" id="search_bar">
-                            <property name="can_focus">False</property>
-                            <property name="margin_top">1</property>
-                            <property name="margin_bottom">1</property>
-                            <child>
-                              <object class="GtkSearchEntry" id="picons_search_entry">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="primary_icon_name">edit-find-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="primary_icon_sensitive">False</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSearchBar" id="filter_bar">
-                            <property name="can_focus">False</property>
-                            <property name="margin_top">1</property>
-                            <property name="margin_bottom">1</property>
-                            <child>
-                              <object class="GtkSearchEntry" id="picons_filter_entry">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="primary_icon_stock">gtk-spell-check</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="primary_icon_sensitive">False</property>
-                                <signal name="search-changed" handler="on_picons_filter_changed" swapped="no"/>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkFileChooserButton" id="explorer_path_button">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
@@ -405,7 +212,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -448,6 +255,49 @@ Author: Dmitriy Yefremov
                           </object>
                           <packing>
                             <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSearchBar" id="search_bar">
+                            <property name="can_focus">False</property>
+                            <property name="margin_top">1</property>
+                            <property name="margin_bottom">1</property>
+                            <child>
+                              <object class="GtkSearchEntry" id="picons_search_entry">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="primary_icon_name">edit-find-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="primary_icon_sensitive">False</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSearchBar" id="filter_bar">
+                            <property name="can_focus">False</property>
+                            <property name="margin_top">1</property>
+                            <property name="margin_bottom">1</property>
+                            <child>
+                              <object class="GtkSearchEntry" id="picons_filter_entry">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="primary_icon_name">edit-find-replace-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="primary_icon_sensitive">False</property>
+                                <signal name="search-changed" handler="on_picons_filter_changed" swapped="no"/>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">3</property>
                           </packing>
@@ -1188,6 +1038,188 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_left">15</property>
+            <property name="margin_right">15</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <child>
+              <object class="GtkButtonBox" id="explorer_action_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="layout_style">expand</property>
+                <child>
+                  <object class="GtkButton" id="send_button">
+                    <property name="label" translatable="yes">Send</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Transfer to receiver</property>
+                    <property name="image">send_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_send" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="download_button">
+                    <property name="label" translatable="yes">Receive</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Download from the receiver</property>
+                    <property name="image">receive_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_download" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="filter_button">
+                    <property name="label" translatable="yes">Filter</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Filter</property>
+                    <property name="image">filter_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
+                    <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | Primary"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="remove_button">
+                    <property name="label" translatable="yes">Remove</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Remove all picons from the receiver</property>
+                    <property name="image">remove_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_remove" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButtonBox" id="downloader_action_box">
+                <property name="can_focus">False</property>
+                <property name="layout_style">expand</property>
+                <child>
+                  <object class="GtkButton" id="cancel_button">
+                    <property name="label" translatable="yes">Cancel</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Cancel</property>
+                    <property name="valign">center</property>
+                    <property name="image">cancel_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_cancel" swapped="no"/>
+                    <accelerator key="z" signal="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="load_providers_button">
+                    <property name="label" translatable="yes">Load providers</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Load providers</property>
+                    <property name="valign">center</property>
+                    <property name="image">load_providers</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_load_providers" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="receive_button">
+                    <property name="label" translatable="yes">Receive picons</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Receive picons</property>
+                    <property name="valign">center</property>
+                    <property name="image">receive_picons_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_receive" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="convert_button">
+                <property name="label" translatable="yes">Convert</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Convert</property>
+                <property name="valign">center</property>
+                <property name="image">convert_image</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_convert" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkExpander" id="expander">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -1221,7 +1253,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -1278,7 +1310,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

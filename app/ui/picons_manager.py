@@ -93,13 +93,15 @@ class PiconsDialog:
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
         self._satellite_label = builder.get_object("satellite_label")
-        self._header_download_box = builder.get_object("header_download_box")
+        self._explorer_action_box = builder.get_object("explorer_action_box")
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_label"), "visible", 4)
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_spinner"), "visible", 4)
-        self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
-        self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
-        self._load_providers_button.bind_property("visible", self._receive_button, "visible")
-        self._load_providers_button.bind_property("visible", builder.get_object("download_box_separator"), "visible")
+        self._cancel_button.bind_property("visible", builder.get_object("receive_button"), "visible", 4)
+        self._cancel_button.bind_property("visible", self._load_providers_button, "visible", 4)
+        self._convert_button.bind_property("visible", self._explorer_action_box, "visible", 4)
+        downloader_action_box = builder.get_object("downloader_action_box")
+        self._explorer_action_box.bind_property("visible", downloader_action_box, "visible", 4)
+        self._convert_button.bind_property("visible", downloader_action_box, "visible", 4)
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._explorer_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
         # Init drag-and-drop
@@ -438,12 +440,12 @@ class PiconsDialog:
     def run_func(self, func, update=False):
         try:
             GLib.idle_add(self._expander.set_expanded, True)
-            GLib.idle_add(self._header_download_box.set_sensitive, False)
+            GLib.idle_add(self._explorer_action_box.set_sensitive, False)
             func()
         except OSError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         finally:
-            GLib.idle_add(self._header_download_box.set_sensitive, True)
+            GLib.idle_add(self._explorer_action_box.set_sensitive, True)
             if update:
                 self.on_picons_folder_changed(self._explorer_path_button)
 
@@ -505,9 +507,8 @@ class PiconsDialog:
     def on_visible_page(self, stack: Gtk.Stack, param):
         name = stack.get_visible_child_name()
         self._convert_button.set_visible(name == "converter")
-        self._load_providers_button.set_visible(name == "downloader")
         is_explorer = name == "explorer"
-        self._filter_button.set_visible(is_explorer)
+        self._explorer_action_box.set_visible(is_explorer)
         if is_explorer:
             self.on_picons_folder_changed(self._explorer_path_button)
 

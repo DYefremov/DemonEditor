@@ -557,7 +557,8 @@ class YtListImportDialog:
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
                                         ("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
-                                         "yt_popup_menu", "remove_selection_image"))
+                                         "yt_popup_menu", "remove_selection_image", "yt_receive_image",
+                                         "yt_import_image"))
         builder.connect_signals(handlers)
 
         self._dialog = builder.get_object("yt_import_dialog_window")

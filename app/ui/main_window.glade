@@ -28,12 +28,121 @@ Author: Dmitriy Yefremov
 -->
 <interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
-  <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2019 Dmitriy Yefremov -->
+  <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
+  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage" id="add_bouquet_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">5</property>
+    <property name="icon_name">bookmark-new-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="backups_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">5</property>
+    <property name="icon_name">document-revert-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkMenu" id="bouquets_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="bouquets_new_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">New</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="bouquet_import_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Import</property>
+        <signal name="activate" handler="on_import_bouquet" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="bouquets_cut_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Cut</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_bouquets_cut" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="x" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="bouquets_copy_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Copy</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_bouquets_copy" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="bouquets_paste_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Paste</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_bouquets_paste" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="v" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="bouquets_edit_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Edit</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_edit" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="bouquets_remove_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_delete" object="bouquets_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkTreeStore" id="bouquets_tree_store">
     <columns>
       <!-- column-name bouquet -->
@@ -47,61 +156,6 @@ Author: Dmitriy Yefremov
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
-  </object>
-  <object class="GtkImage" id="clear_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-clear</property>
-  </object>
-  <object class="GtkImage" id="clear_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-clear</property>
-  </object>
-  <object class="GtkImage" id="copy_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-copy</property>
-  </object>
-  <object class="GtkImage" id="copy_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-copy</property>
-  </object>
-  <object class="GtkImage" id="downloads_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">insert-link</property>
-  </object>
-  <object class="GtkImage" id="edit_image_1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-edit</property>
-  </object>
-  <object class="GtkImage" id="edit_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-revert-to-saved</property>
-  </object>
-  <object class="GtkImage" id="epg_configuration_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-index</property>
-  </object>
-  <object class="GtkImage" id="export_to_m3u_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-save-as</property>
-  </object>
-  <object class="GtkImage" id="extra_edit_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-edit</property>
-  </object>
-  <object class="GtkImage" id="fav_iptv_list_config_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-properties</property>
   </object>
   <object class="GtkListStore" id="fav_list_store">
     <columns>
@@ -130,6 +184,316 @@ Author: Dmitriy Yefremov
     </columns>
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
+  </object>
+  <object class="GtkMenu" id="fav_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="fav_cut_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Cut</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_fav_cut" object="fav_tree_view" swapped="no"/>
+        <accelerator key="x" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_copy_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Copy</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_fav_copy" object="fav_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_paste_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Paste</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_fav_paste" object="fav_tree_view" swapped="no"/>
+        <accelerator key="v" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_edit_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Edit</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_edit" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_edit_sub_menu_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Extra:</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="fav_edit_popoup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="fav_rename_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Rename for this bouquet</property>
+                <signal name="activate" handler="on_rename_for_bouquet" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_set_default_name_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Set default name</property>
+                <signal name="activate" handler="on_set_default_name_for_bouquet" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_locate_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Locate in services</property>
+        <signal name="activate" handler="on_locate_in_services" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_insert_marker_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Insert marker</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_insert_marker" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_4">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_iptv_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">IPTV</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="fav_iptv_popoup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="fav_play_stream_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Play</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_play_stream" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_add_iptv_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Add IPTV or stream service</property>
+                <signal name="activate" handler="on_iptv" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_import_yt_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Import YouTube playlist</property>
+                <signal name="activate" handler="on_import_yt_list" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_import_m3u_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Import m3u</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_import_m3u" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_export_m3u_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Export to m3u</property>
+                <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_6">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_epg_configuration_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">EPG configuration</property>
+                <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_7">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_iptv_list_configuration_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">List configuration</property>
+                <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_8">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_remove_all_unavailable_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Remove all unavailable</property>
+                <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_9">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_picon_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Picon</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="fav_picon_popoup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="fav_assign_picon_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Assign</property>
+                <signal name="activate" handler="on_assign_picon" object="fav_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_remove_picon_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Remove</property>
+                <signal name="activate" handler="on_remove_picon" object="fav_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_reference_picon_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Copy reference</property>
+                <signal name="activate" handler="on_reference_picon" object="fav_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_11">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="fav_remove_unused_picons_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Remove all unused</property>
+                <signal name="activate" handler="on_remove_unused_picons" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_12">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_remove_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_delete" object="fav_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="filter_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-find-replace-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
   <object class="GtkListStore" id="filter_sat_positions_list_store">
     <columns>
@@ -174,444 +538,57 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="find_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-find</property>
+    <property name="icon_name">edit-find-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="import_bouquet_image">
+  <object class="GtkImage" id="ftp_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-file</property>
+    <property name="icon_name">network-transmit-receive-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
-  <object class="GtkMenu" id="bouquets_popup_menu">
+  <object class="GtkImage" id="hide_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquets_new_popup_item">
-        <property name="label">gtk-new</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquet_import_popup_item">
-        <property name="label" translatable="yes">Import</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="image">import_bouquet_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_import_bouquet" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquets_cut_popup_item">
-        <property name="label">gtk-cut</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_bouquets_cut" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="x" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquets_copy_popup_item">
-        <property name="label">gtk-copy</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_bouquets_copy" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquets_paste_popup_item">
-        <property name="label">gtk-paste</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_bouquets_paste" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="v" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator_2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquets_edit_popup_item">
-        <property name="label">gtk-edit</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator_3">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="bouquets_remove_popup_item">
-        <property name="label">gtk-remove</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
-      </object>
-    </child>
+    <property name="icon_name">object-rotate-left-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="insert_image">
+  <object class="GtkImage" id="lock_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">insert-image</property>
+    <property name="icon_name">changes-prevent-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="insert_image_2">
+  <object class="GtkImage" id="open_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">insert-image</property>
+    <property name="margin_left">5</property>
+    <property name="icon_name">folder-open-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="insert_link_image">
+  <object class="GtkImage" id="picons_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">insert-link</property>
-  </object>
-  <object class="GtkImage" id="insert_link_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">insert-link</property>
-  </object>
-  <object class="GtkImage" id="insert_text_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">insert-text</property>
-  </object>
-  <object class="GtkImage" id="network_transmit_receive_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">network-transmit-receive</property>
-  </object>
-  <object class="GtkImage" id="networktransmit_receive_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">network-transmit-receive</property>
-  </object>
-  <object class="GtkImage" id="new_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-new</property>
+    <property name="icon_name">insert-image-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
   <object class="GtkAdjustment" id="player_scale_adjustment">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkImage" id="remova_image">
+  <object class="GtkImage" id="sat_editor_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-remove</property>
+    <property name="icon_name">document-edit-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="remove_all_image">
+  <object class="GtkImage" id="save_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-remove</property>
-  </object>
-  <object class="GtkImage" id="remove_all_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-remove</property>
-  </object>
-  <object class="GtkImage" id="save_as_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-save-as</property>
-  </object>
-  <object class="GtkImage" id="save_as_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-save-as</property>
-  </object>
-  <object class="GtkImage" id="save_as_image_3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-save-as</property>
-  </object>
-  <object class="GtkImage" id="select_all_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-select-all</property>
-  </object>
-  <object class="GtkImage" id="select_all_image_2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-select-all</property>
-  </object>
-  <object class="GtkImage" id="select_all_image_3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-select-all</property>
-  </object>
-  <object class="GtkMenu" id="services_popup_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="services_to_fav_end_move_popup_item">
-        <property name="label">gtk-goto-last</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_to_fav_end_copy" object="services_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_to_fav_move_popup_item">
-        <property name="label">gtk-goto-first</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_to_fav_copy" object="services_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_create_bouquet_popup_item">
-        <property name="label" translatable="yes">Create bouquet</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">new_image</property>
-        <property name="use_stock">False</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="services_bouquet_popup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_sat_popup_item">
-                <property name="label" translatable="yes">For current satellite</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">save_as_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_satellite" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_package_popup_item">
-                <property name="label" translatable="yes">For current package</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">save_as_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_package" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_current_type_popup_item">
-                <property name="label" translatable="yes">For current type</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">save_as_image_3</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_current_type" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="services_bouquet_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_sat_popup_item">
-                <property name="label" translatable="yes">For each satellite</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">select_all_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_satellite" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_package_popup_item">
-                <property name="label" translatable="yes">For each package</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">select_all_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_package" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_create_bouquet_for_each_type_popup_item">
-                <property name="label" translatable="yes">For each type</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">select_all_image_3</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_create_bouquet_for_each_type" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_copy_popup_item">
-        <property name="label">gtk-copy</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_edit_popup_item">
-        <property name="label">gtk-edit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_add_new_popup_item">
-        <property name="label">gtk-new</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_services_add_new" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_3">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_picon_popup_item">
-        <property name="label" translatable="yes">Picon</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">insert_image_2</property>
-        <property name="use_stock">False</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="services_picon_popoup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="services_assign_picon_popup_item">
-                <property name="label" translatable="yes">Assign</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">insert_link_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_assign_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_remove_picon_popup_item">
-                <property name="label" translatable="yes">Remove</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">clear_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_4">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_reference_picon_popup_item">
-                <property name="label" translatable="yes">Copy reference</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">copy_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_5">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="services_remove_unused_picons_popup_item">
-                <property name="label" translatable="yes">Remove all unused</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">remove_all_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_unused_picons" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_6">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="services_remove_popup_item">
-        <property name="label">gtk-remove</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" object="services_tree_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
-      </object>
-    </child>
+    <property name="margin_left">5</property>
+    <property name="icon_name">document-save-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
@@ -668,8 +645,294 @@ Author: Dmitriy Yefremov
   <object class="GtkTreeModelSort" id="services_model_tree_model_sort">
     <property name="model">services_model_filter</property>
   </object>
+  <object class="GtkMenu" id="services_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="services_to_fav_move_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">To the top</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_to_fav_copy" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_to_fav_end_move_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">To the end</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_to_fav_end_copy" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_create_bouquet_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Create bouquet</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="services_bouquet_popup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="services_create_bouquet_for_current_sat_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">For current satellite</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_satellite" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_create_bouquet_for_current_package_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">For current package</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_package" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_create_bouquet_for_current_type_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">For current type</property>
+                <signal name="activate" handler="on_create_bouquet_for_current_type" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_bouquet_separator">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_create_bouquet_for_each_sat_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">For each satellite</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_satellite" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_create_bouquet_for_each_package_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">For each package</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_package" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_create_bouquet_for_each_type_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">For each type</property>
+                <signal name="activate" handler="on_create_bouquet_for_each_type" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_copy_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Copy</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
+        <accelerator key="c" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_edit_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Edit</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_edit" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_add_new_popup_item">
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">New</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_services_add_new" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_picon_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Picon</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="services_picon_popoup_menu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="services_assign_picon_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Assign</property>
+                <signal name="activate" handler="on_assign_picon" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_remove_picon_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Remove</property>
+                <signal name="activate" handler="on_remove_picon" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_reference_picon_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Copy reference</property>
+                <signal name="activate" handler="on_reference_picon" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="services_remove_unused_picons_popup_item">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Remove all unused</property>
+                <signal name="activate" handler="on_remove_unused_picons" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_6">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="services_remove_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_delete" object="services_tree_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMenu" id="toolbar_iptv_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_add_iptv_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Add IPTV or stream service</property>
+        <signal name="activate" handler="on_iptv" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_import_yt_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Import YouTube playlist</property>
+        <signal name="activate" handler="on_import_yt_list" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_import_m3u_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Import m3u</property>
+        <signal name="activate" handler="on_import_m3u" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_export_m3u_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Export to m3u</property>
+        <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="toolbar_iptv_menu_separator_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_separator_epg_configuration_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">EPG configuration</property>
+        <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="toolbar_iptv_menu_separator_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_list_configuration_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">List configuration</property>
+        <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="toolbar_iptv_menu_separator_4">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="toolbar_iptv_remove_all_unavailable_menu_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove all unavailable</property>
+        <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkApplicationWindow" id="main_window">
-    <property name="width_request">640</property>
+    <property name="width_request">720</property>
     <property name="height_request">480</property>
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
@@ -688,315 +951,326 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkToolbar" id="top_toolbar">
+          <object class="GtkBox" id="top_toolbar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">center</property>
             <property name="valign">center</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
+            <property name="margin_left">15</property>
+            <property name="margin_right">15</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="spacing">10</property>
             <child>
-              <object class="GtkToolItem" id="toolbar_main_item">
+              <object class="GtkComboBoxText" id="profile_combo_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_right">10</property>
-                <child>
-                  <object class="GtkBox" id="toolbar_main_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="spacing">2</property>
-                    <child>
-                      <object class="GtkToolButton" id="open_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Open</property>
-                        <property name="action_name">app.on_data_open</property>
-                        <property name="label" translatable="yes">Open</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-open</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="profile_combo_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="focus_on_click">False</property>
-                        <property name="tooltip_text" translatable="yes">Profile</property>
-                        <property name="margin_left">2</property>
-                        <property name="margin_right">2</property>
-                        <property name="active">0</property>
-                        <signal name="changed" handler="on_profile_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="download_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">FTP-transfer</property>
-                        <property name="action_name">app.on_download</property>
-                        <property name="label" translatable="yes">FTP-transfer</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-connect</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="save_tool_button">
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Save</property>
-                        <property name="action_name">app.on_data_save</property>
-                        <property name="label" translatable="yes">Save</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-save</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="backup_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="action_name">app.on_backup_tool_show</property>
-                        <property name="label" translatable="yes">Backup</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-revert-to-saved</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
+                <property name="focus_on_click">False</property>
+                <property name="tooltip_text" translatable="yes">Profile</property>
+                <property name="valign">center</property>
+                <property name="active">0</property>
+                <signal name="changed" handler="on_profile_changed" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkToolItem" id="toolbar_extra_item">
+              <object class="GtkButtonBox" id="toolbar_main_box">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">15</property>
-                <property name="margin_right">15</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="layout_style">expand</property>
                 <child>
-                  <object class="GtkBox" id="toolbar_extra_box">
+                  <object class="GtkButton" id="download_tool_button">
+                    <property name="label" translatable="yes">FTP</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">2</property>
-                    <child>
-                      <object class="GtkToggleToolButton" id="search_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Search</property>
-                        <property name="action_name">win.search</property>
-                        <property name="label" translatable="yes">Search</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-find</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToggleToolButton" id="filter_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Filter</property>
-                        <property name="margin_right">5</property>
-                        <property name="action_name">win.filter</property>
-                        <property name="label" translatable="yes">Filter</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-spell-check</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="lock_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
-                        <property name="margin_left">5</property>
-                        <property name="action_name">app.on_locked</property>
-                        <property name="label" translatable="yes">Parent lock</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-dialog-authentication</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="hide_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
-                        <property name="action_name">app.on_hide</property>
-                        <property name="label" translatable="yes">Hide/Skip</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-jump-to</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">6</property>
-                      </packing>
-                    </child>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">FTP-transfer</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_download</property>
+                    <property name="image">ftp_image</property>
+                    <property name="always_show_image">True</property>
                   </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="open_tool_button">
+                    <property name="label" translatable="yes"> </property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Open</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_data_open</property>
+                    <property name="image">open_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="save_tool_button">
+                    <property name="label" translatable="yes"> </property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Save</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_data_save</property>
+                    <property name="image">save_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="backup_tool_button">
+                    <property name="label" translatable="yes"> </property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Backups</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_backup_tool_show</property>
+                    <property name="image">backups_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkToolItem" id="toolbar_tools_item">
+              <object class="GtkButtonBox" id="toolbar_extra_box">
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="layout_style">expand</property>
                 <child>
-                  <object class="GtkBox" id="toolbar_tools_box">
+                  <object class="GtkToggleButton" id="search_tool_button">
+                    <property name="label" translatable="yes">Search</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Search</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">win.search</property>
+                    <property name="image">find_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="filter_tool_button">
+                    <property name="label" translatable="yes">Filter</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">2</property>
-                    <child>
-                      <object class="GtkToolButton" id="sat_editor_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Satellites editor</property>
-                        <property name="action_name">app.on_satellite_editor_show</property>
-                        <property name="label" translatable="yes">Satellites</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-edit</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="picons_manager_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Picons downloader</property>
-                        <property name="margin_right">5</property>
-                        <property name="action_name">app.on_picons_manager_show</property>
-                        <property name="label" translatable="yes">Picons</property>
-                        <property name="use_underline">True</property>
-                        <property name="icon_name">insert-image</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="import_m3u_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Import m3u file</property>
-                        <property name="margin_left">5</property>
-                        <property name="action_name">app.on_import_m3u</property>
-                        <property name="label" translatable="yes">Import m3u</property>
-                        <property name="use_underline">True</property>
-                        <property name="icon_name">insert-link</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="export_to_m3u_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Export to m3u</property>
-                        <property name="action_name">app.on_export_to_m3u</property>
-                        <property name="label" translatable="yes">Export to m3u</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-save-as</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="epg_config_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">EPG configuration</property>
-                        <property name="action_name">app.on_epg_list_configuration</property>
-                        <property name="label" translatable="yes">EPG configuration</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-index</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton" id="add_bouquet_tool_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Create bouquet</property>
-                        <property name="label" translatable="yes">Create bouquet</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-new</property>
-                        <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">5</property>
-                      </packing>
-                    </child>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Filter</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">win.filter</property>
+                    <property name="image">filter_image</property>
+                    <property name="always_show_image">True</property>
                   </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="lock_tool_button">
+                    <property name="label" translatable="yes">Lock</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Parent lock</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_locked</property>
+                    <property name="image">lock_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="hide_tool_button">
+                    <property name="label" translatable="yes">Hide</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Hide/Skip</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_hide</property>
+                    <property name="image">hide_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButtonBox" id="toolbar_tools_box">
+                <property name="can_focus">False</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="layout_style">expand</property>
+                <child>
+                  <object class="GtkButton" id="sat_editor_tool_button">
+                    <property name="label" translatable="yes">Satellites</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Satellites editor</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_satellite_editor_show</property>
+                    <property name="image">sat_editor_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="picons_manager_tool_button">
+                    <property name="label" translatable="yes">Picons</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Picons manager</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">app.on_picons_manager_show</property>
+                    <property name="image">picons_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkMenuButton" id="iptv_tools_menu_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">IPTV tools</property>
+                    <property name="valign">center</property>
+                    <property name="popup">toolbar_iptv_menu</property>
+                    <child>
+                      <object class="GtkBox" id="iptv_tools_menu_button_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">center</property>
+                        <property name="spacing">2</property>
+                        <child>
+                          <object class="GtkImage" id="iptv_tools_menu_button_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
+                            <property name="icon_name">network-wired-symbolic</property>
+                            <property name="icon_size">1</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="iptv_tools_menu_button_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">IPTV</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="add_bouquet_tool_button">
+                    <property name="label" translatable="yes"> </property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Create bouquet</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="image">add_bouquet_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                    <property name="non_homogeneous">True</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -1212,7 +1486,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkSearchEntry" id="search_entry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="primary_icon_stock">gtk-find</property>
+                            <property name="primary_icon_name">edit-find-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">False</property>
                             <signal name="changed" handler="on_search" swapped="no"/>
@@ -1307,7 +1581,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkSearchEntry" id="filter_entry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="primary_icon_stock">gtk-spell-check</property>
+                            <property name="primary_icon_name">edit-find-replace-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">False</property>
                             <signal name="search-changed" handler="on_filter_changed" swapped="no"/>
@@ -1788,7 +2062,8 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="margin_left">5</property>
-                                <property name="icon_name">emblem-readonly</property>
+                                <property name="icon_name">dialog-password-symbolic</property>
+                                <property name="icon_size">1</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1856,6 +2131,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="icon_name">network-wireless-symbolic</property>
+                                <property name="icon_size">1</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1882,6 +2158,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="icon_name">system-run</property>
+                                <property name="icon_size">1</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2141,7 +2418,8 @@ Author: Dmitriy Yefremov
                                   <object class="GtkImage" id="image2">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="icon_name">document-properties</property>
+                                    <property name="icon_name">document-properties-symbolic</property>
+                                    <property name="icon_size">1</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2326,7 +2604,8 @@ Author: Dmitriy Yefremov
                                   <object class="GtkImage" id="image3">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="icon_name">document-properties</property>
+                                    <property name="icon_name">document-properties-symbolic</property>
+                                    <property name="icon_size">1</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2658,358 +2937,6 @@ Author: Dmitriy Yefremov
             <property name="position">1</property>
           </packing>
         </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="yt_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-connect</property>
-  </object>
-  <object class="GtkMenu" id="fav_popup_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_cut_popup_item">
-        <property name="label">gtk-cut</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_fav_cut" object="fav_tree_view" swapped="no"/>
-        <accelerator key="x" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_copy_popup_item">
-        <property name="label">gtk-copy</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_fav_copy" object="fav_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_paste_popup_item">
-        <property name="label">gtk-paste</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_fav_paste" object="fav_tree_view" swapped="no"/>
-        <accelerator key="v" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_1">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_edit_popup_item">
-        <property name="label">gtk-edit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_edit_sub_menu_popup_item">
-        <property name="label" translatable="yes">Extra:</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">extra_edit_image</property>
-        <property name="use_stock">False</property>
-        <property name="always_show_image">True</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="fav_edit_popoup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_rename_popup_item">
-                <property name="label" translatable="yes">Rename for this bouquet</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">edit_image_1</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_rename_for_bouquet" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_set_default_name_popup_item">
-                <property name="label" translatable="yes">Set default name</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">edit_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_set_default_name_for_bouquet" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_locate_popup_item">
-        <property name="label" translatable="yes">Locate in services</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="image">find_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_locate_in_services" object="fav_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_insert_marker_popup_item">
-        <property name="label" translatable="yes">Insert marker</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="image">insert_text_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_insert_marker" object="fav_tree_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_4">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_iptv_popup_item">
-        <property name="label" translatable="yes">IPTV</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="image">networktransmit_receive_image</property>
-        <property name="use_stock">False</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="fav_iptv_popoup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_play_stream_popup_item">
-                <property name="label">gtk-media-play</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_underline">True</property>
-                <property name="use_stock">True</property>
-                <signal name="activate" handler="on_play_stream" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_5">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_add_iptv_popup_item">
-                <property name="label" translatable="yes">Add IPTV or stream service</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">network_transmit_receive_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_iptv" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_import_yt_popup_item">
-                <property name="label" translatable="yes">Import YouTube playlist</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">yt_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_import_yt_list" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_import_m3u_popup_item">
-                <property name="label" translatable="yes">Import m3u</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_underline">True</property>
-                <property name="image">downloads_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_import_m3u" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_export_m3u_popup_item">
-                <property name="label" translatable="yes">Export to m3u</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">export_to_m3u_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_6">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_epg_configuration_popup_item">
-                <property name="label" translatable="yes">EPG configuration</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">epg_configuration_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_7">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_iptv_list_configuration_popup_item">
-                <property name="label" translatable="yes">List configuration</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">fav_iptv_list_config_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_8">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_remove_all_unavailable_popup_item">
-                <property name="label" translatable="yes">Remove all unavailable</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">remova_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_9">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_picon_popup_item">
-        <property name="label" translatable="yes">Picon</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="image">insert_image</property>
-        <property name="use_stock">False</property>
-        <child type="submenu">
-          <object class="GtkMenu" id="fav_picon_popoup_menu">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_assign_picon_popup_item">
-                <property name="label" translatable="yes">Assign</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">insert_link_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_assign_picon" object="fav_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_remove_picon_popup_item">
-                <property name="label" translatable="yes">Remove</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">clear_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_picon" object="fav_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_10">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_reference_picon_popup_item">
-                <property name="label" translatable="yes">Copy reference</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">copy_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="fav_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_11">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImageMenuItem" id="fav_remove_unused_picons_popup_item">
-                <property name="label" translatable="yes">Remove all unused</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">remove_all_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_remove_unused_picons" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_12">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="fav_remove_popup_item">
-        <property name="label">gtk-remove</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_delete" object="fav_tree_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>

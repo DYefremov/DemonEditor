@@ -16,7 +16,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, IS_DARWIN
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode
 from app.tools.media import Player, Recorder, HttpPlayer
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -216,8 +216,8 @@ class Application(Gtk.Application):
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_item"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_item"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_box"), "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("save_tool_button"), "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")

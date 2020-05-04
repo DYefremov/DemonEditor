@@ -33,6 +33,18 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage" id="download_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-receive-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="send_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-transmit-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
   <object class="GtkWindow" id="download_dialog_window">
     <property name="width_request">500</property>
     <property name="can_focus">False</property>
@@ -601,6 +613,8 @@ Author: Dmitriy Yefremov
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Receive</property>
                 <property name="valign">center</property>
+                <property name="image">download_image</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="on_receive" swapped="no"/>
               </object>
               <packing>
@@ -617,6 +631,8 @@ Author: Dmitriy Yefremov
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Send</property>
                 <property name="valign">center</property>
+                <property name="image">send_image</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="on_send" swapped="no"/>
               </object>
               <packing>

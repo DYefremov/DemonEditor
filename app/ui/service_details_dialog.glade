@@ -254,7 +254,6 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Cancel</property>
         <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
       </object>
     </child>
     <child type="action">
@@ -265,7 +264,6 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Save current service</property>
         <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
       </object>
     </child>
@@ -276,7 +274,6 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Create and save as new service</property>
         <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
         <signal name="clicked" handler="on_create_new" swapped="no"/>
       </object>
     </child>
@@ -1569,7 +1566,6 @@
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
       </object>
     </child>
     <child type="action">
@@ -1579,7 +1575,6 @@
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
       </object>
     </child>
     <child internal-child="vbox">
