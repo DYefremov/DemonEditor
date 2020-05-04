@@ -481,7 +481,9 @@ class Application(Gtk.Application):
             If update=False - first call on program start, else - after options changes!
         """
         if self._s_type is SettingsType.ENIGMA_2:
-            if self._settings.use_colors:
+            self._use_colors = self._settings.use_colors
+
+            if self._use_colors:
                 new_rgb = Gdk.RGBA()
                 extra_rgb = Gdk.RGBA()
                 new_rgb = new_rgb if new_rgb.parse(self._settings.new_color) else None
