@@ -296,7 +296,12 @@ def download_file(ftp, name, save_path, callback):
 
 def send_file(file_name, path, ftp, callback):
     """ Opens the file in binary mode and transfers into receiver """
-    with open(path + file_name, "rb") as f:
+    file_src = path + file_name
+    if not os.path.isfile(file_src):
+        log("Uploading file: '{}'. File not found. Skipping.".format(file_src))
+        return
+
+    with open(file_src, "rb") as f:
         callback("Uploading file: {}.   Status: {}\n".format(file_name, str(ftp.storbinary("STOR " + file_name, f))))
 
 
