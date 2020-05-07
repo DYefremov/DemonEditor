@@ -113,7 +113,6 @@ class SettingsDialog:
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
         self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
         # Streaming
-        header_separator = builder.get_object("header_separator")
         self._apply_presets_button = builder.get_object("apply_presets_button")
         self._transcoding_switch = builder.get_object("transcoding_switch")
         self._edit_preset_switch = builder.get_object("edit_preset_switch")
@@ -124,7 +123,6 @@ class SettingsDialog:
         self._audio_bitrate_field = builder.get_object("audio_bitrate_field")
         self._audio_channels_combo_box = builder.get_object("audio_channels_combo_box")
         self._audio_sample_rate_combo_box = builder.get_object("audio_sample_rate_combo_box")
-        self._apply_presets_button.bind_property("visible", header_separator, "visible")
         self._transcoding_switch.bind_property("active", builder.get_object("record_box"), "sensitive")
         self._edit_preset_switch.bind_property("active", self._apply_presets_button, "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("video_options_frame"), "sensitive")
@@ -165,7 +163,6 @@ class SettingsDialog:
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
         self._apply_profile_button = builder.get_object("apply_profile_button")
-        self._apply_profile_button.bind_property("visible", header_separator, "visible")
         self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
         # Style
         self._style_provider = Gtk.CssProvider()
@@ -194,7 +191,7 @@ class SettingsDialog:
     def init_ui_elements(self, s_type):
         is_enigma_profile = s_type is SettingsType.ENIGMA_2
         self._neutrino_radio_button.set_active(s_type is SettingsType.NEUTRINO_MP)
-        self.update_header_bar()
+        self.update_title()
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
         self._program_frame.set_sensitive(is_enigma_profile)
         self._extra_support_grid.set_sensitive(is_enigma_profile)
@@ -212,14 +209,15 @@ class SettingsDialog:
             model.append((p, icon))
             if icon:
                 scroll_to(ind, self._profile_view)
+                self.on_profile_selected(self._profile_view)
         self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
 
-    def update_header_bar(self):
-        label, sep, st = self._header_bar.get_subtitle().partition(":")
+    def update_title(self):
+        title = "{} [{}]"
         if self._s_type is SettingsType.ENIGMA_2:
-            self._header_bar.set_subtitle("{}: {}".format(label, self._enigma_radio_button.get_label()))
+            self._dialog.set_title(title.format(get_message("Options"), self._enigma_radio_button.get_label()))
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._header_bar.set_subtitle("{}: {}".format(label, self._neutrino_radio_button.get_label()))
+            self._dialog.set_title(title.format(get_message("Options"), self._neutrino_radio_button.get_label()))
 
     def show(self):
         self._dialog.run()

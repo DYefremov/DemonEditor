@@ -129,8 +129,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                    <property name="margin_bottom">2</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
                     <property name="label" translatable="yes">Bouquets</property>
                   </object>
                   <packing>
@@ -228,8 +228,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                    <property name="margin_bottom">2</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
                     <property name="label" translatable="yes">Bouquet details</property>
                   </object>
                   <packing>
@@ -312,8 +312,8 @@ Author: Dmitriy Yefremov
             <property name="valign">center</property>
             <property name="margin_left">15</property>
             <property name="margin_right">15</property>
-            <property name="margin_top">10</property>
-            <property name="margin_bottom">10</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="layout_style">start</property>
             <child>
               <object class="GtkButton" id="import_button">
@@ -322,6 +322,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Bouquets and services</property>
+                <property name="valign">center</property>
                 <property name="image">import_image</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="on_import" swapped="no"/>
@@ -339,6 +340,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Details</property>
+                <property name="valign">center</property>
                 <property name="image">details_image</property>
                 <property name="always_show_image">True</property>
                 <property name="draw_indicator">False</property>

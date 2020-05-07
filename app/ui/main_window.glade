@@ -544,6 +544,7 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="ftp_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="margin_left">5</property>
     <property name="icon_name">network-transmit-receive-symbolic</property>
     <property name="icon_size">1</property>
   </object>
@@ -985,15 +986,14 @@ Author: Dmitriy Yefremov
                 <property name="valign">center</property>
                 <property name="layout_style">expand</property>
                 <child>
-                  <object class="GtkButton" id="download_tool_button">
-                    <property name="label" translatable="yes">FTP</property>
+                  <object class="GtkButton" id="open_tool_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">FTP-transfer</property>
+                    <property name="tooltip_text" translatable="yes">Open</property>
                     <property name="valign">center</property>
-                    <property name="action_name">app.on_download</property>
-                    <property name="image">ftp_image</property>
+                    <property name="action_name">app.on_data_open</property>
+                    <property name="image">open_image</property>
                     <property name="always_show_image">True</property>
                   </object>
                   <packing>
@@ -1003,15 +1003,16 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="open_tool_button">
+                  <object class="GtkButton" id="download_tool_button">
                     <property name="label" translatable="yes"> </property>
+                    <property name="width_request">48</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Open</property>
+                    <property name="tooltip_text" translatable="yes">FTP-transfer</property>
                     <property name="valign">center</property>
-                    <property name="action_name">app.on_data_open</property>
-                    <property name="image">open_image</property>
+                    <property name="action_name">app.on_download</property>
+                    <property name="image">ftp_image</property>
                     <property name="always_show_image">True</property>
                   </object>
                   <packing>
