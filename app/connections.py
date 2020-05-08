@@ -67,17 +67,12 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
         callback("FTP OK.\n")
         save_path = settings.data_local_path
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        files = []
         # bouquets
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(settings.services_path)
-            ftp.dir(files.append)
             file_list = BQ_FILES_LIST + DATA_FILES_LIST if download_type is DownloadType.ALL else BQ_FILES_LIST
-            for file in files:
-                name = str(file).strip()
-                if name.endswith(file_list):
-                    name = name.split()[-1]
-                    download_file(ftp, name, save_path, callback)
+            for file in filter(lambda f: f.endswith(file_list), ftp.nlst()):
+                download_file(ftp, file, save_path, callback)
         # *.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES):
             download_xml(ftp, save_path, settings.satellites_xml_path, STC_XML_FILE, callback)
@@ -97,12 +92,8 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
                 save_path = epg_options.get("epg_dat_path", save_path)
 
             ftp.cwd(stb_path)
-            ftp.dir(files.append)
-            for file in files:
-                name = str(file).strip()
-                if name.endswith("epg.dat"):
-                    name = name.split()[-1]
-                    download_file(ftp, name, save_path, callback)
+            for file in filter(lambda f: f.endswith("epg.dat"), ftp.nlst()):
+                download_file(ftp, file, save_path, callback)
 
         callback("\nDone.\n")
 
@@ -253,14 +244,8 @@ def download_picons(ftp, src, dest, callback):
         callback(str(e))
         return
 
-    files = []
-    ftp.dir(files.append)
-
-    for file in files:
-        name = str(file).strip()
-        if name.endswith(PICONS_SUF):
-            name = name.split()[-1]
-            download_file(ftp, name, dest, callback)
+    for file in filter(lambda f: f.endswith(PICONS_SUF), ftp.nlst()):
+        download_file(ftp, file, dest, callback)
 
 
 def delete_picons(ftp, callback, dest=None):
