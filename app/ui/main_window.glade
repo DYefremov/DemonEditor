@@ -3021,7 +3021,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLevelBar" id="signal_level_bar">
                     <property name="width_request">70</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Tuner signal</property>
+                    <property name="tooltip_text" translatable="yes">Signal level</property>
                     <property name="valign">center</property>
                     <property name="max_value">100</property>
                   </object>
