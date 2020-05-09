@@ -663,7 +663,7 @@ msgid "Disabled"
 msgstr "Выкл."
 
 msgid "Enable ver. 5 support (experimental)"
-msgstr "Включить поддержку вер. 5 (экспериментально)"
+msgstr "Включить поддержку lamedb вер. 5 (экспериментально)"
 
 msgid "Enable HTTP API (experimental)"
 msgstr "Включить HTTP API (экспериментально)"
@@ -802,3 +802,162 @@ msgstr "Удалить добавленные ссылки из плейлист
 
 msgid "A bouquet with that name exists!"
 msgstr "Букет с таким именем существует!"
+
+msgid "Details"
+msgstr "Подробно"
+
+msgid "Profile"
+msgstr "Профиль"
+
+msgid "Reset"
+msgstr "Сброс"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Picons manager"
+msgstr "Менеджер пиконов"
+
+msgid "Explorer"
+msgstr "Проводник"
+
+msgid "Satellite url:"
+msgstr "URL cпутника:"
+
+msgid "Cut"
+msgstr "Вырезать"
+
+msgid "Paste"
+msgstr "Вставить"
+
+msgid "To the top"
+msgstr "В начало"
+
+msgid "To the end"
+msgstr "В конец"
+
+msgid "View"
+msgstr "Вид"
+
+msgid "Lock"
+msgstr "Замок"
+
+msgid "Parent lock"
+msgstr "Родительский замок"
+
+msgid "Hide/Skip"
+msgstr "Скрыть/Пропустить"
+
+msgid "IPTV tools"
+msgstr "Инструменты IPTV"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Установить папку профиля по умолчанию для доп. данных"
+
+msgid "Default data path:"
+msgstr "Путь к данным по умолчанию:"
+
+msgid "Streams record path:"
+msgstr "Путь к записям потоков:"
+
+msgid "Record"
+msgstr "Запись"
+
+msgid "Record:"
+msgstr "Запись:"
+
+msgid "Record to disk:"
+msgstr "Запись на диск:"
+
+msgid "Streaming"
+msgstr "Потоки"
+
+msgid "Activate transcoding"
+msgstr "Активировать перекодировку"
+
+msgid "Presets:"
+msgstr "Предустановки:"
+
+msgid "Video options:"
+msgstr "Опции видео:"
+
+msgid "Audio options:"
+msgstr "Опции аудио:"
+
+msgid "Bitrate (kb/s):"
+msgstr "Битрейт (kb/s):"
+
+msgid "Codec:"
+msgstr "Кодек:"
+
+msgid "Width (px):"
+msgstr "Ширина (px):"
+
+msgid "Height (px):"
+msgstr "Высота (px):"
+
+msgid "Channels:"
+msgstr "Каналы:"
+
+msgid "Sample rate (Hz):"
+msgstr "Частота дискр. (Гц):"
+
+msgid "Play streams mode:"
+msgstr "Режим воспроизведения потоков:"
+
+msgid "Built-in player"
+msgstr "Встроенный плеер"
+
+msgid "VLC media player"
+msgstr "VLC медиаплеер"
+
+msgid "Only get m3u file"
+msgstr "Получить файл *.m3u"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Сохраните и перезапустите программу, чтобы применить настройки."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Некоторые образы могут иметь проблемы с отображением списка избранного!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Работает в режиме ожидания или текущем активном транспондере!"
+
+msgid "No connection to the receiver!"
+msgstr "Нет соединение с ресивером!"
+
+msgid "Signal level"
+msgstr "Уровень сигнала"
+
+msgid "Receiver info"
+msgstr "Информация о ресивере"
+
+msgid "A profile with that name exists!"
+msgstr "Профиль с таким именем существует!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Показывать краткую информацию в виде подсказок в основном списке услуг"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "Показывать подробную информацию в виде подсказок в списке букетов"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Включить альтернативное именование файлов букета"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Позволяет называть файлы букетов, используя их имена."
+
+msgid "Appearance"
+msgstr "Внешний вид"
+
+msgid "Enable Themes support"
+msgstr "Включить поддержку тем"
+
+msgid "Gtk3 Theme:"
+msgstr "Тема Gtk3:"
+
+msgid "Icon Theme:"
+msgstr "Тема значков:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Gtk3 темы и иконки:"

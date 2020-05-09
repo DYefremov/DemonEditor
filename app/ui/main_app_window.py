@@ -1406,7 +1406,7 @@ class Application(Gtk.Application):
         services = self._bouquets.get(key, [])
         ex_services = self._extra_bouquets.get(key, None)
 
-        factor = self.FAV_FACTOR * 5
+        factor = self.FAV_FACTOR * 20
         if len(services) > factor or len(self._fav_model) > factor:
             GLib.idle_add(self._bouquets_view.set_sensitive, False)
 
