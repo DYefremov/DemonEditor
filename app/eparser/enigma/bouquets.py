@@ -84,11 +84,11 @@ def get_bouquet(path, name, bq_type):
         for ch in srvs[1:]:
             ch_data = ch.strip().split(":")
             if ch_data[1] == "64":
-                marker_data = ch.split("#DESCRIPTION", 1)
-                services.append(BouquetService(marker_data[1].strip(), BqServiceType.MARKER, ch, ch_data[2]))
+                m_data, sep, desc = ch.partition("#DESCRIPTION")
+                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, ch, ch_data[2]))
             elif "http" in ch:
-                stream_data = ch.split("#DESCRIPTION", 1)
-                services.append(BouquetService(stream_data[-1].strip(":").strip(), BqServiceType.IPTV, ch, 0))
+                stream_data, sep, desc = ch.partition("#DESCRIPTION")
+                services.append(BouquetService(desc.lstrip(":").strip() if desc else "", BqServiceType.IPTV, ch, 0))
             else:
                 fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
                 name = None
@@ -117,7 +117,7 @@ def parse_bouquets(path, bq_name, bq_type):
                 if name:
                     b_name = name.group(1)
                     if b_name in b_names:
-                        raise ValueError("The list of bouquets contains duplicate [{}] names!".format(b_name))
+                        log("The list of bouquets contains duplicate [{}] names!".format(b_name))
                     else:
                         b_names.add(b_name)
 
