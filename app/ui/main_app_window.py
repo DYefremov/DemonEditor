@@ -612,14 +612,17 @@ class Application(Gtk.Application):
         if len(itrs) > self.DEL_FACTOR:
             self._wait_dialog.show("Deleting data...")
 
+        priority = GLib.PRIORITY_LOW
+
         if model_name == self.FAV_MODEL_NAME:
             gen = self.remove_favs(itrs, model)
         elif model_name == self.BQ_MODEL_NAME:
             gen = self.delete_bouquets(itrs, model)
+            priority = GLib.PRIORITY_DEFAULT
         elif model_name == self.SERVICE_MODEL_NAME:
             gen = self.delete_services(itrs, model, rows)
 
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(lambda: next(gen, False), priority=priority)
         self.on_view_focus(view)
 
         return rows
@@ -679,6 +682,7 @@ class Application(Gtk.Application):
                 continue
 
             self._fav_model.clear()
+            yield True
             b_row = self._bouquets_model[itr][:]
             self._bouquets.pop("{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE]), None)
             self._bouquets_model.remove(itr)
