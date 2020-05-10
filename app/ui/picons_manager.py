@@ -492,7 +492,12 @@ class PiconsDialog:
             return True
 
         t = model.get_value(itr, 1)
-        return not t or self._picons_filter_entry.get_text().upper() in t.upper()
+        if not t:
+            return True
+
+        txt = self._picons_filter_entry.get_text().upper()
+        return txt in t.upper() or t in (
+            map(lambda s: s.picon_id, filter(lambda s: txt in s.service.upper(), self._app.current_services.values())))
 
     def on_position_edited(self, render, path, value):
         model = self._providers_view.get_model()
