@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2020-04-16 17:20+0300\n"
+"PO-Revision-Date: 2020-05-11 20:02+0300\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,7 +30,7 @@ msgid "Picon"
 msgstr "Picon"
 
 msgid "Freq"
-msgstr "Frek"
+msgstr "Frekans"
 
 msgid "Rate"
 msgstr "Oran"
@@ -560,7 +560,7 @@ msgstr "Bu bağlamda işleme izin verilmiyor!"
 msgid "No VLC is found. Check that it is installed!"
 msgstr "VLC bulunamadı. Yüklü olduğundan emin olun!"
 
-# Search unavailable streams dialog / # Kullanılamayan akışlar ara iletişim kutusu
+# Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
 msgstr "Lütfen bekleyin, akış testi devam ediyor ..."
 
@@ -766,6 +766,13 @@ msgstr "Oynatmayı kapat"
 msgid "Import YouTube playlist"
 msgstr "YouTube oynatma listesini içe aktar"
 
+msgid ""
+"Found a link to the YouTube resource!\n"
+"Try to get a direct link to the video?"
+msgstr ""
+"YouTube kaynağına bir bağlantı bulundu!\n"
+"Videoya doğrudan bağlantı almaya çalışılsın mı?"
+
 msgid "Playlist import"
 msgstr "Oynatma listesi içe aktarma"
 
@@ -810,3 +817,162 @@ msgstr "Oynatma listesine eklenen bağlantıları kaldır"
 
 msgid "A bouquet with that name exists!"
 msgstr "Bu isimli bir buket var!"
+
+msgid "Details"
+msgstr "Detaylar"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Reset"
+msgstr "Y.başlat"
+
+msgid "File"
+msgstr "Dosya"
+
+msgid "Picons manager"
+msgstr "Picon yöneticisi"
+
+msgid "Explorer"
+msgstr "Explorer"
+
+msgid "Satellite url:"
+msgstr "Uydu url:"
+
+msgid "Cut"
+msgstr "Kes"
+
+msgid "Paste"
+msgstr "Yapıştır"
+
+msgid "To the top"
+msgstr "Başlangıçta"
+
+msgid "To the end"
+msgstr "Sonunda"
+
+msgid "View"
+msgstr "Görünüm"
+
+msgid "Lock"
+msgstr "Kilit"
+
+msgid "Parent lock"
+msgstr "Ebeveyn kilidi"
+
+msgid "Hide/Skip"
+msgstr "Gizle/Atla"
+
+msgid "IPTV tools"
+msgstr "IPTV araçları"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Ek veriler için profil klasörünü varsayılan yap"
+
+msgid "Default data path:"
+msgstr "Varsayılan veri yolu:"
+
+msgid "Streams record path:"
+msgstr "Akış kayıt yolu:"
+
+msgid "Record"
+msgstr "Kayıt"
+
+msgid "Record:"
+msgstr "Kayıt:"
+
+msgid "Record to disk:"
+msgstr "Diske kaydet:"
+
+msgid "Streaming"
+msgstr "Yayın Akışı"
+
+msgid "Activate transcoding"
+msgstr "Kod dönüştürmeyi etkinleştir"
+
+msgid "Presets:"
+msgstr "Ön ayarlar:"
+
+msgid "Video options:"
+msgstr "Video seçenekleri:"
+
+msgid "Audio options:"
+msgstr "Ses seçenekleri:"
+
+msgid "Bitrate (kb/s):"
+msgstr "Bit hızı (kb/s):"
+
+msgid "Codec:"
+msgstr "Codec:"
+
+msgid "Width (px):"
+msgstr "Genişlik (px):"
+
+msgid "Height (px):"
+msgstr "Yükseklik (px):"
+
+msgid "Channels:"
+msgstr "Kanallar:"
+
+msgid "Sample rate (Hz):"
+msgstr "Örnekleme hızı (Hz):"
+
+msgid "Play streams mode:"
+msgstr "Akışları oynatma modu:"
+
+msgid "Built-in player"
+msgstr "Dahili oynatıcı"
+
+msgid "VLC media player"
+msgstr "VLC media player"
+
+msgid "Only get m3u file"
+msgstr "Sadece m3u dosyası al"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Ayarları uygulamak için programı kaydedin ve yeniden başlatın."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Bazı resimler sık kullanılanlar listesini görüntülerken sorun yaşayabilir!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Bekleme modunda veya geçerli aktif transponderde çalışır!"
+
+msgid "No connection to the receiver!"
+msgstr "Alıcıya bağlantı yok!"
+
+msgid "Signal level"
+msgstr "Sinyal seviyesi"
+
+msgid "Receiver info"
+msgstr "Alıcı bilgisi"
+
+msgid "A profile with that name exists!"
+msgstr "Bu ada sahip bir profil var!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Kısa bilgileri ana hizmetler listesinde ipuçları olarak göster"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "Ayrıntılı bilgileri buket listesinde ipuçları olarak göster"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Alternatif buket dosyası adlandırmasını etkinleştir"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Buket dosyalarını isimlerini kullanarak isimlendirmenizi sağlar."
+
+msgid "Appearance"
+msgstr "Görünüm"
+
+msgid "Enable Themes support"
+msgstr "Temalar desteğini etkinleştir"
+
+msgid "Gtk3 Theme:"
+msgstr "Gtk3 Teması:"
+
+msgid "Icon Theme:"
+msgstr "Simge Teması:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Gtk3 Tema ve Simgeler:"
