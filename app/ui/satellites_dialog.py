@@ -48,7 +48,8 @@ class SatellitesDialog:
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH),
                                         ("satellites_editor_window", "satellites_tree_store", "popup_menu",
-                                         "left_header_menu", "popup_menu_add_image", "popup_menu_add_image_2"))
+                                         "left_header_menu", "popup_menu_add_image", "popup_menu_add_image_2",
+                                         "sat_editor_save_image", "sat_editor_update_image"))
         builder.connect_signals(handlers)
 
         self._window = builder.get_object("satellites_editor_window")
@@ -456,7 +457,8 @@ class SatellitesUpdateDialog:
                                       ("satellites_update_window", "update_source_store", "update_sat_list_store",
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
                                        "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",
-                                       "remove_selection_image"))
+                                       "remove_selection_image", "sat_update_cancel_image", "sat_receive_image",
+                                       "sat_update_filter_image", "sat_update_search_image", "sat_update_image"))
         builder.connect_signals(handlers)
 
         self._window = builder.get_object("satellites_update_window")

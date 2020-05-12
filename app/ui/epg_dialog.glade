@@ -36,7 +36,7 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="apply_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">checkmark</property>
+    <property name="icon_name">document-save-symbolic</property>
     <property name="icon_size">1</property>
   </object>
   <object class="GtkImage" id="auto_config_image">

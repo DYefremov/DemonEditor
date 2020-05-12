@@ -212,6 +212,7 @@ class Application(Gtk.Application):
         self._bq_name_label = builder.get_object("bq_name_label")
         tool_bar = builder.get_object("top_toolbar")
         self._main_data_box.bind_property("visible", tool_bar, "visible")
+        self._telnet_tool_button = builder.get_object("telnet_tool_button")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
@@ -333,6 +334,7 @@ class Application(Gtk.Application):
         ac.connect("activate", self.on_telnet_client_show)
         self.add_action(ac)
         self.set_accels_for_action("app.on_telnet_client_show", ["<primary>t"])
+        self._telnet_tool_button.set_visible(True)
 
     def init_keys(self):
         main_handlers = ("on_new_configuration", "on_data_open", "on_download", "on_settings",
@@ -437,6 +439,7 @@ class Application(Gtk.Application):
                 log("No valid [on, off] arguments for -t found!")
                 return 1
             log("Telnet support is {}. Restart the program to apply the settings!".format(t_op))
+            self._settings.save()
 
         self.activate()
         return 0

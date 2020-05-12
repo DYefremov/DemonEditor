@@ -384,6 +384,48 @@ Author: Dmitriy Yefremov
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="sat_editor_save_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-save-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="sat_editor_update_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">emblem-synchronizing-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="sat_receive_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-receive-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="sat_update_cancel_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">window-close-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="sat_update_filter_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-find-replace-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="sat_update_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">emblem-synchronizing-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="sat_update_search_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-find-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
   <object class="GtkTreeStore" id="satellites_tree_store">
     <columns>
       <!-- column-name satelitte -->
@@ -469,6 +511,8 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Save</property>
+                <property name="image">sat_editor_save_image</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="on_save" object="satellites_editor_tree_view" swapped="no"/>
               </object>
               <packing>
@@ -484,6 +528,8 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Update</property>
+                <property name="image">sat_editor_update_image</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="on_update" swapped="no"/>
               </object>
               <packing>
@@ -1395,6 +1441,8 @@ Author: Dmitriy Yefremov
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Cancel</property>
                     <property name="valign">center</property>
+                    <property name="image">sat_update_cancel_image</property>
+                    <property name="always_show_image">True</property>
                     <signal name="clicked" handler="on_cancel_receive" swapped="no"/>
                   </object>
                   <packing>
@@ -1410,6 +1458,8 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Receive</property>
+                    <property name="image">sat_receive_image</property>
+                    <property name="always_show_image">True</property>
                     <signal name="clicked" handler="on_receive_satellites_list" swapped="no"/>
                   </object>
                   <packing>
@@ -1425,8 +1475,10 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Filter</property>
+                    <property name="image">sat_update_filter_image</property>
+                    <property name="always_show_image">True</property>
                     <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
-                    <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK"/>
+                    <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | Primary"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1441,8 +1493,10 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Find</property>
+                    <property name="image">sat_update_search_image</property>
+                    <property name="always_show_image">True</property>
                     <signal name="toggled" handler="on_find_toggled" swapped="no"/>
-                    <accelerator key="f" signal="clicked"/>
+                    <accelerator key="f" signal="clicked" modifiers="Primary"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1492,6 +1546,8 @@ Author: Dmitriy Yefremov
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Update</property>
                     <property name="valign">center</property>
+                    <property name="image">sat_update_image</property>
+                    <property name="always_show_image">True</property>
                     <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>
                   </object>
                   <packing>
@@ -1580,11 +1636,11 @@ Author: Dmitriy Yefremov
                     <property name="position">2</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="group"/>
+                </style>
               </object>
             </child>
-            <style>
-              <class name="group"/>
-            </style>
           </object>
           <packing>
             <property name="expand">False</property>

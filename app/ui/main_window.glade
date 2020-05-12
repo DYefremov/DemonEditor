@@ -854,6 +854,11 @@ Author: Dmitriy Yefremov
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="telnet_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-workgroup-symbolic</property>
+  </object>
   <object class="GtkMenu" id="toolbar_iptv_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1022,6 +1027,23 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkButton" id="telnet_tool_button">
+                    <property name="label" translatable="yes"> </property>
+                    <property name="visible">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Telnet</property>
+                    <property name="action_name">app.on_telnet_client_show</property>
+                    <property name="image">telnet_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButton" id="save_tool_button">
                     <property name="label" translatable="yes"> </property>
                     <property name="can_focus">False</property>
@@ -1035,7 +1057,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -1053,7 +1075,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>

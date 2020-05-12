@@ -156,7 +156,7 @@ Author: Dmitriy Yefremov
                 <property name="tooltip_text" translatable="yes">Apply profile settings</property>
                 <property name="valign">center</property>
                 <signal name="clicked" handler="on_apply_profile_settings" swapped="no"/>
-                <accelerator key="s" signal="clicked"/>
+                <accelerator key="s" signal="clicked" modifiers="Primary"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -428,7 +428,7 @@ Author: Dmitriy Yefremov
                                     <property name="use_underline">True</property>
                                     <property name="icon_name">emblem-default</property>
                                     <signal name="clicked" handler="on_profile_set_default" swapped="no"/>
-                                    <accelerator key="d" signal="clicked"/>
+                                    <accelerator key="d" signal="clicked" modifiers="Primary"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1322,6 +1322,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Sets the profile folder as default to store picons, backups, etc.</property>
+                        <property name="valign">center</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
                         <property name="margin_top">5</property>
@@ -1346,6 +1347,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkSwitch" id="default_data_paths_switch">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="valign">center</property>
                             <signal name="state-set" handler="on_default_path_mode_switch" swapped="no"/>
                           </object>
                           <packing>

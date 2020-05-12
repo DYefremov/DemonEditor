@@ -35,7 +35,7 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="cancel_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">cancel</property>
+    <property name="icon_name">window-close-symbolic</property>
   </object>
   <object class="GtkImage" id="convert_image">
     <property name="visible">True</property>
