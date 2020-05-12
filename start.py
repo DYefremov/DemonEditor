@@ -11,6 +11,9 @@ else:
         if ns_bundle:
             ns_bundle["CFBundleName"] = "DemonEditor"
 
-from app.ui.main_app_window import start_app
+if __name__ == "__main__":
+    from multiprocessing import set_start_method
+    from app.ui.main_app_window import start_app
 
-start_app()
+    set_start_method("fork")  # For compatibility [Python > 3.7]
+    start_app()
