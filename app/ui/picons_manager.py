@@ -144,6 +144,9 @@ class PiconsDialog:
 
     def update_picons(self, path):
         p_model = self._picons_view.get_model()
+        if not p_model:
+            return
+
         model = get_base_model(p_model)
         self._picons_view.set_model(None)
         factor = self._app.DEL_FACTOR
@@ -158,7 +161,7 @@ class PiconsDialog:
                 return
 
             try:
-                p = GdkPixbuf.Pixbuf.new_from_file(filename="{}/{}".format(path, file))
+                p = GdkPixbuf.Pixbuf.new_from_file_at_scale("{}/{}".format(path, file), 100, 60, True)
             except GLib.GError as e:
                 pass
             else:
