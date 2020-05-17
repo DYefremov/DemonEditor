@@ -943,18 +943,21 @@ class Application(Gtk.Application):
             top_iter = model.get_iter(path)
             parent_itr = model.iter_parent(top_iter)  # parent
             to_del = []
+            is_darwin = self._settings.is_darwin #
+
             if parent_itr:
                 p_path = model.get_path(parent_itr)[0]
                 for itr in itrs:
                     p_itr = model.iter_parent(itr)
                     if not p_itr:
                         break
-                    if p_itr and model.get_path(p_itr)[0] == p_path:
+
+                    if all((not is_darwin, p_itr, model.get_path(p_itr)[0] == p_path)):
                         top_iter = model.move_before(itr, top_iter)
                     else:
                         model.insert(parent_itr, model.get_path(top_iter)[1], model[itr][:])
                         to_del.append(itr)
-            elif not model.iter_has_child(top_iter):
+            elif not model.iter_has_child(top_iter) or is_darwin:
                 for itr in itrs:
                     model.append(top_iter, model[itr][:])
                     to_del.append(itr)
