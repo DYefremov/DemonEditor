@@ -1856,7 +1856,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">Service</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">3</property>
                                     <child>
                                       <object class="GtkCellRendererPixbuf" id="coded_cellrendererpixbuf">
@@ -1904,7 +1903,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">Package</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">6</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="package_cellrenderertext">
@@ -1925,7 +1923,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">Type</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">7</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="service_type_cellrenderertex">
@@ -1944,7 +1941,6 @@ Author: Dmitriy Yefremov
                                     <property name="min_width">25</property>
                                     <property name="title" translatable="yes">Picon</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">9</property>
                                     <child>
                                       <object class="GtkCellRendererPixbuf" id="picon_cellrendererpixbuf"/>
@@ -1976,7 +1972,6 @@ Author: Dmitriy Yefremov
                                     <property name="title">SID</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">10</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="ssid_cellrenderertext">
@@ -1996,7 +1991,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">Freq</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">11</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="freq_cellrenderertext">
@@ -2016,7 +2010,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">Rate</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">12</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="rate_cellrenderertext">
@@ -2036,7 +2029,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">Pol</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">13</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="pol_cellrenderertext">
@@ -2056,7 +2048,6 @@ Author: Dmitriy Yefremov
                                     <property name="title">FEC</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">14</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="fec_cellrenderertext">
@@ -2076,7 +2067,6 @@ Author: Dmitriy Yefremov
                                     <property name="title" translatable="yes">System</property>
                                     <property name="expand">True</property>
                                     <property name="alignment">0.5</property>
-                                    <property name="reorderable">True</property>
                                     <property name="sort_column_id">15</property>
                                     <child>
                                       <object class="GtkCellRendererText" id="system_cellrenderertex">
@@ -2855,6 +2845,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkBox" id="status_bar_box">
             <property name="height_request">28</property>
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_top">1</property>
             <property name="margin_bottom">1</property>
@@ -2892,26 +2883,26 @@ Author: Dmitriy Yefremov
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkLabel" id="current_ip_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Current IP:</property>
+                    <attributes>
+                      <attribute name="size" value="8000"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
-              </packing>
-            </child>
-            <child type="center">
-              <object class="GtkLabel" id="current_ip_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Current IP:</property>
-                <attributes>
-                  <attribute name="size" value="8000"/>
-                </attributes>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
               </packing>
             </child>
             <child>
