@@ -215,7 +215,6 @@ class Application(Gtk.Application):
         self._telnet_tool_button = builder.get_object("telnet_tool_button")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
-        self._app_info_box.bind_property("visible", self._status_bar_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_box"), "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_box"), "visible", 4)
@@ -899,9 +898,9 @@ class Application(Gtk.Application):
 
     def on_view_drag_begin(self, view, context):
         """ Selects a row under the cursor in the view at the dragging beginning. """
-        selection = view.get_selection()
-        if selection.count_selected_rows() > 1:
-            view.do_toggle_cursor_row(view)
+        path, column = view.get_cursor()
+        if path:
+            view.get_selection().select_path(path)
 
     def on_view_drag_data_get(self, view, drag_context, data, info, time):
         selection = self.get_selection(view)
@@ -985,12 +984,12 @@ class Application(Gtk.Application):
                 return
 
             model = get_base_model(view.get_model())
-            dest_index = 0
+            dest_index = len(model)
+
             if drop_info:
                 path, position = drop_info
-                dest_iter = model.get_iter(path)
-                if dest_iter:
-                    dest_index = model.get_value(dest_iter, 0)
+                dest_index = path.get_indices()[0]
+
             fav_bouquet = self._bouquets[bq_selected]
             itrs = itr_str.split(",")
 
@@ -1012,6 +1011,7 @@ class Application(Gtk.Application):
                 for row in in_rows:
                     model.insert(dest_index, row)
                     fav_bouquet.insert(dest_index, row[Column.FAV_ID])
+                    dest_index += 1
                 for in_itr in in_itrs:
                     del fav_bouquet[int(model.get_path(in_itr)[0])]
                     model.remove(in_itr)
