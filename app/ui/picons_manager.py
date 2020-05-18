@@ -188,11 +188,15 @@ class PiconsDialog:
         if not txt:
             return
 
+        if txt.startswith("file://"):
+            self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+            return
+
         itr_str, sep, src = txt.partition("::::")
         if src == self._app.BQ_MODEL_NAME:
             return
 
-        path, pos = view.get_dest_item_at_pos(x, y)
+        path, pos = view.get_dest_item_at_pos(x, y) or None, None
         if not path:
             return
 
@@ -454,7 +458,7 @@ class PiconsDialog:
     def show_info_message(self, text, message_type):
         self._info_bar.set_visible(True)
         self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(text)
+        self._message_label.set_text(get_message(text))
 
     def on_picons_dir_open(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, settings=self._settings)
