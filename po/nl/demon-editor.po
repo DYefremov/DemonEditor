@@ -1,7 +1,7 @@
-# Copyright (C) 2018-2019 Frank Neirynck
+# Copyright (C) 2018-2020 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-# Frank Neirynck <frank@insink.be>, 2018-2019.
+# Frank Neirynck <frank@insink.be>, 2018-2020.
 #
 msgid ""
 msgstr ""
@@ -10,11 +10,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
 
 msgid "translator-credits"
 msgstr "Frank Neirynck <frank@insink.be>"
@@ -777,3 +772,201 @@ msgstr "Importeer playlist"
 
 msgid "Getting link error:"
 msgstr "Volgende Link error gekregen:"
+
+msgid "Extra"
+msgstr "Extra"
+
+msgid "Apply profile settings"
+msgstr "Pas profiel settings toe"
+
+msgid "Settings type:"
+msgstr "Settings type:"
+
+msgid "Set default"
+msgstr "Stel standaard in"
+
+msgid "Language:"
+msgstr "Taal:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Laad de laatst geopende configuratie op bij opstart programma"
+
+msgid "Enable direct playback bar (experimental)"
+msgstr "Laat onmiddelijk playback bar toe (experimenteel)"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Laat rechtstreeks versturen van and playback en media links op de ontvanger toe"
+
+msgid "Watch the channel in the program"
+msgstr "Bekijk het kanaal in het programma"
+
+msgid "Zap and Play"
+msgstr "Zap en speel af"
+
+msgid "Drag  or paste the link here"
+msgstr "Sleep of plak link naar hier"
+
+msgid "Remove added links in the playlist"
+msgstr "Verwijder toegevoegde links uit playlist"
+
+msgid "A bouquet with that name exists!"
+msgstr "Er bestaat al een boeket met deze naam!"
+
+msgid "Details"
+msgstr "Details"
+
+msgid "Profile"
+msgstr "Profiel"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "File"
+msgstr "File"
+
+msgid "Picons manager"
+msgstr "Picons manager"
+
+msgid "Explorer"
+msgstr "Explorer"
+
+msgid "Satellite url:"
+msgstr "Satelliet url:"
+
+msgid "Cut"
+msgstr "Knip"
+
+msgid "Paste"
+msgstr "Plak"
+
+msgid "To the top"
+msgstr "Naar de top"
+
+msgid "To the end"
+msgstr "Naar het einde"
+
+msgid "View"
+msgstr "View"
+
+msgid "Lock"
+msgstr "Slot"
+
+msgid "Parent lock"
+msgstr "Ouderlijk Slot"
+
+msgid "Hide/Skip"
+msgstr "Verberg/Spring"
+
+msgid "IPTV tools"
+msgstr "IPTV instrumenten"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Maak profiel map standaard voor addionele data"
+
+msgid "Default data path:"
+msgstr "Standaard data pad:"
+
+msgid "Streams record path:"
+msgstr "Opnamepad streams:"
+
+msgid "Record"
+msgstr "Opnemen"
+
+msgid "Record:"
+msgstr "Opnemen:"
+
+msgid "Record to disk:"
+msgstr "Opnemen op schijf:"
+
+msgid "Streaming"
+msgstr "Streaming"
+
+msgid "Activate transcoding"
+msgstr "Activeer transcodering"
+
+msgid "Presets:"
+msgstr "Onstellingen:"
+
+msgid "Video options:"
+msgstr "Video opties:"
+
+msgid "Audio options:"
+msgstr "Audio opties:"
+
+msgid "Bitrate (kb/s):"
+msgstr "Bitrate (kb/s):"
+
+msgid "Codec:"
+msgstr "Codec:"
+
+msgid "Width (px):"
+msgstr "Breedte (px):"
+
+msgid "Height (px):"
+msgstr "Hoogte (px):"
+
+msgid "Channels:"
+msgstr "Kanalen:"
+
+msgid "Sample rate (Hz):"
+msgstr "Sample rate (Hz):"
+
+msgid "Play streams mode:"
+msgstr "Speel in streams mode:"
+
+msgid "Built-in player"
+msgstr "Ingebouwde speler"
+
+msgid "VLC media player"
+msgstr "VLC Media speler"
+
+msgid "Only get m3u file"
+msgstr "Enkel de m3u file ophalen"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Het programma opslaan en herstarten om settings toe te passen."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Sommige afbeeldingen kunnen problemen opleveren bij vertonen in de favorietenlijst!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Werkt in standby mode of op dehuiduge actieve transponder!"
+
+msgid "No connection to the receiver!"
+msgstr "Geen verbinding met de ontvanger!"
+
+msgid "Signal level"
+msgstr "Signaal niveau"
+
+msgid "Receiver info"
+msgstr "Informatie over de ontvanger"
+
+msgid "A profile with that name exists!"
+msgstr "Er bestaat al een profiel met die naam!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Toon korte info als hints in de hoofd servicelijst"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "Toon gedetalleerde info als hints in de boeket lijst"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Laat alternatieve boeket benamingen toe"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Laat toe om boeket te noemen naar bestandsbenaming."
+
+msgid "Appearance"
+msgstr "Uitzicht"
+
+msgid "Enable Themes support"
+msgstr "Laat themaondersteuning toe"
+
+msgid "Gtk3 Theme:"
+msgstr "Gtk3 Thema:"
+
+msgid "Icon Theme:"
+msgstr "Icoon Thema:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Gtk3 en Icoon Themas:"
