@@ -961,3 +961,16 @@ msgstr "Тема значков:"
 
 msgid "Gtk3 Themes and Icons:"
 msgstr "Gtk3 темы и иконки:"
+
+msgid "Deleting data..."
+msgstr "Удаление данных ..."
+
+msgid "Download from the receiver"
+msgstr "Загрузить с ресивера"
+
+msgid "Remove all picons from the receiver"
+msgstr "Удалить все пиконы с ресивера"
+
+msgid "Service reference"
+msgstr "Сервисная ссылка"
+
