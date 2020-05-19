@@ -974,3 +974,16 @@ msgstr "Icon-Theme:"
 
 msgid "Gtk3 Themes and Icons:"
 msgstr "Gtk3 Themes and Icons:"
+
+msgid "Deleting data..."
+msgstr "Daten löschen..."
+
+msgid "Download from the receiver"
+msgstr "Downloaden vom Receiver"
+
+msgid "Remove all picons from the receiver"
+msgstr "Alle Picons aus dem Receiver entfernen"
+
+msgid "Service reference"
+msgstr "Kanalreferenz"
+
