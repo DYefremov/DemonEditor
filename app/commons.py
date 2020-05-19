@@ -6,28 +6,22 @@ from gi.repository import GLib
 
 _LOG_FILE = "demon-editor.log"
 _DATE_FORMAT = "%d-%m-%y %H:%M:%S"
-_LOGGER_NAME = "main_logger"
-_USE_LOG = False
+_LOGGER_NAME = None
 
 
 def init_logger():
-    global _USE_LOG
-    _USE_LOG = True
+    global _LOGGER_NAME
+    _LOGGER_NAME = "main_logger"
     logging.Logger(_LOGGER_NAME)
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s %(message)s",
                         datefmt=_DATE_FORMAT,
-                        handlers=[logging.FileHandler(_LOG_FILE),
-                                  logging.StreamHandler()])
+                        handlers=[logging.FileHandler(_LOG_FILE), logging.StreamHandler()])
     log("Logging is enabled.", level=logging.INFO)
 
 
-def get_logger():
-    return logging.getLogger(_LOGGER_NAME)
-
-
 def log(message, level=logging.ERROR):
-    get_logger().log(level, message) if _USE_LOG else print(message)
+    logging.getLogger(_LOGGER_NAME).log(level, message)
 
 
 def run_idle(func):
