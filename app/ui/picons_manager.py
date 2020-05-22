@@ -198,7 +198,7 @@ class PiconsDialog:
         if src == self._app.BQ_MODEL_NAME:
             return
 
-        path, pos = view.get_dest_item_at_pos(x, y) or None, None
+        path, pos = view.get_dest_item_at_pos(x, y) or (None, None)
         if not path:
             return
 
