@@ -16,23 +16,28 @@ from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, 
 
 # ***************** Markers *******************#
 
-def insert_marker(view, bouquets, selected_bouquet, services, parent_window):
+def insert_marker(view, bouquets, selected_bouquet, services, parent_window, m_type=BqServiceType.MARKER):
     """" Inserts marker into bouquet services list. """
-    response = show_dialog(DialogType.INPUT, parent_window)
-    if response == Gtk.ResponseType.CANCEL:
-        return
+    fav_id, text = "1:832:D:0:0:0:0:0:0:0:\n", None
 
-    if not response.strip():
-        show_dialog(DialogType.ERROR, parent_window, "The text of marker is empty, please try again!")
-        return
+    if m_type is BqServiceType.MARKER:
+        response = show_dialog(DialogType.INPUT, parent_window)
+        if response == Gtk.ResponseType.CANCEL:
+            return
 
-    fav_id = "1:64:0:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(response, response)
-    s_type = BqServiceType.MARKER.name
+        if not response.strip():
+            show_dialog(DialogType.ERROR, parent_window, "The text of marker is empty, please try again!")
+            return
+
+        fav_id = "1:64:0:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(response, response)
+        text = response
+
+    s_type = m_type.name
     model, paths = view.get_selection().get_selected_rows()
-    marker = (None, None, response, None, None, s_type, None, fav_id, None, None, None)
+    marker = (None, None, text, None, None, s_type, None, fav_id, None, None, None)
     itr = model.insert_before(model.get_iter(paths[0]), marker) if paths else model.insert(0, marker)
     bouquets[selected_bouquet].insert(model.get_path(itr)[0], fav_id)
-    services[fav_id] = Service(None, None, None, response, None, None, None, s_type, *[None] * 9, 0, fav_id, None)
+    services[fav_id] = Service(None, None, None, text, None, None, None, s_type, *[None] * 9, 0, fav_id, None)
 
 
 # ***************** Movement *******************#

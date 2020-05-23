@@ -307,6 +307,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="icon_name">insert-link</property>
   </object>
+  <object class="GtkImage" id="insert_space_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">format-text-underline</property>
+  </object>
   <object class="GtkImage" id="insert_text_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -3171,6 +3176,16 @@ Author: Dmitriy Yefremov
         <property name="image">insert_text_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_insert_marker" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_insert_space_popup_item">
+        <property name="label" translatable="yes">Insert space</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">insert_space_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_insert_space" object="fav_tree_view" swapped="no"/>
       </object>
     </child>
     <child>

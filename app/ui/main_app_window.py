@@ -121,6 +121,7 @@ class Application(Gtk.Application):
                     "on_import_bouquets": self.on_import_bouquets,
                     "on_backup_tool_show": self.on_backup_tool_show,
                     "on_insert_marker": self.on_insert_marker,
+                    "on_insert_space": self.on_insert_space,
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_picons_manager_show": self.on_picons_manager_show,
@@ -1159,7 +1160,7 @@ class Application(Gtk.Application):
             fav_id = srv.data
             # IPTV and MARKER services
             s_type = srv.type
-            if s_type is BqServiceType.MARKER or s_type is BqServiceType.IPTV:
+            if s_type in (BqServiceType.MARKER, BqServiceType.IPTV, BqServiceType.SPACE):
                 icon = None
                 picon_id = None
                 if s_type is BqServiceType.IPTV:
@@ -1630,10 +1631,13 @@ class Application(Gtk.Application):
         self._radio_count_label.set_text(str(radio_count))
         self._data_count_label.set_text(str(data_count))
 
-    def on_insert_marker(self, view):
+    def on_insert_marker(self, view, m_type=BqServiceType.MARKER):
         """ Inserts marker into bouquet services list. """
-        insert_marker(view, self._bouquets, self._bq_selected, self._services, self._main_window)
+        insert_marker(view, self._bouquets, self._bq_selected, self._services, self._main_window, m_type)
         self.update_fav_num_column(self._fav_model)
+
+    def on_insert_space(self, view):
+        self.on_insert_marker(view, BqServiceType.SPACE)
 
     def on_fav_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:

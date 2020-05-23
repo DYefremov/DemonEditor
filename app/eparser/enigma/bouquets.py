@@ -24,7 +24,8 @@ def write_bouquets(path, bouquets, force_bq_names=False):
     srv_line = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     line = []
     pattern = re.compile("[^\\w_()]+")
-    current_marker = [0]
+    m_index = [0]
+    s_index = [0]
 
     for bqs in bouquets:
         line.clear()
@@ -37,24 +38,30 @@ def write_bouquets(path, bouquets, force_bq_names=False):
             else:
                 bq_name = re.sub(pattern, "_", bq.name) if force_bq_names else "de{0:02d}".format(index)
             line.append(srv_line.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
-            write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services, current_marker)
+            write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services, m_index, s_index)
 
         with open(path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
             file.writelines(line)
 
 
-def write_bouquet(path, name, services, current_marker):
+def write_bouquet(path, name, services, current_marker, current_space):
     bouquet = ["#NAME {}\n".format(name)]
     marker = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
+    space = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
 
     for srv in services:
-        if srv.service_type == BqServiceType.IPTV.name:
+        s_type = srv.service_type
+
+        if s_type == BqServiceType.IPTV.name:
             bouquet.append("#SERVICE {}\n".format(srv.fav_id.strip()))
-        elif srv.service_type == BqServiceType.MARKER.name:
+        elif s_type == BqServiceType.MARKER.name:
             m_data = srv.fav_id.strip().split(":")
             m_data[2] = current_marker[0]
             current_marker[0] += 1
             bouquet.append(marker.format(m_data[2], m_data[-1]))
+        elif s_type == BqServiceType.SPACE.name:
+            bouquet.append(space.format(current_space[0]))
+            current_space[0] += 1
         else:
             data = to_bouquet_id(srv)
             if srv.service:
@@ -89,18 +96,21 @@ def get_bouquet(path, bq_name, bq_type):
         bq_name = srvs.pop(0)
 
         for srv in srvs:
-            ch_data = srv.strip().split(":")
-            if ch_data[1] == "64":
+            srv_data = srv.strip().split(":")
+            if srv_data[1] == "64":
                 m_data, sep, desc = srv.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, ch_data[2]))
+                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, srv_data[2]))
+            elif srv_data[1] == "832":
+                m_data, sep, desc = srv.partition("#DESCRIPTION")
+                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, srv_data[3]))
             elif "http" in srv:
                 stream_data, sep, desc = srv.partition("#DESCRIPTION")
                 services.append(BouquetService(desc.lstrip(":").strip() if desc else "", BqServiceType.IPTV, srv, 0))
             else:
-                fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
+                fav_id = "{}:{}:{}:{}".format(srv_data[3], srv_data[4], srv_data[5], srv_data[6])
                 name = None
-                if len(ch_data) == 12:
-                    name, sep, desc = str(ch_data[-1]).partition("\n#DESCRIPTION")
+                if len(srv_data) == 12:
+                    name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
                 services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), 0))
 
     return bq_name.lstrip("#NAME").strip(), services

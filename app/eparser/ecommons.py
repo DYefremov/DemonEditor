@@ -13,6 +13,7 @@ class BqServiceType(Enum):
     DEFAULT = "DEFAULT"
     IPTV = "IPTV"
     MARKER = "MARKER"  # 64
+    SPACE = "SPACE"  # 832 [hidden marker]
 
 
 Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden"])
@@ -135,7 +136,7 @@ TRANSMISSION_MODE = {"0": "2k", "1": "8k", "2": "Auto", "3": "4k", "4": "1k", "5
 GUARD_INTERVAL = {"0": "1/32", "1": "1/16", "2": "1/8", "3": "1/4", "4": "Auto", "5": "1/128", "6": "19/128",
                   "7": "19/256"}
 
-HIERARCHY = {"0": "None", "1": "1", "2": "2", "3": "4",  "4": "Auto"}
+HIERARCHY = {"0": "None", "1": "1", "2": "2", "3": "4", "4": "Auto"}
 
 T_FEC = {"0": "1/2", "1": "2/3", "2": "3/4", "3": "5/6", "4": "7/8", "5": "Auto", "6": "6/7", "7": "8/9"}
 
