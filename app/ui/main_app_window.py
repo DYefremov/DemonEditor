@@ -1400,8 +1400,8 @@ class Application(Gtk.Application):
         cas = model.get_value(model.get_iter(path), Column.SRV_CAS_FLAGS)
         if not cas:
             return
-        cas_values = list(filter(lambda val: val.startswith("C:"), cas.split(",")))
-        self._cas_label.set_text(",".join(map(str, sorted(set(CAS.get(val, def_val) for val in cas_values)))))
+        cvs = list(filter(lambda val: val.startswith("C:") and len(val) > 3, cas.split(",")))
+        self._cas_label.set_text(",".join(map(str, sorted(set(CAS.get(v[:4].upper(), def_val) for v in cvs)))))
 
     def on_bouquets_selection(self, model, path, column):
         self._current_bq_name = model[path][0] if len(path) > 1 else None
