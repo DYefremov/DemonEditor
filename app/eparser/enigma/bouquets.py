@@ -75,20 +75,27 @@ def to_bouquet_id(srv):
         return "{}:0:{:X}:{}:0:0:0:".format(1, data_type, srv.fav_id)
 
 
-def get_bouquet(path, name, bq_type):
+def get_bouquet(path, bq_name, bq_type):
     """ Parsing services ids from bouquet file. """
-    with open(path + "userbouquet.{}.{}".format(name, bq_type), encoding="utf-8", errors="replace") as file:
+    with open(path + "userbouquet.{}.{}".format(bq_name, bq_type), encoding="utf-8", errors="replace") as file:
         chs_list = file.read()
         services = []
         srvs = list(filter(None, chs_list.split("\n#SERVICE")))  # filtering ['']
-        for ch in srvs[1:]:
-            ch_data = ch.strip().split(":")
+        # May come across empty[wrong] files!
+        if not srvs:
+            log("Bouquet file 'userbouquet.{}.{}' is empty or wrong!".format(bq_name, bq_type))
+            return "{} [empty]".format(bq_name), services
+
+        bq_name = srvs.pop(0)
+
+        for srv in srvs:
+            ch_data = srv.strip().split(":")
             if ch_data[1] == "64":
-                m_data, sep, desc = ch.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, ch, ch_data[2]))
-            elif "http" in ch:
-                stream_data, sep, desc = ch.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.lstrip(":").strip() if desc else "", BqServiceType.IPTV, ch, 0))
+                m_data, sep, desc = srv.partition("#DESCRIPTION")
+                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, ch_data[2]))
+            elif "http" in srv:
+                stream_data, sep, desc = srv.partition("#DESCRIPTION")
+                services.append(BouquetService(desc.lstrip(":").strip() if desc else "", BqServiceType.IPTV, srv, 0))
             else:
                 fav_id = "{}:{}:{}:{}".format(ch_data[3], ch_data[4], ch_data[5], ch_data[6])
                 name = None
@@ -96,7 +103,7 @@ def get_bouquet(path, name, bq_type):
                     name, sep, desc = str(ch_data[-1]).partition("\n#DESCRIPTION")
                 services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), 0))
 
-    return srvs[0].lstrip("#NAME").strip(), services
+    return bq_name.lstrip("#NAME").strip(), services
 
 
 def parse_bouquets(path, bq_name, bq_type):
