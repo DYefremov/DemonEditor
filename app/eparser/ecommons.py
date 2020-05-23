@@ -146,10 +146,8 @@ T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "-1": "DVB-T/T2"}
 C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
 
 # CAS
-CAS = {"C:2600": "BISS", "C:0b00": "Conax", "C:0b01": "Conax", "C:0b02": "Conax", "C:0baa": "Conax", "C:0602": "Irdeto",
-       "C:0604": "Irdeto", "C:0606": "Irdeto", "C:0608": "Irdeto", "C:0622": "Irdeto", "C:0626": "Irdeto",
-       "C:0664": "Irdeto", "C:0614": "Irdeto", "C:0692": "Irdeto", "C:1801": "Nagravision", "C:0500": "Viaccess",
-       "C:0E00": "PowerVu", "C:4ae0": "DRE-Crypt", "C:4ae1": "DRE-Crypt", "C:7be1": "DRE-Crypt"}
+CAS = {"C:26": "BISS", "C:0B": "Conax", "C:06": "Irdeto", "C:18": "Nagravision", "C:05": "Viaccess", "C:01": "SECA",
+       "C:0E": "PowerVu", "C:4A": "DRE-Crypt", "C:7B": "DRE-Crypt", "C:56": "Verimatrix", "C:09": "VideoGuard"}
 
 # 'on' attribute  0070(hex) = 112(int) =  ONID(ONID-TID on www.lyngsat.com)
 PROVIDER = {112: "HTB+", 253: "Tricolor TV"}
