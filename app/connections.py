@@ -51,6 +51,7 @@ class HttpRequestType(Enum):
     PLAYER_PREV = "mediaplayercmd?command=previous"
     PLAYER_STOP = "mediaplayercmd?command=stop"
     PLAYER_REMOVE = "mediaplayerremove?file="
+    GRUB = "grab?format=jpg&mode="
 
 
 class TestException(Exception):
@@ -334,6 +335,7 @@ class HttpAPI:
         self._settings = settings
         self._shutdown = False
         self._session_id = 0
+        self._main_url = None
         self._base_url = None
         self._data = None
         self.init()
@@ -351,6 +353,8 @@ class HttpAPI:
             url += urllib.parse.quote(ref)
         elif req_type is HttpRequestType.PLAY or req_type is HttpRequestType.PLAYER_REMOVE:
             url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
+        elif req_type is HttpRequestType.GRUB:
+            url = "{}/{}{}".format(self._main_url, req_type.value, ref)
 
         def done_callback(f):
             callback(f.result())
@@ -362,10 +366,10 @@ class HttpAPI:
     def init(self):
         user, password = self._settings.http_user, self._settings.http_password
         use_ssl = self._settings.http_use_ssl
-        url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
-        self._base_url = "{}/web/".format(url)
-        init_auth(user, password, url, use_ssl)
-        url = "{}/web/{}".format(url, HttpRequestType.TOKEN.value)
+        self._main_url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
+        self._base_url = "{}/web/".format(self._main_url)
+        init_auth(user, password, self._main_url, use_ssl)
+        url = "{}/web/{}".format(self._main_url, HttpRequestType.TOKEN.value)
         s_id = get_session_id(user, password, url)
         if s_id != "0":
             self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
@@ -381,6 +385,8 @@ def get_response(req_type, url, data=None):
         with urlopen(Request(url, data=data), timeout=10) as f:
             if req_type is HttpRequestType.STREAM or req_type is HttpRequestType.STREAM_CURRENT:
                 return {"m3u": f.read().decode("utf-8")}
+            elif req_type is HttpRequestType.GRUB:
+                return {"img_data": f.read()}
             elif req_type is HttpRequestType.CURRENT:
                 for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
                     return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list

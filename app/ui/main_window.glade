@@ -653,6 +653,70 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-save-as</property>
   </object>
+  <object class="GtkPopoverMenu" id="screenshots_menu">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkBox" id="screenshots_menu_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">10</property>
+        <property name="margin_right">10</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkModelButton" id="screenshot_button_all">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.on_screenshot_all</property>
+            <property name="text" translatable="yes">All</property>
+            <property name="centered">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="screenshot_button_video">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.on_screenshot_video</property>
+            <property name="text" translatable="yes">Video</property>
+            <property name="centered">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="screenshot_button_osd">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.on_screenshot_osd</property>
+            <property name="text" translatable="yes">OSD</property>
+            <property name="centered">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">main</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
   <object class="GtkImage" id="select_all_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2864,6 +2928,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="info_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
                     <property name="stock">gtk-info</property>
                   </object>
                   <packing>
@@ -2910,10 +2976,35 @@ Author: Dmitriy Yefremov
                 <property name="position">0</property>
               </packing>
             </child>
+            <child type="center">
+              <object class="GtkMenuButton" id="screenshots_button">
+                <property name="name">status-bar-button</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Screenshot</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="popover">screenshots_menu</property>
+                <child>
+                  <object class="GtkImage" id="screenshots_menu_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">zoom-best-fit</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkImage" id="http_status_image">
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">No connection to the receiver!</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="icon_name">network-offline</property>
@@ -2953,6 +3044,8 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Record</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
                     <signal name="clicked" handler="on_record" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="record_button_image">
