@@ -2770,6 +2770,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="info_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
                     <property name="stock">gtk-info</property>
                   </object>
                   <packing>
@@ -2816,10 +2818,35 @@ Author: Dmitriy Yefremov
                 <property name="position">0</property>
               </packing>
             </child>
+            <child type="center">
+              <object class="GtkMenuButton" id="screenshots_button">
+                <property name="name">status-bar-button</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Screenshot</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="popover">screenshots_menu</property>
+                <child>
+                  <object class="GtkImage" id="screenshots_menu_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">zoom-best-fit</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkImage" id="http_status_image">
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">No connection to the receiver!</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="icon_name">network-offline</property>
@@ -2860,6 +2887,8 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Record</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
                     <signal name="clicked" handler="on_record" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="record_button_image">

@@ -241,6 +241,9 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
+        # Screenshots
+        self._screenshots_button = builder.get_object("screenshots_button")
+        self._receiver_info_box.bind_property("visible", self._screenshots_button, "visible")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -383,6 +386,10 @@ class Application(Gtk.Application):
         set_action("on_edit", self.on_edit)
         # Save
         self._app_info_box.bind_property("visible", set_action("on_data_save", self.on_data_save, False), "enabled", 4)
+        # Screenshots
+        set_action("on_screenshot_all", self.on_screenshot_all)
+        set_action("on_screenshot_video", self.on_screenshot_video)
+        set_action("on_screenshot_osd", self.on_screenshot_osd)
 
     def set_accels(self):
         """ Setting accelerators for the actions. """
@@ -2291,6 +2298,37 @@ class Application(Gtk.Application):
             dsc = "{} {}:{} - {}:{}".format(title, s_time.hour, s_time.minute, end_time.hour, end_time.minute)
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
+
+    # ******************** Screenshots ************************#
+
+    def on_screenshot_all(self, action, value=None):
+        self._http_api.send(HttpRequestType.GRUB, "all", self.on_screenshot)
+
+    def on_screenshot_video(self, action, value=None):
+        self._http_api.send(HttpRequestType.GRUB, "video", self.on_screenshot)
+
+    def on_screenshot_osd(self, action, value=None):
+        self._http_api.send(HttpRequestType.GRUB, "osd", self.on_screenshot)
+
+    def on_screenshot(self, data):
+        if "error_code" in data:
+            return
+
+        img = data.get("img_data", None)
+        if img:
+            self._screenshots_button.set_sensitive(False)
+            try:
+                import tempfile
+                import subprocess
+
+                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg") as tf:
+                    tf.write(img)
+                    p = subprocess.Popen(["open" if self._settings.is_darwin else "xdg-open", tf.name],
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE)
+                    p.communicate()
+            finally:
+                self._screenshots_button.set_sensitive(True)
 
     # ***************** Filter and search *********************#
 
