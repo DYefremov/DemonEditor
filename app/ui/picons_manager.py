@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from gi.repository import GLib, GdkPixbuf
+from gi.repository import GLib, GdkPixbuf, GObject
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
@@ -28,6 +28,7 @@ class PiconsDialog:
         self._POS_PATTERN = re.compile(r"^\d+\.\d+[EW]?$")
         self._current_process = None
         self._terminate = False
+        self._filter_binding = None
 
         handlers = {"on_receive": self.on_receive,
                     "on_load_providers": self.on_load_providers,
@@ -54,6 +55,7 @@ class PiconsDialog:
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
                     "on_filter_toggled": self.on_filter_toggled,
+                    "on_filter_services_switch": self.on_filter_services_switch,
                     "on_popup_menu": on_popup_menu}
 
         builder = Gtk.Builder()
@@ -103,6 +105,7 @@ class PiconsDialog:
         self._load_providers_button.bind_property("visible", builder.get_object("download_box_separator"), "visible")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._explorer_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
+        self._filter_button.bind_property("active", builder.get_object("filter_service_box"), "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Style
@@ -508,6 +511,15 @@ class PiconsDialog:
         self._filter_bar.set_search_mode(active)
         if not active:
             self._picons_filter_entry.set_text("")
+
+    def on_filter_services_switch(self, button, state):
+        if state:
+            self._filter_binding = self._picons_filter_entry.bind_property("text", self._app.filter_entry, "text")
+            self._app.filter_entry.set_text(self._picons_filter_entry.get_text())
+        else:
+            if self._filter_binding:
+                self._filter_binding.unbind()
+                self._app.filter_entry.set_text("")
 
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())

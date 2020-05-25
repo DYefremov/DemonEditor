@@ -2613,6 +2613,10 @@ class Application(Gtk.Application):
         return self._bouquets_view
 
     @property
+    def filter_entry(self):
+        return self._filter_entry
+
+    @property
     def current_services(self):
         return self._services
 
