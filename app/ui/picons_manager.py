@@ -3,6 +3,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from pathlib import Path
 
 from gi.repository import GLib, GdkPixbuf
 
@@ -136,6 +137,9 @@ class PiconsDialog:
         if not path or not os.path.exists(path):
             return
 
+        self.update_picons_data(path)
+
+    def update_picons_data(self, path):
         GLib.idle_add(self._explorer_path_button.set_sensitive, False)
         gen = self.update_picons(path)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
@@ -163,11 +167,30 @@ class PiconsDialog:
             except GLib.GError as e:
                 pass
             else:
-                yield model.append((p, file))
+                yield model.append((p, file, path))
 
         self._picons_view.set_model(p_model)
         self._explorer_path_button.set_sensitive(True)
         yield True
+
+    def update_picons_from_file(self, view, uri):
+        """ Adds picons in the view on dragging from file system. """
+        model = get_base_model(view.get_model())
+        from urllib.parse import unquote, urlparse
+        path = Path(urlparse(unquote(uri)).path.strip())
+        f_path = str(path.resolve())
+        if not f_path:
+            return
+
+        if path.is_file():
+            try:
+                p = GdkPixbuf.Pixbuf.new_from_file_at_scale(f_path, 100, 60, True)
+            except GLib.GError:
+                pass
+            else:
+                model.append((p, path.name, str(path.parent)))
+        elif path.is_dir():
+            self._explorer_path_button.set_current_folder(f_path + "/")
 
     # ***************** Drag-and-drop ********************* #
 
@@ -189,7 +212,7 @@ class PiconsDialog:
             return
 
         if txt.startswith("file://"):
-            self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
+            self.update_picons_from_file(view, txt)
             return
 
         itr_str, sep, src = txt.partition("::::")
@@ -201,7 +224,8 @@ class PiconsDialog:
             return
 
         model = view.get_model()
-        p_path = "{}/{}".format(self._explorer_path_button.get_filename(), model.get_value(model.get_iter(path), 1))
+        row = model[path][:]
+        p_path = "{}/{}".format(row[-1], row[1])
         if src == self._app.FAV_MODEL_NAME:
             target_view = self._app.fav_view
             c_id = Column.FAV_ID
@@ -226,8 +250,8 @@ class PiconsDialog:
     def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
         model = view.get_model()
         path = view.get_selected_items()[0]
-        p_path = "{}/{}".format(self._explorer_path_button.get_filename(), model.get_value(model.get_iter(path), 1))
-        data.set_uris([p_path])
+        row = model[path][:]
+        data.set_uris(["{}/{}".format(row[-1], row[1])])
 
     # ******************** ####### ************************* #
 

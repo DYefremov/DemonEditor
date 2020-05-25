@@ -39,6 +39,8 @@ Author: Dmitriy Yefremov
       <column type="GdkPixbuf"/>
       <!-- column-name title -->
       <column type="gchararray"/>
+      <!-- column-name path -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkTreeModelFilter" id="picons_filter_model">
@@ -423,6 +425,7 @@ Author: Dmitriy Yefremov
                                 <property name="column_spacing">5</property>
                                 <property name="tooltip_column">1</property>
                                 <property name="item_padding">5</property>
+                                <property name="activate_on_single_click">True</property>
                                 <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                 <signal name="drag-data-received" handler="on_picons_view_drag_data_received" swapped="no"/>
                                 <signal name="drag-drop" handler="on_picons_view_drag_drop" swapped="no"/>
