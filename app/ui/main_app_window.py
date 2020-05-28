@@ -2125,7 +2125,7 @@ class Application(Gtk.Application):
                     callback()
             else:
                 self.show_error_dialog("No connection to the receiver!")
-                self.set_playback_elms_active()
+            self.set_playback_elms_active()
 
         self._http_api.send(HttpRequestType.ZAP, ref, zap)
 
