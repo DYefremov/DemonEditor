@@ -529,6 +529,14 @@ class Settings:
         self._settings["enable_yt_dl"] = value
 
     @property
+    def enable_yt_dl_update(self):
+        return self._settings.get("enable_yt_dl_update", Defaults.ENABLE_YT_DL.value)
+
+    @enable_yt_dl_update.setter
+    def enable_yt_dl_update(self, value):
+        self._settings["enable_yt_dl_update"] = value
+
+    @property
     def enable_send_to(self):
         return self._settings.get("enable_send_to", Defaults.ENABLE_SEND_TO.value)
 

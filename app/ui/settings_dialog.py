@@ -145,9 +145,10 @@ class SettingsDialog:
         self._bouquet_hints_switch = builder.get_object("bouquet_hints_switch")
         self._services_hints_switch = builder.get_object("services_hints_switch")
         self._lang_combo_box = builder.get_object("lang_combo_box")
-        # HTTP API
+        # Extra
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
-        self._enable_y_dl_switch = builder.get_object("enable_y_dl_switch")
+        self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
+        self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
         self._enable_send_to_switch = builder.get_object("enable_send_to_switch")
         self._click_mode_disabled_button = builder.get_object("click_mode_disabled_button")
         self._click_mode_stream_button = builder.get_object("click_mode_stream_button")
@@ -159,7 +160,7 @@ class SettingsDialog:
         self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
         self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
         self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
-        self._extra_support_grid.bind_property("sensitive", builder.get_object("bq_naming_grid"), "sensitive")
+        self._enable_yt_dl_switch.bind_property("active", builder.get_object("yt_dl_update_box"), "sensitive")
         # Profiles
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
@@ -285,7 +286,8 @@ class SettingsDialog:
             self._support_ver5_switch.set_active(self._settings.v5_support)
             self._force_bq_name_switch.set_active(self._settings.force_bq_names)
             self._support_http_api_switch.set_active(self._settings.http_api_support)
-            self._enable_y_dl_switch.set_active(self._settings.enable_yt_dl)
+            self._enable_yt_dl_switch.set_active(self._settings.enable_yt_dl)
+            self._enable_update_yt_dl_switch.set_active(self._settings.enable_yt_dl_update)
             self._enable_send_to_switch.set_active(self._settings.enable_send_to)
             self._set_color_switch.set_active(self._settings.use_colors)
             new_rgb = Gdk.RGBA()
@@ -358,7 +360,8 @@ class SettingsDialog:
             self._ext_settings.v5_support = self._support_ver5_switch.get_active()
             self._ext_settings.force_bq_names = self._force_bq_name_switch.get_active()
             self._ext_settings.http_api_support = self._support_http_api_switch.get_active()
-            self._ext_settings.enable_yt_dl = self._enable_y_dl_switch.get_active()
+            self._ext_settings.enable_yt_dl = self._enable_yt_dl_switch.get_active()
+            self._ext_settings.enable_yt_dl_update = self._enable_update_yt_dl_switch.get_active()
             self._ext_settings.enable_send_to = self._enable_send_to_switch.get_active()
 
         self._ext_settings.default_profile = list(filter(lambda r: r[1], self._profile_view.get_model()))[0][0]
