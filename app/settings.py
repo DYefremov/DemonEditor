@@ -39,8 +39,6 @@ class Defaults(Enum):
 
 
 def get_settings():
-    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         write_settings(get_default_settings())
 
@@ -77,6 +75,7 @@ def get_default_transcoding_presets():
 
 
 def write_settings(config):
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     with open(CONFIG_FILE, "w") as config_file:
         json.dump(config, config_file, indent="    ")
 
@@ -125,6 +124,10 @@ class SettingsException(Exception):
     pass
 
 
+class SettingsReadException(SettingsException):
+    pass
+
+
 class PlayStreamsMode(IntEnum):
     """ Behavior mode when opening streams. """
     BUILT_IN = 0
@@ -137,7 +140,10 @@ class Settings:
     __VERSION = 1
 
     def __init__(self, ext_settings=None):
-        settings = ext_settings or get_settings()
+        try:
+            settings = ext_settings or get_settings()
+        except PermissionError as e:
+            raise SettingsReadException(e)
 
         if self.__VERSION > settings.get("version", 0):
             raise SettingsException("Outdated version of the settings format!")
