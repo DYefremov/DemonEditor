@@ -16,7 +16,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
 from app.tools.media import Player, Recorder, HttpPlayer
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -2715,6 +2715,9 @@ class Application(Gtk.Application):
 def start_app():
     try:
         Settings.get_instance()
+    except SettingsReadException as e:
+        msg = "{}\n {}".format(get_message("Error reading or writing program settings!"), e)
+        show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
     except SettingsException as e:
         msg = "{} \n{}".format(e, get_message("All setting were reset. Restart the program!"))
         show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
