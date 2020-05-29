@@ -28,6 +28,7 @@ Author: Dmitriy Yefremov
 -->
 <interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
+  <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
@@ -87,7 +88,7 @@ Author: Dmitriy Yefremov
         <property name="image">set_default_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_profile_set_default" swapped="no"/>
-        <accelerator key="d" signal="activate"/>
+        <accelerator key="d" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
