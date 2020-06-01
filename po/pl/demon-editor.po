@@ -1,7 +1,6 @@
 # Copyright (C) 2018-2019 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
-#
 msgid ""
 msgstr ""
 "Last-Translator: wwns\n"
@@ -9,16 +8,20 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
 
 msgid "translator-credits"
 msgstr "wwns"
 
 # Main
+msgid "File"
+msgstr "Plik"
+
+msgid "View"
+msgstr "Widok"
+
+msgid "Lock"
+msgstr "Zablokuj"
+
 msgid "Service"
 msgstr "Serwis"
 
@@ -86,7 +89,7 @@ msgid "Hide"
 msgstr "Ukryj"
 
 msgid "Hide/Skip On/Off     Ctrl + H"
-msgstr "Ukryj/Pomiń Wł./Wył     Ctrl + H"
+msgstr "Ukryj/Pomiń wł./wył     Ctrl + H"
 
 msgid "Add IPTV or stream service"
 msgstr "Dodaj strumień IPTV"
@@ -149,7 +152,7 @@ msgid "Open"
 msgstr "Otwórz"
 
 msgid "Parent lock On/Off     Ctrl + L"
-msgstr "Blokada rodzicielska On/Off     Ctrl + L"
+msgstr "Blokada rodzicielska wł./wył     Ctrl + L"
 
 msgid "Picons"
 msgstr "Pikony"
@@ -174,9 +177,6 @@ msgstr "Zapisz"
 
 msgid "Search"
 msgstr "Szukaj"
-
-msgid "Services"
-msgstr "Kanały"
 
 msgid "Services filter"
 msgstr "Filtr kanałów"
@@ -212,10 +212,10 @@ msgid "Host:"
 msgstr "Host:"
 
 msgid "Loading data..."
-msgstr "Ładowanie danych…."
+msgstr "Ładowanie danych…"
 
 msgid "Receive"
-msgstr "Pobieranie"
+msgstr "Pobierz"
 
 msgid "Receive files from receiver"
 msgstr "Pobieranie plików z odbiornika"
@@ -251,7 +251,19 @@ msgid "User bouquet files:"
 msgstr "Pliki bukietu użytkownika:"
 
 msgid "Extra:"
-msgstr "Ekstra:"
+msgstr "Dodatkowe"
+
+msgid "IPTV tools"
+msgstr "Narzędzia IPTV"
+
+msgid "Picons manager"
+msgstr "Menedżer pikonów"
+
+msgid "Hide/Skip"
+msgstr "Ukryj/Pomiń"
+
+msgid "Parent lock"
+msgstr "Blokada rodzicielska"
 
 # Filter bar
 msgid "Only free"
@@ -264,9 +276,6 @@ msgid "All types"
 msgstr "Wszystkie typy"
 
 # Streams player
-msgid "Play"
-msgstr "Odtwarzaj"
-
 msgid "Stop playback"
 msgstr "Zatrzymaj odtwarzanie"
 
@@ -533,10 +542,10 @@ msgid "Done!"
 msgstr "Zrobione!"
 
 msgid "Please, wait..."
-msgstr "Proszę czekać ..."
+msgstr "Proszę czekać…"
 
 msgid "Resizing..."
-msgstr "Zmiana rozmiaru..."
+msgstr "Zmiana rozmiaru…"
 
 msgid "Select paths!"
 msgstr "Wybierz ścieżki!"
@@ -564,7 +573,7 @@ msgstr "Nie znaleziono VLC. Sprawdź, czy jest zainstalowany!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Proszę czekać, trwa testowanie strumieni..."
+msgstr "Proszę czekać, trwa testowanie strumieni…"
 
 msgid "Found"
 msgstr "Znaleziono"
@@ -587,14 +596,8 @@ msgstr "Brak danych do zapisania!"
 msgid "Network"
 msgstr "Sieć"
 
-msgid "Paths"
-msgstr "Ścieżki"
-
 msgid "Program"
 msgstr "Program"
-
-msgid "Backup:"
-msgstr "Kopia:"
 
 msgid "Backup"
 msgstr "Kopia"
@@ -610,21 +613,6 @@ msgstr "Przywróć bukiety"
 
 msgid "Restore all"
 msgstr "Przywrócić wszystko"
-
-msgid "Before saving"
-msgstr "Przed zapisaniem"
-
-msgid "Before downloading from the receiver"
-msgstr "Przed pobraniem z odbiornika"
-
-msgid "Set background color for the services"
-msgstr "Ustaw kolor tła dla usług"
-
-msgid "Marked as new:"
-msgstr "Oznacz jako nowy:"
-
-msgid "With an extra name in the bouquet:"
-msgstr "Z dodatkową nazwą w bukiecie:"
 
 msgid "Select"
 msgstr "Wybierz"
@@ -665,21 +653,6 @@ msgstr "Testuj połączenie"
 
 msgid "Double click on the service in the bouquet list:"
 msgstr "Kliknij dwukrotnie usługę na liście bukietów:"
-
-msgid "Zap"
-msgstr "Przełącz"
-
-msgid "Play  stream"
-msgstr "Odtwórz strumień"
-
-msgid "Disabled"
-msgstr "Wyłączone"
-
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Włącz wer. 5 wsparcie (eksperymentalne)"
-
-msgid "Enable HTTP API (experimental)"
-msgstr "Włącz API HTTP (eksperymentalne)"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Przełącz(zap) kanał(Ctrl + Z)"
@@ -780,3 +753,233 @@ msgstr "Import listy odtwarzania"
 
 msgid "Getting link error:"
 msgstr "Błąd pobierania łącza:"
+
+msgid "Apply profile settings"
+msgstr "Zastosuj ustawienia profilu"
+
+msgid "Settings type:"
+msgstr "Ustawienia dla:"
+
+msgid "Set default"
+msgstr "Uataw domyślnie"
+
+msgid "Enable direct playback bar (experimental)"
+msgstr "Włącz pasek bezpośredniego odtwarzania (eksperymentalnie)"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Umożliwia bezpośrednie wysyłanie i odtwarzanie łączy multimedialnych w odbiorniku"
+
+msgid "Watch the channel in the program"
+msgstr "Obejrzyj kanał w programie"
+
+msgid "Receiver info"
+msgstr "Informacje o odbiorniku"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Działa w trybie gotowości lub aktualnie jest aktywny transponder!"
+
+msgid "Download picons from the receiver"
+msgstr "Pobierz pikony z odbiornika"
+
+msgid "Remove picons from the receiver"
+msgstr "Usuń pikony z odbiornika"
+
+msgid "Use http to reload data in the receiver."
+msgstr "Użyj http aby ponownie załadować dane do odbiornika."
+
+msgid "Apply profile settings"
+msgstr "Zastosuj ustawienia profilu"
+
+msgid "Drag  or paste the link here"
+msgstr "Przeciągnij lub wklej tutaj link"
+
+msgid "Remove added links in the playlist"
+msgstr "Usuń dodane linki z listy odtwarzania"
+
+msgid "A bouquet with that name exists!"
+msgstr "Istnieje bukiet o tej nazwie!"
+
+msgid "Channels:"
+msgstr "Kanały:"
+
+msgid "Remove all picons from the receiver"
+msgstr "Usuń wszystkie pikony z odbiornika"
+
+msgid "Download from the receiver"
+msgstr "Pobierz z odbiornika"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino ma jedynie wsparcie eksperymentalne. Nie wszystkie funkcje są obsługiwane!"
+
+msgid "Default data path:"
+msgstr "Domyślna ścieżka danych:"
+
+# Appearance
+msgid "Appearance"
+msgstr "Wygląd"
+
+msgid "Enable Themes support"
+msgstr "Włącz obsługę motywów"
+
+msgid "EXPERIMENTAL!"
+msgstr "EKSPERYMENTALNE!"
+
+msgid "Gtk3 Theme:"
+msgstr "Gtk3 motyw:"
+
+msgid "Icon Theme:"
+msgstr "Motyw ikon:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Gtk3 motywy i ikony:"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Zapisz i uruchom ponownie program, aby zastosować ustawienia."
+
+# Extra
+msgid "Extra"
+msgstr "Ekstra"
+
+msgid "Enable ver. 5 support (experimental)"
+msgstr "Włącz wer. 5 wsparcie (eksperymentalne)"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Włącz alternatywne nazewnictwo plików bukietów"
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Niektóre obrazy mogą mieć problemy z wyświetlaniem listy ulubionych!"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Pozwala nazwać pliki bukietów przy użyciu ich nazw."
+
+msgid "Enable HTTP API (experimental)"
+msgstr "Włącz API HTTP (eksperymentalne)"
+
+msgid "Enable send to receiver (experimental)"
+msgstr "Włącz wysyłanie do odbiornika (eksperymentalne)"
+
+msgid "Zap"
+msgstr "Przełącz"
+
+msgid "Play"
+msgstr "Odtwarzaj"
+
+msgid "Zap and Play"
+msgstr "Przełącz i Odtwórz"
+
+msgid "Play  stream"
+msgstr "Odtwórz strumień"
+
+msgid "Disabled"
+msgstr "Wyłączone"
+
+#Program
+msgid "Program"
+msgstr "Program"
+
+msgid "Language:"
+msgstr "Język:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Załaduj ostatnią otwartą konfigurację podczas uruchamiania programu"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Pokaż krótkie informacje jako wskazówki na głównej liście usług"
+
+msgid "Show detailed info as hints in the bouquet list" 
+msgstr "Pokaż szczegółowe informacje jako wskazówki na liście bukietów"
+
+msgid "Set background color for the services"
+msgstr "Ustaw kolor tła dla usług"
+
+msgid "Marked as new:"
+msgstr "Oznacz jako nowy:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "Z dodatkową nazwą w bukiecie:"
+
+msgid "Backup:"
+msgstr "Kopia:"
+
+msgid "Before saving"
+msgstr "Przed zapisaniem"
+
+msgid "Before downloading from the receiver"
+msgstr "Przed pobraniem z odbiornika"
+
+#Streaming
+msgid "Streaming"
+msgstr "Transmisja"
+
+msgid "Record to disk:"
+msgstr "Nagrywanie na dysk:"
+
+msgid "Activate transcoding"
+msgstr "Aktywuj transkodowanie"
+
+msgid "Presets:"
+msgstr "Ustawienia wstępne:"
+
+msgid "720p TV/device"
+msgstr "Dla urządzeń z obsługą rozdzielczości 720p"
+
+msgid "1080p TV/device"
+msgstr "Dla urządzeń z obsługą rozdzielczości 1080p"
+
+msgid "Video options:"
+msgstr "Opcje wideo:"
+
+msgid "Width (px):"
+msgstr "Szerokość (px):"
+
+msgid "Height (px):"
+msgstr "Wysokość (px):"
+
+msgid "Codec:"
+msgstr "Kodek:"
+
+msgid "Video options:"
+msgstr "Opcje wideo:"
+
+msgid "Audio options:"
+msgstr "Opcje audio:"
+
+msgid "Services"
+msgstr "Kanały"
+
+msgid "Sample rate (Hz):"
+msgstr "Częstotliwość próbkowania (Hz):"
+
+msgid "Play streams mode:"
+msgstr "Odtwarzaj tryb strumieni:"
+
+msgid "Bulit-in player"
+msgstr "Wbudowany odtwarzacz"
+
+msgid "VLC media player"
+msgstr "Odtwarzacz multimedialny VLC"
+
+msgid "Only get m3u file"
+msgstr "Tylko pobierz plik m3u"
+
+# Paths
+msgid "Paths"
+msgstr "Ścieżki"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Ustaw folder profilu jako domyślny dla dodatkowych danych"
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Ustawia folder profilu jako domyślny do przechowywania pikonów, kopii zapasowych itp."
+
+msgid "Default data path:"
+msgstr "Domyślna ścieżka danych:"
+
+msgid "Record"
+msgstr "Nagrania"
+
+msgid "Streams record path:"
+msgstr "Ścieżka zapisu nagrań:"
+
+msgid "x"
+msgstr "x"
