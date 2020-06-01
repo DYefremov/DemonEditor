@@ -367,16 +367,16 @@ def append_picons(picons, model):
     GLib.idle_add(lambda: next(app, False), priority=GLib.PRIORITY_LOW)
 
 
-def assign_picon(target, srv_view, fav_view, transient, picons, settings, services, p_path=None):
+def assign_picon(target, srv_view, fav_view, transient, picons, settings, services, src_path=None, dst_path=None):
     view = srv_view if target is ViewTarget.SERVICES else fav_view
     model, paths = view.get_selection().get_selected_rows()
 
-    if not p_path:
-        p_path = get_chooser_dialog(transient, settings, "*.png files", ("*.png",))
-        if p_path == Gtk.ResponseType.CANCEL:
+    if not src_path:
+        src_path = get_chooser_dialog(transient, settings, "*.png files", ("*.png",))
+        if src_path == Gtk.ResponseType.CANCEL:
             return
 
-    if not str(p_path).endswith(".png") or not os.path.isfile(p_path):
+    if not str(src_path).endswith(".png") or not os.path.isfile(src_path):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
         return
 
@@ -394,10 +394,10 @@ def assign_picon(target, srv_view, fav_view, transient, picons, settings, servic
         picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
 
         if picon_id:
-            picons_path = settings.picons_local_path
+            picons_path = dst_path or settings.picons_local_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
-            shutil.copy(p_path, picon_file)
+            shutil.copy(src_path, picon_file)
             picon = get_picon_pixbuf(picon_file)
             picons[picon_id] = picon
             model.set_value(itr, p_pos, picon)
@@ -411,7 +411,8 @@ def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):
     for row in model:
         if row[fav_id_pos] == fav_id:
             row[picon_pos] = picon
-            break
+            return True
+    return True
 
 
 def remove_picon(target, srv_view, fav_view, picons, settings):

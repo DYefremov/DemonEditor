@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from gi.repository import GLib, GdkPixbuf, GObject
+from gi.repository import GLib, GdkPixbuf
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
@@ -13,8 +13,9 @@ from app.settings import SettingsType, Settings
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
-from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, GTK_PATH, Column
+from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon, \
+    get_picon_pixbuf
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, GTK_PATH
 
 
 class PiconsDialog:
@@ -29,6 +30,8 @@ class PiconsDialog:
         self._current_process = None
         self._terminate = False
         self._filter_binding = None
+        self._services = None
+        self._current_picon_info = None
 
         handlers = {"on_receive": self.on_receive,
                     "on_load_providers": self.on_load_providers,
@@ -45,17 +48,21 @@ class PiconsDialog:
                     "on_position_edited": self.on_position_edited,
                     "on_visible_page": self.on_visible_page,
                     "on_convert": self.on_convert,
-                    "on_picons_folder_changed": self.on_picons_folder_changed,
+                    "on_picons_src_changed": self.on_picons_src_changed,
+                    "on_picons_dest_changed": self.on_picons_dest_changed,
                     "on_picons_view_drag_drop": self.on_picons_view_drag_drop,
                     "on_picons_view_drag_data_received": self.on_picons_view_drag_data_received,
                     "on_picons_view_drag_data_get": self.on_picons_view_drag_data_get,
-                    "on_picons_view_realize": self.on_picons_view_realize,
+                    "on_picon_info_image_drag_data_received": self.on_picon_info_image_drag_data_received,
+                    "on_picons_dest_view_realize": self.on_picons_dest_view_realize,
                     "on_satellites_view_realize": self.on_satellites_view_realize,
                     "on_satellite_selection": self.on_satellite_selection,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
                     "on_filter_toggled": self.on_filter_toggled,
+                    "on_fiter_srcs_toggled": self.on_fiter_srcs_toggled,
                     "on_filter_services_switch": self.on_filter_services_switch,
+                    "on_picon_activated": self.on_picon_activated,
                     "on_popup_menu": on_popup_menu}
 
         builder = Gtk.Builder()
@@ -64,17 +71,23 @@ class PiconsDialog:
 
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)
-        self._picons_view = builder.get_object("picons_view")
+        self._picons_src_view = builder.get_object("picons_src_view")
+        self._picons_dest_view = builder.get_object("picons_dest_view")
         self._providers_view = builder.get_object("providers_view")
         self._satellites_view = builder.get_object("satellites_view")
-        self._picons_filter_model = builder.get_object("picons_filter_model")
-        self._picons_filter_model.set_visible_func(self.picons_filter_function)
-        self._explorer_path_button = builder.get_object("explorer_path_button")
+        self._picons_src_filter_model = builder.get_object("picons_src_filter_model")
+        self._picons_src_filter_model.set_visible_func(self.picons_src_filter_function)
+        self._picons_dst_filter_model = builder.get_object("picons_dst_filter_model")
+        self._picons_dst_filter_model.set_visible_func(self.picons_dst_filter_function)
+        self._explorer_src_path_button = builder.get_object("explorer_src_path_button")
+        self._explorer_dest_path_button = builder.get_object("explorer_dest_path_button")
         self._expander = builder.get_object("expander")
         self._text_view = builder.get_object("text_view")
         self._info_bar = builder.get_object("info_bar")
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_button = builder.get_object("filter_button")
+        self._src_filter_button = builder.get_object("src_filter_button")
+        self._dst_filter_button = builder.get_object("dst_filter_button")
         self._picons_filter_entry = builder.get_object("picons_filter_entry")
         self._ip_entry = builder.get_object("ip_entry")
         self._picons_entry = builder.get_object("picons_entry")
@@ -83,6 +96,9 @@ class PiconsDialog:
         self._info_bar = builder.get_object("info_bar")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
+        self._info_check_button = builder.get_object("info_check_button")
+        self._picon_info_image = builder.get_object("picon_info_image")
+        self._picon_info_label = builder.get_object("picon_info_label")
         self._load_providers_button = builder.get_object("load_providers_button")
         self._receive_button = builder.get_object("receive_button")
         self._convert_button = builder.get_object("convert_button")
@@ -106,8 +122,12 @@ class PiconsDialog:
         self._explorer_action_box.bind_property("visible", downloader_action_box, "visible", 4)
         self._convert_button.bind_property("visible", downloader_action_box, "visible", 4)
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
-        self._explorer_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
+        self._explorer_src_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
         self._filter_button.bind_property("active", builder.get_object("filter_service_box"), "visible")
+        self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
+        self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
+        self._filter_button.bind_property("visible", self._info_check_button, "visible")
+        self._info_check_button.bind_property("active", builder.get_object("explorer_info_bar"), "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Style
@@ -134,28 +154,34 @@ class PiconsDialog:
     def show(self):
         self._dialog.show()
 
-    def on_picons_view_realize(self, view):
-        self._explorer_path_button.set_current_folder(self._settings.picons_local_path)
+    def on_picons_dest_view_realize(self, view):
+        self._services = {s.picon_id: s for s in self._app.current_services.values() if s.picon_id}
+        self._explorer_dest_path_button.select_filename(self._settings.picons_local_path)
 
-    def on_picons_folder_changed(self, button):
+    def on_picons_src_changed(self, button):
+        self.update_picons_data(self._picons_src_view, button)
+
+    def on_picons_dest_changed(self, button):
+        self.update_picon_info()
+        self.update_picons_data(self._picons_dest_view, button)
+
+    def update_picons_data(self, view, button):
         path = button.get_filename()
         if not path or not os.path.exists(path):
             return
 
-        self.update_picons_data(path)
-
-    def update_picons_data(self, path):
-        GLib.idle_add(self._explorer_path_button.set_sensitive, False)
-        gen = self.update_picons(path)
+        GLib.idle_add(button.set_sensitive, False)
+        gen = self.update_picons(path, view, button)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def update_picons(self, path):
-        p_model = self._picons_view.get_model()
+    def update_picons(self, path, view, button):
+        p_model = view.get_model()
         if not p_model:
+            button.set_sensitive(True)
             return
 
         model = get_base_model(p_model)
-        self._picons_view.set_model(None)
+        view.set_model(None)
         factor = self._app.DEL_FACTOR
 
         for index, itr in enumerate([row.iter for row in model]):
@@ -167,43 +193,49 @@ class PiconsDialog:
             if self._terminate:
                 return
 
-            try:
-                p = GdkPixbuf.Pixbuf.new_from_file_at_scale("{}/{}".format(path, file), 100, 60, True)
-            except GLib.GError as e:
-                pass
-            else:
-                yield model.append((p, file, path))
+            p_path = "{}/{}".format(path, file)
+            p = self.get_pixbuf_at_scale(p_path, 72, 48, True)
+            if p:
+                yield model.append((p, file, p_path))
 
-        self._picons_view.set_model(p_model)
-        self._explorer_path_button.set_sensitive(True)
+        view.set_model(p_model)
+        button.set_sensitive(True)
         yield True
 
     def update_picons_from_file(self, view, uri):
         """ Adds picons in the view on dragging from file system. """
-        model = get_base_model(view.get_model())
         from urllib.parse import unquote, urlparse
         path = Path(urlparse(unquote(uri)).path.strip())
         f_path = str(path.resolve())
         if not f_path:
             return
 
+        model = get_base_model(view.get_model())
+
         if path.is_file():
-            try:
-                p = GdkPixbuf.Pixbuf.new_from_file_at_scale(f_path, 100, 60, True)
-            except GLib.GError:
-                pass
-            else:
-                model.append((p, path.name, str(path.parent)))
+            p = self.get_pixbuf_at_scale(f_path, 72, 48, True)
+            if p:
+                model.append((p, path.name, f_path))
         elif path.is_dir():
-            self._explorer_path_button.set_current_folder(f_path + "/")
+            self._explorer_src_path_button.select_filename(f_path)
+
+    def get_pixbuf_at_scale(self, path, width, height, p_ratio):
+        try:
+            return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width, height, p_ratio)
+        except GLib.GError:
+            pass
 
     # ***************** Drag-and-drop ********************* #
 
     def init_drag_and_drop(self):
-        self._picons_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY)
-        self._picons_view.drag_source_add_uri_targets()
-        self._picons_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
-        self._picons_view.drag_dest_add_text_targets()
+        self._picons_src_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY)
+        self._picons_src_view.drag_source_add_uri_targets()
+
+        self._picons_src_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._picons_src_view.drag_dest_add_text_targets()
+
+        self._picon_info_image.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self._picon_info_image.drag_dest_add_uri_targets()
 
     def on_picons_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
@@ -224,13 +256,11 @@ class PiconsDialog:
         if src == self._app.BQ_MODEL_NAME:
             return
 
-        path, pos = view.get_dest_item_at_pos(x, y) or (None, None)
+        path, pos = view.get_dest_row_at_pos(x, y) or (None, None)
         if not path:
             return
 
         model = view.get_model()
-        row = model[path][:]
-        p_path = "{}/{}".format(row[-1], row[1])
         if src == self._app.FAV_MODEL_NAME:
             target_view = self._app.fav_view
             c_id = Column.FAV_ID
@@ -239,7 +269,7 @@ class PiconsDialog:
             c_id = Column.SRV_FAV_ID
 
         t_mod = target_view.get_model()
-        self._app.on_assign_picon(target_view, p_path)
+        self._app.on_assign_picon(target_view, model[path][-1])
         self.show_assign_info([t_mod.get_value(t_mod.get_iter_from_string(itr), c_id) for itr in itr_str.split(",")])
 
     @run_idle
@@ -253,12 +283,39 @@ class PiconsDialog:
                 self.append_output("Picon assignment for the service:\n{}\n{}\n".format(info, " * " * 30))
 
     def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
-        model = view.get_model()
-        path = view.get_selected_items()[0]
-        row = model[path][:]
-        data.set_uris(["{}/{}".format(row[-1], row[1])])
+        model, path = view.get_selection().get_selected_rows()
+        if path:
+            data.set_uris([Path(model[path][-1]).as_uri(),
+                           Path(self._explorer_dest_path_button.get_filename()).as_uri()])
 
-    # ******************** ####### ************************* #
+    def on_picon_info_image_drag_data_received(self, img, drag_context, x, y, data, info, time):
+        if not self._current_picon_info:
+            self.show_info_message("No selected item!", Gtk.MessageType.ERROR)
+            return
+
+        uris = data.get_uris()
+        if len(uris) == 2:
+            name, fav_id = self._current_picon_info
+            from urllib.parse import unquote, urlparse
+            src = urlparse(unquote(uris[0])).path
+            dst = "{}/{}".format(urlparse(unquote(uris[1])).path, name)
+            if src != dst:
+                shutil.copy(src, dst)
+                for row in get_base_model(self._picons_dest_view.get_model()):
+                    if name == row[1]:
+                        row[0] = self.get_pixbuf_at_scale(row[-1], 72, 48, True)
+                        img.set_from_pixbuf(self.get_pixbuf_at_scale(row[-1], 100, 60, True))
+
+                gen = self.update_picon_in_lists(dst, fav_id)
+                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def update_picon_in_lists(self, dst, fav_id):
+        picon = get_picon_pixbuf(dst)
+        p_pos = Column.SRV_PICON
+        yield set_picon(fav_id, get_base_model(self._app.services_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
+        yield set_picon(fav_id, get_base_model(self._app.fav_view.get_model()), picon, Column.FAV_ID, p_pos)
+
+    # ******************** Downloader ************************* #
 
     def on_satellites_view_realize(self, view):
         self.get_satellites(view)
@@ -443,7 +500,7 @@ class PiconsDialog:
             return
 
         settings = Settings(self._settings.settings)
-        settings.picons_local_path = self._explorer_path_button.get_filename() + "/"
+        settings.picons_local_path = self._explorer_src_path_button.get_filename() + "/"
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
@@ -456,7 +513,7 @@ class PiconsDialog:
             return
 
         settings = Settings(self._settings.settings)
-        settings.picons_local_path = self._explorer_path_button.get_filename() + "/"
+        settings.picons_local_path = self._explorer_src_path_button.get_filename() + "/"
         self.run_func(lambda: download_data(settings=settings,
                                             download_type=DownloadType.PICONS,
                                             callback=self.append_output), True)
@@ -481,7 +538,7 @@ class PiconsDialog:
         finally:
             GLib.idle_add(self._explorer_action_box.set_sensitive, True)
             if update:
-                self.on_picons_folder_changed(self._explorer_path_button)
+                self.on_picons_src_changed(self._explorer_src_path_button)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
@@ -511,13 +568,20 @@ class PiconsDialog:
         view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 7, select))
         self.update_receive_button_state()
 
+    # *********************** Filter **************************** #
+
     def on_filter_toggled(self, button):
         active = button.get_active()
         self._filter_bar.set_search_mode(active)
         if not active:
             self._picons_filter_entry.set_text("")
 
+    def on_fiter_srcs_toggled(self, filter_model):
+        """ Activates re-filtering for model when filter check-button has toggled. """
+        GLib.idle_add(filter_model.refilter, priority=GLib.PRIORITY_LOW)
+
     def on_filter_services_switch(self, button, state):
+        """ Activates or deactivates filtering in the main list of services. """
         if state:
             self._filter_binding = self._picons_filter_entry.bind_property("text", self._app.filter_entry, "text")
             self._app.filter_entry.set_text(self._picons_filter_entry.get_text())
@@ -526,17 +590,20 @@ class PiconsDialog:
                 self._filter_binding.unbind()
                 self._app.filter_entry.set_text("")
 
-    def on_url_changed(self, entry):
-        suit = self._PATTERN.search(entry.get_text())
-        entry.set_name("GtkEntry" if suit else "digit-entry")
-        self._load_providers_button.set_sensitive(suit if suit else False)
-
     @run_with_delay(1)
     def on_picons_filter_changed(self, entry):
-        GLib.idle_add(self._picons_filter_model.refilter, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._picons_src_filter_model.refilter, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._picons_dst_filter_model.refilter, priority=GLib.PRIORITY_LOW)
 
-    def picons_filter_function(self, model, itr, data):
-        if self._picons_filter_model is None or self._picons_filter_model == "None":
+    def picons_src_filter_function(self, model, itr, data):
+        return self.filter_function(itr, model, self._src_filter_button.get_active())
+
+    def picons_dst_filter_function(self, model, itr, data):
+        return self.filter_function(itr, model, self._dst_filter_button.get_active())
+
+    def filter_function(self, itr, model, active):
+        """ Main filtering function. """
+        if any((not active, model is None, model == "None")):
             return True
 
         t = model.get_value(itr, 1)
@@ -546,6 +613,40 @@ class PiconsDialog:
         txt = self._picons_filter_entry.get_text().upper()
         return txt in t.upper() or t in (
             map(lambda s: s.picon_id, filter(lambda s: txt in s.service.upper(), self._app.current_services.values())))
+
+    def on_picon_activated(self, view):
+        if self._info_check_button.get_active():
+            model, path = view.get_selection().get_selected_rows()
+            if not path:
+                return
+
+            row = model[path][:]
+            name, path = row[1], row[-1]
+            srv = self._services.get(row[1], None)
+            self.update_picon_info(name, path, srv)
+
+    def update_picon_info(self, name=None, path=None, srv=None):
+        self._picon_info_image.set_from_pixbuf(self.get_pixbuf_at_scale(path, 100, 60, True) if path else None)
+        self._picon_info_label.set_text(self.get_service_info(srv))
+        self._current_picon_info = (name, srv.fav_id) if srv else None
+
+    def get_service_info(self, srv):
+        """ Returns short info about the service. """
+        if not srv:
+            return ""
+
+        if srv.service_type == "IPTV":
+            return self._app.get_hint_for_srv_list(srv)
+
+        header, ref = self._app.get_hint_header_info(srv)
+        return "{}  {}: {}\n{}: {}  {}: {}\n{}".format(header.rstrip(), get_message("Package"), srv.package,
+                                                       get_message("System"), srv.system, get_message("Freq"), srv.freq,
+                                                       ref)
+
+    def on_url_changed(self, entry):
+        suit = self._PATTERN.search(entry.get_text())
+        entry.set_name("GtkEntry" if suit else "digit-entry")
+        self._load_providers_button.set_sensitive(suit if suit else False)
 
     def on_position_edited(self, render, path, value):
         model = self._providers_view.get_model()
@@ -558,7 +659,7 @@ class PiconsDialog:
         is_explorer = name == "explorer"
         self._explorer_action_box.set_visible(is_explorer)
         if is_explorer:
-            self.on_picons_folder_changed(self._explorer_path_button)
+            self.on_picons_dest_changed(self._explorer_dest_path_button)
 
     @run_idle
     def on_convert(self, item):
