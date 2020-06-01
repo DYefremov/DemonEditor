@@ -885,8 +885,9 @@ class Application(Gtk.Application):
         uris = data.get_uris()
         if txt:
             self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
-        elif len(uris) == 1:
-            self.on_assign_picon(view, uris[0])
+        elif len(uris) == 2:
+            from urllib.parse import unquote, urlparse
+            self.on_assign_picon(view, urlparse(unquote(uris[0])).path, urlparse(unquote(uris[1])).path + "/")
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
@@ -2522,22 +2523,12 @@ class Application(Gtk.Application):
         update_picons_data(self._settings.picons_local_path, self._picons)
         append_picons(self._picons, self._services_model)
 
-    def on_assign_picon(self, view, path=None):
-        assign_picon(self.get_target_view(view),
-                     self._services_view,
-                     self._fav_view,
-                     self._main_window,
-                     self._picons,
-                     self._settings,
-                     self._services,
-                     path)
+    def on_assign_picon(self, view, src_path=None, dst_path=None):
+        assign_picon(self.get_target_view(view), self._services_view, self._fav_view, self._main_window,
+                     self._picons, self._settings, self._services, src_path, dst_path)
 
     def on_remove_picon(self, view):
-        remove_picon(self.get_target_view(view),
-                     self._services_view,
-                     self._fav_view,
-                     self._picons,
-                     self._settings)
+        remove_picon(self.get_target_view(view), self._services_view, self._fav_view, self._picons, self._settings)
 
     def on_reference_picon(self, view):
         """ Copying picon id to clipboard """
