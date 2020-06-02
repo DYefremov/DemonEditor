@@ -787,9 +787,6 @@ msgstr "Usuń pikony z odbiornika"
 msgid "Use http to reload data in the receiver."
 msgstr "Użyj http aby ponownie załadować dane do odbiornika."
 
-msgid "Apply profile settings"
-msgstr "Zastosuj ustawienia profilu"
-
 msgid "Drag  or paste the link here"
 msgstr "Przeciągnij lub wklej tutaj link"
 
@@ -810,9 +807,6 @@ msgstr "Pobierz z odbiornika"
 
 msgid "The Neutrino has only experimental support. Not all features are supported!"
 msgstr "Neutrino ma jedynie wsparcie eksperymentalne. Nie wszystkie funkcje są obsługiwane!"
-
-msgid "Default data path:"
-msgstr "Domyślna ścieżka danych:"
 
 # Appearance
 msgid "Appearance"
@@ -872,10 +866,6 @@ msgstr "Odtwórz strumień"
 
 msgid "Disabled"
 msgstr "Wyłączone"
-
-#Program
-msgid "Program"
-msgstr "Program"
 
 msgid "Language:"
 msgstr "Język:"
@@ -937,9 +927,6 @@ msgstr "Wysokość (px):"
 
 msgid "Codec:"
 msgstr "Kodek:"
-
-msgid "Video options:"
-msgstr "Opcje wideo:"
 
 msgid "Audio options:"
 msgstr "Opcje audio:"
