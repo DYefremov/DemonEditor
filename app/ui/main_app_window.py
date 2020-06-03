@@ -1699,7 +1699,8 @@ class Application(Gtk.Application):
         fav_bqt = self._bouquets.get(self._bq_selected, None)
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, self._s_type).show()
         if response:
-            next(self.remove_favs(response, self._fav_model), False)
+            gen = self.remove_favs(response, self._fav_model)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     # ****************** EPG  **********************#
 
