@@ -167,6 +167,7 @@ class Application(Gtk.Application):
         self._bouquets_buffer = []
         self._services = {}
         self._bouquets = {}
+        self._data_hash = 0
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
         self._picons = {}
@@ -526,7 +527,12 @@ class Application(Gtk.Application):
                     return True
             self._recorder.release()
 
-        GLib.idle_add(self.quit)
+        if not self.is_data_saved():
+            gen = self.save_data(lambda: GLib.idle_add(self.quit))
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            return True
+        else:
+            GLib.idle_add(self.quit)
 
     def on_resize(self, window):
         """ Stores new size properties for app window after resize """
@@ -1057,10 +1063,13 @@ class Application(Gtk.Application):
         show_satellites_dialog(self._main_window, self._settings)
 
     def on_download(self, action=None, value=None):
-        DownloadDialog(transient=self._main_window,
-                       settings=self._settings,
-                       open_data_callback=self.open_data,
-                       update_settings_callback=self.update_settings).show()
+        dialog = DownloadDialog(self._main_window, self._settings, self.open_data, self.update_settings)
+
+        if not self.is_data_saved():
+            gen = self.save_data(dialog.show)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        else:
+            dialog.show()
 
     @run_task
     def on_download_data(self, *args):
@@ -1163,6 +1172,8 @@ class Application(Gtk.Application):
                 callback()
             yield True
             self.on_view_focus(self._services_view)
+            yield True
+            self._data_hash = self.get_data_hash()
             yield True
 
     def append_data(self, bouquets, services):
@@ -1299,13 +1310,13 @@ class Application(Gtk.Application):
             self.show_error_dialog("No data to save!")
             return
 
-        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._main_window) != Gtk.ResponseType.OK:
             return
 
         gen = self.save_data()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def save_data(self):
+    def save_data(self, callback=None):
         profile = self._s_type
         path = self._settings.data_local_path
         backup_path = self._settings.backup_local_path
@@ -1349,6 +1360,10 @@ class Application(Gtk.Application):
             # blacklist
             write_blacklist(path, self._blacklist)
         yield True
+        self._data_hash = self.get_data_hash()
+        yield True
+        if callback:
+            callback()
 
     def on_new_configuration(self, action, value=None):
         """ Creates new empty configuration """
@@ -2396,7 +2411,6 @@ class Application(Gtk.Application):
 
     # ***************** Editing *********************#
 
-    @run_idle
     def on_service_edit(self, view):
         model, paths = view.get_selection().get_selected_rows()
         if is_only_one_item_selected(paths, self._main_window):
@@ -2619,6 +2633,19 @@ class Application(Gtk.Application):
     @run_idle
     def show_error_dialog(self, message):
         show_dialog(DialogType.ERROR, self._main_window, message)
+
+    def is_data_saved(self):
+        if self._data_hash != 0 and self._data_hash != self.get_data_hash():
+            msg = "There are unsaved changes.\n\nSave them now?"
+            resp = show_dialog(DialogType.QUESTION, self._main_window, msg, action_type=Gtk.ButtonsType.YES_NO)
+            return resp != Gtk.ResponseType.YES
+        return True
+
+    def get_data_hash(self):
+        """ Returns the sum of all data hash. """
+        return sum(map(hash, map(frozenset, (self._services.items(),
+                                             self._bouquets.keys(),
+                                             map(tuple, self._bouquets.values())))))
 
     # ******************* Properties ***********************#
 
