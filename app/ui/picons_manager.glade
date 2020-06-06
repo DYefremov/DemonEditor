@@ -381,9 +381,10 @@ Author: Dmitriy Yefremov
                                         <property name="headers_visible">False</property>
                                         <property name="tooltip_column">1</property>
                                         <property name="activate_on_single_click">True</property>
-                                        <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
-                                        <signal name="drag-data-received" handler="on_picons_view_drag_data_received" swapped="no"/>
-                                        <signal name="drag-drop" handler="on_picons_view_drag_drop" swapped="no"/>
+                                        <signal name="drag-data-get" handler="on_picons_src_view_drag_data_get" swapped="no"/>
+                                        <signal name="drag-data-received" handler="on_picons_src_view_drag_data_received" swapped="no"/>
+                                        <signal name="drag-drop" handler="on_picons_src_view_drag_drop" swapped="no"/>
+                                        <signal name="drag-end" handler="on_picons_src_view_drag_end" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="picons_src_view_selection"/>
                                         </child>
