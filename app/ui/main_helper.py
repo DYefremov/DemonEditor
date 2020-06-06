@@ -367,18 +367,20 @@ def append_picons(picons, model):
     GLib.idle_add(lambda: next(app, False), priority=GLib.PRIORITY_LOW)
 
 
-def assign_picon(target, srv_view, fav_view, transient, picons, settings, services, src_path=None, dst_path=None):
+def assign_picons(target, srv_view, fav_view, transient, picons, settings, services, src_path=None, dst_path=None):
+    """ Assigning  picons and returns picons files list. """
     view = srv_view if target is ViewTarget.SERVICES else fav_view
     model, paths = view.get_selection().get_selected_rows()
+    picons_files = []
 
     if not src_path:
         src_path = get_chooser_dialog(transient, settings, "*.png files", ("*.png",))
         if src_path == Gtk.ResponseType.CANCEL:
-            return
+            return picons_files
 
     if not str(src_path).endswith(".png") or not os.path.isfile(src_path):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
-        return
+        return picons_files
 
     p_pos = Column.SRV_PICON
     col_num = Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID
@@ -398,6 +400,7 @@ def assign_picon(target, srv_view, fav_view, transient, picons, settings, servic
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
             shutil.copy(src_path, picon_file)
+            picons_files.append(picon_file)
             picon = get_picon_pixbuf(picon_file)
             picons[picon_id] = picon
             model.set_value(itr, p_pos, picon)
@@ -405,6 +408,8 @@ def assign_picon(target, srv_view, fav_view, transient, picons, settings, servic
                 set_picon(fav_id, fav_view.get_model(), picon, Column.FAV_ID, p_pos)
             else:
                 set_picon(fav_id, get_base_model(srv_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
+
+    return picons_files
 
 
 def set_picon(fav_id, model, picon, fav_id_pos, picon_pos):

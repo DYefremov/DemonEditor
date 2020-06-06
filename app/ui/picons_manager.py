@@ -50,9 +50,10 @@ class PiconsDialog:
                     "on_convert": self.on_convert,
                     "on_picons_src_changed": self.on_picons_src_changed,
                     "on_picons_dest_changed": self.on_picons_dest_changed,
-                    "on_picons_view_drag_drop": self.on_picons_view_drag_drop,
-                    "on_picons_view_drag_data_received": self.on_picons_view_drag_data_received,
-                    "on_picons_view_drag_data_get": self.on_picons_view_drag_data_get,
+                    "on_picons_src_view_drag_drop": self.on_picons_src_view_drag_drop,
+                    "on_picons_src_view_drag_data_received": self.on_picons_src_view_drag_data_received,
+                    "on_picons_src_view_drag_data_get": self.on_picons_src_view_drag_data_get,
+                    "on_picons_src_view_drag_end": self.on_picons_src_view_drag_end,
                     "on_picon_info_image_drag_data_received": self.on_picon_info_image_drag_data_received,
                     "on_picons_dest_view_realize": self.on_picons_dest_view_realize,
                     "on_satellites_view_realize": self.on_satellites_view_realize,
@@ -235,12 +236,12 @@ class PiconsDialog:
         self._picon_info_image.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._picon_info_image.drag_dest_add_uri_targets()
 
-    def on_picons_view_drag_drop(self, view, drag_context, x, y, time):
+    def on_picons_src_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
         targets = drag_context.list_targets()
         view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/plain", False), time)
 
-    def on_picons_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+    def on_picons_src_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         view.stop_emission_by_name("drag_data_received")
         txt = data.get_text()
         if not txt:
@@ -267,8 +268,27 @@ class PiconsDialog:
             c_id = Column.SRV_FAV_ID
 
         t_mod = target_view.get_model()
-        self._app.on_assign_picon(target_view, model[path][-1])
+        dest_path = self._explorer_dest_path_button.get_filename() + "/"
+        self.update_picons_dest_view(self._app.on_assign_picon(target_view, model[path][-1], dest_path))
         self.show_assign_info([t_mod.get_value(t_mod.get_iter_from_string(itr), c_id) for itr in itr_str.split(",")])
+
+    @run_idle
+    def update_picons_dest_view(self, picons):
+        """ Update destination view on adding/changing picons. """
+        if picons:
+            dest_model = get_base_model(self._picons_dest_view.get_model())
+            paths = {r[1]: r.iter for r in dest_model}
+
+            for p_path in picons:
+                p = self.get_pixbuf_at_scale(p_path, 72, 48, True)
+                if p:
+                    p_name = Path(p_path).name
+                    itr = paths.get(p_name, None)
+                    if itr:
+                        dest_model.set_value(itr, 0, p)
+                    else:
+                        itr = dest_model.append((p, p_name, p_path))
+                    scroll_to(dest_model.get_path(itr), self._picons_dest_view)
 
     @run_idle
     def show_assign_info(self, fav_ids):
@@ -280,11 +300,14 @@ class PiconsDialog:
                 info = self._app.get_hint_for_srv_list(srv)
                 self.append_output("Picon assignment for the service:\n{}\n{}\n".format(info, " * " * 30))
 
-    def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
+    def on_picons_src_view_drag_data_get(self, view, drag_context, data, info, time):
         model, path = view.get_selection().get_selected_rows()
         if path:
             data.set_uris([Path(model[path][-1]).as_uri(),
                            Path(self._explorer_dest_path_button.get_filename()).as_uri()])
+
+    def on_picons_src_view_drag_end(self, view, drag_context):
+        self.update_picons_dest_view(self._app.picons_buffer)
 
     def on_picon_info_image_drag_data_received(self, img, drag_context, x, y, data, info, time):
         if not self._current_picon_info:

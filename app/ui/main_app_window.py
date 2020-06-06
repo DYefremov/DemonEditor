@@ -26,7 +26,7 @@ from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
 from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
-                          scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picon,
+                          scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picons,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
                           get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf)
 from .picons_manager import PiconsDialog
@@ -165,6 +165,7 @@ class Application(Gtk.Application):
         # Clearing only after the insertion!
         self._rows_buffer = []
         self._bouquets_buffer = []
+        self._picons_buffer = []
         self._services = {}
         self._bouquets = {}
         self._data_hash = 0
@@ -893,7 +894,8 @@ class Application(Gtk.Application):
             self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
         elif len(uris) == 2:
             from urllib.parse import unquote, urlparse
-            self.on_assign_picon(view, urlparse(unquote(uris[0])).path, urlparse(unquote(uris[1])).path + "/")
+            self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
+                                                      urlparse(unquote(uris[1])).path + "/")
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
@@ -2539,8 +2541,8 @@ class Application(Gtk.Application):
         append_picons(self._picons, self._services_model)
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):
-        assign_picon(self.get_target_view(view), self._services_view, self._fav_view, self._main_window,
-                     self._picons, self._settings, self._services, src_path, dst_path)
+        return assign_picons(self.get_target_view(view), self._services_view, self._fav_view, self._main_window,
+                             self._picons, self._settings, self._services, src_path, dst_path)
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view), self._services_view, self._fav_view, self._picons, self._settings)
@@ -2638,6 +2640,17 @@ class Application(Gtk.Application):
     @property
     def current_services(self):
         return self._services
+
+    @property
+    def picons_buffer(self):
+        """ Returns a copy and clears the current buffer. """
+        buf = list(self._picons_buffer)
+        self._picons_buffer.clear()
+        return buf
+
+    @picons_buffer.setter
+    def picons_buffer(self, value):
+        self._picons_buffer.extend(value)
 
 
 def start_app():
