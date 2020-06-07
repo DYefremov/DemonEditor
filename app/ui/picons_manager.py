@@ -338,6 +338,69 @@ class PiconsDialog:
         yield set_picon(fav_id, get_base_model(self._app.services_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
         yield set_picon(fav_id, get_base_model(self._app.fav_view.get_model()), picon, Column.FAV_ID, p_pos)
 
+    # ******************** Download/Upload/Remove ************************* #
+
+    def on_selective_send(self, view):
+        self.on_send(files_filter=self.get_selected_paths(view))
+
+    def on_selective_download(self, view):
+        self.on_download(files_filter=self.get_selected_paths(view))
+
+    def on_selective_remove(self, view):
+        self.on_remove(files_filter=self.get_selected_paths(view))
+
+    def on_send(self, item=None, files_filter=None):
+        dest_path = self.check_dest_path()
+        if not dest_path:
+            return
+
+        settings = Settings(self._settings.settings)
+        settings.picons_local_path = dest_path + "/"
+        self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
+        self.run_func(lambda: upload_data(settings=settings,
+                                          download_type=DownloadType.PICONS,
+                                          callback=self.append_output,
+                                          done_callback=lambda: self.show_info_message(get_message("Done!"),
+                                                                                       Gtk.MessageType.INFO),
+                                          files_filter=files_filter))
+
+    def on_download(self, item=None, files_filter=None):
+        path = self.check_dest_path()
+        if not path:
+            return
+
+        settings = Settings(self._settings.settings)
+        settings.picons_local_path = path + "/"
+        self.run_func(lambda: download_data(settings=settings,
+                                            download_type=DownloadType.PICONS,
+                                            callback=self.append_output,
+                                            files_filter=files_filter), True)
+
+    def on_remove(self, item, files_filter=None):
+        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+            return
+
+        self.run_func(lambda: remove_picons(settings=self._settings,
+                                            callback=self.append_output,
+                                            done_callback=lambda: self.show_info_message(get_message("Done!"),
+                                                                                         Gtk.MessageType.INFO),
+                                            files_filter=files_filter))
+
+    def get_selected_paths(self, view):
+        model, paths = view.get_selection().get_selected_rows()
+        return {model[p][1] for p in paths}
+
+    def check_dest_path(self):
+        """ Checks the destination path and returns if present. """
+        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
+            return
+
+        path = self._explorer_dest_path_button.get_filename()
+        if not path:
+            show_dialog(DialogType.ERROR, transient=self._dialog, text="Select paths!")
+            return
+        return path
+
     # ******************** Downloader ************************* #
 
     def on_satellites_view_realize(self, view):
@@ -518,38 +581,6 @@ class PiconsDialog:
         if os.path.exists(path):
             shutil.rmtree(path)
 
-    def on_send(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
-        settings = Settings(self._settings.settings)
-        settings.picons_local_path = self._explorer_src_path_button.get_filename() + "/"
-        self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
-        self.run_func(lambda: upload_data(settings=settings,
-                                          download_type=DownloadType.PICONS,
-                                          callback=self.append_output,
-                                          done_callback=lambda: self.show_info_message(get_message("Done!"),
-                                                                                       Gtk.MessageType.INFO)))
-
-    def on_download(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
-        settings = Settings(self._settings.settings)
-        settings.picons_local_path = self._explorer_src_path_button.get_filename() + "/"
-        self.run_func(lambda: download_data(settings=settings,
-                                            download_type=DownloadType.PICONS,
-                                            callback=self.append_output), True)
-
-    def on_remove(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
-            return
-
-        self.run_func(lambda: remove_picons(settings=self._settings,
-                                            callback=self.append_output,
-                                            done_callback=lambda: self.show_info_message(get_message("Done!"),
-                                                                                         Gtk.MessageType.INFO)))
-
     @run_task
     def run_func(self, func, update=False):
         try:
@@ -561,7 +592,7 @@ class PiconsDialog:
         finally:
             GLib.idle_add(self._explorer_action_box.set_sensitive, True)
             if update:
-                self.on_picons_src_changed(self._explorer_src_path_button)
+                self.on_picons_dest_changed(self._explorer_dest_path_button)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

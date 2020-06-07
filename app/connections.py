@@ -62,7 +62,7 @@ class HttpApiException(Exception):
     pass
 
 
-def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
+def download_data(*, settings, download_type=DownloadType.ALL, callback=print, files_filter=None):
     with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
@@ -83,7 +83,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
         if download_type is DownloadType.PICONS:
             picons_path = settings.picons_local_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
-            download_picons(ftp, settings.picons_path, picons_path, callback)
+            download_picons(ftp, settings.picons_path, picons_path, callback, files_filter)
         # epg.dat
         if download_type is DownloadType.EPG:
             stb_path = settings.services_path
@@ -100,7 +100,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print):
 
 
 def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
-                callback=print, done_callback=None, use_http=False):
+                callback=print, done_callback=None, use_http=False, files_filter=None):
     s_type = settings.setting_type
     data_path = settings.data_local_path
     host = settings.host
@@ -163,7 +163,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 upload_files(ftp, data_path, DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                upload_picons(ftp, settings.picons_local_path, settings.picons_path, callback)
+                upload_picons(ftp, settings.picons_local_path, settings.picons_path, callback, files_filter)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino
@@ -199,13 +199,8 @@ def upload_files(ftp, data_path, file_list, callback):
 
 
 def remove_unused_bouquets(ftp, callback):
-    files = []
-    ftp.dir(files.append)
-    for file in files:
-        name = str(file).strip()
-        if name.endswith(("tv", "radio", "bouquets.xml", "ubouquets.xml")):
-            name = name.split()[-1]
-            callback("Deleting file: {}.   Status: {}\n".format(name, ftp.delete(name)))
+    for file in filter(lambda f: f.endswith(("tv", "radio", "bouquets.xml", "ubouquets.xml")), ftp.nlst()):
+        callback("Deleting file: {}.   Status: {}\n".format(file, ftp.delete(file)))
 
 
 def upload_xml(ftp, data_path, xml_path, xml_files, callback):
@@ -223,7 +218,7 @@ def download_xml(ftp, data_path, xml_path, xml_files, callback):
 
 # ***************** Picons *******************#
 
-def upload_picons(ftp, src, dest, callback):
+def upload_picons(ftp, src, dest, callback, files_filter=None):
     try:
         ftp.cwd(dest)
     except error_perm as e:
@@ -231,25 +226,22 @@ def upload_picons(ftp, src, dest, callback):
             ftp.mkd(dest)  # if not exist
             ftp.cwd(dest)
 
-    delete_picons(ftp, callback)
-
-    for file_name in os.listdir(src):
-        if file_name.endswith(PICONS_SUF):
-            send_file(file_name, src, ftp, callback)
+    for file_name in filter(picons_filter_function(files_filter), os.listdir(src)):
+        send_file(file_name, src, ftp, callback)
 
 
-def download_picons(ftp, src, dest, callback):
+def download_picons(ftp, src, dest, callback, files_filter=None):
     try:
         ftp.cwd(src)
     except error_perm as e:
         callback(str(e))
         return
 
-    for file in filter(lambda f: f.endswith(PICONS_SUF), ftp.nlst()):
+    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
         download_file(ftp, file, dest, callback)
 
 
-def delete_picons(ftp, callback, dest=None):
+def delete_picons(ftp, callback, dest=None, files_filter=None):
     if dest:
         try:
             ftp.cwd(dest)
@@ -257,22 +249,21 @@ def delete_picons(ftp, callback, dest=None):
             callback(str(e))
             return
 
-    files = []
-    ftp.dir(files.append)
-    for file in files:
-        name = str(file).strip()
-        if name.endswith(PICONS_SUF):
-            name = name.split()[-1]
-            callback("Delete file: {}.   Status: {}\n".format(name, ftp.delete(name)))
+    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
+        callback("Delete file: {}.   Status: {}\n".format(file, ftp.delete(file)))
 
 
-def remove_picons(*, settings, callback, done_callback=None):
+def remove_picons(*, settings, callback, done_callback=None, files_filter=None):
     with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
-        delete_picons(ftp, callback, settings.picons_path)
+        delete_picons(ftp, callback, settings.picons_path, files_filter)
         if done_callback:
             done_callback()
+
+
+def picons_filter_function(files_filter=None):
+    return lambda f: f in files_filter if files_filter else f.endswith(PICONS_SUF)
 
 
 def download_file(ftp, name, save_path, callback):
