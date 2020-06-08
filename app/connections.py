@@ -51,7 +51,7 @@ class HttpRequestType(Enum):
     PLAYER_PREV = "mediaplayercmd?command=previous"
     PLAYER_STOP = "mediaplayercmd?command=stop"
     PLAYER_REMOVE = "mediaplayerremove?file="
-    GRUB = "grab?format=jpg&mode="
+    GRUB = "grab?format=jpg&"
 
 
 class TestException(Exception):
@@ -329,6 +329,7 @@ class HttpAPI:
         self._main_url = None
         self._base_url = None
         self._data = None
+        self._is_owif = True
         self.init()
 
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
@@ -339,18 +340,20 @@ class HttpAPI:
             return
 
         url = self._base_url + req_type.value
+        data = self._data
 
         if req_type is HttpRequestType.ZAP or req_type is HttpRequestType.STREAM:
             url += urllib.parse.quote(ref)
         elif req_type is HttpRequestType.PLAY or req_type is HttpRequestType.PLAYER_REMOVE:
             url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
         elif req_type is HttpRequestType.GRUB:
+            data = None  # Must be disabled for token-based security.
             url = "{}/{}{}".format(self._main_url, req_type.value, ref)
 
         def done_callback(f):
             callback(f.result())
 
-        future = self._executor.submit(get_response, req_type, url, self._data)
+        future = self._executor.submit(get_response, req_type, url, data)
         future.add_done_callback(done_callback)
 
     @run_task
@@ -364,6 +367,19 @@ class HttpAPI:
         s_id = get_session_id(user, password, url)
         if s_id != "0":
             self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
+
+        self.send(HttpRequestType.INFO, None, self.init_callback)
+
+    def init_callback(self, info):
+        if info:
+            version = info.get("e2webifversion", "").upper()
+            self._is_owif = "OWIF" in version
+            log("HTTP API initialized. Web Interface version: {}".format(version))
+
+    @property
+    def is_owif(self):
+        """ Returns true if the web interface is OpenWebif. """
+        return self._is_owif
 
     @run_task
     def close(self):
