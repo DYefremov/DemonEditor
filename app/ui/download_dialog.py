@@ -2,7 +2,7 @@ import os
 
 from gi.repository import GLib
 
-from app.commons import run_idle, run_task
+from app.commons import run_idle, run_task, log
 from app.connections import download_data, DownloadType, upload_data
 from app.settings import SettingsType
 from app.ui.backup import backup_data, restore_data
@@ -171,8 +171,9 @@ class DownloadDialog:
                             done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO),
                             use_http=self._use_http_switch.get_active())
         except Exception as e:
-            message = str(getattr(e, "message", str(e)))
-            self.show_info_message(message, Gtk.MessageType.ERROR)
+            from traceback import format_exc
+            log("Downloading data error: {}".format(format_exc()))
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
             if all((download, backup, data_path)):
                 restore_data(backup_src, data_path)
         else:
