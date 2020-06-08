@@ -48,6 +48,52 @@ Author: Dmitriy Yefremov
   <object class="GtkTreeModelSort" id="picons_dst_sort_model">
     <property name="model">picons_dst_filter_model</property>
   </object>
+  <object class="GtkMenu" id="picons_dest_view_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="dest_transfer_to_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Transfer to receiver</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_selective_send" object="picons_dest_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="dest_download_to_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Download from the receiver</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_selective_download" object="picons_dest_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="dest_popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="dest_remove_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_local_remove" object="picons_dest_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="dest_remove_from_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove from the receiver</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_selective_remove" object="picons_dest_view" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="picons_src_list_store">
     <columns>
       <!-- column-name picon -->
@@ -63,6 +109,51 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkTreeModelSort" id="picons_src_sort_model">
     <property name="model">picons_src_filter_model</property>
+  </object>
+  <object class="GtkMenu" id="picons_src_view_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="src_transfer_to_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Transfer to receiver</property>
+        <signal name="activate" handler="on_selective_send" object="picons_src_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="src_download_to_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Download from the receiver</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_selective_download" object="picons_src_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="src_popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="src_remove_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_local_remove" object="picons_src_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="src_remove_from_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove from the receiver</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_selective_remove" object="picons_src_view" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="providers_list_store">
     <columns>
@@ -287,6 +378,10 @@ Author: Dmitriy Yefremov
                           <object class="GtkPaned" id="explorer_paned">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
                             <property name="wide_handle">True</property>
                             <child>
                               <object class="GtkBox" id="src_picons_box">
@@ -381,7 +476,8 @@ Author: Dmitriy Yefremov
                                         <property name="headers_visible">False</property>
                                         <property name="tooltip_column">1</property>
                                         <property name="activate_on_single_click">True</property>
-                                        <signal name="drag-data-get" handler="on_picons_src_view_drag_data_get" swapped="no"/>
+                                        <signal name="button-press-event" handler="on_popup_menu" object="picons_src_view_popup_menu" swapped="no"/>
+                                        <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                         <signal name="drag-data-received" handler="on_picons_src_view_drag_data_received" swapped="no"/>
                                         <signal name="drag-drop" handler="on_picons_src_view_drag_drop" swapped="no"/>
                                         <signal name="drag-end" handler="on_picons_src_view_drag_end" swapped="no"/>
@@ -533,7 +629,9 @@ Author: Dmitriy Yefremov
                                         <property name="headers_visible">False</property>
                                         <property name="tooltip_column">1</property>
                                         <property name="activate_on_single_click">True</property>
+                                        <signal name="button-press-event" handler="on_popup_menu" object="picons_dest_view_popup_menu" swapped="no"/>
                                         <signal name="cursor-changed" handler="on_picon_activated" swapped="no"/>
+                                        <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                         <signal name="realize" handler="on_picons_dest_view_realize" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="picons_dest_view_selection"/>
@@ -588,84 +686,84 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                           </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="explorer_paths_frame_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Current picons path:</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkInfoBar" id="explorer_info_bar">
+                        <property name="can_focus">False</property>
+                        <property name="message_type">other</property>
+                        <child internal-child="action_area">
+                          <object class="GtkButtonBox">
+                            <property name="can_focus">False</property>
+                            <property name="spacing">6</property>
+                            <property name="layout_style">end</property>
+                          </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
-                        <child>
-                          <object class="GtkInfoBar" id="explorer_info_bar">
+                        <child internal-child="content_area">
+                          <object class="GtkBox" id="explorer_info_bar_box">
                             <property name="can_focus">False</property>
-                            <property name="message_type">other</property>
-                            <child internal-child="action_area">
-                              <object class="GtkButtonBox">
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkImage" id="picon_info_image">
+                                <property name="width_request">128</property>
+                                <property name="height_request">72</property>
+                                <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="spacing">6</property>
-                                <property name="layout_style">end</property>
+                                <property name="stock">gtk-missing-image</property>
+                                <property name="icon_size">6</property>
+                                <signal name="drag-data-received" handler="on_picon_info_image_drag_data_received" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child internal-child="content_area">
-                              <object class="GtkBox" id="explorer_info_bar_box">
-                                <property name="can_focus">False</property>
-                                <property name="spacing">10</property>
-                                <child>
-                                  <object class="GtkImage" id="picon_info_image">
-                                    <property name="width_request">128</property>
-                                    <property name="height_request">72</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="stock">gtk-missing-image</property>
-                                    <property name="icon_size">6</property>
-                                    <signal name="drag-data-received" handler="on_picon_info_image_drag_data_received" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="picon_info_label">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel" id="picon_info_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
+                        <child>
+                          <placeholder/>
+                        </child>
                       </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="picons_path_labe">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Current picons path:</property>
-                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
