@@ -2246,13 +2246,13 @@ class Application(Gtk.Application):
     # ******************** Screenshots ************************#
 
     def on_screenshot_all(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "all", self.on_screenshot)
+        self._http_api.send(HttpRequestType.GRUB, "mode=all" if self._http_api.is_owif else "d=", self.on_screenshot)
 
     def on_screenshot_video(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "video", self.on_screenshot)
+        self._http_api.send(HttpRequestType.GRUB, "mode=video" if self._http_api.is_owif else "v=", self.on_screenshot)
 
     def on_screenshot_osd(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "osd", self.on_screenshot)
+        self._http_api.send(HttpRequestType.GRUB, "mode=osd" if self._http_api.is_owif else "o=", self.on_screenshot)
 
     def on_screenshot(self, data):
         if "error_code" in data:
