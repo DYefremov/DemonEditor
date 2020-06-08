@@ -477,6 +477,7 @@ Author: Dmitriy Yefremov
                                         <property name="tooltip_column">1</property>
                                         <property name="activate_on_single_click">True</property>
                                         <signal name="button-press-event" handler="on_popup_menu" object="picons_src_view_popup_menu" swapped="no"/>
+                                        <signal name="cursor-changed" handler="on_picon_activated" swapped="no"/>
                                         <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                         <signal name="drag-data-received" handler="on_picons_src_view_drag_data_received" swapped="no"/>
                                         <signal name="drag-drop" handler="on_picons_src_view_drag_drop" swapped="no"/>
