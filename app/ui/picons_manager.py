@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib, GdkPixbuf
 
@@ -50,11 +51,18 @@ class PiconsDialog:
                     "on_convert": self.on_convert,
                     "on_picons_src_changed": self.on_picons_src_changed,
                     "on_picons_dest_changed": self.on_picons_dest_changed,
+                    "on_picons_view_drag_data_get": self.on_picons_view_drag_data_get,
                     "on_picons_src_view_drag_drop": self.on_picons_src_view_drag_drop,
                     "on_picons_src_view_drag_data_received": self.on_picons_src_view_drag_data_received,
-                    "on_picons_src_view_drag_data_get": self.on_picons_src_view_drag_data_get,
                     "on_picons_src_view_drag_end": self.on_picons_src_view_drag_end,
                     "on_picon_info_image_drag_data_received": self.on_picon_info_image_drag_data_received,
+                    "on_send_button_drag_data_received": self.on_send_button_drag_data_received,
+                    "on_download_button_drag_data_received": self.on_download_button_drag_data_received,
+                    "on_remove_button_drag_data_received": self.on_remove_button_drag_data_received,
+                    "on_selective_send": self.on_selective_send,
+                    "on_selective_download": self.on_selective_download,
+                    "on_selective_remove": self.on_selective_remove,
+                    "on_local_remove": self.on_local_remove,
                     "on_picons_dest_view_realize": self.on_picons_dest_view_realize,
                     "on_satellites_view_realize": self.on_satellites_view_realize,
                     "on_satellite_selection": self.on_satellite_selection,
@@ -106,6 +114,8 @@ class PiconsDialog:
         self._enigma2_path_button = builder.get_object("enigma2_path_button")
         self._save_to_button = builder.get_object("save_to_button")
         self._send_button = builder.get_object("send_button")
+        self._download_button = builder.get_object("download_button")
+        self._remove_button = builder.get_object("remove_button")
         self._cancel_button = builder.get_object("cancel_button")
         self._enigma2_radio_button = builder.get_object("enigma2_radio_button")
         self._neutrino_mp_radio_button = builder.get_object("neutrino_mp_radio_button")
@@ -203,7 +213,6 @@ class PiconsDialog:
 
     def update_picons_from_file(self, view, uri):
         """ Adds picons in the view on dragging from file system. """
-        from urllib.parse import unquote, urlparse
         path = Path(urlparse(unquote(uri)).path.strip())
         f_path = str(path.resolve())
         if not f_path:
@@ -230,11 +239,29 @@ class PiconsDialog:
         self._picons_src_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY)
         self._picons_src_view.drag_source_add_uri_targets()
 
+        self._picons_dest_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY)
+        self._picons_dest_view.drag_source_add_uri_targets()
+
         self._picons_src_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._picons_src_view.drag_dest_add_text_targets()
 
         self._picon_info_image.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._picon_info_image.drag_dest_add_uri_targets()
+
+        self._send_button.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self._send_button.drag_dest_add_uri_targets()
+
+        self._download_button.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self._download_button.drag_dest_add_uri_targets()
+
+        self._remove_button.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self._remove_button.drag_dest_add_uri_targets()
+
+    def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
+        model, path = view.get_selection().get_selected_rows()
+        if path:
+            data.set_uris([Path(model[path][-1]).as_uri(),
+                           Path(self._explorer_dest_path_button.get_filename()).as_uri()])
 
     def on_picons_src_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
@@ -300,12 +327,6 @@ class PiconsDialog:
                 info = self._app.get_hint_for_srv_list(srv)
                 self.append_output("Picon assignment for the service:\n{}\n{}\n".format(info, " * " * 30))
 
-    def on_picons_src_view_drag_data_get(self, view, drag_context, data, info, time):
-        model, path = view.get_selection().get_selected_rows()
-        if path:
-            data.set_uris([Path(model[path][-1]).as_uri(),
-                           Path(self._explorer_dest_path_button.get_filename()).as_uri()])
-
     def on_picons_src_view_drag_end(self, view, drag_context):
         self.update_picons_dest_view(self._app.picons_buffer)
 
@@ -317,7 +338,6 @@ class PiconsDialog:
         uris = data.get_uris()
         if len(uris) == 2:
             name, fav_id = self._current_picon_info
-            from urllib.parse import unquote, urlparse
             src = urlparse(unquote(uris[0])).path
             dst = "{}/{}".format(urlparse(unquote(uris[1])).path, name)
             if src != dst:
@@ -330,6 +350,26 @@ class PiconsDialog:
                 gen = self.update_picon_in_lists(dst, fav_id)
                 GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
+    def on_send_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
+        path = self.get_path_from_uris(data)
+        if path:
+            self.on_send(files_filter={path.name}, path=path.parent)
+
+    def on_download_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
+        path = self.get_path_from_uris(data)
+        if path:
+            self.on_download(files_filter={path.name})
+
+    def on_remove_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
+        path = self.get_path_from_uris(data)
+        if path:
+            self.on_remove(files_filter={path.name})
+
+    def get_path_from_uris(self, data):
+        uris = data.get_uris()
+        if len(uris) == 2:
+            return Path(urlparse(unquote(uris[0])).path).resolve()
+
     def update_picon_in_lists(self, dst, fav_id):
         picon = get_picon_pixbuf(dst)
         p_pos = Column.SRV_PICON
@@ -339,21 +379,30 @@ class PiconsDialog:
     # ******************** Download/Upload/Remove ************************* #
 
     def on_selective_send(self, view):
-        self.on_send(files_filter=self.get_selected_paths(view))
+        path = self.get_selected_path(view)
+        if path:
+            self.on_send(files_filter={path.name}, path=path.parent)
 
     def on_selective_download(self, view):
-        self.on_download(files_filter=self.get_selected_paths(view))
+        path = self.get_selected_path(view)
+        if path:
+            self.on_download(files_filter={path.name})
 
     def on_selective_remove(self, view):
-        self.on_remove(files_filter=self.get_selected_paths(view))
+        path = self.get_selected_path(view)
+        if path:
+            self.on_remove(files_filter={path.name})
 
-    def on_send(self, item=None, files_filter=None):
-        dest_path = self.check_dest_path()
+    def on_local_remove(self, view):
+        pass
+
+    def on_send(self, item=None, files_filter=None, path=None):
+        dest_path = path or self.check_dest_path()
         if not dest_path:
             return
 
         settings = Settings(self._settings.settings)
-        settings.picons_local_path = dest_path + "/"
+        settings.picons_local_path = "{}/".format(dest_path)
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
@@ -362,8 +411,8 @@ class PiconsDialog:
                                                                                        Gtk.MessageType.INFO),
                                           files_filter=files_filter))
 
-    def on_download(self, item=None, files_filter=None):
-        path = self.check_dest_path()
+    def on_download(self, item=None, files_filter=None, path=None):
+        path = path or self.check_dest_path()
         if not path:
             return
 
@@ -374,7 +423,7 @@ class PiconsDialog:
                                             callback=self.append_output,
                                             files_filter=files_filter), True)
 
-    def on_remove(self, item, files_filter=None):
+    def on_remove(self, item=None, files_filter=None):
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
@@ -384,9 +433,10 @@ class PiconsDialog:
                                                                                          Gtk.MessageType.INFO),
                                             files_filter=files_filter))
 
-    def get_selected_paths(self, view):
+    def get_selected_path(self, view):
         model, paths = view.get_selection().get_selected_rows()
-        return {model[p][1] for p in paths}
+        if paths:
+            return Path(model[paths.pop()][-1]).resolve()
 
     def check_dest_path(self):
         """ Checks the destination path and returns if present. """
