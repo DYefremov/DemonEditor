@@ -1039,6 +1039,8 @@ class Application(Gtk.Application):
                           download_type=DownloadType.ALL,
                           callback=lambda x: print(x, end=""))
         except Exception as e:
+            from traceback import format_exc
+            log("Downloading data error: {}".format(format_exc()))
             self.show_error_dialog(str(e))
         else:
             GLib.idle_add(self.open_data)
@@ -1063,6 +1065,8 @@ class Application(Gtk.Application):
                         callback=lambda x: print(x, end=""),
                         use_http=use_http)
         except Exception as e:
+            from traceback import format_exc
+            log("Uploading data error: {}".format(format_exc()))
             self.show_error_dialog(str(e))
 
     def on_data_open(self, action=None, value=None):
