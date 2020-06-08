@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2020-05-11 20:02+0300\n"
+"PO-Revision-Date: 2020-06-08 21:53+0300\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -213,7 +213,7 @@ msgid "Loading data..."
 msgstr "Veriler yükleniyor ..."
 
 msgid "Receive"
-msgstr "Al"
+msgstr "Cihazdan Al"
 
 msgid "Receive files from receiver"
 msgstr "Alıcıdan dosya al"
@@ -237,7 +237,7 @@ msgid "Selected"
 msgstr "Seçildi"
 
 msgid "Send"
-msgstr "Gönder"
+msgstr "Cihaza Gönder"
 
 msgid "Send files to receiver"
 msgstr "Alıcıya dosya gönder"
@@ -350,10 +350,10 @@ msgid "Add"
 msgstr "Ekle"
 
 msgid "Satellite"
-msgstr "Uydu"
+msgstr "Uydu Ekle"
 
 msgid "Transponder"
-msgstr "Transponder"
+msgstr "Transponder Ekle"
 
 msgid "Satellite properties:"
 msgstr "Uydu özellikleri:"
@@ -825,7 +825,7 @@ msgid "Profile"
 msgstr "Profil"
 
 msgid "Reset"
-msgstr "Y.başlat"
+msgstr "Yeniden Başlat"
 
 msgid "File"
 msgstr "Dosya"
@@ -976,3 +976,15 @@ msgstr "Simge Teması:"
 
 msgid "Gtk3 Themes and Icons:"
 msgstr "Gtk3 Tema ve Simgeler:"
+
+msgid "Deleting data..."
+msgstr "Veriler siliniyor..."
+
+msgid "Download from the receiver"
+msgstr "Alıcıdan indir"
+
+msgid "Remove all picons from the receiver"
+msgstr "Alıcıdaki tüm piconları kaldırın"
+
+msgid "Service reference"
+msgstr "Servis referansı"
