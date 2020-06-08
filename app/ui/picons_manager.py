@@ -394,7 +394,16 @@ class PiconsDialog:
             self.on_remove(files_filter={path.name})
 
     def on_local_remove(self, view):
-        pass
+        model, paths = view.get_selection().get_selected_rows()
+        if paths and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.OK:
+            itr = model.get_iter(paths.pop())
+            p_path = Path(model.get_value(itr, 2)).resolve()
+            if p_path.is_file():
+                p_path.unlink()
+                base_model = get_base_model(model)
+                filter_model = model.get_model()
+                itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
+                base_model.remove(itr)
 
     def on_send(self, item=None, files_filter=None, path=None):
         dest_path = path or self.check_dest_path()
