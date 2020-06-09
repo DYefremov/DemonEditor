@@ -1,7 +1,7 @@
 """ Module for IPTV and streams support """
 import re
-import urllib.request
 from enum import Enum
+from urllib.parse import unquote
 
 from app.settings import SettingsType
 from app.ui.uicommons import IPTV_ICON
@@ -18,6 +18,7 @@ class StreamType(Enum):
     NONE_TS = "4097"
     NONE_REC_1 = "5001"
     NONE_REC_2 = "5002"
+    E_SERVICE_URI = "8193"
 
 
 def parse_m3u(path, s_type):
@@ -64,7 +65,7 @@ def export_to_m3u(path, bouquet, s_type):
             lines.append("#EXTINF:-1,{}\n".format(s.name))
             if current_grp:
                 lines.append(current_grp)
-            lines.append("{}\n".format(urllib.request.unquote(data.strip())))
+            lines.append("{}\n".format(unquote(data.strip())))
         elif s_type is BqServiceType.MARKER:
             current_grp = "#EXTGRP:{}\n".format(s.name)
 
@@ -75,7 +76,7 @@ def export_to_m3u(path, bouquet, s_type):
 def get_fav_id(url, service_name, s_type):
     """ Returns fav id depending on the profile. """
     if s_type is SettingsType.ENIGMA_2:
-        url = urllib.request.quote(url)
+        url = unquote(url)
         stream_type = StreamType.NONE_TS.value
         return ENIGMA2_FAV_ID_FORMAT.format(stream_type, 1, 0, 0, 0, 0, url, service_name, service_name, None)
     elif s_type is SettingsType.NEUTRINO_MP:
