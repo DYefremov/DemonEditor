@@ -95,23 +95,24 @@ def get_bouquet(path, bq_name, bq_type):
 
         bq_name = srvs.pop(0)
 
-        for srv in srvs:
+        for num, srv in enumerate(srvs, start=1):
             srv_data = srv.strip().split(":")
             if srv_data[1] == "64":
                 m_data, sep, desc = srv.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, srv_data[2]))
+                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, num))
             elif srv_data[1] == "832":
                 m_data, sep, desc = srv.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, srv_data[3]))
-            elif "http" in srv:
+                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
+            elif "http" in srv or srv_data[0] == "8193":
                 stream_data, sep, desc = srv.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.lstrip(":").strip() if desc else "", BqServiceType.IPTV, srv, 0))
+                desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
+                services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))
             else:
                 fav_id = "{}:{}:{}:{}".format(srv_data[3], srv_data[4], srv_data[5], srv_data[6])
                 name = None
                 if len(srv_data) == 12:
                     name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
-                services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), 0))
+                services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), num))
 
     return bq_name.lstrip("#NAME").strip(), services
 
