@@ -1693,7 +1693,7 @@ class Application(Gtk.Application):
                               self._fav_view,
                               self._services,
                               self._bouquets.get(self._bq_selected, None),
-                              self._s_type,
+                              self._settings,
                               Action.ADD).show()
         if response != Gtk.ResponseType.CANCEL:
             self.update_fav_num_column(self._fav_model)
@@ -1756,7 +1756,7 @@ class Application(Gtk.Application):
         if not self._bq_selected:
             return
 
-        YtListImportDialog(self._main_window, self._s_type, self.append_imported_services).show()
+        YtListImportDialog(self._main_window, self._settings, self.append_imported_services).show()
 
     def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
@@ -1858,6 +1858,8 @@ class Application(Gtk.Application):
             url = get_iptv_url(row, self._s_type)
             self.update_player_buttons()
             if not url:
+                self.show_error_dialog("No reference is present!")
+                self.set_playback_elms_active()
                 return
             self.play(url)
 
@@ -2410,7 +2412,7 @@ class Application(Gtk.Application):
                                       self._fav_view,
                                       self._services,
                                       self._bouquets.get(self._bq_selected, None),
-                                      self._s_type,
+                                      self._settings,
                                       Action.EDIT).show()
                 self.on_locate_in_services(view)
 

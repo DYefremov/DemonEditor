@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2019 Dmitriy Yefremov
+Copyright (c) 2018-2020 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2019 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkDialog" id="search_unavailable_streams_dialog">
     <property name="use-header-bar">1</property>
@@ -48,9 +48,6 @@ Author: Dmitriy Yefremov
     <property name="decorated">False</property>
     <property name="gravity">center</property>
     <signal name="response" handler="on_response" swapped="no"/>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="search_unavailable_dialog_box">
         <property name="can_focus">False</property>
@@ -222,6 +219,9 @@ Author: Dmitriy Yefremov
       <row>
         <col id="0">none-REC2</col>
       </row>
+      <row>
+        <col id="0">eServiceUri</col>
+      </row>
     </data>
   </object>
   <object class="GtkDialog" id="iptv_dialog">
@@ -266,9 +266,6 @@ Author: Dmitriy Yefremov
         <property name="always_show_image">True</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
       </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
     </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="iptv_dialog_box">

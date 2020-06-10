@@ -1,11 +1,15 @@
 """ Module for working with YouTube service """
 import gzip
 import json
+import os
 import re
-import urllib
+import shutil
+import sys
 from html.parser import HTMLParser
 from json import JSONDecodeError
-from urllib.request import Request
+from urllib.error import URLError
+from urllib.parse import unquote
+from urllib.request import Request, urlopen, urlretrieve
 
 from app.commons import log
 
@@ -22,6 +26,8 @@ Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p",
 
 class YouTube:
     """ Helper class for working with YouTube service. """
+
+    _VIDEO_INFO_LINK = "https://youtube.com/get_video_info?video_id={}&hl=en"
 
     @staticmethod
     def is_yt_video_link(url):
@@ -47,11 +53,11 @@ class YouTube:
 
             returns tuple from the video links dict and title
          """
-        req = Request("https://youtube.com/get_video_info?video_id={}&hl=en".format(video_id), headers=_HEADERS)
+        req = Request(YouTube._VIDEO_INFO_LINK.format(video_id), headers=_HEADERS)
 
-        with urllib.request.urlopen(req, timeout=2) as resp:
-            data = urllib.request.unquote(gzip.decompress(resp.read()).decode("utf-8")).split("&")
-            out = {k: v for k, sep, v in (str(d).partition("=") for d in map(urllib.request.unquote, data))}
+        with urlopen(req, timeout=2) as resp:
+            data = unquote(gzip.decompress(resp.read()).decode("utf-8")).split("&")
+            out = {k: v for k, sep, v in (str(d).partition("=") for d in map(unquote, data))}
             player_resp = out.get("player_response", None)
 
             if player_resp:
@@ -76,7 +82,7 @@ class YouTube:
             if stream_map:
                 s_map = {k: v for k, sep, v in (str(d).partition("=") for d in stream_map.split("&"))}
                 url, title = s_map.get("url", None), out.get("title", None)
-                url, title = urllib.request.unquote(url) if url else "", title.replace("+", " ") if title else ""
+                url, title = unquote(url) if url else "", title.replace("+", " ") if title else ""
                 if url and title:
                     return {Quality[0]: url}, title.replace("+", " ")
 
@@ -145,11 +151,145 @@ class PlayListParser(HTMLParser):
         """
         request = Request("https://www.youtube.com/playlist?list={}&hl=en".format(play_list_id), headers=_HEADERS)
 
-        with urllib.request.urlopen(request, timeout=2) as resp:
+        with urlopen(request, timeout=2) as resp:
             data = gzip.decompress(resp.read()).decode("utf-8")
             parser = PlayListParser()
             parser.feed(data)
             return parser.header, parser.playlist
+
+
+class YouTubeDL:
+    """ Utility class [experimental] for working with youtube-dl.
+
+         [https://github.com/ytdl-org/youtube-dl]
+     """
+
+    _DL_INSTANCE = None
+    _DownloadError = None
+    _LATEST_RELEASE_URL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
+    _OPTIONS = {"noplaylist": True,  # Single video instead of a playlist [ignoring playlist in URL].
+                "quiet": True,  # Do not print messages to stdout.
+                "simulate": True}  # Do not download the video files.
+
+    VIDEO_LINK = "https://www.youtube.com/watch?v={}"
+
+    class YouTubeDLException(Exception):
+        pass
+
+    def __init__(self, settings, callback):
+        self._path = settings.default_data_path + "tools/"
+        self._update = settings.enable_yt_dl_update
+        self._supported = {"22", "18"}
+        self._dl = None
+        self._callback = callback
+        self._download_exception = None
+        self._is_update_process = False
+
+    @classmethod
+    def get_instance(cls, settings, callback=print):
+        if not cls._DL_INSTANCE:
+            cls._DL_INSTANCE = YouTubeDL(settings, callback)
+        return cls._DL_INSTANCE
+
+    def init(self):
+        if not os.path.isfile(self._path + "youtube_dl/version.py"):
+            self.get_latest_release()
+
+        if self._path not in sys.path:
+            sys.path.append(self._path)
+
+        self.init_dl()
+
+    def init_dl(self):
+        try:
+            import youtube_dl
+        except ModuleNotFoundError as e:
+            log("YouTubeDLHelper error: {}".format(str(e)))
+            raise self.YouTubeDLException(e)
+        else:
+            if self._update:
+                if hasattr(youtube_dl.version, "__version__"):
+                    l_ver = self.get_last_release_id()
+                    cur_ver = youtube_dl.version.__version__
+                    if youtube_dl.version.__version__ < l_ver:
+                        msg = "youtube-dl has new release! Current: {}. Last: {}.".format(cur_ver, l_ver)
+                        log(msg)
+                        self._callback(msg, False)
+                        self.get_latest_release()
+
+            self._DownloadError = youtube_dl.utils.DownloadError
+            self._dl = youtube_dl.YoutubeDL(self._OPTIONS)
+            log("youtube-dl initialized...")
+
+    def get_last_release_id(self):
+        """ Getting last release id. """
+        url = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
+        with urlopen(url, timeout=10) as resp:
+            return json.load(resp).get("tag_name", "0")
+
+    def get_latest_release(self):
+        try:
+            self._is_update_process = True
+            log("Getting the last youtube-dl release...")
+
+            with urlopen(YouTubeDL._LATEST_RELEASE_URL, timeout=10) as resp:
+                r = json.load(resp)
+                zip_url = r.get("zipball_url", None)
+                if zip_url:
+                    zip_file = self._path + "yt.zip"
+                    os.makedirs(os.path.dirname(self._path), exist_ok=True)
+                    f_name, headers = urlretrieve(zip_url, filename=zip_file)
+
+                    import zipfile
+
+                    with zipfile.ZipFile(f_name) as arch:
+
+                        if os.path.isdir(self._path):
+                            shutil.rmtree(self._path)
+                        else:
+                            os.makedirs(os.path.dirname(self._path), exist_ok=True)
+
+                        for info in arch.infolist():
+                            pref, sep, f = info.filename.partition("/youtube_dl/")
+                            if sep:
+                                arch.extract(info.filename)
+                                shutil.move(info.filename, "{}{}{}".format(self._path, sep, f))
+                        shutil.rmtree(pref)
+                        msg = "Getting the last youtube-dl release is done! Please restart."
+                        log(msg)
+                        self._callback(msg, False)
+                        return True
+        except URLError as e:
+            log("YouTubeDLHelper error: {}".format(e))
+            raise self.YouTubeDLException(e)
+        finally:
+            self._is_update_process = False
+
+    def get_yt_link(self, url, skip_errors=False):
+        """ Returns tuple from the video links [dict] and title. """
+        if not self._dl:
+            self.init()
+
+        if self._is_update_process:
+            self._callback("Update process. Please wait.", False)
+            return {}, ""
+
+        try:
+            info = self._dl.extract_info(url, download=False)
+        except URLError as e:
+            log(str(e))
+            raise self.YouTubeDLException(e)
+        except self._DownloadError as e:
+            log(str(e))
+            if not skip_errors:
+                raise self.YouTubeDLException(e)
+        else:
+            fmts = info.get("formats", None)
+            if fmts:
+                return {Quality.get(int(fm["format_id"])): fm.get("url", "") for fm in fmts if
+                        fm.get("format_id", "") in self._supported}, info.get("title", "")
+
+            return {}, info.get("title", "")
 
 
 def flat(key, d):
