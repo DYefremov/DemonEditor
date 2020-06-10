@@ -323,6 +323,9 @@ class HttpAPI:
     __MAX_WORKERS = 4
 
     def __init__(self, settings):
+        from concurrent.futures import ThreadPoolExecutor as PoolExecutor
+        self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
+
         self._settings = settings
         self._shutdown = False
         self._session_id = 0
@@ -331,9 +334,6 @@ class HttpAPI:
         self._data = None
         self._is_owif = True
         self.init()
-
-        from concurrent.futures import ThreadPoolExecutor as PoolExecutor
-        self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
 
     def send(self, req_type, ref, callback=print, ref_prefix=""):
         if self._shutdown:
@@ -374,7 +374,8 @@ class HttpAPI:
         if info:
             version = info.get("e2webifversion", "").upper()
             self._is_owif = "OWIF" in version
-            log("HTTP API initialized. Web Interface version: {}".format(version))
+            version_info = "Web Interface version: {}".format(version) if version else ""
+            log("HTTP API initialized... {}".format(version_info))
 
     @property
     def is_owif(self):
