@@ -28,7 +28,6 @@ Author: Dmitriy Yefremov
 -->
 <interface domain="demon-editor">
   <requires lib="gtk+" version="3.16"/>
-  <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
@@ -88,7 +87,7 @@ Author: Dmitriy Yefremov
         <property name="image">set_default_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_profile_set_default" swapped="no"/>
-        <accelerator key="d" signal="activate" modifiers="Primary"/>
+        <accelerator key="d" signal="activate"/>
       </object>
     </child>
     <child>
@@ -2931,44 +2930,129 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkFrame" id="yt_dl_frame">
-                    <property name="sensitive">False</property>
+                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkGrid" id="yt_dl_grid">
+                      <object class="GtkBox" id="yt_dl_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
                         <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkLabel" id="enable_yt_dl_label">
+                          <object class="GtkBox" id="enable_yt_dl_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="tooltip_text" translatable="yes">Enables parsing links using youtube-dl to get direct links to media</property>
-                            <property name="halign">start</property>
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">Enable support for youtube-dl (experimental)</property>
+                            <property name="tooltip_text" translatable="yes">Enables parsing links using youtube-dl to get direct media links.</property>
+                            <child>
+                              <object class="GtkLabel" id="enable_yt_dl_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Enable support for</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLinkButton" id="yt_dl_link_button">
+                                <property name="label">youtube-dl</property>
+                                <property name="name">status-bar-button</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="halign">start</property>
+                                <property name="valign">center</property>
+                                <property name="relief">none</property>
+                                <property name="uri">https://youtube-dl.org/</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child type="center">
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <property name="label" translatable="yes">EXPERIMENTAL!</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="enable_yt_dl_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">Enables parsing links using youtube-dl to get direct links to media</property>
+                                <property name="halign">end</property>
+                                <property name="valign">center</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSwitch" id="enable_y_dl_switch">
+                          <object class="GtkBox" id="yt_dl_update_box">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="tooltip_text" translatable="yes">Enables parsing links using youtube-dl to get direct links to media</property>
-                            <property name="halign">end</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkLabel" id="auto_update_yt_dl_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Auto-check for updates</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="enable_update_yt_dl_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="halign">end</property>
+                                <property name="valign">center</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>

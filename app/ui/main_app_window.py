@@ -149,7 +149,6 @@ class Application(Gtk.Application):
                           "on_full_screen": self.on_full_screen,
                           "on_drawing_area_realize": self.on_drawing_area_realize,
                           "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
-                          "on_main_window_state": self.on_main_window_state,
                           "on_record": self.on_record,
                           "on_remove_all_unavailable": self.on_remove_all_unavailable,
                           "on_new_bouquet": self.on_new_bouquet,
@@ -960,7 +959,7 @@ class Application(Gtk.Application):
             top_iter = model.get_iter(path)
             parent_itr = model.iter_parent(top_iter)  # parent
             to_del = []
-            is_darwin = self._settings.is_darwin #
+            is_darwin = self._settings.is_darwin
 
             if parent_itr:
                 p_path = model.get_path(parent_itr)[0]
@@ -2056,20 +2055,8 @@ class Application(Gtk.Application):
 
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
-        if self._settings.is_darwin:
-            self.update_state_on_full_screen(not self._full_screen)
+        self.update_state_on_full_screen(not self._full_screen)
         self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
-
-    def on_main_window_state(self, window, event):
-        if self._settings.is_darwin:
-            return
-
-        state = event.new_window_state
-        full = not state & Gdk.WindowState.FULLSCREEN
-        window.set_show_menubar(full)
-        self.update_state_on_full_screen(full)
-        if not state & Gdk.WindowState.ICONIFIED and self._links_transmitter:
-            self._links_transmitter.hide()
 
     @run_idle
     def update_state_on_full_screen(self, visible):

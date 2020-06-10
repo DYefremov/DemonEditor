@@ -298,6 +298,15 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="fav_insert_space_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Insert space</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_insert_space" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparatorMenuItem" id="fav_popup_separator_4">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -590,6 +599,68 @@ Author: Dmitriy Yefremov
     <property name="margin_left">5</property>
     <property name="icon_name">document-save-symbolic</property>
     <property name="icon_size">1</property>
+  </object>
+  <object class="GtkPopoverMenu" id="screenshots_menu">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkBox" id="screenshots_menu_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkModelButton" id="screenshot_button_all">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.on_screenshot_all</property>
+            <property name="text" translatable="yes">All</property>
+            <property name="centered">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="screenshot_button_video">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.on_screenshot_video</property>
+            <property name="text" translatable="yes">Video</property>
+            <property name="centered">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="screenshot_button_osd">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.on_screenshot_osd</property>
+            <property name="text" translatable="yes">OSD</property>
+            <property name="centered">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">main</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
   </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
@@ -947,7 +1018,6 @@ Author: Dmitriy Yefremov
     <property name="startup_id">DemonEditor</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
     <signal name="delete-event" handler="on_close_app" swapped="no"/>
-    <signal name="window-state-event" handler="on_main_window_state" swapped="no"/>
     <child>
       <placeholder/>
     </child>
@@ -1029,7 +1099,6 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="telnet_tool_button">
                     <property name="label" translatable="yes"> </property>
-                    <property name="visible">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Telnet</property>
@@ -2735,7 +2804,7 @@ Author: Dmitriy Yefremov
               <object class="GtkLabel" id="app_ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">0.4.9 Pre-alpha</property>
+                <property name="label" translatable="yes">0.4.8 Pre-alpha</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
@@ -2770,8 +2839,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="info_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
                     <property name="stock">gtk-info</property>
                   </object>
                   <packing>
@@ -2845,8 +2912,6 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="http_status_image">
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">No connection to the receiver!</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
                 <property name="icon_name">network-offline</property>
@@ -2887,8 +2952,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Record</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
                     <signal name="clicked" handler="on_record" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="record_button_image">
