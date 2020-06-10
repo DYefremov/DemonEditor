@@ -2,7 +2,7 @@ import concurrent.futures
 import re
 import urllib
 from urllib.error import HTTPError
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
 
 from gi.repository import GLib
@@ -11,11 +11,11 @@ from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.settings import SettingsType
-from app.tools.yt import YouTube, PlayListParser
+from app.tools.yt import YouTube, PlayListParser, YouTubeDL
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
-from .uicommons import Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey, \
-    get_yt_icon
+from .uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey,
+                        get_yt_icon)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -38,12 +38,14 @@ def get_stream_type(box):
         return StreamType.NONE_TS.value
     elif active == 2:
         return StreamType.NONE_REC_1.value
-    return StreamType.NONE_REC_2.value
+    elif active == 3:
+        return StreamType.NONE_REC_2.value
+    return StreamType.E_SERVICE_URI.value
 
 
 class IptvDialog:
 
-    def __init__(self, transient, view, services, bouquet, profile=SettingsType.ENIGMA_2, action=Action.ADD):
+    def __init__(self, transient, view, services, bouquet, settings, action=Action.ADD):
         handlers = {"on_response": self.on_response,
                     "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
@@ -52,17 +54,19 @@ class IptvDialog:
                     "on_yt_quality_changed": self.on_yt_quality_changed,
                     "on_info_bar_close": self.on_info_bar_close}
 
+        self._action = action
+        self._s_type = settings.setting_type
+        self._settings = settings
+        self._bouquet = bouquet
+        self._services = services
+        self._yt_links = None
+        self._yt_dl = None
+
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
                                         ("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
         builder.connect_signals(handlers)
-
-        self._action = action
-        self._profile = profile
-        self._bouquet = bouquet
-        self._services = services
-        self._yt_links = None
 
         self._dialog = builder.get_object("iptv_dialog")
         self._dialog.set_transient_for(transient)
@@ -91,7 +95,7 @@ class IptvDialog:
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        if profile is SettingsType.NEUTRINO_MP:
+        if self._s_type is SettingsType.NEUTRINO_MP:
             builder.get_object("iptv_dialog_ts_data_frame").set_visible(False)
             builder.get_object("iptv_type_label").set_visible(False)
             builder.get_object("reference_entry").set_visible(False)
@@ -104,8 +108,8 @@ class IptvDialog:
         if self._action is Action.ADD:
             self._save_button.set_visible(False)
             self._add_button.set_visible(True)
-            if self._profile is SettingsType.ENIGMA_2:
-                self._update_reference_entry()
+            if self._s_type is SettingsType.ENIGMA_2:
+                self.update_reference_entry()
                 self._stream_type_combobox.set_active(1)
         elif self._action is Action.EDIT:
             self._current_srv = get_base_model(self._model)[self._paths][:]
@@ -129,13 +133,13 @@ class IptvDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return
 
-        self.save_enigma2_data() if self._profile is SettingsType.ENIGMA_2 else self.save_neutrino_data()
+        self.save_enigma2_data() if self._s_type is SettingsType.ENIGMA_2 else self.save_neutrino_data()
         self._dialog.destroy()
 
     def init_data(self, srv):
         name, fav_id = srv[2], srv[7]
         self._name_entry.set_text(name)
-        self.init_enigma2_data(fav_id) if self._profile is SettingsType.ENIGMA_2 else self.init_neutrino_data(fav_id)
+        self.init_enigma2_data(fav_id) if self._s_type is SettingsType.ENIGMA_2 else self.init_neutrino_data(fav_id)
 
     def init_enigma2_data(self, fav_id):
         data, sep, desc = fav_id.partition("#DESCRIPTION")
@@ -155,6 +159,8 @@ class IptvDialog:
                 self._stream_type_combobox.set_active(2)
             elif stream_type is StreamType.NONE_REC_2:
                 self._stream_type_combobox.set_active(3)
+            elif stream_type is StreamType.E_SERVICE_URI:
+                self._stream_type_combobox.set_active(4)
         except ValueError:
             self.show_info_message("Unknown stream type {}".format(s_type), Gtk.MessageType.ERROR)
 
@@ -163,16 +169,17 @@ class IptvDialog:
         self._tr_id_entry.set_text(str(int(data[4], 16)))
         self._net_id_entry.set_text(str(int(data[5], 16)))
         self._namespace_entry.set_text(str(int(data[6], 16)))
-        self._url_entry.set_text(urllib.request.unquote(data[10].strip()))
-        self._update_reference_entry()
+        self._url_entry.set_text(unquote(data[10].strip()))
+        self.update_reference_entry()
 
     def init_neutrino_data(self, fav_id):
         data = fav_id.split("::")
         self._url_entry.set_text(data[0])
         self._description_entry.set_text(data[1])
 
-    def _update_reference_entry(self):
-        if self._profile is SettingsType.ENIGMA_2:
+    def update_reference_entry(self):
+        if self._s_type is SettingsType.ENIGMA_2:
+            self.on_url_changed(self._url_entry)
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_type_entry.get_text(),
                                                                      int(self._sid_entry.get_text()),
@@ -188,12 +195,13 @@ class IptvDialog:
             entry.set_name(_DIGIT_ENTRY_NAME)
         else:
             entry.set_name("GtkEntry")
-            self._update_reference_entry()
+            self.update_reference_entry()
 
     def on_url_changed(self, entry):
         url_str = entry.get_text()
         url = urlparse(url_str)
-        entry.set_name("GtkEntry" if all([url.scheme, url.netloc, url.path]) else _DIGIT_ENTRY_NAME)
+        cond = all([url.scheme, url.netloc, url.path]) or self.get_type() == StreamType.E_SERVICE_URI.value
+        entry.set_name("GtkEntry" if cond else _DIGIT_ENTRY_NAME)
 
         yt_id = YouTube.get_yt_id(url_str)
         if yt_id:
@@ -211,9 +219,21 @@ class IptvDialog:
 
     def set_yt_url(self, entry, video_id):
         try:
-            links, title = YouTube.get_yt_link(video_id)
+            if self._settings.enable_yt_dl:
+                if not self._yt_dl:
+                    def callback(message, error=True):
+                        msg_type = Gtk.MessageType.ERROR if error else Gtk.MessageType.INFO
+                        self.show_info_message(message, msg_type)
+                    self._yt_dl = YouTubeDL.get_instance(self._settings, callback=callback)
+                    yield True
+                links, title = self._yt_dl.get_yt_link(entry.get_text())
+            else:
+                links, title = YouTube.get_yt_link(video_id)
         except urllib.error.URLError as e:
             self.show_info_message(get_message("Getting link error:") + (str(e)), Gtk.MessageType.ERROR)
+            return
+        except YouTubeDL.YouTubeDLException as e:
+            self.show_info_message((str(e)), Gtk.MessageType.ERROR)
             return
         else:
             if self._action is Action.ADD:
@@ -232,7 +252,9 @@ class IptvDialog:
         yield True
 
     def on_stream_type_changed(self, item):
-        self._update_reference_entry()
+        if self.get_type() == StreamType.E_SERVICE_URI.value:
+            self.show_info_message("DreamOS only!", Gtk.MessageType.WARNING)
+        self.update_reference_entry()
 
     def on_yt_quality_changed(self, box):
         model = box.get_model()
@@ -248,7 +270,7 @@ class IptvDialog:
                                               int(self._tr_id_entry.get_text()),
                                               int(self._net_id_entry.get_text()),
                                               int(self._namespace_entry.get_text()),
-                                              urllib.request.quote(self._url_entry.get_text()),
+                                              quote(self._url_entry.get_text()),
                                               name, name)
         self.update_bouquet_data(name, fav_id)
 
@@ -291,7 +313,7 @@ class IptvDialog:
 
 class SearchUnavailableDialog:
 
-    def __init__(self, transient, model, fav_bouquet, iptv_rows, profile):
+    def __init__(self, transient, model, fav_bouquet, iptv_rows, s_type):
         handlers = {"on_response": self.on_response}
 
         builder = Gtk.Builder()
@@ -305,7 +327,7 @@ class SearchUnavailableDialog:
         self._counter_label = builder.get_object("streams_rows_counter_label")
         self._level_bar = builder.get_object("unavailable_streams_level_bar")
         self._bouquet = fav_bouquet
-        self._profile = profile
+        self._s_type = s_type
         self._iptv_rows = iptv_rows
         self._counter = -1
         self._max_rows = len(self._iptv_rows)
@@ -333,7 +355,7 @@ class SearchUnavailableDialog:
         if not self._download_task:
             return
         try:
-            req = Request(get_iptv_url(row, self._profile))
+            req = Request(get_iptv_url(row, self._s_type))
             self.update_bar()
             urlopen(req, timeout=2)
         except HTTPError as e:
@@ -375,7 +397,7 @@ class SearchUnavailableDialog:
 
 class IptvListConfigurationDialog:
 
-    def __init__(self, transient, services, iptv_rows, bouquet, fav_model, profile):
+    def __init__(self, transient, services, iptv_rows, bouquet, fav_model, s_type):
         handlers = {"on_apply": self.on_apply,
                     "on_response": self.on_response,
                     "on_stream_type_default_togged": self.on_stream_type_default_togged,
@@ -389,17 +411,17 @@ class IptvListConfigurationDialog:
                     "on_entry_changed": self.on_entry_changed,
                     "on_info_bar_close": self.on_info_bar_close}
 
+        self._rows = iptv_rows
+        self._services = services
+        self._bouquet = bouquet
+        self._fav_model = fav_model
+        self._s_type = s_type
+
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
                                         ("iptv_list_configuration_dialog", "stream_type_liststore"))
         builder.connect_signals(handlers)
-
-        self._rows = iptv_rows
-        self._services = services
-        self._bouquet = bouquet
-        self._fav_model = fav_model
-        self._profile = profile
 
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
         self._dialog.set_transient_for(transient)
@@ -487,7 +509,7 @@ class IptvListConfigurationDialog:
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
 
-        if self._profile is SettingsType.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2:
             reset = self._reset_to_default_switch.get_active()
             type_default = self._type_check_button.get_active()
             tid_default = self._tid_check_button.get_active()
@@ -541,7 +563,7 @@ class IptvListConfigurationDialog:
 
 
 class YtListImportDialog:
-    def __init__(self, transient, profile, appender):
+    def __init__(self, transient, settings, appender):
         handlers = {"on_import": self.on_import,
                     "on_receive": self.on_receive,
                     "on_yt_url_entry_changed": self.on_url_entry_changed,
@@ -552,6 +574,14 @@ class YtListImportDialog:
                     "on_unselect_all": self.on_unselect_all,
                     "on_key_press": self.on_key_press,
                     "on_close": self.on_close}
+
+        self.appender = appender
+        self._s_type = settings.setting_type
+        self._download_task = False
+        self._yt_list_id = None
+        self._yt_list_title = None
+        self._settings = settings
+        self._yt_dl = None
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -584,12 +614,6 @@ class YtListImportDialog:
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        self.appender = appender
-        self._profile = profile
-        self._download_task = False
-        self._yt_list_id = None
-        self._yt_list_title = None
-
     def show(self):
         self._dialog.show()
 
@@ -603,7 +627,14 @@ class YtListImportDialog:
             with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
                 done_links = {}
                 rows = list(filter(lambda r: r[2], self._model))
-                futures = {executor.submit(YouTube.get_yt_link, r[1]): r for r in rows}
+                if self._settings.enable_yt_dl:
+                    if not self._yt_dl:
+                        self._yt_dl = YouTubeDL.get_instance(self._settings)
+                    futures = {executor.submit(self._yt_dl.get_yt_link,
+                                               YouTubeDL.VIDEO_LINK.format(r[1]),
+                                               True): r for r in rows}
+                else:
+                    futures = {executor.submit(YouTube.get_yt_link, r[1]): r for r in rows}
                 size = len(futures)
                 counter = 0
 
@@ -615,6 +646,8 @@ class YtListImportDialog:
                     done_links[futures[future]] = future.result()
                     counter += 1
                     self.update_progress_bar(counter / size)
+        except YouTubeDL.YouTubeDLException as e:
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
         except Exception as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
@@ -648,8 +681,8 @@ class YtListImportDialog:
                 self.update_active_elements(True)
 
     def update_links(self, links):
-        for l in links:
-            yield self._model.append((l[0], l[1], True, None))
+        for link in links:
+            yield self._model.append((link[0], link[1], True, None))
 
         size = len(self._model)
         self._yt_count_label.set_text(str(size))
@@ -669,11 +702,11 @@ class YtListImportDialog:
 
         act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)
         for link in links:
-            lnk, title = link
+            lnk, title = link or (None, None)
             if not lnk:
                 continue
             ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
-            fav_id = get_fav_id(ln, title, self._profile)
+            fav_id = get_fav_id(ln, title, self._s_type)
             srv = Service(None, None, IPTV_ICON, title, *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
             srvs.append(srv)
         self.appender(srvs)
