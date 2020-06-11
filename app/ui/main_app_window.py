@@ -925,7 +925,7 @@ class Application(Gtk.Application):
         view.stop_emission_by_name("drag_drop")
         # https://stackoverflow.com/q/7661016  [Some data was dropped, get the data!]
         targets = drag_context.list_targets()
-        view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/plain", False), time)
+        view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/uri-list", False), time)
 
     def on_services_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         #  Needs for the GtkTreeView when using models [filter, sort]
@@ -938,10 +938,12 @@ class Application(Gtk.Application):
         uris = data.get_uris()
         if txt:
             self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
-        elif len(uris) == 2:
+
+        if uris:
             from urllib.parse import unquote, urlparse
-            self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
-                                                      urlparse(unquote(uris[1])).path + "/")
+            picon_path = urlparse(unquote(uris[0])).path
+            dest_path = urlparse(unquote(uris[1])).path + "/" if len(uris) == 2 else None
+            self.picons_buffer = self.on_assign_picon(view, picon_path, dest_path)
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
