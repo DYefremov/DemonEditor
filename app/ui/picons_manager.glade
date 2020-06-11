@@ -667,7 +667,6 @@ Author: Dmitriy Yefremov
                                         <property name="tooltip_column">1</property>
                                         <property name="activate_on_single_click">True</property>
                                         <signal name="button-press-event" handler="on_popup_menu" object="picons_src_view_popup_menu" swapped="no"/>
-                                        <signal name="cursor-changed" handler="on_picon_activated" swapped="no"/>
                                         <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                         <signal name="drag-data-received" handler="on_picons_src_view_drag_data_received" swapped="no"/>
                                         <signal name="drag-drop" handler="on_picons_src_view_drag_drop" swapped="no"/>
@@ -893,60 +892,70 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkInfoBar" id="explorer_info_bar">
+                      <object class="GtkFrame" id="explorer_info_bar_frame">
                         <property name="can_focus">False</property>
-                        <property name="message_type">other</property>
-                        <child internal-child="action_area">
-                          <object class="GtkButtonBox">
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkInfoBar" id="explorer_info_bar">
                             <property name="can_focus">False</property>
-                            <property name="spacing">6</property>
-                            <property name="layout_style">end</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child internal-child="content_area">
-                          <object class="GtkBox" id="explorer_info_bar_box">
-                            <property name="can_focus">False</property>
-                            <property name="spacing">10</property>
-                            <child>
-                              <object class="GtkImage" id="picon_info_image">
-                                <property name="width_request">128</property>
-                                <property name="height_request">72</property>
-                                <property name="visible">True</property>
+                            <property name="message_type">other</property>
+                            <child internal-child="action_area">
+                              <object class="GtkButtonBox">
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-missing-image</property>
-                                <property name="icon_size">6</property>
-                                <signal name="drag-data-received" handler="on_picon_info_image_drag_data_received" swapped="no"/>
+                                <property name="spacing">6</property>
+                                <property name="layout_style">end</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child internal-child="content_area">
+                              <object class="GtkBox" id="explorer_info_bar_box">
+                                <property name="can_focus">False</property>
+                                <property name="spacing">10</property>
+                                <child>
+                                  <object class="GtkImage" id="picon_info_image">
+                                    <property name="width_request">128</property>
+                                    <property name="height_request">72</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="stock">gtk-missing-image</property>
+                                    <property name="icon_size">6</property>
+                                    <signal name="drag-data-received" handler="on_picon_info_image_drag_data_received" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="picon_info_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="picon_info_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
+                              <placeholder/>
                             </child>
                           </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
                         </child>
-                        <child>
+                        <child type="label_item">
                           <placeholder/>
                         </child>
                       </object>

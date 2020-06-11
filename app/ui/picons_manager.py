@@ -136,7 +136,9 @@ class PiconsDialog:
         self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
         self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
         self._filter_button.bind_property("visible", self._info_check_button, "visible")
-        self._info_check_button.bind_property("active", builder.get_object("explorer_info_bar"), "visible")
+        explorer_info_bar = builder.get_object("explorer_info_bar")
+        explorer_info_bar.bind_property("visible", builder.get_object("explorer_info_bar_frame"), "visible")
+        self._info_check_button.bind_property("active", explorer_info_bar, "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Style
