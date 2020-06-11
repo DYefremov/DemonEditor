@@ -2804,7 +2804,7 @@ Author: Dmitriy Yefremov
               <object class="GtkLabel" id="app_ver_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">0.4.8 Pre-alpha</property>
+                <property name="label" translatable="yes">0.4.9 Pre-alpha</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
@@ -2898,7 +2898,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="screenshots_menu_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">zoom-best-fit</property>
+                    <property name="icon_name">zoom-fit-best-symbolic</property>
                   </object>
                 </child>
               </object>
