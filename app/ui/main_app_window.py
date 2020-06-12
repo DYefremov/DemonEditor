@@ -54,8 +54,9 @@ class Application(Gtk.Application):
                          "services_add_new_popup_item", "services_picon_popup_item", "services_remove_popup_item")
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
-                     "fav_insert_marker_popup_item", "fav_edit_sub_menu_popup_item", "fav_edit_popup_item",
-                     "fav_picon_popup_item", "fav_copy_popup_item", "fav_epg_configuration_popup_item")
+                     "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
+                     "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item",
+                     "fav_epg_configuration_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "bouquet_import_popup_item",
