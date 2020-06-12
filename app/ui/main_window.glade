@@ -3275,6 +3275,7 @@ Author: Dmitriy Yefremov
       <object class="GtkImageMenuItem" id="fav_insert_space_popup_item">
         <property name="label" translatable="yes">Insert space</property>
         <property name="visible">True</property>
+        <property name="sensitive">False</property>
         <property name="can_focus">False</property>
         <property name="image">insert_space_image</property>
         <property name="use_stock">False</property>
