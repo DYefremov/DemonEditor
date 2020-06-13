@@ -14,7 +14,7 @@ from urllib.request import Request, urlopen, urlretrieve
 from app.commons import log
 
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
-_YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{23,})?.*")
+_YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{18,})?.*")
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
 _HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/69.0",
             "DNT": "1",
@@ -24,10 +24,31 @@ Quality = {137: "1080p", 136: "720p", 135: "480p", 134: "360p",
            133: "240p", 160: "144p", 0: "0p", 18: "360p", 22: "720p"}
 
 
+class YouTubeException(Exception):
+    pass
+
+
 class YouTube:
     """ Helper class for working with YouTube service. """
 
+    _YT_INSTANCE = None
     _VIDEO_INFO_LINK = "https://youtube.com/get_video_info?video_id={}&hl=en"
+
+    VIDEO_LINK = "https://www.youtube.com/watch?v={}"
+
+    def __init__(self, settings, callback):
+        self._settings = settings
+        self._yt_dl = None
+        self._callback = callback
+
+        if self._settings.enable_yt_dl:
+            self._yt_dl = YouTubeDL.get_instance(self._settings, callback=self._callback)
+
+    @classmethod
+    def get_instance(cls, settings, callback=log):
+        if not cls._YT_INSTANCE:
+            cls._YT_INSTANCE = YouTube(settings, callback)
+        return cls._YT_INSTANCE
 
     @staticmethod
     def is_yt_video_link(url):
@@ -47,12 +68,24 @@ class YouTube:
         if yt:
             return yt.group(1)
 
-    @staticmethod
-    def get_yt_link(video_id):
-        """ Getting link to YouTube video by id.
+    def get_yt_link(self, video_id, url=None, skip_errors=False):
+        """  Getting link to YouTube video by id or URL.
 
-            returns tuple from the video links dict and title
+            Returns tuple from the video links dict and title.
          """
+        if self._settings.enable_yt_dl and url:
+            if not self._yt_dl:
+                self._yt_dl = YouTubeDL.get_instance(self._settings, self._callback)
+            return self._yt_dl.get_yt_link(url, skip_errors)
+
+        return self.get_yt_link_by_id(video_id)
+
+    @staticmethod
+    def get_yt_link_by_id(video_id):
+        """  Getting link to YouTube video by id.
+
+            Returns tuple from the video links dict and title.
+        """
         req = Request(YouTube._VIDEO_INFO_LINK.format(video_id), headers=_HEADERS)
 
         with urlopen(req, timeout=2) as resp:
@@ -169,12 +202,8 @@ class YouTubeDL:
     _LATEST_RELEASE_URL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
     _OPTIONS = {"noplaylist": True,  # Single video instead of a playlist [ignoring playlist in URL].
                 "quiet": True,  # Do not print messages to stdout.
-                "simulate": True}  # Do not download the video files.
-
-    VIDEO_LINK = "https://www.youtube.com/watch?v={}"
-
-    class YouTubeDLException(Exception):
-        pass
+                "simulate": True,  # Do not download the video files.
+                "cookiefile": "cookies.txt"}  # File name where cookies should be read from and dumped to.
 
     def __init__(self, settings, callback):
         self._path = settings.default_data_path + "tools/"
@@ -184,6 +213,8 @@ class YouTubeDL:
         self._callback = callback
         self._download_exception = None
         self._is_update_process = False
+
+        self.init()
 
     @classmethod
     def get_instance(cls, settings, callback=print):
@@ -205,7 +236,7 @@ class YouTubeDL:
             import youtube_dl
         except ModuleNotFoundError as e:
             log("YouTubeDLHelper error: {}".format(str(e)))
-            raise self.YouTubeDLException(e)
+            raise YouTubeException(e)
         else:
             if self._update:
                 if hasattr(youtube_dl.version, "__version__"):
@@ -221,7 +252,8 @@ class YouTubeDL:
             self._dl = youtube_dl.YoutubeDL(self._OPTIONS)
             log("youtube-dl initialized...")
 
-    def get_last_release_id(self):
+    @staticmethod
+    def get_last_release_id():
         """ Getting last release id. """
         url = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
         with urlopen(url, timeout=10) as resp:
@@ -255,21 +287,18 @@ class YouTubeDL:
                                 arch.extract(info.filename)
                                 shutil.move(info.filename, "{}{}{}".format(self._path, sep, f))
                         shutil.rmtree(pref)
-                        msg = "Getting the last youtube-dl release is done! Please restart."
+                        msg = "Getting the last youtube-dl release is done!"
                         log(msg)
                         self._callback(msg, False)
                         return True
         except URLError as e:
             log("YouTubeDLHelper error: {}".format(e))
-            raise self.YouTubeDLException(e)
+            raise YouTubeException(e)
         finally:
             self._is_update_process = False
 
     def get_yt_link(self, url, skip_errors=False):
         """ Returns tuple from the video links [dict] and title. """
-        if not self._dl:
-            self.init()
-
         if self._is_update_process:
             self._callback("Update process. Please wait.", False)
             return {}, ""
@@ -278,11 +307,11 @@ class YouTubeDL:
             info = self._dl.extract_info(url, download=False)
         except URLError as e:
             log(str(e))
-            raise self.YouTubeDLException(e)
+            raise YouTubeException(e)
         except self._DownloadError as e:
             log(str(e))
             if not skip_errors:
-                raise self.YouTubeDLException(e)
+                raise YouTubeException(e)
         else:
             fmts = info.get("formats", None)
             if fmts:

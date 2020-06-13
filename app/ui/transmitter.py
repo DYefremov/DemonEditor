@@ -18,7 +18,7 @@ class LinksTransmitter:
     """
     __STREAM_PREFIX = "4097:0:1:0:0:0:0:0:0:0:"
 
-    def __init__(self, http_api, app_window):
+    def __init__(self, http_api, app_window, settings):
         handlers = {"on_popup_menu": self.on_popup_menu,
                     "on_status_icon_activate": self.on_status_icon_activate,
                     "on_url_changed": self.on_url_changed,
@@ -45,6 +45,7 @@ class LinksTransmitter:
         self._restore_menu_item = builder.get_object("restore_menu_item")
         self._status_active = None
         self._status_passive = None
+        self._yt = YouTube.get_instance(settings)
 
         try:
             gi.require_version("AppIndicator3", "0.1")
@@ -113,7 +114,7 @@ class LinksTransmitter:
 
             if yt_id:
                 self._url_entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
-                links, title = YouTube.get_yt_link(yt_id)
+                links, title = self._yt.get_yt_link(yt_id, url)
                 yield True
                 if links:
                     url = links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]

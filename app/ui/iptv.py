@@ -11,7 +11,7 @@ from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.settings import SettingsType
-from app.tools.yt import YouTube, PlayListParser, YouTubeDL
+from app.tools.yt import PlayListParser, YouTubeException, YouTube
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
 from .uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey,
@@ -219,20 +219,19 @@ class IptvDialog:
 
     def set_yt_url(self, entry, video_id):
         try:
-            if self._settings.enable_yt_dl:
-                if not self._yt_dl:
-                    def callback(message, error=True):
-                        msg_type = Gtk.MessageType.ERROR if error else Gtk.MessageType.INFO
-                        self.show_info_message(message, msg_type)
-                    self._yt_dl = YouTubeDL.get_instance(self._settings, callback=callback)
-                    yield True
-                links, title = self._yt_dl.get_yt_link(entry.get_text())
-            else:
-                links, title = YouTube.get_yt_link(video_id)
+            if not self._yt_dl:
+                def callback(message, error=True):
+                    msg_type = Gtk.MessageType.ERROR if error else Gtk.MessageType.INFO
+                    self.show_info_message(message, msg_type)
+
+                self._yt_dl = YouTube.get_instance(self._settings, callback=callback)
+                yield True
+            links, title = self._yt_dl.get_yt_link(video_id, entry.get_text())
+            yield True
         except urllib.error.URLError as e:
             self.show_info_message(get_message("Getting link error:") + (str(e)), Gtk.MessageType.ERROR)
             return
-        except YouTubeDL.YouTubeDLException as e:
+        except YouTubeException as e:
             self.show_info_message((str(e)), Gtk.MessageType.ERROR)
             return
         else:
@@ -581,7 +580,7 @@ class YtListImportDialog:
         self._yt_list_id = None
         self._yt_list_title = None
         self._settings = settings
-        self._yt_dl = None
+        self._yt = None
 
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
@@ -626,14 +625,11 @@ class YtListImportDialog:
             with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
                 done_links = {}
                 rows = list(filter(lambda r: r[2], self._model))
-                if self._settings.enable_yt_dl:
-                    if not self._yt_dl:
-                        self._yt_dl = YouTubeDL.get_instance(self._settings)
-                    futures = {executor.submit(self._yt_dl.get_yt_link,
-                                               YouTubeDL.VIDEO_LINK.format(r[1]),
-                                               True): r for r in rows}
-                else:
-                    futures = {executor.submit(YouTube.get_yt_link, r[1]): r for r in rows}
+                if not self._yt:
+                    self._yt = YouTube.get_instance(self._settings)
+
+                futures = {executor.submit(self._yt.get_yt_link, r[1], YouTube.VIDEO_LINK.format(r[1]),
+                                           True): r for r in rows}
                 size = len(futures)
                 counter = 0
 
@@ -645,7 +641,7 @@ class YtListImportDialog:
                     done_links[futures[future]] = future.result()
                     counter += 1
                     self.update_progress_bar(counter / size)
-        except YouTubeDL.YouTubeDLException as e:
+        except YouTubeException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         except Exception as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
