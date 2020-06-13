@@ -2136,7 +2136,7 @@ class Application(Gtk.Application):
     @run_idle
     def init_send_to(self, enable):
         if enable and not self._links_transmitter:
-            self._links_transmitter = LinksTransmitter(self._http_api, self._main_window)
+            self._links_transmitter = LinksTransmitter(self._http_api, self._main_window, self._settings)
         elif self._links_transmitter:
             self._links_transmitter.show(enable)
 
