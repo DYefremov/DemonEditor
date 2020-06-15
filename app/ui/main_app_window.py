@@ -2309,25 +2309,27 @@ class Application(Gtk.Application):
     def on_screenshot_osd(self, action, value=None):
         self._http_api.send(HttpRequestType.GRUB, "mode=osd" if self._http_api.is_owif else "o=", self.on_screenshot)
 
+    @run_task
     def on_screenshot(self, data):
         if "error_code" in data:
             return
 
         img = data.get("img_data", None)
         if img:
-            self._screenshots_button.set_sensitive(False)
+            is_darwin = self._settings.is_darwin
+            GLib.idle_add(self._screenshots_button.set_sensitive, is_darwin)
+            path = os.path.expanduser("~/Desktop") if is_darwin else None
+
             try:
                 import tempfile
                 import subprocess
 
-                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg") as tf:
+                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg", dir=path, delete=not is_darwin) as tf:
                     tf.write(img)
-                    p = subprocess.Popen(["open" if self._settings.is_darwin else "xdg-open", tf.name],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE)
-                    p.communicate()
+                    cmd = ["open" if is_darwin else "xdg-open", tf.name]
+                    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             finally:
-                self._screenshots_button.set_sensitive(True)
+                GLib.idle_add(self._screenshots_button.set_sensitive, True)
 
     # ***************** Filter and search *********************#
 
