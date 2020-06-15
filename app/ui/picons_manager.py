@@ -262,8 +262,9 @@ class PiconsDialog:
     def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
         model, path = view.get_selection().get_selected_rows()
         if path:
-            data.set_uris([Path(model[path][-1]).as_uri(),
-                           Path(self._explorer_dest_path_button.get_filename()).as_uri()])
+            p_uri = Path(model[path][-1]).as_uri()
+            dest_uri = Path(self._explorer_dest_path_button.get_filename()).as_uri()
+            data.set_uris(["{}::::{}".format(p_uri, dest_uri)])
 
     def on_picons_src_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
@@ -338,10 +339,11 @@ class PiconsDialog:
             return
 
         uris = data.get_uris()
-        if len(uris) == 2:
+        if uris:
             name, fav_id = self._current_picon_info
-            src = urlparse(unquote(uris[0])).path
-            dst = "{}/{}".format(urlparse(unquote(uris[1])).path, name)
+            src, sep, dst = uris[0].partition("::::")
+            src = urlparse(unquote(src)).path
+            dst = "{}/{}".format(urlparse(unquote(dst)).path, name)
             if src != dst:
                 shutil.copy(src, dst)
                 for row in get_base_model(self._picons_dest_view.get_model()):
@@ -369,7 +371,7 @@ class PiconsDialog:
 
     def get_path_from_uris(self, data):
         uris = data.get_uris()
-        if len(uris) == 2:
+        if uris:
             return Path(urlparse(unquote(uris[0])).path).resolve()
 
     def update_picon_in_lists(self, dst, fav_id):

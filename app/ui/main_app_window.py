@@ -942,9 +942,12 @@ class Application(Gtk.Application):
 
         if uris:
             from urllib.parse import unquote, urlparse
-            picon_path = urlparse(unquote(uris[0])).path
-            dest_path = urlparse(unquote(uris[1])).path + "/" if len(uris) == 2 else None
+
+            src, sep, dest = uris[0].partition("::::")
+            picon_path = urlparse(unquote(src)).path
+            dest_path = urlparse(unquote(dest)).path + "/"
             self.picons_buffer = self.on_assign_picon(view, picon_path, dest_path)
+            drag_context.finish(True, None, time)
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
