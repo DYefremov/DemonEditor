@@ -372,7 +372,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkSearchEntry" id="picons_filter_entry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="primary_icon_stock">gtk-spell-check</property>
+                            <property name="primary_icon_name">edit-find-replace-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">False</property>
                             <signal name="search-changed" handler="on_picons_filter_changed" swapped="no"/>
