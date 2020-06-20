@@ -372,7 +372,8 @@ class PiconsDialog:
     def get_path_from_uris(self, data):
         uris = data.get_uris()
         if uris:
-            return Path(urlparse(unquote(uris[0])).path).resolve()
+            src, sep, dst = uris[0].partition("::::")
+            return Path(urlparse(unquote(src)).path).resolve()
 
     def update_picon_in_lists(self, dst, fav_id):
         picon = get_picon_pixbuf(dst)
