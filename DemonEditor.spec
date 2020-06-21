@@ -1,4 +1,5 @@
 import os
+import datetime
 import distutils.util
 
 EXE_NAME = 'start.py'
@@ -6,6 +7,7 @@ DIR_PATH = os.getcwd()
 COMPILING_PLATFORM = distutils.util.get_platform()
 PATH_EXE = [os.path.join(DIR_PATH, EXE_NAME)]
 STRIP = True
+BUILD_DATE = datetime.datetime.now().strftime("%Y%m%d")
 
 block_cipher = None
 
@@ -58,6 +60,6 @@ app = BUNDLE(coll,
                  'CFBundleName': 'DemonEditor',
                  'CFBundleDisplayName': 'DemonEditor',
                  'CFBundleGetInfoString': "Enigma2 channel and satellites editor",
-                 'CFBundleShortVersionString': "0.4.8 Pre-alpha",
+                 'CFBundleShortVersionString': "0.4.9 Pre-alpha (Build: {})".format(BUILD_DATE),
                  'NSHumanReadableCopyright': u"Copyright © 2020, Dmitriy Yefremov"
              })
