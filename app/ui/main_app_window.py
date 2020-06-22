@@ -1014,7 +1014,7 @@ class Application(Gtk.Application):
                 return
 
             model = get_base_model(view.get_model())
-            dest_index = len(model)
+            dest_index = -1
 
             if drop_info:
                 path, position = drop_info
@@ -1027,7 +1027,7 @@ class Application(Gtk.Application):
                 ext_model = self._services_view.get_model()
                 ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
                 ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
-                dest_index -= 1
+                
                 for ext_row in ext_rows:
                     dest_index += 1
                     fav_id = ext_row[Column.SRV_FAV_ID]
