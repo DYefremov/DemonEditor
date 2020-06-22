@@ -1,7 +1,7 @@
-""" This is helper module for ui """
+""" Helper module for the ui. """
 import os
 import shutil
-import urllib.request
+from urllib.parse import unquote
 
 from gi.repository import GdkPixbuf, GLib
 
@@ -213,6 +213,7 @@ def set_flags(flag, services_view, fav_view, services, blacklist):
     if not paths:
         return
 
+    paths = get_base_paths(paths, model)
     model = get_base_model(model)
 
     if flag is Flag.HIDE:
@@ -241,12 +242,13 @@ def set_lock(blacklist, services, model, paths, target, services_model):
     locked = has_locked_hide(model, paths, col_num)
 
     ids = []
+    skip_type = {BqServiceType.IPTV.name, BqServiceType.MARKER.name, BqServiceType.SPACE.name}
 
     for path in paths:
         itr = model.get_iter(path)
         fav_id = model.get_value(itr, Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID)
         srv = services.get(fav_id, None)
-        if srv:
+        if srv and srv.service_type not in skip_type:
             bq_id = to_bouquet_id(srv)
             if not bq_id:
                 continue
@@ -590,10 +592,26 @@ def update_entry_data(entry, dialog, settings):
 
 
 def get_base_model(model):
-    """ Returns base tree model if has wrappers ("TreeModelSort" and "TreeModelFilter") """
+    """ Returns base tree model if has wrappers [TreeModelSort, TreeModelFilter]. """
     if type(model) is Gtk.TreeModelSort:
         return model.get_model().get_model()
     return model
+
+
+def get_base_itrs(itrs, model):
+    """ Returns base iters from wrapper models. """
+    if type(model) is Gtk.TreeModelSort:
+        filter_model = model.get_model()
+        return [filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr)) for itr in itrs]
+    return itrs
+
+
+def get_base_paths(paths, model):
+    """ Returns base paths from wrapper models. """
+    if type(model) is Gtk.TreeModelSort:
+        filter_model = model.get_model()
+        return [filter_model.convert_path_to_child_path(model.convert_path_to_child_path(p)) for p in paths]
+    return paths
 
 
 def get_model_data(view):
@@ -618,7 +636,7 @@ def get_iptv_url(row, s_type):
         data = list(filter(lambda x: "http" in x, data))
     if data:
         url = data[0]
-        return urllib.request.unquote(url) if s_type is SettingsType.ENIGMA_2 else url
+        return unquote(url) if s_type is SettingsType.ENIGMA_2 else url
 
 
 def on_popup_menu(menu, event):
