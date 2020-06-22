@@ -2451,6 +2451,7 @@ Author: Dmitriy Yefremov
                                           </object>
                                           <attributes>
                                             <attribute name="cell-background-rgba">10</attribute>
+                                            <attribute name="visible">0</attribute>
                                             <attribute name="text">0</attribute>
                                           </attributes>
                                         </child>

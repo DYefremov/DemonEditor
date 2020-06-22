@@ -178,6 +178,7 @@ class Application(Gtk.Application):
         self._bq_selected = ""  # Current selected bouquet
         # Current satellite positions in the services list
         self._sat_positions = []
+        self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
         # Player
         self._player = None
         self._full_screen = False
@@ -793,8 +794,12 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_num_column(self, model):
-        for index, row in enumerate(model):
-            row[0] = index + 1
+        num = 0
+        for row in model:
+            is_marker = row[Column.FAV_TYPE] in self._marker_types
+            if not is_marker:
+                num += 1
+            row[Column.FAV_NUM] = 0 if is_marker else num
         yield True
 
     def update_bouquet_list(self):
@@ -1407,15 +1412,22 @@ class Application(Gtk.Application):
         self._fav_model.clear()
         yield True
 
-        for num, srv_id in enumerate(services):
+        num = 0
+        for srv_id in services:
             srv = self._services.get(srv_id, None)
             ex_srv_name = None
             if ex_services:
                 ex_srv_name = ex_services.get(srv_id)
             if srv:
                 background = self._EXTRA_COLOR if self._use_colors and ex_srv_name else None
-                self._fav_model.append((num + 1, srv.coded, ex_srv_name if ex_srv_name else srv.service, srv.locked,
-                                        srv.hide, srv.service_type, srv.pos, srv.fav_id,
+
+                srv_type = srv.service_type
+                is_marker = srv_type in self._marker_types
+                if not is_marker:
+                    num += 1
+
+                self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
+                                        srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
                                         self._picons.get(srv.picon_id, None), None, background))
             if num % self.FAV_FACTOR == 0:
                 yield True
@@ -2170,7 +2182,7 @@ class Application(Gtk.Application):
         row = self._fav_model[path][:]
         srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
 
-        if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
+        if srv_type == BqServiceType.IPTV.name or srv_type in self._marker_types:
             self.show_error_dialog("Not allowed in this context!")
             self.set_playback_elms_active()
             return
@@ -2408,7 +2420,7 @@ class Application(Gtk.Application):
             model_name = get_base_model(model).get_name()
             if model_name == self.FAV_MODEL_NAME:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
-                if srv_type == BqServiceType.MARKER.name:
+                if srv_type in self._marker_types:
                     return self.on_rename(view)
                 elif srv_type == BqServiceType.IPTV.name:
                     return IptvDialog(self._main_window,
