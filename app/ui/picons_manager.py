@@ -103,7 +103,7 @@ class PiconsDialog:
         self._url_entry = builder.get_object("url_entry")
         self._picons_dir_entry = builder.get_object("picons_dir_entry")
         self._message_label = builder.get_object("info_bar_message_label")
-        self._info_check_button = builder.get_object("info_check_button")
+        self._info_toggle_button = builder.get_object("info_toggle_button")
         self._picon_info_image = builder.get_object("picon_info_image")
         self._picon_info_label = builder.get_object("picon_info_label")
         self._load_providers_button = builder.get_object("load_providers_button")
@@ -135,10 +135,10 @@ class PiconsDialog:
         self._filter_button.bind_property("active", builder.get_object("filter_service_box"), "visible")
         self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
         self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
-        self._filter_button.bind_property("visible", self._info_check_button, "visible")
+        self._filter_button.bind_property("visible", self._info_toggle_button, "visible")
         explorer_info_bar = builder.get_object("explorer_info_bar")
         explorer_info_bar.bind_property("visible", builder.get_object("explorer_info_bar_frame"), "visible")
-        self._info_check_button.bind_property("active", explorer_info_bar, "visible")
+        self._info_toggle_button.bind_property("active", explorer_info_bar, "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Style
@@ -356,7 +356,7 @@ class PiconsDialog:
 
     def on_send_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
         path = self.get_path_from_uris(data)
-        if path:
+        if path and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.OK:
             self.on_send(files_filter={path.name}, path=path.parent)
 
     def on_download_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
@@ -385,7 +385,7 @@ class PiconsDialog:
 
     def on_selective_send(self, view):
         path = self.get_selected_path(view)
-        if path:
+        if path and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.OK:
             self.on_send(files_filter={path.name}, path=path.parent)
 
     def on_selective_download(self, view):
@@ -438,7 +438,7 @@ class PiconsDialog:
                                             files_filter=files_filter), True)
 
     def on_remove(self, item=None, files_filter=None):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
             return
 
         self.run_func(lambda: remove_picons(settings=self._settings,
@@ -731,7 +731,7 @@ class PiconsDialog:
             map(lambda s: s.picon_id, filter(lambda s: txt in s.service.upper(), self._app.current_services.values())))
 
     def on_picon_activated(self, view):
-        if self._info_check_button.get_active():
+        if self._info_toggle_button.get_active():
             model, path = view.get_selection().get_selected_rows()
             if not path:
                 return
