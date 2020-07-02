@@ -210,7 +210,7 @@ class SettingsDialog:
             model.append((p, icon))
             if icon:
                 scroll_to(ind, self._profile_view)
-                self.on_profile_selected(self._profile_view)
+                self.on_profile_selected(self._profile_view, False)
         self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
 
     def update_title(self):
@@ -300,7 +300,7 @@ class SettingsDialog:
         else:
             self._neutrino_radio_button.activate()
 
-    def on_apply_profile_settings(self, item):
+    def on_apply_profile_settings(self, item=None):
         if not self.is_data_correct(self._digit_elems):
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
@@ -328,9 +328,10 @@ class SettingsDialog:
         self._settings.backup_local_path = self._backup_dir_field.get_text()
 
     def apply_settings(self, item=None):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
             return
 
+        self.on_apply_profile_settings()
         self._ext_settings.profiles = self._settings.profiles
         self._ext_settings.backup_before_save = self._before_save_switch.get_active()
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
@@ -467,7 +468,7 @@ class SettingsDialog:
         self._profiles[name] = self._s_type.get_default_settings()
         model.append((name, None))
         scroll_to(len(model) - 1, self._profile_view)
-        self.on_profile_selected(self._profile_view)
+        self.on_profile_selected(self._profile_view, False)
         self.on_reset()
 
     def on_profile_edit(self, item=None):
@@ -503,7 +504,7 @@ class SettingsDialog:
             row[0] = new_value
             self._profiles[new_value] = p_settings
             self.update_local_paths(new_value, old_name)
-        self.on_profile_selected(self._profile_view)
+        self.on_profile_selected(self._profile_view, False)
 
     def update_local_paths(self, p_name, old_name, force_rename=False):
         data_path = self._settings.data_local_path
@@ -525,7 +526,10 @@ class SettingsDialog:
             except OSError as e:
                 self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
-    def on_profile_selected(self, view):
+    def on_profile_selected(self, view, force=True):
+        if force:
+            self.on_apply_profile_settings()
+
         model, paths = self._profile_view.get_selection().get_selected_rows()
         if paths:
             profile = model.get_value(model.get_iter(paths), 0)
