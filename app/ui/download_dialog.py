@@ -24,6 +24,8 @@ class DownloadDialog:
                     "on_settings_button": self.on_settings_button,
                     "on_settings": self.on_settings,
                     "on_profile_changed": self.on_profile_changed,
+                    "on_use_http_state_set": self.on_use_http_state_set,
+                    "on_remove_unused_bouquets_toggled": self.on_remove_unused_bouquets_toggled,
                     "on_info_bar_close": self.on_info_bar_close}
 
         builder = Gtk.Builder()
@@ -64,7 +66,6 @@ class DownloadDialog:
         self.update_profiles()
         self.init_ui_settings()
 
-    @run_idle
     def init_ui_settings(self):
         self._host_entry.set_text(self._settings.host)
         self._data_path_entry.set_text(self._settings.data_local_path)
@@ -72,7 +73,8 @@ class DownloadDialog:
         self._webtv_radio_button.set_visible(not is_enigma)
         self._http_radio_button.set_visible(is_enigma)
         self._use_http_box.set_visible(is_enigma)
-        self._use_http_switch.set_active(is_enigma)
+        self._use_http_switch.set_active(is_enigma and self._settings.use_http)
+        self._remove_unused_check_button.set_active(self._settings.remove_unused_bouquets)
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()
@@ -142,6 +144,12 @@ class DownloadDialog:
             self._profile_combo_box.set_active_id(active)
             self._s_type = self._settings.setting_type
             self.init_ui_settings()
+
+    def on_use_http_state_set(self, button, state):
+        self._settings.use_http = state
+
+    def on_remove_unused_bouquets_toggled(self, button):
+        self._settings.remove_unused_bouquets = button.get_active()
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

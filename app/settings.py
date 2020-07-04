@@ -650,6 +650,24 @@ class Settings:
     def is_darwin(self):
         return IS_DARWIN
 
+    # *********** Download dialog *********** #
+
+    @property
+    def use_http(self):
+        return self._settings.get("use_http", True)
+
+    @use_http.setter
+    def use_http(self, value):
+        self._settings["use_http"] = value
+
+    @property
+    def remove_unused_bouquets(self):
+        return self._settings.get("remove_unused_bouquets", True)
+
+    @remove_unused_bouquets.setter
+    def remove_unused_bouquets(self, value):
+        self._settings["remove_unused_bouquets"] = value
+
 
 if __name__ == "__main__":
     pass
