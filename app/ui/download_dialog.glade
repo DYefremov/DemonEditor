@@ -357,6 +357,7 @@ Author: Dmitriy Yefremov
                         <property name="receives_default">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_remove_unused_bouquets_toggled" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -387,6 +388,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Use http to reload data in the receiver.</property>
                             <property name="active">True</property>
+                            <signal name="state-set" handler="on_use_http_state_set" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
