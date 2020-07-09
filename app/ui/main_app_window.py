@@ -28,7 +28,7 @@ from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDial
 from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picons,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
-                          get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf)
+                          get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs)
 from .picons_manager import PiconsDialog
 from .satellites_dialog import show_satellites_dialog
 from .search import SearchProvider
@@ -103,6 +103,7 @@ class Application(Gtk.Application):
                     "on_edit": self.on_edit,
                     "on_to_fav_copy": self.on_to_fav_copy,
                     "on_to_fav_end_copy": self.on_to_fav_end_copy,
+                    "on_fav_sort": self.on_fav_sort,
                     "on_fav_view_query_tooltip": self.on_fav_view_query_tooltip,
                     "on_services_view_query_tooltip": self.on_services_view_query_tooltip,
                     "on_view_drag_begin": self.on_view_drag_begin,
@@ -660,8 +661,7 @@ class Application(Gtk.Application):
 
     def delete_services(self, itrs, model, rows):
         """ Deleting services """
-        for index, s_itr in enumerate([self._services_model_filter.convert_iter_to_child_iter(
-                model.convert_iter_to_child_iter(itr)) for itr in itrs]):
+        for index, s_itr in enumerate(get_base_itrs(itrs, model)):
             self._services_model.remove(s_itr)
             if index % self.DEL_FACTOR == 0:
                 yield True
@@ -809,6 +809,72 @@ class Application(Gtk.Application):
             fav_bouquet.clear()
             for row in self._fav_model:
                 fav_bouquet.append(row[Column.FAV_ID])
+
+    # ** Bouquet details sort [sorting model not used!] ** #
+
+    def on_fav_sort(self, column):
+        """ Bouquet details (FAV) list sorting by clicking on column header. """
+        if not len(self._fav_model):
+            return
+
+        bq = self._bouquets.get(self._bq_selected, None)
+        if not bq:
+            return
+
+        msg = "Are you sure you want to change the order\n of services in this bouquet?"
+        if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
+            return
+
+        c_num = Column.FAV_NUM
+        c_name = column.get_name()
+
+        if c_name == "fav_service_column":
+            c_num = Column.FAV_SERVICE
+        elif c_name == "fav_type_column":
+            c_num = Column.FAV_TYPE
+        elif c_name == "fav_pos_column":
+            c_num = Column.FAV_POS
+
+        order = column.get_sort_order()
+        if not column.get_sort_indicator():
+            self.reset_view_sort_indication(self._fav_view)
+            column.set_sort_indicator(True)
+        else:
+            order = not order
+            column.set_sort_order(not column.get_sort_order())
+
+        model, paths = self._fav_view.get_selection().get_selected_rows()
+
+        if len(paths) < 2 and len(bq) > self.FAV_FACTOR or len(paths) > self.FAV_FACTOR:
+            self._wait_dialog.show(get_message("Sorting data..."))
+        GLib.idle_add(self.sort_fav, c_num, bq, paths, order, 0 if c_num == Column.FAV_NUM else "")
+
+    @run_idle
+    def sort_fav(self, c_num, bq, paths, rev=False, nv=""):
+        """ Sorting function for the bouquet details list.
+
+            @param c_num: column number
+            @param bq: current bouquet
+            @param paths: selected paths
+            @param rev: sort reverse.
+            @param nv: default value for the None items.
+            If the number of selected items is more than one, then only these items will be sorted!
+        """
+        rows = self._fav_model if len(paths) < 2 else [self._fav_model[p] for p in paths]
+        index = int(str(rows[0].path))
+
+        for s_row, row in zip(sorted(map(lambda r: r[:], rows), key=lambda r: r[c_num] or nv, reverse=rev), rows):
+            self._fav_model.set_row(row.iter, s_row)
+            bq[index] = s_row[Column.FAV_ID]
+            index += 1
+
+        self._wait_dialog.hide()
+        self._fav_view.grab_focus()
+
+    def reset_view_sort_indication(self, view):
+        for column in view.get_columns():
+            column.set_sort_indicator(False)
+            column.set_sort_order(Gtk.SortType.ASCENDING)
 
     # ********************* Hints *************************#
 
@@ -973,7 +1039,7 @@ class Application(Gtk.Application):
                 ext_model = self._services_view.get_model()
                 ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
                 ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
-                
+
                 for ext_row in ext_rows:
                     dest_index += 1
                     fav_id = ext_row[Column.SRV_FAV_ID]
@@ -1377,6 +1443,7 @@ class Application(Gtk.Application):
         self._cas_label.set_text(",".join(map(str, sorted(set(CAS.get(v[:4].upper(), def_val) for v in cvs)))))
 
     def on_bouquets_selection(self, model, path, column):
+        self.reset_view_sort_indication(self._fav_view)
         self._current_bq_name = model[path][0] if len(path) > 1 else None
         self._bq_name_label.set_text(self._current_bq_name if self._current_bq_name else "")
 
@@ -1407,7 +1474,7 @@ class Application(Gtk.Application):
 
         factor = self.FAV_FACTOR * 20
         if len(services) > factor or len(self._fav_model) > factor:
-            GLib.idle_add(self._bouquets_view.set_sensitive, False)
+            self._bouquets_view.set_sensitive(False)
 
         self._fav_model.clear()
         yield True

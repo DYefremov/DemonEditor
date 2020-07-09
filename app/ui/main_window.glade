@@ -1024,7 +1024,7 @@ Author: Dmitriy Yefremov
   <object class="GtkTreeModelFilter" id="services_model_filter">
     <property name="child_model">services_list_store</property>
   </object>
-  <object class="GtkTreeModelSort" id="services_model_tree_model_sort">
+  <object class="GtkTreeModelSort" id="services_model_sort">
     <property name="model">services_model_filter</property>
   </object>
   <object class="GtkApplicationWindow" id="main_window">
@@ -1871,7 +1871,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkTreeView" id="services_tree_view">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="model">services_model_tree_model_sort</property>
+                                <property name="model">services_model_sort</property>
                                 <property name="enable_search">False</property>
                                 <property name="search_column">3</property>
                                 <property name="rubber_banding">True</property>
@@ -2438,11 +2438,13 @@ Author: Dmitriy Yefremov
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="GtkTreeViewColumn" id="num_column">
+                                      <object class="GtkTreeViewColumn" id="fav_num_column">
                                         <property name="resizable">True</property>
                                         <property name="min_width">25</property>
                                         <property name="title" translatable="yes">Num</property>
+                                        <property name="clickable">True</property>
                                         <property name="alignment">0.5</property>
+                                        <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                         <child>
                                           <object class="GtkCellRendererText" id="num_cellrenderertext">
                                             <property name="xalign">0.20000000298023224</property>
@@ -2463,7 +2465,9 @@ Author: Dmitriy Yefremov
                                         <property name="min_width">50</property>
                                         <property name="title" translatable="yes">Service</property>
                                         <property name="expand">True</property>
+                                        <property name="clickable">True</property>
                                         <property name="alignment">0.5</property>
+                                        <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                         <child>
                                           <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf">
                                             <property name="xpad">2</property>
@@ -2518,7 +2522,9 @@ Author: Dmitriy Yefremov
                                         <property name="min_width">25</property>
                                         <property name="title" translatable="yes">Type</property>
                                         <property name="expand">True</property>
+                                        <property name="clickable">True</property>
                                         <property name="alignment">0.5</property>
+                                        <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                         <child>
                                           <object class="GtkCellRendererText" id="type_cellrenderertext">
                                             <property name="xalign">0.50999999046325684</property>
@@ -2535,7 +2541,9 @@ Author: Dmitriy Yefremov
                                         <property name="min_width">25</property>
                                         <property name="title" translatable="yes">Pos</property>
                                         <property name="expand">True</property>
+                                        <property name="clickable">True</property>
                                         <property name="alignment">0.5</property>
+                                        <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                         <child>
                                           <object class="GtkCellRendererText" id="pos_cellrenderertext">
                                             <property name="xalign">0.50999999046325684</property>
