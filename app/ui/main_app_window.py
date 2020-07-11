@@ -77,6 +77,7 @@ class Application(Gtk.Application):
         # Adding command line options
         self.add_main_option("log", ord("l"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
         self.add_main_option("record", ord("r"), GLib.OptionFlags.NONE, GLib.OptionArg.NONE, "", None)
+        self.add_main_option("debug", ord("d"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING, "", None)
 
         handlers = {"on_close_app": self.on_close_app,
                     "on_resize": self.on_resize,
@@ -405,6 +406,18 @@ class Application(Gtk.Application):
         if "record" in options:
             log("Starting record of current stream...")
             log("Not implemented yet!")
+
+        if "debug" in options:
+            d_op = options.get("debug", "off")
+            if d_op == "on":
+                self._settings.debug_mode = True
+            elif d_op == "off":
+                self._settings.debug_mode = False
+            else:
+                log("No valid [on, off] arguments for -d found!")
+                return 1
+            log("Debug mode is {}.".format(d_op))
+            self._settings.save()
 
         self.activate()
         return 0
@@ -1111,14 +1124,21 @@ class Application(Gtk.Application):
                           download_type=DownloadType.ALL,
                           callback=lambda x: print(x, end=""))
         except Exception as e:
-            from traceback import format_exc
-            log("Downloading data error: {}".format(format_exc()))
+            msg = "Downloading data error: {}"
+            log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_dialog(str(e))
         else:
             GLib.idle_add(self.open_data)
 
-    @run_task
     def on_upload_data(self, download_type):
+        if not self.is_data_saved():
+            gen = self.save_data(lambda: self.on_upload_data(download_type))
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        else:
+            self.upload_data(download_type)
+
+    @run_task
+    def upload_data(self, download_type):
         try:
             profile = self._s_type
             opts = self._settings
@@ -1137,8 +1157,8 @@ class Application(Gtk.Application):
                         callback=lambda x: print(x, end=""),
                         use_http=use_http)
         except Exception as e:
-            from traceback import format_exc
-            log("Uploading data error: {}".format(format_exc()))
+            msg = "Uploading data error: {}"
+            log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_dialog(str(e))
 
     def on_data_open(self, action=None, value=None):
@@ -1195,9 +1215,9 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
             return
         except Exception as e:
-            from traceback import format_exc
-            log("Reading data error: {}".format(format_exc()))
-            self.show_error_dialog(get_message("Reading data error!") + "\n" + str(e))
+            msg = "Reading data error: {}"
+            log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
+            self.show_error_dialog("{}\n{}".format(get_message("Reading data error!"), e))
             return
         else:
             self.append_blacklist(black_list)

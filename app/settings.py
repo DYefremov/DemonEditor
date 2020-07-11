@@ -668,6 +668,16 @@ class Settings:
     def remove_unused_bouquets(self, value):
         self._settings["remove_unused_bouquets"] = value
 
+    # **************** Debug **************** #
+
+    @property
+    def debug_mode(self):
+        return self._settings.get("debug_mode", False)
+
+    @debug_mode.setter
+    def debug_mode(self, value):
+        self._settings["debug_mode"] = value
+
 
 if __name__ == "__main__":
     pass
