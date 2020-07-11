@@ -20,8 +20,14 @@ def init_logger():
     log("Logging is enabled.", level=logging.INFO)
 
 
-def log(message, level=logging.ERROR):
-    logging.getLogger(_LOGGER_NAME).log(level, message)
+def log(message, level=logging.ERROR, debug=False, fmt_message="{}"):
+    """ The main logging function. """
+    logger = logging.getLogger(_LOGGER_NAME)
+    if debug:
+        from traceback import format_exc
+        logger.log(level, fmt_message.format(format_exc()))
+    else:
+        logger.log(level, message)
 
 
 def run_idle(func):

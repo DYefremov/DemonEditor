@@ -179,8 +179,8 @@ class DownloadDialog:
                             done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO),
                             use_http=self._use_http_switch.get_active())
         except Exception as e:
-            from traceback import format_exc
-            log("Downloading data error: {}".format(format_exc()))
+            msg = "Downloading data error: {}"
+            log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
             if all((download, backup, data_path)):
                 restore_data(backup_src, data_path)
