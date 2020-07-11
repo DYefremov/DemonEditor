@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -2923,6 +2923,7 @@ Author: Dmitriy Yefremov
                 <property name="tooltip_text" translatable="yes">No connection to the receiver!</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
+                <property name="pixel_size">24</property>
                 <property name="icon_name">network-offline</property>
               </object>
               <packing>

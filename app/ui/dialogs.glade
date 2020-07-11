@@ -212,7 +212,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <style>
-          <class name="primary-toolbar"/>
+          <class name="app-notification"/>
         </style>
       </object>
     </child>
