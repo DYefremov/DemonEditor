@@ -3016,8 +3016,7 @@ Author: Dmitriy Yefremov
                 <property name="valign">center</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
-                <property name="pixel_size">24</property>
-                <property name="icon_name">network-offline</property>
+                <property name="icon_name">network-offline-symbolic</property>
               </object>
               <packing>
                 <property name="expand">False</property>

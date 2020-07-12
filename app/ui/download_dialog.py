@@ -157,7 +157,7 @@ class DownloadDialog:
     @run_task
     def download(self, download, d_type):
         """ Download/upload data from/to receiver """
-        self._expander.set_expanded(True)
+        GLib.idle_add(self._expander.set_expanded, True)
         self.clear_output()
         backup, backup_src, data_path = self._settings.backup_before_downloading, None, None
 
