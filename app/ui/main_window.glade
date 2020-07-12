@@ -2923,7 +2923,7 @@ Author: Dmitriy Yefremov
                 <property name="tooltip_text" translatable="yes">No connection to the receiver!</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">10</property>
-                <property name="icon_name">network-offline</property>
+                <property name="icon_name">network-offline-symbolic</property>
               </object>
               <packing>
                 <property name="expand">False</property>
