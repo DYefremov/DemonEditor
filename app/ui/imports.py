@@ -12,7 +12,7 @@ from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
 
 
-def import_bouquet(transient, model, path, settings, services, appender):
+def import_bouquet(transient, model, path, settings, services, appender, file_path=None):
     """ Import of single bouquet """
     itr = model.get_iter(path)
     bq_type = BqType(model.get(itr, Column.BQ_TYPE)[0])
@@ -30,7 +30,7 @@ def import_bouquet(transient, model, path, settings, services, appender):
         elif bq_type is BqType.WEBTV:
             f_pattern = "webtv.xml"
 
-    file_path = get_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
+    file_path = file_path or get_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
     if file_path == Gtk.ResponseType.CANCEL:
         return
 
