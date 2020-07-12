@@ -988,6 +988,12 @@ class Application(Gtk.Application):
         data = data.get_text()
         if not data:
             return
+
+        if data.startswith("file://"):
+            from urllib.parse import unquote, urlparse
+            self.on_import_bouquet(None, file_path=urlparse(unquote(data)).path.strip())
+            return
+
         itr_str, sep, source = data.partition("::::")
         if source != self.BQ_MODEL_NAME:
             return
@@ -1907,14 +1913,14 @@ class Application(Gtk.Application):
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
-    def on_import_bouquet(self, action, value=None):
+    def on_import_bouquet(self, action, value=None, file_path=None):
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
             self.show_error_dialog("No selected item!")
             return
 
         appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
-        import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender)
+        import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender, file_path)
 
     def on_import_bouquets(self, action, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
