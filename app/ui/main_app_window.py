@@ -501,6 +501,7 @@ class Application(Gtk.Application):
         self._bouquets_view.drag_source_set_target_list(None)
         self._bouquets_view.drag_dest_add_text_targets()
         self._bouquets_view.drag_source_add_text_targets()
+        self._bouquets_view.drag_dest_add_uri_targets()
 
     def init_colors(self, update=False):
         """ Initialisation of background colors for the services.
@@ -1036,13 +1037,15 @@ class Application(Gtk.Application):
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
         drop_info = view.get_dest_row_at_pos(x, y)
-        data = data.get_text()
-        if not data:
+
+        uris = data.get_uris()
+        if uris:
+            from urllib.parse import unquote, urlparse
+            self.on_import_bouquet(None, file_path=urlparse(unquote(uris[0])).path.strip())
             return
 
-        if data.startswith("file://"):
-            from urllib.parse import unquote, urlparse
-            self.on_import_bouquet(None, file_path=urlparse(unquote(data)).path.strip())
+        data = data.get_text()
+        if not data:
             return
 
         itr_str, sep, source = data.partition("::::")

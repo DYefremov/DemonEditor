@@ -21,7 +21,7 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
 
     if profile is SettingsType.ENIGMA_2:
         pattern = ".{}".format(bq_type.value)
-        f_pattern = "userbouquet.*{}".format(pattern)
+        f_pattern = "*" + pattern if settings.is_darwin else "userbouquet.*{}".format(pattern)
     elif profile is SettingsType.NEUTRINO_MP:
         pattern = "webtv.xml" if bq_type is BqType.WEBTV else "bouquets.xml"
         f_pattern = "bouquets.xml"
@@ -34,11 +34,15 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
     if file_path == Gtk.ResponseType.CANCEL:
         return
 
-    if not str(file_path).endswith(pattern):
+    if not file_path.endswith(pattern):
         show_dialog(DialogType.ERROR, transient, text="No bouquet file is selected!")
         return
 
     if profile is SettingsType.ENIGMA_2:
+        if settings.is_darwin and file_path.rfind("userbouquet.") < 0:
+            show_dialog(DialogType.ERROR, transient, text="No bouquet file is selected!")
+            return
+
         bq = get_enigma2_bouquet(file_path)
         imported = list(filter(lambda x: x.data in services or x.type is BqServiceType.IPTV, bq.services))
 
