@@ -8,8 +8,11 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gtk, Gdk
+gi.require_version("Notify", "0.7")
+from gi.repository import Gtk, Gdk, Notify
 
+# Init notify
+Notify.init("DemonEditor")
 # Setting mod mask for the keyboard depending on the platform.
 MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
 # Path to *.glade files.
@@ -49,7 +52,10 @@ DEFAULT_ICON = theme.load_icon("emblem-default", 16, 0) if theme.lookup_icon("em
 
 @lru_cache(maxsize=1)
 def get_yt_icon(icon_name, size=24):
-    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "Info" icon is returned by default! """
+    """ Getting  YouTube icon.
+
+        If the icon is not found in the icon themes, the "Info" icon is returned by default!
+    """
     default_theme = Gtk.IconTheme.get_default()
     if default_theme.has_icon(icon_name):
         return default_theme.load_icon(icon_name, size, 0)
@@ -63,6 +69,19 @@ def get_yt_icon(icon_name, size=24):
             return n_theme.load_icon(icon_name, size, 0)
 
     return default_theme.load_icon("info", size, 0)
+
+
+def show_notification(message, timeout=10000, urgency=1):
+    """ Shows notification.
+
+        @param message: text to display
+        @param timeout: milliseconds
+        @param urgency: 0 - low, 1 - normal, 2 - critical
+    """
+    notify = Notify.Notification.new("DemonEditor", message, "demon-editor")
+    notify.set_urgency(urgency)
+    notify.set_timeout(timeout)
+    notify.show()
 
 
 class KeyboardKey(Enum):

@@ -12,6 +12,7 @@ from urllib.parse import unquote
 from urllib.request import Request, urlopen, urlretrieve
 
 from app.commons import log
+from app.ui.uicommons import show_notification
 
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
 _YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{18,})?.*")
@@ -237,27 +238,32 @@ class YouTubeDL:
         except ModuleNotFoundError as e:
             log("YouTubeDLHelper error: {}".format(str(e)))
             raise YouTubeException(e)
+        except ImportError as e:
+            log("YouTubeDLHelper error: {}".format(str(e)))
         else:
             if self._update:
                 if hasattr(youtube_dl.version, "__version__"):
                     l_ver = self.get_last_release_id()
                     cur_ver = youtube_dl.version.__version__
                     if youtube_dl.version.__version__ < l_ver:
-                        msg = "youtube-dl has new release! Current: {}. Last: {}.".format(cur_ver, l_ver)
+                        msg = "youtube-dl has new release!\nCurrent: {}. Last: {}.".format(cur_ver, l_ver)
+                        show_notification(msg)
                         log(msg)
                         self._callback(msg, False)
                         self.get_latest_release()
 
             self._DownloadError = youtube_dl.utils.DownloadError
             self._dl = youtube_dl.YoutubeDL(self._OPTIONS)
-            log("youtube-dl initialized...")
+            msg = "youtube-dl initialized..."
+            show_notification(msg)
+            log(msg)
 
     @staticmethod
     def get_last_release_id():
         """ Getting last release id. """
         url = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
         with urlopen(url, timeout=10) as resp:
-            return json.load(resp).get("tag_name", "0")
+            return json.loads(resp.read().decode("utf-8")).get("tag_name", "0")
 
     def get_latest_release(self):
         try:
@@ -265,7 +271,7 @@ class YouTubeDL:
             log("Getting the last youtube-dl release...")
 
             with urlopen(YouTubeDL._LATEST_RELEASE_URL, timeout=10) as resp:
-                r = json.load(resp)
+                r = json.loads(resp.read().decode("utf-8"))
                 zip_url = r.get("zipball_url", None)
                 if zip_url:
                     zip_file = self._path + "yt.zip"
@@ -288,6 +294,7 @@ class YouTubeDL:
                                 shutil.move(info.filename, "{}{}{}".format(self._path, sep, f))
                         shutil.rmtree(pref)
                         msg = "Getting the last youtube-dl release is done!"
+                        show_notification(msg)
                         log(msg)
                         self._callback(msg, False)
                         return True
