@@ -124,6 +124,7 @@ class SettingsDialog:
         self._audio_bitrate_field = builder.get_object("audio_bitrate_field")
         self._audio_channels_combo_box = builder.get_object("audio_channels_combo_box")
         self._audio_sample_rate_combo_box = builder.get_object("audio_sample_rate_combo_box")
+        self._audio_codec_combo_box = builder.get_object("audio_codec_combo_box")
         self._apply_presets_button.bind_property("visible", header_separator, "visible")
         self._transcoding_switch.bind_property("active", builder.get_object("record_box"), "sensitive")
         self._edit_preset_switch.bind_property("active", self._apply_presets_button, "sensitive")
@@ -633,6 +634,7 @@ class SettingsDialog:
         self._audio_bitrate_field.set_text(prs.get("ab", "0"))
         self._audio_channels_combo_box.set_active_id(prs.get("channels", "2"))
         self._audio_sample_rate_combo_box.set_active_id(prs.get("samplerate", "44100"))
+        self._audio_codec_combo_box.set_active_id(prs.get("acodec", "mp3"))
 
     def on_apply_presets(self, item):
         if not self.is_data_correct(self._digit_elems):
@@ -650,6 +652,7 @@ class SettingsDialog:
         prs["ab"] = self._audio_bitrate_field.get_text()
         prs["channels"] = self._audio_channels_combo_box.get_active_id()
         prs["samplerate"] = self._audio_sample_rate_combo_box.get_active_id()
+        prs["acodec"] = self._audio_codec_combo_box.get_active_id()
         self._ext_settings.transcoding_presets = presets
         self._edit_preset_switch.set_active(False)
 
