@@ -987,3 +987,30 @@ msgstr "Alle Picons aus dem Receiver entfernen"
 msgid "Service reference"
 msgstr "Kanalreferenz"
 
+msgid "Enable support for"
+msgstr "Unterstützung aktivieren für"
+
+msgid "Auto-check for updates"
+msgstr "Automatische Prüfung auf Updates"
+
+msgid "Filter services"
+msgstr "Dienste filtern"
+
+msgid "Filter services in the main list."
+msgstr "Dienste in der Hauptliste filtern."
+
+msgid "Destination:"
+msgstr "Ziel:"
+
+msgid "EXPERIMENTAL!"
+msgstr "EXPERIMENTELL!"
+
+msgid "Sorting data..."
+msgstr "Daten sortieren..."
+
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Es gibt ungespeicherte Änderungen.\n\n\t Möchtest du jetzt speichern?"
+
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "Bist du sicher, dass du die Reihenfolge der Dienstleistungen\n\t in diesem Bouquet ändern willst?"
+
