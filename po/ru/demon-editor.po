@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2019 Dmitriy Yefremov
+# Copyright (C) 2018-2020 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -973,4 +973,31 @@ msgstr "Удалить все пиконы с ресивера"
 
 msgid "Service reference"
 msgstr "Сервисная ссылка"
+
+msgid "Enable support for"
+msgstr "Включить поддержку"
+
+msgid "Auto-check for updates"
+msgstr "Автопроверка обновлений"
+
+msgid "Filter services"
+msgstr "Фильтровать сервисы"
+
+msgid "Filter services in the main list."
+msgstr "Фильтровать сервисы в основном списке."
+
+msgid "Destination:"
+msgstr "Назначение:"
+
+msgid "EXPERIMENTAL!"
+msgstr "ЭКСПЕРИМЕНТАЛЬНО!"
+
+msgid "Sorting data..."
+msgstr "Сортировка данных..."
+
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Имеются несохранённые изменения.\n\n\t Сохранить их сейчас?"
+
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "Вы уверены, что хотите изменить порядок\n\t сервисов в этом букете?"
 
