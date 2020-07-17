@@ -834,7 +834,7 @@ class Application(Gtk.Application):
         if not bq:
             return
 
-        msg = "Are you sure you want to change the order\n of services in this bouquet?"
+        msg = "Are you sure you want to change the order\n\t of services in this bouquet?"
         if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
             return
 
@@ -2722,7 +2722,7 @@ class Application(Gtk.Application):
 
     def is_data_saved(self):
         if self._data_hash != 0 and self._data_hash != self.get_data_hash():
-            msg = "There are unsaved changes.\n\nSave them now?"
+            msg = "There are unsaved changes.\n\n\t Save them now?"
             resp = show_dialog(DialogType.QUESTION, self._main_window, msg, action_type=Gtk.ButtonsType.YES_NO)
             return resp != Gtk.ResponseType.YES
         return True
