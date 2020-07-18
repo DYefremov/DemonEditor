@@ -242,14 +242,14 @@ def set_lock(blacklist, services, model, paths, target, services_model):
     locked = has_locked_hide(model, paths, col_num)
 
     ids = []
-    skip_type = {BqServiceType.IPTV.name, BqServiceType.MARKER.name, BqServiceType.SPACE.name}
+    skip_type = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
 
     for path in paths:
         itr = model.get_iter(path)
         fav_id = model.get_value(itr, Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID)
         srv = services.get(fav_id, None)
         if srv and srv.service_type not in skip_type:
-            bq_id = to_bouquet_id(srv)
+            bq_id = srv.data_id if srv.service_type == BqServiceType.IPTV.name else to_bouquet_id(srv)
             if not bq_id:
                 continue
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)

@@ -1286,12 +1286,18 @@ class Application(Gtk.Application):
             if s_type in (BqServiceType.MARKER, BqServiceType.IPTV, BqServiceType.SPACE):
                 icon = None
                 picon_id = None
+                data_id = srv.num
+                locked = None
+
                 if s_type is BqServiceType.IPTV:
                     icon = IPTV_ICON
-                    id_data = fav_id.lstrip().split(":")
-                    picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*id_data[0:10])
-                srv = Service(*agr[0:2], icon, srv.name, *agr[0:3], s_type.name, self._picons.get(picon_id, None),
-                              picon_id, *agr, srv.num, fav_id, None)
+                    fav_id_data = fav_id.lstrip().split(":")
+                    if len(fav_id_data) > 10:
+                        data_id = ":".join(fav_id_data[:11])
+                        picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
+                        locked = LOCKED_ICON if data_id in self._blacklist else None
+                srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
+                              self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
                 self._services[fav_id] = srv
             elif srv.name:
                 extra_services[fav_id] = srv.name
