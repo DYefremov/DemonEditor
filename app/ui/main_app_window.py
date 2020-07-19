@@ -1472,7 +1472,7 @@ class Application(Gtk.Application):
         if not cas:
             return
         cvs = list(filter(lambda val: val.startswith("C:") and len(val) > 3, cas.split(",")))
-        self._cas_label.set_text(",".join(map(str, sorted(set(CAS.get(v[:4].upper(), def_val) for v in cvs)))))
+        self._cas_label.set_text(", ".join(map(str, sorted(set(CAS.get(v[:4].upper(), def_val) for v in cvs)))))
 
     def on_bouquets_selection(self, model, path, column):
         self.reset_view_sort_indication(self._fav_view)
