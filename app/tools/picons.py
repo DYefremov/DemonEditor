@@ -125,10 +125,7 @@ class ProviderParser(HTMLParser):
     _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
     _ONID_TID_PATTERN = re.compile("^\d+-\d+.*")
     _TRANSPONDER_FREQUENCY_PATTERN = re.compile("^\d+ [HVLR]+")
-    _DOMAIN = "http://www.lyngsat.com"
-    _TV_DOMAIN = _DOMAIN + "/tvchannels/"
-    _RADIO_DOMAIN = _DOMAIN + "/radiochannels/"
-    _PKG_DOMAIN = _DOMAIN + "/packages/"
+    _DOMAINS = {"/tvchannels/", "/radiochannels/", "/packages/"}
 
     def __init__(self, entities=False, separator=' '):
 
@@ -160,7 +157,7 @@ class ProviderParser(HTMLParser):
                 self._current_row.append(attrs[0][1])
         if tag == "a":
             url = attrs[0][1]
-            if url.startswith((self._PKG_DOMAIN, self._TV_DOMAIN, self._RADIO_DOMAIN)):
+            if any(d in url for d in self._DOMAINS):
                 self._current_row.append(url)
         if tag == "font" and len(attrs) == 1:
             atr = attrs[0]
