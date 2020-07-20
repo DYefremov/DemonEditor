@@ -1014,3 +1014,12 @@ msgstr "Es gibt ungespeicherte Änderungen.\n\n\t Möchtest du jetzt speichern?"
 msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
 msgstr "Bist du sicher, dass du die Reihenfolge der Dienstleistungen\n\t in diesem Bouquet ändern willst?"
 
+msgid "Remove from the receiver"
+msgstr "Aus dem Receiver entfernen"
+
+msgid "Screenshot"
+msgstr "Screenshot"
+
+msgid "Video"
+msgstr "Video"
+
