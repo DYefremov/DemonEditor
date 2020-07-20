@@ -16,7 +16,7 @@ from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon, \
     get_picon_pixbuf
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, GTK_PATH
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, GTK_PATH, KeyboardKey
 
 
 class PiconsDialog:
@@ -72,6 +72,7 @@ class PiconsDialog:
                     "on_fiter_srcs_toggled": self.on_fiter_srcs_toggled,
                     "on_filter_services_switch": self.on_filter_services_switch,
                     "on_picon_activated": self.on_picon_activated,
+                    "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_popup_menu": on_popup_menu}
 
         builder = Gtk.Builder()
@@ -758,6 +759,15 @@ class PiconsDialog:
         return "{}  {}: {}\n{}: {}  {}: {}\n{}".format(header.rstrip(), get_message("Package"), srv.package,
                                                        get_message("System"), srv.system, get_message("Freq"), srv.freq,
                                                        ref)
+
+    def on_tree_view_key_press(self, view, event):
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+
+        key = KeyboardKey(key_code)
+        if key is KeyboardKey.DELETE:
+            self.on_local_remove(view)
 
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())

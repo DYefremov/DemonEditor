@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -110,6 +110,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Remove</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_local_remove" object="picons_dest_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
     <child>
@@ -171,6 +172,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Remove</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_local_remove" object="picons_src_view" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
     <child>
@@ -462,6 +464,7 @@ Author: Dmitriy Yefremov
                                         <signal name="drag-data-received" handler="on_picons_src_view_drag_data_received" swapped="no"/>
                                         <signal name="drag-drop" handler="on_picons_src_view_drag_drop" swapped="no"/>
                                         <signal name="drag-end" handler="on_picons_src_view_drag_end" swapped="no"/>
+                                        <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="picons_src_view_selection"/>
                                         </child>
@@ -613,6 +616,7 @@ Author: Dmitriy Yefremov
                                         <signal name="button-press-event" handler="on_popup_menu" object="picons_dest_view_popup_menu" swapped="no"/>
                                         <signal name="cursor-changed" handler="on_picon_activated" swapped="no"/>
                                         <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
+                                        <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <signal name="realize" handler="on_picons_dest_view_realize" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="picons_dest_view_selection"/>
