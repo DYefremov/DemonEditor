@@ -1001,3 +1001,12 @@ msgstr "Имеются несохранённые изменения.\n\n\t Со
 msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
 msgstr "Вы уверены, что хотите изменить порядок\n\t сервисов в этом букете?"
 
+msgid "Remove from the receiver"
+msgstr "Удалить с ресивера"
+
+msgid "Screenshot"
+msgstr "Скриншот"
+
+msgid "Video"
+msgstr "Видео"
+
