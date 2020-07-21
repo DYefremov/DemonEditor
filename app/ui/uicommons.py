@@ -15,7 +15,7 @@ MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 LANG_PATH = UI_RESOURCES_PATH + "lang"
 GTK_PATH = os.environ.get("GTK_PATH", None)
-
+NOTIFY_IS_INIT = False
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # Translation.
 TEXT_DOMAIN = "demon-editor"
@@ -51,6 +51,14 @@ else:
     import locale
 
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+    # Init notify
+    try:
+        gi.require_version("Notify", "0.7")
+        from gi.repository import Notify
+    except ImportError:
+        pass
+    else:
+        NOTIFY_IS_INIT = Notify.init("DemonEditor")
 
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(GTK_PATH + "/share/icons" if GTK_PATH else UI_RESOURCES_PATH + "icons")
@@ -75,7 +83,10 @@ DEFAULT_ICON = get_theme_icon(theme, "emblem-default", 16)
 
 @lru_cache(maxsize=1)
 def get_yt_icon(icon_name, size=24):
-    """ Getting  YouTube icon. If the icon is not found in the icon themes, the "APPLY" icon is returned by default! """
+    """ Getting  YouTube icon.
+
+        If the icon is not found in the icon themes, the "Info" icon is returned by default!
+    """
     default_theme = Gtk.IconTheme.get_default()
     if default_theme.has_icon(icon_name):
         return default_theme.load_icon(icon_name, size, 0)
@@ -90,6 +101,23 @@ def get_yt_icon(icon_name, size=24):
 
     if default_theme.lookup_icon(Gtk.STOCK_APPLY, size, 0):
         return default_theme.load_icon(Gtk.STOCK_APPLY, size, 0)
+
+
+def show_notification(message, timeout=10000, urgency=1):
+    """ Shows notification.
+
+        @param message: text to display
+        @param timeout: milliseconds
+        @param urgency: 0 - low, 1 - normal, 2 - critical
+    """
+    if IS_DARWIN:
+        # Since NSUserNotification has been deprecated, osascript will be used.
+        os.system("""osascript -e 'display notification "{}" with title "DemonEditor"'""".format(message))
+    elif NOTIFY_IS_INIT:
+        notify = Notify.Notification.new("DemonEditor", message, "demon-editor")
+        notify.set_urgency(urgency)
+        notify.set_timeout(timeout)
+        notify.show()
 
 
 class KeyboardKey(Enum):
