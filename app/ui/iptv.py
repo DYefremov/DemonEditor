@@ -119,7 +119,7 @@ class IptvDialog:
         self._dialog.run()
 
     def on_response(self, dialog, response):
-        if response == Gtk.ResponseType.CANCEL:
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             self._dialog.destroy()
 
     def on_save(self, item):
@@ -130,7 +130,7 @@ class IptvDialog:
             self.show_info_message(get_message("Error. Verify the data!"), Gtk.MessageType.ERROR)
             return
 
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog) in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
         self.save_enigma2_data() if self._s_type is SettingsType.ENIGMA_2 else self.save_neutrino_data()
@@ -178,7 +178,7 @@ class IptvDialog:
         self._description_entry.set_text(data[1])
 
     def update_reference_entry(self):
-        if self._s_type is SettingsType.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2 and is_data_correct(self._digit_elems):
             self.on_url_changed(self._url_entry)
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_type_entry.get_text(),
