@@ -1,8 +1,8 @@
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ## Enigma2 channel and satellites list editor for macOS (experimental).                                
-**The functionality and performance of this version may be different from the Linux version!                                                     
-Not all features can be supported and tested!**    
+### The functionality and performance of this version may be different from the Linux version!  
+
 ### Main features of the program:
 * Editing bouquets, channels, satellites.
 * Import function.
@@ -52,16 +52,16 @@ Install [PyInstaller](https://www.pyinstaller.org/) with the command from the te
 and in th root dir run command:                                                                                         
 ```pyinstaller DemonEditor.spec``` 
 ### Standalone package:                                                                                                                                 
-Users of the **64-bit version of the OS** can download a ready-made package from [here](https://github.com/DYefremov/DemonEditor/raw/experimental-mac/dist/DemonEditor.app.zip).                                     
-Just unpack and run. Recommended copy the bundle to the **Application** directory.                                      
-Perhaps in the security settings it will be necessary to allow the launch of this application!
+You can download the ready-made package as a ***.dmg** file from the [releases](https://github.com/DYefremov/DemonEditor/releases) page.  
+Recommended copy the package to the **Application** directory.  
+Perhaps in the security settings it will be necessary to allow the launch of this application!  
+**The package may not contain all the latest changes. Not all features can be supported and tested!**
 ### Note:
 THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY.                                                                        
 AUTHOR IS NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY CONNECTION WITH THIS SOFTWARE.                           
-This package may contain components distributed under the GPL [v3](http://www.gnu.org/licenses/gpl-3.0.html) or lower license.
-By downloading this package you agree to the terms of this [license](http://www.gnu.org/licenses/gpl-3.0.html) and the possible inconvenience associated with this!
-
-**The package may not contain all the latest changes!**                                                                                                                                                                                                                                      
+The package may contain components distributed under the GPL [v3](http://www.gnu.org/licenses/gpl-3.0.html) or lower license.  
+By downloading and using this package you agree to the terms of this [license](http://www.gnu.org/licenses/gpl-3.0.html) and the possible inconvenience associated with this!
+                                                                                                                                                                                                                                         
 ### Important: 
 Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!                                                                                                
 Main supported *lamedb* format is version **4**. Versions **3** and **5** has only **experimental** support!                                                                                                                                                        
