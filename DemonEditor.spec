@@ -60,6 +60,6 @@ app = BUNDLE(coll,
                  'CFBundleName': 'DemonEditor',
                  'CFBundleDisplayName': 'DemonEditor',
                  'CFBundleGetInfoString': "Enigma2 channel and satellites editor",
-                 'CFBundleShortVersionString': "0.4.9 Pre-alpha (Build: {})".format(BUILD_DATE),
+                 'CFBundleShortVersionString': "1.0.0 Alpha (Build: {})".format(BUILD_DATE),
                  'NSHumanReadableCopyright': u"Copyright © 2020, Dmitriy Yefremov"
              })
