@@ -87,7 +87,7 @@ Author: Dmitriy Yefremov
         <property name="image">copy_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_copy_ref" swapped="no"/>
-        <accelerator key="c" signal="activate"/>
+        <accelerator key="c" signal="activate" modifiers="Primary"/>
       </object>
     </child>
   </object>
@@ -118,7 +118,7 @@ Author: Dmitriy Yefremov
         <property name="image">insert_link_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_assign_ref" swapped="no"/>
-        <accelerator key="v" signal="activate"/>
+        <accelerator key="v" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
@@ -336,7 +336,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkEntry" id="url_to_xml_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_stock">gtk-connect</property>
+                        <property name="primary_icon_name">network-transmit-receive-symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                       </object>
                       <packing>
@@ -436,8 +436,8 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">/data/epg/</property>
-                    <property name="primary_icon_stock">gtk-edit</property>
-                    <property name="secondary_icon_stock">gtk-directory</property>
+                    <property name="primary_icon_name">document-edit-symbolic</property>
+                    <property name="secondary_icon_name">folder-open-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                     <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
@@ -466,7 +466,7 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="text" translatable="yes">/etc/enigma2/</property>
-                    <property name="primary_icon_stock">gtk-edit</property>
+                    <property name="primary_icon_name">document-edit-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                   </object>
                   <packing>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 
+<!-- Generated with glade 3.22.2
 
 The MIT License (MIT)
 
@@ -132,9 +132,6 @@ Author: Dmitriy Yefremov
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
     <signal name="response" handler="on_response" swapped="no"/>
-    <child>
-      <placeholder/>
-    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="main_box">
         <property name="can_focus">False</property>
@@ -288,7 +285,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkScrolledWindow">
+                              <object class="GtkScrolledWindow" id="profile_tree_view_scrolled">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="margin_left">1</property>
@@ -350,96 +347,117 @@ Author: Dmitriy Yefremov
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToolbar" id="profile_tool_bar">
+                              <object class="GtkButtonBox" id="profile_button_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="valign">center</property>
+                                <property name="margin_left">1</property>
+                                <property name="margin_right">1</property>
+                                <property name="margin_bottom">1</property>
+                                <property name="layout_style">expand</property>
                                 <child>
-                                  <object class="GtkToolButton" id="profile_add_button">
+                                  <object class="GtkButton" id="profile_add_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="receives_default">True</property>
                                     <property name="tooltip_text" translatable="yes">Add</property>
-                                    <property name="label" translatable="yes">Add</property>
-                                    <property name="use_underline">True</property>
-                                    <property name="stock_id">gtk-add</property>
+                                    <property name="valign">center</property>
                                     <signal name="clicked" handler="on_profile_add" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="profile_add_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">list-add-symbolic</property>
+                                      </object>
+                                    </child>
                                     <accelerator key="Insert" signal="clicked"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="homogeneous">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkToolButton" id="profile_edit_button">
+                                  <object class="GtkButton" id="profile_edit_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Edit</property>
-                                    <property name="label" translatable="yes">Edit</property>
-                                    <property name="use_underline">True</property>
-                                    <property name="stock_id">gtk-edit</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Rename</property>
+                                    <property name="valign">center</property>
                                     <signal name="clicked" handler="on_profile_edit" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="profile_edit_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">document-edit-symbolic</property>
+                                      </object>
+                                    </child>
                                     <accelerator key="F2" signal="clicked"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="homogeneous">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkToolButton" id="profile_remove_button">
+                                  <object class="GtkButton" id="profile_remove_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="receives_default">True</property>
                                     <property name="tooltip_text" translatable="yes">Remove</property>
-                                    <property name="label" translatable="yes">Remove</property>
-                                    <property name="use_underline">True</property>
-                                    <property name="stock_id">gtk-remove</property>
+                                    <property name="valign">center</property>
                                     <signal name="clicked" handler="on_profile_remove" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="profile_remove_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">list-remove-symbolic</property>
+                                      </object>
+                                    </child>
                                     <accelerator key="Delete" signal="clicked"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="homogeneous">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkToolItem">
+                                  <object class="GtkButton" id="profile_set_default_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="homogeneous">False</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkToolButton" id="profile_set_default_button">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="receives_default">True</property>
                                     <property name="tooltip_text" translatable="yes">Set default</property>
-                                    <property name="halign">end</property>
-                                    <property name="label" translatable="yes">Set default</property>
-                                    <property name="use_underline">True</property>
-                                    <property name="icon_name">emblem-default</property>
+                                    <property name="valign">center</property>
                                     <signal name="clicked" handler="on_profile_set_default" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="profile_set_default_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">emblem-default</property>
+                                      </object>
+                                    </child>
                                     <accelerator key="d" signal="clicked" modifiers="Primary"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="homogeneous">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">3</property>
+                                    <property name="secondary">True</property>
                                   </packing>
                                 </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
+                                <property name="fill">False</property>
+                                <property name="position">3</property>
                               </packing>
                             </child>
                           </object>
@@ -1203,7 +1221,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open</property>
+                                <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                                 <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
@@ -1232,7 +1250,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open</property>
+                                <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                                 <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
@@ -1260,7 +1278,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open</property>
+                                <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                                 <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
@@ -1397,7 +1415,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="primary_icon_name">document-edit-symbolic</property>
-                        <property name="secondary_icon_name">folder-open</property>
+                        <property name="secondary_icon_name">folder-open-symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                         <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
@@ -1453,7 +1471,7 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="primary_icon_name">document-edit-symbolic</property>
-                            <property name="secondary_icon_name">folder-open</property>
+                            <property name="secondary_icon_name">folder-open-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
                             <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
@@ -2550,6 +2568,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">False</property>
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
+                            <property name="spacing">2</property>
                             <child>
                               <object class="GtkLabel" id="theme_label">
                                 <property name="visible">True</property>
@@ -2586,7 +2605,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkImage" id="theme_add_button_image">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="stock">gtk-add</property>
+                                    <property name="icon_name">list-add-symbolic</property>
                                   </object>
                                 </child>
                               </object>
@@ -2608,7 +2627,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkImage" id="theme_remove_button_image">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="stock">gtk-remove</property>
+                                    <property name="icon_name">list-remove-symbolic</property>
                                   </object>
                                 </child>
                               </object>
@@ -2689,6 +2708,7 @@ Author: Dmitriy Yefremov
                         <property name="margin_right">5</property>
                         <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
+                        <property name="spacing">2</property>
                         <child>
                           <object class="GtkLabel" id="icon_theme_label">
                             <property name="visible">True</property>
@@ -2725,7 +2745,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkImage" id="icon_theme_add_button_image">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-add</property>
+                                <property name="icon_name">list-add-symbolic</property>
                               </object>
                             </child>
                           </object>
@@ -2747,7 +2767,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkImage" id="icon_theme_remove_button_image">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="stock">gtk-remove</property>
+                                <property name="icon_name">list-remove-symbolic</property>
                               </object>
                             </child>
                           </object>
