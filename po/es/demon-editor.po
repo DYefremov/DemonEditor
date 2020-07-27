@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2019 Frank Neirynck
+# Copyright (C) 2018-2020 Frank Neirynck
 # This file is distributed under the MIT license.
 #
 # Frank Neirynck <frank@insink.be>, 2018-2019.
@@ -817,3 +817,211 @@ msgstr "Quitar los enlaces añadidos en la lista de reproducción"
 
 msgid "A bouquet with that name exists!"
 msgstr "¡Ya existe un bouquet con ese nombre!"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "Profile"
+msgstr "Perfil"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "File"
+msgstr "Archivo"
+
+msgid "Picons manager"
+msgstr "Picons manager"
+
+msgid "Explorer"
+msgstr "Explorador"
+
+msgid "Satellite url:"
+msgstr "Url Satelite:"
+
+msgid "Cut"
+msgstr "Cortar"
+
+msgid "Paste"
+msgstr "Pegar"
+
+msgid "To the top"
+msgstr "Ir arriba"
+
+msgid "To the end"
+msgstr "Al final"
+
+msgid "View"
+msgstr "Vista"
+
+msgid "Lock"
+msgstr "Bloqueo"
+
+msgid "Parent lock"
+msgstr "Bloqueo parental"
+
+msgid "Hide/Skip"
+msgstr "Escoder/Saltar"
+
+msgid "IPTV tools"
+msgstr "Intrumentos IPTV"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Has folder de perfil estandar para datos adicionales"
+
+msgid "Default data path:"
+msgstr "Ruta estandar de datos:"
+
+msgid "Streams record path:"
+msgstr "Ruta de gravacion de stream:"
+
+msgid "Record"
+msgstr "Gravar"
+
+msgid "Record:"
+msgstr "Gravar:"
+
+msgid "Record to disk:"
+msgstr "Gravar en disco:"
+
+msgid "Streaming"
+msgstr "Streameando"
+
+msgid "Activate transcoding"
+msgstr "Activer transcodificacion"
+
+msgid "Presets:"
+msgstr "Presets:"
+
+msgid "Video options:"
+msgstr "Opciones Video:"
+
+msgid "Audio options:"
+msgstr "Opciones Audio:"
+
+msgid "Bitrate (kb/s):"
+msgstr "Bitrate (kb/s):"
+
+msgid "Codec:"
+msgstr "Codec:"
+
+msgid "Width (px):"
+msgstr "Ancho (px):"
+
+msgid "Height (px):"
+msgstr "Alto (px):"
+
+msgid "Channels:"
+msgstr "Canales:"
+
+msgid "Sample rate (Hz):"
+msgstr "Sample rate (Гц):"
+
+msgid "Play streams mode:"
+msgstr "Tocar en modo streams:"
+
+msgid "Built-in player"
+msgstr "Reproductor interno"
+
+msgid "VLC media player"
+msgstr "Reproductor VLC"
+
+msgid "Only get m3u file"
+msgstr "Solo bajar archivo *.m3u"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Guarde y reinicie el programa para aplicar la configuración."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Algunas imágenes pueden tener problemas para mostrar la lista de favoritos!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Funciona en modo de espera o transpondedor activo actual!"
+
+msgid "No connection to the receiver!"
+msgstr "Sin conexión al receptor!"
+
+msgid "Signal level"
+msgstr "Nivel de señal"
+
+msgid "Receiver info"
+msgstr "Informacion sobre receptor"
+
+msgid "A profile with that name exists!"
+msgstr "Existe un perfil con ese nombre!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Mostrar información breve como sugerencias en la lista de servicios principal"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "Mostrar información detallada como pistas en la lista de bouquet"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Habilitar nombres alternativos de archivos de bouquet"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Le permite nombrar archivos de bouquet usando sus nombres."
+
+msgid "Appearance"
+msgstr "Apariencia"
+
+msgid "Enable Themes support"
+msgstr "Habilitar compatibilidad con temas"
+
+msgid "Gtk3 Theme:"
+msgstr "Тема Gtk3:"
+
+msgid "Icon Theme:"
+msgstr "Тема Icono:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Tema Gtk3 e Iconos:"
+
+msgid "Deleting data..."
+msgstr "Borrando datos ..."
+
+msgid "Download from the receiver"
+msgstr "Descargar desde el receptor"
+
+msgid "Remove all picons from the receiver"
+msgstr "Eliminar todos los picons del receptor"
+
+msgid "Service reference"
+msgstr "Referencia de servicio"
+
+msgid "Enable support for"
+msgstr "Habilitar soporte para"
+
+msgid "Auto-check for updates"
+msgstr "Verificación automática de actualizaciones"
+
+msgid "Filter services"
+msgstr "Filtrar servicios"
+
+msgid "Filter services in the main list."
+msgstr "Filtrar servicios en la lista principal."
+
+msgid "Destination:"
+msgstr "Destino:"
+
+msgid "EXPERIMENTAL!"
+msgstr "EXPERIMENTAL!"
+
+msgid "Sorting data..."
+msgstr "Ordenando datos..."
+
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Hay cambios sin guardar.\n\n\t ¿Guardarlos ahora?"
+
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "¿Está seguro de que desea cambiar el orden\n\t de servicios en este bouquet?"
+
+msgid "Remove from the receiver"
+msgstr "Retirar del receptor"
+
+msgid "Screenshot"
+msgstr "Captura de pantalla"
+
+msgid "Video"
+msgstr "Vidео"
+

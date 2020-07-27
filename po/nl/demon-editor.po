@@ -970,3 +970,46 @@ msgstr "Icoon Thema:"
 
 msgid "Gtk3 Themes and Icons:"
 msgstr "Gtk3 en Icoon Themas:"
+
+msgid "Deleting data..."
+msgstr "Wist data ..."
+
+msgid "Download from the receiver"
+msgstr "Download  van de ontvanger"
+
+msgid "Service reference"
+msgstr "Service referentie"
+
+msgid "Auto-check for updates"
+msgstr "Auto-check voor updates"
+
+msgid "Filter services"
+msgstr "Filter diensten"
+
+msgid "Filter services in the main list."
+msgstr "Filter diensten in de hoofdlijst."
+
+msgid "Destination:"
+msgstr "Doel:"
+
+msgid "EXPERIMENTAL!"
+msgstr "EXPERIMENTEEL!"
+
+msgid "Sorting data..."
+msgstr "Data ordenen..."
+
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Er zijn niet-bwaarde wijzigingen.\n\n\t Nu opslaan?"
+
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "Ben je zeker dat je de volgorde\n\t van de diensten in dit boeket wil wijzigen?"
+
+msgid "Remove from the receiver"
+msgstr "Verwijder van de ontvanger"
+
+msgid "Screenshot"
+msgstr "Schermafbeelding"
+
+msgid "Video"
+msgstr "Vidео"
+
