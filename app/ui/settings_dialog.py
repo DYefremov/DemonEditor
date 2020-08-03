@@ -36,6 +36,7 @@ class SettingsDialog:
                     "on_set_color_switch": self.on_set_color_switch,
                     "on_force_bq_name": self.on_force_bq_name,
                     "on_http_mode_switch": self.on_http_mode_switch,
+                    "on_experimental_switch": self.on_experimental_switch,
                     "on_yt_dl_switch": self.on_yt_dl_switch,
                     "on_default_path_mode_switch": self.on_default_path_mode_switch,
                     "on_default_data_path_changed": self.on_default_data_path_changed,
@@ -134,8 +135,7 @@ class SettingsDialog:
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
-        self._program_frame = builder.get_object("program_frame")
-        self._extra_support_grid = builder.get_object("extra_support_grid")
+        self._enable_experimental_box = builder.get_object("enable_experimental_box")
         self._colors_grid = builder.get_object("colors_grid")
         self._set_color_switch = builder.get_object("set_color_switch")
         self._new_color_button = builder.get_object("new_color_button")
@@ -156,10 +156,18 @@ class SettingsDialog:
         self._click_mode_zap_and_play_button = builder.get_object("click_mode_zap_and_play_button")
         self._click_mode_zap_button.bind_property("sensitive", self._click_mode_play_button, "sensitive")
         self._click_mode_zap_button.bind_property("sensitive", self._click_mode_zap_and_play_button, "sensitive")
-        self._click_mode_zap_button.bind_property("sensitive", self._enable_send_to_switch, "sensitive")
-        self._enable_send_to_switch.bind_property("sensitive", builder.get_object("enable_send_to_label"), "sensitive")
-        self._extra_support_grid.bind_property("sensitive", builder.get_object("v5_support_grid"), "sensitive")
+        # EXPERIMENTAL
+        self._enable_exp_switch = builder.get_object("enable_experimental_switch")
+        self._enable_exp_switch.bind_property("active", builder.get_object("yt_dl_box"), "sensitive")
         self._enable_yt_dl_switch.bind_property("active", builder.get_object("yt_dl_update_box"), "sensitive")
+        self._enable_exp_switch.bind_property("active", builder.get_object("v5_support_box"), "sensitive")
+        self._enable_exp_switch.bind_property("active", builder.get_object("enable_direct_playback_box"), "sensitive")
+        # Enigma2 only
+        self._enigma_radio_button.bind_property("active", builder.get_object("bq_naming_grid"), "sensitive")
+        self._enigma_radio_button.bind_property("active", builder.get_object("enable_http_box"), "sensitive")
+        self._enigma_radio_button.bind_property("active", builder.get_object("enable_experimental_box"), "sensitive")
+        self._enigma_radio_button.bind_property("active", builder.get_object("program_frame"), "sensitive")
+        self._enigma_radio_button.bind_property("active", builder.get_object("experimental_box"), "sensitive")
         # Profiles
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
@@ -195,8 +203,6 @@ class SettingsDialog:
         self._neutrino_radio_button.set_active(s_type is SettingsType.NEUTRINO_MP)
         self.update_title()
         self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
-        self._program_frame.set_sensitive(is_enigma_profile)
-        self._extra_support_grid.set_sensitive(is_enigma_profile)
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
         self._lang_combo_box.set_active_id(self._ext_settings.language)
@@ -282,6 +288,7 @@ class SettingsDialog:
         self.on_transcoding_preset_changed(self._presets_combo_box)
 
         if self._s_type is SettingsType.ENIGMA_2:
+            self._enable_exp_switch.set_active(self._settings.is_enable_experimental)
             self._support_ver5_switch.set_active(self._settings.v5_support)
             self._force_bq_name_switch.set_active(self._settings.force_bq_names)
             self._support_http_api_switch.set_active(self._settings.http_api_support)
@@ -354,6 +361,7 @@ class SettingsDialog:
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
 
         if self._s_type is SettingsType.ENIGMA_2:
+            self._ext_settings.is_enable_experimental = self._enable_exp_switch.get_active()
             self._ext_settings.use_colors = self._set_color_switch.get_active()
             self._ext_settings.new_color = self._new_color_button.get_rgba().to_string()
             self._ext_settings.extra_color = self._extra_color_button.get_rgba().to_string()
@@ -438,6 +446,12 @@ class SettingsDialog:
                 self._click_mode_zap_button.get_active(),
                 self._click_mode_zap_and_play_button.get_active())):
             self._click_mode_disabled_button.set_active(True)
+
+    def on_experimental_switch(self, switch, state):
+        if not state:
+            self._support_ver5_switch.set_active(state)
+            self._enable_send_to_switch.set_active(state)
+            self._enable_yt_dl_switch.set_active(state)
 
     def on_force_bq_name(self, switch, state):
         if self._main_stack.get_visible_child_name() != "extra":
