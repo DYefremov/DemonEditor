@@ -678,6 +678,17 @@ class Settings:
     def debug_mode(self, value):
         self._settings["debug_mode"] = value
 
+    # **************** Experimental **************** #
+
+    @property
+    def is_enable_experimental(self):
+        """ Allows experimental functionality. """
+        return self._settings.get("enable_experimental", False)
+
+    @is_enable_experimental.setter
+    def is_enable_experimental(self, value):
+        self._settings["enable_experimental"] = value
+
 
 if __name__ == "__main__":
     pass
