@@ -671,11 +671,11 @@ msgstr "Speel stream af"
 msgid "Disabled"
 msgstr "Uitgeschakeld"
 
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Ondersteuning voor ver. 5 inschakelen (experimenteel)"
+msgid "Enable lamedb ver. 5 support"
+msgstr "Ondersteuning voor lamedb ver. 5 inschakelen"
 
-msgid "Enable HTTP API (experimental)"
-msgstr "HTTP API inschakelen (experimenteel)"
+msgid "Enable HTTP API"
+msgstr "HTTP API inschakelen"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Schakelaar (ZAP) naar het kanaal (CTRL + Z)"
@@ -791,8 +791,8 @@ msgstr "Taal:"
 msgid "Load the last open configuration at program startup"
 msgstr "Laad de laatst geopende configuratie op bij opstart programma"
 
-msgid "Enable direct playback bar (experimental)"
-msgstr "Laat onmiddelijk playback bar toe (experimenteel)"
+msgid "Enable direct playback bar"
+msgstr "Laat onmiddelijk playback bar toe"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Laat rechtstreeks versturen van and playback en media links op de ontvanger toe"

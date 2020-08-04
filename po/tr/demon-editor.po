@@ -673,11 +673,11 @@ msgstr "Akışı oynat"
 msgid "Disabled"
 msgstr "Devre dışı"
 
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Sürüm 5 desteğini etkinleştir (deneysel)"
+msgid "Enable lamedb ver. 5 support"
+msgstr "Sürüm 5 desteğini etkinleştir"
 
-msgid "Enable HTTP API (experimental)"
-msgstr "HTTP API'sini etkinleştir (deneysel)"
+msgid "Enable HTTP API"
+msgstr "HTTP API'sini etkinleştir"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Kanalı değiştir (zap) (Ctrl + Z)"
@@ -797,8 +797,8 @@ msgstr "Dil:"
 msgid "Load the last open configuration at program startup"
 msgstr "Program açılışında son açık yapılandırmayı yükle"
 
-msgid "Enable direct playback bar (experimental)"
-msgstr "Doğrudan oynatma çubuğunu etkinleştir (deneysel)"
+msgid "Enable direct playback bar"
+msgstr "Doğrudan oynatma çubuğunu etkinleştir"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Alıcıdaki medya bağlantılarının doğrudan gönderilmesini ve oynatılmasını sağlar"

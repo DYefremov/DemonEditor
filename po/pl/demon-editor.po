@@ -763,8 +763,8 @@ msgstr "Ustawienia dla:"
 msgid "Set default"
 msgstr "Uataw domyślnie"
 
-msgid "Enable direct playback bar (experimental)"
-msgstr "Włącz pasek bezpośredniego odtwarzania (eksperymentalnie)"
+msgid "Enable direct playback bar"
+msgstr "Włącz pasek bezpośredniego odtwarzania"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Umożliwia bezpośrednie wysyłanie i odtwarzanie łączy multimedialnych w odbiorniku"
@@ -834,8 +834,8 @@ msgstr "Zapisz i uruchom ponownie program, aby zastosować ustawienia."
 msgid "Extra"
 msgstr "Ekstra"
 
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Włącz wer. 5 wsparcie (eksperymentalne)"
+msgid "Enable lamedb ver. 5 support"
+msgstr "Włącz lamedb wer. 5 wsparcie"
 
 msgid "Enable alternate bouquet file naming"
 msgstr "Włącz alternatywne nazewnictwo plików bukietów"
@@ -846,11 +846,11 @@ msgstr "Niektóre obrazy mogą mieć problemy z wyświetlaniem listy ulubionych!
 msgid "Allows you to name bouquet files using their names."
 msgstr "Pozwala nazwać pliki bukietów przy użyciu ich nazw."
 
-msgid "Enable HTTP API (experimental)"
-msgstr "Włącz API HTTP (eksperymentalne)"
+msgid "Enable HTTP API"
+msgstr "Włącz API HTTP"
 
-msgid "Enable send to receiver (experimental)"
-msgstr "Włącz wysyłanie do odbiornika (eksperymentalne)"
+msgid "Enable send to receiver"
+msgstr "Włącz wysyłanie do odbiornika"
 
 msgid "Zap"
 msgstr "Przełącz"

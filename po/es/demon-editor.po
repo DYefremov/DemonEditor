@@ -677,11 +677,11 @@ msgstr "Reproducir flujo"
 msgid "Disabled"
 msgstr "Desactivado"
 
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Soporte para ver. 5 (experimental)"
+msgid "Enable lamedb ver. 5 support"
+msgstr "Soporte para lamedb ver. 5"
 
-msgid "Enable HTTP API (experimental)"
-msgstr "Habilitar API HTTP (experimental)"
+msgid "Enable HTTP API"
+msgstr "Habilitar API HTTP"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Poner el canal (Ctrl + Z)"
@@ -797,8 +797,8 @@ msgstr "Idioma:"
 msgid "Load the last open configuration at program startup"
 msgstr "Cargar la última configuración abierta al iniciar el programa"
 
-msgid "Enable direct playback bar (experimental)"
-msgstr "Habilitar la barra de reproducción directa (experimental)"
+msgid "Enable direct playback bar"
+msgstr "Habilitar la barra de reproducción directa"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Habilita el envío directo y la reproducción de enlaces de medios en el receptor"

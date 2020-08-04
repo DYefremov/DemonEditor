@@ -671,11 +671,11 @@ msgstr "Play  Stream"
 msgid "Disabled"
 msgstr "Ausgeschaltet"
 
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Lamedb ver. 5 Unterstützung aktivieren (experimentell)"
+msgid "Enable lamedb ver. 5 support"
+msgstr "Lamedb ver. 5 Unterstützung aktivieren"
 
-msgid "Enable HTTP API (experimental)"
-msgstr "HTTP-API aktivieren (experimentell)"
+msgid "Enable HTTP API"
+msgstr "HTTP-API aktivieren"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Umschalten des Kanals (Strg + Z)"
@@ -795,8 +795,8 @@ msgstr "Sprache:"
 msgid "Load the last open configuration at program startup"
 msgstr "Laden der zuletzt geöffneten Konfiguration beim Programmstart"
 
-msgid "Enable direct playback bar (experimental)"
-msgstr "Aktivieren der direkten Wiedergabeleiste (experimentell)"
+msgid "Enable direct playback bar"
+msgstr "Aktivieren der direkten Wiedergabeleiste"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Ermöglicht das direkte Senden und Abspielen von Medienlinks auf dem Box"
@@ -1022,4 +1022,11 @@ msgstr "Screenshot"
 
 msgid "Video"
 msgstr "Video"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Die Neutrino hat nur experimentelle Unterstützung. Nicht alle Funktionen werden unterstützt!"
+
+msgid "Enable experimental features"
+msgstr "Experimentelle Funktionen aktivieren"
+
 
