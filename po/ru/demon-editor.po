@@ -662,11 +662,11 @@ msgstr "Воспр. потока"
 msgid "Disabled"
 msgstr "Выкл."
 
-msgid "Enable ver. 5 support (experimental)"
-msgstr "Включить поддержку lamedb вер. 5 (экспериментально)"
+msgid "Enable lamedb ver. 5 support"
+msgstr "Включить поддержку lamedb вер. 5"
 
-msgid "Enable HTTP API (experimental)"
-msgstr "Включить HTTP API (экспериментально)"
+msgid "Enable HTTP API"
+msgstr "Включить HTTP API"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Переключить канал(Ctrl + Z)"
@@ -782,8 +782,8 @@ msgstr "Язык:"
 msgid "Load the last open configuration at program startup"
 msgstr "Загружать последнюю открытую конфигурацию при запуске программы"
 
-msgid "Enable direct playback bar (experimental)"
-msgstr "Включить панель прямого воспроизведения (экспериментально)"
+msgid "Enable direct playback bar"
+msgstr "Включить панель прямого воспроизведения"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Включает прямую отправку и воспроизведение медиа-ссылок на ресивере"
@@ -1010,3 +1010,8 @@ msgstr "Скриншот"
 msgid "Video"
 msgstr "Видео"
 
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino имеет только экспериментальную поддержку. Поддерживаются не все функции!"
+
+msgid "Enable experimental features"
+msgstr "Включить экспериментальные функции"
