@@ -119,6 +119,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 message = "All user data will be reloaded!"
             elif download_type is DownloadType.SATELLITES:
                 message = "Satellites.xml file will be updated!"
+            elif download_type is DownloadType.PICONS:
+                message = "Picons will be updated!"
 
             params = urlencode({"text": message, "type": 2, "timeout": 5})
             ht.send((url + "message?{}".format(params), "Sending info message... "))
@@ -128,14 +130,15 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 ht.send((url + "powerstate?newstate=0", "Toggle Standby "))
                 time.sleep(2)
         else:
-            # telnet
-            tn = telnet(host=host,
-                        user=settings.telnet_user,
-                        password=settings.telnet_password,
-                        timeout=settings.telnet_timeout)
-            next(tn)
-            # terminate enigma or neutrino
-            tn.send("init 4")
+            if download_type is not DownloadType.PICONS:
+                # telnet
+                tn = telnet(host=host,
+                            user=settings.telnet_user,
+                            password=settings.telnet_password,
+                            timeout=settings.telnet_timeout)
+                next(tn)
+                # terminate enigma or neutrino
+                tn.send("init 4")
 
         with FTP(host=host, user=settings.user, passwd=settings.password) as ftp:
             ftp.encoding = "utf-8"
