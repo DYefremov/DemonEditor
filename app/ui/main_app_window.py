@@ -909,7 +909,6 @@ class Application(Gtk.Application):
             self._wait_dialog.show(get_message("Sorting data..."))
         GLib.idle_add(self.sort_fav, c_num, bq, paths, order, 0 if c_num == Column.FAV_NUM else "")
 
-    @run_idle
     def sort_fav(self, c_num, bq, paths, rev=False, nv=""):
         """ Sorting function for the bouquet details list.
 

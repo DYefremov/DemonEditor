@@ -59,14 +59,13 @@ class BackupDialog:
     def show(self):
         self._dialog_window.show()
 
+    @run_idle
     def init_data(self):
-        try:
-            files = os.listdir(self._backup_path)
-        except FileNotFoundError as e:
-            self.show_info_message(str(e), Gtk.MessageType.ERROR)
-        else:
-            for file in filter(lambda x: x.endswith(".zip"), files):
+        if os.path.isdir(self._backup_path):
+            for file in filter(lambda x: x.endswith(".zip"), os.listdir(self._backup_path)):
                 self._model.append((file.rstrip(".zip"), False))
+        else:
+            os.makedirs(os.path.dirname(self._backup_path), exist_ok=True)
 
     def on_restore_bouquets(self, item):
         self.restore(RestoreType.BOUQUETS)
@@ -129,6 +128,8 @@ class BackupDialog:
                         append_text_to_tview(name + "\n", self._text_view)
             except FileNotFoundError as e:
                 self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self._text_view.get_buffer().set_text("")
 
     def restore(self, restore_type):
         model, paths = self._main_view.get_selection().get_selected_rows()
