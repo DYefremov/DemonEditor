@@ -613,6 +613,14 @@ class Settings:
     # *********** Appearance *********** #
 
     @property
+    def dark_mode(self):
+        return self._settings.get("dark_mode", False)
+
+    @dark_mode.setter
+    def dark_mode(self, value):
+        self._settings["dark_mode"] = value
+
+    @property
     def is_themes_support(self):
         return self._settings.get("is_themes_support", False)
 

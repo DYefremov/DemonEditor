@@ -2462,6 +2462,57 @@ Author: Dmitriy Yefremov
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
+                      <object class="GtkFrame" id="dark_mode_frame">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkBox" id="dark_mode_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
+                            <child>
+                              <object class="GtkLabel" id="dark_mode_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Enable Dark Mode</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="dark_mode_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <signal name="state-set" handler="on_icon_theme_changed" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkFrame" id="hemes_support_frame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -2470,7 +2521,6 @@ Author: Dmitriy Yefremov
                         <child>
                           <object class="GtkBox" id="themes_support_box">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="margin_left">5</property>
                             <property name="margin_right">5</property>
@@ -2486,6 +2536,18 @@ Author: Dmitriy Yefremov
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child type="center">
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">EXPERIMENTAL!</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
@@ -2510,7 +2572,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -2657,7 +2719,47 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="themes_source_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">center</property>
+                        <child>
+                          <object class="GtkLabel" id="themes_source_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Gtk3 Themes and Icons:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLinkButton" id="themes_source_link_button">
+                            <property name="label" translatable="yes">www.gnome-look.org</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="relief">none</property>
+                            <property name="uri">https://www.gnome-look.org/</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -2753,47 +2855,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="themes_source_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">center</property>
-                        <child>
-                          <object class="GtkLabel" id="themes_source_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Gtk3 Themes and Icons:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLinkButton" id="themes_source_link_button">
-                            <property name="label" translatable="yes">www.gnome-look.org</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="relief">none</property>
-                            <property name="uri">https://www.gnome-look.org/</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
