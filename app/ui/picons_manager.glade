@@ -1192,7 +1192,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkEntry" id="picons_dir_entry">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="secondary_icon_name">folder-open</property>
+                                    <property name="secondary_icon_name">folder-open-symbolic</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <signal name="icon-press" handler="on_picons_dir_open" swapped="no"/>
                                   </object>

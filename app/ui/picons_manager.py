@@ -591,7 +591,7 @@ class PiconsDialog:
         if condition == GLib.IO_IN:
             char = fd.read(1)
             self.append_output(char)
-            return True
+            return char
         return False
 
     @run_idle
