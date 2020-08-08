@@ -192,6 +192,7 @@ class SettingsDialog:
             self._theme_thumbnail_image = builder.get_object("theme_thumbnail_image")
             self._theme_combo_box = builder.get_object("theme_combo_box")
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
+            self._dark_mode_switch = builder.get_object("dark_mode_switch")
             self._themes_support_switch = builder.get_object("themes_support_switch")
             self._themes_support_switch.bind_property("active", builder.get_object("gtk_theme_frame"), "sensitive")
             self._themes_support_switch.bind_property("active", builder.get_object("icon_theme_frame"), "sensitive")
@@ -356,6 +357,7 @@ class SettingsDialog:
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
 
         if self._ext_settings.is_darwin:
+            self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
@@ -772,6 +774,7 @@ class SettingsDialog:
 
     @run_idle
     def init_appearance(self):
+        self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
         if t_support:
