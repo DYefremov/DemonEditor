@@ -22,10 +22,10 @@ a = Analysis([EXE_NAME],
              pathex=PATH_EXE,
              binaries=None,
              datas=ui_files,
-             hiddenimports=[],
+             hiddenimports=['fileinput', 'uuid'],
              hookspath=[],
              runtime_hooks=[],
-             excludes=[],
+             excludes=['youtube_dl'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
@@ -60,6 +60,7 @@ app = BUNDLE(coll,
                  'CFBundleName': 'DemonEditor',
                  'CFBundleDisplayName': 'DemonEditor',
                  'CFBundleGetInfoString': "Enigma2 channel and satellites editor",
-                 'CFBundleShortVersionString': "1.0.0 Alpha (Build: {})".format(BUILD_DATE),
-                 'NSHumanReadableCopyright': u"Copyright © 2020, Dmitriy Yefremov"
+                 'CFBundleShortVersionString': "1.0.0 Alpha-2 (Build: {})".format(BUILD_DATE),
+                 'NSHumanReadableCopyright': u"Copyright © 2020, Dmitriy Yefremov",
+                 'NSRequiresAquaSystemAppearance': 'false'
              })
