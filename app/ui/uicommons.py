@@ -26,9 +26,10 @@ except SettingsException:
     pass
 else:
     os.environ["LANGUAGE"] = settings.language
+    st = Gtk.Settings().get_default()
+    st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
 
     if settings.is_themes_support:
-        st = Gtk.Settings().get_default()
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
     else:
