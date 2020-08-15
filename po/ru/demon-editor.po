@@ -1015,3 +1015,10 @@ msgstr "Neutrino имеет только экспериментальную по
 
 msgid "Enable experimental features"
 msgstr "Включить экспериментальные функции"
+
+msgid "Can't Playback!"
+msgstr "Не удается воспроизвести!"
+
+msgid "Enable Dark Mode"
+msgstr "Включить темный режим"
+
