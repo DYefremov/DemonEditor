@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr "Charly, Dmitriy Yefremov"
+msgstr "Charly\nDmitriy Yefremov"
 
 # Main
 msgid "Service"
@@ -1028,5 +1028,13 @@ msgstr "Die Neutrino hat nur experimentelle Unterstützung. Nicht alle Funktione
 
 msgid "Enable experimental features"
 msgstr "Experimentelle Funktionen aktivieren"
+
+msgid "Can't Playback!"
+msgstr "Kann nicht abgespielt werden!"
+
+msgid "Enable Dark Mode"
+msgstr "Dunkelmodus aktivieren"
+
+
 
 
