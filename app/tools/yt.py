@@ -43,7 +43,10 @@ class YouTube:
         self._callback = callback
 
         if self._settings.enable_yt_dl:
-            self._yt_dl = YouTubeDL.get_instance(self._settings, callback=self._callback)
+            try:
+                self._yt_dl = YouTubeDL.get_instance(self._settings, callback=self._callback)
+            except YouTubeException:
+                pass  # NOP
 
     @classmethod
     def get_instance(cls, settings, callback=log):
@@ -245,7 +248,7 @@ class YouTubeDL:
                 if hasattr(youtube_dl.version, "__version__"):
                     l_ver = self.get_last_release_id()
                     cur_ver = youtube_dl.version.__version__
-                    if youtube_dl.version.__version__ < l_ver:
+                    if l_ver and youtube_dl.version.__version__ < l_ver:
                         msg = "youtube-dl has new release!\nCurrent: {}. Last: {}.".format(cur_ver, l_ver)
                         show_notification(msg)
                         log(msg)
@@ -262,8 +265,11 @@ class YouTubeDL:
     def get_last_release_id():
         """ Getting last release id. """
         url = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
-        with urlopen(url, timeout=10) as resp:
-            return json.loads(resp.read().decode("utf-8")).get("tag_name", "0")
+        try:
+            with urlopen(url, timeout=10) as resp:
+                return json.loads(resp.read().decode("utf-8")).get("tag_name", "0")
+        except URLError as e:
+            log("YouTubeDLHelper error [get last release id]: {}".format(e))
 
     def get_latest_release(self):
         try:
