@@ -565,10 +565,10 @@ class PiconsDialog:
                     return
                 self.process_provider(Provider(*prv))
 
-            if self._resize_no_radio_button.get_active():
+            if not self._resize_no_radio_button.get_active():
                 self.resize(self._picons_dir_entry.get_text())
-
-            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+            else:
+                self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
         finally:
             GLib.idle_add(self._cancel_button.hide)
             self._terminate = False
@@ -598,16 +598,24 @@ class PiconsDialog:
     def append_output(self, char):
         append_text_to_tview(char, self._text_view)
 
+    @run_task
     def resize(self, path):
         self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
-        exe = "{}mogrify".format("./" if GTK_PATH else "")
-        is_220_132 = self._resize_220_132_radio_button.get_active()
-        command = "{} -resize {}! *.png".format(exe, "220x132" if is_220_132 else "100x60").split()
+
         try:
-            self._current_process = subprocess.Popen(command, universal_newlines=True, cwd=path)
-            self._current_process.wait()
-        except FileNotFoundError as e:
-            self.show_info_message("Conversion error. " + str(e), Gtk.MessageType.ERROR)
+            from pathlib import Path
+            from PIL import Image
+        except ImportError as e:
+            self.show_info_message("{} {}".format(get_message("Conversion error."), e), Gtk.MessageType.ERROR)
+        else:
+            res = (220, 132) if self._resize_220_132_radio_button.get_active() else (100, 60)
+
+            for img_file in Path(path).glob("*.png"):
+                img = Image.open(img_file)
+                img = img.resize(res, Image.ANTIALIAS)
+                img.save(img_file, "PNG", optimize=True)
+
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def on_cancel(self, item=None):
         if self.is_task_running() and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
