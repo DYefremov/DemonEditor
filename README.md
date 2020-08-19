@@ -38,13 +38,13 @@ For multiple mouse selection (including Drag and Drop), press and hold the **&#8
 
 ### Minimum requirements:
 Python >= **3.5**, GTK+ >= **3.16**, pygobject3, adwaita-icon-theme, python3-requests.                                  
-#### Installation:                                                                             
+### Installation:                                                                             
 ```brew install python3 gtk+3 pygobject3 adwaita-icon-theme```                                                                  
 ```pip3 install requests```                                                                                                                                                                                          
-#### Optional:                                                                                                          
-```brew install wget imagemagick```                                                                                                                                                                                                                                                                                                      
-```pip3 install pyobjc```                                                                                                
-#### Launching:                                                                                                                                                                                                                     
+### Optional:                                                                                                          
+```brew install wget```                                                                                                                                                                                                                                                                                                      
+```pip3 install pillow, pyobjc```                                                                                                
+### Launching:                                                                                                                                                                                                                     
 To start the program, just download the archive, unpack and run it from the terminal with the command: ```./start.py``` 
 ### Building standalone application:                                                                                     
 Install [PyInstaller](https://www.pyinstaller.org/) with the command from the terminal:                                                                    
