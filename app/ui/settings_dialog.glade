@@ -981,6 +981,8 @@ Author: Dmitriy Yefremov
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="hexpand">True</property>
+                                            <property name="visibility">False</property>
+                                            <property name="invisible_char">●</property>
                                             <property name="width_chars">12</property>
                                             <property name="max_width_chars">15</property>
                                             <property name="primary_icon_name">emblem-readonly</property>
