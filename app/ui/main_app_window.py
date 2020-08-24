@@ -1491,7 +1491,7 @@ class Application(Gtk.Application):
 
         if len(path) > 1:
             gen = self.update_bouquet_services(model, path)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            GLib.idle_add(lambda: next(gen, False))
 
     def update_bouquet_services(self, model, path, bq_key=None):
         """ Updates list of bouquet services """
@@ -1503,12 +1503,12 @@ class Application(Gtk.Application):
         services = self._bouquets.get(key, [])
         ex_services = self._extra_bouquets.get(key, None)
 
-        factor = self.FAV_FACTOR * 20
-        if len(services) > factor or len(self._fav_model) > factor:
+        if len(services) > self.FAV_FACTOR * 20:
             self._bouquets_view.set_sensitive(False)
+            yield True
 
+        self._fav_view.set_model(None)
         self._fav_model.clear()
-        yield True
 
         num = 0
         for srv_id in services:
@@ -1527,11 +1527,11 @@ class Application(Gtk.Application):
                 self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
                                         srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
                                         self._picons.get(srv.picon_id, None), None, background))
-            if num % self.FAV_FACTOR == 0:
-                yield True
 
-        GLib.idle_add(self._bouquets_view.set_sensitive, True)
-        GLib.idle_add(self._bouquets_view.grab_focus)
+        yield True
+        self._fav_view.set_model(self._fav_model)
+        self._bouquets_view.set_sensitive(True)
+        self._bouquets_view.grab_focus()
         yield True
 
     def check_bouquet_selection(self):
