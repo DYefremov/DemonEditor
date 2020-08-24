@@ -1,6 +1,7 @@
 # Copyright (C) 2018-2019 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
+#
 msgid ""
 msgstr ""
 "Last-Translator: wwns\n"
@@ -265,6 +266,9 @@ msgstr "Ukryj/Pomiń"
 msgid "Parent lock"
 msgstr "Blokada rodzicielska"
 
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Istnieją niezapisane zmiany.\n\n\t Zapisać je teraz?"
+
 # Filter bar
 msgid "Only free"
 msgstr "Tylko FTA"
@@ -386,6 +390,12 @@ msgid "Remove selection"
 msgstr "Usuń wybrane"
 
 # Service details dialog
+msgid "To the top"
+msgstr "Przenieś na góre bukietu"
+
+msgid "To the end"
+msgstr "Przenieś na koniec bukietu"
+
 msgid "Service data:"
 msgstr "Dane usług:"
 
@@ -626,6 +636,15 @@ msgstr "Wyjście"
 msgid "Tools"
 msgstr "Narzędzia"
 
+msgid "Cut"
+msgstr "Wytnij"
+
+msgid "Paste"
+msgstr "Wklej"
+
+msgid "Insert space"
+msgstr "Wstaw spację"
+
 # Import
 msgid "Import"
 msgstr "Importuj"
@@ -648,11 +667,11 @@ msgstr "Usuń wszystkie nieużywane"
 msgid "Test"
 msgstr "Test"
 
+msgid "Details"
+msgstr "Właściwości"
+
 msgid "Test connection"
 msgstr "Testuj połączenie"
-
-msgid "Double click on the service in the bouquet list:"
-msgstr "Kliknij dwukrotnie usługę na liście bukietów:"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Przełącz(zap) kanał(Ctrl + Z)"
@@ -763,9 +782,6 @@ msgstr "Ustawienia dla:"
 msgid "Set default"
 msgstr "Uataw domyślnie"
 
-msgid "Enable direct playback bar"
-msgstr "Włącz pasek bezpośredniego odtwarzania"
-
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Umożliwia bezpośrednie wysyłanie i odtwarzanie łączy multimedialnych w odbiorniku"
 
@@ -786,6 +802,9 @@ msgstr "Usuń pikony z odbiornika"
 
 msgid "Use http to reload data in the receiver."
 msgstr "Użyj http aby ponownie załadować dane do odbiornika."
+
+msgid "Apply profile settings"
+msgstr "Zastosuj ustawienia profilu"
 
 msgid "Drag  or paste the link here"
 msgstr "Przeciągnij lub wklej tutaj link"
@@ -808,9 +827,18 @@ msgstr "Pobierz z odbiornika"
 msgid "The Neutrino has only experimental support. Not all features are supported!"
 msgstr "Neutrino ma jedynie wsparcie eksperymentalne. Nie wszystkie funkcje są obsługiwane!"
 
+msgid "Default data path:"
+msgstr "Domyślna ścieżka danych:"
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Niektóre obrazy mogą mieć problemy z wyświetlaniem listy ulubionych!"
+
 # Appearance
 msgid "Appearance"
 msgstr "Wygląd"
+
+msgid "Enable Dark Mode"
+msgstr "Włącz tryb ciemny"
 
 msgid "Enable Themes support"
 msgstr "Włącz obsługę motywów"
@@ -834,14 +862,8 @@ msgstr "Zapisz i uruchom ponownie program, aby zastosować ustawienia."
 msgid "Extra"
 msgstr "Ekstra"
 
-msgid "Enable lamedb ver. 5 support"
-msgstr "Włącz lamedb wer. 5 wsparcie"
-
 msgid "Enable alternate bouquet file naming"
 msgstr "Włącz alternatywne nazewnictwo plików bukietów"
-
-msgid "Some images may have problems displaying the favorites list!"
-msgstr "Niektóre obrazy mogą mieć problemy z wyświetlaniem listy ulubionych!"
 
 msgid "Allows you to name bouquet files using their names."
 msgstr "Pozwala nazwać pliki bukietów przy użyciu ich nazw."
@@ -849,8 +871,8 @@ msgstr "Pozwala nazwać pliki bukietów przy użyciu ich nazw."
 msgid "Enable HTTP API"
 msgstr "Włącz API HTTP"
 
-msgid "Enable send to receiver"
-msgstr "Włącz wysyłanie do odbiornika"
+msgid "Double click on the service in the bouquet list:"
+msgstr "Kliknij dwukrotnie usługę na liście bukietów:"
 
 msgid "Zap"
 msgstr "Przełącz"
@@ -867,6 +889,28 @@ msgstr "Odtwórz strumień"
 msgid "Disabled"
 msgstr "Wyłączone"
 
+msgid "Enable experimental features"
+msgstr "Włącz funkcje eksperymentalne"
+
+msgid "Enable lamedb ver. 5 support"
+msgstr "Włącz wsparcie dla lamedb w wer.5"
+
+msgid "Enable support for"
+msgstr "Włącz obsługę"
+
+msgid "Enables parsing links using youtube-dl to get direct links to media"
+msgstr "Umożliwia analizowanie linków za pomocą youtube-dl, aby uzyskać bezpośrednie linki do multimediów"
+
+msgid "Auto-check for updates"
+msgstr "Automatyczne sprawdzanie aktualizacji"
+
+msgid "Enable direct playback bar"
+msgstr "Włącz pasek bezpośredniego odtwarzania"
+
+#Program
+msgid "Program"
+msgstr "Program"
+
 msgid "Language:"
 msgstr "Język:"
 
@@ -876,7 +920,7 @@ msgstr "Załaduj ostatnią otwartą konfigurację podczas uruchamiania programu"
 msgid "Show short info as hints in the main services list"
 msgstr "Pokaż krótkie informacje jako wskazówki na głównej liście usług"
 
-msgid "Show detailed info as hints in the bouquet list"
+msgid "Show detailed info as hints in the bouquet list" 
 msgstr "Pokaż szczegółowe informacje jako wskazówki na liście bukietów"
 
 msgid "Set background color for the services"
@@ -928,6 +972,9 @@ msgstr "Wysokość (px):"
 msgid "Codec:"
 msgstr "Kodek:"
 
+msgid "Video options:"
+msgstr "Opcje wideo:"
+
 msgid "Audio options:"
 msgstr "Opcje audio:"
 
@@ -962,8 +1009,8 @@ msgstr "Ustawia folder profilu jako domyślny do przechowywania pikonów, kopii 
 msgid "Default data path:"
 msgstr "Domyślna ścieżka danych:"
 
-msgid "Record"
-msgstr "Nagrania"
+msgid "Record:"
+msgstr "Nagrania:"
 
 msgid "Streams record path:"
 msgstr "Ścieżka zapisu nagrań:"
