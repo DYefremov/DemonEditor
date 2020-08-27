@@ -790,6 +790,7 @@ Author: Dmitriy Yefremov
     <property name="use-header-bar">{use_header}</property>
     <property name="title" translatable="yes">Satellite</property>
     <property name="can_focus">False</property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
@@ -797,25 +798,6 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
-    <child type="action">
-      <object class="GtkButton" id="sat_cancel_button">
-        <property name="label">gtk-cancel</property>
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-      </object>
-    </child>
-    <child type="action">
-      <object class="GtkButton" id="sat_ok_button">
-        <property name="label">gtk-ok</property>
-        <property name="width_request">90</property>
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-      </object>
-    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="satelitte_dialog_vbox">
         <property name="can_focus">False</property>
@@ -825,6 +807,35 @@ Author: Dmitriy Yefremov
           <object class="GtkButtonBox" id="dialog-action_area3">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="sat_cancel_button">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="valign">center</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="sat_ok_button">
+                <property name="label" translatable="yes">OK</property>
+                <property name="width_request">90</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="valign">center</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -876,7 +887,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkEntry" id="sat_name_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="primary_icon_stock">gtk-edit</property>
+                    <property name="primary_icon_name">document-edit-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_activatable">False</property>
                     <property name="secondary_icon_sensitive">False</property>
@@ -978,25 +989,6 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
-    <child type="action">
-      <object class="GtkButton" id="tr_cancel_button">
-        <property name="label">gtk-cancel</property>
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-      </object>
-    </child>
-    <child type="action">
-      <object class="GtkButton" id="tr_ok_button">
-        <property name="label">gtk-ok</property>
-        <property name="width_request">90</property>
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-      </object>
-    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="tr_dialog_vbox">
         <property name="can_focus">False</property>
@@ -1006,6 +998,35 @@ Author: Dmitriy Yefremov
           <object class="GtkButtonBox" id="tr_dialog-action_area">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="tr_cancel_button">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="valign">center</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="tr_ok_button">
+                <property name="label" translatable="yes">OK</property>
+                <property name="width_request">90</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="valign">center</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1109,7 +1130,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="secondary_icon_sensitive">False</property>
@@ -1128,7 +1149,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <property name="placeholder_text" translatable="yes">27500000</property>
                         <property name="input_purpose">digits</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
@@ -1284,7 +1305,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
                             <property name="max_width_chars">12</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="placeholder_text" translatable="yes">0 - 262142</property>
                             <property name="input_purpose">digits</property>
@@ -1301,7 +1322,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
                             <property name="max_width_chars">12</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="placeholder_text" translatable="yes">0 - 255</property>
                             <property name="input_purpose">digits</property>
