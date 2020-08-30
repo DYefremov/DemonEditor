@@ -228,7 +228,6 @@ Author: Dmitriy Yefremov
       <object class="GtkHeaderBar" id="header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Picons manager</property>
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
@@ -297,16 +296,6 @@ Author: Dmitriy Yefremov
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator" id="download_box_separator">
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -380,6 +369,13 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="position">6</property>
           </packing>
+        </child>
+        <child type="title">
+          <object class="GtkStackSwitcher" id="sctack">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="stack">stack</property>
+          </object>
         </child>
         <child>
           <object class="GtkButton" id="convert_button">
@@ -456,7 +452,6 @@ Author: Dmitriy Yefremov
           <object class="GtkFrame" id="stack_frame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_top">5</property>
             <property name="label_xalign">0.5</property>
             <property name="shadow_type">none</property>
             <child>
@@ -465,7 +460,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
-                <property name="margin_top">10</property>
+                <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <signal name="notify::visible-child" handler="on_visible_page" swapped="no"/>
                 <child>
@@ -1681,12 +1676,8 @@ Author: Dmitriy Yefremov
                 </child>
               </object>
             </child>
-            <child type="label">
-              <object class="GtkStackSwitcher" id="sctack">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stack">stack</property>
-              </object>
+            <child type="label_item">
+              <placeholder/>
             </child>
           </object>
           <packing>
