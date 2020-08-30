@@ -728,6 +728,7 @@ Author: Dmitriy Yefremov
     <property name="use-header-bar">{use_header}</property>
     <property name="title" translatable="yes">Satellite</property>
     <property name="can_focus">False</property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
