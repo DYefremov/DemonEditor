@@ -401,15 +401,19 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
             picons_path = dst_path or settings.picons_local_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
-            shutil.copy(src_path, picon_file)
-            picons_files.append(picon_file)
-            picon = get_picon_pixbuf(picon_file)
-            picons[picon_id] = picon
-            model.set_value(itr, p_pos, picon)
-            if target is ViewTarget.SERVICES:
-                set_picon(fav_id, fav_view.get_model(), picon, Column.FAV_ID, p_pos)
+            try:
+                shutil.copy(src_path, picon_file)
+            except shutil.SameFileError:
+                pass  # NOP
             else:
-                set_picon(fav_id, get_base_model(srv_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
+                picons_files.append(picon_file)
+                picon = get_picon_pixbuf(picon_file)
+                picons[picon_id] = picon
+                model.set_value(itr, p_pos, picon)
+                if target is ViewTarget.SERVICES:
+                    set_picon(fav_id, fav_view.get_model(), picon, Column.FAV_ID, p_pos)
+                else:
+                    set_picon(fav_id, get_base_model(srv_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
 
     return picons_files
 
