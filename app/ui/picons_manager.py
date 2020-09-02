@@ -14,8 +14,8 @@ from app.settings import SettingsType, Settings
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
-from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon, \
-    get_picon_pixbuf
+from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
+                          get_picon_pixbuf)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey
 
 
@@ -130,13 +130,15 @@ class PiconsDialog:
         self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._load_providers_button.bind_property("visible", self._receive_button, "visible")
-        self._load_providers_button.bind_property("visible", builder.get_object("download_box_separator"), "visible")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._explorer_src_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
         self._filter_button.bind_property("active", builder.get_object("filter_service_box"), "visible")
         self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
         self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
         self._filter_button.bind_property("visible", self._info_check_button, "visible")
+        self._filter_button.bind_property("visible", self._send_button, "visible")
+        self._filter_button.bind_property("visible", self._download_button, "visible")
+        self._filter_button.bind_property("visible", self._remove_button, "visible")
         explorer_info_bar = builder.get_object("explorer_info_bar")
         explorer_info_bar.bind_property("visible", builder.get_object("explorer_info_bar_frame"), "visible")
         self._info_check_button.bind_property("active", explorer_info_bar, "visible")

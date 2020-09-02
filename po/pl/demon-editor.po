@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2019 Dmitriy Yefremov
+# Copyright (C) 2018-2020 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -606,9 +606,6 @@ msgstr "Brak danych do zapisania!"
 msgid "Network"
 msgstr "Sieć"
 
-msgid "Program"
-msgstr "Program"
-
 msgid "Backup"
 msgstr "Kopia"
 
@@ -773,9 +770,6 @@ msgstr "Import listy odtwarzania"
 msgid "Getting link error:"
 msgstr "Błąd pobierania łącza:"
 
-msgid "Apply profile settings"
-msgstr "Zastosuj ustawienia profilu"
-
 msgid "Settings type:"
 msgstr "Ustawienia dla:"
 
@@ -826,9 +820,6 @@ msgstr "Pobierz z odbiornika"
 
 msgid "The Neutrino has only experimental support. Not all features are supported!"
 msgstr "Neutrino ma jedynie wsparcie eksperymentalne. Nie wszystkie funkcje są obsługiwane!"
-
-msgid "Default data path:"
-msgstr "Domyślna ścieżka danych:"
 
 msgid "Some images may have problems displaying the favorites list!"
 msgstr "Niektóre obrazy mogą mieć problemy z wyświetlaniem listy ulubionych!"
@@ -971,9 +962,6 @@ msgstr "Wysokość (px):"
 
 msgid "Codec:"
 msgstr "Kodek:"
-
-msgid "Video options:"
-msgstr "Opcje wideo:"
 
 msgid "Audio options:"
 msgstr "Opcje audio:"

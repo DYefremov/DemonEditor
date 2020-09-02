@@ -1491,7 +1491,7 @@ class Application(Gtk.Application):
 
         if len(path) > 1:
             gen = self.update_bouquet_services(model, path)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            GLib.idle_add(lambda: next(gen, False))
 
     def update_bouquet_services(self, model, path, bq_key=None):
         """ Updates list of bouquet services """
@@ -1503,12 +1503,12 @@ class Application(Gtk.Application):
         services = self._bouquets.get(key, [])
         ex_services = self._extra_bouquets.get(key, None)
 
-        factor = self.FAV_FACTOR * 20
-        if len(services) > factor or len(self._fav_model) > factor:
+        if len(services) > self.FAV_FACTOR * 20:
             self._bouquets_view.set_sensitive(False)
+            yield True
 
+        self._fav_view.set_model(None)
         self._fav_model.clear()
-        yield True
 
         num = 0
         for srv_id in services:
@@ -1527,11 +1527,11 @@ class Application(Gtk.Application):
                 self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
                                         srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
                                         self._picons.get(srv.picon_id, None), None, background))
-            if num % self.FAV_FACTOR == 0:
-                yield True
 
-        GLib.idle_add(self._bouquets_view.set_sensitive, True)
-        GLib.idle_add(self._bouquets_view.grab_focus)
+        yield True
+        self._fav_view.set_model(self._fav_model)
+        self._bouquets_view.set_sensitive(True)
+        self._bouquets_view.grab_focus()
         yield True
 
     def check_bouquet_selection(self):
@@ -1995,8 +1995,7 @@ class Application(Gtk.Application):
                 self.set_playback_elms_active()
         else:
             if not self._player_box.get_visible():
-                w, h = self._main_window.get_size()
-                self._player_box.set_size_request(w * 0.6, -1)
+                self.set_player_area_size(self._player_box)
                 self._current_mrl = url
             self._player_box.set_visible(True)
 
@@ -2066,14 +2065,13 @@ class Application(Gtk.Application):
         self._fav_view.do_grab_focus(self._fav_view)
 
     def get_time_str(self, duration):
-        """ returns a string representation of time from duration in milliseconds """
+        """ Returns a string representation of time from duration in milliseconds """
         m, s = divmod(duration // 1000, 60)
         h, m = divmod(m, 60)
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
     def on_drawing_area_realize(self, widget):
-        w, h = self._main_window.get_size()
-        widget.set_size_request(w * 0.6, -1)
+        self.set_player_area_size(widget)
 
         if not self._player:
             try:
@@ -2092,6 +2090,10 @@ class Application(Gtk.Application):
                 self._player.play(self._current_mrl)
             finally:
                 self.set_playback_elms_active()
+
+    def set_player_area_size(self, widget):
+        w, h = self._main_window.get_size()
+        widget.set_size_request(w * 0.6, -1)
 
     def on_player_drawing_area_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area.
@@ -2214,6 +2216,11 @@ class Application(Gtk.Application):
 
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
+        if self._app_info_box.get_visible() and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+            self.set_player_area_size(self._player_box)
+            self._player_box.set_visible(True)
+            GLib.idle_add(self._app_info_box.set_visible, False)
+
         self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.watch)
 
     def watch(self, data):

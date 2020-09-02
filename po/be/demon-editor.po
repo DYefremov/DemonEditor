@@ -1,0 +1,1029 @@
+# Copyright (C) 2018-2020 Dmitriy Yefremov
+# This file is distributed under the MIT license.
+#
+#
+msgid ""
+msgstr ""
+"Last-Translator: Dmitriy Yefremov\n"
+"Language: be\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "translator-credits"
+msgstr ""
+
+# Main
+msgid "Service"
+msgstr "Сэрвіс"
+
+msgid "Package"
+msgstr "Пакет"
+
+msgid "Type"
+msgstr "Тып"
+
+msgid "Picon"
+msgstr "Пiкон"
+
+msgid "Freq"
+msgstr "Частата"
+
+msgid "Rate"
+msgstr "Знак. хуткасць"
+
+msgid "Pol"
+msgstr "Пал."
+
+msgid "System"
+msgstr "Сістэма"
+
+msgid "Pos"
+msgstr "Паз."
+
+msgid "Num"
+msgstr "№"
+
+msgid "Current IP:"
+msgstr "Цякучы IP:"
+
+msgid "Assign"
+msgstr "Прывязаць"
+
+msgid "Bouquet details"
+msgstr "Сэрвісы букета"
+
+msgid "Bouquets"
+msgstr "Букеты"
+
+msgid "Copy"
+msgstr "Скапіраваць"
+
+msgid "Copy reference"
+msgstr "Скапіраваць спасылку"
+
+msgid "Download"
+msgstr "Спампаваць"
+
+msgid "Edit"
+msgstr "Правіць"
+
+msgid "Edit mаrker text"
+msgstr "Правіць тэкст маркера"
+
+msgid "FTP-transfer"
+msgstr "Перадача ўсталёвак па FTP"
+
+msgid "Global search"
+msgstr "Глабальны пошук"
+
+msgid "Hide"
+msgstr "Схаваць"
+
+msgid "Hide/Skip On/Off     Ctrl + H"
+msgstr "Схаваць/Прапусціць Укл./Выкл."
+
+msgid "Add IPTV or stream service"
+msgstr "Дадаць IPTV ці паток"
+
+msgid "Import m3u"
+msgstr "Імпартаваць m3u"
+
+msgid "Import m3u file"
+msgstr "Імпартаваць файл m3u"
+
+msgid "List configuration"
+msgstr "Канфігурацыя спіса"
+
+msgid "Rename for this bouquet"
+msgstr "Пераназваць для букета"
+
+msgid "Set default name"
+msgstr "Імя па змаўчанні"
+
+msgid "Insert marker"
+msgstr "Уставіць маркер"
+
+msgid "Insert space"
+msgstr "Уставіць прабел"
+
+msgid "Locate in services"
+msgstr "Знайсці ў спісе сэрвісаў"
+
+msgid "Locked"
+msgstr "Заблакаваны"
+
+msgid "Move"
+msgstr "Перанесці"
+
+msgid "New"
+msgstr "Новы"
+
+msgid "New bouquet"
+msgstr "Новы букет"
+
+msgid "Create bouquet"
+msgstr "Стварыць букет"
+
+msgid "For current satellite"
+msgstr "Для цякучага спадарожніка"
+
+msgid "For current package"
+msgstr "Для цякучага пакета"
+
+msgid "For current type"
+msgstr "Для цякучага тыпу"
+
+msgid "For each satellite"
+msgstr "Для кожнага спадарожніка"
+
+msgid "For each package"
+msgstr "Для кожнага пакета"
+
+msgid "For each type"
+msgstr "Для кожнага тыпу"
+
+msgid "Open"
+msgstr "Адкрыць"
+
+msgid "Parent lock On/Off     Ctrl + L"
+msgstr "Бацькоўскі замок Укл./Выкл.     Ctrl + L"
+
+msgid "Picons"
+msgstr "Піконы"
+
+msgid "Picons downloader"
+msgstr "Загрузнік піконаў"
+
+msgid "Satellites downloader"
+msgstr "Загрузнік спадарожнікаў"
+
+msgid "Remove"
+msgstr "Выдаліць"
+
+msgid "Remove all unavailable"
+msgstr "Выдаліць усе недаступныя"
+
+msgid "Satellites editor"
+msgstr "Рэдактар спадарожнікаў"
+
+msgid "Save"
+msgstr "Запісаць"
+
+msgid "Search"
+msgstr "Пошук"
+
+msgid "Services"
+msgstr "Сэрвісы"
+
+msgid "Services filter"
+msgstr "Фільтр сэрвісаў"
+
+msgid "Settings"
+msgstr "Налады"
+
+msgid "Up"
+msgstr "Уверх"
+
+msgid "Down"
+msgstr "Уніз"
+
+msgid "Active profile:"
+msgstr "Актыўны профіль:"
+
+msgid "All"
+msgstr "Усе"
+
+msgid "Are you sure?"
+msgstr "Вы ўпэўнены?"
+
+msgid "Current data path:"
+msgstr "Цякучы шлях да дадзеных:"
+
+msgid "Data:"
+msgstr "Дадзеныя:"
+
+msgid "Enigma2 channel and satellites list editor for GNU/Linux"
+msgstr "Рэдактар спіса каналаў і спадарожнікаў Enigma2\n для GNU/Linux"
+
+msgid "Host:"
+msgstr "Адрас рэсівера:"
+
+msgid "Loading data..."
+msgstr "Загрузка дадзеных..."
+
+msgid "Receive"
+msgstr "Атрымаць"
+
+msgid "Receive files from receiver"
+msgstr "Атрымаць файлы з рэсівера"
+
+msgid "Receiver IP:"
+msgstr "IP адрас рэсівера:"
+
+msgid "Remove unused bouquets"
+msgstr "Выдаліць некарыстаныя букеты"
+
+msgid "Reset profile"
+msgstr "Скід профілю"
+
+msgid "Satellites"
+msgstr "Спадарожнікі"
+
+msgid "Satellites.xml file:"
+msgstr "Файл satellites.xml:"
+
+msgid "Selected"
+msgstr "Выбар"
+
+msgid "Send"
+msgstr "Адправіць"
+
+msgid "Send files to receiver"
+msgstr "Адправіць файлы ў рэсівер"
+
+msgid "Services and Bouquets files:"
+msgstr "Файлы сэрвісаў і букетаў:"
+
+msgid "User bouquet files:"
+msgstr "Файлы букетаў:"
+
+msgid "Extra:"
+msgstr "Дадаткова:"
+
+# Filter bar
+msgid "Only free"
+msgstr "Толькі адкрытыя"
+
+msgid "All positions"
+msgstr "Усе пазіцыі"
+
+msgid "All types"
+msgstr "Усе тыпы"
+
+# Streams player
+msgid "Play"
+msgstr "Прайграванне"
+
+msgid "Stop playback"
+msgstr "Супын"
+
+msgid "Previous stream in the list"
+msgstr "Папярэдні паток у спісе"
+
+msgid "Next stream in the list"
+msgstr "Наступны паток у спісе"
+
+msgid "Toggle in fullscreen"
+msgstr "Паказаць ва ўвесь экран"
+
+msgid "Close"
+msgstr "Закрыць"
+
+# Picons dialog
+msgid "Load providers"
+msgstr "Загрузіць правайдары"
+
+msgid "Providers"
+msgstr "Правайдары"
+
+msgid "Receive picons"
+msgstr "Загрузіць піконы"
+
+msgid "Picons name format:"
+msgstr "Фармат імя піконаў:"
+
+msgid "Resize:"
+msgstr "Змяніць памер:"
+
+msgid "Current picons path:"
+msgstr "Цякучы шлях да піконаў:"
+
+msgid "Receiver picons path:"
+msgstr "Шлях да піконаў рэсівера:"
+
+msgid "Picons download tool"
+msgstr "Загрузнік піконаў"
+
+msgid "Transfer to receiver"
+msgstr "Загрузіць у рэсівер"
+
+msgid "Downloader"
+msgstr "Загрузнік"
+
+msgid "Converter"
+msgstr "Канвертар"
+
+msgid "Convert"
+msgstr "Канвертаваць"
+
+msgid "Path to save:"
+msgstr "Шлях для захавання:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Шлях да піконаў фармату Enigma2:"
+
+msgid "Specify the correct position value for the provider!"
+msgstr "Пакажыце правільнае значэнне пазіцыі для правайдара!"
+
+msgid "Converter between name formats"
+msgstr "Канвертар фармату імёнаў"
+
+msgid "Receive picons for providers"
+msgstr "Атрыманне піконаў для правайдараў"
+
+msgid "Load satellite providers."
+msgstr "Загрузка правайдараў"
+
+msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
+msgstr "Для аўтаматычнага іменавання піконаў,\nзагрузіце спіс патрэбных сэрвісаў у галоўнае акно праграмы."
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "Рэдактар спадарожнікаў"
+
+msgid "Add"
+msgstr "Дадаць"
+
+msgid "Satellite"
+msgstr "Спадарожнік"
+
+msgid "Transponder"
+msgstr "Транспондар"
+
+msgid "Satellite properties:"
+msgstr "Параметры спадарожніка:"
+
+msgid "Transponder properties:"
+msgstr "Параметры транспондара:"
+
+msgid "Name"
+msgstr "Імя"
+
+msgid "Position"
+msgstr "Пазіцыя"
+
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "Абнаўленне спадарожнікаў"
+
+msgid "Remove selection"
+msgstr "Выдаліць вылучэнне"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "Дадзеныя сэрвісу:"
+
+msgid "Transponder data:"
+msgstr "Дадзеныя транспондара:"
+
+msgid "Service data"
+msgstr "Дадзеныя сэрвісу"
+
+msgid "Transponder details"
+msgstr "Падрабязнасці транспандэра"
+
+msgid "Changes will be applied to all services of this transponder!\nContinue?"
+msgstr "Змены будуць ужыты да ўсіх сэрвісаў дадзенага транспондара!\nПрацягнуць?"
+
+msgid "Reference"
+msgstr "Спасылка"
+
+msgid "Namespace"
+msgstr "Пр. імёнаў"
+
+msgid "Flags:"
+msgstr "Флагі:"
+
+msgid "Delays (ms):"
+msgstr "Затрымкі (mc)"
+
+msgid "Bitstream"
+msgstr "Паток"
+
+msgid "Description"
+msgstr "Апісанне"
+
+msgid "Source:"
+msgstr "Крыніца:"
+
+msgid "Cancel"
+msgstr "Скасаваць"
+
+msgid "Update"
+msgstr "Абнавіць"
+
+msgid "Filter"
+msgstr "Фільтр"
+
+msgid "Find"
+msgstr "Пошук"
+
+# IPTV dialog
+msgid "Stream data"
+msgstr "Даныя патоку"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "Стартавыя значэнні"
+
+msgid "Reset to default"
+msgstr "Скінуць па змаўчанні"
+
+msgid "IPTV streams list configuration"
+msgstr "Канфігурацыя спіса IPTV патокаў"
+
+#Settings dialog
+msgid "Preferences"
+msgstr "Налады"
+
+msgid "Profile:"
+msgstr "Профіль:"
+
+msgid "Timeout between commands in seconds"
+msgstr "Паўза паміж камандамі ў сек."
+
+msgid "Timeout:"
+msgstr "Тайм-аўт:"
+
+msgid "Login:"
+msgstr "Лагін:"
+
+msgid "Options"
+msgstr "Налады"
+
+msgid "Password:"
+msgstr "Пароль:"
+
+msgid "Picons:"
+msgstr "Піконы:"
+
+msgid "Port:"
+msgstr "Порт:"
+
+msgid "Data path:"
+msgstr "Шлях да дадзеных:"
+
+msgid "Picons path:"
+msgstr "Шлях да піконаў:"
+
+msgid "Network settings:"
+msgstr "Налады сеткі:"
+
+msgid "STB file paths:"
+msgstr "Шляхі да файлаў рэсівера:"
+
+msgid "Local file paths:"
+msgstr "Шляхі да лакальных файлаў:"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "Памылка. Не абраны букет!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "Гэты элемент не дазволены да выдалення!"
+
+msgid "This item is not allowed to edit!"
+msgstr "Гэты элемент не прызначаны для рэдагавання!"
+
+msgid "Not allowed in this context!"
+msgstr "Забаронена ў дадзеным кантэксце!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "Калі ласка, загрузіце файлы з рэсівера альбо наладзьце шлях для чытання дадзеных!"
+
+msgid "Reading data error!"
+msgstr "Памылка чытання дадзеных!"
+
+msgid "No m3u file is selected!"
+msgstr "Не абраны m3u файл!"
+
+msgid "Not implemented yet!"
+msgstr "Пакуль не рэалізавана!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "Тэкст маркера пусты, паспрабуйце яшчэ!"
+
+msgid "Please, select only one item!"
+msgstr "Калі ласка, выберыце толькі адзін элемент!"
+
+msgid "No png file is selected!"
+msgstr "Не абраны png файл!"
+
+msgid "No profile selected!"
+msgstr "Не абраны профіль!"
+
+msgid "No reference is present!"
+msgstr "Спасылка не знойдзена!"
+
+msgid "No selected item!"
+msgstr "Не абраны элемент!"
+
+msgid "The task is already running!"
+msgstr "Заданне ўжо запушчана!"
+
+msgid "Done!"
+msgstr "Гатова!"
+
+msgid "Please, wait..."
+msgstr "Калі ласка, пачакайце..."
+
+msgid "Resizing..."
+msgstr "Змена памеру..."
+
+msgid "Select paths!"
+msgstr "Задайце шляхі!"
+
+msgid "No satellite is selected!"
+msgstr "Не абраны спадарожнік!"
+
+msgid "Please, select only one satellite!"
+msgstr "Калі ласка, выберыце толькі адзін спадарожнік!"
+
+msgid "Please check your parameters and try again."
+msgstr "Калі ласка, праверце параметры і паспрабуйце зноў!"
+
+msgid "No satellites.xml file is selected!"
+msgstr "Не абраны файл satellites.xml!"
+
+msgid "Error. Verify the data!"
+msgstr "Памылка. Праверце дадзеныя!"
+
+msgid "Operation not allowed in this context!"
+msgstr "Недапушчальная аперацыя ў дадзеным кантэксце!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "VLC не знойдзены. Праверце, што ён усталяваны!"
+
+# Search unavailable streams dialog
+msgid "Please wait,  streams testing  in progress..."
+msgstr "Чакайце, ідзе тэставанне патокаў..."
+
+msgid "Found"
+msgstr "Знойдзена"
+
+msgid "unavailable streams."
+msgstr "недаступных патокаў."
+
+msgid "No changes required!"
+msgstr "Змен не патрабуецца!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "Гэты спіс не ўтрымвае патокаў IPTV!"
+
+msgid "New empty configuration"
+msgstr "Новая канфігурацыя"
+
+msgid "No data to save!"
+msgstr "Няма дадзеных для захавання!"
+
+msgid "Network"
+msgstr "Сетка"
+
+msgid "Paths"
+msgstr "Шляхі"
+
+msgid "Program"
+msgstr "Праграма"
+
+msgid "Backup:"
+msgstr "Рэзервовае капіяванне:"
+
+msgid "Backup"
+msgstr "Рэзервовае капіяванне"
+
+msgid "Backups"
+msgstr "Рэзервовыя копіі"
+
+msgid "Backup path:"
+msgstr "Шлях да рэзервовых копій:"
+
+msgid "Restore bouquets"
+msgstr "Аднавіць букеты"
+
+msgid "Restore all"
+msgstr "Аднавіць усё"
+
+msgid "Before saving"
+msgstr "Перад захаваннем"
+
+msgid "Before downloading from the receiver"
+msgstr "Перад загрузкай з рэсівера"
+
+msgid "Set background color for the services"
+msgstr "Усталяваць колер фону для сэрвісаў"
+
+msgid "Marked as new:"
+msgstr "Пазначаныя як новыя:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "З карыстацкім імем у букеце:"
+
+msgid "Select"
+msgstr "Выбраць"
+
+msgid "About"
+msgstr "Аб праграме"
+
+msgid "Exit"
+msgstr "Выйсці"
+
+msgid "Tools"
+msgstr "Прылады"
+
+#Import
+msgid "Import"
+msgstr "Імпарт"
+
+msgid "Bouquet"
+msgstr "Букета"
+
+msgid "Bouquets and services"
+msgstr "Букетаў і сэрвісаў"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "Асноўны спіс не ўтрымвае сэрвісаў для дадзенага букета!"
+
+msgid "No bouquet file is selected!"
+msgstr "Не абраны файл букета!"
+
+msgid "Remove all unused"
+msgstr "Выдаліць усе некарыстаныя"
+
+msgid "Test"
+msgstr "Тэставаць"
+
+msgid "Test connection"
+msgstr "Тэставаць злучэнне"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Падвойны клік па сэрвісе ў спісе букетаў:"
+
+msgid "Zap"
+msgstr "Пераключыць"
+
+msgid "Play  stream"
+msgstr "Пр. паток"
+
+msgid "Disabled"
+msgstr "Выкл."
+
+msgid "Enable lamedb ver. 5 support"
+msgstr "Уключыць падтрымку lamedb вер. 5"
+
+msgid "Enable HTTP API"
+msgstr "Уключыць HTTP API"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Пераключыць канал (Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Пераключыць канал і прагляд у праграме (Ctrl + W)."
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Прайграванне IPTV альбо іншага патока ў праграме (Ctrl + P)"
+
+msgid "Export to m3u"
+msgstr "Экспарт у m3u"
+
+msgid "EPG configuration"
+msgstr "Канфігурацыя EPG"
+
+msgid "Apply"
+msgstr "Ужыць"
+
+msgid "EPG source"
+msgstr "Крыніца EPG"
+
+msgid "Service names source:"
+msgstr "Крыніца імёнаў сэрвісаў:"
+
+msgid "Main service list"
+msgstr "Асноўны спіс сэрвісаў:"
+
+msgid "XML file"
+msgstr "Файл XML"
+
+msgid "Use web source"
+msgstr "Скарыстаць ўэб-крыніцу"
+
+msgid "Url to *.xml.gz file:"
+msgstr "URL да файла *.xml.gz:"
+
+msgid "Enable filtering"
+msgstr "Уключыць фільтрацыю"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Фільтраваць па наяўнасці ў файле epg.dat."
+
+msgid "Paths to the epg.dat file:"
+msgstr "Шляхі да файла epg.dat:"
+
+msgid "Local path:"
+msgstr "Лакальны шлях:"
+
+msgid "STB path:"
+msgstr "Шлях у рэсіверы:"
+
+msgid "Update on start"
+msgstr "Шлях у рэсіверы:"
+
+msgid "Auto configuration by service names."
+msgstr "Аўтаналадка па імёнах сэрвісаў."
+
+msgid "Save list to xml."
+msgstr "Захаваць спіс у XML."
+
+msgid "Download XML file error."
+msgstr "Памылка загрузкі XML-файла."
+
+msgid "Unsupported file type:"
+msgstr "Непадтрымоўваны тып файла:"
+
+msgid "Unpacking data error."
+msgstr "Памылка распакавання дадзеных."
+
+msgid "XML parsing error:"
+msgstr "Памылка парсінгу XML:"
+
+msgid "Count of successfully configured services:"
+msgstr "Колькасць паспяхова сканфігураваных сэрвісаў:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Цякучы файл epg.dat не ўтрымвае спасылак на сэрвісы дадзенага букета!"
+
+msgid "Use HTTP"
+msgstr "Скарыстаць HTTP"
+
+msgid "Close playback"
+msgstr "Закрыць прайграванне"
+
+msgid "Import YouTube playlist"
+msgstr "Імпарт плэйліста YouTube"
+
+msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+msgstr "Знойдзена спасылка на рэсурс YouTube!\nПаспрабаваць атрымаць прамую спасылку на відэа?"
+
+msgid "Playlist import"
+msgstr "Імпарт плэйліста"
+
+msgid "Getting link error:"
+msgstr "Памылка атрымання спасылкі:"
+
+msgid "Extra"
+msgstr "Дадаткова"
+
+msgid "Apply profile settings"
+msgstr "Ужыць налады профілю"
+
+msgid "Settings type:"
+msgstr "Тып налад:"
+
+msgid "Set default"
+msgstr "Усталяваць па змаўчанні"
+
+msgid "Language:"
+msgstr "Мова:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Загружаць апошнюю адкрытую канфігурацыю пры запуску праграмы"
+
+msgid "Enable direct playback bar"
+msgstr "Уключыць панэль прамога прайгравання"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Улучае прамое адпраўленне і прайграванне медыя-спасылак на рэсіверы"
+
+msgid "Watch the channel in the program"
+msgstr "Прагляд канала ў праграме"
+
+msgid "Zap and Play"
+msgstr "Перакл. і прайграць"
+
+msgid "Drag  or paste the link here"
+msgstr "Перацягніце ці ўстаўце спасылку тут"
+
+msgid "Remove added links in the playlist"
+msgstr "Выдаліць дададзеныя спасылкі з плэйліста"
+
+msgid "A bouquet with that name exists!"
+msgstr "Букет з такім імем існуе!"
+
+msgid "Details"
+msgstr "Падрабязна"
+
+msgid "Profile"
+msgstr "Профіль"
+
+msgid "Reset"
+msgstr "Скід"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Picons manager"
+msgstr "Мэнэджар піконаў"
+
+msgid "Explorer"
+msgstr "Правадыр"
+
+msgid "Satellite url:"
+msgstr "URL спадарожніка:"
+
+msgid "Cut"
+msgstr "Выразаць"
+
+msgid "Paste"
+msgstr "Уставіць"
+
+msgid "To the top"
+msgstr "У пачатак"
+
+msgid "To the end"
+msgstr "У канец"
+
+msgid "View"
+msgstr "Выгляд"
+
+msgid "Lock"
+msgstr "Замок"
+
+msgid "Parent lock"
+msgstr "Бацькоўскі замок"
+
+msgid "Hide/Skip"
+msgstr "Схаваць/Прапусціць"
+
+msgid "IPTV tools"
+msgstr "Прылады IPTV"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Усталяваць папку профілю па змаўчанні для дад. дадзеных"
+
+msgid "Default data path:"
+msgstr "Шлях да дадзеных па змаўчанні:"
+
+msgid "Streams record path:"
+msgstr "Шлях да запісаў патокаў:"
+
+msgid "Record"
+msgstr "Запіс"
+
+msgid "Record:"
+msgstr "Запіс:"
+
+msgid "Record to disk:"
+msgstr "Запіс на дыск:"
+
+msgid "Streaming"
+msgstr "Патокі"
+
+msgid "Activate transcoding"
+msgstr "Актываваць перакадоўку"
+
+msgid "Presets:"
+msgstr "Перадусталёўкі:"
+
+msgid "Video options:"
+msgstr "Опцыі відэа:"
+
+msgid "Audio options:"
+msgstr "Опцыі аўдыя:"
+
+msgid "Bitrate (kb/s):"
+msgstr "Бітрэйт (kb/s):"
+
+msgid "Codec:"
+msgstr "Кодэк:"
+
+msgid "Width (px):"
+msgstr "Шырыня (px):"
+
+msgid "Height (px):"
+msgstr "Вышыня (px):"
+
+msgid "Channels:"
+msgstr "Каналы:"
+
+msgid "Sample rate (Hz):"
+msgstr "Частата дыскр. (Гц):"
+
+msgid "Play streams mode:"
+msgstr "Рэжым прайгравання струменяў:"
+
+msgid "Built-in player"
+msgstr "Убудаваны плэер"
+
+msgid "VLC media player"
+msgstr "VLC медыяплэер"
+
+msgid "Only get m3u file"
+msgstr "Атрымаць файл *.m3u"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Захавайце і перазапусціце праграму, каб ужыць налады."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Некаторыя выявы могуць мець праблемы з адлюстраваннем спіса абранага!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Працуе ў рэжыме чакання ці актыўным транспондары!"
+
+msgid "No connection to the receiver!"
+msgstr "Няма злучэння з рэсіверам!"
+
+msgid "Signal level"
+msgstr "Узровень сігналу"
+
+msgid "Receiver info"
+msgstr "Інфармацыя пра рэсівер"
+
+msgid "A profile with that name exists!"
+msgstr "Профіль з такім імем існуе!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Паказваць кароткую інфармацыю ў выглядзе падказак у асноўным спісе паслуг"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "Паказваць падрабязную інфармацыю ў выглядзе падказак у спісе букетаў"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Уключыць альтэрнатыўнае найменне файлаў букета"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Дазваляе называць файлы букетаў, выкарыстоўваючы іх імёны."
+
+msgid "Appearance"
+msgstr "Выгляд"
+
+msgid "Enable Themes support"
+msgstr "Уключыць падтрымку тэм"
+
+msgid "Gtk3 Theme:"
+msgstr "Тэма Gtk3:"
+
+msgid "Icon Theme:"
+msgstr "Тэма значкоў:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Gtk3 тэмы и значкі:"
+
+msgid "Deleting data..."
+msgstr "Выдаленне дадзеных..."
+
+msgid "Download from the receiver"
+msgstr "Загрузіць з рэсівера"
+
+msgid "Remove all picons from the receiver"
+msgstr "Выдаліць усе піконы з рэсівера"
+
+msgid "Service reference"
+msgstr "Сэрвісная спасылка"
+
+msgid "Enable support for"
+msgstr "Уключыць падтрымку"
+
+msgid "Auto-check for updates"
+msgstr "Аўтаправерка абнаўленняў"
+
+msgid "Filter services"
+msgstr "Фільтраваць сэрвісы"
+
+msgid "Filter services in the main list."
+msgstr "Фільтраваць сэрвісы ў асноўным спісе."
+
+msgid "Destination:"
+msgstr "Прызначэнне:"
+
+msgid "EXPERIMENTAL!"
+msgstr "ЭКСПЕРЫМЕНТАЛЬНА!"
+
+msgid "Sorting data..."
+msgstr "Сартаванне дадзеных..."
+
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Ёсць незахаваныя змены.\n\n\t Захаваць іх цяпер?"
+
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "Вы ўпэўнены, што хочаце змяніць парадак\n\t сэрвісаў у гэтым букеце?"
+
+msgid "Remove from the receiver"
+msgstr "Выдаліць з рэсівера"
+
+msgid "Screenshot"
+msgstr "Здымак экрана"
+
+msgid "Video"
+msgstr "Відэа"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino мае толькі эксперыментальную падтрымку. Падтрымваюцца не ўсе функцыі!"
+
+msgid "Enable experimental features"
+msgstr "Уключыць эксперыментальныя функцыі"
+
+msgid "Can't Playback!"
+msgstr "Не атрымоўваецца прайграць!"
+
+msgid "Enable Dark Mode"
+msgstr "Уключыць цёмны рэжым"
