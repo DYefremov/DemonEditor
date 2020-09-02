@@ -683,7 +683,7 @@ msgid "Export to m3u"
 msgstr "Eksportuj do m3u"
 
 msgid "EPG configuration"
-msgstr "Koniguruj EPG"
+msgstr "Konfiguruj EPG"
 
 msgid "Apply"
 msgstr "Zatwierdź"
@@ -770,14 +770,11 @@ msgstr "Import listy odtwarzania"
 msgid "Getting link error:"
 msgstr "Błąd pobierania łącza:"
 
-msgid "Apply profile settings"
-msgstr "Zastosuj ustawienia profilu"
-
 msgid "Settings type:"
 msgstr "Ustawienia dla:"
 
 msgid "Set default"
-msgstr "Uataw domyślnie"
+msgstr "Ustaw domyślnie"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Umożliwia bezpośrednie wysyłanie i odtwarzanie łączy multimedialnych w odbiorniku"
@@ -798,7 +795,10 @@ msgid "Remove picons from the receiver"
 msgstr "Usuń pikony z odbiornika"
 
 msgid "Use http to reload data in the receiver."
-msgstr "Użyj http aby ponownie załadować dane do odbiornika."
+msgstr "Użyj http aby przeładować dane w odbiorniku."
+
+msgid "Apply profile settings"
+msgstr "Zastosuj ustawienia profilu"
 
 msgid "Drag  or paste the link here"
 msgstr "Przeciągnij lub wklej tutaj link"
