@@ -105,6 +105,9 @@ msgstr "Standardbezeichnung setzen"
 msgid "Insert marker"
 msgstr "Marker einfügen"
 
+msgid "Insert space"
+msgstr "Leerzeichen einfügen"
+
 msgid "Locate in services"
 msgstr "In den Diensten suchen"
 
@@ -160,7 +163,7 @@ msgid "Remove"
 msgstr "Entfernen"
 
 msgid "Remove all unavailable"
-msgstr "Entfernt alle nicht verfügbaren"
+msgstr "Entfernen alle nicht verfügbaren"
 
 msgid "Satellites editor"
 msgstr "Satelliten-Editor"
@@ -515,6 +518,9 @@ msgstr "Bitte wählen Sie nur einen Eintrag aus!"
 
 msgid "No png file is selected!"
 msgstr "Es ist keine png-Datei ausgewählt!"
+
+msgid "No profile selected!"
+msgstr "Kein Profil ausgewählt!"
 
 msgid "No reference is present!"
 msgstr "Es liegt keine Referenz vor!"

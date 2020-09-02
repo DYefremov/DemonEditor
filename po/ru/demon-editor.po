@@ -104,6 +104,9 @@ msgstr "Имя по умолчанию"
 msgid "Insert marker"
 msgstr "Вставить маркер"
 
+msgid "Insert space"
+msgstr "Вставить пробел"
+
 msgid "Locate in services"
 msgstr "Найти в списке сервисов"
 
@@ -507,6 +510,9 @@ msgstr "Пожалуйста, выберите только один элеме�
 msgid "No png file is selected!"
 msgstr "Не выбран png файл!"
 
+msgid "No profile selected!"
+msgstr "Не выбран профиль!"
+
 msgid "No reference is present!"
 msgstr "Ссылка не найдена!"
 
@@ -672,7 +678,7 @@ msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Переключить канал(Ctrl + Z)"
 
 msgid "Switch the channel and watch in the program(Ctrl + W)"
-msgstr "Переклють канал и просмотр в программе(Ctrl + W)."
+msgstr "Переключить канал и просмотр в программе(Ctrl + W)."
 
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Воспроизведение IPTV или другого потока в программе(Ctrl + P)"
