@@ -510,6 +510,9 @@ msgstr "Калі ласка, выберыце толькі адзін элеме
 msgid "No png file is selected!"
 msgstr "Не абраны png файл!"
 
+msgid "No profile selected!"
+msgstr "Не абраны профіль!"
+
 msgid "No reference is present!"
 msgstr "Спасылка не знойдзена!"
 
