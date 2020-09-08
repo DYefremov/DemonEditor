@@ -1,15 +1,16 @@
-import re
 import os
+import re
 
 from app.commons import run_idle
 from app.eparser import Service
-from app.eparser.ecommons import MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, \
-    get_key_by_value, get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION, TrType, \
-    SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, HIERARCHY, T_FEC
+from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, get_key_by_value,
+                                  get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION,
+                                  TrType, SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, T_FEC,
+                                  HIERARCHY)
 from app.settings import SettingsType
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, IS_GNOME_SESSION
 from .dialogs import show_dialog, DialogType, Action, get_dialogs_string
 from .main_helper import get_base_model
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, IS_GNOME_SESSION
 
 _UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
 
@@ -438,14 +439,17 @@ class ServiceDetailsDialog:
     def update_fav_view(self, old_service, new_service):
         model = self._fav_view.get_model()
         for row in filter(lambda r: old_service.fav_id == r[7], model):
-            model.set(row.iter, {1: new_service.coded,
-                                 2: new_service.service,
-                                 3: new_service.locked,
-                                 4: new_service.hide,
-                                 5: new_service.service_type,
-                                 6: new_service.pos,
-                                 7: new_service.fav_id,
-                                 8: new_service.picon})
+            itr = row.iter
+            if not model.get_value(itr, Column.FAV_BACKGROUND):
+                model.set_value(itr, Column.FAV_SERVICE, new_service.service)
+
+            model.set(itr, {Column.FAV_CODED: new_service.coded,
+                            Column.FAV_LOCKED: new_service.locked,
+                            Column.FAV_HIDE: new_service.hide,
+                            Column.FAV_TYPE: new_service.service_type,
+                            Column.FAV_POS: new_service.pos,
+                            Column.FAV_ID: new_service.fav_id,
+                            Column.FAV_PICON: new_service.picon})
 
     def update_picon_name(self, old_name, new_name):
         if not os.path.isdir(self._picons_dir_path):

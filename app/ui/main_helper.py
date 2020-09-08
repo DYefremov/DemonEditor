@@ -161,7 +161,8 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, servic
             return
 
         srv_name = response
-        model.set_value(itr, Column.FAV_SERVICE, response)
+        if not model.get_value(itr, Column.FAV_BACKGROUND):
+            model.set_value(itr, Column.FAV_SERVICE, response)
 
         if service_view is not None:
             for row in get_base_model(service_view.get_model()):
