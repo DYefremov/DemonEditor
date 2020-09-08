@@ -2614,7 +2614,7 @@ class Application(Gtk.Application):
         dialog.show()
 
     def on_bouquets_edit(self, view):
-        """ Rename bouquets """
+        """ Renaming bouquets. """
         if not self._bq_selected:
             self.show_error_dialog("This item is not allowed to edit!")
             return
@@ -2634,10 +2634,15 @@ class Application(Gtk.Application):
                 return
 
             model.set_value(itr, 0, response)
-            self._bouquets[bq] = self._bouquets.pop("{}:{}".format(bq_name, bq_type))
+            old_bq_name = "{}:{}".format(bq_name, bq_type)
+            self._bouquets[bq] = self._bouquets.pop(old_bq_name)
             self._current_bq_name = response
             self._bq_name_label.set_text(self._current_bq_name)
-            self._bq_selected = "{}:{}".format(response, bq_type)
+            self._bq_selected = bq
+            # services with extra names for the bouquet
+            ext_bq = self._extra_bouquets.get(old_bq_name, None)
+            if ext_bq:
+                self._extra_bouquets[bq] = ext_bq
 
     def on_rename(self, view):
         name, model = get_model_data(view)
