@@ -885,7 +885,7 @@ msgid "Record to disk:"
 msgstr "Grabación en disco:"
 
 msgid "Streaming"
-msgstr "Streameando"
+msgstr "Streaming"
 
 msgid "Activate transcoding"
 msgstr "Activar transcodificación"
