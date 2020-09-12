@@ -976,22 +976,34 @@ class Application(Gtk.Application):
 
         pol = ", {}: {},".format(get_message("Pol"), srv.pol) if srv.pol else ","
         fec = "{}: {}".format("FEC", srv.fec) if srv.fec else ","
-        ht = "{}{}: {}\n{}: {}\n{}: {}\n{}: {}{} {}, {}: {}\n{}"
+        ht = "{}{}: {}\n{}: {}\n{}: {}\n{}: {}{} {}, {}\n{}"
         return ht.format(header,
                          get_message("Package"), srv.package,
                          get_message("System"), srv.system,
                          get_message("Freq"), srv.freq,
-                         get_message("Rate"), srv.rate, pol, fec, "SID", srv.ssid,
+                         get_message("Rate"), srv.rate, pol, fec, self.get_ssid_info(srv),
                          ref)
 
     def get_hint_for_srv_list(self, srv):
         """ Returns short info about service as formatted string for using as hint. """
-        return "{}{}".format(*self.get_hint_header_info(srv))
+        header, ref = self.get_hint_header_info(srv)
+        return "{}{}\n{}".format(header, self.get_ssid_info(srv), ref)
 
     def get_hint_header_info(self, srv):
         header = "{}: {}\n{}: {}\n".format(get_message("Name"), srv.service, get_message("Type"), srv.service_type)
         ref = "{}: {}".format(get_message("Service reference"), srv.picon_id.rstrip(".png"))
         return header, ref
+
+    def get_ssid_info(self, srv):
+        """ Returns SID representation in hex and dec formats. """
+        try:
+            dec = "{0: 04d}".format(int(srv.ssid, 16))
+        except ValueError as e:
+            log("SID value conversion error: {}".format(e))
+        else:
+            return "SID: 0x{} ({})".format(srv.ssid, dec)
+
+        return "SID: 0x{}".format(srv.ssid)
 
     # ***************** Drag-and-drop *********************#
 
