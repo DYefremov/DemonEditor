@@ -997,13 +997,13 @@ class Application(Gtk.Application):
     def get_ssid_info(self, srv):
         """ Returns SID representation in hex and dec formats. """
         try:
-            dec = "{0: 04d}".format(int(srv.ssid, 16))
+            dec = "{0:04d}".format(int(srv.ssid, 16))
         except ValueError as e:
             log("SID value conversion error: {}".format(e))
         else:
-            return "SID: 0x{} ({})".format(srv.ssid, dec)
+            return "SID: 0x{} ({})".format(srv.ssid.upper(), dec)
 
-        return "SID: 0x{}".format(srv.ssid)
+        return "SID: 0x{}".format(srv.ssid.upper())
 
     # ***************** Drag-and-drop *********************#
 
