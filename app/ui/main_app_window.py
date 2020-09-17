@@ -339,6 +339,7 @@ class Application(Gtk.Application):
         set_action("on_data_save", self.on_data_save)
         set_action("on_download", self.on_download)
         set_action("on_data_open", self.on_data_open)
+        set_action("on_archive_open", self.on_archive_open)
         # Search, Filter
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
         search_action.connect("change-state", self.on_search_toggled)
@@ -1179,14 +1180,63 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
 
     def on_data_open(self, action=None, value=None):
-        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
+        """ Opening data via "File/Open". """
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, title="Open folder")
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+        self.open_data(response)
+
+    def on_archive_open(self, action=None, value=None):
+        """ Opening the data archive via "File/Open archive". """
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name("*.zip, *.gz")
+        file_filter.add_mime_type("application/zip")
+        file_filter.add_mime_type("application/gzip")
+
+        response = show_dialog(DialogType.CHOOSER, self._main_window,
+                               action_type=Gtk.FileChooserAction.OPEN,
+                               file_filter=file_filter,
+                               settings=self._settings,
+                               title="Open archive")
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self.open_data(response)
 
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
-        gen = self.update_data(data_path, callback)
+        if data_path and os.path.isfile(data_path):
+            self.open_compressed_data(data_path)
+        else:
+            gen = self.update_data(data_path, callback)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def open_compressed_data(self, data_path):
+        """ Opening archived data.  """
+        import zipfile
+        import tarfile
+        import tempfile
+
+        tmp_path = tempfile.TemporaryDirectory()
+        tmp_path_name = str(tmp_path.name)
+
+        if zipfile.is_zipfile(data_path):
+            with zipfile.ZipFile(data_path) as zip_file:
+                for zip_info in zip_file.infolist():
+                    if not zip_info.is_dir():
+                        zip_info.filename = os.path.basename(zip_info.filename)
+                        zip_file.extract(zip_info, path=tmp_path_name)
+        elif tarfile.is_tarfile(data_path):
+            with tarfile.open(data_path) as tar:
+                for mb in tar.getmembers():
+                    if mb.isfile():
+                        mb.name = os.path.basename(mb.name)
+                        tar.extract(mb, path=tmp_path_name)
+        else:
+            self.show_error_dialog("Unsupported format!")
+            tmp_path.cleanup()
+            return
+
+        gen = self.update_data("{}{}".format(tmp_path_name, os.sep), callback=tmp_path.cleanup)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_data(self, data_path, callback=None):
