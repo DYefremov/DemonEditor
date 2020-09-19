@@ -4,6 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from functools import lru_cache
 from itertools import chain
+from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib, Gio
 
@@ -430,7 +431,7 @@ class Application(Gtk.Application):
             self.set_profile(profile)
 
     def init_drag_and_drop(self):
-        """ Enable drag-and-drop """
+        """ Enable drag-and-drop. """
         target = []
         bq_target = []
 
@@ -450,12 +451,16 @@ class Application(Gtk.Application):
 
         self._services_view.drag_source_set_target_list(None)
         self._services_view.drag_source_add_text_targets()
+        self._services_view.drag_dest_add_text_targets()
         self._services_view.drag_dest_add_uri_targets()
 
         self._bouquets_view.drag_dest_set_target_list(None)
         self._bouquets_view.drag_source_set_target_list(None)
         self._bouquets_view.drag_dest_add_text_targets()
         self._bouquets_view.drag_source_add_text_targets()
+
+        self._app_info_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self._app_info_box.drag_dest_add_text_targets()
 
     def init_colors(self, update=False):
         """ Initialisation of background colors for the services.
@@ -988,11 +993,13 @@ class Application(Gtk.Application):
         txt = data.get_text()
         uris = data.get_uris()
         if txt:
-            self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
+            if txt.startswith("file://"):
+                self.on_import_data(urlparse(unquote(txt)).path.strip())
+            else:
+                self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
         elif len(uris) == 2:
-            from urllib.parse import unquote, urlparse
             self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
-                                                      urlparse(unquote(uris[1])).path + "/")
+                                                      urlparse(unquote(uris[1])).path + os.sep)
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
@@ -1002,7 +1009,6 @@ class Application(Gtk.Application):
             return
 
         if data.startswith("file://"):
-            from urllib.parse import unquote, urlparse
             self.on_import_bouquet(None, file_path=urlparse(unquote(data)).path.strip())
             return
 
@@ -1212,17 +1218,24 @@ class Application(Gtk.Application):
 
     def open_compressed_data(self, data_path):
         """ Opening archived data.  """
+        arch_path = self.get_archive_path(data_path)
+        if arch_path:
+            gen = self.update_data("{}{}".format(arch_path.name, os.sep), callback=arch_path.cleanup)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def get_archive_path(self, data_path):
+        """ Returns the temp dir path for the extracted data, or None if the archive format is not supported. """
         import zipfile
         import tarfile
         import tempfile
 
         tmp_path = tempfile.TemporaryDirectory()
-        tmp_path_name = str(tmp_path.name)
+        tmp_path_name = tmp_path.name
 
         if zipfile.is_zipfile(data_path):
             with zipfile.ZipFile(data_path) as zip_file:
                 for zip_info in zip_file.infolist():
-                    if not zip_info.is_dir():
+                    if not zip_info.filename.endswith(os.sep):
                         zip_info.filename = os.path.basename(zip_info.filename)
                         zip_file.extract(zip_info, path=tmp_path_name)
         elif tarfile.is_tarfile(data_path):
@@ -1232,12 +1245,12 @@ class Application(Gtk.Application):
                         mb.name = os.path.basename(mb.name)
                         tar.extract(mb, path=tmp_path_name)
         else:
-            self.show_error_dialog("Unsupported format!")
             tmp_path.cleanup()
+            log("Error getting the path for the archive. Unsupported file format: {}".format(data_path))
+            self.show_error_dialog("Unsupported format!")
             return
 
-        gen = self.update_data("{}{}".format(tmp_path_name, os.sep), callback=tmp_path.cleanup)
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        return tmp_path
 
     def update_data(self, data_path, callback=None):
         self._profile_combo_box.set_sensitive(False)
@@ -1980,6 +1993,16 @@ class Application(Gtk.Application):
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
+    def on_import_data(self, path):
+        msg = "Combine with the current data?"
+        if len(self._services_model) > 0 and show_dialog(DialogType.QUESTION, self._main_window,
+                                                         msg) == Gtk.ResponseType.OK:
+            self.import_data(path, force=True)
+        else:
+            if os.path.isdir(path) and not path.endswith(os.sep):
+                path += os.sep
+            self.open_data(path)
+
     def on_import_bouquet(self, action, value=None, file_path=None):
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
@@ -1994,17 +2017,34 @@ class Application(Gtk.Application):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
+        self.import_data(response)
+
+    def import_data(self, path, force=None, callback=None):
+        if os.path.isdir(path) and not path.endswith(os.sep):
+            path += os.sep
+        elif os.path.isfile(path):
+            arch_path = self.get_archive_path(path)
+            if not arch_path:
+                return
+
+            path = arch_path.name + os.sep
+            callback = arch_path.cleanup
+
         def append(b, s):
-            gen = self.append_imported_data(b, s)
+            gen = self.append_imported_data(b, s, callback)
             GLib.idle_add(lambda: next(gen, False))
 
-        ImportDialog(self._main_window, response, self._settings, self._services.keys(), append).show()
+        dialog = ImportDialog(self._main_window, path, self._settings, self._services.keys(), append)
+        dialog.import_data() if force else dialog.show()
 
-    def append_imported_data(self, bouquets, services):
+    def append_imported_data(self, bouquets, services, callback=None):
         try:
             self._wait_dialog.show()
             yield from self.append_data(bouquets, services)
         finally:
+            log("Importing data done!")
+            if callback:
+                callback()
             self._wait_dialog.hide()
 
     # ***************** Backup  ********************#

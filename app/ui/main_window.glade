@@ -2881,6 +2881,7 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="orientation">vertical</property>
+            <signal name="drag-data-received" handler="on_view_drag_data_received" object="services_tree_view" swapped="no"/>
             <signal name="key-press-event" handler="on_tree_view_key_press" object="services_tree_view" swapped="no"/>
             <signal name="key-release-event" handler="on_tree_view_key_release" object="services_tree_view" swapped="no"/>
             <child>

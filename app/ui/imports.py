@@ -1,7 +1,7 @@
 from contextlib import suppress
 from pathlib import Path
 
-from app.commons import run_idle
+from app.commons import run_idle, log
 from app.eparser import get_bouquets, get_services
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.enigma.bouquets import get_bouquet
@@ -119,6 +119,7 @@ class ImportDialog:
         self._services_model.clear()
         try:
             if not self._bouquets:
+                log("Import [init data]: getting bouquets...")
                 self._bouquets = get_bouquets(path, self._profile)
             for bqs in self._bouquets:
                 for bq in bqs.bouquets:
@@ -129,6 +130,7 @@ class ImportDialog:
             for srv in services:
                 self._services[srv.fav_id] = srv
         except FileNotFoundError as e:
+            log("Import error [init data]: {}".format(e))
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_import(self, item):
@@ -139,9 +141,17 @@ class ImportDialog:
         if not self._bouquets or show_dialog(DialogType.QUESTION, self._dialog_window) == Gtk.ResponseType.CANCEL:
             return
 
+        self.import_data()
+
+    @run_idle
+    def import_data(self):
+        """ Importing data into models. """
+        if not self._bouquets:
+            return
+
+        log("Importing data...")
         services = set()
         to_delete = set()
-
         for row in self._main_model:
             bq = (row[0], row[1])
             if row[-1]:
@@ -151,19 +161,16 @@ class ImportDialog:
                         services.add(srv)
             else:
                 to_delete.add(bq)
-
         bqs_to_delete = []
         for bqs in self._bouquets:
             for bq in bqs.bouquets:
                 if (bq.name, bq.type) in to_delete:
                     bqs_to_delete.append(bq)
-
         for bqs in self._bouquets:
             bq = bqs.bouquets
             for b in bqs_to_delete:
                 with suppress(ValueError):
                     bq.remove(b)
-
         self._append(self._bouquets, list(filter(lambda s: s.fav_id not in self._service_ids, services)))
         self._dialog_window.destroy()
 
