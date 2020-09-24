@@ -1894,10 +1894,12 @@ Author: Dmitriy Yefremov
                                 <property name="activate_on_single_click">True</property>
                                 <signal name="button-press-event" handler="on_view_popup_menu" object="services_popup_menu" swapped="no"/>
                                 <signal name="button-press-event" handler="on_view_press" swapped="no"/>
-                                <signal name="drag-begin" handler="on_view_drag_begin" swapped="no"/>
+                                <signal name="button-release-event" handler="on_view_release" swapped="no"/>
+                                <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
                                 <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                 <signal name="drag-data-received" handler="on_services_view_drag_data_received" swapped="no"/>
                                 <signal name="drag-drop" handler="on_services_view_drag_drop" swapped="no"/>
+                                <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
                                 <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                 <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
@@ -2439,9 +2441,11 @@ Author: Dmitriy Yefremov
                                     <property name="activate_on_single_click">True</property>
                                     <signal name="button-press-event" handler="on_fav_press" object="fav_popup_menu" swapped="no"/>
                                     <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
-                                    <signal name="drag-begin" handler="on_view_drag_begin" swapped="no"/>
+                                    <signal name="button-release-event" handler="on_view_release" swapped="no"/>
+                                    <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
                                     <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                     <signal name="drag-data-received" handler="on_view_drag_data_received" swapped="no"/>
+                                    <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
                                     <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                     <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                     <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
@@ -2724,9 +2728,11 @@ Author: Dmitriy Yefremov
                                     <property name="activate_on_single_click">True</property>
                                     <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
                                     <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
-                                    <signal name="drag-begin" handler="on_view_drag_begin" swapped="no"/>
+                                    <signal name="button-release-event" handler="on_view_release" swapped="no"/>
+                                    <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
                                     <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                     <signal name="drag-data-received" handler="on_bq_view_drag_data_received" swapped="no"/>
+                                    <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
                                     <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                     <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                     <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>

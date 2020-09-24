@@ -109,12 +109,14 @@ class Application(Gtk.Application):
                     "on_fav_view_query_tooltip": self.on_fav_view_query_tooltip,
                     "on_services_view_query_tooltip": self.on_services_view_query_tooltip,
                     "on_view_drag_begin": self.on_view_drag_begin,
+                    "on_view_drag_end": self.on_view_drag_end,
                     "on_view_drag_data_get": self.on_view_drag_data_get,
                     "on_services_view_drag_drop": self.on_services_view_drag_drop,
                     "on_services_view_drag_data_received": self.on_services_view_drag_data_received,
                     "on_view_drag_data_received": self.on_view_drag_data_received,
                     "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
                     "on_view_press": self.on_view_press,
+                    "on_view_release": self.on_view_release,
                     "on_view_popup_menu": self.on_view_popup_menu,
                     "on_view_focus": self.on_view_focus,
                     "on_model_changed": self.on_model_changed,
@@ -179,6 +181,7 @@ class Application(Gtk.Application):
         self._blacklist = set()
         self._current_bq_name = None
         self._bq_selected = ""  # Current selected bouquet
+        self._select_enabled = True  # Multiple selection
         # Current satellite positions in the services list
         self._sat_positions = []
         self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
@@ -461,6 +464,10 @@ class Application(Gtk.Application):
 
         self._app_info_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._app_info_box.drag_dest_add_text_targets()
+        # For multiple selection.
+        self._services_view.get_selection().set_select_function(lambda *args: self._select_enabled)
+        self._fav_view.get_selection().set_select_function(lambda *args: self._select_enabled)
+        self._bouquets_view.get_selection().set_select_function(lambda *args: self._select_enabled)
 
     def init_colors(self, update=False):
         """ Initialisation of background colors for the services.
@@ -722,6 +729,8 @@ class Application(Gtk.Application):
             self._bouquets.pop("{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE]), None)
             self._bouquets_model.remove(itr)
 
+        self._bq_selected = ""
+        self._bq_name_label.set_text(self._bq_selected)
         self._wait_dialog.hide()
         yield True
 
@@ -955,22 +964,83 @@ class Application(Gtk.Application):
 
     def get_ssid_info(self, srv):
         """ Returns SID representation in hex and dec formats. """
+        sid = srv.ssid or "0"
         try:
-            dec = "{0:04d}".format(int(srv.ssid, 16))
+            dec = "{0:04d}".format(int(sid, 16))
         except ValueError as e:
             log("SID value conversion error: {}".format(e))
         else:
-            return "SID: 0x{} ({})".format(srv.ssid.upper(), dec)
+            return "SID: 0x{} ({})".format(sid.upper(), dec)
 
-        return "SID: 0x{}".format(srv.ssid.upper())
+        return "SID: 0x{}".format(sid.upper())
 
     # ***************** Drag-and-drop *********************#
 
     def on_view_drag_begin(self, view, context):
-        """ Selects a row under the cursor in the view at the dragging beginning. """
-        path, column = view.get_cursor()
-        if path:
-            view.get_selection().select_path(path)
+        """ Sets its own icon for dragging.
+
+            We have to use "connect_after" (after="yes" in xml) to override what the default handler did.
+            https://lazka.github.io/pgi-docs/Gtk-3.0/classes/Widget.html#Gtk.Widget.signals.drag_begin
+        """
+        model, paths = view.get_selection().get_selected_rows()
+        if len(paths) < 1:
+            return
+
+        name, model = get_model_data(view)
+        name_column, type_column = Column.SRV_SERVICE, Column.SRV_TYPE
+        if name == self.FAV_MODEL_NAME:
+            name_column, type_column = Column.FAV_SERVICE, Column.FAV_TYPE
+        elif name == self.BQ_MODEL_NAME:
+            name_column, type_column = Column.BQ_NAME, Column.BQ_TYPE
+        # https://stackoverflow.com/a/52248549
+        Gtk.drag_set_icon_widget(context, self.get_drag_widget(model, paths, name_column, type_column), 0, 0)
+
+    def on_view_drag_end(self, view: Gtk.TreeView, context):
+        self._select_enabled = True
+        view.get_selection().unselect_all()
+
+    def get_drag_widget(self, model, paths, text_column, type_column):
+        """ Creates and returns a widget for a dragging icon. """
+        frame = Gtk.Frame()
+        frame.set_border_width(2)
+        list_box = Gtk.ListBox()
+        padding = 10
+        for index, row in enumerate([model[p] for p in paths]):
+            if index == 25:
+                list_box.add(Gtk.Arrow(Gtk.ArrowType.DOWN))
+                break
+
+            h_box = Gtk.HBox()
+            h_box.set_spacing(10)
+            s_context = h_box.get_style_context()
+            s_context.add_class(Gtk.STYLE_CLASS_LIST_ROW)
+            label = Gtk.Label(row[text_column])
+            label.set_alignment(0, 0)
+            label.set_padding(padding, 2)
+            h_box.add(label)
+            label = Gtk.Label(row[type_column])
+            label.set_halign(Gtk.Align.END)
+            label.set_padding(padding, 2)
+            h_box.add(label)
+            list_box.add(h_box)
+
+        if len(paths) > 1:
+            list_box.add(Gtk.Separator())
+            h_box = Gtk.HBox()
+            h_box.set_spacing(2)
+            img = Gtk.Image.new_from_icon_name("document-properties", 0)
+            h_box.add(img)
+            h_box.add(Gtk.Label(len(paths)))
+            h_box.set_halign(Gtk.Align.START)
+            h_box.set_margin_left(10)
+            h_box.set_margin_bottom(5)
+            h_box.set_margin_top(2)
+            list_box.add(h_box)
+
+        frame.add(list_box)
+        frame.show_all()
+
+        return frame
 
     def on_view_drag_data_get(self, view, drag_context, data, info, time):
         selection = self.get_selection(view)
@@ -993,10 +1063,13 @@ class Application(Gtk.Application):
         txt = data.get_text()
         uris = data.get_uris()
         if txt:
-            if txt.startswith("file://"):
+            name, model = get_model_data(view)
+            if txt.startswith("file://") and name == self.SERVICE_MODEL_NAME:
                 self.on_import_data(urlparse(unquote(txt)).path.strip())
-            else:
+            elif name == self.FAV_MODEL_NAME:
                 self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
+            else:
+                self.show_error_dialog("Not allowed in this context!")
         elif len(uris) == 2:
             self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
                                                       urlparse(unquote(uris[1])).path + os.sep)
@@ -1029,7 +1102,8 @@ class Application(Gtk.Application):
                     if not p_itr:
                         break
                     if p_itr and model.get_path(p_itr)[0] == p_path:
-                        top_iter = model.move_before(itr, top_iter)
+                        model.move_after(itr, top_iter)
+                        top_iter = itr
                     else:
                         model.insert(parent_itr, model.get_path(top_iter)[1], model[itr][:])
                         to_del.append(itr)
@@ -1099,9 +1173,21 @@ class Application(Gtk.Application):
             self.show_error_dialog(str(e))
 
     def on_view_press(self, view, event):
+        """ Handles a mouse click (press) to view. """
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
+            target = view.get_path_at_pos(event.x, event.y)
+            # Idea taken from here: https://kevinmehall.net/2010/pygtk_multi_select_drag_drop
+            mask = not (event.state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK))
+            if target and mask and view.get_selection().path_is_selected(target[0]):
+                self._select_enabled = False
+
             name, model = get_model_data(view)
             self.delete_views_selection(name)
+
+    def on_view_release(self, view, event):
+        """ Handles a mouse click (release) to view. """
+        # Enable selection.
+        self._select_enabled = True
 
     def delete_views_selection(self, name):
         if name == self.SERVICE_MODEL_NAME:
