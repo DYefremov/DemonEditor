@@ -1041,6 +1041,20 @@ msgstr "Kann nicht abgespielt werden!"
 msgid "Enable Dark Mode"
 msgstr "Dunkelmodus aktivieren"
 
+msgid "Extract..."
+msgstr "Entpacken..."
+
+msgid "Unsupported format!"
+msgstr "Nicht unterstütztes Format!"
+
+msgid "Combine with the current data?"
+msgstr "Mit den aktuellen Daten kombinieren?"
+
+msgid "Importing data done!"
+msgstr "Daten importieren erledigt!"
+
+
+
 
 
 

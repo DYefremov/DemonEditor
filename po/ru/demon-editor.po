@@ -1028,3 +1028,16 @@ msgstr "Не удается воспроизвести!"
 msgid "Enable Dark Mode"
 msgstr "Включить темный режим"
 
+msgid "Extract..."
+msgstr "Извлечь..."
+
+msgid "Unsupported format!"
+msgstr "Неподдерживаемый формат!"
+
+msgid "Combine with the current data?"
+msgstr "Объединить с текущими данными?"
+
+msgid "Importing data done!"
+msgstr "Импорт данных завершен!"
+
+
