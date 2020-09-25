@@ -1027,3 +1027,15 @@ msgstr "Не атрымоўваецца прайграць!"
 
 msgid "Enable Dark Mode"
 msgstr "Уключыць цёмны рэжым"
+
+msgid "Extract..."
+msgstr "Выняць..."
+
+msgid "Unsupported format!"
+msgstr "Непадтрымоўваны фармат!"
+
+msgid "Combine with the current data?"
+msgstr "Аб'яднаць з цякучымі дадзенымі?"
+
+msgid "Importing data done!"
+msgstr "Імпарт дадзеных завершаны!"
