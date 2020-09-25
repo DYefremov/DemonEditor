@@ -4,7 +4,7 @@ DemonEditor
 Enigma2 channel and satellites list editor for GNU/Linux.
 
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
-Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc)
+Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).
 
 Main features of the program:
    Editing bouquets, channels, satellites.
@@ -40,7 +40,7 @@ Keyboard shortcuts:
     Ctrl + F - show/hide search bar.
     Ctrl + Shift + F - show/hide filter bar.
 
-    For multiple mouse selection (including Drag and Drop), press and hold the **Ctrl** key!
+    For multiple selection with the mouse, press and hold the Ctrl key!
 
 Minimum requirements:
     Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings, python3-requests.
