@@ -2,6 +2,7 @@
 import gettext
 from enum import Enum
 from functools import lru_cache
+from pathlib import Path
 
 from app.commons import run_idle
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
@@ -72,12 +73,13 @@ class WaitDialog:
         self._dialog.destroy()
 
 
-def show_dialog(dialog_type: DialogType, transient, text=None, settings=None, action_type=None, file_filter=None):
-    """ Shows dialogs by name """
+def show_dialog(dialog_type, transient, text=None, settings=None, action_type=None, file_filter=None, buttons=None,
+                title=None):
+    """ Shows dialogs by name. """
     if dialog_type in (DialogType.INFO, DialogType.ERROR):
         return get_message_dialog(transient, dialog_type, Gtk.ButtonsType.OK, text)
     elif dialog_type is DialogType.CHOOSER and settings:
-        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter)
+        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons, title)
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
@@ -87,7 +89,7 @@ def show_dialog(dialog_type: DialogType, transient, text=None, settings=None, ac
         return get_about_dialog(transient)
 
 
-def get_chooser_dialog(transient, settings, name, patterns):
+def get_chooser_dialog(transient, settings, name, patterns, title=None):
     file_filter = Gtk.FileFilter()
     file_filter.set_name(name)
     for p in patterns:
@@ -97,30 +99,28 @@ def get_chooser_dialog(transient, settings, name, patterns):
                        transient=transient,
                        settings=settings,
                        action_type=Gtk.FileChooserAction.OPEN,
-                       file_filter=file_filter)
+                       file_filter=file_filter,
+                       title=title)
 
 
-def get_file_chooser_dialog(transient, text, settings, action_type, file_filter):
-    dialog = Gtk.FileChooserNative()
-    dialog.set_title(get_message(text) if text else "")
-    dialog.set_transient_for(transient)
-    dialog.set_action(action_type if action_type is not None else Gtk.FileChooserAction.SELECT_FOLDER)
+def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None):
+    action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
+    dialog = Gtk.FileChooserNative.new(get_message(title) if title else "", transient, action_type)
     dialog.set_create_folders(False)
     dialog.set_modal(True)
 
     if file_filter is not None:
         dialog.add_filter(file_filter)
 
-    path = settings.data_local_path
-    dialog.set_current_folder(path)
+    dialog.set_current_folder(settings.data_local_path)
     response = dialog.run()
 
     if response == Gtk.ResponseType.ACCEPT:
-        if dialog.get_filename():
-            path = dialog.get_filename()
-            if action_type is not Gtk.FileChooserAction.OPEN:
-                path = path + "/"
-            response = path
+        path = Path(dialog.get_filename() or dialog.get_current_folder())
+        if path.is_dir():
+            response = "{}/".format(path.resolve())
+        elif path.is_file():
+            response = str(path.resolve())
     dialog.destroy()
 
     return response
