@@ -46,54 +46,57 @@ def move_items(key, view: Gtk.TreeView):
     """ Move items in the tree view """
     selection = view.get_selection()
     model, paths = selection.get_selected_rows()
+    if not paths:
+        return
 
-    if paths:
-        mod_length = len(model)
-        if mod_length == len(paths):
-            return
-        cursor_path = view.get_cursor()[0]
-        max_path = Gtk.TreePath.new_from_indices((mod_length,))
-        min_path = Gtk.TreePath.new_from_indices((0,))
+    is_tree_store = type(model) is Gtk.TreeStore
+    mod_length = len(model)
+    if not is_tree_store and mod_length == len(paths):
+        return
+
+    cursor_path = view.get_cursor()[0]
+    max_path = Gtk.TreePath.new_from_indices((mod_length,))
+    min_path = Gtk.TreePath.new_from_indices((0,))
+
+    if is_tree_store:
         is_tree_store = False
+        parent_paths = list(filter(lambda p: p.get_depth() == 1, paths))
+        if parent_paths:
+            paths = parent_paths
+            min_path = model.get_path(model.get_iter_first())
+            view.collapse_all()
+            if mod_length == len(paths):
+                return
+        else:
+            if not is_some_level(paths):
+                return
+            parent_itr = model.iter_parent(model.get_iter(paths[0]))
+            parent_index = model.get_path(parent_itr)
+            children_num = model.iter_n_children(parent_itr)
+            if key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
+                children_num -= 1
+            min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
+            max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
+            is_tree_store = True
 
-        if type(model) is Gtk.TreeStore:
-            parent_paths = list(filter(lambda p: p.get_depth() == 1, paths))
-            if parent_paths:
-                paths = parent_paths
-                min_path = model.get_path(model.get_iter_first())
-                view.collapse_all()
-                if mod_length == len(paths):
-                    return
-            else:
-                if not is_some_level(paths):
-                    return
-                parent_itr = model.iter_parent(model.get_iter(paths[0]))
-                parent_index = model.get_path(parent_itr)
-                children_num = model.iter_n_children(parent_itr)
-                if key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
-                    children_num -= 1
-                min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
-                max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
-                is_tree_store = True
-
-        if key is KeyboardKey.UP:
-            top_path = Gtk.TreePath(paths[0])
-            set_cursor(top_path, paths, selection, view)
-            top_path.prev()
-            move_up(top_path, model, paths)
-        elif key is KeyboardKey.DOWN:
-            down_path = Gtk.TreePath(paths[-1])
-            set_cursor(down_path, paths, selection, view)
-            down_path.next()
-            if down_path < max_path:
-                move_down(down_path, model, paths)
-            else:
-                max_path.prev()
-                move_down(max_path, model, paths)
-        elif key in (KeyboardKey.PAGE_UP, KeyboardKey.HOME, KeyboardKey.PAGE_UP_KP, KeyboardKey.HOME_KP):
-            move_up(min_path if is_tree_store else cursor_path, model, paths)
-        elif key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
-            move_down(max_path if is_tree_store else cursor_path, model, paths)
+    if key is KeyboardKey.UP:
+        top_path = Gtk.TreePath(paths[0])
+        set_cursor(top_path, paths, selection, view)
+        top_path.prev()
+        move_up(top_path, model, paths)
+    elif key is KeyboardKey.DOWN:
+        down_path = Gtk.TreePath(paths[-1])
+        set_cursor(down_path, paths, selection, view)
+        down_path.next()
+        if down_path < max_path:
+            move_down(down_path, model, paths)
+        else:
+            max_path.prev()
+            move_down(max_path, model, paths)
+    elif key in (KeyboardKey.PAGE_UP, KeyboardKey.HOME, KeyboardKey.PAGE_UP_KP, KeyboardKey.HOME_KP):
+        move_up(min_path if is_tree_store else cursor_path, model, paths)
+    elif key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
+        move_down(max_path if is_tree_store else cursor_path, model, paths)
 
 
 def move_up(top_path, model, paths):
