@@ -1040,18 +1040,24 @@ class Application(Gtk.Application):
         elif name == self.BQ_MODEL_NAME:
             name_column, type_column = Column.BQ_NAME, Column.BQ_TYPE
         # https://stackoverflow.com/a/52248549
-        Gtk.drag_set_icon_widget(context, self.get_drag_widget(model, paths, name_column, type_column), 0, 0)
+        Gtk.drag_set_icon_pixbuf(context, self.get_drag_icon_pixbuf(model, paths, name_column, type_column), 0, 0)
+        return True
 
-    def on_view_drag_end(self, view: Gtk.TreeView, context):
+    def on_view_drag_end(self, view, context):
         self._select_enabled = True
         view.get_selection().unselect_all()
 
-    def get_drag_widget(self, model, paths, text_column, type_column):
-        """ Creates and returns a widget for a dragging icon. """
+    def get_drag_icon_pixbuf(self, model, paths, text_column, type_column):
+        """ Creates and returns Pixbuf for a dragging icon. """
+        import cairo
+
+        window = Gtk.OffscreenWindow()
+        window.get_style_context().add_class(Gtk.STYLE_CLASS_DND)
         frame = Gtk.Frame()
-        frame.set_border_width(2)
         list_box = Gtk.ListBox()
+        list_box.set_selection_mode(Gtk.SelectionMode.NONE)
         padding = 10
+
         for index, row in enumerate([model[p] for p in paths]):
             if index == 25:
                 list_box.add(Gtk.Arrow(Gtk.ArrowType.DOWN))
@@ -1059,8 +1065,7 @@ class Application(Gtk.Application):
 
             h_box = Gtk.HBox()
             h_box.set_spacing(10)
-            s_context = h_box.get_style_context()
-            s_context.add_class(Gtk.STYLE_CLASS_LIST_ROW)
+            h_box.get_style_context().add_class(Gtk.STYLE_CLASS_LIST_ROW)
             label = Gtk.Label(row[text_column])
             label.set_alignment(0, 0)
             label.set_padding(padding, 2)
@@ -1086,8 +1091,16 @@ class Application(Gtk.Application):
 
         frame.add(list_box)
         frame.show_all()
+        window.add(frame)
+        window.show()
+        alloc = frame.get_allocation()
+        w, h = alloc.width, alloc.height
+        surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+        frame.draw(cairo.Context(surf))
+        pix = Gdk.pixbuf_get_from_surface(surf, 0, 0, w, h)
+        window.destroy()
 
-        return frame
+        return pix
 
     def on_view_drag_data_get(self, view, drag_context, data, info, time):
         selection = self.get_selection(view)
@@ -1121,7 +1134,7 @@ class Application(Gtk.Application):
             picon_path = urlparse(unquote(src)).path
             dest_path = urlparse(unquote(dest)).path + "/"
             self.picons_buffer = self.on_assign_picon(view, picon_path, dest_path)
-            drag_context.finish(True, None, time)
+            drag_context.finish(True, False, time)
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
