@@ -72,8 +72,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print, f
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(settings.services_path)
             file_list = BQ_FILES_LIST + DATA_FILES_LIST if download_type is DownloadType.ALL else BQ_FILES_LIST
-            for file in filter(lambda f: f.endswith(file_list), ftp.nlst()):
-                download_file(ftp, file, save_path, callback)
+            download_files(ftp, save_path, file_list, callback)
         # *.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES):
             download_xml(ftp, save_path, settings.satellites_xml_path, STC_XML_FILE, callback)
@@ -93,8 +92,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=print, f
                 save_path = epg_options.get("epg_dat_path", save_path)
 
             ftp.cwd(stb_path)
-            for file in filter(lambda f: f.endswith("epg.dat"), ftp.nlst()):
-                download_file(ftp, file, save_path, callback)
+            download_files(ftp, save_path, "epg.dat", callback)
 
         callback("\nDone.\n")
 
@@ -202,7 +200,11 @@ def upload_files(ftp, data_path, file_list, callback):
 
 
 def remove_unused_bouquets(ftp, callback):
-    for file in filter(lambda f: f.endswith(("tv", "radio", "bouquets.xml", "ubouquets.xml")), ftp.nlst()):
+    files = []
+    ftp.dir(files.append)
+    bq_files = ("tv", "radio", "bouquets.xml", "ubouquets.xml")
+
+    for file in filter(lambda f: f.endswith(bq_files), map(lambda f: f.split()[-1], map(str.rstrip, files))):
         callback("Deleting file: {}.   Status: {}\n".format(file, ftp.delete(file)))
 
 
@@ -216,7 +218,7 @@ def upload_xml(ftp, data_path, xml_path, xml_files, callback):
 def download_xml(ftp, data_path, xml_path, xml_files, callback):
     """ Used for download *.xml files. """
     ftp.cwd(xml_path)
-    list(map(lambda f: download_file(ftp, f, data_path, callback), (f for f in ftp.nlst() if f.endswith(xml_files))))
+    download_files(ftp, data_path, xml_files, callback)
 
 
 # ***************** Picons *******************#
@@ -240,7 +242,10 @@ def download_picons(ftp, src, dest, callback, files_filter=None):
         callback(str(e))
         return
 
-    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
+    files = []
+    ftp.dir(files.append)
+
+    for file in filter(picons_filter_function(files_filter), map(lambda f: f.split()[-1], map(str.rstrip, files))):
         download_file(ftp, file, dest, callback)
 
 
@@ -252,7 +257,10 @@ def delete_picons(ftp, callback, dest=None, files_filter=None):
             callback(str(e))
             return
 
-    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
+    files = []
+    ftp.dir(files.append)
+
+    for file in filter(picons_filter_function(files_filter), map(lambda f: f.split()[-1], map(str.rstrip, files))):
         callback("Delete file: {}.   Status: {}\n".format(file, ftp.delete(file)))
 
 
@@ -267,6 +275,15 @@ def remove_picons(*, settings, callback, done_callback=None, files_filter=None):
 
 def picons_filter_function(files_filter=None):
     return lambda f: f in files_filter if files_filter else f.endswith(PICONS_SUF)
+
+
+def download_files(ftp, save_path, file_list, callback):
+    """ Downloads files from the receiver via FTP. """
+    files = []
+    ftp.dir(files.append)
+
+    for file in map(lambda f: f.split()[-1], filter(lambda s: s.endswith(file_list), map(str.rstrip, files))):
+        download_file(ftp, file, save_path, callback)
 
 
 def download_file(ftp, name, save_path, callback):
