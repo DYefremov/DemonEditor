@@ -1053,6 +1053,15 @@ msgstr "Mit den aktuellen Daten kombinieren?"
 msgid "Importing data done!"
 msgstr "Daten importieren erledigt!"
 
+msgid "Current service"
+msgstr "Aktueller Service"
+
+msgid "Open folder"
+msgstr "Ordner öffnen"
+
+msgid "Open archive"
+msgstr "Archiv öffnen"
+
 
 
 
