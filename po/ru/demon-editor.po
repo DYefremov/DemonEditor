@@ -1040,4 +1040,11 @@ msgstr "Объединить с текущими данными?"
 msgid "Importing data done!"
 msgstr "Импорт данных завершен!"
 
+msgid "Current service"
+msgstr "Текущий сервис"
 
+msgid "Open folder"
+msgstr "Открыть папку"
+
+msgid "Open archive"
+msgstr "Открыть архив"

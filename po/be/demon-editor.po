@@ -1039,3 +1039,12 @@ msgstr "Аб'яднаць з цякучымі дадзенымі?"
 
 msgid "Importing data done!"
 msgstr "Імпарт дадзеных завершаны!"
+
+msgid "Current service"
+msgstr "Цякучы сэрвіс"
+
+msgid "Open folder"
+msgstr "Адкрыць тэчку"
+
+msgid "Open archive"
+msgstr "Адкрыць архіў"
