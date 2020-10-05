@@ -500,7 +500,6 @@ class Application(Gtk.Application):
 
         self._services_view.drag_source_set_target_list(None)
         self._services_view.drag_source_add_text_targets()
-        self._services_view.drag_dest_add_text_targets()
         self._services_view.drag_dest_add_uri_targets()
 
         self._bouquets_view.drag_dest_set_target_list(None)
@@ -510,7 +509,11 @@ class Application(Gtk.Application):
         self._bouquets_view.drag_dest_add_uri_targets()
 
         self._app_info_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
-        self._app_info_box.drag_dest_add_text_targets()
+        if self._settings.is_darwin:
+            self._app_info_box.drag_dest_add_uri_targets()
+        else:
+            self._app_info_box.drag_dest_add_text_targets()
+            self._services_view.drag_dest_add_text_targets()
         # For multiple selection.
         self._services_view.get_selection().set_select_function(lambda *args: self._select_enabled)
         self._fav_view.get_selection().set_select_function(lambda *args: self._select_enabled)
@@ -1122,8 +1125,9 @@ class Application(Gtk.Application):
     def on_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         txt = data.get_text()
         uris = data.get_uris()
+        name, model = get_model_data(view)
+
         if txt:
-            name, model = get_model_data(view)
             if txt.startswith("file://") and name == self.SERVICE_MODEL_NAME:
                 self.on_import_data(urlparse(unquote(txt)).path.strip())
             elif name == self.FAV_MODEL_NAME:
@@ -1131,9 +1135,12 @@ class Application(Gtk.Application):
 
         if uris:
             src, sep, dest = uris[0].partition("::::")
-            picon_path = urlparse(unquote(src)).path
-            dest_path = urlparse(unquote(dest)).path + "/"
-            self.picons_buffer = self.on_assign_picon(view, picon_path, dest_path)
+            src_path = urlparse(unquote(src)).path
+            if dest:
+                dest_path = urlparse(unquote(dest)).path + "/"
+                self.picons_buffer = self.on_assign_picon(view, src_path, dest_path)
+            elif name == self.SERVICE_MODEL_NAME:
+                self.on_import_data(src_path)
             drag_context.finish(True, False, time)
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
@@ -1394,8 +1401,13 @@ class Application(Gtk.Application):
             with zipfile.ZipFile(data_path) as zip_file:
                 for zip_info in zip_file.infolist():
                     if not zip_info.filename.endswith(os.sep):
-                        zip_info.filename = os.path.basename(zip_info.filename)
-                        zip_file.extract(zip_info, path=tmp_path_name)
+                        try:
+                            f_name = zip_info.filename.encode("cp437").decode("utf-8")
+                        except (UnicodeEncodeError, UnicodeDecodeError) as e:
+                            log("Filename [{}] error in zip archive: {}".format(zip_info.filename, e))
+                        else:
+                            zip_info.filename = os.path.basename(f_name)
+                            zip_file.extract(zip_info, path=tmp_path_name)
         elif tarfile.is_tarfile(data_path):
             with tarfile.open(data_path) as tar:
                 for mb in tar.getmembers():
