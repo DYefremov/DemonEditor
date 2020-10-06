@@ -164,7 +164,7 @@ class PlayListParser(HTMLParser):
 
                     ct = resp.get("contents", None)
                     if ct:
-                        for d in [(d.get("title", {}).get("simpleText", ""),
+                        for d in [(d.get("title", {}).get("runs", [{}])[0].get("text", ""),
                                    d.get("videoId", "")) for d in flat("playlistVideoRenderer", ct)]:
                             self._playlist.append(d)
             self._is_script = False
