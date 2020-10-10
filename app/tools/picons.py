@@ -2,11 +2,10 @@ import glob
 import os
 import re
 import shutil
-
 from collections import namedtuple
 from html.parser import HTMLParser
 
-from app.commons import run_task
+from app.commons import run_task, log
 from app.settings import SettingsType
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
@@ -33,9 +32,9 @@ class PiconsParser(HTMLParser):
         self.picons = []
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'td':
+        if tag == "td":
             self._is_td = True
-        if tag == 'th':
+        if tag == "th":
             self._is_th = True
         if tag == "img":
             self._current_row.append(attrs[0][1])
@@ -46,16 +45,16 @@ class PiconsParser(HTMLParser):
             self._current_cell.append(data.strip())
 
     def handle_endtag(self, tag):
-        if tag == 'td':
+        if tag == "td":
             self._is_td = False
-        elif tag == 'th':
+        elif tag == "th":
             self._is_th = False
 
-        if tag in ('td', 'th'):
+        if tag in ("td", "th"):
             final_cell = self._separator.join(self._current_cell).strip()
             self._current_row.append(final_cell)
             self._current_cell = []
-        elif tag == 'tr':
+        elif tag == "tr":
             row = self._current_row
             ln = len(row)
 
@@ -80,6 +79,10 @@ class PiconsParser(HTMLParser):
 
     @staticmethod
     def parse(open_path, picons_path, tmp_path, provider, picon_ids, s_type=SettingsType.ENIGMA_2):
+        if not os.path.isfile(open_path):
+            log("PiconsParser error [parse]. No such file or directory: {}".format(open_path))
+            return
+
         with open(open_path, encoding="utf-8", errors="replace") as f:
             on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
             neg_pos = pos.endswith("W")
@@ -105,8 +108,7 @@ class PiconsParser(HTMLParser):
                         shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
                     except (TypeError, ValueError) as e:
                         msg = "Picons format parse error: {}".format(p) + "\n" + str(e)
-                        # log(msg)
-                        print(msg)
+                        log(msg)
 
     @staticmethod
     def format(ssid, on_id, namespace, picon_ids, s_type):
