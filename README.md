@@ -46,7 +46,9 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 
 ## Minimum requirements
-*Python >= 3.5.2, GTK+ >= 3.16 with PyGObject bindings, python3-requests.*                                     
+*Python >= 3.5.2, GTK+ >= 3.16 with PyGObject bindings, python3-requests.*   
+   
+***Optional:** python3-gi-cairo, python3-pil.*                        
 ## Installation and Launch
 * ### Linux                                                                                                          
 To start the program, in most cases it is enough to download the [archive](https://github.com/DYefremov/DemonEditor/archive/master.zip), unpack and run it by                                                   
