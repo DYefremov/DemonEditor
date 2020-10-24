@@ -44,6 +44,7 @@ class HttpRequestType(Enum):
     CURRENT = "getcurrent"
     TEST = None
     TOKEN = "session"
+    # Player
     PLAY = "mediaplayerplay?file="
     PLAYER_LIST = "mediaplayerlist?path=playlist"
     PLAYER_PLAY = "mediaplayercmd?command=play"
@@ -51,6 +52,11 @@ class HttpRequestType(Enum):
     PLAYER_PREV = "mediaplayercmd?command=previous"
     PLAYER_STOP = "mediaplayercmd?command=stop"
     PLAYER_REMOVE = "mediaplayerremove?file="
+    # Remote control
+    POWER = "powerstate?newstate="
+    REMOTE = "remotecontrol?command="
+    VOL = "vol?set=set"
+    # Screenshot
     GRUB = "grab?format=jpg&"
 
 
@@ -342,6 +348,29 @@ def telnet(host, port=23, user="", password="", timeout=5):
 class HttpAPI:
     __MAX_WORKERS = 4
 
+    class Remote(str, Enum):
+        """ Args for HttpRequestType [REMOTE] class. """
+        UP = "103"
+        LEFT = "105"
+        RIGHT = "106"
+        DOWN = "108"
+        MENU = "139"
+        EXIT = "174"
+        OK = "352"
+        RED = "398"
+        GREEN = "399"
+        YELLOW = "400"
+        BLUE = "401"
+
+    class Power(str, Enum):
+        """ Args for HttpRequestType [POWER] class. """
+        TOGGLE_STANDBY = "0"
+        DEEP_STANDBY = "1"
+        REBOOT = "2"
+        RESTART_GUI = "3"
+        WAKEUP = "4"
+        STANDBY = "5"
+
     def __init__(self, settings):
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
         self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
@@ -369,6 +398,8 @@ class HttpAPI:
         elif req_type is HttpRequestType.GRUB:
             data = None  # Must be disabled for token-based security.
             url = "{}/{}{}".format(self._main_url, req_type.value, ref)
+        elif req_type in (HttpRequestType.REMOTE, HttpRequestType.POWER, HttpRequestType.VOL):
+            url += ref
 
         def done_callback(f):
             callback(f.result())
