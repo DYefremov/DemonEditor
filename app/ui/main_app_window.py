@@ -152,6 +152,8 @@ class Application(Gtk.Application):
                     "on_player_close": self.on_player_close,
                     "on_player_press": self.on_player_press,
                     "on_full_screen": self.on_full_screen,
+                    "on_volume_changed": self.on_volume_changed,
+                    "on_http_status_visible": self.on_http_status_visible,
                     "on_drawing_area_realize": self.on_drawing_area_realize,
                     "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
                     "on_main_window_state": self.on_main_window_state,
@@ -248,9 +250,18 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
-        # Screenshots
+        # Remote controller
+        self._controller_button = builder.get_object("remote controller_button")
+        self._receiver_info_box.bind_property("visible", self._controller_button, "visible")
+        self._remote_revealer = builder.get_object("remote_revealer")
+        self._screenshot_image = builder.get_object("screenshot_image")
         self._screenshots_button = builder.get_object("screenshots_button")
-        self._receiver_info_box.bind_property("visible", self._screenshots_button, "visible")
+        self._screenshot_check_button = builder.get_object("screenshot_check_button")
+        self._screenshot_check_button.bind_property("active", self._screenshot_image, "visible")
+        self._snr_value_label = builder.get_object("snr_value_label")
+        self._ber_value_label = builder.get_object("ber_value_label")
+        self._agc_value_label = builder.get_object("agc_value_label")
+        self._volume_button = builder.get_object("volume_button")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -361,6 +372,28 @@ class Application(Gtk.Application):
         set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
         # Edit
         set_action("on_edit", self.on_edit)
+        # Remote controller
+        # TODO: maybe we need a decoupling and lazy loading.
+        remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
+        remote_action.connect("change-state", self.on_remote)
+        self.add_action(remote_action)
+        set_action("on_up", lambda a, v: self.on_remote_action(HttpAPI.Remote.UP))
+        set_action("on_down", lambda a, v: self.on_remote_action(HttpAPI.Remote.DOWN))
+        set_action("on_left", lambda a, v: self.on_remote_action(HttpAPI.Remote.LEFT))
+        set_action("on_right", lambda a, v: self.on_remote_action(HttpAPI.Remote.RIGHT))
+        set_action("on_ok", lambda a, v: self.on_remote_action(HttpAPI.Remote.OK))
+        set_action("on_menu", lambda a, v: self.on_remote_action(HttpAPI.Remote.MENU))
+        set_action("on_exit", lambda a, v: self.on_remote_action(HttpAPI.Remote.EXIT))
+        set_action("on_red", lambda a, v: self.on_remote_action(HttpAPI.Remote.RED))
+        set_action("on_green", lambda a, v: self.on_remote_action(HttpAPI.Remote.GREEN))
+        set_action("on_yellow", lambda a, v: self.on_remote_action(HttpAPI.Remote.YELLOW))
+        set_action("on_blue", lambda a, v: self.on_remote_action(HttpAPI.Remote.BLUE))
+        # Power
+        set_action("on_standby", lambda a, v: self.on_power_action(HttpAPI.Power.STANDBY))
+        set_action("on_wake_up", lambda a, v: self.on_power_action(HttpAPI.Power.WAKEUP))
+        set_action("on_reboot", lambda a, v: self.on_power_action(HttpAPI.Power.REBOOT))
+        set_action("on_restart_gui", lambda a, v: self.on_power_action(HttpAPI.Power.RESTART_GUI))
+        set_action("on_shutdown", lambda a, v: self.on_power_action(HttpAPI.Power.DEEP_STANDBY))
         # Screenshots
         set_action("on_screenshot_all", self.on_screenshot_all)
         set_action("on_screenshot_video", self.on_screenshot_video)
@@ -2535,6 +2568,9 @@ class Application(Gtk.Application):
             self._http_api.send(HttpRequestType.CURRENT, None, self.update_status)
 
     def update_signal(self, sig):
+        self._snr_value_label.set_text(sig.get("e2snrdb", "0 dB").strip())
+        self._ber_value_label.set_text(str(sig.get("e2ber", None) or "0").strip())
+        self._agc_value_label.set_text(sig.get("e2acg", "0 %").strip())
         self.set_signal(sig.get("e2snr", "0 %") if sig else "0 %")
 
     @lru_cache(maxsize=2)
@@ -2563,16 +2599,65 @@ class Application(Gtk.Application):
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
 
-    # ******************** Screenshots ************************#
+    # ***************** Remote controller ********************* #
+
+    def on_remote(self, action, state=False):
+        """ Shows/Hides [R key] remote controller. """
+        action.set_state(state)
+        self._remote_revealer.set_visible(state)
+        self._remote_revealer.set_reveal_child(state)
+
+        if state:
+            self._http_api.send(HttpRequestType.VOL, "state", self.update_volume)
+
+    def on_remote_action(self, action):
+        self._http_api.send(HttpRequestType.REMOTE, action, self.on_response)
+
+    @run_with_delay(0.5)
+    def on_volume_changed(self, button, value):
+        self._http_api.send(HttpRequestType.VOL, "{:.0f}".format(value), self.on_response)
+
+    def update_volume(self, vol):
+        if "error_code" in vol:
+            return
+
+        GLib.idle_add(self._volume_button.set_value, int(vol.get("e2current", "0")))
+
+    def on_response(self, resp):
+        if "error_code" in resp:
+            return
+
+        if self._screenshot_check_button.get_active():
+            ref = "mode=all" if self._http_api.is_owif else "d="
+            self._http_api.send(HttpRequestType.GRUB, ref, self.update_screenshot)
+
+    @run_task
+    def update_screenshot(self, data):
+        if "error_code" in data:
+            return
+
+        data = data.get("img_data", None)
+        if data:
+            from gi.repository import GdkPixbuf
+
+            loader = GdkPixbuf.PixbufLoader.new_with_type("jpeg")
+            loader.set_size(200, 120)
+            loader.write(data)
+            pix = loader.get_pixbuf()
+            loader.close()
+            GLib.idle_add(self._screenshot_image.set_from_pixbuf, pix)
 
     def on_screenshot_all(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=all" if self._http_api.is_owif else "d=", self.on_screenshot)
+        self._http_api.send(HttpRequestType.GRUB, "mode=all" if self._http_api.is_owif else "d=",
+                            self.on_screenshot)
 
     def on_screenshot_video(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=video" if self._http_api.is_owif else "v=", self.on_screenshot)
+        self._http_api.send(HttpRequestType.GRUB, "mode=video" if self._http_api.is_owif else "v=",
+                            self.on_screenshot)
 
     def on_screenshot_osd(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=osd" if self._http_api.is_owif else "o=", self.on_screenshot)
+        self._http_api.send(HttpRequestType.GRUB, "mode=osd" if self._http_api.is_owif else "o=",
+                            self.on_screenshot)
 
     @run_task
     def on_screenshot(self, data):
@@ -2596,7 +2681,13 @@ class Application(Gtk.Application):
             finally:
                 GLib.idle_add(self._screenshots_button.set_sensitive, True)
 
-    # ***************** Filter and search *********************#
+    def on_power_action(self, action):
+        self._http_api.send(HttpRequestType.POWER, action, lambda resp: log("Power status changed..."))
+
+    def on_http_status_visible(self, img):
+        self._controller_button.set_active(False)
+
+    # ***************** Filter and search ********************* #
 
     def on_filter_toggled(self, action, value):
         if self._app_info_box.get_visible():

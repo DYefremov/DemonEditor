@@ -7,6 +7,22 @@
   margin: 1px;
 }
 
+.red-button {
+  background-color: red;
+}
+
+.green-button {
+  background-color: green;
+}
+
+.yellow-button {
+  background-color: yellow;
+}
+
+.blue-button {
+  background-color: blue;
+}
+
 .group {}
 
 .group :first-child {
