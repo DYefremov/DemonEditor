@@ -12,6 +12,7 @@ def get_blacklist(path):
         with open(path + __FILE_NAME, "r") as file:
             # filter empty values and "\n"
             return {*list(filter(None, (x.strip() for x in file.readlines())))}
+    return {}
 
 
 def write_blacklist(path, channels):

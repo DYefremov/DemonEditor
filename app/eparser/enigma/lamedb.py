@@ -25,11 +25,16 @@ def write_services(path, services, format_version=4):
 
 def write_to_lamedb(path, services):
     """ Writing lamedb file ver.4  """
+    with open(path + _FILE_NAME, "w") as file:
+        file.writelines(get_services_lines(services))
+
+
+def get_services_lines(services):
+    """ Returns a list of strings from services for lamedb [v.4]. """
     lines = [_HEADER.format(4), "\ntransponders\n"]
     tr_lines = []
     services_lines = ["end\nservices\n"]
     tr_set = set()
-
     for srv in services:
         data_id = str(srv.data_id).split(_SEP)
         tr_id = "{}:{}:{}".format(data_id[1], data_id[2], data_id[3])
@@ -44,12 +49,12 @@ def write_to_lamedb(path, services):
     lines.extend(tr_lines)
     lines.extend(services_lines)
     lines.append("end\n" + _END_LINE)
-    with open(path + _FILE_NAME, "w") as file:
-        file.writelines(lines)
+
+    return lines
 
 
 def write_to_lamedb5(path, services):
-    """ Writing lamedb5 file """
+    """ Writing lamedb5 file. """
     lines = [_HEADER.format(5) + "\n"]
     services_lines = []
     tr_set = set()
@@ -73,7 +78,7 @@ def write_to_lamedb5(path, services):
 
 
 def parse(path, version=4):
-    """ Parsing lamedb """
+    """ Parsing lamedb. """
     if version == 4:
         return parse_v4(path)
     elif version == 5:
@@ -82,7 +87,7 @@ def parse(path, version=4):
 
 
 def parse_v3(services, transponders, path):
-    """ Parsing version 3 """
+    """ Parsing version 3. """
     for t in transponders:
         tr = transponders[t].lower()
         tr_type = tr[0:1]
@@ -108,32 +113,37 @@ def parse_v3(services, transponders, path):
 
 
 def parse_v4(path):
-    """ Parsing version 4 """
+    """ Parsing version 4. """
     with open(path + _FILE_NAME, "r", encoding="utf-8", errors="replace") as file:
         try:
             data = str(file.read())
         except UnicodeDecodeError as e:
             log("lamedb parse error: " + str(e))
         else:
-            transponders, sep, services = data.partition("transponders")  # 1 step
-            pattern = re.compile("/[34]/$")
-            match = re.search(pattern, transponders)
-            if not match:
-                msg = "lamedb parsing error: unsupported format."
-                log(msg)
-                raise SyntaxError(msg)
+            return get_services_list(data, path)
 
-            transponders, sep, services = services.partition("services")  # 2 step
-            services, sep, _ = services.partition("\nend")  # 3 step
 
-            if match.group() == "/3/":
-                return parse_v3(services.split("\n"), parse_transponders(transponders.split("/")), path)
+def get_services_list(data, path=None):
+    """ Returns a list of services from a string data representation. """
+    transponders, sep, services = data.partition("transponders")  # 1 step
+    pattern = re.compile("/[34]/$")
+    match = re.search(pattern, transponders)
+    if not match:
+        msg = "lamedb parsing error: unsupported format."
+        log(msg)
+        raise SyntaxError(msg)
 
-        return parse_services(services.split("\n"), parse_transponders(transponders.split("/")), path)
+    transponders, sep, services = services.partition("services")  # 2 step
+    services, sep, _ = services.partition("\nend")  # 3 step
+
+    if match.group() == "/3/":
+        return parse_v3(services.split("\n"), parse_transponders(transponders.split("/")), path)
+
+    return parse_services(services.split("\n"), parse_transponders(transponders.split("/")), path)
 
 
 def parse_v5(path):
-    """ Parsing version 5 """
+    """ Parsing version 5. """
     with open(path + "lamedb5", "r", encoding="utf-8", errors="replace") as file:
         lns = file.readlines()
 
@@ -141,9 +151,9 @@ def parse_v5(path):
             raise SyntaxError("lamedb v.5 parsing error: unsupported format.")
 
         trs, srvs = {}, [""]
-        for l in lns:
-            if l.startswith("s:"):
-                srv_data = l.strip("s:").split(",", 2)
+        for line in lns:
+            if line.startswith("s:"):
+                srv_data = line.strip("s:").split(",", 2)
                 srv_data[1] = srv_data[1].strip("\"")
                 data_len = len(srv_data)
                 if data_len == 3:
@@ -151,15 +161,15 @@ def parse_v5(path):
                 elif data_len == 2:
                     srv_data.append("p:")
                 srvs.extend(srv_data)
-            elif l.startswith("t:"):
-                tr, srv = l.split(",")
+            elif line.startswith("t:"):
+                tr, srv = line.split(",")
                 trs[tr.strip("t:")] = srv.strip().replace(":", " ", 1)
 
         return parse_services(srvs, trs, path)
 
 
 def parse_transponders(arg):
-    """ Parsing transponders """
+    """ Parsing transponders. """
     transponders = {}
     for ar in arg:
         tr = ar.replace("\n", "").split("\t")
@@ -170,9 +180,9 @@ def parse_transponders(arg):
 
 
 def parse_services(services, transponders, path):
-    """ Parsing services """
+    """ Parsing services. """
     services_list = []
-    blacklist = str(get_blacklist(path))
+    blacklist = get_blacklist(path) if path else {}
     srvs = split(services, 3)
     if srvs[0][0] == "":  # remove first empty element
         srvs.remove(srvs[0])
@@ -208,12 +218,13 @@ def parse_services(services, transponders, path):
         # For comparison in bouquets. Needed in upper case!!!
         fav_id = "{}:{}:{}:{}".format(ssid, tid, nid, onid)
         picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(srv_type, ssid, tid, nid, onid)
+        s_id = "1:0:{:X}:{}:{}:{}:{}:0:0:0:".format(srv_type, ssid, tid, nid, onid)
 
         all_flags = srv[2].split(",")
         coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
         flags = list(filter(lambda x: x.startswith("f:"), all_flags))
         hide = HIDE_ICON if flags and Flag.is_hide(int(flags[0][2:])) else None
-        locked = LOCKED_ICON if fav_id in blacklist else None
+        locked = LOCKED_ICON if s_id in blacklist else None
 
         package = list(filter(lambda x: x.startswith("p:"), all_flags))
         package = package[0][2:] if package else ""
