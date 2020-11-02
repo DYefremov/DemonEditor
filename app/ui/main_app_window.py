@@ -31,7 +31,7 @@ from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_fla
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
                           get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs)
 from .picons_manager import PiconsDialog
-from .satellites_dialog import show_satellites_dialog
+from .satellites_dialog import show_satellites_dialog, ServicesUpdateDialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
@@ -355,6 +355,7 @@ class Application(Gtk.Application):
         set_action("on_download", self.on_download)
         set_action("on_data_open", self.on_data_open)
         set_action("on_archive_open", self.on_archive_open)
+        set_action("on_import_from_web", self.on_import_from_web)
         # Search, Filter
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
         search_action.connect("change-state", self.on_search_toggled)
@@ -1666,6 +1667,8 @@ class Application(Gtk.Application):
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
             self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
             self._bouquets_model.append(None, ["WEBTV", None, None, BqType.WEBTV.value])
+
+        self._data_hash = self.get_data_hash()
         yield True
 
     def on_services_selection(self, model, path, column):
@@ -2177,6 +2180,30 @@ class Application(Gtk.Application):
             if callback:
                 callback()
             self._wait_dialog.hide()
+
+    def on_import_from_web(self, action, value=None):
+        if self._s_type is not SettingsType.ENIGMA_2:
+            self.show_error_dialog("Not allowed in this context!")
+            return
+        ServicesUpdateDialog(self._main_window, self._settings, self.on_import_data_from_web).show()
+
+    @run_idle
+    def on_import_data_from_web(self, services):
+        msg = "Combine with the current data?"
+        if len(self._services_model) > 0 and show_dialog(DialogType.QUESTION, self._main_window,
+                                                         msg) == Gtk.ResponseType.OK:
+            gen = self.append_imported_data([], services)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        else:
+            gen = self.import_data_from_web(services)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def import_data_from_web(self, services):
+        self._wait_dialog.show()
+        if self._app_info_box.get_visible():
+            yield from self.create_new_configuration(self._s_type)
+        yield from self.append_services(services)
+        self._wait_dialog.hide()
 
     # ***************** Backup  ********************#
 

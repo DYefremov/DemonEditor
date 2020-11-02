@@ -1,14 +1,14 @@
+import concurrent.futures
 import re
 import time
-import concurrent.futures
 from math import fabs
 
 from gi.repository import GLib
 
-from app.commons import run_idle, run_task
+from app.commons import run_idle, run_task, log
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
-from app.tools.satellites import SatellitesParser, SatelliteSource
+from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from .dialogs import show_dialog, DialogType, get_dialogs_string, get_chooser_dialog
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 from .search import SearchProvider
@@ -279,7 +279,7 @@ class SatellitesDialog:
 
     @run_idle
     def on_update(self, item):
-        SatellitesUpdateDialog(self._window, self._sat_view.get_model()).show()
+        SatellitesUpdateDialog(self._window, self._settings, self._sat_view.get_model()).show()
 
     @staticmethod
     def parse_data(model, path, itr, sats):
@@ -326,7 +326,7 @@ class TransponderDialog:
         self._pls_code_entry = builder.get_object("pls_code_entry")
         self._is_id_entry = builder.get_object("is_id_entry")
         # pattern for frequency and rate entries (only digits)
-        self._pattern = re.compile("\D")
+        self._pattern = re.compile(r"\D")
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -428,16 +428,17 @@ class SatelliteDialog:
         return Satellite(name=name, flags="0", position=pos, transponders=None)
 
 
-# ***************** Satellite update dialog *******************#
+# ********************** Update dialogs ************************ #
 
-class SatellitesUpdateDialog:
-    """ Dialog for update satellites over internet """
+class UpdateDialog:
+    """ Base dialog for update satellites, transponders and services from the web."""
 
-    def __init__(self, transient, main_model):
+    def __init__(self, transient, settings, title=None):
         handlers = {"on_update_satellites_list": self.on_update_satellites_list,
-                    "on_receive_satellites_list": self.on_receive_satellites_list,
+                    "on_receive_data": self.on_receive_data,
                     "on_cancel_receive": self.on_cancel_receive,
-                    "on_selected_toggled": self.on_selected_toggled,
+                    "on_satellite_toggled": self.on_satellite_toggled,
+                    "on_transponder_toggled": self.on_transponder_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_filter_toggled": self.on_filter_toggled,
                     "on_find_toggled": self.on_find_toggled,
@@ -450,26 +451,36 @@ class SatellitesUpdateDialog:
                     "on_search_up": self.on_search_up,
                     "on_quit": self.on_quit}
 
+        self._settings = settings
+        self._download_task = False
+        self._parser = None
+        self._size_name = "{}_window_size".format("_".join(re.findall("[A-Z][^A-Z]*", self.__class__.__name__))).lower()
+
         builder = Gtk.Builder()
         builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_objects_from_file(UI_RESOURCES_PATH + "satellites_dialog.glade",
                                       ("satellites_update_window", "update_source_store", "update_sat_list_store",
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
                                        "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",
-                                       "remove_selection_image"))
+                                       "remove_selection_image", "update_transponder_store", "update_service_store"))
         builder.connect_signals(handlers)
 
         self._window = builder.get_object("satellites_update_window")
         self._window.set_transient_for(transient)
-        self._main_model = main_model
-        # self._dialog.get_content_area().set_border_width(0)
+        if title:
+            self._window.set_title(title)
+
+        self._transponder_paned = builder.get_object("sat_update_tr_paned")
         self._sat_view = builder.get_object("sat_update_tree_view")
+        self._transponder_view = builder.get_object("sat_update_tr_view")
+        self._service_view = builder.get_object("sat_update_srv_view")
         self._source_box = builder.get_object("source_combo_box")
         self._sat_update_expander = builder.get_object("sat_update_expander")
         self._text_view = builder.get_object("text_view")
-        self._receive_button = builder.get_object("receive_sat_list_tool_button")
+        self._receive_button = builder.get_object("receive_data_button")
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
+        self._receive_button.bind_property("visible", builder.get_object("cancel_data_button"), "visible", 4)
         # Filter
         self._filter_bar = builder.get_object("sat_update_filter_bar")
         self._from_pos_button = builder.get_object("from_pos_button")
@@ -485,21 +496,31 @@ class SatellitesUpdateDialog:
                                                builder.get_object("sat_update_search_down_button"),
                                                builder.get_object("sat_update_search_up_button"))
 
-        self._download_task = False
-        self._parser = None
+        window_size = self._settings.get(self._size_name)
+        if window_size:
+            self._window.resize(*window_size)
 
     def show(self):
         self._window.show()
 
+    @property
+    def is_download(self):
+        return self._download_task
+
+    @is_download.setter
+    def is_download(self, value):
+        self._download_task = value
+        self._receive_button.set_visible(not value)
+
     @run_idle
     def on_update_satellites_list(self, item):
-        if self._download_task:
+        if self.is_download:
             show_dialog(DialogType.ERROR, self._window, "The task is already running!")
             return
 
         model = get_base_model(self._sat_view.get_model())
         model.clear()
-        self._download_task = True
+        self.is_download = True
         src = self._source_box.get_active()
         if not self._parser:
             self._parser = SatellitesParser()
@@ -511,7 +532,7 @@ class SatellitesUpdateDialog:
         sats = self._parser.get_satellites_list(SatelliteSource.FLYSAT if src == 0 else SatelliteSource.LYNGSAT)
         if sats:
             callback(sats)
-        self._download_task = False
+        self.is_download = False
 
     @run_idle
     def append_satellites(self, sats):
@@ -520,69 +541,15 @@ class SatellitesUpdateDialog:
             model.append(sat)
 
     @run_idle
-    def on_receive_satellites_list(self, item):
-        if self._download_task:
+    def on_receive_data(self, item):
+        if self.is_download:
             show_dialog(DialogType.ERROR, self._window, "The task is already running!")
             return
-        self.receive_satellites()
-
-    @run_task
-    def receive_satellites(self):
-        self._download_task = True
-        self.update_expander()
-        model = self._sat_view.get_model()
-        start = time.time()
-
-        with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
-            text = "Processing: {}\n"
-            sats = []
-            appender = self.append_output()
-            next(appender)
-            futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model if r[4]]}
-            for future in concurrent.futures.as_completed(futures):
-                if not self._download_task:
-                    self._download_task = True
-                    executor.shutdown()
-                    appender.send("\nCanceled\n")
-                    appender.close()
-                    self._download_task = False
-                    return
-                data = future.result()
-                appender.send(text.format(data[0]))
-                sats.append(data)
-
-            appender.send("-" * 75 + "\n")
-            appender.send("Consumed : {:0.0f}s, {} satellites received.".format(start - time.time(), len(sats)))
-            appender.close()
-
-            sats = {s[2]: s for s in sats}  # key = position, v = satellite
-
-            for row in self._main_model:
-                pos = row[-1]
-                if pos in sats:
-                    sat = sats.pop(pos)
-                    itr = row.iter
-                    self.update_satellite(itr, row, sat)
-
-            for sat in sats.values():
-                append_satellite(self._main_model, sat)
-
-            self._download_task = False
 
     @run_idle
     def update_expander(self):
         self._sat_update_expander.set_expanded(True)
         self._text_view.get_buffer().set_text("", 0)
-
-    @run_idle
-    def update_satellite(self, itr, row, sat):
-        if self._main_model.iter_has_child(itr):
-            children = row.iterchildren()
-            for ch in children:
-                self._main_model.remove(ch.iter)
-
-        for tr in sat[3]:
-            self._main_model.append(itr, ["Transponder:", *tr, None, None])
 
     def append_output(self):
         @run_idle
@@ -596,10 +563,14 @@ class SatellitesUpdateDialog:
     def on_cancel_receive(self, item=None):
         self._download_task = False
 
-    def on_selected_toggled(self, toggle, path):
+    def on_satellite_toggled(self, toggle, path):
         model = self._sat_view.get_model()
         self.update_state(model, path, not toggle.get_active())
         self.update_receive_button_state(self._filter_model)
+
+    def on_transponder_toggled(self, toggle, path):
+        model = self._transponder_view.get_model()
+        model.set_value(model.get_iter(path), 2, not toggle.get_active())
 
     @run_idle
     def update_receive_button_state(self, model):
@@ -625,7 +596,7 @@ class SatellitesUpdateDialog:
         self._filter_positions = self.get_positions()
         self._filter_model.refilter()
 
-    def filter_function(self, model, iter, data):
+    def filter_function(self, model, itr, data):
         if self._filter_model is None or self._filter_model == "None":
             return True
 
@@ -636,7 +607,7 @@ class SatellitesUpdateDialog:
         if from_pos > to_pos:
             from_pos, to_pos = to_pos, from_pos
 
-        return from_pos <= float(self._parser.get_position(model.get(iter, 1)[0])) <= to_pos
+        return from_pos <= float(self._parser.get_position(model.get(itr, 1)[0])) <= to_pos
 
     def get_positions(self):
         from_pos = round(self._from_pos_button.get_value(), 1) * (-1 if self._filter_from_combo_box.get_active() else 1)
@@ -669,10 +640,266 @@ class SatellitesUpdateDialog:
         self._filter_model.get_model().set_value(itr, 4, select)
 
     def on_quit(self, window, event):
-        self._download_task = False
+        self._settings.add(self._size_name, window.get_size())
+        self.is_download = False
 
 
-# ***************** Commons *******************#
+class SatellitesUpdateDialog(UpdateDialog):
+    """ Dialog for update satellites from the web. """
+
+    def __init__(self, transient, settings, main_model):
+        super().__init__(transient=transient, settings=settings)
+
+        self._main_model = main_model
+
+    @run_idle
+    def on_receive_data(self, item):
+        if self.is_download:
+            show_dialog(DialogType.ERROR, self._window, "The task is already running!")
+            return
+
+        self.receive_satellites()
+
+    @run_task
+    def receive_satellites(self):
+        self.is_download = True
+        self.update_expander()
+        model = self._sat_view.get_model()
+        start = time.time()
+
+        with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+            text = "Processing: {}\n"
+            sats = []
+            appender = self.append_output()
+            next(appender)
+            futures = {executor.submit(self._parser.get_satellite, sat[:-1]): sat for sat in [r for r in model if r[4]]}
+            for future in concurrent.futures.as_completed(futures):
+                if not self.is_download:
+                    self.is_download = True
+                    executor.shutdown()
+                    appender.send("\nCanceled\n")
+                    appender.close()
+                    self.is_download = False
+                    return
+                data = future.result()
+                appender.send(text.format(data[0]))
+                sats.append(data)
+
+            appender.send("-" * 75 + "\n")
+            appender.send("Consumed: {:0.0f}s, {} satellites received.".format(time.time() - start, len(sats)))
+            appender.close()
+
+            sats = {s[2]: s for s in sats}  # key = position, v = satellite
+
+            for row in self._main_model:
+                pos = row[-1]
+                if pos in sats:
+                    sat = sats.pop(pos)
+                    itr = row.iter
+                    self.update_satellite(itr, row, sat)
+
+            for sat in sats.values():
+                append_satellite(self._main_model, sat)
+
+            self.is_download = False
+
+    @run_idle
+    def update_satellite(self, itr, row, sat):
+        if self._main_model.iter_has_child(itr):
+            children = row.iterchildren()
+            for ch in children:
+                self._main_model.remove(ch.iter)
+
+        for tr in sat[3]:
+            self._main_model.append(itr, ["Transponder:", *tr, None, None])
+
+
+class ServicesUpdateDialog(UpdateDialog):
+    """ Dialog for updating services from the web. """
+
+    def __init__(self, transient, settings, callback):
+        super().__init__(transient=transient, settings=settings, title="Services update")
+
+        self._callback = callback
+        self._satellite_paths = {}
+        self._transponders = {}
+        self._services = {}
+        self._selected_transponders = set()
+        self._services_parser = ServicesParser(source=SatelliteSource.LYNGSAT)
+
+        self._transponder_paned.set_visible(True)
+        s_model = self._source_box.get_model()
+        s_model.remove(s_model.get_iter_first())
+        self._source_box.set_active(0)
+        self._sat_view.connect("row-activated", self.on_activate_satellite)
+        self._transponder_view.connect("row-activated", self.on_activate_transponder)
+
+    @run_idle
+    def on_receive_data(self, item):
+        if self.is_download:
+            show_dialog(DialogType.ERROR, self._window, "The task is already running!")
+            return
+
+        self.receive_services()
+
+    @run_task
+    def receive_services(self):
+        self.is_download = True
+        self.update_expander()
+        model = self._sat_view.get_model()
+        appender = self.append_output()
+        next(appender)
+
+        start = time.time()
+        non_cached_sats = []
+        sat_names = {}
+        t_names = {}
+        t_urls = []
+        services = []
+
+        for sat, url in (r[0, 3] for r in model if r[-1]):
+            if not self.is_download:
+                appender.send("\nCanceled\n")
+                return
+
+            trs = self._transponders.get(url, None)
+            if trs:
+                for t in filter(lambda tp: tp.url in self._selected_transponders, trs):
+                    t_urls.append(t.url)
+                    t_names[t.url] = t.text
+            else:
+                non_cached_sats.append(url)
+                sat_names[url] = sat
+
+        if non_cached_sats:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+                futures = {executor.submit(self._services_parser.get_transponders_links, u): u for u in non_cached_sats}
+                for future in concurrent.futures.as_completed(futures):
+                    if not self.is_download:
+                        appender.send("\nCanceled.\n")
+                        self.is_download = False
+                        return
+
+                    appender.send("Getting transponders for: {}.\n".format(sat_names.get(futures[future])))
+                    for t in future.result():
+                        t_urls.append(t.url)
+                        t_names[t.url] = t.text
+
+                appender.send("-" * 75 + "\n")
+                appender.send("{} transponders received.\n\n".format(len(t_urls)))
+
+        non_cached_ts = []
+        for tr in t_urls:
+            srvs = self._services.get(tr)
+            services.extend(srvs) if srvs else non_cached_ts.append(tr)
+
+        if non_cached_ts:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+                futures = {executor.submit(self._services_parser.get_transponder_services, u): u for u in non_cached_ts}
+                for future in concurrent.futures.as_completed(futures):
+                    if not self.is_download:
+                        appender.send("\nCanceled.\n")
+                        self.is_download = False
+                        return
+
+                    appender.send("Getting services for: {}.\n".format(t_names.get(futures[future], "")))
+                    list(map(services.append, future.result()))
+
+        appender.send("-" * 75 + "\n")
+        appender.send("Consumed: {:0.0f}s, {} services received.".format(time.time() - start, len(services)))
+
+        try:
+            from app.eparser.enigma.lamedb import get_services_lines, get_services_list
+            # Used for double checking!
+            srvs = get_services_list("".join(get_services_lines(services)))
+        except ValueError as e:
+            log("ServicesUpdateDialog [on receive data] error: {}".format(e))
+        else:
+            self._callback(srvs)
+
+        self.is_download = False
+
+    @run_task
+    def get_sat_list(self, src, callback):
+        sats = self._parser.get_satellites_list(SatelliteSource.LYNGSAT)
+        if sats:
+            callback(sats)
+        self.is_download = False
+
+    def on_satellite_toggled(self, toggle, path):
+        model = self._sat_view.get_model()
+        self.update_state(model, path, not toggle.get_active())
+        self.update_receive_button_state(self._filter_model)
+
+        url = model.get_value(model.get_iter(path), 3)
+        selected = toggle.get_active()
+        transponders = self._transponders.get(url, None)
+
+        if transponders:
+            for t in transponders:
+                self._selected_transponders.add(t.url) if selected else self._selected_transponders.discard(t.url)
+
+    def on_transponder_toggled(self, toggle, path):
+        model = self._transponder_view.get_model()
+        itr = model.get_iter(path)
+        active = not toggle.get_active()
+        model.set_value(itr, 2, active)
+        url = model.get_value(itr, 1)
+        self._selected_transponders.add(url) if active else self._selected_transponders.discard(url)
+
+        s_path = self._satellite_paths.get(url)
+        if s_path:
+            sat_model = self._sat_view.get_model()
+            if active:
+                self.update_state(sat_model, s_path, active)
+            else:
+                self.update_state(sat_model, s_path, any((r[-1] for r in model)))
+            self.update_receive_button_state(self._filter_model)
+
+    @run_task
+    def on_activate_satellite(self, view, path, column):
+        url, selected = view.get_model()[path][3, 4]
+        transponders = self._transponders.get(url, None)
+        if transponders is None:
+            GLib.idle_add(view.set_sensitive, False)
+            transponders = self._services_parser.get_transponders_links(url)
+            self._transponders[url] = transponders
+
+            for t in transponders:
+                t_url = t.url
+                self._satellite_paths[t_url] = path
+                self._selected_transponders.add(t_url) if selected else self._selected_transponders.discard(t_url)
+
+        self.append_transponders(self._transponder_view.get_model(), transponders)
+
+    @run_idle
+    def append_transponders(self, model, trs_list):
+        model.clear()
+        list(map(model.append, [(t.text, t.url, t.url in self._selected_transponders) for t in trs_list]))
+        self._sat_view.set_sensitive(True)
+
+    @run_task
+    def on_activate_transponder(self, view, path, column):
+        url = view.get_model()[path][1]
+        services = self._services.get(url, None)
+        if services is None:
+            GLib.idle_add(view.set_sensitive, False)
+            services = self._services_parser.get_transponder_services(url)
+            self._services[url] = services
+
+        self.append_services(self._service_view.get_model(), services)
+
+    @run_idle
+    def append_services(self, model, srv_list):
+        model.clear()
+        for s in srv_list:
+            model.append((None, s.service, s.package, s.service_type, str(s.ssid), None))
+
+        self._transponder_view.set_sensitive(True)
+
+
+# ************************* Commons ************************* #
+
 
 @run_idle
 def append_satellite(model, sat):
