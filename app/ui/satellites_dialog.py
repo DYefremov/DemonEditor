@@ -760,11 +760,12 @@ class ServicesUpdateDialog(UpdateDialog):
         t_urls = []
         services = []
 
-        for sat, url in (r[0, 3] for r in model if r[-1]):
+        for r in (r for r in model if r[-1]):
             if not self.is_download:
                 appender.send("\nCanceled\n")
                 return
 
+            sat, url = r[0], r[3]
             trs = self._transponders.get(url, None)
             if trs:
                 for t in filter(lambda tp: tp.url in self._selected_transponders, trs):
@@ -861,7 +862,9 @@ class ServicesUpdateDialog(UpdateDialog):
 
     @run_task
     def on_activate_satellite(self, view, path, column):
-        url, selected = view.get_model()[path][3, 4]
+        model = view.get_model()
+        itr = model.get_iter(path)
+        url, selected = model.get_value(itr, 3), model.get_value(itr, 4)
         transponders = self._transponders.get(url, None)
         if transponders is None:
             GLib.idle_add(view.set_sensitive, False)
