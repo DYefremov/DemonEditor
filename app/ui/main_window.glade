@@ -2409,6 +2409,7 @@ Author: Dmitriy Yefremov
                                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
                                         <signal name="query-tooltip" handler="on_fav_view_query_tooltip" swapped="no"/>
+                                        <signal name="row-activated" handler="on_fav_selection" object="fav_list_store" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="fav_selection">
                                             <property name="mode">multiple</property>
@@ -3133,11 +3134,9 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkRevealer" id="control_revealer">
-            <property name="width_request">240</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
             <property name="transition_type">crossfade</property>
-            <property name="transition_duration">500</property>
             <child>
               <placeholder/>
             </child>

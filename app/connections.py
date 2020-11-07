@@ -56,6 +56,11 @@ class HttpRequestType(Enum):
     POWER = "powerstate?newstate="
     REMOTE = "remotecontrol?command="
     VOL = "vol?set=set"
+    # EPG
+    EPG = "epgservice?sRef="
+    # Timer
+    TIMER = ""
+    TIMER_LIST = "timerlist"
     # Screenshot
     GRUB = "grab?format=jpg&"
 
@@ -398,7 +403,7 @@ class HttpAPI:
         elif req_type is HttpRequestType.GRUB:
             data = None  # Must be disabled for token-based security.
             url = "{}/{}{}".format(self._main_url, req_type.value, ref)
-        elif req_type in (HttpRequestType.REMOTE, HttpRequestType.POWER, HttpRequestType.VOL):
+        elif req_type in (HttpRequestType.REMOTE, HttpRequestType.POWER, HttpRequestType.VOL, HttpRequestType.EPG):
             url += ref
 
         def done_callback(f):
@@ -452,6 +457,12 @@ def get_response(req_type, url, data=None):
             elif req_type is HttpRequestType.PLAYER_LIST:
                 return [{el.tag: el.text for el in el.iter()} for el in
                         ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
+            elif req_type is HttpRequestType.EPG:
+                return {"event_list": [{el.tag: el.text for el in el.iter()} for el in
+                        ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
+            elif req_type is HttpRequestType.TIMER_LIST:
+                return {"timer_list": [{el.tag: el.text for el in el.iter()} for el in
+                        ETree.fromstring(f.read().decode("utf-8")).iter("e2timer")]}
             else:
                 return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
     except HTTPError as e:

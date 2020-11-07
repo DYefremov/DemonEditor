@@ -7,6 +7,10 @@
   margin: 1px;
 }
 
+.control-box {
+  padding: 5px;
+}
+
 .red-button {
   background-color: red;
 }
