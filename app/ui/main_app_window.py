@@ -9,8 +9,8 @@ from urllib.parse import urlparse, unquote
 from gi.repository import GLib, Gio
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
-from app.connections import (HttpAPI, HttpRequestType, download_data, DownloadType, upload_data, test_http,
-                             TestException, HttpApiException, STC_XML_FILE)
+from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
+                             HttpApiException, STC_XML_FILE)
 from app.eparser import get_blacklist, write_blacklist, parse_m3u
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
@@ -2385,7 +2385,7 @@ class Application(Gtk.Application):
         if is_record:
             self._recorder.stop()
         else:
-            self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.record)
+            self._http_api.send(HttpAPI.Request.STREAM_CURRENT, None, self.record)
 
     def record(self, data):
         url = self.get_url_from_m3u(data)
@@ -2450,7 +2450,7 @@ class Application(Gtk.Application):
         if self._player and self._player.is_playing():
             self._player.stop()
 
-        self._http_api.send(HttpRequestType.STREAM, ref, self.watch)
+        self._http_api.send(HttpAPI.Request.STREAM, ref, self.watch)
 
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
@@ -2459,7 +2459,7 @@ class Application(Gtk.Application):
             self._player_box.set_visible(True)
             GLib.idle_add(self._app_info_box.set_visible, False)
 
-        self._http_api.send(HttpRequestType.STREAM_CURRENT, None, self.watch)
+        self._http_api.send(HttpAPI.Request.STREAM_CURRENT, None, self.watch)
 
     def watch(self, data):
         url = self.get_url_from_m3u(data)
@@ -2519,7 +2519,7 @@ class Application(Gtk.Application):
                 self.show_error_dialog("No connection to the receiver!")
             self.set_playback_elms_active()
 
-        self._http_api.send(HttpRequestType.ZAP, ref, zap)
+        self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
 
     def get_service_ref(self, path):
         row = self._fav_model[path][:]
@@ -2541,7 +2541,7 @@ class Application(Gtk.Application):
             GLib.idle_add(self._receiver_info_box.set_visible, False)
             return False
 
-        self._http_api.send(HttpRequestType.INFO, None, self.update_receiver_info)
+        self._http_api.send(HttpAPI.Request.INFO, None, self.update_receiver_info)
         return True
 
     def update_receiver_info(self, info):
@@ -2569,8 +2569,8 @@ class Application(Gtk.Application):
 
     def update_service_info(self):
         if self._http_api:
-            self._http_api.send(HttpRequestType.SIGNAL, None, self.update_signal)
-            self._http_api.send(HttpRequestType.CURRENT, None, self.update_status)
+            self._http_api.send(HttpAPI.Request.SIGNAL, None, self.update_signal)
+            self._http_api.send(HttpAPI.Request.CURRENT, None, self.update_status)
 
     def update_signal(self, sig):
         if self._control_box:
@@ -2618,7 +2618,7 @@ class Application(Gtk.Application):
             self._control_revealer.add(self._control_box)
 
         if state:
-            self._http_api.send(HttpRequestType.VOL, "state", self._control_box.update_volume)
+            self._http_api.send(HttpAPI.Request.VOL, "state", self._control_box.update_volume)
 
     def on_http_status_visible(self, img):
         self._control_button.set_active(False)
