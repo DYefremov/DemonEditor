@@ -9,7 +9,7 @@ from app.commons import run_idle, run_task, log
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
-from .dialogs import show_dialog, DialogType, get_dialogs_string, get_chooser_dialog
+from .dialogs import show_dialog, DialogType, get_dialogs_string, get_chooser_dialog, get_message
 from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, MOVE_KEYS, KeyboardKey, IS_GNOME_SESSION, MOD_MASK
@@ -731,8 +731,21 @@ class ServicesUpdateDialog(UpdateDialog):
         s_model = self._source_box.get_model()
         s_model.remove(s_model.get_iter_first())
         self._source_box.set_active(0)
+        # Transponder view popup menu
+        tr_popup_menu = Gtk.Menu()
+        select_all_item = Gtk.ImageMenuItem.new_from_stock("gtk-select-all")
+        select_all_item.connect("activate", lambda w: self.update_transponder_selection(True))
+        tr_popup_menu.append(select_all_item)
+        remove_selection_item = Gtk.ImageMenuItem.new_from_stock("gtk-undo")
+        remove_selection_item.set_label(get_message("Remove selection"))
+        remove_selection_item.connect("activate", lambda w: self.update_transponder_selection(False))
+        tr_popup_menu.append(remove_selection_item)
+        tr_popup_menu.show_all()
+
         self._sat_view.connect("row-activated", self.on_activate_satellite)
         self._transponder_view.connect("row-activated", self.on_activate_transponder)
+        self._transponder_view.connect("button-press-event", lambda w, e: on_popup_menu(tr_popup_menu, e))
+        self._transponder_view.connect("select_all", lambda w: self.update_transponder_selection(True))
 
     @run_idle
     def on_receive_data(self, item):
@@ -844,18 +857,25 @@ class ServicesUpdateDialog(UpdateDialog):
         model = self._transponder_view.get_model()
         itr = model.get_iter(path)
         active = not toggle.get_active()
+        url = self.update_transponder_state(itr, model, active)
+
+        s_path = self._satellite_paths.get(url, None)
+        if s_path:
+            self.update_sat_state(model, s_path, active)
+
+    def update_sat_state(self, model, path, active):
+        sat_model = self._sat_view.get_model()
+        if active:
+            self.update_state(sat_model, path, active)
+        else:
+            self.update_state(sat_model, path, any((r[-1] for r in model)))
+        self.update_receive_button_state(self._filter_model)
+
+    def update_transponder_state(self, itr, model, active):
         model.set_value(itr, 2, active)
         url = model.get_value(itr, 1)
         self._selected_transponders.add(url) if active else self._selected_transponders.discard(url)
-
-        s_path = self._satellite_paths.get(url)
-        if s_path:
-            sat_model = self._sat_view.get_model()
-            if active:
-                self.update_state(sat_model, s_path, active)
-            else:
-                self.update_state(sat_model, s_path, any((r[-1] for r in model)))
-            self.update_receive_button_state(self._filter_model)
+        return url
 
     @run_task
     def on_activate_satellite(self, view, path, column):
@@ -899,6 +919,15 @@ class ServicesUpdateDialog(UpdateDialog):
             model.append((None, s.service, s.package, s.service_type, str(s.ssid), None))
 
         self._transponder_view.set_sensitive(True)
+
+    def update_transponder_selection(self, select):
+        m = self._transponder_view.get_model()
+        if not len(m):
+            return
+
+        s_path = self._satellite_paths.get({self.update_transponder_state(r.iter, m, select) for r in m}.pop(), None)
+        if s_path:
+            self.update_sat_state(m, s_path, select)
 
 
 # ************************* Commons ************************* #
