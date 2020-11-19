@@ -1048,3 +1048,90 @@ msgstr "Адкрыць тэчку"
 
 msgid "Open archive"
 msgstr "Адкрыць архіў"
+
+msgid "Import from Web"
+msgstr "Імпарт з сеткі"
+
+msgid "Control"
+msgstr "Кіраванне"
+
+msgid "Timers"
+msgstr "Таймеры"
+
+msgid "Timer"
+msgstr "Таймер"
+
+msgid "Add timer"
+msgstr "Дадаць таймер"
+
+msgid "Hr."
+msgstr "г."
+
+msgid "Min."
+msgstr "хв."
+
+msgid "Power"
+msgstr "Сілкаванне"
+
+msgid "Standby"
+msgstr "Рэжым чакання"
+
+msgid "Wake Up"
+msgstr "Абуджэнне"
+
+msgid "Reboot"
+msgstr "Перазагрузка"
+
+msgid "Restart GUI"
+msgstr "Перазагрузіць графічны інтэрфейс"
+
+msgid "Shutdown"
+msgstr "Выключэнне"
+
+msgid "Shut down"
+msgstr "Выключыць"
+
+msgid "Do Nothing"
+msgstr "Нічога не рабіць"
+
+msgid "Auto"
+msgstr "Аўта"
+
+msgid "Grab screenshot"
+msgstr "Зрабіць скрыншот"
+
+msgid "Enabled:"
+msgstr "Улучаны:"
+
+msgid "Name:"
+msgstr "Імя:"
+
+msgid "Description:"
+msgstr "Апісанне:"
+
+msgid "Service:"
+msgstr "Сэрвіс:"
+
+msgid "Service reference:"
+msgstr "Сэрвісная спасылка:"
+
+msgid "Event ID:"
+msgstr "ID падзеі:"
+
+msgid "Begins:"
+msgstr "Пачатак:"
+
+msgid "Ends:"
+msgstr "Сканчэнне:"
+
+msgid "Repeated:"
+msgstr "Паўтор:"
+
+msgid "Action:"
+msgstr "Дзеянне:"
+
+msgid "After event:"
+msgstr "Пасля падзеі:"
+
+msgid "Location:"
+msgstr "Месцаванне:"

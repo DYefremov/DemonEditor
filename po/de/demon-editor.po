@@ -1062,8 +1062,89 @@ msgstr "Ordner öffnen"
 msgid "Open archive"
 msgstr "Archiv öffnen"
 
+msgid "Import from Web"
+msgstr "Import aus dem Web"
 
+msgid "Control"
+msgstr "Steuerung"
 
+msgid "Timers"
+msgstr "Timers"
 
+msgid "Timer"
+msgstr "Timer"
 
+msgid "Add timer"
+msgstr "Timer hinzufügen"
 
+msgid "Hr."
+msgstr "Std."
+
+msgid "Min."
+msgstr "Min."
+
+msgid "Power"
+msgstr "Power"
+
+msgid "Standby"
+msgstr "Standby"
+
+msgid "Wake Up"
+msgstr "Aufwachen"
+
+msgid "Reboot"
+msgstr "Neustarten"
+
+msgid "Restart GUI"
+msgstr "GUI neustarten"
+
+msgid "Shutdown"
+msgstr "Ausschalten"
+
+msgid "Shut down"
+msgstr "Ausschalten"
+
+msgid "Do Nothing"
+msgstr "Nichts tun"
+
+msgid "Auto"
+msgstr "Auto"
+
+msgid "Grab screenshot"
+msgstr "Screenshot schnappen"
+
+msgid "Enabled:"
+msgstr "Aktiviert:"
+
+msgid "Name:"
+msgstr "Name:"
+
+msgid "Description:"
+msgstr "Beschreibung:"
+
+msgid "Service:"
+msgstr "Service"
+
+msgid "Service reference:"
+msgstr "Kanalreferenz"
+
+msgid "Event ID:"
+msgstr "Ereignis-ID:"
+
+msgid "Begins:"
+msgstr "Beginnt:"
+
+msgid "Ends:"
+msgstr "Endet:"
+
+msgid "Repeated:"
+msgstr "Wiederhole:"
+
+msgid "Action:"
+msgstr "Aktion:"
+
+msgid "After event:"
+msgstr "Nach dem Ereignis:"
+
+msgid "Location:"
+msgstr "Zielverzeichnis:"
