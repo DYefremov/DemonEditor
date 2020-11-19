@@ -1048,3 +1048,90 @@ msgstr "Открыть папку"
 
 msgid "Open archive"
 msgstr "Открыть архив"
+
+msgid "Import from Web"
+msgstr "Импорт из сети"
+
+msgid "Control"
+msgstr "Управление"
+
+msgid "Timers"
+msgstr "Таймеры"
+
+msgid "Timer"
+msgstr "Таймер"
+
+msgid "Add timer"
+msgstr "Добавить таймер"
+
+msgid "Hr."
+msgstr "ч."
+
+msgid "Min."
+msgstr "мин."
+
+msgid "Power"
+msgstr "Питание"
+
+msgid "Standby"
+msgstr "Режим ожидания"
+
+msgid "Wake Up"
+msgstr "Пробуждение"
+
+msgid "Reboot"
+msgstr "Перезагрузка"
+
+msgid "Restart GUI"
+msgstr "Перезагрузить графический интерфейс"
+
+msgid "Shutdown"
+msgstr "Выключение"
+
+msgid "Shut down"
+msgstr "Выключить"
+
+msgid "Do Nothing"
+msgstr "Ничего не делать"
+
+msgid "Auto"
+msgstr "Авто"
+
+msgid "Grab screenshot"
+msgstr "Сделать скриншот"
+
+msgid "Enabled:"
+msgstr "Включен:"
+
+msgid "Name:"
+msgstr "Имя:"
+
+msgid "Description:"
+msgstr "Описание:"
+
+msgid "Service:"
+msgstr "Сервис:"
+
+msgid "Service reference:"
+msgstr "Сервисная ссылка:"
+
+msgid "Event ID:"
+msgstr "ID события:"
+
+msgid "Begins:"
+msgstr "Начало:"
+
+msgid "Ends:"
+msgstr "Окончание:"
+
+msgid "Repeated:"
+msgstr "Повтор:"
+
+msgid "Action:"
+msgstr "Действие:"
+
+msgid "After event:"
+msgstr "После события:"
+
+msgid "Location:"
+msgstr "Расположение:"
