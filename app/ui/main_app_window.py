@@ -43,6 +43,7 @@ class Application(Gtk.Application):
     SERVICE_MODEL_NAME = "services_list_store"
     FAV_MODEL_NAME = "fav_list_store"
     BQ_MODEL_NAME = "bouquets_tree_store"
+    DRAG_SEP = "::::"
 
     DEL_FACTOR = 50  # Batch size to delete in one pass.
     FAV_FACTOR = DEL_FACTOR * 2
@@ -446,7 +447,7 @@ class Application(Gtk.Application):
         self._services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
         self._services_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target,
-                                                Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+                                                Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE | Gdk.DragAction.COPY)
         self._fav_view.enable_model_drag_dest(target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._bouquets_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, bq_target,
                                                      Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
@@ -1102,7 +1103,7 @@ class Application(Gtk.Application):
             self.on_import_bouquet(None, file_path=urlparse(unquote(data)).path.strip())
             return
 
-        itr_str, sep, source = data.partition("::::")
+        itr_str, sep, source = data.partition(self.DRAG_SEP)
         if source != self.BQ_MODEL_NAME:
             return
 
@@ -1145,7 +1146,7 @@ class Application(Gtk.Application):
     def receive_selection(self, *, view, drop_info, data):
         """  Update fav view  after data received  """
         try:
-            itr_str, sep, source = data.partition("::::")
+            itr_str, sep, source = data.partition(self.DRAG_SEP)
             if source == self.BQ_MODEL_NAME:
                 return
 

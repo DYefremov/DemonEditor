@@ -1268,6 +1268,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkBox" id="right_header_box">
             <property name="can_focus">False</property>
+            <property name="margin_right">5</property>
             <property name="spacing">1</property>
             <child>
               <object class="GtkButton" id="sat_editor_header_button">
@@ -2978,7 +2979,7 @@ Author: Dmitriy Yefremov
                     <property name="action_name">app.on_remote</property>
                     <property name="image">control_image</property>
                     <property name="always_show_image">True</property>
-                    <accelerator key="r" signal="clicked"/>
+                    <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
