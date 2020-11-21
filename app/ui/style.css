@@ -18,18 +18,22 @@ paned > separator {
 }
 
 .red-button {
+  background-image: none;
   background-color: red;
 }
 
 .green-button {
+  background-image: none;
   background-color: green;
 }
 
 .yellow-button {
+  background-image: none;
   background-color: yellow;
 }
 
 .blue-button {
+  background-image: none;
   background-color: blue;
 }
 
@@ -48,10 +52,11 @@ paned > separator {
 .group :last-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  border-left-width: 0;
 }
 
 .group :not(:first-child):not(:last-child) {
   border-radius: 0;
   border-left-width: 0;
-  border-right-width: 0;
+  border-right-width: 1px;
 }
