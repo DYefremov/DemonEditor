@@ -91,9 +91,9 @@ class ControlBox(Gtk.HBox):
             service_name_label = builder.get_object("timer_service_name_label")
             time_label = builder.get_object("timer_time_label")
 
-            name_label.set_text(timer.get("e2name", ""))
-            description_label.set_text(timer.get("e2description", ""))
-            service_name_label.set_text(timer.get("e2servicename", ""))
+            name_label.set_text(timer.get("e2name", "") or "")
+            description_label.set_text(timer.get("e2description", "") or "")
+            service_name_label.set_text(timer.get("e2servicename", "") or "")
             # Time
             start_time = datetime.fromtimestamp(int(timer.get("e2timebegin", "0")))
             end_time = datetime.fromtimestamp(int(timer.get("e2timeend", "0")))
@@ -471,8 +471,8 @@ class ControlBox(Gtk.HBox):
             timer = row.timer
             self._current_timer = timer
             self._timer_name_entry.set_text(timer.get("e2name", ""))
-            self._timer_desc_entry.set_text(timer.get("e2description", ""))
-            self._timer_service_entry.set_text(timer.get("e2servicename", ""))
+            self._timer_desc_entry.set_text(timer.get("e2description", "") or "")
+            self._timer_service_entry.set_text(timer.get("e2servicename", "") or "")
             self._timer_service_ref_entry.set_text(timer.get("e2servicereference", ""))
             self._timer_event_id_entry.set_text(timer.get("e2eit", ""))
             self._timer_enabled_switch.set_active((timer.get("e2disabled", "0") == "0"))
