@@ -409,118 +409,6 @@ Author: Dmitriy Yefremov
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkFrame" id="power_frame">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="margin_top">5</property>
-                    <property name="label_xalign">0.5</property>
-                    <property name="shadow_type">none</property>
-                    <child>
-                      <object class="GtkButtonBox" id="power_button_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">center</property>
-                        <property name="valign">center</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="homogeneous">True</property>
-                        <property name="layout_style">expand</property>
-                        <child>
-                          <object class="GtkButton" id="standby_button">
-                            <property name="width_request">32</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Standby</property>
-                            <property name="action_name">app.on_standby</property>
-                            <property name="image">standby_image</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="wake_up_button">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Wake Up</property>
-                            <property name="action_name">app.on_wake_up</property>
-                            <property name="image">wake_up_image</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="reboot_butto">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Reboot</property>
-                            <property name="action_name">app.on_reboot</property>
-                            <property name="image">reboot_image</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="restart_gui_butto">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Restart GUI</property>
-                            <property name="action_name">app.on_restart_gui</property>
-                            <property name="image">restart_gui_image</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="shutdown_butto">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Shutdown</property>
-                            <property name="action_name">app.on_shutdown</property>
-                            <property name="image">shutdown_image</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="power_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Power</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkBox" id="control_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -530,6 +418,115 @@ Author: Dmitriy Yefremov
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkFrame" id="power_frame">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_top">5</property>
+                        <property name="label_xalign">0.5</property>
+                        <property name="shadow_type">none</property>
+                        <child>
+                          <object class="GtkBox" id="power_button_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
+                            <property name="homogeneous">True</property>
+                            <child>
+                              <object class="GtkButton" id="standby_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Standby</property>
+                                <property name="action_name">app.on_standby</property>
+                                <property name="image">standby_image</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="wake_up_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Wake Up</property>
+                                <property name="action_name">app.on_wake_up</property>
+                                <property name="image">wake_up_image</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="reboot_butto">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Reboot</property>
+                                <property name="action_name">app.on_reboot</property>
+                                <property name="image">reboot_image</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="restart_gui_butto">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Restart GUI</property>
+                                <property name="action_name">app.on_restart_gui</property>
+                                <property name="image">restart_gui_image</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="shutdown_butto">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Shutdown</property>
+                                <property name="action_name">app.on_shutdown</property>
+                                <property name="image">shutdown_image</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
+                            <style>
+                              <class name="group"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="power_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Power</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                     <child>
                       <object class="GtkGrid" id="control_grid">
                         <property name="visible">True</property>
@@ -624,7 +621,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -669,7 +666,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -684,7 +681,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -722,7 +719,7 @@ audio-volume-medium-symbolic</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -733,7 +730,7 @@ audio-volume-medium-symbolic</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">4</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
@@ -818,7 +815,7 @@ audio-volume-medium-symbolic</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">5</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                   </object>
@@ -1625,7 +1622,7 @@ audio-volume-medium-symbolic</property>
                           <object class="GtkImage" id="timer_location_image">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="icon_name">edit</property>
+                            <property name="icon_name">gtk-edit</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1656,7 +1653,7 @@ audio-volume-medium-symbolic</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">edit</property>
+                        <property name="primary_icon_name">gtk-edit</property>
                         <property name="placeholder_text" translatable="yes">Default</property>
                       </object>
                       <packing>
