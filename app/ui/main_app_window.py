@@ -2182,6 +2182,8 @@ class Application(Gtk.Application):
         if self._app_info_box.get_visible():
             yield from self.create_new_configuration(self._s_type)
         yield from self.append_services(services)
+        self.update_sat_positions()
+        yield True
         self._wait_dialog.hide()
 
     # ***************** Backup  ********************#
