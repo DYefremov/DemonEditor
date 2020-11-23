@@ -1135,3 +1135,27 @@ msgstr "Пасля падзеі:"
 
 msgid "Location:"
 msgstr "Месцаванне:"
+
+msgid "Mo"
+msgstr "Пн"
+
+msgid "Tu"
+msgstr "Аў"
+
+msgid "We"
+msgstr "Ср"
+
+msgid "Th"
+msgstr "Чц"
+
+msgid "Fr"
+msgstr "Пт"
+
+msgid "Sa"
+msgstr "Сб"
+
+msgid "Su"
+msgstr "Нд"
+
+msgid "Set"
+msgstr "Усталяваць"
