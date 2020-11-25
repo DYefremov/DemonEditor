@@ -2123,7 +2123,6 @@ Author: Dmitriy Yefremov
             <property name="margin_right">1</property>
             <property name="margin_top">2</property>
             <property name="margin_bottom">2</property>
-            <property name="resize_toplevel">True</property>
             <child>
               <object class="GtkScrolledWindow" id="text_view_scrolled_window">
                 <property name="height_request">120</property>
