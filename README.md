@@ -1,10 +1,10 @@
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![platform](https://img.shields.io/badge/platform-linux%20|%20macos-lightgrey)
-### Enigma2 channel and satellites list editor for GNU/Linux.                                                                       
+### Enigma2 channel and satellite list editor for GNU/Linux.                                                                       
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).                                                   
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).
   
-![Main app window in macOS Big Sur.](https://user-images.githubusercontent.com/7511379/92320982-9b20c780-f02e-11ea-8a43-fc0c70503573.png)
+![The main application window in Linux Mint](https://user-images.githubusercontent.com/7511379/100156250-a3fc9900-2eb9-11eb-8729-7bcb6ddcdd4a.png)
 
 ## Main features of the program
 * Editing bouquets, channels, satellites.
