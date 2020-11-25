@@ -38,6 +38,10 @@
           </section>
         </submenu>
         <item>
+          <attribute name="label" translatable="yes">Import from Web</attribute>
+          <attribute name="action">app.on_import_from_web</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">New empty configuration</attribute>
           <attribute name="action">app.on_new_configuration</attribute>
         </item>
