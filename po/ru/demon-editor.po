@@ -203,8 +203,8 @@ msgstr "Текущий путь к данным:"
 msgid "Data:"
 msgstr "Данные:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Редактор списка каналов и спутников Enigma2\n для GNU/Linux"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "Редактор списка каналов и спутников Enigma2\n для GNU/Linux."
 
 msgid "Host:"
 msgstr "Адрес ресивера:"

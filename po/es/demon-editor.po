@@ -1,7 +1,7 @@
 # Copyright (C) 2018-2020 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-# Frank Neirynck <frank@insink.be>, 2018-2019.
+# Frank Neirynck <frank@insink.be>, 2018-2020.
 #
 msgid ""
 msgstr ""
@@ -206,8 +206,8 @@ msgstr "Ruta de datos actual:"
 msgid "Data:"
 msgstr "Datos:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Editor de canales y satélites Enigma2 para GNU/Linux"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "Editor de canales y satélites Enigma2 para GNU/Linux."
 
 msgid "Host:"
 msgstr "Host:"

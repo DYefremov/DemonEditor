@@ -203,8 +203,8 @@ msgstr "Mevcut veri yolu:"
 msgid "Data:"
 msgstr "Veri:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "GNU/Linux için Enigma2 kanalı ve uydu listesi editörü"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "GNU/Linux için Enigma2 kanalı ve uydu listesi editörü."
 
 msgid "Host:"
 msgstr "Ana bilgisayar:"
