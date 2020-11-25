@@ -206,8 +206,8 @@ msgstr "Aktualna ścieżka danych:"
 msgid "Data:"
 msgstr "Dane:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Edytor kanałów Enigma2 i listy satelitów dla GNU/Linux"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "Edytor kanałów Enigma2 i listy satelitów dla GNU/Linux."
 
 msgid "Host:"
 msgstr "Host:"

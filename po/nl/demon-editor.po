@@ -201,8 +201,8 @@ msgstr "Huidig datapad:"
 msgid "Data:"
 msgstr "Data:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Enigma2 kanaal and satelliet lijst editor voor GNU/Linux"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "Enigma2 kanaal and satelliet lijst editor voor GNU/Linux."
 
 msgid "Host:"
 msgstr "Host:"

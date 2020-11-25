@@ -50,7 +50,7 @@ Author: Dmitriy Yefremov
     <property name="authors">Dmitriy Yefremov
 </property>
     <property name="translator_credits" translatable="yes">translator-credits</property>
-    <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt; mfgeg&lt;/a&gt;</property>
+    <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt;mfgeg&lt;/a&gt;</property>
     <property name="logo_icon_name">demon-editor</property>
     <property name="wrap_license">True</property>
     <property name="license_type">mit-x11</property>
