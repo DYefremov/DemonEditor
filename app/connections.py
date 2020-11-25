@@ -117,7 +117,9 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                             timeout=settings.telnet_timeout)
                 next(tn)
                 # terminate enigma or neutrino
+                callback("Telnet initialization ...\n")
                 tn.send("init 4")
+                callback("Stopping GUI...\n")
 
         with FTP(host=host, user=settings.user, passwd=settings.password) as ftp:
             ftp.encoding = "utf-8"
@@ -150,6 +152,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             if tn and not use_http:
                 # resume enigma or restart neutrino
                 tn.send("init 3" if s_type is SettingsType.ENIGMA_2 else "init 6")
+                callback("Starting...\n" if s_type is SettingsType.ENIGMA_2 else "Rebooting...\n")
             elif ht and use_http:
                 if download_type is DownloadType.BOUQUETS:
                     ht.send((url + "servicelistreload?mode=2", "Reloading Userbouquets."))
@@ -302,11 +305,11 @@ def telnet(host, port=23, user="", password="", timeout=5):
         time.sleep(1)
         command = yield
         if user != "":
-            tn.read_until(b"login: ")
+            tn.read_until(b"login: ", timeout)
             tn.write(user.encode("utf-8") + b"\n")
             time.sleep(timeout)
         if password != "":
-            tn.read_until(b"Password: ")
+            tn.read_until(b"Password: ", timeout)
             tn.write(password.encode("utf-8") + b"\n")
             time.sleep(timeout)
         tn.write("{}\r\n".format(command).encode("utf-8"))
