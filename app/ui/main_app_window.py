@@ -1361,6 +1361,10 @@ class Application(Gtk.Application):
         self._wait_dialog.show()
 
         yield from self.clear_current_data()
+        # Reset of sorting
+        self._services_view.get_model().reset_default_sort_func()
+        self.reset_view_sort_indication(self._services_view)
+        self.reset_view_sort_indication(self._fav_view)
 
         try:
             current_profile = self._profile_combo_box.get_active_text()
