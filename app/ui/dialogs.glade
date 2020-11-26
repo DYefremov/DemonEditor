@@ -43,7 +43,7 @@ Author: Dmitriy Yefremov
     <property name="version">1.0.2 Beta</property>
     <property name="copyright">2018-2020 Dmitriy Yefremov
 </property>
-    <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for MacOS.
+    <property name="comments" translatable="yes">Enigma2 channel and satellite list editor for MacOS.
     (Experimental)</property>
     <property name="website">https://github.com/DYefremov/DemonEditor/tree/experimental-mac</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
@@ -51,7 +51,7 @@ Author: Dmitriy Yefremov
     <property name="authors">Dmitriy Yefremov
 </property>
     <property name="translator_credits" translatable="yes">translator-credits</property>
-    <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt; mfgeg&lt;/a&gt;</property>
+    <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt;mfgeg&lt;/a&gt;</property>
     <property name="logo_icon_name">demon-editor</property>
     <property name="wrap_license">True</property>
     <property name="license_type">mit-x11</property>

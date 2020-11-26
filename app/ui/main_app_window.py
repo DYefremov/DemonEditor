@@ -91,6 +91,7 @@ class Application(Gtk.Application):
                           "on_tree_view_key_release": self.on_tree_view_key_release,
                           "on_bouquets_selection": self.on_bouquets_selection,
                           "on_satellite_editor_show": self.on_satellite_editor_show,
+                          "on_fav_selection": self.on_fav_selection,
                           "on_services_selection": self.on_services_selection,
                           "on_fav_cut": self.on_fav_cut,
                           "on_bouquets_cut": self.on_bouquets_cut,
@@ -250,7 +251,7 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
-        # Remote controller
+        # Control
         self._control_button = builder.get_object("control_button")
         self._receiver_info_box.bind_property("visible", self._control_button, "visible")
         self._control_revealer = builder.get_object("control_revealer")
@@ -1713,6 +1714,13 @@ class Application(Gtk.Application):
 
         self._data_hash = self.get_data_hash()
         yield True
+
+    def on_fav_selection(self, model, path, column):
+        if self._control_box and self._control_box.update_epg:
+            ref = self.get_service_ref(path)
+            if not ref:
+                return
+            self._control_box.on_service_changed(ref)
 
     def on_services_selection(self, model, path, column):
         self.update_service_bar(model, path)

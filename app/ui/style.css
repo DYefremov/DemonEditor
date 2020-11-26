@@ -7,6 +7,26 @@
   margin: 0.1em;
 }
 
+.control-box {
+  padding: 0.1em;
+}
+
+.red-button {
+  background-color: red;
+}
+
+.green-button {
+  background-color: green;
+}
+
+.yellow-button {
+  background-color: yellow;
+}
+
+.blue-button {
+  background-color: blue;
+}
+
 #textview-large {
   font-size: 14px;
 }
