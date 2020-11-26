@@ -6,7 +6,7 @@ from gi.repository import GLib
 
 from app.commons import log
 from app.settings import IS_DARWIN
-from app.connections import HttpRequestType
+from app.connections import HttpAPI
 from app.tools.yt import YouTube
 from app.ui.iptv import get_yt_icon
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
@@ -128,7 +128,7 @@ class LinksTransmitter:
             else:
                 self._url_entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
 
-            self._http_api.send(HttpRequestType.PLAY, url, self.on_done, self.__STREAM_PREFIX)
+            self._http_api.send(HttpAPI.Request.PLAY, url, self.on_done, self.__STREAM_PREFIX)
             yield True
 
     def on_done(self, res):
@@ -138,21 +138,21 @@ class LinksTransmitter:
         GLib.idle_add(self._tool_bar.set_sensitive, True)
 
     def on_previous(self, item):
-        self._http_api.send(HttpRequestType.PLAYER_PREV, None, self.on_done)
+        self._http_api.send(HttpAPI.Request.PLAYER_PREV, None, self.on_done)
 
     def on_next(self, item):
-        self._http_api.send(HttpRequestType.PLAYER_NEXT, None, self.on_done)
+        self._http_api.send(HttpAPI.Request.PLAYER_NEXT, None, self.on_done)
 
     def on_play(self, item):
-        self._http_api.send(HttpRequestType.PLAYER_PLAY, None, self.on_done)
+        self._http_api.send(HttpAPI.Request.PLAYER_PLAY, None, self.on_done)
 
     def on_stop(self, item):
-        self._http_api.send(HttpRequestType.PLAYER_STOP, None, self.on_done)
+        self._http_api.send(HttpAPI.Request.PLAYER_STOP, None, self.on_done)
 
     def on_clear(self, item):
         """ Remove added links in the playlist. """
         GLib.idle_add(self._tool_bar.set_sensitive, False)
-        self._http_api.send(HttpRequestType.PLAYER_LIST, None, self.clear_playlist)
+        self._http_api.send(HttpAPI.Request.PLAYER_LIST, None, self.clear_playlist)
 
     def clear_playlist(self, res):
         GLib.idle_add(self._tool_bar.set_sensitive, not res)
@@ -163,7 +163,7 @@ class LinksTransmitter:
 
         for ref in res:
             GLib.idle_add(self._tool_bar.set_sensitive, False)
-            self._http_api.send(HttpRequestType.PLAYER_REMOVE,
+            self._http_api.send(HttpAPI.Request.PLAYER_REMOVE,
                                 ref.get("e2servicereference", ""),
                                 self.on_done,
                                 self.__STREAM_PREFIX)

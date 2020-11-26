@@ -35,36 +35,6 @@ class DownloadType(Enum):
     EPG = 5
 
 
-class HttpRequestType(Enum):
-    ZAP = "zap?sRef="
-    INFO = "about"
-    SIGNAL = "signal"
-    STREAM = "stream.m3u?ref="
-    STREAM_CURRENT = "streamcurrent.m3u"
-    CURRENT = "getcurrent"
-    TEST = None
-    TOKEN = "session"
-    # Player
-    PLAY = "mediaplayerplay?file="
-    PLAYER_LIST = "mediaplayerlist?path=playlist"
-    PLAYER_PLAY = "mediaplayercmd?command=play"
-    PLAYER_NEXT = "mediaplayercmd?command=next"
-    PLAYER_PREV = "mediaplayercmd?command=previous"
-    PLAYER_STOP = "mediaplayercmd?command=stop"
-    PLAYER_REMOVE = "mediaplayerremove?file="
-    # Remote control
-    POWER = "powerstate?newstate="
-    REMOTE = "remotecontrol?command="
-    VOL = "vol?set=set"
-    # EPG
-    EPG = "epgservice?sRef="
-    # Timer
-    TIMER = ""
-    TIMER_LIST = "timerlist"
-    # Screenshot
-    GRUB = "grab?format=jpg&"
-
-
 class TestException(Exception):
     pass
 
@@ -319,7 +289,7 @@ def http(user, password, url, callback, use_ssl=False):
 
     while True:
         url, message = yield
-        resp = get_response(HttpRequestType.TEST, url, data).get("e2statetext", None)
+        resp = get_response(HttpAPI.Request.TEST, url, data).get("e2statetext", None)
         callback("HTTP: {} {}\n".format(message, "Successful." if resp and message else ""))
 
 
@@ -352,6 +322,35 @@ def telnet(host, port=23, user="", password="", timeout=5):
 
 class HttpAPI:
     __MAX_WORKERS = 4
+
+    class Request(Enum):
+        ZAP = "zap?sRef="
+        INFO = "about"
+        SIGNAL = "signal"
+        STREAM = "stream.m3u?ref="
+        STREAM_CURRENT = "streamcurrent.m3u"
+        CURRENT = "getcurrent"
+        TEST = None
+        TOKEN = "session"
+        # Player
+        PLAY = "mediaplayerplay?file="
+        PLAYER_LIST = "mediaplayerlist?path=playlist"
+        PLAYER_PLAY = "mediaplayercmd?command=play"
+        PLAYER_NEXT = "mediaplayercmd?command=next"
+        PLAYER_PREV = "mediaplayercmd?command=previous"
+        PLAYER_STOP = "mediaplayercmd?command=stop"
+        PLAYER_REMOVE = "mediaplayerremove?file="
+        # Remote control
+        POWER = "powerstate?newstate="
+        REMOTE = "remotecontrol?command="
+        VOL = "vol?set=set"
+        # EPG
+        EPG = "epgservice?sRef="
+        # Timer
+        TIMER = ""
+        TIMER_LIST = "timerlist"
+        # Screenshot
+        GRUB = "grab?format=jpg&"
 
     class Remote(str, Enum):
         """ Args for HttpRequestType [REMOTE] class. """
@@ -396,14 +395,18 @@ class HttpAPI:
         url = self._base_url + req_type.value
         data = self._data
 
-        if req_type is HttpRequestType.ZAP or req_type is HttpRequestType.STREAM:
+        if req_type is self.Request.ZAP or req_type is self.Request.STREAM:
             url += urllib.parse.quote(ref)
-        elif req_type is HttpRequestType.PLAY or req_type is HttpRequestType.PLAYER_REMOVE:
+        elif req_type is self.Request.PLAY or req_type is self.Request.PLAYER_REMOVE:
             url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
-        elif req_type is HttpRequestType.GRUB:
+        elif req_type is self.Request.GRUB:
             data = None  # Must be disabled for token-based security.
             url = "{}/{}{}".format(self._main_url, req_type.value, ref)
-        elif req_type in (HttpRequestType.REMOTE, HttpRequestType.POWER, HttpRequestType.VOL, HttpRequestType.EPG):
+        elif req_type in (self.Request.REMOTE,
+                          self.Request.POWER,
+                          self.Request.VOL,
+                          self.Request.EPG,
+                          self.Request.TIMER):
             url += ref
 
         def done_callback(f):
@@ -419,12 +422,12 @@ class HttpAPI:
         self._main_url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
         self._base_url = "{}/web/".format(self._main_url)
         init_auth(user, password, self._main_url, use_ssl)
-        url = "{}/web/{}".format(self._main_url, HttpRequestType.TOKEN.value)
+        url = "{}/web/{}".format(self._main_url, self.Request.TOKEN.value)
         s_id = get_session_id(user, password, url)
         if s_id != "0":
             self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
 
-        self.send(HttpRequestType.INFO, None, self.init_callback)
+        self.send(self.Request.INFO, None, self.init_callback)
 
     def init_callback(self, info):
         if info:
@@ -447,30 +450,30 @@ class HttpAPI:
 def get_response(req_type, url, data=None):
     try:
         with urlopen(Request(url, data=data), timeout=10) as f:
-            if req_type is HttpRequestType.STREAM or req_type is HttpRequestType.STREAM_CURRENT:
+            if req_type is HttpAPI.Request.STREAM or req_type is HttpAPI.Request.STREAM_CURRENT:
                 return {"m3u": f.read().decode("utf-8")}
-            elif req_type is HttpRequestType.GRUB:
+            elif req_type is HttpAPI.Request.GRUB:
                 return {"img_data": f.read()}
-            elif req_type is HttpRequestType.CURRENT:
+            elif req_type is HttpAPI.Request.CURRENT:
                 for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
                     return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
-            elif req_type is HttpRequestType.PLAYER_LIST:
+            elif req_type is HttpAPI.Request.PLAYER_LIST:
                 return [{el.tag: el.text for el in el.iter()} for el in
                         ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
-            elif req_type is HttpRequestType.EPG:
+            elif req_type is HttpAPI.Request.EPG:
                 return {"event_list": [{el.tag: el.text for el in el.iter()} for el in
-                        ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
-            elif req_type is HttpRequestType.TIMER_LIST:
+                                       ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
+            elif req_type is HttpAPI.Request.TIMER_LIST:
                 return {"timer_list": [{el.tag: el.text for el in el.iter()} for el in
-                        ETree.fromstring(f.read().decode("utf-8")).iter("e2timer")]}
+                                       ETree.fromstring(f.read().decode("utf-8")).iter("e2timer")]}
             else:
                 return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
     except HTTPError as e:
-        if req_type is HttpRequestType.TEST:
+        if req_type is HttpAPI.Request.TEST:
             raise e
         return {"error_code": e.code}
     except (URLError, RemoteDisconnected, ConnectionResetError) as e:
-        if req_type is HttpRequestType.TEST:
+        if req_type is HttpAPI.Request.TEST:
             raise e
     except ETree.ParseError as e:
         log("Parsing response error: {}".format(e))
@@ -497,11 +500,11 @@ def init_auth(user, password, url, use_ssl=False):
 
 def get_session_id(user, password, url):
     data = urllib.parse.urlencode(dict(user=user, password=password)).encode("utf-8")
-    return get_response(HttpRequestType.TOKEN, url, data=data).get("e2sessionid", "0")
+    return get_response(HttpAPI.Request.TOKEN, url, data=data).get("e2sessionid", "0")
 
 
 def get_post_data(base_url, password, user):
-    s_id = get_session_id(user, password, "{}/web/{}".format(base_url, HttpRequestType.TOKEN.value))
+    s_id = get_session_id(user, password, "{}/web/{}".format(base_url, HttpAPI.Request.TOKEN.value))
     data = None
     if s_id != "0":
         data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
@@ -527,7 +530,7 @@ def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message
     data = get_post_data(base_url, password, user)
 
     try:
-        return get_response(HttpRequestType.TEST, "{}/web/{}".format(base_url, params), data).get("e2statetext", "")
+        return get_response(HttpAPI.Request.TEST, "{}/web/{}".format(base_url, params), data).get("e2statetext", "")
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
 

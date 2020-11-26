@@ -7,7 +7,7 @@ from gi.repository import GLib
 
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
 from ..commons import run_task, run_with_delay, log, run_idle
-from ..connections import HttpRequestType, HttpAPI
+from ..connections import HttpAPI
 
 
 class ControlBox(Gtk.HBox):
@@ -132,14 +132,14 @@ class ControlBox(Gtk.HBox):
         self._remote_revealer.set_reveal_child(state)
 
         if state:
-            self._http_api.send(HttpRequestType.VOL, "state", self.update_volume)
+            self._http_api.send(HttpAPI.Request.VOL, "state", self.update_volume)
 
     def on_remote_action(self, action):
-        self._http_api.send(HttpRequestType.REMOTE, action, self.on_response)
+        self._http_api.send(HttpAPI.Request.REMOTE, action, self.on_response)
 
     @run_with_delay(0.5)
     def on_volume_changed(self, button, value):
-        self._http_api.send(HttpRequestType.VOL, "{:.0f}".format(value), self.on_response)
+        self._http_api.send(HttpAPI.Request.VOL, "{:.0f}".format(value), self.on_response)
 
     def update_volume(self, vol):
         if "error_code" in vol:
@@ -153,7 +153,7 @@ class ControlBox(Gtk.HBox):
 
         if self._screenshot_check_button.get_active():
             ref = "mode=all" if self._http_api.is_owif else "d="
-            self._http_api.send(HttpRequestType.GRUB, ref, self.update_screenshot)
+            self._http_api.send(HttpAPI.Request.GRUB, ref, self.update_screenshot)
 
     @run_task
     def update_screenshot(self, data):
@@ -177,15 +177,15 @@ class ControlBox(Gtk.HBox):
                 loader.close()
 
     def on_screenshot_all(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=all" if self._http_api.is_owif else "d=",
+        self._http_api.send(HttpAPI.Request.GRUB, "mode=all" if self._http_api.is_owif else "d=",
                             self.on_screenshot)
 
     def on_screenshot_video(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=video" if self._http_api.is_owif else "v=",
+        self._http_api.send(HttpAPI.Request.GRUB, "mode=video" if self._http_api.is_owif else "v=",
                             self.on_screenshot)
 
     def on_screenshot_osd(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=osd" if self._http_api.is_owif else "o=",
+        self._http_api.send(HttpAPI.Request.GRUB, "mode=osd" if self._http_api.is_owif else "o=",
                             self.on_screenshot)
 
     @run_task
@@ -211,7 +211,7 @@ class ControlBox(Gtk.HBox):
                 GLib.idle_add(self._screenshot_button_box.set_sensitive, True)
 
     def on_power_action(self, action):
-        self._http_api.send(HttpRequestType.POWER, action, lambda resp: log("Power status changed..."))
+        self._http_api.send(HttpAPI.Request.POWER, action, lambda resp: log("Power status changed..."))
 
     def update_signal(self, sig):
         self._snr_value_label.set_text(sig.get("e2snrdb", "0 dB").strip())
@@ -222,7 +222,7 @@ class ControlBox(Gtk.HBox):
 
     def on_service_changed(self, ref):
         self._app._wait_dialog.show()
-        self._http_api.send(HttpRequestType.EPG, ref, self.update_epg_data)
+        self._http_api.send(HttpAPI.Request.EPG, ref, self.update_epg_data)
 
     @run_idle
     def update_epg_data(self, epg):
@@ -238,7 +238,7 @@ class ControlBox(Gtk.HBox):
 
     def update_timer_list(self):
         self._app._wait_dialog.show()
-        self._http_api.send(HttpRequestType.TIMER_LIST, "", self.update_timers_data)
+        self._http_api.send(HttpAPI.Request.TIMER_LIST, "", self.update_timers_data)
 
     @run_idle
     def update_timers_data(self, timers):
