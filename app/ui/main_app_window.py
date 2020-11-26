@@ -195,6 +195,7 @@ class Application(Gtk.Application):
         self._http_api = None
         self._fav_click_mode = None
         self._links_transmitter = None
+        self._control_box = None
         # Colors
         self._use_colors = False
         self._NEW_COLOR = None  # Color for new services in the main list
@@ -249,9 +250,10 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
-        # Screenshots
-        self._screenshots_button = builder.get_object("screenshots_button")
-        self._receiver_info_box.bind_property("visible", self._screenshots_button, "visible")
+        # Remote controller
+        self._control_button = builder.get_object("control_button")
+        self._receiver_info_box.bind_property("visible", self._control_button, "visible")
+        self._control_revealer = builder.get_object("control_revealer")
         # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -393,13 +395,18 @@ class Application(Gtk.Application):
         set_action("on_archive_open", self.on_archive_open)
         set_action("on_import_from_web", self.on_import_from_web)
         # Edit
-        set_action("on_edit", self.on_edit)
-        # Save
-        self._app_info_box.bind_property("visible", set_action("on_data_save", self.on_data_save, False), "enabled", 4)
-        # Screenshots
-        set_action("on_screenshot_all", self.on_screenshot_all)
-        set_action("on_screenshot_video", self.on_screenshot_video)
-        set_action("on_screenshot_osd", self.on_screenshot_osd)
+        self.set_action("on_edit", self.on_edit)
+        # Control
+        remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
+        remote_action.connect("change-state", self.on_control)
+        self.add_action(remote_action)
+
+    def set_action(self, name, fun, enabled=True):
+        ac = Gio.SimpleAction.new(name, None)
+        ac.connect("activate", fun)
+        ac.set_enabled(enabled)
+        self.add_action(ac)
+        return ac
 
     def set_accels(self):
         """ Setting accelerators for the actions. """
@@ -2637,6 +2644,9 @@ class Application(Gtk.Application):
             self._http_api.send(HttpRequestType.CURRENT, None, self.update_status)
 
     def update_signal(self, sig):
+        if self._control_box:
+            self._control_box.update_signal(sig)
+
         self.set_signal(sig.get("e2snr", "0 %") if sig else "0 %")
 
     @lru_cache(maxsize=2)
@@ -2665,40 +2675,26 @@ class Application(Gtk.Application):
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
 
-    # ******************** Screenshots ************************#
+    # ******************* Control *********************** #
 
-    def on_screenshot_all(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=all" if self._http_api.is_owif else "d=", self.on_screenshot)
+    def on_control(self, action, state=False):
+        """ Shows/Hides [R key] remote controller. """
+        action.set_state(state)
+        self._control_revealer.set_visible(state)
+        self._control_revealer.set_reveal_child(state)
 
-    def on_screenshot_video(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=video" if self._http_api.is_owif else "v=", self.on_screenshot)
+        if not self._control_box:
+            from app.ui.control import ControlBox
+            self._control_box = ControlBox(self, self._http_api, self._settings)
+            self._control_revealer.add(self._control_box)
 
-    def on_screenshot_osd(self, action, value=None):
-        self._http_api.send(HttpRequestType.GRUB, "mode=osd" if self._http_api.is_owif else "o=", self.on_screenshot)
+        if state:
+            self._http_api.send(HttpRequestType.VOL, "state", self._control_box.update_volume)
 
-    @run_task
-    def on_screenshot(self, data):
-        if "error_code" in data:
-            return
+    def on_http_status_visible(self, img):
+        self._control_button.set_active(False)
 
-        img = data.get("img_data", None)
-        if img:
-            is_darwin = self._settings.is_darwin
-            GLib.idle_add(self._screenshots_button.set_sensitive, is_darwin)
-            path = os.path.expanduser("~/Desktop") if is_darwin else None
-
-            try:
-                import tempfile
-                import subprocess
-
-                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg", dir=path, delete=not is_darwin) as tf:
-                    tf.write(img)
-                    cmd = ["open" if is_darwin else "xdg-open", tf.name]
-                    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-            finally:
-                GLib.idle_add(self._screenshots_button.set_sensitive, True)
-
-    # ***************** Filter and search *********************#
+    # ***************** Filter and search ********************* #
 
     def on_filter_toggled(self, action, value):
         if self._app_info_box.get_visible():
