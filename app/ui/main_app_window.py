@@ -359,21 +359,14 @@ class Application(Gtk.Application):
         iptv_handlers = ("on_iptv", "on_import_yt_list", "on_import_m3u", "on_export_to_m3u",
                          "on_epg_list_configuration", "on_iptv_list_configuration", "on_remove_all_unavailable")
 
-        def set_action(n, fun, enabled=True):
-            ac = Gio.SimpleAction.new(n, None)
-            ac.connect("activate", fun)
-            ac.set_enabled(enabled)
-            self.add_action(ac)
-            return ac
-
-        list(map(lambda x: set_action(x, self._handlers.get(x)), main_handlers))
+        list(map(lambda x: self.set_action(x, self._handlers.get(x)), main_handlers))
         # Import
-        action = set_action("on_import_bouquet", self._handlers.get("on_import_bouquet"), False)
+        action = self.set_action("on_import_bouquet", self._handlers.get("on_import_bouquet"), False)
         self._tool_elements.get("bouquet_import_popup_item").bind_property("sensitive", action, "enabled")
         # IPTV
         iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
         for h in iptv_handlers:
-            action = set_action(h, self._handlers.get(h), False)
+            action = self.set_action(h, self._handlers.get(h), False)
             iptv_elem.bind_property("sensitive", action, "enabled")
         # Search, Filter
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
@@ -387,17 +380,20 @@ class Application(Gtk.Application):
         self._app_info_box.bind_property("visible", filter_action, "enabled", 4)
         self._main_window.add_action(filter_action)
         # Lock, Hide
-        self._app_info_box.bind_property("visible", set_action("on_hide", self.on_hide, False), "enabled", 4)
-        self._app_info_box.bind_property("visible", set_action("on_locked", self.on_locked, False), "enabled", 4)
+        self._app_info_box.bind_property("visible", self.set_action("on_hide", self.on_hide, False), "enabled", 4)
+        self._app_info_box.bind_property("visible", self.set_action("on_locked", self.on_locked, False), "enabled", 4)
         # Open and download/upload data
-        set_action("open_data", lambda a, v: self.open_data())
-        set_action("on_download_data", self.on_download_data)
-        set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
-        set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
-        set_action("on_archive_open", self.on_archive_open)
-        set_action("on_import_from_web", self.on_import_from_web)
+        self.set_action("open_data", lambda a, v: self.open_data())
+        self.set_action("on_download_data", self.on_download_data)
+        self.set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
+        self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
+        self.set_action("on_archive_open", self.on_archive_open)
+        self.set_action("on_import_from_web", self.on_import_from_web)
         # Edit
         self.set_action("on_edit", self.on_edit)
+        # Save
+        self._app_info_box.bind_property("visible", self.set_action("on_data_save", self.on_data_save, False),
+                                         "enabled", 4)
         # Control
         remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
         remote_action.connect("change-state", self.on_control)
@@ -1300,7 +1296,7 @@ class Application(Gtk.Application):
                 self.delete_selection(self._services_view, self._fav_view)
                 self.on_view_focus(self._bouquets_view)
 
-            menu.popup(None, None, None, None, event.button, event.time)
+            menu.popup_at_pointer(None)
             return True
 
     def on_satellite_editor_show(self, action, value=None):

@@ -341,33 +341,33 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_add_iptv_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_iptv</property>
                 <property name="label" translatable="yes">Add IPTV or stream service</property>
-                <signal name="activate" handler="on_iptv" swapped="no"/>
               </object>
             </child>
             <child>
               <object class="GtkMenuItem" id="fav_import_yt_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_import_yt_list</property>
                 <property name="label" translatable="yes">Import YouTube playlist</property>
-                <signal name="activate" handler="on_import_yt_list" swapped="no"/>
               </object>
             </child>
             <child>
               <object class="GtkMenuItem" id="fav_import_m3u_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_import_m3u</property>
                 <property name="label" translatable="yes">Import m3u</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="on_import_m3u" swapped="no"/>
               </object>
             </child>
             <child>
               <object class="GtkMenuItem" id="fav_export_m3u_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_export_to_m3u</property>
                 <property name="label" translatable="yes">Export to m3u</property>
-                <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
               </object>
             </child>
             <child>
@@ -380,8 +380,8 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_epg_configuration_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_epg_list_configuration</property>
                 <property name="label" translatable="yes">EPG configuration</property>
-                <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
               </object>
             </child>
             <child>
@@ -394,8 +394,8 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_iptv_list_configuration_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_iptv_list_configuration</property>
                 <property name="label" translatable="yes">List configuration</property>
-                <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
               </object>
             </child>
             <child>
@@ -408,8 +408,8 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_remove_all_unavailable_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="action_name">app.on_remove_all_unavailable</property>
                 <property name="label" translatable="yes">Remove all unavailable</property>
-                <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
               </object>
             </child>
           </object>
@@ -599,68 +599,6 @@ Author: Dmitriy Yefremov
     <property name="margin_left">5</property>
     <property name="icon_name">document-save-symbolic</property>
     <property name="icon_size">1</property>
-  </object>
-  <object class="GtkPopoverMenu" id="screenshots_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkBox" id="screenshots_menu_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkModelButton" id="screenshot_button_all">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.on_screenshot_all</property>
-            <property name="text" translatable="yes">All</property>
-            <property name="centered">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="screenshot_button_video">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.on_screenshot_video</property>
-            <property name="text" translatable="yes">Video</property>
-            <property name="centered">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="screenshot_button_osd">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.on_screenshot_osd</property>
-            <property name="text" translatable="yes">OSD</property>
-            <property name="centered">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">main</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
   </object>
   <object class="GtkListStore" id="services_list_store">
     <columns>
@@ -937,32 +875,32 @@ Author: Dmitriy Yefremov
       <object class="GtkMenuItem" id="toolbar_iptv_add_iptv_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_iptv</property>
         <property name="label" translatable="yes">Add IPTV or stream service</property>
-        <signal name="activate" handler="on_iptv" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="toolbar_iptv_import_yt_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_import_yt_list</property>
         <property name="label" translatable="yes">Import YouTube playlist</property>
-        <signal name="activate" handler="on_import_yt_list" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="toolbar_iptv_import_m3u_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_import_m3u</property>
         <property name="label" translatable="yes">Import m3u</property>
-        <signal name="activate" handler="on_import_m3u" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="toolbar_iptv_export_m3u_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_export_to_m3u</property>
         <property name="label" translatable="yes">Export to m3u</property>
-        <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
       </object>
     </child>
     <child>
@@ -975,8 +913,8 @@ Author: Dmitriy Yefremov
       <object class="GtkMenuItem" id="toolbar_iptv_separator_epg_configuration_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_epg_list_configuration</property>
         <property name="label" translatable="yes">EPG configuration</property>
-        <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
       </object>
     </child>
     <child>
@@ -989,8 +927,8 @@ Author: Dmitriy Yefremov
       <object class="GtkMenuItem" id="toolbar_iptv_list_configuration_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_iptv_list_configuration</property>
         <property name="label" translatable="yes">List configuration</property>
-        <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
       </object>
     </child>
     <child>
@@ -1003,8 +941,8 @@ Author: Dmitriy Yefremov
       <object class="GtkMenuItem" id="toolbar_iptv_remove_all_unavailable_menu_item">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="action_name">app.on_remove_all_unavailable</property>
         <property name="label" translatable="yes">Remove all unavailable</property>
-        <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
       </object>
     </child>
   </object>
