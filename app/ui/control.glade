@@ -362,50 +362,52 @@ Author: Dmitriy Yefremov
     <property name="icon_name">document-revert</property>
     <property name="icon_size">1</property>
   </object>
-  <object class="GtkBox" id="main_box">
-    <property name="width_request">320</property>
+  <object class="GtkFrame" id="main_box_frame">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_left">2</property>
-    <property name="margin_right">2</property>
-    <property name="orientation">vertical</property>
+    <property name="margin_left">1</property>
+    <property name="margin_right">1</property>
+    <property name="margin_bottom">1</property>
+    <property name="label_xalign">0</property>
+    <property name="shadow_type">in</property>
     <child>
-      <object class="GtkStackSwitcher" id="stack_switcher">
+      <object class="GtkBox" id="main_box">
+        <property name="width_request">320</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="halign">center</property>
-        <property name="valign">center</property>
-        <property name="margin_left">10</property>
-        <property name="margin_right">10</property>
-        <property name="margin_top">5</property>
-        <property name="stack">stack</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkStack" id="stack">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
         <property name="margin_top">5</property>
         <property name="margin_bottom">5</property>
-        <property name="transition_type">crossfade</property>
-        <signal name="notify::visible-child" handler="on_visible_tool" swapped="no"/>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkFrame" id="remote_frame">
+          <object class="GtkStackSwitcher" id="stack_switcher">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">out</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">10</property>
+            <property name="stack">stack</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStack" id="stack">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="transition_type">crossfade</property>
+            <signal name="notify::visible-child" handler="on_visible_tool" swapped="no"/>
             <child>
               <object class="GtkBox" id="remote_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
@@ -414,7 +416,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">25</property>
                     <property name="margin_right">25</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
@@ -422,7 +423,6 @@ Author: Dmitriy Yefremov
                       <object class="GtkFrame" id="power_frame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_top">5</property>
                         <property name="label_xalign">0.5</property>
                         <property name="shadow_type">none</property>
                         <child>
@@ -919,65 +919,37 @@ audio-volume-medium-symbolic</property>
                   </packing>
                 </child>
               </object>
-            </child>
-            <child type="label_item">
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="name">control</property>
-            <property name="title" translatable="yes">Control</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="epg_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
-            <child>
-              <object class="GtkScrolledWindow" id="epg_view_scrolled_window">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <object class="GtkViewport" id="epg_view_port">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkListBox" id="epg_list_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="selection_mode">multiple</property>
-                        <property name="activate_on_single_click">False</property>
-                        <signal name="button-press-event" handler="on_epg_press" swapped="no"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="name">control</property>
+                <property name="title" translatable="yes">Control</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="epg_action_box">
+              <object class="GtkBox" id="epg_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkSearchEntry" id="epg_filter_entry">
+                  <object class="GtkScrolledWindow" id="epg_view_scrolled_window">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip_text" translatable="yes">Filter</property>
-                    <property name="primary_icon_stock">gtk-spell-check</property>
-                    <property name="primary_icon_name">tools-check-spelling</property>
-                    <property name="primary_icon_activatable">False</property>
-                    <property name="primary_icon_sensitive">False</property>
-                    <property name="placeholder_text" translatable="yes">Filter</property>
-                    <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkViewport" id="epg_view_port">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkListBox" id="epg_list_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="selection_mode">multiple</property>
+                            <property name="activate_on_single_click">False</property>
+                            <signal name="button-press-event" handler="on_epg_press" swapped="no"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -986,82 +958,85 @@ audio-volume-medium-symbolic</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="epg_add_timer_button">
+                  <object class="GtkBox" id="epg_action_box">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Add timer</property>
-                    <property name="action_name">app.on_timer_add_from_event</property>
-                    <property name="image">add_timer_image</property>
-                    <property name="always_show_image">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkSearchEntry" id="epg_filter_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Filter</property>
+                        <property name="primary_icon_stock">gtk-spell-check</property>
+                        <property name="primary_icon_name">edit-find-replace-symbolic</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">False</property>
+                        <property name="placeholder_text" translatable="yes">Filter</property>
+                        <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="epg_add_timer_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Add timer</property>
+                        <property name="action_name">app.on_timer_add_from_event</property>
+                        <property name="image">add_timer_image</property>
+                        <property name="always_show_image">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
+                <property name="name">epg</property>
+                <property name="title" translatable="yes">EPG</property>
                 <property name="position">1</property>
               </packing>
             </child>
-          </object>
-          <packing>
-            <property name="name">epg</property>
-            <property name="title" translatable="yes">EPG</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="timers_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
             <child>
-              <object class="GtkScrolledWindow" id="timers_screlled_window">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <object class="GtkViewport" id="timers_viewport">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkListBox" id="timers_list_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="selection_mode">multiple</property>
-                        <property name="activate_on_single_click">False</property>
-                        <signal name="button-press-event" handler="on_timers_press" swapped="no"/>
-                        <signal name="drag-data-received" handler="on_timers_drag_data_received" swapped="no"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButtonBox" id="timers_button_box">
+              <object class="GtkBox" id="timers_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">end</property>
-                <property name="homogeneous">True</property>
-                <property name="layout_style">expand</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">5</property>
                 <child>
-                  <object class="GtkButton" id="timer_add_button">
-                    <property name="label" translatable="yes">Add</property>
+                  <object class="GtkScrolledWindow" id="timers_screlled_window">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="action_name">app.on_timer_add</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkViewport" id="timers_viewport">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkListBox" id="timers_list_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="selection_mode">multiple</property>
+                            <property name="activate_on_single_click">False</property>
+                            <signal name="button-press-event" handler="on_timers_press" swapped="no"/>
+                            <signal name="drag-data-received" handler="on_timers_drag_data_received" swapped="no"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1070,59 +1045,69 @@ audio-volume-medium-symbolic</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="timer_remove_button">
-                    <property name="label" translatable="yes">Remove</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="action_name">app.on_timer_remove</property>
+                  <object class="GtkButtonBox" id="timers_button_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">end</property>
+                    <property name="homogeneous">True</property>
+                    <property name="layout_style">expand</property>
+                    <child>
+                      <object class="GtkButton" id="timer_add_button">
+                        <property name="label" translatable="yes">Add</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_timer_add</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="timer_remove_button">
+                        <property name="label" translatable="yes">Remove</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_timer_remove</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="timer_edit_button">
+                        <property name="label" translatable="yes">Edit</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_timer_edit</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="timer_edit_button">
-                    <property name="label" translatable="yes">Edit</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="action_name">app.on_timer_edit</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
+                <property name="name">timers</property>
+                <property name="title" translatable="yes">Timers</property>
                 <property name="position">2</property>
               </packing>
             </child>
-          </object>
-          <packing>
-            <property name="name">timers</property>
-            <property name="title" translatable="yes">Timers</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame" id="timer_frame">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label_xalign">0.5</property>
-            <property name="shadow_type">in</property>
             <child>
               <object class="GtkBox" id="timer_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
@@ -1191,7 +1176,7 @@ audio-volume-medium-symbolic</property>
                       <object class="GtkEntry" id="timer_service_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1202,7 +1187,7 @@ audio-volume-medium-symbolic</property>
                       <object class="GtkEntry" id="timer_desc_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1213,7 +1198,7 @@ audio-volume-medium-symbolic</property>
                       <object class="GtkEntry" id="timer_name_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1500,7 +1485,7 @@ audio-volume-medium-symbolic</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                           </object>
                         </child>
                         <style>
@@ -1571,7 +1556,7 @@ audio-volume-medium-symbolic</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                           </object>
                         </child>
                         <style>
@@ -1622,7 +1607,7 @@ audio-volume-medium-symbolic</property>
                           <object class="GtkImage" id="timer_location_image">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="icon_name">gtk-edit</property>
+                            <property name="icon_name">document-edit-symbolic</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1653,7 +1638,7 @@ audio-volume-medium-symbolic</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <property name="placeholder_text" translatable="yes">Default</property>
                       </object>
                       <packing>
@@ -1730,149 +1715,135 @@ audio-volume-medium-symbolic</property>
                   </packing>
                 </child>
               </object>
-            </child>
-            <child type="label_item">
-              <placeholder/>
+              <packing>
+                <property name="name">timer</property>
+                <property name="position">3</property>
+              </packing>
             </child>
           </object>
           <packing>
-            <property name="name">timer</property>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="remote_signal_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">10</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkLabel" id="signal_level_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Signal level</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="column_homogeneous">True</property>
+                <child>
+                  <object class="GtkLabel" id="snr_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">SNR:</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="ber_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">BER:</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="agc_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">AGC:</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="snr_value_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">0 dB</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="ber_value_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">0</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="agc_value_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">0 %</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>
         </child>
       </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">2</property>
-      </packing>
     </child>
-    <child>
-      <object class="GtkBox" id="remote_signal_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="margin_top">10</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkLabel" id="signal_level_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Signal level</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkGrid">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="column_homogeneous">True</property>
-            <child>
-              <object class="GtkLabel" id="snr_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">SNR:</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="ber_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">BER:</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="agc_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">AGC:</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="snr_value_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">0 dB</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="ber_value_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="agc_value_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">0 %</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="pack_type">end</property>
-        <property name="position">3</property>
-      </packing>
+    <child type="label_item">
+      <placeholder/>
     </child>
-    <style>
-      <class name="control-box"/>
-    </style>
   </object>
 </interface>

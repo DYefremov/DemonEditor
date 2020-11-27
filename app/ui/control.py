@@ -133,7 +133,7 @@ class ControlBox(Gtk.HBox):
         builder.add_from_file(UI_RESOURCES_PATH + "control.glade")
         builder.connect_signals(handlers)
 
-        self.add(builder.get_object("main_box"))
+        self.add(builder.get_object("main_box_frame"))
         self._stack = builder.get_object("stack")
         self._screenshot_image = builder.get_object("screenshot_image")
         self._screenshot_button_box = builder.get_object("screenshot_button_box")
