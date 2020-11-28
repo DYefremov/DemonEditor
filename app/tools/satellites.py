@@ -310,8 +310,10 @@ class ServicesParser(HTMLParser):
 
         HTMLParser.__init__(self)
 
-        self._S_TYPES = {"": "2", "MPEG-2 SD": "1", "MPEG-4 SD": "22", "MPEG-4 HD": "25", "HEVC UHD": "31"}
-        self._TR_PAT = re.compile(r"(DVB-S[2]?)/?(.*PSK)?\s+SR\s+(\d+)\s+FEC\s+(\d/\d)\s+ONID/TID:\s+(\d+)/(\d+)\s+.*")
+        self._S_TYPES = {"": "2", "MPEG-2 SD": "1", "SD": "1", "MPEG-4 SD": "22", "HEVC SD": "22", "MPEG-4 HD": "25",
+                         "MPEG-4 HD 1080": "25", "MPEG-4 HD 720": "25", "HEVC HD": "25", "HEVC UHD": "31",
+                         "HEVC UHD 4K": "31"}
+        self._TR_PAT = re.compile(r"(DVB-S[2]?)/?(.*PSK)?\s+SR\s+(\d+)\s+FEC\s+(\d/\d).*ONID/TID:\s+(\d+)/(\d+)\s+.*")
         self._PTR_PAT = re.compile(r".*?(\d+\.\d°[EW]):\s+(\d+)\s+([RLHV]).*")
         self._TR = "s {}000:{}000:{}:{}:{}:{}:{}:{}"
         self._S2_TR = "{}:{}:{}:{}"
