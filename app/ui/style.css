@@ -13,10 +13,6 @@ paned > separator {
   background-size: 2px 24px;
 }
 
-.control-box {
-  padding: 5px;
-}
-
 .red-button {
   background-image: none;
   background-color: red;
