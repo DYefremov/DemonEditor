@@ -12,11 +12,12 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Backup function.
 * Extended support of IPTV.
 * Support of picons.
-* Downloading of picons and updating of satellites (transponders) from the web.
+* Importing services, downloading picons and updating satellites from the Web.
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPG from DVB or XML for IPTV services (only Enigma2, experimental).
 * Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
+* Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
                                                                                                  
 #### Keyboard shortcuts
 * **Ctrl + X** - only in bouquet list.
