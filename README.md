@@ -1,6 +1,6 @@
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![platform](https://img.shields.io/badge/platform-macos-lightgrey)
-## Enigma2 channel and satellites list editor for macOS (experimental).
+## Enigma2 channel and satellite list editor for macOS (experimental).
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).  
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).                                
 **The functionality and performance of this version may be different from the [Linux version](https://github.com/DYefremov/DemonEditor)!**
@@ -13,11 +13,13 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Backup function.
 * Extended support of IPTV.
 * Support of picons.
-* Downloading of picons and updating of satellites (transponders) from the web.
+* Importing services, downloading picons and updating satellites from the Web.
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
 * Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
+* Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
+
 #### Keyboard shortcuts                                                                                                                                                                                            
 * **&#8984; + X** - only in bouquet list.
 * **&#8984; + C** - only in services list.                                                                                                                                                    
