@@ -11,7 +11,7 @@ from app.commons import run_idle, run_task
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
 from app.settings import SettingsType
-from app.tools.yt import PlayListParser, YouTubeException, YouTube
+from app.tools.yt import YouTubeException, YouTube
 from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
 from .main_helper import get_base_model, get_iptv_url, on_popup_menu
 from .uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey,
@@ -666,7 +666,9 @@ class YtListImportDialog:
     def update_refs_list(self):
         if self._yt_list_id:
             try:
-                self._yt_list_title, links = PlayListParser.get_yt_playlist(self._yt_list_id)
+                if not self._yt:
+                    self._yt = YouTube.get_instance(self._settings)
+                self._yt_list_title, links = self._yt.get_yt_playlist(self._yt_list_id, self._url_entry.get_text())
             except Exception as e:
                 self.show_info_message(str(e), Gtk.MessageType.ERROR)
                 return
