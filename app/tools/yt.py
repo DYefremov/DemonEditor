@@ -129,6 +129,19 @@ class YouTube:
 
             return None, rsn
 
+    def get_yt_playlist(self, list_id, url=None):
+        """ Returns tuple from the playlist header and list of tuples (title, video id). """
+        if self._settings.enable_yt_dl and url:
+            try:
+                self._yt_dl.update_options({"noplaylist": False, "extract_flat": True})
+                info = self._yt_dl.get_info(url, skip_errors=False)
+                return info.get("title", ""), [(e.get("title", ""), e.get("id", "")) for e in info.get("entries", [])]
+            finally:
+                # Restoring default options
+                self._yt_dl.update_options({"noplaylist": True, "extract_flat": False})
+
+        return PlayListParser.get_yt_playlist(list_id)
+
 
 class PlayListParser(HTMLParser):
     """ Very simple parser to handle YouTube playlist pages. """
@@ -139,6 +152,7 @@ class PlayListParser(HTMLParser):
         self._header = ""
         self._playlist = []
         self._is_script = False
+        self._scr_start = ('var ytInitialData = ', 'window["ytInitialData"] = ')
 
     def handle_starttag(self, tag, attrs):
         if tag == "script":
@@ -147,8 +161,11 @@ class PlayListParser(HTMLParser):
     def handle_data(self, data):
         if self._is_script:
             data = data.lstrip()
-            if data.startswith('window["ytInitialData"] = '):
-                data = data.split(";")[0].lstrip('window["ytInitialData"] = ')
+            if data.startswith(self._scr_start):
+                data = data.split(";")[0]
+                for s in self._scr_start:
+                    data = data.lstrip(s)
+
                 try:
                     resp = json.loads(data)
                 except JSONDecodeError as e:
@@ -205,6 +222,7 @@ class YouTubeDL:
     _DownloadError = None
     _LATEST_RELEASE_URL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
     _OPTIONS = {"noplaylist": True,  # Single video instead of a playlist [ignoring playlist in URL].
+                "extract_flat": False,  # Do not resolve URLs, return the immediate result.
                 "quiet": True,  # Do not print messages to stdout.
                 "simulate": True,  # Do not download the video files.
                 "cookiefile": "cookies.txt"}  # File name where cookies should be read from and dumped to.
@@ -316,8 +334,17 @@ class YouTubeDL:
             self._callback("Update process. Please wait.", False)
             return {}, ""
 
+        info = self.get_info(url, skip_errors)
+        fmts = info.get("formats", None)
+        if fmts:
+            return {Quality.get(int(fm["format_id"])): fm.get("url", "") for fm in fmts if
+                    fm.get("format_id", "") in self._supported}, info.get("title", "")
+
+        return {}, info.get("title", "")
+
+    def get_info(self, url, skip_errors=False):
         try:
-            info = self._dl.extract_info(url, download=False)
+            return self._dl.extract_info(url, download=False)
         except URLError as e:
             log(str(e))
             raise YouTubeException(e)
@@ -325,13 +352,13 @@ class YouTubeDL:
             log(str(e))
             if not skip_errors:
                 raise YouTubeException(e)
-        else:
-            fmts = info.get("formats", None)
-            if fmts:
-                return {Quality.get(int(fm["format_id"])): fm.get("url", "") for fm in fmts if
-                        fm.get("format_id", "") in self._supported}, info.get("title", "")
 
-            return {}, info.get("title", "")
+    def update_options(self, options):
+        self._dl.params.update(options)
+
+    @property
+    def options(self):
+        return self._dl.params
 
 
 def flat(key, d):
