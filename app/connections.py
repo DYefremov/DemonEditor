@@ -5,7 +5,7 @@ import time
 import urllib
 import xml.etree.ElementTree as ETree
 from enum import Enum
-from ftplib import FTP, error_perm
+from ftplib import FTP, CRLF, Error, error_perm
 from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
@@ -43,8 +43,42 @@ class HttpApiException(Exception):
     pass
 
 
-def download_data(*, settings, download_type=DownloadType.ALL, callback=print, files_filter=None):
-    with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+class UtfFTP(FTP):
+    """ FTP class wrapper.
+
+        It is used to read settings and skip errors related to reading
+        file names in encoding other than UTF-8 or Latin-1.
+    """
+
+    def retrlines(self, cmd, callback=None):
+        """ Small modification of the original method.
+
+            Decode errors are ignored [UnicodeDecodeError, etc].
+         """
+        if callback is None:
+            callback = log
+        self.sendcmd("TYPE A")
+        with self.transfercmd(cmd) as conn, conn.makefile("r", encoding=self.encoding, errors="ignore") as fp:
+            while 1:
+                line = fp.readline(self.maxline + 1)
+                if len(line) > self.maxline:
+                    msg = "UtfFTP [retrlines] error: got more than {} bytes".format(self.maxline)
+                    log(msg)
+                    raise Error(msg)
+                if self.debugging > 2:
+                    log('UtfFTP [retrlines] *retr* {}'.format(repr(line)))
+                if not line:
+                    break
+                if line[-2:] == CRLF:
+                    line = line[:-2]
+                elif line[-1:] == "\n":
+                    line = line[:-1]
+                callback(line)
+        return self.voidresp()
+
+
+def download_data(*, settings, download_type=DownloadType.ALL, callback=log, files_filter=None):
+    with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
         save_path = settings.data_local_path
@@ -121,7 +155,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 tn.send("init 4")
                 callback("Stopping GUI...\n")
 
-        with FTP(host=host, user=settings.user, passwd=settings.password) as ftp:
+        with UtfFTP(host=host, user=settings.user, passwd=settings.password) as ftp:
             ftp.encoding = "utf-8"
             callback("FTP OK.\n")
             sat_xml_path = settings.satellites_xml_path
@@ -184,12 +218,16 @@ def upload_files(ftp, data_path, file_list, callback):
 
 
 def remove_unused_bouquets(ftp, callback):
-    files = []
-    ftp.dir(files.append)
-    bq_files = ("tv", "radio", "bouquets.xml", "ubouquets.xml")
+    bq_files = ("userbouquet.", "bouquets.xml", "ubouquets.xml")
 
-    for file in filter(lambda f: f.endswith(bq_files), map(lambda f: f.split()[-1], map(str.rstrip, files))):
-        callback("Deleting file: {}.   Status: {}\n".format(file, ftp.delete(file)))
+    for file in filter(lambda f: f.startswith(bq_files), ftp.nlst()):
+        msg = "Deleting file: {}.   Status: {}\n"
+        try:
+            callback(msg.format(file, ftp.delete(file)))
+        except error_perm as e:
+            msg = msg.format(file, e)
+            log(msg)
+            callback(msg)
 
 
 def upload_xml(ftp, data_path, xml_path, xml_files, callback):
@@ -226,10 +264,7 @@ def download_picons(ftp, src, dest, callback, files_filter=None):
         callback(str(e))
         return
 
-    files = []
-    ftp.dir(files.append)
-
-    for file in filter(picons_filter_function(files_filter), map(lambda f: f.split()[-1], map(str.rstrip, files))):
+    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
         download_file(ftp, file, dest, callback)
 
 
@@ -241,10 +276,7 @@ def delete_picons(ftp, callback, dest=None, files_filter=None):
             callback(str(e))
             return
 
-    files = []
-    ftp.dir(files.append)
-
-    for file in filter(picons_filter_function(files_filter), map(lambda f: f.split()[-1], map(str.rstrip, files))):
+    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
         callback("Delete file: {}.   Status: {}\n".format(file, ftp.delete(file)))
 
 
@@ -263,16 +295,19 @@ def picons_filter_function(files_filter=None):
 
 def download_files(ftp, save_path, file_list, callback):
     """ Downloads files from the receiver via FTP. """
-    files = []
-    ftp.dir(files.append)
-
-    for file in map(lambda f: f.split()[-1], filter(lambda s: s.endswith(file_list), map(str.rstrip, files))):
+    for file in filter(lambda s: s.endswith(file_list), ftp.nlst()):
         download_file(ftp, file, save_path, callback)
 
 
 def download_file(ftp, name, save_path, callback):
     with open(save_path + name, "wb") as f:
-        callback("Downloading file: {}.   Status: {}\n".format(name, str(ftp.retrbinary("RETR " + name, f.write))))
+        msg = "Downloading file: {}.   Status: {}\n"
+        try:
+            callback(msg.format(name, str(ftp.retrbinary("RETR " + name, f.write))))
+        except error_perm as e:
+            msg = msg.format(name, e)
+            log(msg)
+            callback(msg)
 
 
 def send_file(file_name, path, ftp, callback):
