@@ -2071,10 +2071,17 @@ class Application(Gtk.Application):
             self.show_error_dialog("No m3u file is selected!")
             return
 
-        channels = parse_m3u(response, self._s_type)
+        self._wait_dialog.show()
+        self.get_m3u(response)
 
-        if channels and self._bq_selected:
-            self.append_imported_services(channels)
+    @run_task
+    def get_m3u(self, path):
+        try:
+            channels = parse_m3u(path, self._s_type)
+            if channels and self._bq_selected:
+                GLib.idle_add(self.append_imported_services, channels)
+        finally:
+            GLib.idle_add(self._wait_dialog.hide)
 
     def append_imported_services(self, services):
         bq_services = self._bouquets.get(self._bq_selected)

@@ -21,15 +21,27 @@ class StreamType(Enum):
     E_SERVICE_URI = "8193"
 
 
-def parse_m3u(path, s_type):
-    with open(path) as file:
+def parse_m3u(path, s_type, detect_encoding=True):
+    with open(path, "rb") as file:
+        data = file.read()
+        encoding = "utf-8"
+
+        if detect_encoding:
+            try:
+                import chardet
+            except ModuleNotFoundError:
+                pass
+            else:
+                enc = chardet.detect(data)
+                encoding = enc.get("encoding", "utf-8")
+
         aggr = [None] * 10
         services = []
         groups = set()
         counter = 0
         name = None
 
-        for line in file.readlines():
+        for line in str(data, encoding=encoding, errors="ignore").splitlines():
             if line.startswith("#EXTINF"):
                 name = line[1 + line.index(","):].strip()
             elif line.startswith("#EXTGRP") and s_type is SettingsType.ENIGMA_2:
