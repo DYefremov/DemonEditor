@@ -23,8 +23,8 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * **Ctrl + X** - only in bouquet list.
 * **Ctrl + C** - only in services list.                                                              
 Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                                                                                     
-* **Ctrl + Insert** - copies the selected channels from the main list to the the bouquet beginning                                                           
- or inserts (creates) a new bouquet.                                                                                    
+* **Ctrl + Insert** - copies the selected channels from the main list to the bouquet  
+  beginning or inserts (creates) a new bouquet.  
 * **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.
 * **Ctrl + E** - edit.                                                                                                                                                                                                                                                                                                                    
 * **Ctrl + R, F2** - rename.                                                                                                                                                                                                                                                                                                                     
@@ -49,13 +49,12 @@ For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 ## Minimum requirements
 *Python >= 3.5.2, GTK+ >= 3.16 with PyGObject bindings, python3-requests.*   
    
-***Optional:** python3-gi-cairo, python3-pil.*                        
+***Optional:** python3-gi-cairo, python3-pil, python3-chardet.*                        
 ## Installation and Launch
 * ### Linux                                                                                                          
-To start the program, in most cases it is enough to download the [archive](https://github.com/DYefremov/DemonEditor/archive/master.zip), unpack and run it by                                                   
-double clicking on DemonEditor.desktop in the root directory, or launching from the console   
-with the command:
-```./start.py```                                                                              
+To start the program, in most cases it is enough to download the [archive](https://github.com/DYefremov/DemonEditor/archive/master.zip), unpack  
+and run it by double clicking on DemonEditor.desktop in the root directory,  
+or launching from the console with the command:```./start.py```                                                                                
 Extra folders can be deleted, excluding the *app* folder and root files like *DemonEditor.desktop* and *start.py*!      
 
 To create a simple **debian package**, you can use the *build-deb.sh.*                                                   
