@@ -591,8 +591,8 @@ def get_bouquets_names(model):
 # ***************** Others *********************#
 
 def update_entry_data(entry, dialog, settings):
-    """ Updates value in text entry from chooser dialog """
-    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, settings=settings)
+    """ Updates value in text entry from chooser dialog. """
+    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, settings=settings, create_dir=True)
     if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
         entry.set_text(response)
         return response

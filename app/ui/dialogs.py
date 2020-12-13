@@ -74,12 +74,12 @@ class WaitDialog:
 
 
 def show_dialog(dialog_type, transient, text=None, settings=None, action_type=None, file_filter=None, buttons=None,
-                title=None):
+                title=None, create_dir=False):
     """ Shows dialogs by name. """
     if dialog_type in (DialogType.INFO, DialogType.ERROR):
         return get_message_dialog(transient, dialog_type, Gtk.ButtonsType.OK, text)
     elif dialog_type is DialogType.CHOOSER and settings:
-        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons, title)
+        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons, title, create_dir)
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
@@ -103,13 +103,13 @@ def get_chooser_dialog(transient, settings, name, patterns, title=None):
                        title=title)
 
 
-def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None):
+def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None, dirs=False):
     text = get_message(text) if text else ""
     action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
     buttons = buttons or (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
     dialog = Gtk.FileChooserDialog(text, transient, action_type, buttons, use_header_bar=IS_GNOME_SESSION)
     dialog.set_title(get_message(title) if title else "")
-    dialog.set_create_folders(False)
+    dialog.set_create_folders(dirs)
 
     if file_filter is not None:
         dialog.add_filter(file_filter)
