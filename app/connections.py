@@ -44,15 +44,13 @@ class HttpApiException(Exception):
 
 
 class UtfFTP(FTP):
-    """ FTP class wrapper.
-
-        It is used to read settings and skip errors related to reading
-        file names in encoding other than UTF-8 or Latin-1.
-    """
+    """ FTP class wrapper. """
 
     def retrlines(self, cmd, callback=None):
         """ Small modification of the original method.
 
+            It is used to retrieve data in line mode and skip errors related
+            to reading file names in encoding other than UTF-8 or Latin-1.
             Decode errors are ignored [UnicodeDecodeError, etc].
          """
         if callback is None:
@@ -76,6 +74,246 @@ class UtfFTP(FTP):
                 callback(line)
         return self.voidresp()
 
+    # ***************** Download ******************* #
+
+    def download_files(self, save_path, file_list, callback=None):
+        """ Downloads files from the receiver via FTP. """
+        for file in filter(lambda s: s.endswith(file_list), self.nlst()):
+            self.download_file(file, save_path, callback)
+
+    def download_file(self, name, save_path, callback=None):
+        with open(save_path + name, "wb") as f:
+            msg = "Downloading file: {}.   Status: {}\n"
+            try:
+                resp = str(self.retrbinary("RETR " + name, f.write))
+            except error_perm as e:
+                resp = str(e)
+                msg = msg.format(name, e)
+                log(msg)
+            else:
+                msg = msg.format(name, resp)
+
+            if callback:
+                callback(msg)
+
+            return resp
+
+    def download_dir(self, path, save_path, callback=None):
+        """  Downloads directory from FTP with all contents.
+
+            Base implementation [prototype].
+            Creates a leaf directory and all intermediate ones. This is recursive.
+         """
+        files = []
+        self.dir(path, files.append)
+        for f in files:
+            f_data = f.split()
+            f_path = os.path.join(path, " ".join(f_data[8:]))
+
+            if f_data[0][0] == "d":
+                try:
+                    os.makedirs(os.path.join(save_path, f_path), exist_ok=True)
+                except OSError as e:
+                    msg = "Download dir error: {}".format(e)
+                    log(msg)
+                    return "500 " + msg
+                else:
+                    self.download_dir(f_path, save_path, callback)
+            else:
+                try:
+                    self.download_file(f_path, save_path, callback)
+                except OSError as e:
+                    log("Download dir error: {}".format(e))
+
+        resp = "226 Transfer complete."
+        msg = "Copy directory {}.   Status: {}\n".format(path, resp)
+        log(msg)
+
+        if callback:
+            callback(msg)
+
+        return resp
+
+    def download_xml(self, data_path, xml_path, xml_files, callback):
+        """ Used for download *.xml files. """
+        self.cwd(xml_path)
+        self.download_files(data_path, xml_files, callback)
+
+    def download_picons(self, src, dest, callback, files_filter=None):
+        try:
+            self.cwd(src)
+        except error_perm as e:
+            callback(str(e))
+            return
+
+        for file in filter(picons_filter_function(files_filter), self.nlst()):
+            self.download_file(file, dest, callback)
+
+    # ***************** Uploading ******************* #
+
+    def upload_bouquets(self, data_path, remove_unused, callback):
+        if remove_unused:
+            self.remove_unused_bouquets(callback)
+        self.upload_files(data_path, BQ_FILES_LIST, callback)
+
+    def upload_files(self, data_path, file_list, callback):
+        for file_name in os.listdir(data_path):
+            if file_name in STC_XML_FILE or file_name in WEB_TV_XML_FILE:
+                continue
+            if file_name.endswith(file_list):
+                self.send_file(file_name, data_path, callback)
+
+    def upload_xml(self, data_path, xml_path, xml_files, callback):
+        """ Used for transfer *.xml files. """
+        self.cwd(xml_path)
+        for xml_file in xml_files:
+            self.send_file(xml_file, data_path, callback)
+
+    def upload_picons(self, src, dest, callback, files_filter=None):
+        try:
+            self.cwd(dest)
+        except error_perm as e:
+            if str(e).startswith("550"):
+                self.mkd(dest)  # if not exist
+                self.cwd(dest)
+
+        for file_name in filter(picons_filter_function(files_filter), os.listdir(src)):
+            self.send_file(file_name, src, callback)
+
+    def remove_unused_bouquets(self, callback):
+        bq_files = ("userbouquet.", "bouquets.xml", "ubouquets.xml")
+
+        for file in filter(lambda f: f.startswith(bq_files), self.nlst()):
+            self.delete_file(file, callback)
+
+    def send_file(self, file_name, path, callback=None):
+        """ Opens the file in binary mode and transfers into receiver """
+        file_src = path + file_name
+        resp = "500"
+        if not os.path.isfile(file_src):
+            log("Uploading file: '{}'. File not found. Skipping.".format(file_src))
+            return resp + " File not found."
+
+        with open(file_src, "rb") as f:
+            msg = "Uploading file: {}.   Status: {}\n"
+            try:
+                resp = str(self.storbinary("STOR " + file_name, f))
+            except Error as e:
+                resp = str(e)
+                msg = msg.format(file_name, resp)
+                log(msg)
+            else:
+                msg = msg.format(file_name, resp)
+
+            if callback:
+                callback(msg)
+
+        return resp
+
+    def upload_dir(self, path, callback=None):
+        """ Uploads directory to FTP with all contents.
+
+            Base implementation [prototype].
+            Creates a leaf directory and all intermediate ones. This is recursive.
+        """
+        try:
+            files = os.listdir(path)
+        except OSError as e:
+            log(e)
+        else:
+            os.chdir(path)
+            for f in files:
+                file = r"{}{}".format(path, f)
+                if os.path.isfile(file):
+                    self.send_file(f, path, callback)
+                elif os.path.isdir(file):
+                    try:
+                        self.mkd(f)
+                        self.cwd(f)
+                    except Error as e:
+                        log(e)
+                    else:
+                        self.upload_dir(file + "/")
+
+            self.cwd("..")
+            os.chdir("..")
+
+        return "200"
+
+    # ****************** Deletion ******************** #
+
+    def delete_picons(self, callback, dest=None, files_filter=None):
+        if dest:
+            try:
+                self.cwd(dest)
+            except Error as e:
+                callback(str(e))
+                return
+
+        for file in filter(picons_filter_function(files_filter), self.nlst()):
+            self.delete_file(file, callback)
+
+    def delete_file(self, file, callback=log):
+        msg = "Deleting file: {}.   Status: {}\n"
+        try:
+            resp = self.delete(file)
+        except Error as e:
+            resp = str(e)
+            msg = msg.format(file, resp)
+            log(msg)
+        else:
+            msg = msg.format(file, resp)
+
+        if callback:
+            callback(msg)
+
+        return resp
+
+    def delete_dir(self, path, callback=None):
+        files = []
+        self.dir(path, files.append)
+        for f in files:
+            f_data = f.split()
+            name = " ".join(f_data[8:])
+            f_path = path + "/" + name
+
+            if f_data[0][0] == "d":
+                self.delete_dir(f_path, callback)
+            else:
+                self.delete_file(f_path, callback)
+
+        msg = "Remove directory {}.   Status: {}\n"
+        try:
+            resp = self.rmd(path)
+        except Error as e:
+            msg = msg.format(path, e)
+            log(msg)
+            return "500"
+        else:
+            msg = msg.format(path, resp)
+            log("Remove directory: {}.   Status: {}\n".format(path, resp))
+
+        if callback:
+            callback(msg)
+
+        return resp
+
+    def rename_file(self, from_name, to_name, callback=None):
+        msg = "File rename: {}.   Status: {}\n"
+        try:
+            resp = self.rename(from_name, to_name)
+        except Error as e:
+            resp = str(e)
+            msg = msg.format(from_name, resp)
+            log(msg)
+        else:
+            msg = msg.format(from_name, resp)
+
+        if callback:
+            callback(msg)
+
+        return resp
+
 
 def download_data(*, settings, download_type=DownloadType.ALL, callback=log, files_filter=None):
     with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
@@ -87,17 +325,17 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
             ftp.cwd(settings.services_path)
             file_list = BQ_FILES_LIST + DATA_FILES_LIST if download_type is DownloadType.ALL else BQ_FILES_LIST
-            download_files(ftp, save_path, file_list, callback)
+            ftp.download_files(save_path, file_list, callback)
         # *.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES):
-            download_xml(ftp, save_path, settings.satellites_xml_path, STC_XML_FILE, callback)
+            ftp.download_xml(save_path, settings.satellites_xml_path, STC_XML_FILE, callback)
         if download_type in (DownloadType.ALL, DownloadType.WEBTV):
-            download_xml(ftp, save_path, settings.satellites_xml_path, WEB_TV_XML_FILE, callback)
+            ftp.download_xml(save_path, settings.satellites_xml_path, WEB_TV_XML_FILE, callback)
 
         if download_type is DownloadType.PICONS:
             picons_path = settings.picons_local_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
-            download_picons(ftp, settings.picons_path, picons_path, callback, files_filter)
+            ftp.download_picons(settings.picons_path, picons_path, callback, files_filter)
         # epg.dat
         if download_type is DownloadType.EPG:
             stb_path = settings.services_path
@@ -107,13 +345,13 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
                 save_path = epg_options.get("epg_dat_path", save_path)
 
             ftp.cwd(stb_path)
-            download_files(ftp, save_path, "epg.dat", callback)
+            ftp.download_files(save_path, "epg.dat", callback)
 
         callback("\nDone.\n")
 
 
 def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
-                callback=print, done_callback=None, use_http=False, files_filter=None):
+                callback=log, done_callback=None, use_http=False, files_filter=None):
     s_type = settings.setting_type
     data_path = settings.data_local_path
     host = settings.host
@@ -162,26 +400,26 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             services_path = settings.services_path
 
             if download_type is DownloadType.SATELLITES:
-                upload_xml(ftp, data_path, sat_xml_path, STC_XML_FILE, callback)
+                ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
 
             if s_type is SettingsType.NEUTRINO_MP and download_type is DownloadType.WEBTV:
-                upload_xml(ftp, data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
+                ftp.upload_xml(data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
 
             if download_type is DownloadType.BOUQUETS:
                 ftp.cwd(services_path)
-                upload_bouquets(ftp, data_path, remove_unused, callback)
+                ftp.upload_bouquets(data_path, remove_unused, callback)
 
             if download_type is DownloadType.ALL:
-                upload_xml(ftp, data_path, sat_xml_path, STC_XML_FILE, callback)
+                ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
                 if s_type is SettingsType.NEUTRINO_MP:
-                    upload_xml(ftp, data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
+                    ftp.upload_xml(data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
 
                 ftp.cwd(services_path)
-                upload_bouquets(ftp, data_path, remove_unused, callback)
-                upload_files(ftp, data_path, DATA_FILES_LIST, callback)
+                ftp.upload_bouquets(data_path, remove_unused, callback)
+                ftp.upload_files(data_path, DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                upload_picons(ftp, settings.picons_local_path, settings.picons_path, callback, files_filter)
+                ftp.upload_picons(settings.picons_local_path, settings.picons_path, callback, files_filter)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino
@@ -203,122 +441,19 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             ht.close()
 
 
-def upload_bouquets(ftp, data_path, remove_unused, callback):
-    if remove_unused:
-        remove_unused_bouquets(ftp, callback)
-    upload_files(ftp, data_path, BQ_FILES_LIST, callback)
-
-
-def upload_files(ftp, data_path, file_list, callback):
-    for file_name in os.listdir(data_path):
-        if file_name in STC_XML_FILE or file_name in WEB_TV_XML_FILE:
-            continue
-        if file_name.endswith(file_list):
-            send_file(file_name, data_path, ftp, callback)
-
-
-def remove_unused_bouquets(ftp, callback):
-    bq_files = ("userbouquet.", "bouquets.xml", "ubouquets.xml")
-
-    for file in filter(lambda f: f.startswith(bq_files), ftp.nlst()):
-        msg = "Deleting file: {}.   Status: {}\n"
-        try:
-            callback(msg.format(file, ftp.delete(file)))
-        except error_perm as e:
-            msg = msg.format(file, e)
-            log(msg)
-            callback(msg)
-
-
-def upload_xml(ftp, data_path, xml_path, xml_files, callback):
-    """ Used for transfer *.xml files. """
-    ftp.cwd(xml_path)
-    for xml_file in xml_files:
-        send_file(xml_file, data_path, ftp, callback)
-
-
-def download_xml(ftp, data_path, xml_path, xml_files, callback):
-    """ Used for download *.xml files. """
-    ftp.cwd(xml_path)
-    download_files(ftp, data_path, xml_files, callback)
-
-
 # ***************** Picons *******************#
 
-def upload_picons(ftp, src, dest, callback, files_filter=None):
-    try:
-        ftp.cwd(dest)
-    except error_perm as e:
-        if str(e).startswith("550"):
-            ftp.mkd(dest)  # if not exist
-            ftp.cwd(dest)
-
-    for file_name in filter(picons_filter_function(files_filter), os.listdir(src)):
-        send_file(file_name, src, ftp, callback)
-
-
-def download_picons(ftp, src, dest, callback, files_filter=None):
-    try:
-        ftp.cwd(src)
-    except error_perm as e:
-        callback(str(e))
-        return
-
-    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
-        download_file(ftp, file, dest, callback)
-
-
-def delete_picons(ftp, callback, dest=None, files_filter=None):
-    if dest:
-        try:
-            ftp.cwd(dest)
-        except error_perm as e:
-            callback(str(e))
-            return
-
-    for file in filter(picons_filter_function(files_filter), ftp.nlst()):
-        callback("Delete file: {}.   Status: {}\n".format(file, ftp.delete(file)))
-
-
 def remove_picons(*, settings, callback, done_callback=None, files_filter=None):
-    with FTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+    with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
-        delete_picons(ftp, callback, settings.picons_path, files_filter)
+        ftp.delete_picons(callback, settings.picons_path, files_filter)
         if done_callback:
             done_callback()
 
 
 def picons_filter_function(files_filter=None):
     return lambda f: f in files_filter if files_filter else f.endswith(PICONS_SUF)
-
-
-def download_files(ftp, save_path, file_list, callback):
-    """ Downloads files from the receiver via FTP. """
-    for file in filter(lambda s: s.endswith(file_list), ftp.nlst()):
-        download_file(ftp, file, save_path, callback)
-
-
-def download_file(ftp, name, save_path, callback):
-    with open(save_path + name, "wb") as f:
-        msg = "Downloading file: {}.   Status: {}\n"
-        try:
-            callback(msg.format(name, str(ftp.retrbinary("RETR " + name, f.write))))
-        except error_perm as e:
-            msg = msg.format(name, e)
-            log(msg)
-            callback(msg)
-
-
-def send_file(file_name, path, ftp, callback):
-    """ Opens the file in binary mode and transfers into receiver """
-    file_src = path + file_name
-    if not os.path.isfile(file_src):
-        log("Uploading file: '{}'. File not found. Skipping.".format(file_src))
-        return
-
-    with open(file_src, "rb") as f:
-        callback("Uploading file: {}.   Status: {}\n".format(file_name, str(ftp.storbinary("STOR " + file_name, f))))
 
 
 def http(user, password, url, callback, use_ssl=False):
