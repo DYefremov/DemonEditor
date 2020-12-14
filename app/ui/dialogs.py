@@ -74,12 +74,12 @@ class WaitDialog:
 
 
 def show_dialog(dialog_type, transient, text=None, settings=None, action_type=None, file_filter=None, buttons=None,
-                title=None):
+                title=None, create_dir=False):
     """ Shows dialogs by name. """
     if dialog_type in (DialogType.INFO, DialogType.ERROR):
         return get_message_dialog(transient, dialog_type, Gtk.ButtonsType.OK, text)
     elif dialog_type is DialogType.CHOOSER and settings:
-        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons, title)
+        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons, title, create_dir)
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
@@ -103,10 +103,10 @@ def get_chooser_dialog(transient, settings, name, patterns, title=None):
                        title=title)
 
 
-def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None):
+def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None, dirs=False):
     action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
     dialog = Gtk.FileChooserNative.new(get_message(title) if title else "", transient, action_type)
-    dialog.set_create_folders(False)
+    dialog.set_create_folders(dirs)
     dialog.set_modal(True)
 
     if file_filter is not None:
