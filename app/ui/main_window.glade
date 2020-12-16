@@ -181,6 +181,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-find</property>
   </object>
+  <object class="GtkImage" id="ftp_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-server</property>
+  </object>
   <object class="GtkImage" id="import_bouquet_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1038,7 +1043,7 @@ Author: Dmitriy Yefremov
             <property name="margin_right">1</property>
           </object>
           <packing>
-            <property name="position">2</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -1052,7 +1057,7 @@ Author: Dmitriy Yefremov
             <signal name="changed" handler="on_profile_changed" swapped="no"/>
           </object>
           <packing>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -1138,7 +1143,7 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="position">4</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -1262,6 +1267,49 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox" id="tools_button_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_right">5</property>
+            <property name="layout_style">expand</property>
+            <child>
+              <object class="GtkToggleButton" id="control_button">
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Control</property>
+                <property name="action_name">app.on_remote</property>
+                <property name="image">control_image</property>
+                <property name="always_show_image">True</property>
+                <accelerator key="t" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="ftp_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">FTP client</property>
+                <property name="image">ftp_image</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
             <property name="position">6</property>
           </packing>
         </child>
@@ -1416,7 +1464,7 @@ Author: Dmitriy Yefremov
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">1</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </object>
@@ -2967,26 +3015,6 @@ Author: Dmitriy Yefremov
                     <property name="position">0</property>
                   </packing>
                 </child>
-                <child type="center">
-                  <object class="GtkToggleButton" id="control_button">
-                    <property name="name">status-bar-button</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Control</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="action_name">app.on_remote</property>
-                    <property name="image">control_image</property>
-                    <property name="always_show_image">True</property>
-                    <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
                 <child>
                   <object class="GtkImage" id="http_status_image">
                     <property name="can_focus">False</property>
@@ -3146,6 +3174,23 @@ Author: Dmitriy Yefremov
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRevealer" id="ftp_revealer">
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="transition_type">crossfade</property>
+            <property name="reveal_child">True</property>
+            <signal name="realize" handler="on_ftp_realize" swapped="no"/>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

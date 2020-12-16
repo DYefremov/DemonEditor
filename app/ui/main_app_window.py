@@ -157,6 +157,7 @@ class Application(Gtk.Application):
                     "on_http_status_visible": self.on_http_status_visible,
                     "on_drawing_area_realize": self.on_drawing_area_realize,
                     "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
+                    "on_ftp_realize": self.on_ftp_realize,
                     "on_main_window_state": self.on_main_window_state,
                     "on_record": self.on_record,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
@@ -199,6 +200,7 @@ class Application(Gtk.Application):
         self._fav_click_mode = None
         self._links_transmitter = None
         self._control_box = None
+        self._ftp_client = None
         # Colors
         self._use_colors = False
         self._NEW_COLOR = None  # Color for new services in the main list
@@ -256,7 +258,12 @@ class Application(Gtk.Application):
         self._control_button = builder.get_object("control_button")
         self._receiver_info_box.bind_property("visible", self._control_button, "visible")
         self._control_revealer = builder.get_object("control_revealer")
-        # Force ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
+        # FTP client
+        self._ftp_button = builder.get_object("ftp_button")
+        self._ftp_revealer = builder.get_object("ftp_revealer")
+        self._ftp_button.bind_property("active", self._ftp_revealer, "visible")
+        self._ftp_button.set_visible(self._settings.is_enable_experimental)
+        # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
         # Clipboard
@@ -312,9 +319,9 @@ class Application(Gtk.Application):
                       self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
         # Style
-        self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def do_startup(self):
@@ -1788,11 +1795,15 @@ class Application(Gtk.Application):
         if active in self._settings.profiles:
             self.set_profile(active)
 
+        gen = self.init_http_api()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+        if self._ftp_button.get_active() and self._ftp_client:
+            self._ftp_client.init_ftp()
+
         if self._app_info_box.get_visible():
             return
 
-        gen = self.init_http_api()
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         if changed:
             self.open_data()
 
@@ -2636,6 +2647,15 @@ class Application(Gtk.Application):
 
     def on_http_status_visible(self, img):
         self._control_button.set_active(False)
+
+    # ****************** FTP client ********************* #
+
+    def on_ftp_realize(self, revealer):
+        if not self._ftp_client:
+            from app.ui.ftp import FtpClientBox
+            revealer.set_visible(True)
+            self._ftp_client = FtpClientBox(self, self._settings)
+            revealer.add(self._ftp_client)
 
     # ***************** Filter and search ********************* #
 
