@@ -146,6 +146,7 @@ class KeyboardKey(Enum):
     LEFT = 123 if IS_DARWIN else 113
     RIGHT = 123 if IS_DARWIN else 114
     F2 = 120 if IS_DARWIN else 68
+    F7 = 98 if IS_DARWIN else 73
     SPACE = 49 if IS_DARWIN else 65
     DELETE = 51 if IS_DARWIN else 119
     BACK_SPACE = 76 if IS_DARWIN else 22
