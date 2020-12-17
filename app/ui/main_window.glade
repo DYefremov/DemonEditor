@@ -33,13 +33,6 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
-  <object class="GtkImage" id="add_bouquet_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="margin_left">5</property>
-    <property name="icon_name">bookmark-new-symbolic</property>
-    <property name="icon_size">1</property>
-  </object>
   <object class="GtkImage" id="backups_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -341,33 +334,33 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_add_iptv_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_iptv</property>
                 <property name="label" translatable="yes">Add IPTV or stream service</property>
+                <signal name="activate" handler="on_iptv" swapped="no"/>
               </object>
             </child>
             <child>
               <object class="GtkMenuItem" id="fav_import_yt_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_import_yt_list</property>
                 <property name="label" translatable="yes">Import YouTube playlist</property>
+                <signal name="activate" handler="on_import_yt_list" swapped="no"/>
               </object>
             </child>
             <child>
               <object class="GtkMenuItem" id="fav_import_m3u_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_import_m3u</property>
                 <property name="label" translatable="yes">Import m3u</property>
                 <property name="use_underline">True</property>
+                <signal name="activate" handler="on_import_m3u" swapped="no"/>
               </object>
             </child>
             <child>
               <object class="GtkMenuItem" id="fav_export_m3u_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_export_to_m3u</property>
                 <property name="label" translatable="yes">Export to m3u</property>
+                <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
               </object>
             </child>
             <child>
@@ -380,8 +373,8 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_epg_configuration_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_epg_list_configuration</property>
                 <property name="label" translatable="yes">EPG configuration</property>
+                <signal name="activate" handler="on_epg_list_configuration" swapped="no"/>
               </object>
             </child>
             <child>
@@ -394,8 +387,8 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_iptv_list_configuration_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_iptv_list_configuration</property>
                 <property name="label" translatable="yes">List configuration</property>
+                <signal name="activate" handler="on_iptv_list_configuration" swapped="no"/>
               </object>
             </child>
             <child>
@@ -408,8 +401,8 @@ Author: Dmitriy Yefremov
               <object class="GtkMenuItem" id="fav_remove_all_unavailable_popup_item">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="action_name">app.on_remove_all_unavailable</property>
                 <property name="label" translatable="yes">Remove all unavailable</property>
+                <signal name="activate" handler="on_remove_all_unavailable" swapped="no"/>
               </object>
             </child>
           </object>
@@ -968,14 +961,14 @@ Author: Dmitriy Yefremov
           <object class="GtkBox" id="top_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">10</property>
             <child type="center">
               <object class="GtkBox" id="top_toolbar">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin_left">15</property>
-                <property name="margin_right">5</property>
+                <property name="margin_left">10</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="spacing">10</property>
@@ -1273,26 +1266,6 @@ Author: Dmitriy Yefremov
                         <property name="position">5</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkButton" id="add_bouquet_tool_button">
-                        <property name="label" translatable="yes"> </property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Create bouquet</property>
-                        <property name="halign">start</property>
-                        <property name="valign">start</property>
-                        <property name="image">add_bouquet_image</property>
-                        <property name="always_show_image">True</property>
-                        <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">5</property>
-                        <property name="non_homogeneous">True</property>
-                      </packing>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1308,27 +1281,86 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="control_button">
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="halign">center</property>
+              <object class="GtkButtonBox" id="toolbar_extra_tools_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="valign">center</property>
-                <property name="margin_right">15</property>
-                <property name="action_name">app.on_remote</property>
+                <property name="margin_right">10</property>
+                <property name="homogeneous">True</property>
+                <property name="layout_style">expand</property>
                 <child>
-                  <object class="GtkImage" id="control_button_image">
-                    <property name="visible">True</property>
+                  <object class="GtkButton" id="add_bouquet_tool_button">
+                    <property name="width_request">32</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">input-gaming-symbolic</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Create bouquet</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="add_bouquet_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">bookmark-new-symbolic</property>
+                        <property name="icon_size">1</property>
+                      </object>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
-                <accelerator key="i" signal="clicked" modifiers="Primary"/>
+                <child>
+                  <object class="GtkToggleButton" id="control_button">
+                    <property name="width_request">32</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="action_name">app.on_remote</property>
+                    <child>
+                      <object class="GtkImage" id="control_button_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">input-gaming-symbolic</property>
+                      </object>
+                    </child>
+                    <accelerator key="t" signal="clicked" modifiers="Primary"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="ftp_button">
+                    <property name="width_request">32</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="ftp_tool_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">FTP client</property>
+                        <property name="icon_name">network-server-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -3040,6 +3072,22 @@ Author: Dmitriy Yefremov
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkRevealer" id="ftp_revealer">
+                <property name="can_focus">False</property>
+                <property name="transition_type">crossfade</property>
+                <property name="reveal_child">True</property>
+                <signal name="realize" handler="on_ftp_realize" swapped="no"/>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
