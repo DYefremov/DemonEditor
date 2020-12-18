@@ -61,7 +61,7 @@ class SettingsDialog:
                     "on_theme_changed": self.on_theme_changed,
                     "on_theme_add": self.on_theme_add,
                     "on_theme_remove": self.on_theme_remove,
-                    "on_icon_theme_changed": self.on_icon_theme_changed,
+                    "on_appearance_changed": self.on_appearance_changed,
                     "on_icon_theme_add": self.on_icon_theme_add,
                     "on_icon_theme_remove": self.on_icon_theme_remove}
 
@@ -196,6 +196,7 @@ class SettingsDialog:
             self._theme_combo_box = builder.get_object("theme_combo_box")
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
             self._dark_mode_switch = builder.get_object("dark_mode_switch")
+            self._layout_switch = builder.get_object("layout_switch")
             self._themes_support_switch = builder.get_object("themes_support_switch")
             self._themes_support_switch.bind_property("active", builder.get_object("gtk_theme_frame"), "sensitive")
             self._themes_support_switch.bind_property("active", builder.get_object("icon_theme_frame"), "sensitive")
@@ -361,6 +362,7 @@ class SettingsDialog:
 
         if self._ext_settings.is_darwin:
             self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
+            self._ext_settings.alternate_layout = self._layout_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
@@ -705,7 +707,7 @@ class SettingsDialog:
             Gtk.Settings().get_default().set_property("gtk-theme-name", "")
             self.remove_theme(self._theme_combo_box, self._ext_settings.themes_path)
 
-    def on_icon_theme_changed(self, button, state=False):
+    def on_appearance_changed(self, button, state=False):
         if self._main_stack.get_visible_child_name() != "appearance":
             return
         self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
@@ -778,6 +780,7 @@ class SettingsDialog:
     @run_idle
     def init_appearance(self):
         self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
+        self._layout_switch.set_active(self._ext_settings.alternate_layout)
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
         if t_support:

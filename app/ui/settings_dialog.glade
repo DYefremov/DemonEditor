@@ -2465,24 +2465,50 @@ Author: Dmitriy Yefremov
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkFrame" id="dark_mode_frame">
+                      <object class="GtkFrame" id="style_frame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkBox" id="dark_mode_box">
+                          <object class="GtkBox" id="style_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="margin_left">5</property>
                             <property name="margin_right">5</property>
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkLabel" id="dark_mode_label">
+                              <object class="GtkBox" id="dark_mode_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Enable Dark Mode</property>
+                                <child>
+                                  <object class="GtkLabel" id="dark_mode_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Enable Dark Mode</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSwitch" id="dark_mode_switch">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <signal name="state-set" handler="on_appearance_changed" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2491,15 +2517,39 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSwitch" id="dark_mode_switch">
+                              <object class="GtkBox" id="layout_box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <signal name="state-set" handler="on_icon_theme_changed" swapped="no"/>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Enables an alternate layout of the main window elements.</property>
+                                <child>
+                                  <object class="GtkLabel" id="layout_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Enable alternate layout</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSwitch" id="layout_switch">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <signal name="state-set" handler="on_appearance_changed" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="pack_type">end</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -2557,7 +2607,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkSwitch" id="themes_support_switch">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <signal name="state-set" handler="on_icon_theme_changed" swapped="no"/>
+                                <signal name="state-set" handler="on_appearance_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2796,7 +2846,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkComboBoxText" id="icon_theme_combo_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <signal name="changed" handler="on_icon_theme_changed" swapped="no"/>
+                                <signal name="changed" handler="on_appearance_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>

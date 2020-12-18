@@ -621,6 +621,14 @@ class Settings:
         self._settings["dark_mode"] = value
 
     @property
+    def alternate_layout(self):
+        return self._settings.get("alternate_layout", IS_DARWIN)
+
+    @alternate_layout.setter
+    def alternate_layout(self, value):
+        self._settings["alternate_layout"] = value
+
+    @property
     def is_themes_support(self):
         return self._settings.get("is_themes_support", False)
 
