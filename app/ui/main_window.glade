@@ -1277,7 +1277,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -1317,6 +1317,7 @@ Author: Dmitriy Yefremov
                     <property name="width_request">32</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Control</property>
                     <property name="action_name">app.on_remote</property>
                     <child>
                       <object class="GtkImage" id="control_button_image">
@@ -1360,7 +1361,7 @@ Author: Dmitriy Yefremov
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>

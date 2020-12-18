@@ -321,6 +321,39 @@ class Application(Gtk.Application):
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        self.init_layout(builder)
+
+    def init_layout(self, builder):
+        """ Initializes an alternate layout, if enabled. """
+        if self._settings.is_darwin and self._settings.alternate_layout:
+            top_box = builder.get_object("top_box")
+            top_toolbar = builder.get_object("top_toolbar")
+            top_toolbar.set_margin_left(0)
+            top_toolbar.set_margin_right(10)
+
+            extra_box = builder.get_object("toolbar_extra_tools_box")
+            extra_box.set_margin_left(10)
+            extra_box.set_margin_right(0)
+            extra_box.reorder_child(self._ftp_button, 0)
+            extra_box.reorder_child(builder.get_object("add_bouquet_tool_button"), 2)
+
+            top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
+            top_box.set_child_packing(top_toolbar, False, True, 0, Gtk.PackType.END)
+            top_box.reorder_child(extra_box, 0)
+            top_box.reorder_child(top_toolbar, 1)
+
+            center_box = builder.get_object("center_box")
+            center_box.reorder_child(self._ftp_revealer, 0)
+            center_box.reorder_child(self._control_revealer, 1)
+            center_box.reorder_child(builder.get_object("main_box"), 2)
+
+            main_data_paned = builder.get_object("main_data_paned")
+            ch1 = main_data_paned.get_child1()
+            ch2 = main_data_paned.get_child2()
+            main_data_paned.remove(ch2)
+            main_data_paned.remove(ch1)
+            main_data_paned.pack1(ch2, True, True)
+            main_data_paned.pack2(ch1)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
