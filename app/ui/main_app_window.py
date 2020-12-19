@@ -82,7 +82,6 @@ class Application(Gtk.Application):
         self.add_main_option("debug", ord("d"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING, "", None)
 
         handlers = {"on_close_app": self.on_close_app,
-                    "on_resize": self.on_resize,
                     "on_about_app": self.on_about_app,
                     "on_settings": self.on_settings,
                     "on_profile_changed": self.on_profile_changed,
@@ -524,6 +523,10 @@ class Application(Gtk.Application):
         event.state |= MOD_MASK
 
     def on_close_app(self, *args):
+        """ Performing operations before closing the application. """
+        # Saving the current size of the application window.
+        self._settings.add("window_size", self._main_window.get_size())
+
         if self._recorder:
             if self._recorder.is_record():
                 msg = "{}\n\n\t{}".format(get_message("Recording in progress!"), get_message("Are you sure?"))
@@ -537,10 +540,6 @@ class Application(Gtk.Application):
             return True
         else:
             GLib.idle_add(self.quit)
-
-    def on_resize(self, window):
-        """ Stores new size properties for app window after resize """
-        self._settings.add("window_size", window.get_size())
 
     @run_idle
     def on_about_app(self, action, value=None):
