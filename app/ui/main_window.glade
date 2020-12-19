@@ -947,7 +947,6 @@ Author: Dmitriy Yefremov
     <property name="icon_name">demon-editor</property>
     <property name="gravity">center</property>
     <property name="startup_id">DemonEditor</property>
-    <signal name="check-resize" handler="on_resize" swapped="no"/>
     <signal name="delete-event" handler="on_close_app" swapped="no"/>
     <child>
       <placeholder/>
