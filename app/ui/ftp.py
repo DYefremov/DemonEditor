@@ -3,7 +3,7 @@ import subprocess
 from collections import namedtuple
 from datetime import datetime
 from enum import IntEnum
-from ftplib import error_perm
+from ftplib import all_errors
 from pathlib import Path
 from shutil import rmtree
 from urllib.parse import urlparse, unquote
@@ -16,7 +16,7 @@ from app.ui.dialogs import show_dialog, DialogType
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
 
-File = namedtuple("File", ["icon", "name", "size", "date", "attr"])
+File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
 
 
 class FtpClientBox(Gtk.HBox):
@@ -25,6 +25,7 @@ class FtpClientBox(Gtk.HBox):
     FOLDER = "<Folder>"
     LINK = "<Link>"
     MAX_SIZE = 10485760  # 10 MB file limit
+    URI_SEP = "::::"
 
     class Column(IntEnum):
         ICON = 0
@@ -32,6 +33,7 @@ class FtpClientBox(Gtk.HBox):
         SIZE = 2
         DATE = 3
         ATTR = 4
+        EXTRA = 5
 
     def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,7 +45,9 @@ class FtpClientBox(Gtk.HBox):
         self._ftp = None
         self._select_enabled = True
 
-        handlers = {"on_ftp_row_activated": self.on_ftp_row_activated,
+        handlers = {"on_connect": self.on_connect,
+                    "on_disconnect": self.on_disconnect,
+                    "on_ftp_row_activated": self.on_ftp_row_activated,
                     "on_file_row_activated": self.on_file_row_activated,
                     "on_ftp_edit": self.on_ftp_edit,
                     "on_ftp_edited": self.on_ftp_edited,
@@ -76,19 +80,27 @@ class FtpClientBox(Gtk.HBox):
         self._file_view = builder.get_object("file_view")
         self._file_model = builder.get_object("file_list_store")
         self._file_name_renderer = builder.get_object("file_name_column_renderer")
+        # Buttons
+        self._connect_button = builder.get_object("connect_button")
+        disconnect_button = builder.get_object("disconnect_button")
+        disconnect_button.bind_property("visible", builder.get_object("ftp_create_folder_menu_item"), "sensitive")
+        disconnect_button.bind_property("visible", builder.get_object("ftp_edit_menu_item"), "sensitive")
+        disconnect_button.bind_property("visible", builder.get_object("ftp_remove_menu_item"), "sensitive")
+        self._connect_button.bind_property("visible", builder.get_object("disconnect_button"), "visible", 4)
         # Force Ctrl
         self._ftp_view.connect("key-press-event", self._app.force_ctrl)
         self._file_view.connect("key-press-event", self._app.force_ctrl)
         # Icons
         theme = Gtk.IconTheme.get_default()
-        self._folder_icon = theme.load_icon("folder", 16, 0) if theme.lookup_icon("folder", 16, 0) else None
+        folder_icon = "folder-symbolic" if settings.is_darwin else "folder"
+        self._folder_icon = theme.load_icon(folder_icon, 16, 0) if theme.lookup_icon(folder_icon, 16, 0) else None
         self._link_icon = theme.load_icon("emblem-symbolic-link", 16, 0) if theme.lookup_icon("emblem-symbolic-link",
                                                                                               16, 0) else None
         # Initialization
         self.init_drag_and_drop()
         self.init_ftp()
         self.init_file_data()
-        self.show_all()
+        self.show()
 
     @run_task
     def init_ftp(self):
@@ -100,11 +112,13 @@ class FtpClientBox(Gtk.HBox):
             self._ftp = UtfFTP(host=self._settings.host, user=self._settings.user, passwd=self._settings.password)
             self._ftp.encoding = "utf-8"
             self.update_ftp_info(self._ftp.getwelcome())
-        except OSError as e:
+        except all_errors as e:
             self.update_ftp_info(str(e))
+            self.on_disconnect()
         else:
             self.init_ftp_data()
 
+    @run_task
     def init_ftp_data(self, path=None):
         if not self._ftp:
             return
@@ -112,12 +126,19 @@ class FtpClientBox(Gtk.HBox):
         if path:
             try:
                 self._ftp.cwd(path)
-            except error_perm as e:
+            except all_errors as e:
                 self.update_ftp_info(str(e))
 
         files = []
-        self._ftp.dir(files.append)
-        self.append_ftp_data(files)
+        try:
+            self._ftp.dir(files.append)
+        except all_errors as e:
+            log(e)
+            self.update_ftp_info(str(e))
+            self.on_disconnect()
+        else:
+            self.append_ftp_data(files)
+            GLib.idle_add(self._connect_button.set_visible, False)
 
     @run_task
     def init_file_data(self, path=None):
@@ -126,11 +147,11 @@ class FtpClientBox(Gtk.HBox):
     @run_idle
     def append_file_data(self, path: Path):
         self._file_model.clear()
-        self._file_model.append(File(None, self.ROOT, None, None, str(path)))
+        self._file_model.append(File(None, self.ROOT, None, None, str(path), "0"))
 
         try:
             dirs = [p for p in path.iterdir()]
-        except PermissionError as e:
+        except OSError as e:
             log(e)
         else:
             for p in dirs:
@@ -140,18 +161,20 @@ class FtpClientBox(Gtk.HBox):
                 date = datetime.fromtimestamp(st.st_mtime).strftime("%d-%m-%y %H:%M")
                 icon = None
                 if is_dir:
-                    size = self.FOLDER
+                    r_size = self.FOLDER
                     icon = self._folder_icon
                 elif p.is_symlink():
-                    size = self.LINK
+                    r_size = self.LINK
                     icon = self._link_icon
+                else:
+                    r_size = self.get_size_from_bytes(size)
 
-                self._file_model.append(File(icon=icon, name=p.name, size=size, date=date, attr=str(p.resolve())))
+                self._file_model.append(File(icon, p.name, r_size, date, str(p.resolve()), size))
 
     @run_idle
     def append_ftp_data(self, files):
         self._ftp_model.clear()
-        self._ftp_model.append(File(None, self.ROOT, None, None, self._ftp.pwd()))
+        self._ftp_model.append(File(None, self.ROOT, None, None, self._ftp.pwd(), "0"))
 
         for f in files:
             f_data = f.split()
@@ -159,16 +182,28 @@ class FtpClientBox(Gtk.HBox):
             is_dir = f_type == "d"
             is_link = f_type == "l"
             size = f_data[4]
+
             icon = None
             if is_dir:
-                size = self.FOLDER
+                r_size = self.FOLDER
                 icon = self._folder_icon
             elif is_link:
-                size = self.LINK
+                r_size = self.LINK
                 icon = self._link_icon
+            else:
+                r_size = self.get_size_from_bytes(size)
 
             date = "{}, {}  {}".format(f_data[5], f_data[6], f_data[7])
-            self._ftp_model.append(File(icon=icon, name=" ".join(f_data[8:]), size=size, date=date, attr=f_data[0]))
+            self._ftp_model.append(File(icon, " ".join(f_data[8:]), r_size, date, f_data[0], size))
+
+    def on_connect(self, item=None):
+        self.init_ftp()
+
+    def on_disconnect(self, item=None):
+        if self._ftp:
+            self._ftp.close()
+        self._connect_button.set_visible(True)
+        GLib.idle_add(self._ftp_model.clear)
 
     def on_ftp_row_activated(self, view, path, column):
         row = self._ftp_model[path][:]
@@ -178,7 +213,8 @@ class FtpClientBox(Gtk.HBox):
         if size == self.FOLDER or f_path == self.ROOT:
             self.init_ftp_data(f_path)
         else:
-            if size.isdigit() and int(size) > self.MAX_SIZE:
+            b_size = row[self.Column.EXTRA]
+            if b_size.isdigit() and int(b_size) > self.MAX_SIZE:
                 self._app.show_error_dialog("The file size is too large!")
             else:
                 self.open_ftp_file(f_path)
@@ -217,7 +253,7 @@ class FtpClientBox(Gtk.HBox):
                 try:
                     status = self._ftp.retrbinary("RETR " + f_path, tf.write)
                     self.update_ftp_info(msg.format(f_path, status))
-                except error_perm as e:
+                except all_errors as e:
                     self.update_ftp_info(msg.format(f_path, e))
 
                 tf.flush()
@@ -228,6 +264,9 @@ class FtpClientBox(Gtk.HBox):
 
     def on_ftp_edit(self, renderer):
         model, paths = self._ftp_view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
         if len(paths) > 1:
             self._app.show_error_dialog("Please, select only one item!")
             return
@@ -276,7 +315,7 @@ class FtpClientBox(Gtk.HBox):
                     row[self.Column.ATTR] = str(new_path.resolve())
 
     def on_file_remove(self, item=None):
-        if show_dialog(DialogType.QUESTION, None) != Gtk.ResponseType.OK:
+        if show_dialog(DialogType.QUESTION, self._app._main_window) != Gtk.ResponseType.OK:
             return
 
         model, paths = self._file_view.get_selection().get_selected_rows()
@@ -294,7 +333,7 @@ class FtpClientBox(Gtk.HBox):
         list(map(model.remove, to_delete))
 
     def on_ftp_file_remove(self, item=None):
-        if show_dialog(DialogType.QUESTION, None) != Gtk.ResponseType.OK:
+        if show_dialog(DialogType.QUESTION, self._app._main_window) != Gtk.ResponseType.OK:
             return
 
         model, paths = self._ftp_view.get_selection().get_selected_rows()
@@ -328,8 +367,7 @@ class FtpClientBox(Gtk.HBox):
             log(e)
             self._app.show_error_dialog(str(e))
         else:
-            itr = self._file_model.append(
-                File(icon=self._folder_icon, name=path.name, size=self.FOLDER, date="", attr=str(path.resolve())))
+            itr = self._file_model.append(File(self._folder_icon, path.name, self.FOLDER, "", str(path.resolve()), "0"))
             renderer.set_property("editable", True)
             self._file_view.set_cursor(self._file_model.get_path(itr), self._file_view.get_column(0), True)
 
@@ -344,13 +382,12 @@ class FtpClientBox(Gtk.HBox):
         try:
             folder = "{}/{}".format(cur_path, name)
             resp = self._ftp.mkd(folder)
-        except error_perm as e:
+        except all_errors as e:
             self.update_ftp_info(str(e))
             log(e)
         else:
             if resp == "{}/{}".format(cur_path, name):
-                itr = self._ftp_model.append(
-                    File(icon=self._folder_icon, name=name, size=self.FOLDER, date="", attr="drwxr-xr-x"))
+                itr = self._ftp_model.append(File(self._folder_icon, name, self.FOLDER, "", "drwxr-xr-x", "0"))
                 renderer.set_property("editable", True)
                 self._ftp_view.set_cursor(self._ftp_model.get_path(itr), self._ftp_view.get_column(0), True)
 
@@ -392,44 +429,66 @@ class FtpClientBox(Gtk.HBox):
     def on_ftp_drag_data_get(self, view, context, data, info, time):
         model, paths = view.get_selection().get_selected_rows()
         if len(paths) > 0:
-            uris = ["{}::::{}".format(r[self.Column.NAME], r[self.Column.ATTR]) for r in [model[p][:] for p in paths]]
-            data.set_uris(uris)
+            sep = self.URI_SEP if self._settings.is_darwin else "\n"
+            uris = []
+            for r in [model[p][:] for p in paths]:
+                if r[self.Column.SIZE] != self.LINK and r[self.Column.NAME] != self.ROOT:
+                    uris.append(Path("/{}:{}".format(r[self.Column.NAME], r[self.Column.ATTR])).as_uri())
+            data.set_uris([sep.join(uris)])
 
     @run_task
-    def on_ftp_drag_data_received(self, view, context, x, y, data, info, time):
+    def on_ftp_drag_data_received(self, view, context, x, y, data: Gtk.SelectionData, info, time):
+        if not self._ftp:
+            return
+
         resp = "2"
         try:
             GLib.idle_add(self._app._wait_dialog.show)
-            for uri in data.get_uris():
-                if uri.startswith("file://"):
-                    uri = urlparse(unquote(uri)).path
 
+            uris = data.get_uris()
+            if self._settings.is_darwin and len(uris) == 1:
+                uris = uris[0].split(self.URI_SEP)
+
+            for uri in uris:
+                uri = urlparse(unquote(uri)).path
                 path = Path(uri)
                 if path.is_dir():
-                    self._ftp.mkd(path.name)
+                    try:
+                        self._ftp.mkd(path.name)
+                    except all_errors as e:
+                        pass  # NOP
                     self._ftp.cwd(path.name)
-                    resp = self._ftp.upload_dir(str(path.resolve()) + "/")
+                    resp = self._ftp.upload_dir(str(path.resolve()) + "/", self.update_ftp_info)
                 else:
                     resp = self._ftp.send_file(path.name, str(path.parent) + "/", callback=self.update_ftp_info)
         finally:
             GLib.idle_add(self._app._wait_dialog.hide)
             if resp and resp[0] == "2":
-                self.init_ftp_data(self._ftp_model.get_value(self._ftp_model.get_iter_first(), self.Column.ATTR))
+                itr = self._ftp_model.get_iter_first()
+                if itr:
+                    self.init_ftp_data(self._ftp_model.get_value(itr, self.Column.ATTR))
         Gtk.drag_finish(context, True, False, time)
         return True
 
-    def on_file_drag_data_get(self, view, context, data, info, time):
+    def on_file_drag_data_get(self, view, context, data: Gtk.SelectionData, info, time):
         model, paths = view.get_selection().get_selected_rows()
         if len(paths) > 0:
-            data.set_uris([model[p][self.Column.ATTR] for p in paths])
+            sep = self.URI_SEP if self._settings.is_darwin else "\n"
+            uris = [sep.join([Path(model[p][self.Column.ATTR]).as_uri() for p in paths])]
+            data.set_uris(uris)
 
     @run_task
     def on_file_drag_data_received(self, view, context, x, y, data, info, time):
         cur_path = self._file_model.get_value(self._file_model.get_iter_first(), self.Column.ATTR) + "/"
         try:
             GLib.idle_add(self._app._wait_dialog.show)
-            for uri in data.get_uris():
-                name, sep, attr = uri.partition("::::")
+
+            uris = data.get_uris()
+            if self._settings.is_darwin and len(uris) == 1:
+                uris = uris[0].split(self.URI_SEP)
+
+            for uri in uris:
+                name, sep, attr = unquote(Path(uri).name).partition(":")
                 if not attr:
                     return True
 
@@ -437,6 +496,8 @@ class FtpClientBox(Gtk.HBox):
                     self._ftp.download_dir(name, cur_path, self.update_ftp_info)
                 else:
                     self._ftp.download_file(name, cur_path, self.update_ftp_info)
+        except OSError as e:
+            log(e)
         finally:
             GLib.idle_add(self._app._wait_dialog.hide)
             self.init_file_data(cur_path)
@@ -489,6 +550,24 @@ class FtpClientBox(Gtk.HBox):
         """ Handles a mouse click (release) to view. """
         # Enable selection.
         self._select_enabled = True
+
+    def get_size_from_bytes(self, size):
+        """ Simple convert function from bytes to other units like K, M or G. """
+        try:
+            b = float(size)
+        except ValueError:
+            return size
+        else:
+            kb, mb, gb = 1024.0, 1048576.0, 1073741824.0
+
+            if b < kb:
+                return str(b)
+            elif kb <= b < mb:
+                return "{0:.1f} K".format(b / kb)
+            elif mb <= b < gb:
+                return "{0:.1f} M".format(b / mb)
+            elif gb <= b:
+                return "{0:.1f} G".format(b / gb)
 
 
 if __name__ == '__main__':

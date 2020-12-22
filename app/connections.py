@@ -89,21 +89,21 @@ class UtfFTP(FTP):
             except error_perm as e:
                 resp = str(e)
                 msg = msg.format(name, e)
-                log(msg)
+                log(msg.rstrip())
             else:
                 msg = msg.format(name, resp)
 
-            if callback:
-                callback(msg)
+            callback(msg) if callback else log(msg.rstrip())
 
             return resp
 
     def download_dir(self, path, save_path, callback=None):
         """  Downloads directory from FTP with all contents.
 
-            Base implementation [prototype].
             Creates a leaf directory and all intermediate ones. This is recursive.
          """
+        os.makedirs(os.path.join(save_path, path), exist_ok=True)
+
         files = []
         self.dir(path, files.append)
         for f in files:
@@ -114,7 +114,7 @@ class UtfFTP(FTP):
                 try:
                     os.makedirs(os.path.join(save_path, f_path), exist_ok=True)
                 except OSError as e:
-                    msg = "Download dir error: {}".format(e)
+                    msg = "Download dir error: {}".format(e).rstrip()
                     log(msg)
                     return "500 " + msg
                 else:
@@ -123,10 +123,10 @@ class UtfFTP(FTP):
                 try:
                     self.download_file(f_path, save_path, callback)
                 except OSError as e:
-                    log("Download dir error: {}".format(e))
+                    log("Download dir error: {}".format(e).rstrip())
 
         resp = "226 Transfer complete."
-        msg = "Copy directory {}.   Status: {}\n".format(path, resp)
+        msg = "Copy directory {}.   Status: {}".format(path, resp)
         log(msg)
 
         if callback:
@@ -213,9 +213,10 @@ class UtfFTP(FTP):
     def upload_dir(self, path, callback=None):
         """ Uploads directory to FTP with all contents.
 
-            Base implementation [prototype].
             Creates a leaf directory and all intermediate ones. This is recursive.
         """
+        resp = "200"
+        msg = "Uploading directory: {}.   Status: {}"
         try:
             files = os.listdir(path)
         except OSError as e:
@@ -229,16 +230,24 @@ class UtfFTP(FTP):
                 elif os.path.isdir(file):
                     try:
                         self.mkd(f)
+                    except Error:
+                        pass  # NOP
+
+                    try:
                         self.cwd(f)
                     except Error as e:
-                        log(e)
+                        resp = str(e)
+                        log(msg.format(f, resp))
                     else:
                         self.upload_dir(file + "/")
 
             self.cwd("..")
             os.chdir("..")
 
-        return "200"
+            if callback:
+                callback(msg.format(path, resp))
+
+        return resp
 
     # ****************** Deletion ******************** #
 
@@ -291,7 +300,7 @@ class UtfFTP(FTP):
             return "500"
         else:
             msg = msg.format(path, resp)
-            log("Remove directory: {}.   Status: {}\n".format(path, resp))
+            log(msg.rstrip())
 
         if callback:
             callback(msg)
