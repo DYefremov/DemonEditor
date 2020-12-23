@@ -17,8 +17,9 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPG from DVB or XML for IPTV services (only Enigma2, experimental).
 * Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
-* Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
-                                                                                                 
+* Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).  
+* Simple FTP client (experimental).  
+
 #### Keyboard shortcuts
 * **Ctrl + X** - only in bouquet list.
 * **Ctrl + C** - only in services list.                                                              
@@ -57,7 +58,7 @@ and run it by double clicking on DemonEditor.desktop in the root directory,
 or launching from the console with the command:```./start.py```                                                                                
 Extra folders can be deleted, excluding the *app* folder and root files like *DemonEditor.desktop* and *start.py*!      
 
-To create a simple **debian package**, you can use the *build-deb.sh.*                                                   
+To create a simple **debian package**, you can use the *build-deb.sh.* You can also download a ready-made *.deb package from the [releases](https://github.com/DYefremov/DemonEditor/releases) page.                                                 
 Users of **LTS** versions of [Ubuntu](https://ubuntu.com/) or distributions based on them can use [PPA](https://launchpad.net/~dmitriy-yefremov/+archive/ubuntu/demon-editor) repository.
 * ### macOS (experimental)
 **This program can also be run on macOS.**
