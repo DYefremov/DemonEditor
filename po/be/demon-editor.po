@@ -1159,3 +1159,30 @@ msgstr "Нд"
 
 msgid "Set"
 msgstr "Усталяваць"
+
+msgid "Services update"
+msgstr "Абнаўленне сэрвісаў"
+
+msgid "Create folder"
+msgstr "Стварыць тэчку"
+
+msgid "FTP client"
+msgstr "FTP-кліент"
+
+msgid "The file size is too large!"
+msgstr "Памер файла занадта вялікі!"
+
+msgid "Connect"
+msgstr "Злучэнне"
+
+msgid "Disconnect"
+msgstr "Раз'яднаць"
+
+msgid "Size"
+msgstr "Памер"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Attr."
+msgstr "Атрыб."
