@@ -1270,11 +1270,11 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkButtonBox" id="tools_button_box">
+          <object class="GtkBox" id="tools_button_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_right">5</property>
-            <property name="layout_style">expand</property>
+            <property name="spacing">1</property>
             <child>
               <object class="GtkToggleButton" id="control_button">
                 <property name="can_focus">True</property>
@@ -1301,8 +1301,8 @@ Author: Dmitriy Yefremov
                 <property name="image">ftp_image</property>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
