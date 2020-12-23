@@ -135,6 +135,8 @@ class YouTube:
             try:
                 self._yt_dl.update_options({"noplaylist": False, "extract_flat": True})
                 info = self._yt_dl.get_info(url, skip_errors=False)
+                if "url" in info:
+                    info = self._yt_dl.get_info(info.get("url"), skip_errors=False)
                 return info.get("title", ""), [(e.get("title", ""), e.get("id", "")) for e in info.get("entries", [])]
             finally:
                 # Restoring default options
