@@ -19,6 +19,7 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
 * Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
 * Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
+* Simple FTP client (experimental). 
 
 #### Keyboard shortcuts                                                                                                                                                                                            
 * **&#8984; + X** - only in bouquet list.
