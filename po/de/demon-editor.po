@@ -1172,3 +1172,30 @@ msgstr "So"
 
 msgid "Set"
 msgstr "Einstellen"
+
+msgid "Services update"
+msgstr "Dienste-Update"
+
+msgid "Create folder"
+msgstr "Ordner erstellen"
+
+msgid "FTP client"
+msgstr "FTP-Client"
+
+msgid "The file size is too large!"
+msgstr "Die Datei ist zu groß!"
+
+msgid "Connect"
+msgstr "Verbinden"
+
+msgid "Disconnect"
+msgstr "Verbindung trennen"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Attr."
+msgstr "Attr."

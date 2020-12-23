@@ -1159,3 +1159,30 @@ msgstr "Вс"
 
 msgid "Set"
 msgstr "Установить"
+
+msgid "Services update"
+msgstr "Обновление сервисов"
+
+msgid "Create folder"
+msgstr "Создать папку"
+
+msgid "FTP client"
+msgstr "FTP-клиент"
+
+msgid "The file size is too large!"
+msgstr "Размер файла слишком велик!"
+
+msgid "Connect"
+msgstr "Соединение"
+
+msgid "Disconnect"
+msgstr "Разъединить"
+
+msgid "Size"
+msgstr "Размер"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Attr."
+msgstr "Атриб."
