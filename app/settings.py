@@ -629,6 +629,14 @@ class Settings:
         self._settings["alternate_layout"] = value
 
     @property
+    def bq_details_first(self):
+        return self._settings.get("bq_details_first", False)
+
+    @bq_details_first.setter
+    def bq_details_first(self, value):
+        self._settings["bq_details_first"] = value
+
+    @property
     def is_themes_support(self):
         return self._settings.get("is_themes_support", False)
 
