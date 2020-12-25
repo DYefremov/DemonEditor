@@ -346,13 +346,20 @@ class Application(Gtk.Application):
             center_box.reorder_child(self._control_revealer, 1)
             center_box.reorder_child(builder.get_object("main_box"), 2)
 
-            main_data_paned = builder.get_object("main_data_paned")
-            ch1 = main_data_paned.get_child1()
-            ch2 = main_data_paned.get_child2()
-            main_data_paned.remove(ch2)
-            main_data_paned.remove(ch1)
-            main_data_paned.pack1(ch2, True, True)
-            main_data_paned.pack2(ch1)
+            main_paned = builder.get_object("main_data_paned")
+            services_box = main_paned.get_child1()
+            fav_paned = main_paned.get_child2()
+            main_paned.remove(services_box)
+
+            if not self._settings.bq_details_first:
+                bouquets_box = fav_paned.get_child2()
+                fav_paned.remove(bouquets_box)
+                fav_paned.pack2(services_box, True, False)
+                main_paned.pack1(bouquets_box, True, False)
+            else:
+                main_paned.remove(fav_paned)
+                main_paned.pack1(fav_paned, True, True)
+                main_paned.pack2(services_box)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
