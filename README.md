@@ -1,25 +1,34 @@
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![platform](https://img.shields.io/badge/platform-linux%20|%20macos-lightgrey)
-### Enigma2 channel and satellite list editor for GNU/Linux.                                                                       
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![platform](https://img.shields.io/badge/platform-linux%20|%20macos-lightgrey)  
+### Enigma2 channel and satellite list editor for GNU/Linux. 
+[<img src="https://user-images.githubusercontent.com/7511379/103152885-4a7bd880-479d-11eb-96e8-4ad0f5dc3e2e.png" width="560"/>](https://user-images.githubusercontent.com/7511379/103152885-4a7bd880-479d-11eb-96e8-4ad0f5dc3e2e.png)  
+
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).                                                   
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).
-  
-![The main application window in Linux Mint](https://user-images.githubusercontent.com/7511379/100156250-a3fc9900-2eb9-11eb-8729-7bcb6ddcdd4a.png)
 
 ## Main features of the program
-* Editing bouquets, channels, satellites.
-* Import function.
-* Backup function.
+* Editing bouquets, channels, satellites.  
+  [<img src="https://user-images.githubusercontent.com/7511379/100156250-a3fc9900-2eb9-11eb-8729-7bcb6ddcdd4a.png" width="480"/>](https://user-images.githubusercontent.com/7511379/100156250-a3fc9900-2eb9-11eb-8729-7bcb6ddcdd4a.png)
+* Import function.  
+  [<img src="https://user-images.githubusercontent.com/7511379/103150878-8a38c500-4789-11eb-9e03-0c8ee832ff99.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103150878-8a38c500-4789-11eb-9e03-0c8ee832ff99.png)
+* Backup function.  
+  [<img src="https://user-images.githubusercontent.com/7511379/103150886-a0df1c00-4789-11eb-88fa-91996b72d1f9.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103150886-a0df1c00-4789-11eb-88fa-91996b72d1f9.png)
+* Support of picons.  
+  [<img src="https://user-images.githubusercontent.com/7511379/103150891-accade00-4789-11eb-8804-e1807df89c99.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103150891-accade00-4789-11eb-8804-e1807df89c99.png)
+* Importing services, downloading picons and updating satellites from the Web.  
+  [<img src="https://user-images.githubusercontent.com/7511379/97909451-4c0ac080-1d59-11eb-9626-85bed91f7ccc.png" width="250"/>](https://user-images.githubusercontent.com/7511379/97909451-4c0ac080-1d59-11eb-9626-85bed91f7ccc.png)
+  [<img src="https://user-images.githubusercontent.com/7511379/103150872-77be8b80-4789-11eb-8a74-7a49fb3edd98.png" width="292"/>](https://user-images.githubusercontent.com/7511379/103150872-77be8b80-4789-11eb-8a74-7a49fb3edd98.png)
 * Extended support of IPTV.
-* Support of picons.
-* Importing services, downloading picons and updating satellites from the Web.
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPG from DVB or XML for IPTV services (only Enigma2, experimental).
-* Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
+* Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).    
+  [<img src="https://user-images.githubusercontent.com/7511379/103151911-89a52c00-4793-11eb-9941-8430f4e87eef.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103151911-89a52c00-4793-11eb-9941-8430f4e87eef.png)
 * Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).  
-* Simple FTP client (experimental).  
-
+  [<img src="https://user-images.githubusercontent.com/7511379/103150898-c79d5280-4789-11eb-9d16-e7f89225738b.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103150898-c79d5280-4789-11eb-9d16-e7f89225738b.png)
+* Simple FTP client (experimental).   
+  [<img src="https://user-images.githubusercontent.com/7511379/103152009-7e9ecb80-4794-11eb-85f1-c97e189a3195.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103152009-7e9ecb80-4794-11eb-85f1-c97e189a3195.png)
+  
 #### Keyboard shortcuts
 * **Ctrl + X** - only in bouquet list.
 * **Ctrl + C** - only in services list.                                                              
