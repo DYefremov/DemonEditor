@@ -1,2 +1,4 @@
 theme: jekyll-theme-slate
-show_downloads: true
+title: DemonEditor
+description: Enigma2 channel and satellite list editor.
+show_downloads: false
