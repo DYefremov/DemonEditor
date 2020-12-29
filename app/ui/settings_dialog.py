@@ -1,6 +1,5 @@
 import os
 import re
-from enum import Enum
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
@@ -12,12 +11,6 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
 
 def show_settings_dialog(transient, options):
     return SettingsDialog(transient, options).show()
-
-
-class Property(Enum):
-    FTP = "ftp"
-    HTTP = "http"
-    TELNET = "telnet"
 
 
 class SettingsDialog:
@@ -50,7 +43,6 @@ class SettingsDialog:
                     "on_profile_set_default": self.on_profile_set_default,
                     "on_lang_changed": self.on_lang_changed,
                     "on_main_settings_visible": self.on_main_settings_visible,
-                    "on_network_settings_visible": self.on_network_settings_visible,
                     "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
                     "on_click_mode_togged": self.on_click_mode_togged,
                     "on_play_mode_changed": self.on_play_mode_changed,
@@ -84,15 +76,13 @@ class SettingsDialog:
         self._port_field = builder.get_object("port_field")
         self._login_field = builder.get_object("login_field")
         self._password_field = builder.get_object("password_field")
-        self._http_login_field = builder.get_object("http_login_field")
-        self._http_password_field = builder.get_object("http_password_field")
         self._http_port_field = builder.get_object("http_port_field")
         self._http_use_ssl_check_button = builder.get_object("http_use_ssl_check_button")
-        self._telnet_login_field = builder.get_object("telnet_login_field")
-        self._telnet_password_field = builder.get_object("telnet_password_field")
         self._telnet_port_field = builder.get_object("telnet_port_field")
         self._telnet_timeout_spin_button = builder.get_object("telnet_timeout_spin_button")
-        self._settings_stack = builder.get_object("settings_stack")
+        # Test
+        self._ftp_radio_button = builder.get_object("ftp_radio_button")
+        self._http_radio_button = builder.get_object("http_radio_button")
         # Paths
         self._services_field = builder.get_object("services_field")
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
@@ -176,7 +166,6 @@ class SettingsDialog:
         self._profile_remove_button = builder.get_object("profile_remove_button")
         self._apply_profile_button = builder.get_object("apply_profile_button")
         self._apply_profile_button.bind_property("visible", header_separator, "visible")
-        self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
         # Style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -209,7 +198,6 @@ class SettingsDialog:
         is_enigma_profile = s_type is SettingsType.ENIGMA_2
         self._neutrino_radio_button.set_active(s_type is SettingsType.NEUTRINO_MP)
         self.update_header_bar()
-        self._settings_stack.get_child_by_name(Property.HTTP.value).set_visible(is_enigma_profile)
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
         self._lang_combo_box.set_active_id(self._ext_settings.language)
@@ -265,12 +253,8 @@ class SettingsDialog:
         self._port_field.set_text(self._settings.port)
         self._login_field.set_text(self._settings.user)
         self._password_field.set_text(self._settings.password)
-        self._http_login_field.set_text(self._settings.http_user)
-        self._http_password_field.set_text(self._settings.http_password)
         self._http_port_field.set_text(self._settings.http_port)
         self._http_use_ssl_check_button.set_active(self._settings.http_use_ssl)
-        self._telnet_login_field.set_text(self._settings.telnet_user)
-        self._telnet_password_field.set_text(self._settings.telnet_password)
         self._telnet_port_field.set_text(self._settings.telnet_port)
         self._telnet_timeout_spin_button.set_value(self._settings.telnet_timeout)
         self._services_field.set_text(self._settings.services_path)
@@ -326,12 +310,8 @@ class SettingsDialog:
         self._settings.port = self._port_field.get_text()
         self._settings.user = self._login_field.get_text()
         self._settings.password = self._password_field.get_text()
-        self._settings.http_user = self._http_login_field.get_text()
-        self._settings.http_password = self._http_password_field.get_text()
         self._settings.http_port = self._http_port_field.get_text()
         self._settings.http_use_ssl = self._http_use_ssl_check_button.get_active()
-        self._settings.telnet_user = self._telnet_login_field.get_text()
-        self._settings.telnet_password = self._telnet_password_field.get_text()
         self._settings.telnet_port = self._telnet_port_field.get_text()
         self._settings.telnet_timeout = int(self._telnet_timeout_spin_button.get_value())
         self._settings.services_path = self._services_field.get_text()
@@ -391,16 +371,15 @@ class SettingsDialog:
         if self._test_spinner.get_state() is Gtk.StateType.ACTIVE:
             return
         self.show_spinner(True)
-        current_property = Property(self._settings_stack.get_visible_child_name())
-        if current_property is Property.HTTP:
-            self.test_http()
-        elif current_property is Property.TELNET:
-            self.test_telnet()
-        elif current_property is Property.FTP:
+        if self._ftp_radio_button.get_active():
             self.test_ftp()
+        elif self._http_radio_button.get_active():
+            self.test_http()
+        else:
+            self.test_telnet()
 
     def test_http(self):
-        user, password = self._http_login_field.get_text(), self._http_password_field.get_text()
+        user, password = self._login_field.get_text(), self._password_field.get_text()
         host, port = self._host_field.get_text(), self._http_port_field.get_text()
         use_ssl = self._http_use_ssl_check_button.get_active()
         try:
@@ -415,7 +394,7 @@ class SettingsDialog:
     def test_telnet(self):
         timeout = int(self._telnet_timeout_spin_button.get_value())
         host, port = self._host_field.get_text(), self._telnet_port_field.get_text()
-        user, password = self._telnet_login_field.get_text(), self._telnet_password_field.get_text()
+        user, password = self._login_field.get_text(), self._password_field.get_text()
         try:
             self.show_info_message(test_telnet(host, port, user, password, timeout), Gtk.MessageType.INFO)
             self.show_spinner(False)
@@ -580,9 +559,6 @@ class SettingsDialog:
         name = stack.get_visible_child_name()
         self._apply_profile_button.set_visible(name == "profiles")
         self._apply_presets_button.set_visible(name == "streaming")
-
-    def on_network_settings_visible(self, stack, param):
-        self._http_use_ssl_check_button.set_visible(Property(stack.get_visible_child_name()) is Property.HTTP)
 
     def on_http_use_ssl_toggled(self, button):
         active = button.get_active()
