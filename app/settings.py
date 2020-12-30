@@ -99,10 +99,10 @@ class SettingsType(IntEnum):
         """ Returns default settings for current type """
         if self is self.ENIGMA_2:
             return {"setting_type": self.value,
-                    "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
-                    "http_user": "root", "http_password": "", "http_port": "80",
-                    "http_timeout": 5, "http_use_ssl": False,
-                    "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 5,
+                    "host": "127.0.0.1", "port": "21", "timeout": 5,
+                    "user": "root", "password": "root",
+                    "http_port": "80", "http_timeout": 5, "http_use_ssl": False,
+                    "telnet_port": "23", "telnet_timeout": 5,
                     "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
                     "satellites_xml_path": "/etc/tuxbox/", "data_local_path": DATA_PATH + "enigma2/",
                     "picons_path": "/usr/share/enigma2/picon/",
@@ -110,9 +110,10 @@ class SettingsType(IntEnum):
                     "backup_local_path": DATA_PATH + "enigma2/backup/"}
         elif self is self.NEUTRINO_MP:
             return {"setting_type": self,
-                    "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
-                    "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2, "http_use_ssl": False,
-                    "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 1,
+                    "host": "127.0.0.1", "port": "21", "timeout": 5,
+                    "user": "root", "password": "root",
+                    "http_port": "80", "http_timeout": 2, "http_use_ssl": False,
+                    "telnet_port": "23", "telnet_timeout": 1,
                     "services_path": "/var/tuxbox/config/zapit/", "user_bouquet_path": "/var/tuxbox/config/zapit/",
                     "satellites_xml_path": "/var/tuxbox/config/", "data_local_path": DATA_PATH + "neutrino/",
                     "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/",
@@ -280,22 +281,6 @@ class Settings:
         self._cp_settings["password"] = value
 
     @property
-    def http_user(self):
-        return self._cp_settings.get("http_user", self.get_default("http_user"))
-
-    @http_user.setter
-    def http_user(self, value):
-        self._cp_settings["http_user"] = value
-
-    @property
-    def http_password(self):
-        return self._cp_settings.get("http_password", self.get_default("http_password"))
-
-    @http_password.setter
-    def http_password(self, value):
-        self._cp_settings["http_password"] = value
-
-    @property
     def http_port(self):
         return self._cp_settings.get("http_port", self.get_default("http_port"))
 
@@ -318,22 +303,6 @@ class Settings:
     @http_use_ssl.setter
     def http_use_ssl(self, value):
         self._cp_settings["http_use_ssl"] = value
-
-    @property
-    def telnet_user(self):
-        return self._cp_settings.get("telnet_user", self.get_default("telnet_user"))
-
-    @telnet_user.setter
-    def telnet_user(self, value):
-        self._cp_settings["telnet_user"] = value
-
-    @property
-    def telnet_password(self):
-        return self._cp_settings.get("telnet_password", self.get_default("telnet_password"))
-
-    @telnet_password.setter
-    def telnet_password(self, value):
-        self._cp_settings["telnet_password"] = value
 
     @property
     def telnet_port(self):

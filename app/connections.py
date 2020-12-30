@@ -370,7 +370,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
     try:
         if s_type is SettingsType.ENIGMA_2 and use_http:
-            ht = http(settings.http_user, settings.http_password, base_url, callback, settings.http_use_ssl)
+            ht = http(settings.user, settings.password, base_url, callback, settings.http_use_ssl)
             next(ht)
             message = ""
             if download_type is DownloadType.BOUQUETS:
@@ -393,8 +393,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             if download_type is not DownloadType.PICONS:
                 # telnet
                 tn = telnet(host=host,
-                            user=settings.telnet_user,
-                            password=settings.telnet_password,
+                            user=settings.user,
+                            password=settings.password,
                             timeout=settings.telnet_timeout)
                 next(tn)
                 # terminate enigma or neutrino
@@ -599,7 +599,7 @@ class HttpAPI:
 
     @run_task
     def init(self):
-        user, password = self._settings.http_user, self._settings.http_password
+        user, password = self._settings.user, self._settings.password
         use_ssl = self._settings.http_use_ssl
         self._main_url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
         self._base_url = "{}/web/".format(self._main_url)

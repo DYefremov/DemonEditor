@@ -21,7 +21,6 @@ class DownloadDialog:
 
         handlers = {"on_receive": self.on_receive,
                     "on_send": self.on_send,
-                    "on_settings_button": self.on_settings_button,
                     "on_settings": self.on_settings,
                     "on_profile_changed": self.on_profile_changed,
                     "on_use_http_state_set": self.on_use_http_state_set,
@@ -32,7 +31,6 @@ class DownloadDialog:
         builder.add_from_file(UI_RESOURCES_PATH + "download_dialog.glade")
         builder.connect_signals(handlers)
 
-        self._current_property = "FTP"
         self._dialog_window = builder.get_object("download_dialog_window")
         self._dialog_window.set_transient_for(transient)
         self._info_bar = builder.get_object("info_bar")
@@ -46,12 +44,6 @@ class DownloadDialog:
         self._bouquets_radio_button = builder.get_object("bouquets_radio_button")
         self._satellites_radio_button = builder.get_object("satellites_radio_button")
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
-        self._login_entry = builder.get_object("login_entry")
-        self._password_entry = builder.get_object("password_entry")
-        self._host_entry = builder.get_object("host_entry")
-        self._port_entry = builder.get_object("port_entry")
-        self._timeout_entry = builder.get_object("timeout_entry")
-        self._settings_buttons_box = builder.get_object("settings_buttons_box")
         self._use_http_switch = builder.get_object("use_http_switch")
         self._http_radio_button = builder.get_object("http_radio_button")
         self._use_http_box = builder.get_object("use_http_box")
@@ -71,7 +63,6 @@ class DownloadDialog:
         self._data_path_entry.set_text(self._settings.data_local_path)
         is_enigma = self._s_type is SettingsType.ENIGMA_2
         self._webtv_radio_button.set_visible(not is_enigma)
-        self._http_radio_button.set_visible(is_enigma)
         self._use_http_box.set_visible(is_enigma)
         self._use_http_switch.set_active(is_enigma and self._settings.use_http)
         self._remove_unused_check_button.set_active(self._settings.remove_unused_bouquets)
@@ -104,26 +95,6 @@ class DownloadDialog:
     def destroy(self):
         self._dialog_window.destroy()
 
-    def on_settings_button(self, button):
-        if button.get_active():
-            label = button.get_label()
-            if label == "Telnet":
-                self._login_entry.set_text(self._settings.telnet_user)
-                self._password_entry.set_text(self._settings.telnet_password)
-                self._port_entry.set_text(self._settings.telnet_port)
-                self._timeout_entry.set_text(str(self._settings.telnet_timeout))
-            elif label == "HTTP":
-                self._login_entry.set_text(self._settings.http_user)
-                self._password_entry.set_text(self._settings.http_password)
-                self._port_entry.set_text(self._settings.http_port)
-                self._timeout_entry.set_text(str(self._settings.http_timeout))
-            elif label == "FTP":
-                self._login_entry.set_text(self._settings.user)
-                self._password_entry.set_text(self._settings.password)
-                self._port_entry.set_text(self._settings.port)
-                self._timeout_entry.set_text("")
-            self._current_property = label
-
     def on_settings(self, item):
         response = show_settings_dialog(self._dialog_window, self._settings)
         if response != Gtk.ResponseType.CANCEL:
@@ -131,11 +102,6 @@ class DownloadDialog:
             self.update_profiles()
             gen = self._update_settings_callback()
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-            for button in self._settings_buttons_box.get_children():
-                if button.get_active():
-                    self.on_settings_button(button)
-                    break
 
     def on_profile_changed(self, box):
         active = box.get_active_text()
