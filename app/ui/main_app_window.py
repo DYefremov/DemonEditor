@@ -1202,7 +1202,6 @@ class Application(Gtk.Application):
 
         uris = data.get_uris()
         if uris:
-            from urllib.parse import unquote, urlparse
             self.on_import_bouquet(None, file_path=urlparse(unquote(uris[0])).path.strip())
             return
 
