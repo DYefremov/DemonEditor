@@ -94,6 +94,7 @@ def get_bouquet(path, bq_name, bq_type):
             return "{} [empty]".format(bq_name), services
 
         bq_name = srvs.pop(0)
+        stream_types = {"4097", "5001", "5002", "8193"}
 
         for num, srv in enumerate(srvs, start=1):
             srv_data = srv.strip().split(":")
@@ -103,7 +104,7 @@ def get_bouquet(path, bq_name, bq_type):
             elif srv_data[1] == "832":
                 m_data, sep, desc = srv.partition("#DESCRIPTION")
                 services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
-            elif "http" in srv or srv_data[0] == "8193":
+            elif srv_data[0].strip() in stream_types or srv_data[10].startswith(("http", "rtsp")):
                 stream_data, sep, desc = srv.partition("#DESCRIPTION")
                 desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
                 services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))
