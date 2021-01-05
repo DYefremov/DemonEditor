@@ -34,6 +34,18 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkListStore" id="alt_list_store">
+    <columns>
+      <!-- column-name num -->
+      <column type="gint"/>
+      <!-- column-name service -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+      <!-- column-name pos -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkTreeStore" id="bouquets_tree_store">
     <columns>
       <!-- column-name bouquet -->
@@ -1017,7 +1029,6 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">DemonEditor</property>
         <property name="subtitle" translatable="yes">Profile:</property>
-        <property name="spacing">0</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkMenuButton" id="file_header_button">
@@ -1038,8 +1049,6 @@ Author: Dmitriy Yefremov
           <object class="GtkSeparator" id="left_header_separator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">1</property>
-            <property name="margin_right">1</property>
           </object>
           <packing>
             <property name="position">1</property>
@@ -1050,8 +1059,6 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="focus_on_click">False</property>
-            <property name="margin_left">1</property>
-            <property name="margin_right">1</property>
             <property name="active">0</property>
             <signal name="changed" handler="on_profile_changed" swapped="no"/>
           </object>
@@ -1063,20 +1070,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox" id="main_header_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="spacing">1</property>
-            <child>
-              <object class="GtkSeparator" id="main_header_box_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">1</property>
-                <property name="margin_right">1</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkButton" id="download_header_button">
                 <property name="visible">True</property>
@@ -1148,20 +1142,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkBox" id="left_header_box">
             <property name="can_focus">False</property>
-            <property name="spacing">1</property>
-            <child>
-              <object class="GtkSeparator" id="left_header_box_separator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">1</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">2</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkToggleButton" id="filter_header_button">
                 <property name="visible">True</property>
@@ -1273,8 +1254,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox" id="tools_button_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_right">5</property>
-            <property name="spacing">1</property>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkToggleButton" id="control_button">
                 <property name="can_focus">True</property>
@@ -1315,8 +1295,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkBox" id="right_header_box">
             <property name="can_focus">False</property>
-            <property name="margin_right">5</property>
-            <property name="spacing">1</property>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkButton" id="sat_editor_header_button">
                 <property name="visible">True</property>
@@ -1363,8 +1342,8 @@ Author: Dmitriy Yefremov
               <object class="GtkSeparator" id="right_header_box_separator">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">2</property>
-                <property name="margin_right">2</property>
+                <property name="margin_left">3</property>
+                <property name="margin_right">3</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2430,185 +2409,318 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkScrolledWindow" id="fav_scrolled_window">
+                                  <object class="GtkBox" id="fav_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_bottom">2</property>
-                                    <property name="shadow_type">in</property>
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">2</property>
                                     <child>
-                                      <object class="GtkTreeView" id="fav_tree_view">
+                                      <object class="GtkScrolledWindow" id="fav_scrolled_window">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="model">fav_list_store</property>
-                                        <property name="enable_search">False</property>
-                                        <property name="search_column">2</property>
-                                        <property name="rubber_banding">True</property>
-                                        <property name="enable_grid_lines">both</property>
-                                        <property name="tooltip_column">9</property>
-                                        <property name="activate_on_single_click">True</property>
-                                        <signal name="button-press-event" handler="on_fav_press" object="fav_popup_menu" swapped="no"/>
-                                        <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
-                                        <signal name="button-release-event" handler="on_view_release" swapped="no"/>
-                                        <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
-                                        <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
-                                        <signal name="drag-data-received" handler="on_view_drag_data_received" swapped="no"/>
-                                        <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
-                                        <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
-                                        <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
-                                        <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
-                                        <signal name="query-tooltip" handler="on_fav_view_query_tooltip" swapped="no"/>
-                                        <signal name="row-activated" handler="on_fav_selection" object="fav_list_store" swapped="no"/>
-                                        <child internal-child="selection">
-                                          <object class="GtkTreeSelection" id="fav_selection">
-                                            <property name="mode">multiple</property>
-                                          </object>
-                                        </child>
+                                        <property name="can_focus">False</property>
+                                        <property name="shadow_type">in</property>
                                         <child>
-                                          <object class="GtkTreeViewColumn" id="fav_num_column">
-                                            <property name="resizable">True</property>
-                                            <property name="min_width">25</property>
-                                            <property name="title" translatable="yes">Num</property>
-                                            <property name="clickable">True</property>
-                                            <property name="alignment">0.5</property>
-                                            <signal name="clicked" handler="on_fav_sort" swapped="no"/>
-                                            <child>
-                                              <object class="GtkCellRendererText" id="num_cellrenderertext">
-                                                <property name="xalign">0.20000000298023224</property>
-                                                <property name="width_chars">5</property>
-                                                <property name="max_width_chars">5</property>
+                                          <object class="GtkTreeView" id="fav_tree_view">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="model">fav_list_store</property>
+                                            <property name="enable_search">False</property>
+                                            <property name="search_column">2</property>
+                                            <property name="rubber_banding">True</property>
+                                            <property name="enable_grid_lines">both</property>
+                                            <property name="tooltip_column">9</property>
+                                            <property name="activate_on_single_click">True</property>
+                                            <signal name="button-press-event" handler="on_fav_press" object="fav_popup_menu" swapped="no"/>
+                                            <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
+                                            <signal name="button-release-event" handler="on_view_release" swapped="no"/>
+                                            <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
+                                            <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
+                                            <signal name="drag-data-received" handler="on_view_drag_data_received" swapped="no"/>
+                                            <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
+                                            <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
+                                            <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
+                                            <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
+                                            <signal name="query-tooltip" handler="on_fav_view_query_tooltip" swapped="no"/>
+                                            <signal name="row-activated" handler="on_fav_selection" object="fav_list_store" swapped="no"/>
+                                            <child internal-child="selection">
+                                              <object class="GtkTreeSelection" id="fav_selection">
+                                                <property name="mode">multiple</property>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="visible">0</attribute>
-                                                <attribute name="text">0</attribute>
-                                              </attributes>
                                             </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn" id="fav_service_column">
-                                            <property name="resizable">True</property>
-                                            <property name="min_width">50</property>
-                                            <property name="title" translatable="yes">Service</property>
-                                            <property name="expand">True</property>
-                                            <property name="clickable">True</property>
-                                            <property name="alignment">0.5</property>
-                                            <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                             <child>
-                                              <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf">
-                                                <property name="xpad">2</property>
+                                              <object class="GtkTreeViewColumn" id="fav_num_column">
+                                                <property name="resizable">True</property>
+                                                <property name="min_width">25</property>
+                                                <property name="title" translatable="yes">Num</property>
+                                                <property name="clickable">True</property>
+                                                <property name="alignment">0.5</property>
+                                                <signal name="clicked" handler="on_fav_sort" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkCellRendererText" id="num_cellrenderertext">
+                                                    <property name="xalign">0.20000000298023224</property>
+                                                    <property name="width_chars">5</property>
+                                                    <property name="max_width_chars">5</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="visible">0</attribute>
+                                                    <attribute name="text">0</attribute>
+                                                  </attributes>
+                                                </child>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="pixbuf">8</attribute>
-                                              </attributes>
                                             </child>
                                             <child>
-                                              <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf">
-                                                <property name="xpad">2</property>
+                                              <object class="GtkTreeViewColumn" id="fav_service_column">
+                                                <property name="resizable">True</property>
+                                                <property name="min_width">50</property>
+                                                <property name="title" translatable="yes">Service</property>
+                                                <property name="expand">True</property>
+                                                <property name="clickable">True</property>
+                                                <property name="alignment">0.5</property>
+                                                <signal name="clicked" handler="on_fav_sort" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf">
+                                                    <property name="xpad">2</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="pixbuf">8</attribute>
+                                                  </attributes>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf">
+                                                    <property name="xpad">2</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="pixbuf">1</attribute>
+                                                  </attributes>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkCellRendererText" id="fav_service_cellrenderertext">
+                                                    <property name="ellipsize">end</property>
+                                                    <property name="width_chars">25</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="text">2</attribute>
+                                                  </attributes>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkCellRendererPixbuf" id="fav_locked_cellrendererpixbuf">
+                                                    <property name="xpad">2</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="pixbuf">3</attribute>
+                                                  </attributes>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkCellRendererPixbuf" id="fav_hide_cellrendererpixbuf">
+                                                    <property name="xpad">2</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="pixbuf">4</attribute>
+                                                  </attributes>
+                                                </child>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="pixbuf">1</attribute>
-                                              </attributes>
                                             </child>
                                             <child>
-                                              <object class="GtkCellRendererText" id="fav_service_cellrenderertext">
-                                                <property name="ellipsize">end</property>
-                                                <property name="width_chars">25</property>
+                                              <object class="GtkTreeViewColumn" id="fav_type_column">
+                                                <property name="resizable">True</property>
+                                                <property name="min_width">25</property>
+                                                <property name="title" translatable="yes">Type</property>
+                                                <property name="expand">True</property>
+                                                <property name="clickable">True</property>
+                                                <property name="alignment">0.5</property>
+                                                <signal name="clicked" handler="on_fav_sort" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkCellRendererText" id="type_cellrenderertext">
+                                                    <property name="xalign">0.50999999046325684</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="text">5</attribute>
+                                                  </attributes>
+                                                </child>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="text">2</attribute>
-                                              </attributes>
                                             </child>
                                             <child>
-                                              <object class="GtkCellRendererPixbuf" id="fav_locked_cellrendererpixbuf">
-                                                <property name="xpad">2</property>
+                                              <object class="GtkTreeViewColumn" id="fav_pos_column">
+                                                <property name="min_width">25</property>
+                                                <property name="title" translatable="yes">Pos</property>
+                                                <property name="expand">True</property>
+                                                <property name="clickable">True</property>
+                                                <property name="alignment">0.5</property>
+                                                <signal name="clicked" handler="on_fav_sort" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkCellRendererText" id="pos_cellrenderertext">
+                                                    <property name="xalign">0.50999999046325684</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="text">6</attribute>
+                                                  </attributes>
+                                                </child>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="pixbuf">3</attribute>
-                                              </attributes>
                                             </child>
                                             <child>
-                                              <object class="GtkCellRendererPixbuf" id="fav_hide_cellrendererpixbuf">
-                                                <property name="xpad">2</property>
+                                              <object class="GtkTreeViewColumn" id="fav_id_column">
+                                                <property name="visible">False</property>
+                                                <property name="title">fav_id</property>
+                                                <child>
+                                                  <object class="GtkCellRendererText" id="fav_id_cellrenderertext4"/>
+                                                  <attributes>
+                                                    <attribute name="text">7</attribute>
+                                                  </attributes>
+                                                </child>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="pixbuf">4</attribute>
-                                              </attributes>
                                             </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn" id="fav_type_column">
-                                            <property name="resizable">True</property>
-                                            <property name="min_width">25</property>
-                                            <property name="title" translatable="yes">Type</property>
-                                            <property name="expand">True</property>
-                                            <property name="clickable">True</property>
-                                            <property name="alignment">0.5</property>
-                                            <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                             <child>
-                                              <object class="GtkCellRendererText" id="type_cellrenderertext">
-                                                <property name="xalign">0.50999999046325684</property>
+                                              <object class="GtkTreeViewColumn" id="fav_extra_column">
+                                                <property name="visible">False</property>
+                                                <property name="title" translatable="yes">extra</property>
+                                                <child>
+                                                  <object class="GtkCellRendererText" id="fav_tooltip_cellrenderertext"/>
+                                                  <attributes>
+                                                    <attribute name="text">9</attribute>
+                                                  </attributes>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkCellRendererPixbuf" id="fav_background_cellrenderertext"/>
+                                                </child>
                                               </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="text">5</attribute>
-                                              </attributes>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn" id="fav_pos_column">
-                                            <property name="min_width">25</property>
-                                            <property name="title" translatable="yes">Pos</property>
-                                            <property name="expand">True</property>
-                                            <property name="clickable">True</property>
-                                            <property name="alignment">0.5</property>
-                                            <signal name="clicked" handler="on_fav_sort" swapped="no"/>
-                                            <child>
-                                              <object class="GtkCellRendererText" id="pos_cellrenderertext">
-                                                <property name="xalign">0.50999999046325684</property>
-                                              </object>
-                                              <attributes>
-                                                <attribute name="cell-background-rgba">10</attribute>
-                                                <attribute name="text">6</attribute>
-                                              </attributes>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn" id="fav_id_column">
-                                            <property name="visible">False</property>
-                                            <property name="title">fav_id</property>
-                                            <child>
-                                              <object class="GtkCellRendererText" id="fav_id_cellrenderertext4"/>
-                                              <attributes>
-                                                <attribute name="text">7</attribute>
-                                              </attributes>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn" id="fav_extra_column">
-                                            <property name="visible">False</property>
-                                            <property name="title" translatable="yes">extra</property>
-                                            <child>
-                                              <object class="GtkCellRendererText" id="fav_tooltip_cellrenderertext"/>
-                                              <attributes>
-                                                <attribute name="text">9</attribute>
-                                              </attributes>
-                                            </child>
-                                            <child>
-                                              <object class="GtkCellRendererPixbuf" id="fav_background_cellrenderertext"/>
                                             </child>
                                           </object>
                                         </child>
                                       </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRevealer" id="alt_revealer">
+                                        <property name="can_focus">False</property>
+                                        <property name="transition_type">slide-up</property>
+                                        <child>
+                                          <object class="GtkBox" id="alt_box">
+                                            <property name="height_request">200</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="orientation">vertical</property>
+                                            <property name="spacing">2</property>
+                                            <child>
+                                              <object class="GtkLabel" id="alt_label">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="label" translatable="yes">Alternatives</property>
+                                                <attributes>
+                                                  <attribute name="weight" value="semibold"/>
+                                                </attributes>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">0</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <object class="GtkScrolledWindow" id="alt_scrolled_window">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">True</property>
+                                                <property name="shadow_type">in</property>
+                                                <child>
+                                                  <object class="GtkTreeView" id="alt_tree_view">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">True</property>
+                                                    <property name="model">alt_list_store</property>
+                                                    <property name="enable_search">False</property>
+                                                    <child internal-child="selection">
+                                                      <object class="GtkTreeSelection" id="alt_selection"/>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkTreeViewColumn" id="alt_num_column">
+                                                        <property name="min_width">25</property>
+                                                        <property name="title" translatable="yes">Num</property>
+                                                        <property name="alignment">0.5</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_num_cellrenderertext">
+                                                            <property name="width_chars">5</property>
+                                                            <property name="max_width_chars">5</property>
+                                                          </object>
+                                                          <attributes>
+                                                            <attribute name="text">0</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkTreeViewColumn" id="alt_service_column">
+                                                        <property name="resizable">True</property>
+                                                        <property name="min_width">50</property>
+                                                        <property name="title" translatable="yes">Service</property>
+                                                        <property name="expand">True</property>
+                                                        <property name="alignment">0.5</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_service_cellrenderertext"/>
+                                                          <attributes>
+                                                            <attribute name="text">1</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkTreeViewColumn" id="alt_type_column">
+                                                        <property name="resizable">True</property>
+                                                        <property name="title" translatable="yes">Type</property>
+                                                        <property name="expand">True</property>
+                                                        <property name="alignment">0.5</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_type_cellrenderertext">
+                                                            <property name="xalign">0.50999999046325684</property>
+                                                          </object>
+                                                          <attributes>
+                                                            <attribute name="text">2</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkTreeViewColumn" id="alt_pos_column">
+                                                        <property name="min_width">25</property>
+                                                        <property name="title" translatable="yes">Pos</property>
+                                                        <property name="alignment">0.5</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_pos_cellrenderertext">
+                                                            <property name="xalign">0.50999999046325684</property>
+                                                          </object>
+                                                          <attributes>
+                                                            <attribute name="text">3</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
+                                                    </child>
+                                                  </object>
+                                                </child>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">True</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">1</property>
+                                              </packing>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
                                     </child>
                                   </object>
                                   <packing>

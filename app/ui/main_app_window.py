@@ -253,6 +253,10 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
+        # Alternatives
+        self._alt_model = builder.get_object("alt_list_store")
+        self._alt_revealer = builder.get_object("alt_revealer")
+        self._alt_revealer.bind_property("visible", self._alt_revealer, "reveal-child")
         # Control
         self._control_button = builder.get_object("control_button")
         self._receiver_info_box.bind_property("visible", self._control_button, "visible")
@@ -1364,6 +1368,7 @@ class Application(Gtk.Application):
 
     def update_data(self, data_path, callback=None):
         self._profile_combo_box.set_sensitive(False)
+        self._alt_revealer.set_visible(False)
         self._wait_dialog.show()
 
         yield from self.clear_current_data()
@@ -1487,6 +1492,10 @@ class Application(Gtk.Application):
                 srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
                               self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
                 self._services[fav_id] = srv
+            elif s_type is BqServiceType.ALT:
+                srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
+                              None, None, *agr, fav_id, fav_id, srv.num)
+                self._services[fav_id] = srv
             elif srv.name:
                 extra_services[fav_id] = srv.name
             services.append(fav_id)
@@ -1595,10 +1604,12 @@ class Application(Gtk.Application):
                                                                  Column.BQ_HIDDEN, Column.BQ_TYPE)
                     bq_id = "{}:{}".format(bq_name, bq_type)
                     favs = self._bouquets[bq_id]
-                    ex_s = self._extra_bouquets.get(bq_id)
+                    ex_s = self._extra_bouquets.get(bq_id, None)
                     bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
+
                     if profile is SettingsType.ENIGMA_2:
-                        bq_s = list(map(lambda s: s._replace(service=ex_s.get(s.fav_id, None) if ex_s else None), bq_s))
+                        bq_s = self.get_enigma_bq_services(bq_s, ex_s)
+
                     bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden)
                     bqs.append(bq)
             if len(b_path) == 1:
@@ -1613,7 +1624,7 @@ class Application(Gtk.Application):
         services = [Service(*row[: Column.SRV_TOOLTIP]) for row in services_model]
         write_services(path, services, profile, self.get_format_version() if profile is SettingsType.ENIGMA_2 else 0)
         yield True
-        # removing bouquet files
+
         if profile is SettingsType.ENIGMA_2:
             # blacklist
             write_blacklist(path, self._blacklist)
@@ -1624,6 +1635,20 @@ class Application(Gtk.Application):
         yield True
         if callback:
             callback()
+
+    def get_enigma_bq_services(self, services, ext_services):
+        """ Preparing a list of services for the Enigma2 bouquet. """
+        s_list = []
+        for srv in services:
+            if srv.service_type == BqServiceType.ALT.name:
+                # Alternatives to service in a bouquet.
+                alts = list(map(lambda s: s._replace(service=None),
+                                filter(None, [self._services.get(s.data, None) for s in srv.transponder or []])))
+                s_list.append(srv._replace(transponder=alts))
+            else:
+                # Extra names for service in bouquet.
+                s_list.append(srv._replace(service=ext_services.get(srv.fav_id, None) if ext_services else None))
+        return s_list
 
     def on_new_configuration(self, action, value=None):
         """ Creates new empty configuration """
@@ -1654,11 +1679,24 @@ class Application(Gtk.Application):
         yield True
 
     def on_fav_selection(self, model, path, column):
-        if self._control_box and self._control_box.update_epg:
-            ref = self.get_service_ref(path)
-            if not ref:
-                return
-            self._control_box.on_service_changed(ref)
+        row = model[path][:]
+        if row[Column.FAV_TYPE] == BqServiceType.ALT.name:
+            self._alt_model.clear()
+            srv = self._services.get(row[Column.FAV_ID], None)
+            if srv:
+                for index, s in enumerate(srv[-1] or [], start=1):
+                    srv = self._services.get(s.data, None)
+                    if srv:
+                        self._alt_model.append((index, srv.service, srv.service_type, srv.pos))
+                self._alt_revealer.set_visible(True)
+        else:
+            self._alt_revealer.set_visible(False)
+
+            if self._control_box and self._control_box.update_epg:
+                ref = self.get_service_ref(path)
+                if not ref:
+                    return
+                self._control_box.on_service_changed(ref)
 
     def on_services_selection(self, model, path, column):
         self.update_service_bar(model, path)
