@@ -14,6 +14,7 @@ class BqServiceType(Enum):
     IPTV = "IPTV"
     MARKER = "MARKER"  # 64
     SPACE = "SPACE"  # 832 [hidden marker]
+    ALT = "ALT"  # Service with alternatives
 
 
 Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden"])

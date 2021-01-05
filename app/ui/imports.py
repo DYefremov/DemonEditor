@@ -2,9 +2,8 @@ from contextlib import suppress
 from pathlib import Path
 
 from app.commons import run_idle, log
-from app.eparser import get_bouquets, get_services
+from app.eparser import get_bouquets, get_services, BouquetsReader
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
-from app.eparser.enigma.bouquets import get_bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.settings import SettingsType
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message
@@ -67,7 +66,7 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
 def get_enigma2_bouquet(path):
     path, sep, f_name = path.rpartition("userbouquet.")
     name, sep, suf = f_name.rpartition(".")
-    bq = get_bouquet(path, name, suf)
+    bq = BouquetsReader.get_bouquet(path, name, suf)
     bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
     return bouquet
 

@@ -2,7 +2,7 @@ from app.commons import run_task
 from app.settings import SettingsType
 from .ecommons import Service, Satellite, Transponder, Bouquet, Bouquets, is_transponder_valid
 from .enigma.blacklist import get_blacklist, write_blacklist
-from .enigma.bouquets import get_bouquets as get_enigma_bouquets, write_bouquets as write_enigma_bouquets, to_bouquet_id
+from .enigma.bouquets import to_bouquet_id, BouquetsWriter, BouquetsReader
 from .enigma.lamedb import get_services as get_enigma_services, write_services as write_enigma_services
 from .iptv import parse_m3u
 from .neutrino.bouquets import get_bouquets as get_neutrino_bouquets, write_bouquets as write_neutrino_bouquets
@@ -27,7 +27,7 @@ def write_services(path, channels, s_type, format_version):
 
 def get_bouquets(path, s_type):
     if s_type is SettingsType.ENIGMA_2:
-        return get_enigma_bouquets(path)
+        return BouquetsReader(path).get()
     elif s_type is SettingsType.NEUTRINO_MP:
         return get_neutrino_bouquets(path)
 
@@ -35,7 +35,7 @@ def get_bouquets(path, s_type):
 @run_task
 def write_bouquets(path, bouquets, s_type, force_bq_names=False):
     if s_type is SettingsType.ENIGMA_2:
-        write_enigma_bouquets(path, bouquets, force_bq_names)
+        BouquetsWriter(path, bouquets, force_bq_names).write()
     elif s_type is SettingsType.NEUTRINO_MP:
         write_neutrino_bouquets(path, bouquets)
 
