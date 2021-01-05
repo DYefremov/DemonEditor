@@ -2314,15 +2314,81 @@ Author: Dmitriy Yefremov
                                     <property name="can_focus">False</property>
                                     <property name="orientation">vertical</property>
                                     <child>
-                                      <object class="GtkLabel" id="fav_header_label">
+                                      <object class="GtkBox" id="fav_header_box">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="margin_top">2</property>
-                                        <property name="margin_bottom">2</property>
-                                        <property name="label" translatable="yes">Bouquet details</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
+                                        <property name="margin_left">2</property>
+                                        <property name="margin_right">2</property>
+                                        <property name="spacing">2</property>
+                                        <child>
+                                          <object class="GtkButton" id="left_arrow_bq_button">
+                                            <property name="can_focus">False</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Toggle display position</property>
+                                            <property name="action_name">app.on_switch_fav_position</property>
+                                            <property name="relief">none</property>
+                                            <child>
+                                              <object class="GtkImage" id="left_arrow_bq_image">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="pixel_size">12</property>
+                                                <property name="icon_name">pan-end-symbolic-rtl</property>
+                                              </object>
+                                            </child>
+                                            <style>
+                                              <class name="arrow-button"/>
+                                            </style>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child type="center">
+                                          <object class="GtkLabel" id="fav_header_label">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="margin_top">2</property>
+                                            <property name="margin_bottom">2</property>
+                                            <property name="label" translatable="yes">Bouquet details</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"/>
+                                            </attributes>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="right_arrow_bq_button">
+                                            <property name="can_focus">False</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Toggle display position</property>
+                                            <property name="action_name">app.on_switch_fav_position</property>
+                                            <property name="relief">none</property>
+                                            <property name="always_show_image">True</property>
+                                            <child>
+                                              <object class="GtkImage" id="right_arrow_bq_image">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="pixel_size">12</property>
+                                                <property name="icon_name">pan-end-symbolic</property>
+                                              </object>
+                                            </child>
+                                            <style>
+                                              <class name="arrow-button"/>
+                                            </style>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="pack_type">end</property>
+                                            <property name="position">2</property>
+                                          </packing>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>

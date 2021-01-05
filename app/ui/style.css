@@ -36,6 +36,13 @@
   margin: 0px;
 }
 
+.arrow-button {
+  padding: 0px;
+  margin: 1px;
+  min-width: 12px;
+  min-height: 12px;
+}
+
 .group {}
 
 .group :first-child {
