@@ -1017,9 +1017,10 @@ class Application(Gtk.Application):
         """
         rows = self._fav_model if len(paths) < 2 else [self._fav_model[p] for p in paths]
         index = int(str(rows[0].path))
+        columns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
         for s_row, row in zip(sorted(map(lambda r: r[:], rows), key=lambda r: r[c_num] or nv, reverse=rev), rows):
-            self._fav_model.set_row(row.iter, s_row)
+            self._fav_model.set(row.iter, columns, s_row)
             bq[index] = s_row[Column.FAV_ID]
             index += 1
 
@@ -1817,7 +1818,8 @@ class Application(Gtk.Application):
                 for index, s in enumerate(srv[-1] or [], start=1):
                     srv = self._services.get(s.data, None)
                     if srv:
-                        self._alt_model.append((index, srv.service, srv.service_type, srv.pos))
+                        picon = self._picons.get(srv.picon_id, None)
+                        self._alt_model.append((index, picon, srv.service, srv.service_type, srv.pos))
                 self._alt_revealer.set_visible(True)
         else:
             self._alt_revealer.set_visible(False)
@@ -1890,9 +1892,17 @@ class Application(Gtk.Application):
                 if not is_marker:
                     num += 1
 
+                picon = self._picons.get(srv.picon_id, None)
+                # Alternatives
+                if srv.service_type == BqServiceType.ALT.name:
+                    alt_servs = srv.transponder
+                    if alt_servs:
+                        alt_srv = self._services.get(alt_servs[0].data, None)
+                        picon = self._picons.get(alt_srv.picon_id, None) if srv else None
+
                 self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
                                         srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
-                                        self._picons.get(srv.picon_id, None), None, background))
+                                        picon, None, background))
 
         yield True
         self._fav_view.set_model(self._fav_model)
