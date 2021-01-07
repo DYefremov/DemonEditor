@@ -186,7 +186,6 @@ class SettingsDialog:
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
             self._dark_mode_switch = builder.get_object("dark_mode_switch")
             self._layout_switch = builder.get_object("layout_switch")
-            self._bq_list_switch = builder.get_object("bq_list_switch")
             self._layout_switch.bind_property("active", builder.get_object("bouquet_box"), "sensitive")
             self._themes_support_switch = builder.get_object("themes_support_switch")
             self._themes_support_switch.bind_property("active", builder.get_object("gtk_theme_frame"), "sensitive")
@@ -345,7 +344,6 @@ class SettingsDialog:
         if self._ext_settings.is_darwin:
             self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
             self._ext_settings.alternate_layout = self._layout_switch.get_active()
-            self._ext_settings.bq_details_first = self._bq_list_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
@@ -760,7 +758,6 @@ class SettingsDialog:
     def init_appearance(self):
         self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
         self._layout_switch.set_active(self._ext_settings.alternate_layout)
-        self._bq_list_switch.set_active(self._ext_settings.bq_details_first)
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
         if t_support:
