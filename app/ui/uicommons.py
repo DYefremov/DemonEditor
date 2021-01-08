@@ -196,7 +196,7 @@ class BqGenType(Enum):
 
 class Column(IntEnum):
     """ Column nums in the views """
-    # main view
+    # Main view
     SRV_CAS_FLAGS = 0
     SRV_STANDARD = 1
     SRV_CODED = 2
@@ -219,7 +219,7 @@ class Column(IntEnum):
     SRV_TRANSPONDER = 19
     SRV_TOOLTIP = 20
     SRV_BACKGROUND = 21
-    # fav view
+    # FAV view
     FAV_NUM = 0
     FAV_CODED = 1
     FAV_SERVICE = 2
@@ -231,11 +231,20 @@ class Column(IntEnum):
     FAV_PICON = 8
     FAV_TOOLTIP = 9
     FAV_BACKGROUND = 10
-    # bouquets view
+    # Bouquets view
     BQ_NAME = 0
     BQ_LOCKED = 1
     BQ_HIDDEN = 2
     BQ_TYPE = 3
+    # Alternatives view
+    ALT_NUM = 0
+    ALT_PICON = 1
+    ALT_SERVICE = 2
+    ALT_TYPE = 3
+    ALT_POS = 4
+    ALT_FAV_ID = 5
+    ALT_ID = 6
+    ALT_ITER = 7
 
     def __index__(self):
         """ Overridden to get the index in slices directly """

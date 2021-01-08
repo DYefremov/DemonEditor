@@ -45,7 +45,27 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
       <!-- column-name pos -->
       <column type="gchararray"/>
+      <!-- column-name fav_id -->
+      <column type="gchararray"/>
+      <!-- column-name alt_id -->
+      <column type="gchararray"/>
+      <!-- column-name fav_iter -->
+      <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkMenu" id="alt_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="alt_remove_popup_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_delete" object="alt_tree_view" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="backups_image">
     <property name="visible">True</property>
@@ -311,6 +331,22 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Insert space</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_insert_space" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="fav_add_alt_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Add alternatives</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_add_alternatives" swapped="no"/>
       </object>
     </child>
     <child>
@@ -2473,10 +2509,14 @@ Author: Dmitriy Yefremov
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="GtkTreeViewColumn" id="fav_picon_column">
-                                                <property name="min_width">25</property>
-                                                <property name="title" translatable="yes">Picon</property>
+                                              <object class="GtkTreeViewColumn" id="fav_service_column">
+                                                <property name="resizable">True</property>
+                                                <property name="min_width">50</property>
+                                                <property name="title" translatable="yes">Service</property>
+                                                <property name="expand">True</property>
+                                                <property name="clickable">True</property>
                                                 <property name="alignment">0.5</property>
+                                                <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                                 <child>
                                                   <object class="GtkCellRendererPixbuf" id="fav_picon_cellrendererpixbuf">
                                                     <property name="xpad">2</property>
@@ -2486,17 +2526,6 @@ Author: Dmitriy Yefremov
                                                     <attribute name="pixbuf">8</attribute>
                                                   </attributes>
                                                 </child>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="GtkTreeViewColumn" id="fav_service_column">
-                                                <property name="resizable">True</property>
-                                                <property name="min_width">50</property>
-                                                <property name="title" translatable="yes">Service</property>
-                                                <property name="expand">True</property>
-                                                <property name="clickable">True</property>
-                                                <property name="alignment">0.5</property>
-                                                <signal name="clicked" handler="on_fav_sort" swapped="no"/>
                                                 <child>
                                                   <object class="GtkCellRendererPixbuf" id="fav_coded_cellrendererpixbuf">
                                                     <property name="xpad">2</property>
@@ -2648,9 +2677,14 @@ Author: Dmitriy Yefremov
                                                     <property name="can_focus">True</property>
                                                     <property name="model">alt_list_store</property>
                                                     <property name="enable_search">False</property>
+                                                    <property name="rubber_banding">True</property>
                                                     <property name="enable_grid_lines">both</property>
+                                                    <signal name="button-press-event" handler="on_view_popup_menu" object="alt_popup_menu" swapped="no"/>
+                                                    <signal name="drag-data-received" handler="on_alt_view_drag_data_received" swapped="no"/>
                                                     <child internal-child="selection">
-                                                      <object class="GtkTreeSelection" id="alt_selection"/>
+                                                      <object class="GtkTreeSelection" id="alt_selection">
+                                                        <property name="mode">multiple</property>
+                                                      </object>
                                                     </child>
                                                     <child>
                                                       <object class="GtkTreeViewColumn" id="alt_num_column">
@@ -2670,9 +2704,11 @@ Author: Dmitriy Yefremov
                                                       </object>
                                                     </child>
                                                     <child>
-                                                      <object class="GtkTreeViewColumn" id="alt_picon_column">
-                                                        <property name="min_width">25</property>
-                                                        <property name="title" translatable="yes">Picon</property>
+                                                      <object class="GtkTreeViewColumn" id="alt_service_column">
+                                                        <property name="resizable">True</property>
+                                                        <property name="min_width">50</property>
+                                                        <property name="title" translatable="yes">Service</property>
+                                                        <property name="expand">True</property>
                                                         <property name="alignment">0.5</property>
                                                         <child>
                                                           <object class="GtkCellRendererPixbuf" id="alt_picon_cellrendererpixbuf">
@@ -2682,15 +2718,6 @@ Author: Dmitriy Yefremov
                                                             <attribute name="pixbuf">1</attribute>
                                                           </attributes>
                                                         </child>
-                                                      </object>
-                                                    </child>
-                                                    <child>
-                                                      <object class="GtkTreeViewColumn" id="alt_service_column">
-                                                        <property name="resizable">True</property>
-                                                        <property name="min_width">50</property>
-                                                        <property name="title" translatable="yes">Service</property>
-                                                        <property name="expand">True</property>
-                                                        <property name="alignment">0.5</property>
                                                         <child>
                                                           <object class="GtkCellRendererText" id="alt_service_cellrenderertext">
                                                             <property name="xalign">0.10000000149011612</property>
@@ -2728,6 +2755,30 @@ Author: Dmitriy Yefremov
                                                           </object>
                                                           <attributes>
                                                             <attribute name="text">4</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkTreeViewColumn" id="alt_id_column">
+                                                        <property name="visible">False</property>
+                                                        <property name="title" translatable="yes">ID</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_fav_id_cellrenderertext"/>
+                                                          <attributes>
+                                                            <attribute name="text">5</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_id_cellrenderertext"/>
+                                                          <attributes>
+                                                            <attribute name="text">6</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="alt_iter_cellrenderertext"/>
+                                                          <attributes>
+                                                            <attribute name="text">7</attribute>
                                                           </attributes>
                                                         </child>
                                                       </object>
