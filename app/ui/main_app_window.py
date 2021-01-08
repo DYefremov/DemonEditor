@@ -43,6 +43,7 @@ class Application(Gtk.Application):
     SERVICE_MODEL_NAME = "services_list_store"
     FAV_MODEL_NAME = "fav_list_store"
     BQ_MODEL_NAME = "bouquets_tree_store"
+    ALT_MODEL_NAME = "alt_list_store"
     DRAG_SEP = "::::"
 
     DEL_FACTOR = 50  # Batch size to delete in one pass.
@@ -58,7 +59,7 @@ class Application(Gtk.Application):
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
                      "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item",
-                     "fav_epg_configuration_popup_item")
+                     "fav_epg_configuration_popup_item", "fav_add_alt_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
@@ -116,6 +117,7 @@ class Application(Gtk.Application):
                     "on_services_view_drag_data_received": self.on_services_view_drag_data_received,
                     "on_view_drag_data_received": self.on_view_drag_data_received,
                     "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
+                    "on_alt_view_drag_data_received": self.on_alt_view_drag_data_received,
                     "on_view_press": self.on_view_press,
                     "on_view_release": self.on_view_release,
                     "on_view_popup_menu": self.on_view_popup_menu,
@@ -166,7 +168,8 @@ class Application(Gtk.Application):
                     "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
                     "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package,
                     "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
-                    "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type}
+                    "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type,
+                    "on_add_alternatives": self.on_add_alternatives}
 
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
@@ -254,6 +257,7 @@ class Application(Gtk.Application):
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
         # Alternatives
+        self._alt_view = builder.get_object("alt_tree_view")
         self._alt_model = builder.get_object("alt_list_store")
         self._alt_revealer = builder.get_object("alt_revealer")
         self._alt_revealer.bind_property("visible", self._alt_revealer, "reveal-child")
@@ -461,6 +465,7 @@ class Application(Gtk.Application):
         self._bouquets_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, bq_target,
                                                      Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._bouquets_view.enable_model_drag_dest(bq_target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._alt_view.enable_model_drag_dest(bq_target, Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY)
 
         self._fav_view.drag_source_set_target_list(None)
         self._fav_view.drag_dest_add_text_targets()
@@ -477,6 +482,7 @@ class Application(Gtk.Application):
         self._bouquets_view.drag_dest_add_text_targets()
         self._bouquets_view.drag_source_add_text_targets()
 
+        self._alt_view.drag_dest_add_text_targets()
         self._app_info_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._app_info_box.drag_dest_add_text_targets()
         # For multiple selection.
@@ -679,6 +685,8 @@ class Application(Gtk.Application):
             priority = GLib.PRIORITY_DEFAULT
         elif model_name == self.SERVICE_MODEL_NAME:
             gen = self.delete_services(itrs, model, rows)
+        elif model_name == self.ALT_MODEL_NAME:
+            gen = self.delete_alts(itrs, model, rows)
 
         GLib.idle_add(lambda: next(gen, False), priority=priority)
         self.on_view_focus(view)
@@ -1682,13 +1690,15 @@ class Application(Gtk.Application):
         row = model[path][:]
         if row[Column.FAV_TYPE] == BqServiceType.ALT.name:
             self._alt_model.clear()
-            srv = self._services.get(row[Column.FAV_ID], None)
+            a_id = row[Column.FAV_ID]
+            srv = self._services.get(a_id, None)
             if srv:
-                for index, s in enumerate(srv[-1] or [], start=1):
+                for i, s in enumerate(srv[-1] or [], start=1):
                     srv = self._services.get(s.data, None)
                     if srv:
-                        picon = self._picons.get(srv.picon_id, None)
-                        self._alt_model.append((index, picon, srv.service, srv.service_type, srv.pos))
+                        pic = self._picons.get(srv.picon_id, None)
+                        itr = model.get_string_from_iter(model.get_iter(path))
+                        self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, a_id, itr))
                 self._alt_revealer.set_visible(True)
         else:
             self._alt_revealer.set_visible(False)
@@ -2998,7 +3008,7 @@ class Application(Gtk.Application):
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV
 
-    # ***************** Bouquets *********************#
+    # ***************** Bouquets ********************* #
 
     def on_create_bouquet_for_current_satellite(self, item):
         self.create_bouquets(BqGenType.SAT)
@@ -3022,7 +3032,114 @@ class Application(Gtk.Application):
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
                      self._s_type, self.append_bouquet)
 
-    # ***************** Profile label *********************#
+    # ***************** Alternatives ********************* #
+
+    def on_add_alternatives(self, item):
+        model, paths = self._fav_view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
+        if len(paths) > 1:
+            self.show_error_dialog("Please, select only one item!")
+            return
+
+        row = model[paths][:]
+        if row[Column.FAV_TYPE] in {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}:
+            self.show_error_dialog("Operation not allowed in this context!")
+            return
+
+        srv = self._services.get(row[Column.FAV_ID], None)
+        bq = self._bouquets.get(self._bq_selected, None)
+        if not srv or not bq:
+            return
+
+        fav_id = srv.fav_id
+        alt_id = "alternatives_{}_{}".format(self._bq_selected, fav_id)
+        if alt_id in bq:
+            self.show_error_dialog("A similar service is already in this list!")
+            return
+
+        dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
+        bq_srv = BouquetService(None, dt if srv.service_type != it.name else it, fav_id, 0)
+        s_type = BqServiceType.ALT.name
+        a_srv = srv._replace(service_type=s_type, pos=None, fav_id=alt_id, data_id=alt_id, transponder=(bq_srv,))
+        try:
+            index = bq.index(fav_id)
+        except ValueError as e:
+            log("[on_add_alternatives] error: {}".format(e))
+        else:
+            bq[index] = alt_id
+            self._services[alt_id] = a_srv
+            data = {Column.FAV_CODED: srv.coded, Column.FAV_SERVICE: srv.service, Column.FAV_LOCKED: srv.locked,
+                    Column.FAV_HIDE: srv.hide, Column.FAV_TYPE: s_type, Column.FAV_POS: None,
+                    Column.FAV_ID: alt_id, Column.FAV_PICON: self._picons.get(srv.picon_id, None)}
+            model.set(model.get_iter(paths), data)
+            self._fav_view.row_activated(paths[0], self._fav_view.get_column(Column.FAV_NUM))
+
+    def delete_alts(self, itrs, model, rows):
+        list(map(model.remove, itrs))
+        row = rows[0]
+        alt_id = row[Column.ALT_ID]
+
+        if not len(model):
+            bq = self._bouquets.get(self._bq_selected, None)
+            if not bq:
+                return
+
+            fav_id, itr = row[Column.ALT_FAV_ID], row[Column.ALT_ITER]
+            bq[bq.index(alt_id)] = fav_id
+            self._services.pop(alt_id, None)
+            srv = self._services.get(fav_id, None)
+            if srv:
+                itr = self._fav_model.get_iter_from_string(itr)
+                data = {Column.FAV_CODED: srv.coded, Column.FAV_SERVICE: srv.service, Column.FAV_LOCKED: srv.locked,
+                        Column.FAV_HIDE: srv.hide, Column.FAV_TYPE: srv.service_type, Column.FAV_POS: srv.pos,
+                        Column.FAV_ID: srv.fav_id, Column.FAV_PICON: self._picons.get(srv.picon_id, None)}
+                self._fav_model.set(itr, data)
+                self._alt_revealer.set_visible(False)
+        else:
+            srv = self._services.get(alt_id, None)
+            if srv:
+                alt_services = srv.transponder or ()
+                alt_services = tuple(s for s in alt_services if s.data not in {row[Column.ALT_FAV_ID] for row in rows})
+                self._services[alt_id] = srv._replace(transponder=alt_services)
+
+        yield True
+
+    def on_alt_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+        txt = data.get_text()
+        if txt:
+            itr_str, sep, source = txt.partition(self.DRAG_SEP)
+            if source == self.SERVICE_MODEL_NAME:
+                model, id_col, t_col = self._services_view.get_model(), Column.SRV_FAV_ID, Column.SRV_TYPE
+            elif source == self.FAV_MODEL_NAME:
+                model, id_col, t_col = self._fav_view.get_model(), Column.FAV_ID, Column.FAV_TYPE
+            else:
+                return True
+
+            srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
+            if not srv:
+                return True
+
+            itrs = tuple(model.get_iter_from_string(itr) for itr in itr_str.split(","))
+            types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
+            ids = tuple(model.get_value(itr, id_col) for itr in itrs if model.get_value(itr, t_col) not in types)
+            srvs = tuple(self._services.get(f_id, None) for f_id in ids)
+            dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
+            a_srvs = tuple(BouquetService(None, dt if s.service_type != it.name else it, s.fav_id, 0) for s in srvs)
+            alt_services = srv.transponder + a_srvs
+            self._services[srv.fav_id] = srv._replace(transponder=alt_services)
+
+            a_row = self._alt_model[self._alt_model.get_iter_first()][:]
+            alt_id, a_itr = a_row[Column.ALT_ID], a_row[Column.ALT_ITER]
+
+            for i, srv in enumerate(srvs, start=len(self._alt_model) + 1):
+                pic = self._picons.get(srv.picon_id, None)
+                self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, alt_id, a_itr))
+
+        return True
+
+    # ***************** Profile label ********************* #
 
     @run_idle
     def update_profile_label(self):
