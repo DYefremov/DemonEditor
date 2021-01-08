@@ -265,7 +265,6 @@ class Application(Gtk.Application):
         self._ftp_button = builder.get_object("ftp_button")
         self._ftp_revealer = builder.get_object("ftp_revealer")
         self._ftp_button.bind_property("active", self._ftp_revealer, "visible")
-        self._ftp_button.set_visible(self._settings.is_enable_experimental)
         # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)

@@ -186,10 +186,6 @@ class ControlBox(Gtk.HBox):
         self._timers_list_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY)
         self._timers_list_box.drag_dest_add_text_targets()
 
-        builder.get_object("stack_switcher").set_visible(settings.is_enable_experimental)
-        builder.get_object("epg_box").set_visible(settings.is_enable_experimental)
-        builder.get_object("timers_box").set_visible(settings.is_enable_experimental)
-
         self.init_actions(app)
         self.connect("hide", self.on_hide)
         self.show()
