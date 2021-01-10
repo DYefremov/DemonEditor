@@ -21,6 +21,7 @@ class BouquetsWriter:
     _MARKER = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
     _SPACE = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
     _ALT = '#SERVICE 1:134:1:0:0:0:0:0:0:0:FROM BOUQUET "{}" ORDER BY bouquet\n'
+    _ALT_PAT = r"[^\x30-\x7A]|[<>:\"/\\|?*\-\s]"
 
     def __init__(self, path, bouquets, force_bq_names=False):
         self._path = path
@@ -68,7 +69,8 @@ class BouquetsWriter:
                 services = srv.transponder
                 if services:
                     p = Path(path)
-                    f_name = "alternatives.{}{}".format(re.sub("[<>:\"/\\|?*\-\s]", "_", srv.service), p.suffix)
+                    alt_name = re.sub(self._ALT_PAT, "_", srv.service).lower()
+                    f_name = "alternatives.{}{}".format(alt_name, p.suffix)
                     alt_path = "{}/{}".format(p.parent, f_name)
                     bouquet.append(self._ALT.format(f_name))
                     self.write_bouquet(alt_path, srv.service, services)
