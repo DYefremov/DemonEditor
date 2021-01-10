@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.22.2
 
 The MIT License (MIT)
 
@@ -2680,6 +2680,8 @@ Author: Dmitriy Yefremov
                                                     <property name="rubber_banding">True</property>
                                                     <property name="enable_grid_lines">both</property>
                                                     <signal name="button-press-event" handler="on_view_popup_menu" object="alt_popup_menu" swapped="no"/>
+                                                    <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
+                                                    <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                                     <signal name="drag-data-received" handler="on_alt_view_drag_data_received" swapped="no"/>
                                                     <child internal-child="selection">
                                                       <object class="GtkTreeSelection" id="alt_selection">

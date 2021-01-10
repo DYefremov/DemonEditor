@@ -568,6 +568,7 @@ class Application(Gtk.Application):
                                                      Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._bouquets_view.enable_model_drag_dest(bq_target, Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._alt_view.enable_model_drag_dest(bq_target, Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY)
+        self._alt_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.MOVE)
 
         self._fav_view.drag_source_set_target_list(None)
         self._fav_view.drag_dest_add_text_targets()
@@ -584,7 +585,10 @@ class Application(Gtk.Application):
         self._bouquets_view.drag_source_add_text_targets()
         self._bouquets_view.drag_dest_add_uri_targets()
 
+        self._alt_view.drag_source_set_target_list(None)
+        self._alt_view.drag_source_add_text_targets()
         self._alt_view.drag_dest_add_text_targets()
+
         self._app_info_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         if self._settings.is_darwin:
             self._app_info_box.drag_dest_add_uri_targets()
@@ -1128,6 +1132,8 @@ class Application(Gtk.Application):
             name_column, type_column = Column.FAV_SERVICE, Column.FAV_TYPE
         elif name == self.BQ_MODEL_NAME:
             name_column, type_column = Column.BQ_NAME, Column.BQ_TYPE
+        elif name == self.ALT_MODEL_NAME:
+            name_column, type_column = Column.ALT_SERVICE, Column.ALT_TYPE
         # https://stackoverflow.com/a/52248549
         Gtk.drag_set_icon_pixbuf(context, self.get_drag_icon_pixbuf(model, paths, name_column, type_column), 0, 0)
         return True
@@ -3169,6 +3175,7 @@ class Application(Gtk.Application):
     # ***************** Alternatives ********************* #
 
     def on_add_alternatives(self, item):
+        """ Adding alternatives. """
         model, paths = self._fav_view.get_selection().get_selected_rows()
         if not paths:
             return
@@ -3211,6 +3218,7 @@ class Application(Gtk.Application):
             self._fav_view.row_activated(paths[0], self._fav_view.get_column(Column.FAV_NUM))
 
     def delete_alts(self, itrs, model, rows):
+        """ Deleting alternatives. """
         list(map(model.remove, itrs))
         row = rows[0]
         alt_id = row[Column.ALT_ID]
@@ -3241,6 +3249,10 @@ class Application(Gtk.Application):
         yield True
 
     def on_alt_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+        srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
+        if not srv:
+            return True
+
         txt = data.get_text()
         if txt:
             itr_str, sep, source = txt.partition(self.DRAG_SEP)
@@ -3248,28 +3260,56 @@ class Application(Gtk.Application):
                 model, id_col, t_col = self._services_view.get_model(), Column.SRV_FAV_ID, Column.SRV_TYPE
             elif source == self.FAV_MODEL_NAME:
                 model, id_col, t_col = self._fav_view.get_model(), Column.FAV_ID, Column.FAV_TYPE
+            elif source == self.ALT_MODEL_NAME:
+                return self.on_alt_move(itr_str, view.get_dest_row_at_pos(x, y), srv)
             else:
                 return True
 
-            srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
-            if not srv:
-                return True
+            return self.on_alt_received(itr_str, model, id_col, t_col, srv)
 
-            itrs = tuple(model.get_iter_from_string(itr) for itr in itr_str.split(","))
-            types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
-            ids = tuple(model.get_value(itr, id_col) for itr in itrs if model.get_value(itr, t_col) not in types)
-            srvs = tuple(self._services.get(f_id, None) for f_id in ids)
-            dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
-            a_srvs = tuple(BouquetService(None, dt if s.service_type != it.name else it, s.fav_id, 0) for s in srvs)
-            alt_services = srv.transponder + a_srvs
-            self._services[srv.fav_id] = srv._replace(transponder=alt_services)
+    def on_alt_received(self, itr_str, model, id_col, t_col, srv):
+        itrs = tuple(model.get_iter_from_string(itr) for itr in itr_str.split(","))
+        types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
+        ids = tuple(model.get_value(itr, id_col) for itr in itrs if model.get_value(itr, t_col) not in types)
+        srvs = tuple(self._services.get(f_id, None) for f_id in ids)
+        dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
+        a_srvs = tuple(BouquetService(None, dt if s.service_type != it.name else it, s.fav_id, 0) for s in srvs)
+        alt_services = srv.transponder + a_srvs
+        self._services[srv.fav_id] = srv._replace(transponder=alt_services)
 
-            a_row = self._alt_model[self._alt_model.get_iter_first()][:]
-            alt_id, a_itr = a_row[Column.ALT_ID], a_row[Column.ALT_ITER]
+        a_row = self._alt_model[self._alt_model.get_iter_first()][:]
+        alt_id, a_itr = a_row[Column.ALT_ID], a_row[Column.ALT_ITER]
 
-            for i, srv in enumerate(srvs, start=len(self._alt_model) + 1):
-                pic = self._picons.get(srv.picon_id, None)
-                self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, alt_id, a_itr))
+        for i, srv in enumerate(srvs, start=len(self._alt_model) + 1):
+            pic = self._picons.get(srv.picon_id, None)
+            self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, alt_id, a_itr))
+
+        return True
+
+    def on_alt_move(self, s_iters, info, srv):
+        """ Move alternatives in the list. """
+        di = -1
+        if info:
+            path, position = info
+            di = path.get_indices()[0]
+
+        itrs = tuple(self._alt_model.get_iter_from_string(itr) for itr in s_iters.split(","))
+        [self._alt_model.insert(i, r) for i, r in enumerate((self._alt_model[in_itr][:] for in_itr in itrs), start=di)]
+        list(map(self._alt_model.remove, itrs))
+
+        d_type, i_type = BqServiceType.DEFAULT, BqServiceType.IPTV
+        alt_srvs = []
+        for i, r in enumerate(self._alt_model, start=1):
+            r[Column.ALT_NUM] = i
+            s_type = d_type if r[Column.ALT_TYPE] != i_type.name else i_type
+            alt_srvs.append(BouquetService(None, s_type, r[Column.ALT_FAV_ID], i))
+
+        self._services[srv.fav_id] = srv._replace(transponder=tuple(alt_srvs))
+        a_iter = self._alt_model.get_iter_first()
+        srv = self._services.get(self._alt_model.get_value(a_iter, Column.ALT_FAV_ID), None)
+        if srv:
+            fav_iter = self._fav_model.get_iter_from_string(self._alt_model.get_value(a_iter, Column.ALT_ITER))
+            self._fav_model.set_value(fav_iter, Column.FAV_PICON, self._picons.get(srv.picon_id, None))
 
         return True
 
