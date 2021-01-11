@@ -89,7 +89,7 @@ class BouquetsReader:
     """ Class for reading and parsing bouquets. """
     _ALT_PAT = re.compile(".*alternatives\\.+(.*)\\.([tv|radio]+).*")
     _BQ_PAT = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
-    _STREAM_TYPES = {"4097", "5001", "5002", "8193"}
+    _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
     __slots__ = ["_path"]
 

@@ -19,6 +19,7 @@ class StreamType(Enum):
     NONE_REC_1 = "5001"
     NONE_REC_2 = "5002"
     E_SERVICE_URI = "8193"
+    E_SERVICE_HLS = "8739"
 
 
 def parse_m3u(path, s_type, detect_encoding=True):

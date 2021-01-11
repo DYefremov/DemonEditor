@@ -222,6 +222,9 @@ Author: Dmitriy Yefremov
       <row>
         <col id="0">eServiceUri</col>
       </row>
+      <row>
+        <col id="0">eServiceHLS</col>
+      </row>
     </data>
   </object>
   <object class="GtkDialog" id="iptv_dialog">
