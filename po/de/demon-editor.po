@@ -22,7 +22,7 @@ msgid "Package"
 msgstr "Paket"
 
 msgid "Type"
-msgstr "Model"
+msgstr "Typ"
 
 msgid "Picon"
 msgstr "Picon"
@@ -1199,3 +1199,18 @@ msgstr "Datum"
 
 msgid "Attr."
 msgstr "Attr."
+
+msgid "Toggle display position"
+msgstr "Anzeigeposition umschalten"
+
+msgid "Alternatives"
+msgstr "Alternativen"
+
+msgid "Add alternatives"
+msgstr "Alternativen hinzufügen"
+
+msgid "DreamOS only!"
+msgstr "Nur DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Ein ähnlicher Dienst ist bereits in dieser Liste enthalten!"
