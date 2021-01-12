@@ -408,6 +408,19 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
+                                  <object class="GtkToolItem" id="profile_sep_item">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="homogeneous">False</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkToolButton" id="profile_set_default_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
