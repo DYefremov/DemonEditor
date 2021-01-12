@@ -1186,3 +1186,18 @@ msgstr "Дата"
 
 msgid "Attr."
 msgstr "Атрыб."
+
+msgid "Toggle display position"
+msgstr "Перамкнуць пазіцыю адлюстравання"
+
+msgid "Alternatives"
+msgstr "Альтэрнатывы"
+
+msgid "Add alternatives"
+msgstr "Дадаць альтэрнатывы"
+
+msgid "DreamOS only!"
+msgstr "Толькі DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Падобны сэрвіс ужо ёсць у гэтым спісе!"

@@ -1184,5 +1184,17 @@ msgstr "Размер"
 msgid "Date"
 msgstr "Дата"
 
-msgid "Attr."
-msgstr "Атриб."
+msgid "Toggle display position"
+msgstr "Переключить позицию отображения"
+
+msgid "Alternatives"
+msgstr "Альтернативы"
+
+msgid "Add alternatives"
+msgstr "Добавить альтернативы"
+
+msgid "DreamOS only!"
+msgstr "Только DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Подобный сервис уже есть в этом списке!"
