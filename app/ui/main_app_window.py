@@ -1122,7 +1122,7 @@ class Application(Gtk.Application):
             We have to use "connect_after" (after="yes" in xml) to override what the default handler did.
             https://lazka.github.io/pgi-docs/Gtk-3.0/classes/Widget.html#Gtk.Widget.signals.drag_begin
         """
-        model, paths = view.get_selection().get_selected_rows()
+        top_model, paths = view.get_selection().get_selected_rows()
         if len(paths) < 1:
             return
 
@@ -1135,7 +1135,7 @@ class Application(Gtk.Application):
         elif name == self.ALT_MODEL_NAME:
             name_column, type_column = Column.ALT_SERVICE, Column.ALT_TYPE
         # https://stackoverflow.com/a/52248549
-        Gtk.drag_set_icon_pixbuf(context, self.get_drag_icon_pixbuf(model, paths, name_column, type_column), 0, 0)
+        Gtk.drag_set_icon_pixbuf(context, self.get_drag_icon_pixbuf(top_model, paths, name_column, type_column), 0, 0)
         return True
 
     def on_view_drag_end(self, view, context):
