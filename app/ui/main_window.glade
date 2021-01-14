@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -3112,7 +3112,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel" id="app_ver_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">1.0.4 Beta</property>
+                    <property name="label" translatable="yes">1.0.5 Beta</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
