@@ -27,7 +27,7 @@ class BouquetsWriter:
         self._path = path
         self._bouquets = bouquets
         self._force_bq_names = force_bq_names
-        self._marker_index = 0
+        self._marker_index = 1
         self._space_index = 0
         self._alt_index = 0
 
@@ -40,10 +40,8 @@ class BouquetsWriter:
             line.append("#NAME {}\n".format(bqs.name))
 
             for index, bq in enumerate(bqs.bouquets):
-                bq_name = bq.name
-                if bq_name == "Favourites (TV)" or bq_name == "Favourites (Radio)":
-                    bq_name = _DEFAULT_BOUQUET_NAME
-                else:
+                bq_name = _DEFAULT_BOUQUET_NAME
+                if index > 0:
                     bq_name = re.sub(pattern, "_", bq.name) if self._force_bq_names else "de{0:02d}".format(index)
                 line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
                 self.write_bouquet(self._path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
