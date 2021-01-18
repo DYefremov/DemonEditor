@@ -2760,7 +2760,7 @@ class Application(Gtk.Application):
             for srv in self._services.values():
                 tr_type = srv.transponder_type
                 if tr_type == "s" and srv.pos:
-                    sat_positions.add(float(srv.pos))
+                    sat_positions.add(srv.pos)
                 elif tr_type == "t":
                     terrestrial = True
                 elif tr_type == "c":
@@ -2771,7 +2771,7 @@ class Application(Gtk.Application):
             if cable:
                 self._sat_positions.append("C")
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            list(map(lambda s: sat_positions.add(float(s.pos)), filter(lambda s: s.pos, self._services.values())))
+            list(map(lambda s: sat_positions.add(s.pos), filter(lambda s: s.pos, self._services.values())))
 
         self._sat_positions.extend(map(str, sorted(sat_positions)))
         if self._filter_bar.is_visible():

@@ -89,11 +89,8 @@ def parse_webtv(path, name, bq_type):
             group = group.value if group else group
             fav_id = NEUTRINO_FAV_ID_FORMAT.format(url, description, urlkey, account, usrname, psw, s_type, iconsrc,
                                                    iconsrc_b, group)
-            srv = BouquetService(name=title,
-                                 type=BqServiceType.IPTV,
-                                 data=fav_id,
-                                 num=0)
-            services.append(srv)
+            services.append(BouquetService(name=title, type=BqServiceType.IPTV, data=fav_id, num=0))
+
     bouquet = Bouquet(name="default", type=bq_type, services=services, locked=None, hidden=None)
     bouquets[2].append(bouquet)
 
@@ -125,14 +122,15 @@ def write_bouquet(file, bouquet):
         root.appendChild(bq_elem)
 
         for srv in bq.services:
+            f_data = srv.flags_cas.split(":")
             tr_id, on, ssid = srv.fav_id.split(":")
             srv_elem = doc.createElement("S")
             srv_elem.setAttribute("i", ssid)
             srv_elem.setAttribute("n", srv.service)
             srv_elem.setAttribute("t", tr_id)
             srv_elem.setAttribute("on", on)
-            srv_elem.setAttribute("s", srv.pos.replace(".", ""))
-            srv_elem.setAttribute("frq", srv.freq[:-3])
+            srv_elem.setAttribute("s", f_data[1])
+            srv_elem.setAttribute("frq", srv.freq)
             srv_elem.setAttribute("l", "0")  # temporary !!!
             bq_elem.appendChild(srv_elem)
 

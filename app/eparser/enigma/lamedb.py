@@ -105,11 +105,11 @@ class LameDbReader:
         services_list = []
         blacklist = get_blacklist(self._path) if self._path else {}
         srvs = self.split(services, 3)
-        if srvs[0][0] == "":  # remove first empty element
+        if srvs[0][0] == "":  # Remove first empty element.
             srvs.remove(srvs[0])
 
         for srv in srvs:
-            data_id = str(srv[0]).lower()  # lower is for lamedb ver.3
+            data_id = str(srv[0]).lower()  # Lower is for lamedb ver.3.
             data = data_id.split(_SEP)
             sp = "0"
             tid = data[2]
@@ -157,6 +157,8 @@ class LameDbReader:
                 service_type = SERVICE_TYPE.get(data[4], SERVICE_TYPE["-2"])
                 # Removing all non printable symbols!
                 srv_name = "".join(c for c in srv[1] if c.isprintable())
+                freq = tr[0]
+                rate = tr[1]
                 pol = None
                 fec = None
                 system = None
@@ -166,7 +168,7 @@ class LameDbReader:
                     pol = POLARIZATION.get(tr[2], None)
                     fec = FEC.get(tr[3], None)
                     system = "DVB-S2" if len(tr) > 7 else "DVB-S"
-                    pos = "{}.{}".format(tr[4][:-1], tr[4][-1:])
+                    pos = tr[4]
                 if tr_type is TrType.Terrestrial:
                     system = T_SYSTEM.get(tr[9], None)
                     pos = "T"
@@ -176,26 +178,20 @@ class LameDbReader:
                     pos = "C"
                     fec = FEC_DEFAULT.get(tr[4])
 
-                services_list.append(Service(flags_cas=srv[2],
-                                             transponder_type=tr_type.value,
-                                             coded=coded,
-                                             service=srv_name,
-                                             locked=locked,
-                                             hide=hide,
-                                             package=package,
-                                             service_type=service_type,
-                                             picon=None,
-                                             picon_id=picon_id,
-                                             ssid=data[0],
-                                             freq=tr[0],
-                                             rate=tr[1],
-                                             pol=pol,
-                                             fec=fec,
-                                             system=system,
-                                             pos=pos,
-                                             data_id=data_id,
-                                             fav_id=fav_id,
-                                             transponder=transponder))
+                # Formatting displayed values.
+                try:
+                    freq = "{}".format(int(freq) // 1000)
+                    rate = "{}".format(int(rate) // 1000)
+                    if tr_type is TrType.Satellite:
+                        pos = int(pos)
+                        pos = "{:0.1f}{}".format(abs(pos / 10), "W" if pos < 0 else "E")
+                except ValueError as e:
+                    log("Parse error [parse_services]: {}".format(e))
+
+                s = Service(srv[2], tr_type.value, coded, srv_name, locked, hide, package, service_type, None,
+                            picon_id, data[0], freq, rate, pol, fec, system, pos, data_id, fav_id, transponder)
+
+                services_list.append(s)
         return services_list
 
     def get_services_list(self, data):
