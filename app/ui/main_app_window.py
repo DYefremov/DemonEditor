@@ -1810,9 +1810,9 @@ class Application(Gtk.Application):
         yield from c_gen
 
         if profile is SettingsType.ENIGMA_2:
-            parent = self._bouquets_model.append(None, ["Favourites (TV)", None, None, BqType.TV.value])
+            parent = self._bouquets_model.append(None, ["Bouquets (TV)", None, None, BqType.TV.value])
             self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None), parent)
-            parent = self._bouquets_model.append(None, ["Favourites (Radio)", None, None, BqType.RADIO.value])
+            parent = self._bouquets_model.append(None, ["Bouquets (Radio)", None, None, BqType.RADIO.value])
             self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None), parent)
         elif profile is SettingsType.NEUTRINO_MP:
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
