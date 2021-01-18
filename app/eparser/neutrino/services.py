@@ -1,5 +1,6 @@
 from xml.dom.minidom import parse, Document
 
+from app.commons import log
 from ..ecommons import Service, POLARIZATION, FEC, SYSTEM, SERVICE_TYPE, PROVIDER
 
 _FILE = "services.xml"
@@ -28,7 +29,7 @@ def write_services(path, services):
         tr_atr = sat.split(":")
         sat_elem = doc.createElement("sat")
         sat_elem.setAttribute("name", tr_atr[0])
-        sat_elem.setAttribute("position", tr_atr[1].replace(".", ""))
+        sat_elem.setAttribute("position", tr_atr[1])
         sat_elem.setAttribute("diseqc", tr_atr[2])
         sat_elem.setAttribute("uncommited", tr_atr[3])
         root.appendChild(sat_elem)
@@ -88,7 +89,6 @@ def parse_services(path):
             if elem.hasAttributes():
                 sat_name = elem.attributes["name"].value
                 sat_pos = elem.attributes["position"].value
-                sat_pos = "{}.{}".format(sat_pos[:-1], sat_pos[-1:])
                 diseqc = elem.attributes.get("diseqc")
                 diseqc = diseqc.value if diseqc else diseqc
                 uncommited = elem.attributes.get("uncommited")
@@ -117,6 +117,15 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
 
     tr = "{}:{}:{}:{}:{}:{}:{}:{}:{}".format(tr_id, on, freq, inv, rate, fec, pol, mod, sys)
     tr_id = tr_id.lstrip("0")
+    pol = POLARIZATION.get(pol)
+    # Formatting displayed values.
+    try:
+        freq = "{}".format(int(freq) // 1000)
+        rate = "{}".format(int(rate) // 1000)
+        sat_pos = int(sat_pos)
+        sat_pos = "{:0.1f}{}".format(abs(sat_pos / 10), "W" if sat_pos < 0 else "E")
+    except ValueError as e:
+        log("Neutrino parsing error [parse_transponder]: {}".format(e))
 
     for srv_elem in tr_elem.getElementsByTagName("S"):
         if srv_elem.hasAttributes():
@@ -141,27 +150,10 @@ def parse_transponder(api, sat, sat_pos, services, tr_elem):
             data_id = "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}".format(api, srv_type, sys, num, f, v, a, p, pmt, tx, vt)
             fav_id = "{}:{}:{}".format(tr_id, on.lstrip("0"), ssid.lstrip("0"))
             picon_id = "{}{}{}.png".format(tr_id, on, ssid)
+            prv, st, = PROVIDER.get(int(on, 16)), SERVICE_TYPE.get(str(int(srv_type, 16)), SERVICE_TYPE.get("-2"))
 
-            srv = Service(flags_cas=sat,
-                          transponder_type=None,
-                          coded=None,
-                          service=name,
-                          locked=None,
-                          hide=None,
-                          package=PROVIDER.get(int(on, 16)),
-                          service_type=SERVICE_TYPE.get(str(int(srv_type, 16))),
-                          picon=None,
-                          picon_id=picon_id,
-                          ssid=ssid,
-                          freq=freq,
-                          rate=rate,
-                          pol=POLARIZATION.get(pol),
-                          fec=FEC.get(fec),
-                          system=SYSTEM.get(sys),
-                          pos=sat_pos,
-                          data_id=data_id,
-                          fav_id=fav_id,
-                          transponder=tr)
+            srv = Service(sat, None, None, name, None, None, prv, st, None, picon_id, ssid, freq, rate, pol,
+                          FEC.get(fec), SYSTEM.get(sys), sat_pos, data_id, fav_id, tr)
             services.append(srv)
 
 
