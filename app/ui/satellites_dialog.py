@@ -823,9 +823,10 @@ class ServicesUpdateDialog(UpdateDialog):
         appender.send("Consumed: {:0.0f}s, {} services received.".format(time.time() - start, len(services)))
 
         try:
-            from app.eparser.enigma.lamedb import get_services_lines, get_services_list
+            from app.eparser.enigma.lamedb import LameDbReader
             # Used for double checking!
-            srvs = get_services_list("".join(get_services_lines(services)))
+            reader = LameDbReader(path=None)
+            srvs = reader.get_services_list("".join(reader.get_services_lines(services)))
         except ValueError as e:
             log("ServicesUpdateDialog [on receive data] error: {}".format(e))
         else:
