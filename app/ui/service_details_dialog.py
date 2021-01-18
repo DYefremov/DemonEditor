@@ -1,7 +1,7 @@
 import os
 import re
 
-from app.commons import run_idle
+from app.commons import run_idle, log
 from app.eparser import Service
 from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, get_key_by_value,
                                   get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION,
@@ -120,6 +120,7 @@ class ServiceDetailsDialog:
         self._pids_grid = builder.get_object("pids_grid")
         # Transponder elements
         self._sat_pos_button = builder.get_object("sat_pos_button")
+        self._pos_side_box = builder.get_object("pos_side_box")
         self._pol_combo_box = builder.get_object("pol_combo_box")
         self._fec_combo_box = builder.get_object("fec_combo_box")
         self._rate_lp_combo_box = builder.get_object("rate_lp_combo_box")
@@ -137,7 +138,7 @@ class ServiceDetailsDialog:
         self._TRANSPONDER_ELEMENTS = (self._sat_pos_button, self._pol_combo_box, self._invertion_combo_box,
                                       self._sys_combo_box, self._freq_entry, self._transponder_id_entry,
                                       self._network_id_entry, self._namespace_entry, self._fec_combo_box,
-                                      self._rate_entry, self._rate_lp_combo_box)
+                                      self._rate_entry, self._rate_lp_combo_box, self._pos_side_box)
 
         if self._action is Action.EDIT:
             self.update_data_elements()
@@ -336,7 +337,8 @@ class ServiceDetailsDialog:
 
     def set_sat_positions(self, sat_pos):
         """ Sat positions initialisation """
-        self._sat_pos_button.set_value(float(sat_pos))
+        self._sat_pos_button.set_value(float(sat_pos[:-1]))
+        self._pos_side_box.set_active_id(sat_pos[-1:])
 
     def on_system_changed(self, box):
         if not self._tr_edit_switch.get_active():
@@ -387,7 +389,7 @@ class ServiceDetailsDialog:
     def on_edit(self):
         """ Edit current service.  """
         fav_id, data_id = self.get_srv_data()
-        # transponder
+        # Transponder
         transponder = self._old_service.transponder
         if self._tr_edit_switch.get_active():
             try:
@@ -398,12 +400,12 @@ class ServiceDetailsDialog:
                 elif self._tr_type is TrType.Cable:
                     transponder = self.get_cable_transponder_data()
             except Exception as e:
-                print(e)
+                log("Edit service error: {}".format(e))
                 show_dialog(DialogType.ERROR, transient=self._dialog, text="Error getting transponder parameters!")
             else:
                 if self._transponder_services_iters:
                     self.update_transponder_services(transponder)
-        # service
+        # Service
         service = self.get_service(fav_id, data_id, transponder)
         old_fav_id = self._old_service.fav_id
         if old_fav_id != fav_id:
@@ -556,7 +558,7 @@ class ServiceDetailsDialog:
             freq = self._freq_entry.get_text()
             rate = self._rate_entry.get_text()
             pol = self._pol_combo_box.get_active_id()
-            pos = str(round(self._sat_pos_button.get_value(), 1))
+            pos = "{}{}".format(round(self._sat_pos_button.get_value(), 1), self._pos_side_box.get_active_id())
             return freq, rate, pol, fec, system, pos
         elif self._tr_type is TrType.Terrestrial:
             o_srv = self._old_service
@@ -567,11 +569,13 @@ class ServiceDetailsDialog:
 
     def get_satellite_transponder_data(self):
         sys = self._sys_combo_box.get_active_id()
-        freq = self._freq_entry.get_text()
-        rate = self._rate_entry.get_text()
+        freq = "{}000".format(self._freq_entry.get_text())
+        rate = "{}000".format(self._rate_entry.get_text())
         pol = self.get_value_from_combobox_id(self._pol_combo_box, POLARIZATION)
         fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
-        sat_pos = str(round(self._sat_pos_button.get_value(), 1)).replace(".", "")
+        sat_pos = self._sat_pos_button.get_value() * (-1 if self._pos_side_box.get_active_id() == "W" else 1)
+        sat_pos = str(round(sat_pos, 1)).replace(".", "")
+
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         srv_sys = "0"  # !!!
 
@@ -600,7 +604,7 @@ class ServiceDetailsDialog:
         # frequency, bandwidth, code rate HP, code rate LP, modulation, transmission mode, guard interval, hierarchy,
         # inversion, system, plp_id
         # Bandwidth -> Pol, Rate HP -> FEC, TransmissionMode -> Roll off, GuardInterval -> Pilot, Hierarchy -> Pls Mode
-        tr_data[1] = self._freq_entry.get_text()
+        tr_data[1] = "{}000".format(self._freq_entry.get_text())
         tr_data[2] = self.get_value_from_combobox_id(self._pol_combo_box, BANDWIDTH)
         tr_data[3] = self.get_value_from_combobox_id(self._fec_combo_box, T_FEC)
         tr_data[4] = self.get_value_from_combobox_id(self._rate_lp_combo_box, T_FEC)
@@ -615,8 +619,8 @@ class ServiceDetailsDialog:
     def get_cable_transponder_data(self):
         tr_data = re.split("\s|:", self._old_service.transponder)
         # frequency, symbol_rate, modulation, inversion, fec_inner, system;
-        tr_data[1] = self._freq_entry.get_text()
-        tr_data[2] = self._rate_entry.get_text()
+        tr_data[1] = "{}000".format(self._freq_entry.get_text())
+        tr_data[2] = "{}000".format(self._rate_entry.get_text())
         tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, C_MODULATION)
         tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
