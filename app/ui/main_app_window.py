@@ -92,6 +92,7 @@ class Application(Gtk.Application):
                     "on_bouquets_selection": self.on_bouquets_selection,
                     "on_satellite_editor_show": self.on_satellite_editor_show,
                     "on_fav_selection": self.on_fav_selection,
+                    "on_alt_selection": self.on_alt_selection,
                     "on_services_selection": self.on_services_selection,
                     "on_fav_cut": self.on_fav_cut,
                     "on_bouquets_cut": self.on_bouquets_cut,
@@ -2612,13 +2613,13 @@ class Application(Gtk.Application):
         row = self._fav_model[path][:]
         srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
 
-        if srv_type == BqServiceType.IPTV.name or srv_type in self._marker_types:
+        if srv_type in self._marker_types:
             self.show_error_dialog("Not allowed in this context!")
             self.set_playback_elms_active()
             return
 
         srv = self._services.get(fav_id, None)
-        if srv and srv.transponder:
+        if srv and srv.transponder or srv_type == BqServiceType.IPTV.name:
             return srv.picon_id.rstrip(".png").replace("_", ":")
 
     def update_info(self):
@@ -3178,6 +3179,13 @@ class Application(Gtk.Application):
             self._fav_model.set_value(fav_iter, Column.FAV_PICON, self._picons.get(srv.picon_id, None))
 
         return True
+
+    def on_alt_selection(self, model, path, column):
+        if self._control_box and self._control_box.update_epg:
+            row = model[path][:]
+            srv = self._services.get(row[Column.ALT_FAV_ID], None)
+            if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
+                self._control_box.on_service_changed(srv.picon_id.rstrip(".png").replace("_", ":"))
 
     # ***************** Profile label ********************* #
 

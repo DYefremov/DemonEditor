@@ -6,10 +6,11 @@ from urllib.parse import quote
 
 from gi.repository import GLib
 
-from .dialogs import get_dialogs_string, show_dialog, DialogType
+from .dialogs import get_dialogs_string, show_dialog, DialogType, get_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI
+from ..eparser.ecommons import BqServiceType
 
 
 class ControlBox(Gtk.HBox):
@@ -669,6 +670,12 @@ class ControlBox(Gtk.HBox):
 
             service = self._app.current_services.get(fav_id, None)
             if service:
+                if service.service_type == BqServiceType.ALT.name:
+                    msg = "Alternative service.\n\n {}".format(get_message("Not implemented yet!"))
+                    show_dialog(DialogType.ERROR, transient=self._app._main_window, text=msg)
+                    context.finish(False, False, time)
+                    return
+
                 self._timer_name_entry.set_text(service.service)
                 self._timer_service_entry.set_text(service.service)
                 self._timer_service_ref_entry.set_text(service.picon_id.rstrip(".png").replace("_", ":"))
