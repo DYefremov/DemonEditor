@@ -285,6 +285,7 @@ Author: Dmitriy Yefremov
         <property name="tooltip_text" translatable="yes">Cancel</property>
         <property name="use_stock">True</property>
         <property name="always_show_image">True</property>
+        <signal name="clicked" handler="on_cancel" swapped="no"/>
       </object>
     </child>
     <child type="action">
@@ -1585,9 +1586,6 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="-6">cancel_button</action-widget>
-    </action-widgets>
   </object>
   <object class="GtkListStore" id="transponder_services_liststore">
     <columns>
