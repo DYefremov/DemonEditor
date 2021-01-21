@@ -295,6 +295,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="valign">center</property>
+                <signal name="clicked" handler="on_cancel" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -1599,9 +1600,6 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="-6">cancel_button</action-widget>
-    </action-widgets>
   </object>
   <object class="GtkListStore" id="transponder_services_liststore">
     <columns>
