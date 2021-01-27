@@ -17,7 +17,8 @@ class BqServiceType(Enum):
     ALT = "ALT"  # Service with alternatives
 
 
-Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden"])
+Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden", "file"])
+Bouquet.__new__.__defaults__ = (None, BqServiceType.DEFAULT, [], None, None, None)  # For Python3 < 3.7
 Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
 BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 

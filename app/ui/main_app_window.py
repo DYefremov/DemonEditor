@@ -180,6 +180,9 @@ class Application(Gtk.Application):
         self._picons_buffer = []
         self._services = {}
         self._bouquets = {}
+        self._bq_file = {}
+        self._alt_file = set()
+        self._alt_counter = 1
         self._data_hash = 0
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
@@ -1614,9 +1617,9 @@ class Application(Gtk.Application):
                         self.append_bouquet(bq, row.iter)
 
     def append_bouquet(self, bq, parent):
-        name, bt_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
-        self._bouquets_model.append(parent, [name, locked, hidden, bt_type])
-        bq_id = "{}:{}".format(name, bt_type)
+        name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
+        self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
+        bq_id = "{}:{}".format(name, bq_type)
         services = []
         extra_services = {}  # for services with different names in bouquet and main list
         agr = [None] * 7
@@ -1641,14 +1644,16 @@ class Application(Gtk.Application):
                               self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.ALT:
+                self._alt_file.add("{}:{}".format(srv.data, bq_type))
                 srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
-                              None, None, *agr, fav_id, fav_id, srv.num)
+                              None, None, *agr, srv.data, fav_id, srv.num)
                 self._services[fav_id] = srv
             elif srv.name:
                 extra_services[fav_id] = srv.name
             services.append(fav_id)
 
         self._bouquets[bq_id] = services
+        self._bq_file[bq_id] = bq.file
         if extra_services:
             self._extra_bouquets[bq_id] = extra_services
 
@@ -1707,7 +1712,10 @@ class Application(Gtk.Application):
         self._services.clear()
         self._rows_buffer.clear()
         self._picons.clear()
+        self._alt_file.clear()
+        self._alt_counter = 1
         self._bouquets.clear()
+        self._bq_file.clear()
         self._extra_bouquets.clear()
         self._current_bq_name = None
         self._bq_name_label.set_text("")
@@ -1757,7 +1765,7 @@ class Application(Gtk.Application):
                     if profile is SettingsType.ENIGMA_2:
                         bq_s = self.get_enigma_bq_services(bq_s, ex_s)
 
-                    bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden)
+                    bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden, self._bq_file.get(bq_id, None))
                     bqs.append(bq)
             if len(b_path) == 1:
                 bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
@@ -1812,9 +1820,9 @@ class Application(Gtk.Application):
 
         if profile is SettingsType.ENIGMA_2:
             parent = self._bouquets_model.append(None, ["Bouquets (TV)", None, None, BqType.TV.value])
-            self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None), parent)
+            self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None, "favourites"), parent)
             parent = self._bouquets_model.append(None, ["Bouquets (Radio)", None, None, BqType.RADIO.value])
-            self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None), parent)
+            self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None, "favourites"), parent)
         elif profile is SettingsType.NEUTRINO_MP:
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
             self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
@@ -2983,6 +2991,9 @@ class Application(Gtk.Application):
             model_name = get_base_model(model).get_name()
             if model_name == self.FAV_MODEL_NAME:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
+                if srv_type == BqServiceType.ALT.name:
+                    return self.show_error_dialog("Operation not allowed in this context!")
+
                 if srv_type in self._marker_types:
                     return self.on_rename(view)
                 elif srv_type == BqServiceType.IPTV.name:
@@ -3036,6 +3047,7 @@ class Application(Gtk.Application):
             model.set_value(itr, 0, response)
             old_bq_name = "{}:{}".format(bq_name, bq_type)
             self._bouquets[bq] = self._bouquets.pop(old_bq_name)
+            self._bq_file[bq] = self._bq_file.pop(old_bq_name, None)
             self._current_bq_name = response
             self._bq_name_label.set_text(self._current_bq_name)
             self._bq_selected = bq
@@ -3186,7 +3198,8 @@ class Application(Gtk.Application):
             return
 
         row = model[paths][:]
-        if row[Column.FAV_TYPE] in {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}:
+        s_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name, BqServiceType.IPTV.name}
+        if row[Column.FAV_TYPE] in s_types:
             self.show_error_dialog("Operation not allowed in this context!")
             return
 
@@ -3195,7 +3208,16 @@ class Application(Gtk.Application):
         if not srv or not bq:
             return
 
+        bq_name, sep, bq_type = self._bq_selected.partition(":")
         fav_id = srv.fav_id
+
+        key = "de{:02d}:{}".format(self._alt_counter, bq_type)
+        #  Generating file name for alternative
+        while key in self._alt_file:
+            self._alt_counter += 1
+            key = "de{:02d}:{}".format(self._alt_counter, bq_type)
+
+        alt_name = "de{:02d}".format(self._alt_counter)
         alt_id = "alternatives_{}_{}".format(self._bq_selected, fav_id)
         if alt_id in bq:
             self.show_error_dialog("A similar service is already in this list!")
@@ -3204,7 +3226,7 @@ class Application(Gtk.Application):
         dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
         bq_srv = BouquetService(None, dt if srv.service_type != it.name else it, fav_id, 0)
         s_type = BqServiceType.ALT.name
-        a_srv = srv._replace(service_type=s_type, pos=None, fav_id=alt_id, data_id=alt_id, transponder=(bq_srv,))
+        a_srv = srv._replace(service_type=s_type, pos=None, data_id=alt_name, fav_id=alt_id, transponder=(bq_srv,))
         try:
             index = bq.index(fav_id)
         except ValueError as e:
@@ -3212,6 +3234,7 @@ class Application(Gtk.Application):
         else:
             bq[index] = alt_id
             self._services[alt_id] = a_srv
+            self._alt_file.add(key)
             data = {Column.FAV_CODED: srv.coded, Column.FAV_SERVICE: srv.service, Column.FAV_LOCKED: srv.locked,
                     Column.FAV_HIDE: srv.hide, Column.FAV_TYPE: s_type, Column.FAV_POS: None,
                     Column.FAV_ID: alt_id, Column.FAV_PICON: self._picons.get(srv.picon_id, None)}

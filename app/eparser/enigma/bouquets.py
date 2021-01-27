@@ -29,7 +29,7 @@ class BouquetsWriter:
         self._force_bq_names = force_bq_names
         self._marker_index = 1
         self._space_index = 0
-        self._alt_index = 0
+        self._alt_names = set()
 
     def write(self):
         line = []
@@ -38,11 +38,21 @@ class BouquetsWriter:
         for bqs in self._bouquets:
             line.clear()
             line.append("#NAME {}\n".format(bqs.name))
+            bq_file_names = {b.file for b in bqs.bouquets}
+            count = 1
 
-            for index, bq in enumerate(bqs.bouquets):
-                bq_name = _DEFAULT_BOUQUET_NAME
-                if index > 0:
-                    bq_name = re.sub(pattern, "_", bq.name) if self._force_bq_names else "de{0:02d}".format(index)
+            for bq in bqs.bouquets:
+                bq_name = bq.file
+                if not bq_name:
+                    if self._force_bq_names:
+                        bq_name = re.sub(pattern, "_", bq.name)
+                    else:
+                        bq_name = "de{0:02d}".format(count)
+                        while bq_name in bq_file_names:
+                            count += 1
+                            bq_name = "de{0:02d}".format(count)
+                        bq_file_names.add(bq_name)
+
                 line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
                 self.write_bouquet(self._path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
 
@@ -68,12 +78,13 @@ class BouquetsWriter:
                 services = srv.transponder
                 if services:
                     p = Path(path)
+                    alt_name = srv.data_id
+                    f_name = "alternatives.{}{}".format(alt_name, p.suffix)
+
                     if self._force_bq_names:
                         alt_name = re.sub(self._ALT_PAT, "_", srv.service).lower()
                         f_name = "alternatives.{}{}".format(alt_name, p.suffix)
-                    else:
-                        f_name = "alternatives.de{:02d}{}".format(self._alt_index, p.suffix)
-                        self._alt_index += 1
+
                     alt_path = "{}/{}".format(p.parent, f_name)
                     bouquet.append(self._ALT.format(f_name))
                     self.write_bouquet(alt_path, srv.service, services)
@@ -133,7 +144,7 @@ class BouquetsReader:
                         else:
                             real_b_names[rb_name] = 0
 
-                        bouquets[2].append(Bouquet(rb_name, bq_type, services, None, None))
+                        bouquets[2].append(Bouquet(rb_name, bq_type, services, None, None, b_name))
                     else:
                         raise ValueError("No bouquet name found for: {}".format(line))
 
@@ -167,7 +178,7 @@ class BouquetsReader:
                     if alt:
                         alt_name, alt_type = alt.group(1), alt.group(2)
                         alt_bq_name, alt_srvs = BouquetsReader.get_bouquet(path, alt_name, alt_type, "alternatives")
-                        services.append(BouquetService(alt_bq_name, BqServiceType.ALT, srv.lstrip(), tuple(alt_srvs)))
+                        services.append(BouquetService(alt_bq_name, BqServiceType.ALT, alt_name, tuple(alt_srvs)))
                 elif srv_data[0].strip() in BouquetsReader._STREAM_TYPES or srv_data[10].startswith(("http", "rtsp")):
                     stream_data, sep, desc = srv.partition("#DESCRIPTION")
                     desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
