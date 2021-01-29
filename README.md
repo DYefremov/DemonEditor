@@ -68,7 +68,8 @@ or launching from the console with the command:```./start.py```
 Extra folders can be deleted, excluding the *app* folder and root files like *DemonEditor.desktop* and *start.py*!      
 
 To create a simple **debian package**, you can use the *build-deb.sh.* You can also download a ready-made *.deb package from the [releases](https://github.com/DYefremov/DemonEditor/releases) page.                                                 
-Users of **LTS** versions of [Ubuntu](https://ubuntu.com/) or distributions based on them can use [PPA](https://launchpad.net/~dmitriy-yefremov/+archive/ubuntu/demon-editor) repository.
+Users of **LTS** versions of [Ubuntu](https://ubuntu.com/) or distributions based on them can use [PPA](https://launchpad.net/~dmitriy-yefremov/+archive/ubuntu/demon-editor) repository.  
+A ready-made [package](https://aur.archlinux.org/packages/demoneditor-bin) is also available for [Arch Linux](https://archlinux.org/) users in the [AUR](https://aur.archlinux.org/) repository. 
 * ### macOS (experimental)
 **This program can also be run on macOS.**
 To work in this OS, you must use a [separate branch](https://github.com/DYefremov/DemonEditor/tree/experimental-mac).  
