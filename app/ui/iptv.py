@@ -5,17 +5,18 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
 
-from gi.repository import GLib
+from gi.repository import GLib, Gio, GdkPixbuf
 
-from app.commons import run_idle, run_task
+from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
-from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT
+from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
+                              parse_m3u)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
-from .dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
-from .main_helper import get_base_model, get_iptv_url, on_popup_menu
-from .uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION, KeyboardKey,
-                        get_yt_icon)
+from app.ui.dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
+from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu
+from app.ui.uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION,
+                              KeyboardKey, get_yt_icon)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -399,9 +400,10 @@ class SearchUnavailableDialog:
         self._dialog.destroy()
 
 
-class IptvListConfigurationDialog:
+class IptvListDialog:
+    """ Base class for working with iptv lists. """
 
-    def __init__(self, transient, services, iptv_rows, bouquet, fav_model, s_type):
+    def __init__(self, transient, s_type):
         handlers = {"on_apply": self.on_apply,
                     "on_response": self.on_response,
                     "on_stream_type_default_togged": self.on_stream_type_default_togged,
@@ -415,10 +417,6 @@ class IptvListConfigurationDialog:
                     "on_entry_changed": self.on_entry_changed,
                     "on_info_bar_close": self.on_info_bar_close}
 
-        self._rows = iptv_rows
-        self._services = services
-        self._bouquet = bouquet
-        self._fav_model = fav_model
         self._s_type = s_type
 
         builder = Gtk.Builder()
@@ -429,6 +427,8 @@ class IptvListConfigurationDialog:
 
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
         self._dialog.set_transient_for(transient)
+        self._data_box = builder.get_object("iptv_list_data_box")
+        self._start_values_grid = builder.get_object("start_values_grid")
         self._info_bar = builder.get_object("list_configuration_info_bar")
         self._reference_label = builder.get_object("reference_label")
         self._stream_type_check_button = builder.get_object("stream_type_default_check_button")
@@ -444,13 +444,15 @@ class IptvListConfigurationDialog:
         self._list_nid_entry = builder.get_object("list_nid_entry")
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
         self._reset_to_default_switch = builder.get_object("reset_to_default_lists_switch")
-        # style
-        self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        # Style
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._default_elems = (self._stream_type_check_button, self._type_check_button, self._sid_auto_check_button,
+                               self._tid_check_button, self._nid_check_button, self._namespace_check_button)
         self._digit_elems = (self._list_srv_type_entry, self._list_sid_entry, self._list_tid_entry,
                              self._list_nid_entry, self._list_namespace_entry)
         for el in self._digit_elems:
-            el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+            el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def show(self):
@@ -494,18 +496,57 @@ class IptvListConfigurationDialog:
         self._list_namespace_entry.set_sensitive(not button.get_active())
 
     @run_idle
-    def on_reset_to_default(self, item, active):
-        item.set_sensitive(not active)
+    def on_reset_to_default(self, item):
         self._stream_type_combobox.set_active(1)
         self._list_srv_type_entry.set_text("1")
-        for el in (self._list_sid_entry, self._list_nid_entry, self._list_tid_entry, self._list_namespace_entry):
+        for el in self._digit_elems[1:]:
             el.set_text("0")
-        for el in (self._stream_type_check_button, self._type_check_button, self._sid_auto_check_button,
-                   self._tid_check_button, self._nid_check_button, self._namespace_check_button):
+        for el in self._default_elems:
             el.set_active(True)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
+
+    def on_apply(self, item):
+        pass
+
+    @run_idle
+    def update_reference(self):
+        if is_data_correct(self._digit_elems):
+            stream_type = get_stream_type(self._stream_type_combobox)
+            self._reference_label.set_text(
+                _ENIGMA2_REFERENCE.format(stream_type, *[int(elem.get_text()) for elem in self._digit_elems]))
+
+    def on_entry_changed(self, entry):
+        if _PATTERN.search(entry.get_text()):
+            entry.set_name(_DIGIT_ENTRY_NAME)
+        else:
+            entry.set_name("GtkEntry")
+            self.update_reference()
+
+    def is_default_values(self):
+        return any(el.get_text() == "0" for el in self._digit_elems[2:])
+
+    def is_all_data_default(self):
+        return all(el.get_active() for el in self._default_elems)
+
+
+class IptvListConfigurationDialog(IptvListDialog):
+
+    def __init__(self, transient, services, iptv_rows, bouquet, fav_model, s_type):
+        super().__init__(transient, s_type)
+
+        self._rows = iptv_rows
+        self._bouquet = bouquet
+        self._fav_model = fav_model
+        self._services = services
+
+        apply_button = Gtk.Button(visible=True,
+                                  image=Gtk.Image(icon_name="gtk-apply"),
+                                  always_show_image=True,
+                                  label=get_message("Apply"))
+        apply_button.connect("clicked", self.on_apply)
+        self._dialog.add_action_widget(apply_button, Gtk.ResponseType.APPLY)
 
     @run_idle
     def on_apply(self, item):
@@ -514,14 +555,13 @@ class IptvListConfigurationDialog:
             return
 
         if self._s_type is SettingsType.ENIGMA_2:
-            reset = self._reset_to_default_switch.get_active()
             type_default = self._type_check_button.get_active()
             tid_default = self._tid_check_button.get_active()
             sid_auto = self._sid_auto_check_button.get_active()
             nid_default = self._nid_check_button.get_active()
             namespace_default = self._namespace_check_button.get_active()
 
-            stream_type = StreamType.NONE_TS.value if reset else get_stream_type(self._stream_type_combobox)
+            stream_type = get_stream_type(self._stream_type_combobox)
             srv_type = "1" if type_default else self._list_srv_type_entry.get_text()
             tid = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
             nid = "0" if nid_default else "{:X}".format(int(self._list_nid_entry.get_text()))
@@ -532,7 +572,7 @@ class IptvListConfigurationDialog:
                 data, sep, desc = fav_id.partition("http")
                 data = data.split(":")
 
-                if reset:
+                if self.is_all_data_default():
                     data[2], data[3], data[4], data[5], data[6] = "10000"
                 else:
                     data[0], data[2], data[4], data[5], data[6] = stream_type, srv_type, tid, nid, namespace
@@ -551,19 +591,178 @@ class IptvListConfigurationDialog:
 
             self._info_bar.set_visible(True)
 
-    @run_idle
-    def update_reference(self):
-        if is_data_correct(self._digit_elems):
-            stream_type = get_stream_type(self._stream_type_combobox)
-            self._reference_label.set_text(
-                _ENIGMA2_REFERENCE.format(stream_type, *[int(elem.get_text()) for elem in self._digit_elems]))
 
-    def on_entry_changed(self, entry):
-        if _PATTERN.search(entry.get_text()):
-            entry.set_name(_DIGIT_ENTRY_NAME)
-        else:
-            entry.set_name("GtkEntry")
-            self.update_reference()
+class M3uImportDialog(IptvListDialog):
+    """ Import dialog for *.m3u* playlists. """
+
+    def __init__(self, transient, s_type, path, callback):
+        super().__init__(transient, s_type)
+
+        self._callback = callback
+        self._services = None
+        self._url_count = 0
+        self._max_count = 0
+        self._is_download = False
+        self._cancellable = Gio.Cancellable()
+        self._dialog.set_title(get_message("Playlist import"))
+        # Progress
+        self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
+        self._spinner = Gtk.Spinner(active=False)
+        self._info_label = Gtk.Label(visible=True, ellipsize="end", max_width_chars=30)
+        load_label = Gtk.Label(label=get_message("Loading data..."))
+        self._spinner.bind_property("active", self._spinner, "visible")
+        self._spinner.bind_property("visible", load_label, "visible")
+        self._spinner.bind_property("active", self._start_values_grid, "sensitive", 4)
+
+        progress_box = Gtk.HBox(visible=True, spacing=2)
+        progress_box.add(self._progress_bar)
+        progress_box.pack_end(self._spinner, False, False, 0)
+        progress_box.pack_start(load_label, False, False, 0)
+        # Picons
+        self._picons_switch = Gtk.Switch(visible=True)
+        self._picon_box = Gtk.HBox(visible=False, sensitive=False, spacing=2)
+        self._picon_box.pack_end(self._picons_switch, False, False, 0)
+        self._picon_box.pack_end(Gtk.Label(visible=True, label=get_message("Download picons")), False, False, 0)
+        # Extra box
+        extra_box = Gtk.HBox(visible=True, spacing=2, margin_bottom=5, margin_top=5)
+        extra_box.set_center_widget(progress_box)
+        extra_box.pack_start(self._info_label, False, False, 5)
+        extra_box.pack_end(self._picon_box, True, True, 5)
+
+        frame = Gtk.Frame(visible=True)
+        frame.add(extra_box)
+        self._data_box.add(frame)
+
+        self._apply_button = Gtk.Button(visible=True,
+                                        image=Gtk.Image(icon_name="insert-link"),
+                                        always_show_image=True,
+                                        label=get_message("Import"))
+        self._apply_button.connect("clicked", self.on_apply)
+        self._dialog.add_action_widget(self._apply_button, Gtk.ResponseType.APPLY)
+        self._dialog.connect("delete-event", self.on_close)
+
+        self.get_m3u(path, s_type)
+
+    @run_task
+    def get_m3u(self, path, s_type):
+        try:
+            GLib.idle_add(self._spinner.set_property, "active", True)
+            self._services = parse_m3u(path, s_type)
+            for s in self._services:
+                if s.picon:
+                    GLib.idle_add(self._picon_box.set_sensitive, True)
+                    break
+        finally:
+            msg = "{} {}".format(get_message("Streams detected:"), len(self._services) if self._services else 0)
+            GLib.idle_add(self._info_label.set_text, msg)
+            GLib.idle_add(self._spinner.set_property, "active", False)
+
+    def on_apply(self, item):
+        if not is_data_correct(self._digit_elems):
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
+        picons = {}
+        services = self._services
+
+        if not self.is_all_data_default():
+            services = []
+            params = [int(el.get_text()) for el in self._digit_elems]
+            s_type = params[0]
+            params = params[1:]
+            stream_type = get_stream_type(self._stream_type_combobox)
+
+            for i, s in enumerate(self._services, start=params[0]):
+                # Skipping markers.
+                if not s.data_id:
+                    services.append(s)
+                    continue
+
+                params[0] = i
+                picon_id = "1_0_{:X}_{:X}_{:X}_{:X}_{:04X}0000_0_0_0.png".format(s_type, *params)
+                fav_id = get_fav_id(url=s.data_id,
+                                    service_name=s.service,
+                                    settings_type=self._s_type,
+                                    params=params,
+                                    stream_type=stream_type,
+                                    s_type=s_type)
+
+                picons[s.picon] = picon_id
+                services.append(s._replace(picon_id=picon_id, data_id=None, fav_id=fav_id))
+
+        if self._picons_switch.get_active():
+            if self.is_default_values():
+                show_dialog(DialogType.ERROR, self._dialog,
+                            "Set values for TID, NID and Namespace for correct naming of the picons!")
+                return
+
+            self.download_picons(picons)
+
+        self._callback(services)
+
+    @run_task
+    def download_picons(self, picons):
+        self._is_download = True
+        GLib.idle_add(self._apply_button.set_sensitive, False)
+        GLib.idle_add(self._progress_bar.set_visible, True)
+
+        self._url_count = len(picons)
+        self._max_count = self._url_count
+        self._cancellable.reset()
+
+        for p in filter(None, picons):
+            if not self._is_download:
+                return
+
+            f = Gio.File.new_for_uri(p)
+            try:
+                GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(f.read(cancellable=self._cancellable), 220, 132, False,
+                                                                self._cancellable,
+                                                                self.on_picon_load_done,
+                                                                picons.get(p, None))
+            except GLib.GError as e:
+                self.update_progress()
+                if e.code != Gio.IOErrorEnum.CANCELLED:
+                    log(str("Picon download error:{}  {}").format(p, e))
+
+    def on_picon_load_done(self, file, result, user_data):
+        try:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(result)
+        except GLib.GError as e:
+            if e.code != Gio.IOErrorEnum.CANCELLED:
+                log("Loading picon [{}] data error: {}".format(user_data, e))
+        finally:
+            self._info_label.set_text("Processing: {}".format(user_data))
+            self.update_progress()
+
+    def update_progress(self):
+        self._url_count -= 1
+        frac = 1 - self._url_count / self._max_count
+        self._progress_bar.set_fraction(frac)
+
+        if self._url_count == 0:
+            self._progress_bar.set_visible(False)
+            self._progress_bar.set_fraction(0.0)
+            self._apply_button.set_sensitive(True)
+            self._info_label.set_text(get_message("Done!"))
+            self._is_download = False
+
+    def on_response(self, dialog, response):
+        if response == Gtk.ResponseType.APPLY:
+            return True
+
+        if response == Gtk.ResponseType.CANCEL and not self._is_download or not self.on_close():
+            self._dialog.destroy()
+
+    def on_close(self, window=None, event=None):
+        if self._is_download:
+            if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.OK:
+                self._is_download = False
+                self._cancellable.cancel()
+                return False
+            return True
+
+        return False
 
 
 class YtListImportDialog:
