@@ -313,8 +313,9 @@ class ServicesParser(HTMLParser):
         self._S_TYPES = {"": "2", "MPEG-2 SD": "1", "SD": "1", "MPEG-4 SD": "22", "HEVC SD": "22", "MPEG-4 HD": "25",
                          "MPEG-4 HD 1080": "25", "MPEG-4 HD 720": "25", "HEVC HD": "25", "HEVC UHD": "31",
                          "HEVC UHD 4K": "31"}
-        self._TR_PAT = re.compile(r"(DVB-S[2]?)/?(.*PSK)?\s+SR\s+(\d+)\s+FEC\s+(\d/\d).*ONID/TID:\s+(\d+)/(\d+)\s+.*")
-        self._PTR_PAT = re.compile(r".*?(\d+\.\d°[EW]):\s+(\d+)\s+([RLHV]).*")
+        self._TR_PAT = re.compile(
+            r".*?(\d+)\s+([RLHV]).*(DVB-S[2]?)/?(.*PSK)?\s(T2-MI)?\s?SR-FEC:\s(\d+)-(\d/\d)\s+.*ONID-TID:\s+(\d+)-(\d+).*")
+        self._POS_PAT = re.compile(r".*?(\d+\.\d°[EW]).*")
         self._TR = "s {}000:{}000:{}:{}:{}:{}:{}:{}"
         self._S2_TR = "{}:{}:{}:{}"
 
@@ -406,26 +407,33 @@ class ServicesParser(HTMLParser):
         else:
             pos, freq, sr, fec, pol, namespace, tid, nid = sat_position or 0, 0, 0, 0, 0, 0, 0, 0
             sys = "DVB-S"
-            tr_found = False
             pos_found = False
             tr = None
             # Transponder
-            for r in filter(lambda x: x and len(x) == 2, self._rows):
+            for r in filter(lambda x: x and 6 < len(x) < 9, self._rows):
                 if not pos_found:
-                    pos_tr = re.match(self._PTR_PAT, r[1].text)
-                    if pos_tr:
-                        if not sat_position:
-                            pos = int(SatellitesParser.get_position(
-                                "".join(c for c in pos_tr.group(1) if c.isdigit() or c.isalpha())))
-                        freq = int(pos_tr.group(2))
-                        pol = get_key_by_value(POLARIZATION, pos_tr.group(3))
-                        pos_found = True
+                    pos_tr = re.match(self._POS_PAT, r[0].text)
+                    if not pos_tr:
+                        continue
 
-                if pos_found and not tr_found:
-                    td = re.match(self._TR_PAT, r[1].text) or re.match(self._TR_PAT, r[0].text)
+                    if not sat_position:
+                        pos = int(SatellitesParser.get_position(
+                            "".join(c for c in pos_tr.group(1) if c.isdigit() or c.isalpha())))
+
+                    pos_found = True
+
+                if pos_found:
+                    text = " ".join(c.text for c in r[1:])
+                    td = re.match(self._TR_PAT, text)
                     if td:
-                        sys, mod, sr, _fec, nid, tid = td.group(1), td.group(2), td.group(3), td.group(4), td.group(
-                            5), td.group(6)
+                        freq, pol = int(td.group(1)), get_key_by_value(POLARIZATION, td.group(2))
+                        if td.group(5):
+                            log("Detected T2-MI transponder!")
+                            continue
+
+                        sys, mod, sr, _fec, = td.group(3), td.group(4), td.group(6), td.group(7)
+                        nid, tid = td.group(8), td.group(9)
+
                         neg_pos = False  # POS = W
                         # For negative (West) positions: 3600 - numeric position value!!!
                         namespace = "{:04x}0000".format(3600 - pos if neg_pos else pos)
@@ -439,7 +447,6 @@ class ServicesParser(HTMLParser):
                         s2_flags = "" if sys == "DVB-S" else self._S2_TR.format(tr_flag, mod or 0, roll_off, pilot)
                         nid, tid = int(nid), int(tid)
                         tr = self._TR.format(freq, sr, pol, fec, pos, inv, sys, s2_flags)
-                        tr_found = True
 
             if not tr:
                 msg = "ServicesParser error [get transponder services]: {}"
@@ -449,8 +456,8 @@ class ServicesParser(HTMLParser):
 
             # Services
             for r in filter(lambda x: x and len(x) == 12 and (x[0].text.isdigit()), self._rows):
-                sid, name, cas, pkg, s_type, v_pid, a_pid = r[0].text, r[2].text, r[4].text, r[5].text, r[
-                    6].text.strip(), r[7].text, r[8].text.split()
+                sid, name, s_type, v_pid, a_pid, cas, pkg = r[0].text, r[2].text, r[4].text, r[
+                    5].text.strip(), r[6].text.split(), r[9].text, r[10].text.strip()
 
                 try:
                     s_type = self._S_TYPES.get(s_type, "3")  # 3 = Data
