@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkImage" id="remove_selection_image">
     <property name="visible">True</property>
@@ -281,8 +281,8 @@ Author: Dmitriy Yefremov
             <property name="valign">center</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="close_config_list_button">
-                <property name="label" translatable="yes">Close</property>
+              <object class="GtkButton" id="cancel_config_list_button">
+                <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -382,30 +382,18 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSwitch" id="reset_to_default_lists_switch">
+                      <object class="GtkButton" id="reset_list_to_default_button">
+                        <property name="label" translatable="yes">Reset to default</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="state-set" handler="on_reset_to_default" object="start_values_frame" swapped="no"/>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_reset_to_default" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="pack_type">end</property>
                         <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="reset_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_right">2</property>
-                        <property name="label" translatable="yes">Reset to default</property>
-                        <property name="xalign">1</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
@@ -776,7 +764,8 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">close_config_list_button</action-widget>
+      <action-widget response="-6">cancel_config_list_button</action-widget>
+      <action-widget response="-10">list_configuration_apply_button</action-widget>
     </action-widgets>
   </object>
   <object class="GtkImage" id="yt_import_image">

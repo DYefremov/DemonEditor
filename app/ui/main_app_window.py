@@ -11,7 +11,7 @@ from gi.repository import GLib, Gio
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
 from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
                              HttpApiException, STC_XML_FILE)
-from app.eparser import get_blacklist, write_blacklist, parse_m3u
+from app.eparser import get_blacklist, write_blacklist
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
@@ -25,7 +25,7 @@ from .backup import BackupDialog, backup_data, clear_data_path
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
 from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
-from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog
+from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picons,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
@@ -2283,17 +2283,8 @@ class Application(Gtk.Application):
             self.show_error_dialog("No m3u file is selected!")
             return
 
-        self._wait_dialog.show()
-        self.get_m3u(response)
-
-    @run_task
-    def get_m3u(self, path):
-        try:
-            channels = parse_m3u(path, self._s_type)
-            if channels and self._bq_selected:
-                GLib.idle_add(self.append_imported_services, channels)
-        finally:
-            GLib.idle_add(self._wait_dialog.hide)
+        if self._bq_selected:
+            M3uImportDialog(self._main_window, self._s_type, response, self.append_imported_services).show()
 
     def append_imported_services(self, services):
         bq_services = self._bouquets.get(self._bq_selected)
