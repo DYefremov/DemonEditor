@@ -1,4 +1,5 @@
 import concurrent.futures
+import os
 import re
 import urllib
 from urllib.error import HTTPError
@@ -14,7 +15,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
-from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu
+from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu, get_picon_pixbuf
 from app.ui.uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION,
                               KeyboardKey, get_yt_icon)
 
@@ -443,7 +444,7 @@ class IptvListDialog:
         self._list_tid_entry = builder.get_object("list_tid_entry")
         self._list_nid_entry = builder.get_object("list_nid_entry")
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
-        self._reset_to_default_switch = builder.get_object("reset_to_default_lists_switch")
+        self._apply_button = builder.get_object("list_configuration_apply_button")
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -459,8 +460,10 @@ class IptvListDialog:
         self._dialog.run()
 
     def on_response(self, dialog, response):
-        if response == Gtk.ResponseType.CANCEL:
-            self._dialog.destroy()
+        if response == Gtk.ResponseType.APPLY:
+            return True
+
+        self._dialog.destroy()
 
     def on_stream_type_changed(self, box):
         self.update_reference()
@@ -541,13 +544,6 @@ class IptvListConfigurationDialog(IptvListDialog):
         self._fav_model = fav_model
         self._services = services
 
-        apply_button = Gtk.Button(visible=True,
-                                  image=Gtk.Image(icon_name="gtk-apply"),
-                                  always_show_image=True,
-                                  label=get_message("Apply"))
-        apply_button.connect("clicked", self.on_apply)
-        self._dialog.add_action_widget(apply_button, Gtk.ResponseType.APPLY)
-
     @run_idle
     def on_apply(self, item):
         if not is_data_correct(self._digit_elems):
@@ -595,16 +591,21 @@ class IptvListConfigurationDialog(IptvListDialog):
 class M3uImportDialog(IptvListDialog):
     """ Import dialog for *.m3u* playlists. """
 
-    def __init__(self, transient, s_type, path, callback):
+    def __init__(self, transient, s_type, m3_path, app):
         super().__init__(transient, s_type)
 
-        self._callback = callback
+        self._app = app
+        self._picons = app._picons
+        self._pic_path = app._settings.picons_local_path
         self._services = None
         self._url_count = 0
+        self._errors_count = 0
         self._max_count = 0
         self._is_download = False
         self._cancellable = Gio.Cancellable()
         self._dialog.set_title(get_message("Playlist import"))
+        self._dialog.connect("delete-event", self.on_close)
+        self._apply_button.set_label(get_message("Import"))
         # Progress
         self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
         self._spinner = Gtk.Spinner(active=False)
@@ -620,7 +621,7 @@ class M3uImportDialog(IptvListDialog):
         progress_box.pack_start(load_label, False, False, 0)
         # Picons
         self._picons_switch = Gtk.Switch(visible=True)
-        self._picon_box = Gtk.HBox(visible=False, sensitive=False, spacing=2)
+        self._picon_box = Gtk.HBox(visible=True, sensitive=False, spacing=2)
         self._picon_box.pack_end(self._picons_switch, False, False, 0)
         self._picon_box.pack_end(Gtk.Label(visible=True, label=get_message("Download picons")), False, False, 0)
         # Extra box
@@ -633,15 +634,7 @@ class M3uImportDialog(IptvListDialog):
         frame.add(extra_box)
         self._data_box.add(frame)
 
-        self._apply_button = Gtk.Button(visible=True,
-                                        image=Gtk.Image(icon_name="insert-link"),
-                                        always_show_image=True,
-                                        label=get_message("Import"))
-        self._apply_button.connect("clicked", self.on_apply)
-        self._dialog.add_action_widget(self._apply_button, Gtk.ResponseType.APPLY)
-        self._dialog.connect("delete-event", self.on_close)
-
-        self.get_m3u(path, s_type)
+        self.get_m3u(m3_path, s_type)
 
     @run_task
     def get_m3u(self, path, s_type):
@@ -653,7 +646,7 @@ class M3uImportDialog(IptvListDialog):
                     GLib.idle_add(self._picon_box.set_sensitive, True)
                     break
         finally:
-            msg = "{} {}".format(get_message("Streams detected:"), len(self._services) if self._services else 0)
+            msg = "{} {}.".format(get_message("Streams detected:"), len(self._services) if self._services else 0)
             GLib.idle_add(self._info_label.set_text, msg)
             GLib.idle_add(self._spinner.set_property, "active", False)
 
@@ -679,16 +672,12 @@ class M3uImportDialog(IptvListDialog):
                     continue
 
                 params[0] = i
-                picon_id = "1_0_{:X}_{:X}_{:X}_{:X}_{:04X}0000_0_0_0.png".format(s_type, *params)
-                fav_id = get_fav_id(url=s.data_id,
-                                    service_name=s.service,
-                                    settings_type=self._s_type,
-                                    params=params,
-                                    stream_type=stream_type,
-                                    s_type=s_type)
+                picon_id = "{}_0_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(stream_type, s_type, *params)
+                fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, stream_type, s_type)
+                if s.picon:
+                    picons[s.picon] = picon_id
 
-                picons[s.picon] = picon_id
-                services.append(s._replace(picon_id=picon_id, data_id=None, fav_id=fav_id))
+                services.append(s._replace(picon=None, picon_id=picon_id, data_id=None, fav_id=fav_id))
 
         if self._picons_switch.get_active():
             if self.is_default_values():
@@ -698,14 +687,16 @@ class M3uImportDialog(IptvListDialog):
 
             self.download_picons(picons)
 
-        self._callback(services)
+        self._app.append_imported_services(services)
 
     @run_task
     def download_picons(self, picons):
         self._is_download = True
+        os.makedirs(os.path.dirname(self._pic_path), exist_ok=True)
         GLib.idle_add(self._apply_button.set_sensitive, False)
         GLib.idle_add(self._progress_bar.set_visible, True)
 
+        self._errors_count = 0
         self._url_count = len(picons)
         self._max_count = self._url_count
         self._cancellable.reset()
@@ -722,17 +713,22 @@ class M3uImportDialog(IptvListDialog):
                                                                 picons.get(p, None))
             except GLib.GError as e:
                 self.update_progress()
+                self._errors_count += 1
                 if e.code != Gio.IOErrorEnum.CANCELLED:
-                    log(str("Picon download error:{}  {}").format(p, e))
+                    log(str("Picon download error: {}  [{}]").format(p, e))
 
     def on_picon_load_done(self, file, result, user_data):
         try:
+            self._info_label.set_text("Processing: {}".format(user_data))
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(result)
+            path = "{}{}".format(self._pic_path, user_data)
+            pixbuf.savev(path, "png", [], [])
+            self._picons[user_data] = get_picon_pixbuf(path)
         except GLib.GError as e:
+            self._errors_count += 1
             if e.code != Gio.IOErrorEnum.CANCELLED:
                 log("Loading picon [{}] data error: {}".format(user_data, e))
         finally:
-            self._info_label.set_text("Processing: {}".format(user_data))
             self.update_progress()
 
     def update_progress(self):
@@ -744,8 +740,21 @@ class M3uImportDialog(IptvListDialog):
             self._progress_bar.set_visible(False)
             self._progress_bar.set_fraction(0.0)
             self._apply_button.set_sensitive(True)
-            self._info_label.set_text(get_message("Done!"))
+            self._info_label.set_text("{}  Errors: {}.".format(get_message("Done!"), self._errors_count))
             self._is_download = False
+
+            gen = self.update_fav_model()
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def update_fav_model(self):
+        services = self._app._services
+        picons = self._app._picons
+        model = self._app.fav_view.get_model()
+        for r in model:
+            s = services.get(r[Column.FAV_ID], None)
+            if s:
+                model.set_value(r.iter, Column.FAV_PICON, picons.get(s.picon_id, None))
+                yield True
 
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.APPLY:

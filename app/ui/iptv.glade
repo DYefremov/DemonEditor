@@ -742,6 +742,17 @@ Author: Dmitriy Yefremov
         <property name="always_show_image">True</property>
       </object>
     </child>
+    <child type="action">
+      <object class="GtkButton" id="list_configuration_apply_button">
+        <property name="label">gtk-apply</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
+        <signal name="clicked" handler="on_apply" swapped="no"/>
+      </object>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="iptv_list_configuration_dialog_box">
         <property name="can_focus">False</property>
@@ -1196,6 +1207,7 @@ Author: Dmitriy Yefremov
     </child>
     <action-widgets>
       <action-widget response="-6">cancel_config_list_button</action-widget>
+      <action-widget response="-10">list_configuration_apply_button</action-widget>
     </action-widgets>
   </object>
   <object class="GtkImage" id="remove_selection_image">
