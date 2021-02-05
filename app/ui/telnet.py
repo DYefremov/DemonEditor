@@ -114,7 +114,7 @@ class TelnetDialog:
         try:
             GLib.idle_add(self._connect_button.set_visible, False)
             GLib.idle_add(self.on_info_bar_close)
-            user, password = self._settings.telnet_user, self._settings.telnet_password
+            user, password = self._settings.user, self._settings.password
             timeout = self._settings.telnet_timeout
 
             self._tn = ExtTelnet(self.append_output,
