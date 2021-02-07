@@ -18,7 +18,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
-from app.tools.media import Player, Recorder, HttpPlayer
+from app.tools.media import Player, Recorder
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
@@ -199,6 +199,7 @@ class Application(Gtk.Application):
         self._player = None
         self._full_screen = False
         self._current_mrl = None
+        self._playback_window = None
         # Record
         self._recorder = None
         # http api
@@ -1737,6 +1738,7 @@ class Application(Gtk.Application):
 
     def on_bouquets_selection(self, model, path, column):
         self.reset_view_sort_indication(self._fav_view)
+        self._alt_revealer.set_visible(False)
         self._current_bq_name = model[path][0] if len(path) > 1 else None
         self._bq_name_label.set_text(self._current_bq_name if self._current_bq_name else "")
 
@@ -2305,30 +2307,34 @@ class Application(Gtk.Application):
             self.save_stream_to_m3u(url)
             return
 
+        if self._player and self._player.get_play_mode() is not mode:
+            self.show_error_dialog("Play mode has been changed!\nRestart the program to apply the settings.")
+            self.set_playback_elms_active()
+            return
+
         if mode is PlayStreamsMode.VLC:
             try:
-                if self._player and self._player.get_play_mode() is not mode:
-                    self._player.release()
-                    self._player = None
                 if not self._player:
-                    self._player = HttpPlayer.get_instance(self._settings)
-            except ImportError:
-                self.show_error_dialog("No VLC is found. Check that it is installed!")
-            else:
-                self._player.play(url)
+                    self._current_mrl = url
+                    self.show_playback_window()
+                elif self._playback_window:
+                    title = self.get_playback_title()
+                    GLib.idle_add(self._playback_window.set_title, title)
+                    GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+                    GLib.idle_add(self._playback_window.show)
+                else:
+                    self.show_error_dialog("Init player error!")
             finally:
                 self.set_playback_elms_active()
         else:
-            if not self._player_box.get_visible():
-                self.set_player_area_size(self._player_box)
+            if not self._player:
                 self._current_mrl = url
-            self._player_box.set_visible(True)
+            else:
+                if not self._player_box.get_visible():
+                    self.set_player_area_size(self._player_box)
 
-            if self._player and self._player.get_play_mode() is PlayStreamsMode.BUILT_IN:
                 GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
-            elif self._player:
-                self.show_error_dialog("Play mode has been changed!\nRestart the program to apply the settings.")
-                self.set_playback_elms_active()
+            self._player_box.set_visible(True)
 
     def on_player_stop(self, item=None):
         if self._player:
@@ -2361,12 +2367,17 @@ class Application(Gtk.Application):
             self._player_prev_button.set_sensitive(current_index != 0)
             self._player_next_button.set_sensitive(len(self._fav_model) != current_index + 1)
 
-    def on_player_close(self, item=None):
+    def on_player_close(self, window=None, event=None):
         if self._player:
             self._player.stop()
 
         self.set_playback_elms_active()
-        GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
+        if self._playback_window:
+            self._settings.add("playback_window_size", self._playback_window.get_size())
+            self._playback_window.hide()
+        else:
+            GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
+        return True
 
     @lru_cache(maxsize=1)
     def on_player_duration_changed(self, duration):
@@ -2396,14 +2407,13 @@ class Application(Gtk.Application):
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
     def on_drawing_area_realize(self, widget):
-        self.set_player_area_size(widget)
-
         if not self._player:
             try:
-                self._player = Player.get_instance(rewind_callback=self.on_player_duration_changed,
-                                                   position_callback=self.on_player_time_changed,
-                                                   error_callback=self.on_player_error,
-                                                   playing_callback=self.set_playback_elms_active)
+                self._player = Player.get_instance(mode=self._settings.play_streams_mode,
+                                                   rewind_cb=self.on_player_duration_changed,
+                                                   position_cb=self.on_player_time_changed,
+                                                   error_cb=self.on_player_error,
+                                                   playing_cb=self.set_playback_elms_active)
             except (ImportError, NameError, AttributeError):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return True
@@ -2415,7 +2425,10 @@ class Application(Gtk.Application):
                 self._player.play(self._current_mrl)
             finally:
                 self.set_playback_elms_active()
+                if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+                    self.set_player_area_size(widget)
 
+    @run_idle
     def set_player_area_size(self, widget):
         w, h = self._main_window.get_size()
         widget.set_size_request(w * 0.6, -1)
@@ -2443,7 +2456,11 @@ class Application(Gtk.Application):
 
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
-        self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
+        if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+            self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
+        elif self._playback_window:
+            self._player_tool_bar.set_visible(not self._full_screen)
+            self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
 
     def on_main_window_state(self, window, event):
         state = event.new_window_state
@@ -2453,6 +2470,35 @@ class Application(Gtk.Application):
         self._status_bar_box.set_visible(full)
         if not state & Gdk.WindowState.ICONIFIED and self._links_transmitter:
             self._links_transmitter.hide()
+
+    @run_idle
+    def show_playback_window(self):
+        self._player_prev_button.set_visible(False)
+        self._player_next_button.set_visible(False)
+        width, height = 480, 240
+        size = self._settings.get("playback_window_size")
+        if size:
+            width, height = size
+
+        self._playback_window = Gtk.Window(title=self.get_playback_title(),
+                                           window_position=Gtk.WindowPosition.CENTER,
+                                           gravity=Gdk.Gravity.CENTER,
+                                           icon_name="demon-editor")
+        self._playback_window.resize(width, height)
+        self._playback_window.connect("delete-event", self.on_player_close)
+        box = Gtk.HBox(visible=True, orientation="vertical")
+        self._player_drawing_area.reparent(box)
+        self._player_box.remove(self._player_tool_bar)
+        box.pack_end(self._player_tool_bar, False, False, 0)
+        self._playback_window.add(box)
+        self._playback_window.set_application(self)
+        self._playback_window.show()
+
+    def get_playback_title(self):
+        path, column = self._fav_view.get_cursor()
+        if path:
+            return "DemonEditor [{}]".format(self._fav_model[path][:][Column.FAV_SERVICE])
+        return "DemonEditor [Playback]"
 
     # ************************* Record ***************************** #
 
@@ -2541,7 +2587,7 @@ class Application(Gtk.Application):
 
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player """
-        if self._app_info_box.get_visible() and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+        if not self._app_info_box.get_visible() and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
             self.set_player_area_size(self._player_box)
             self._player_box.set_visible(True)
             GLib.idle_add(self._app_info_box.set_visible, False)
@@ -2597,6 +2643,11 @@ class Application(Gtk.Application):
         if self._player and self._player.is_playing():
             self._player.stop()
 
+        # IPTV type checking
+        row = self._fav_model[path][:]
+        if row[Column.FAV_TYPE] == BqServiceType.IPTV.name and callback:
+            callback = self.play(get_iptv_url(row, self._s_type))
+
         def zap(rq):
             if rq and rq.get("e2state", False):
                 GLib.idle_add(scroll_to, path, self._fav_view)
@@ -2618,8 +2669,11 @@ class Application(Gtk.Application):
             return
 
         srv = self._services.get(fav_id, None)
-        if srv and srv.transponder or srv_type == BqServiceType.IPTV.name:
-            return srv.picon_id.rstrip(".png").replace("_", ":")
+        if srv:
+            if srv_type == BqServiceType.IPTV.name:
+                return srv.fav_id.strip()
+            elif srv.picon_id:
+                return srv.picon_id.rstrip(".png").replace("_", ":")
 
     def update_info(self):
         """ Updating current info over HTTP API """
