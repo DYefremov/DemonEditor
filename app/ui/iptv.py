@@ -1,10 +1,12 @@
 import concurrent.futures
+import os
 import re
 import urllib
 from urllib.error import HTTPError
 from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
 
+import requests
 from gi.repository import GLib, Gio, GdkPixbuf
 
 from app.commons import run_idle, run_task, log
@@ -14,7 +16,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
-from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu
+from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu, get_picon_pixbuf
 from app.ui.uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION,
                               KeyboardKey, get_yt_icon)
 
@@ -590,12 +592,15 @@ class IptvListConfigurationDialog(IptvListDialog):
 class M3uImportDialog(IptvListDialog):
     """ Import dialog for *.m3u* playlists. """
 
-    def __init__(self, transient, s_type, path, callback):
+    def __init__(self, transient, s_type, m3_path, app):
         super().__init__(transient, s_type)
 
-        self._callback = callback
+        self._app = app
+        self._picons = app._picons
+        self._pic_path = app._settings.picons_local_path
         self._services = None
         self._url_count = 0
+        self._errors_count = 0
         self._max_count = 0
         self._is_download = False
         self._cancellable = Gio.Cancellable()
@@ -617,7 +622,7 @@ class M3uImportDialog(IptvListDialog):
         progress_box.pack_start(load_label, False, False, 0)
         # Picons
         self._picons_switch = Gtk.Switch(visible=True)
-        self._picon_box = Gtk.HBox(visible=False, sensitive=False, spacing=2)
+        self._picon_box = Gtk.HBox(visible=True, sensitive=False, spacing=2)
         self._picon_box.pack_end(self._picons_switch, False, False, 0)
         self._picon_box.pack_end(Gtk.Label(visible=True, label=get_message("Download picons")), False, False, 0)
         # Extra box
@@ -630,7 +635,7 @@ class M3uImportDialog(IptvListDialog):
         frame.add(extra_box)
         self._data_box.add(frame)
 
-        self.get_m3u(path, s_type)
+        self.get_m3u(m3_path, s_type)
 
     @run_task
     def get_m3u(self, path, s_type):
@@ -642,7 +647,7 @@ class M3uImportDialog(IptvListDialog):
                     GLib.idle_add(self._picon_box.set_sensitive, True)
                     break
         finally:
-            msg = "{} {}".format(get_message("Streams detected:"), len(self._services) if self._services else 0)
+            msg = "{} {}.".format(get_message("Streams detected:"), len(self._services) if self._services else 0)
             GLib.idle_add(self._info_label.set_text, msg)
             GLib.idle_add(self._spinner.set_property, "active", False)
 
@@ -668,16 +673,12 @@ class M3uImportDialog(IptvListDialog):
                     continue
 
                 params[0] = i
-                picon_id = "1_0_{:X}_{:X}_{:X}_{:X}_{:04X}0000_0_0_0.png".format(s_type, *params)
-                fav_id = get_fav_id(url=s.data_id,
-                                    service_name=s.service,
-                                    settings_type=self._s_type,
-                                    params=params,
-                                    stream_type=stream_type,
-                                    s_type=s_type)
+                picon_id = "{}_0_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(stream_type, s_type, *params)
+                fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, stream_type, s_type)
+                if s.picon:
+                    picons[s.picon] = picon_id
 
-                picons[s.picon] = picon_id
-                services.append(s._replace(picon_id=picon_id, data_id=None, fav_id=fav_id))
+                services.append(s._replace(picon=None, picon_id=picon_id, data_id=None, fav_id=fav_id))
 
         if self._picons_switch.get_active():
             if self.is_default_values():
@@ -687,54 +688,87 @@ class M3uImportDialog(IptvListDialog):
 
             self.download_picons(picons)
 
-        self._callback(services)
+        self._app.append_imported_services(services)
 
     @run_task
     def download_picons(self, picons):
         self._is_download = True
+        os.makedirs(os.path.dirname(self._pic_path), exist_ok=True)
         GLib.idle_add(self._apply_button.set_sensitive, False)
         GLib.idle_add(self._progress_bar.set_visible, True)
 
+        self._errors_count = 0
         self._url_count = len(picons)
         self._max_count = self._url_count
         self._cancellable.reset()
 
-        for p in filter(None, picons):
-            if not self._is_download:
-                return
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(self.download_picon, p, picons.get(p, None)): p for p in filter(None, picons)}
+            done, not_done = concurrent.futures.wait(futures, timeout=0)
+            while self._is_download and not_done:
+                done, not_done = concurrent.futures.wait(not_done, timeout=5)
 
-            f = Gio.File.new_for_uri(p)
-            try:
-                GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(f.read(cancellable=self._cancellable), 220, 132, False,
-                                                                self._cancellable,
-                                                                self.on_picon_load_done,
-                                                                picons.get(p, None))
-            except GLib.GError as e:
-                self.update_progress()
-                if e.code != Gio.IOErrorEnum.CANCELLED:
-                    log(str("Picon download error:{}  {}").format(p, e))
+            for future in not_done:
+                future.cancel()
+            concurrent.futures.wait(not_done)
 
-    def on_picon_load_done(self, file, result, user_data):
+            self.update_progress(self._url_count)
+            self.on_done()
+
+    def download_picon(self, url, pic_data):
+        err_msg = "Picon download error: {}  [{}]"
+        timeout = (3, 5)  # connect and read timeouts
+
+        req = requests.get(url, timeout=timeout)
+        if req.status_code != 200:
+            log(err_msg.format(url, req.reason))
+            self.update_progress(1)
+        else:
+            self.on_picon_load_done(req.content, pic_data)
+
+    @run_idle
+    def on_picon_load_done(self, data, user_data):
         try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(result)
+            self._info_label.set_text("Processing: {}".format(user_data))
+            f = Gio.MemoryInputStream.new_from_data(data)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, 220, 132, False, self._cancellable)
+            path = "{}{}".format(self._pic_path, user_data)
+            pixbuf.savev(path, "png", [], [])
+            self._picons[user_data] = get_picon_pixbuf(path)
         except GLib.GError as e:
+            self.update_progress(1)
             if e.code != Gio.IOErrorEnum.CANCELLED:
                 log("Loading picon [{}] data error: {}".format(user_data, e))
-        finally:
-            self._info_label.set_text("Processing: {}".format(user_data))
+        else:
             self.update_progress()
 
-    def update_progress(self):
+    @run_idle
+    def update_progress(self, error=0):
+        self._errors_count += error
         self._url_count -= 1
         frac = 1 - self._url_count / self._max_count
         self._progress_bar.set_fraction(frac)
 
-        if self._url_count == 0:
-            self._progress_bar.set_visible(False)
-            self._progress_bar.set_fraction(0.0)
-            self._apply_button.set_sensitive(True)
-            self._info_label.set_text(get_message("Done!"))
-            self._is_download = False
+    @run_idle
+    def on_done(self):
+        self._progress_bar.set_visible(False)
+        self._progress_bar.set_fraction(0.0)
+        self._apply_button.set_sensitive(True)
+        self._info_label.set_text("{}  Errors: {}.".format(get_message("Done!"), self._errors_count))
+        self._is_download = False
+
+        gen = self.update_fav_model()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def update_fav_model(self):
+        services = self._app._services
+        picons = self._app._picons
+        model = self._app.fav_view.get_model()
+        for r in model:
+            s = services.get(r[Column.FAV_ID], None)
+            if s:
+                model.set_value(r.iter, Column.FAV_PICON, picons.get(s.picon_id, None))
+                yield True
 
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.APPLY:

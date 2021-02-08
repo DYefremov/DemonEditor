@@ -2284,7 +2284,7 @@ class Application(Gtk.Application):
             return
 
         if self._bq_selected:
-            M3uImportDialog(self._main_window, self._s_type, response, self.append_imported_services).show()
+            M3uImportDialog(self._main_window, self._s_type, response, self).show()
 
     def append_imported_services(self, services):
         bq_services = self._bouquets.get(self._bq_selected)
