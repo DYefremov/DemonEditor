@@ -2448,7 +2448,7 @@ class Application(Gtk.Application):
             self.set_playback_elms_active()
             return
 
-        if mode is PlayStreamsMode.VLC:
+        if mode is PlayStreamsMode.WINDOW:
             try:
                 if not self._player:
                     self._current_mrl = url

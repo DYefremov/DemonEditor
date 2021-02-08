@@ -1,12 +1,8 @@
 import os
-import subprocess
 import sys
 from datetime import datetime
-from enum import Enum
-from urllib.request import urlopen
 
 from app.commons import run_task, log, _DATE_FORMAT
-from app.settings import PlayStreamsMode
 
 
 class Player:
@@ -113,95 +109,6 @@ class Player:
 
     def set_full_screen(self, full):
         self._player.set_fullscreen(full)
-
-
-class HttpPlayer:
-    """ Simple wrapper for VLC media player to interact over http.
-
-        NOT used anymore! May be deleted in the future!
-     """
-
-    __VLC_INSTANCE = None
-    __PLAY_STREAMS_MODE = PlayStreamsMode.VLC
-
-    class Commands(Enum):
-        STATUS = "http://127.0.0.1:{}/requests/status.xml"
-        PLAY = "http://127.0.0.1:{}/requests/status.xml?command=in_play&input={}"
-        STOP = "http://127.0.0.1:{}/requests/status.xml?command=pl_stop"
-        CLEAR = "http://127.0.0.1:{}/requests/status.xml?command=pl_empty"
-
-    def __init__(self, exe, port, is_darwin):
-        from concurrent.futures import ThreadPoolExecutor as PoolExecutor
-
-        self._executor = PoolExecutor(max_workers=1)
-        self._cmd = [exe, "--no-stats", "--verbose=-1", "--extraintf", "http", "--http-port", port, "--quiet"]
-        if not is_darwin:
-            self._cmd.append("--one-instance")
-
-        self._p = None
-        self._state = None
-        self._port = port
-
-    @classmethod
-    def get_instance(cls, settings):
-        if not cls.__VLC_INSTANCE:
-            import shutil
-
-            is_darwin = settings.is_darwin
-            # TODO Add options[vlc_exe and port] to the settings!
-            exe = "/Applications/VLC.app/Contents/MacOS/VLC" if is_darwin else "/usr/bin/vlc"
-            if shutil.which(exe) is None:
-                raise ImportError
-            cls.__VLC_INSTANCE = HttpPlayer(exe=exe, port=str(9090), is_darwin=is_darwin)
-        return cls.__VLC_INSTANCE
-
-    @staticmethod
-    def get_play_mode():
-        return HttpPlayer.__PLAY_STREAMS_MODE
-
-    @run_task
-    def play(self, mrl=None):
-        if not self._p or self._p and self._p.poll() is not None:
-            self._p = subprocess.Popen(self._cmd + [mrl], preexec_fn=os.setsid)
-            self._p.communicate()
-        else:
-            self._executor.submit(self.open_command, self.Commands.CLEAR)
-            self._executor.submit(self.open_command, self.Commands.PLAY, mrl)
-
-    def open_command(self, command, url=None):
-        if command is self.Commands.PLAY:
-            url = self.Commands.PLAY.value.format(self._port, url)
-        else:
-            url = command.value.format(self._port)
-
-        try:
-            with urlopen(url, timeout=5) as f:
-                self._state = command
-        except Exception as e:
-            log("{}[open_command, {}] error: {}".format(__class__.__name__, command, e))
-
-    def stop(self):
-        if self._state is self.Commands.PLAY:
-            self._executor.submit(self.open_command, self.Commands.STOP)
-
-    def pause(self):
-        pass
-
-    def set_time(self, time):
-        pass
-
-    @run_task
-    def release(self):
-        if self._p and self._p.poll() is None:
-            import signal
-            # Good explanation here: https://stackoverflow.com/a/4791612
-            os.killpg(os.getpgid(self._p.pid), signal.SIGTERM)
-
-    def is_playing(self):
-        return self._state is self.Commands.PLAY
-
-    def set_full_screen(self, full):
-        pass
 
 
 class Recorder:
