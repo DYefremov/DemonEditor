@@ -927,8 +927,8 @@ msgstr "Streams Abspielen-Modus:"
 msgid "Built-in player"
 msgstr "Integrierter Player"
 
-msgid "VLC media player"
-msgstr "VLC Media Player"
+msgid "In a separate window"
+msgstr "In einem separaten Fenster"
 
 msgid "Only get m3u file"
 msgstr "Nur m3u-Datei erhalten"
@@ -1214,3 +1214,18 @@ msgstr "Nur DreamOS!"
 
 msgid "A similar service is already in this list!"
 msgstr "Ein ähnlicher Dienst ist bereits in dieser Liste enthalten!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "Abspielen-Modus wurde geändert!\nStarte  das Programm neu, um die Einstellungen zu übernehmen."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Stelle die Werte für TID, NID und Namespace für die korrekte Benennung der Picons ein!"
+
+msgid "Streams detected:"
+msgstr "Streams gefunden:"
+
+msgid "Download picons"
+msgstr "Download picons"
+
+msgid "Errors:"
+msgstr "Fehler:"
