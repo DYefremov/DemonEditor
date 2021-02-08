@@ -302,6 +302,7 @@ class Application(Gtk.Application):
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
+        self._player_play_button = builder.get_object("player_play_button")
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
@@ -2475,6 +2476,8 @@ class Application(Gtk.Application):
     def show_playback_window(self):
         self._player_prev_button.set_visible(False)
         self._player_next_button.set_visible(False)
+        self._player_play_button.set_margin_left(5)
+
         width, height = 480, 240
         size = self._settings.get("playback_window_size")
         if size:

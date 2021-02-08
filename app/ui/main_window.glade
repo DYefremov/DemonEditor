@@ -1509,13 +1509,12 @@ Author: Dmitriy Yefremov
                       <object class="GtkToolbar" id="player_tool_bar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">15</property>
-                        <property name="margin_right">15</property>
                         <child>
                           <object class="GtkToolButton" id="player_prev_button">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">Previous stream in the list</property>
+                            <property name="margin_left">5</property>
                             <property name="use_underline">True</property>
                             <property name="stock_id">gtk-media-previous</property>
                             <signal name="clicked" handler="on_player_previous" swapped="no"/>
@@ -1647,6 +1646,7 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">Close playback</property>
+                            <property name="margin_right">5</property>
                             <property name="use_underline">True</property>
                             <property name="stock_id">gtk-close</property>
                             <signal name="clicked" handler="on_player_close" swapped="no"/>
