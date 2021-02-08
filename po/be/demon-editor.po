@@ -914,8 +914,8 @@ msgstr "Рэжым прайгравання струменяў:"
 msgid "Built-in player"
 msgstr "Убудаваны плэер"
 
-msgid "VLC media player"
-msgstr "VLC медыяплэер"
+msgid "In a separate window"
+msgstr "У асобным акне"
 
 msgid "Only get m3u file"
 msgstr "Атрымаць файл *.m3u"
@@ -1201,3 +1201,18 @@ msgstr "Толькі DreamOS!"
 
 msgid "A similar service is already in this list!"
 msgstr "Падобны сэрвіс ужо ёсць у гэтым спісе!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "Зменены рэжым прайгравання!\nПеразапусціце праграму для ўжывання налад."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Усталюйце значэнні TID, NID і пр. імёнаў для слушнага наймення пiконаў!"
+
+msgid "Streams detected:"
+msgstr "Выяўлена патокаў:"
+
+msgid "Download picons"
+msgstr "Загрузіць пiконы"
+
+msgid "Errors:"
+msgstr "Памылак:"
