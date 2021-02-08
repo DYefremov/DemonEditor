@@ -8,8 +8,7 @@ from enum import Enum
 from urllib.error import HTTPError, URLError
 
 from gi.repository import GLib
-
-from app.commons import run_idle
+from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.tools.epg import EPG, ChannelsParser
@@ -539,6 +538,7 @@ class EpgDialog:
 
     # ***************** Downloads *********************#
 
+    @run_task
     def download_epg_from_stb(self):
         """ Download the epg.dat file via ftp from the receiver. """
         download_data(settings=self._settings, download_type=DownloadType.EPG, callback=print)
