@@ -1891,8 +1891,8 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="play_in_vlc_radio_button">
-                                <property name="label" translatable="yes"> VLC media player</property>
+                              <object class="GtkRadioButton" id="play_in_window_radio_button">
+                                <property name="label" translatable="yes">In a separate window</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>

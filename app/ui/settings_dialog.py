@@ -122,7 +122,7 @@ class SettingsDialog:
         self._edit_preset_switch.bind_property("active", builder.get_object("video_options_frame"), "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("audio_options_frame"), "sensitive")
         self._play_in_built_radio_button = builder.get_object("play_in_built_radio_button")
-        self._play_in_vlc_radio_button = builder.get_object("play_in_vlc_radio_button")
+        self._play_in_window_radio_button = builder.get_object("play_in_window_radio_button")
         self._get_m3u_radio_button = builder.get_object("get_m3u_radio_button")
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
@@ -607,14 +607,14 @@ class SettingsDialog:
     def set_play_stream_mode(self, mode):
         self._play_in_built_radio_button.set_sensitive(not self._settings.is_darwin)
         self._play_in_built_radio_button.set_active(mode is PlayStreamsMode.BUILT_IN)
-        self._play_in_vlc_radio_button.set_active(mode is PlayStreamsMode.VLC)
+        self._play_in_window_radio_button.set_active(mode is PlayStreamsMode.WINDOW)
         self._get_m3u_radio_button.set_active(mode is PlayStreamsMode.M3U)
 
     def get_play_stream_mode(self):
         if self._play_in_built_radio_button.get_active():
             return PlayStreamsMode.BUILT_IN
-        if self._play_in_vlc_radio_button.get_active():
-            return PlayStreamsMode.VLC
+        if self._play_in_window_radio_button.get_active():
+            return PlayStreamsMode.WINDOW
         if self._get_m3u_radio_button.get_active():
             return PlayStreamsMode.M3U
 

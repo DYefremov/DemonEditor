@@ -132,7 +132,7 @@ class SettingsReadException(SettingsException):
 class PlayStreamsMode(IntEnum):
     """ Behavior mode when opening streams. """
     BUILT_IN = 0
-    VLC = 1
+    WINDOW = 1
     M3U = 2
 
 
