@@ -424,7 +424,7 @@ class ControlBox(Gtk.HBox):
         refs = {}
         for row in rows:
             timer = row.timer
-            ref = "timerdelete?sRef={}&begin={}&end={}".format(timer.get("e2servicereference", ""),
+            ref = "timerdelete?sRef={}&begin={}&end={}".format(quote(timer.get("e2servicereference", "")),
                                                                timer.get("e2timebegin", ""),
                                                                timer.get("e2timeend", ""))
             refs[ref] = row
@@ -485,7 +485,7 @@ class ControlBox(Gtk.HBox):
     def on_timer_save(self, action, value=None):
         args = []
         t_data = self.get_timer_data()
-        s_ref = t_data.get("sRef", "")
+        s_ref = quote(t_data.get("sRef", ""))
 
         if self._timer_action is self.TimerAction.EVENT:
             args.append("timeraddbyeventid?sRef={}".format(s_ref))
