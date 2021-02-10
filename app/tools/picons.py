@@ -5,8 +5,11 @@ import shutil
 from collections import namedtuple
 from html.parser import HTMLParser
 
+import requests
+
 from app.commons import run_task, log
 from app.settings import SettingsType
+from .satellites import _HEADERS
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
@@ -17,6 +20,7 @@ Picon = namedtuple("Picon", ["ref", "ssid", "v_pid"])
 
 class PiconsParser(HTMLParser):
     """ Parser for package html page. (https://www.lyngsat.com/packages/*provider-name*.html) """
+    _BASE_URL = "https://www.lyngsat.com"
 
     def __init__(self, entities=False, separator=' ', single=None):
 
@@ -58,14 +62,14 @@ class PiconsParser(HTMLParser):
             row = self._current_row
             ln = len(row)
 
-            if self._single and ln == 4 and row[0].startswith("../../logo/"):
-                self.picons.append(Picon(row[0].strip("../"), "0", "0"))
+            if self._single and ln == 4 and row[0].startswith("/logo/"):
+                self.picons.append(Picon(row[0].strip(), "0", "0"))
             else:
                 if 9 < ln < 13:
                     url = None
-                    if row[0].startswith("../logo/"):
+                    if row[0].startswith("/logo/"):
                         url = row[0]
-                    elif row[1].startswith("../logo/"):
+                    elif row[1].startswith("/logo/"):
                         url = row[1]
 
                     ssid = row[-4]
@@ -78,37 +82,44 @@ class PiconsParser(HTMLParser):
         pass
 
     @staticmethod
-    def parse(open_path, picons_path, tmp_path, provider, picon_ids, s_type=SettingsType.ENIGMA_2):
-        if not os.path.isfile(open_path):
-            log("PiconsParser error [parse]. No such file or directory: {}".format(open_path))
+    def parse(provider, picons_path, picon_ids, s_type=SettingsType.ENIGMA_2):
+        """ Returns tuple(url, picon file name) list. """
+        req = requests.get(provider.url, timeout=5)
+        if req.status_code == 200:
+            logo_data = req.text
+        else:
+            log("Provider picons downloading error: {} {}".format(provider.url, req.reason))
             return
 
-        with open(open_path, encoding="utf-8", errors="replace") as f:
-            on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
-            neg_pos = pos.endswith("W")
-            pos = int("".join(c for c in pos if c.isdigit()))
-            # For negative (West) positions 3600 - numeric position value!!!
-            if neg_pos:
-                pos = 3600 - pos
-            parser = PiconsParser(single=single)
-            parser.reset()
-            parser.feed(f.read())
-            picons = parser.picons
-            if picons:
-                os.makedirs(picons_path, exist_ok=True)
-                for p in picons:
-                    try:
-                        if single:
-                            on_id, freq = on_id.strip().split("::")
-                            namespace = "{:X}{:X}".format(int(pos), int(freq))
-                        else:
-                            namespace = "{:X}0000".format(int(pos))
-                        name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, s_type)
-                        p_name = picons_path + (name if name else os.path.basename(p.ref))
-                        shutil.copyfile(tmp_path + "www.lyngsat.com/" + p.ref.lstrip("."), p_name)
-                    except (TypeError, ValueError) as e:
-                        msg = "Picons format parse error: {}".format(p) + "\n" + str(e)
-                        log(msg)
+        on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
+        neg_pos = pos.endswith("W")
+        pos = int("".join(c for c in pos if c.isdigit()))
+        # For negative (West) positions 3600 - numeric position value!!!
+        if neg_pos:
+            pos = 3600 - pos
+
+        parser = PiconsParser(single=provider.single)
+        parser.reset()
+        parser.feed(logo_data)
+        picons = parser.picons
+        picons_data = []
+
+        if picons:
+            for p in picons:
+                try:
+                    if single:
+                        on_id, freq = on_id.strip().split("::")
+                        namespace = "{:X}{:X}".format(int(pos), int(freq))
+                    else:
+                        namespace = "{:X}0000".format(int(pos))
+                    name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, s_type)
+                    p_name = picons_path + (name if name else os.path.basename(p.ref))
+                    picons_data.append(("{}{}".format(PiconsParser._BASE_URL, p.ref), p_name))
+                except (TypeError, ValueError) as e:
+                    msg = "Picons format parse error: {}".format(p) + "\n" + str(e)
+                    log(msg)
+
+        return picons_data
 
     @staticmethod
     def format(ssid, on_id, namespace, picon_ids, s_type):
@@ -127,7 +138,8 @@ class ProviderParser(HTMLParser):
     _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
     _ONID_TID_PATTERN = re.compile("^\d+-\d+.*")
     _TRANSPONDER_FREQUENCY_PATTERN = re.compile("^\d+ [HVLR]+")
-    _DOMAINS = {"/tvchannels/", "/radiochannels/", "/packages/"}
+    _DOMAINS = {"/tvchannels/", "/radiochannels/", "/packages/", "/logo/"}
+    _BASE_URL = "https://www.lyngsat.com"
 
     def __init__(self, entities=False, separator=' '):
 
@@ -155,7 +167,7 @@ class ProviderParser(HTMLParser):
         if tag == 'tr':
             self._is_th = True
         if tag == "img":
-            if attrs[0][1].startswith("logo/"):
+            if attrs[0][1].startswith("/logo/"):
                 self._current_row.append(attrs[0][1])
         if tag == "a":
             url = attrs[0][1]
@@ -187,41 +199,47 @@ class ProviderParser(HTMLParser):
             self._current_row.append(final_cell)
             self._current_cell = []
         elif tag == 'tr':
-            r = self._current_row
+            row = self._current_row
             # Satellite position
             if not self._positon:
-                pos = re.findall(self._POSITION_PATTERN, str(r))
+                pos = re.findall(self._POSITION_PATTERN, str(row))
                 if pos:
                     self._positon = "".join(c for c in str(pos) if c.isdigit() or c in ".EW")
 
-            len_row = len(r)
+            len_row = len(row)
             if len_row > 2:
-                m = self._TRANSPONDER_FREQUENCY_PATTERN.match(r[1])
+                m = self._TRANSPONDER_FREQUENCY_PATTERN.match(row[1])
                 if m:
                     self._freq = m.group().split()[0]
 
-            if len_row == 12:
+            if len_row == 14:
                 # Providers
-                name = r[5]
+                name = row[6]
                 self._prv_names.add(name)
-                m = self._ONID_TID_PATTERN.match(str(r[-2]))
+                m = self._ONID_TID_PATTERN.match(str(row[9]))
                 if m:
                     on_id, tid = m.group().split("-")
                     if on_id not in self._ids:
-                        r[-2] = on_id
+                        row[-2] = on_id
                         self._ids.add(on_id)
-                        r[0] = self._positon
+                        row[0] = self._positon
                     if name + on_id not in self._prv_names:
                         self._prv_names.add(name + on_id)
-                        self.rows.append(Provider(logo=r[2], name=name, pos=self._positon, url=r[6], on_id=on_id,
+                        logo_data = None
+                        req = requests.get(self._BASE_URL + row[3], timeout=5)
+                        if req.status_code == 200:
+                            logo_data = req.content
+                        else:
+                            log("Downloading provider logo error: {}".format(req.reason))
+                        self.rows.append(Provider(logo=logo_data, name=name, pos=self._positon, url=row[5], on_id=on_id,
                                                   ssid=None, single=False, selected=True))
-            elif 6 < len_row < 10:
+            elif 6 < len_row < 14:
                 # Single services
                 name, url, ssid = None, None, None
-                if r[0].startswith("http"):
-                    name, url, ssid = r[1], r[0], r[4]
-                elif r[1].startswith("http"):
-                    name, url, ssid = r[2], r[1], r[5]
+                if row[0].startswith("http"):
+                    name, url, ssid = row[1], row[0], row[0]
+                elif row[1].startswith("http"):
+                    name, url, ssid = row[2], row[1], row[0]
 
                 if name and url:
                     on_id = "{}::{}".format(self._on_id if self._on_id else "1", self._freq)
@@ -237,14 +255,51 @@ class ProviderParser(HTMLParser):
         super().reset()
 
 
-def parse_providers(open_path):
+def parse_providers(url):
+    """ Returns a list of providers sorted by logo [single channels after providers]. """
     parser = ProviderParser()
-    parser.reset()
 
-    with open(open_path, encoding="utf-8", errors="replace") as f:
-        parser.feed(f.read())
+    request = requests.get(url=url, headers=_HEADERS)
+    if request.status_code == 200:
+        parser.feed(request.text)
+    else:
+        log("Parse providers error [{}]: {}".format(url, request.reason))
 
-        return parser.rows
+    def srt(p):
+        if p.logo is None:
+            return 1
+        return 0
+
+    providers = parser.rows
+    providers.sort(key=srt)
+
+    return providers
+
+
+def download_picon(src_url, dest_path, callback):
+    """ Downloads and saves the picon to file.  """
+    err_msg = "Picon download error: {}  [{}]"
+    timeout = (3, 5)  # connect and read timeouts
+
+    if callback:
+        callback("Downloading: {}.\n".format(os.path.basename(dest_path)))
+
+    req = requests.get(src_url, timeout=timeout, stream=True)
+    if req.status_code != 200:
+        err_msg = err_msg.format(src_url, req.reason)
+        log(err_msg)
+        if callback:
+            callback(err_msg + "\n")
+    else:
+        try:
+            with open(dest_path, "wb") as f:
+                for chunk in req:
+                    f.write(chunk)
+        except OSError as e:
+            err_msg = "Saving picon [{}] error: {}".format(dest_path, e)
+            log(err_msg)
+            if callback:
+                callback(err_msg + "\n")
 
 
 @run_task
