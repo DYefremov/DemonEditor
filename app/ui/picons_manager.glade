@@ -1704,6 +1704,8 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
                     <property name="wrap_mode">word-char</property>
+                    <property name="left_margin">5</property>
+                    <property name="right_margin">5</property>
                     <property name="overwrite">True</property>
                   </object>
                 </child>

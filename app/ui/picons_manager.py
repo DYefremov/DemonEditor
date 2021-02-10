@@ -1,17 +1,16 @@
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 
-from gi.repository import GLib, GdkPixbuf
+from gi.repository import GLib, GdkPixbuf, Gio
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
 from app.settings import SettingsType, Settings
-from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to
+from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to, download_picon
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message
 from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
@@ -30,6 +29,7 @@ class PiconsDialog:
         self._POS_PATTERN = re.compile(r"^\d+\.\d+[EW]?$")
         self._current_process = None
         self._terminate = False
+        self._is_downloading = False
         self._filter_binding = None
         self._services = None
         self._current_picon_info = None
@@ -480,7 +480,7 @@ class PiconsDialog:
         try:
             for sat in sats:
                 pos = sat[1]
-                name, pos = "{} ({})".format(sat[0], pos), "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
+                name = "{} ({})".format(sat[0], pos)
 
                 if not self._terminate and model:
                     if pos in self._sat_positions:
@@ -492,49 +492,28 @@ class PiconsDialog:
         model = view.get_model()
         self._url_entry.set_text(model.get(model.get_iter(path), 1)[0])
 
-    @run_idle
     def on_load_providers(self, item):
-        self._expander.set_expanded(True)
         self.on_info_bar_close()
-        self._cancel_button.show()
-        url = self._url_entry.get_text()
-
-        try:
-            self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
-                                                     stdout=subprocess.PIPE,
-                                                     stderr=subprocess.PIPE,
-                                                     universal_newlines=True)
-        except FileNotFoundError as e:
-            self._cancel_button.hide()
-            self.show_info_message(str(e), Gtk.MessageType.ERROR)
-        else:
-            GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
-            model = self._providers_view.get_model()
-            model.clear()
-            self.append_providers(url, model)
+        model = self._providers_view.get_model()
+        model.clear()
+        self.get_providers(model)
 
     @run_task
-    def append_providers(self, url, model):
-        self._current_process.wait()
-        try:
-            self._terminate = False
-            providers = parse_providers(self._TMP_DIR + url[url.find("w"):])
-        except FileNotFoundError:
-            pass  # NOP
-        else:
-            if providers:
-                for p in providers:
-                    if self._terminate:
-                        return
-                    model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
-            self.update_receive_button_state()
-        finally:
-            GLib.idle_add(self._cancel_button.hide)
-            self._terminate = False
+    def get_providers(self, model):
+        providers = parse_providers(self._url_entry.get_text())
+        if providers:
+            self.append_providers(providers, model)
 
-    def get_pixbuf(self, img_url):
-        return GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self._TMP_DIR + "www.lyngsat.com/" + img_url,
-                                                       width=48, height=48, preserve_aspect_ratio=True)
+    @run_idle
+    def append_providers(self, providers, model):
+        for p in providers:
+            model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
+        self.update_receive_button_state()
+
+    def get_pixbuf(self, img_data):
+        if img_data:
+            f = Gio.MemoryInputStream.new_from_data(img_data)
+            return GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, 48, 32, True, None)
 
     def on_receive(self, item):
         self._cancel_button.show()
@@ -542,12 +521,12 @@ class PiconsDialog:
 
     @run_task
     def start_download(self):
-        if self._current_process.poll() is None:
+        if self._is_downloading:
             self.show_dialog("The task is already running!", DialogType.ERROR)
             return
 
-        self._terminate = False
-        self._expander.set_expanded(True)
+        self._is_downloading = True
+        GLib.idle_add(self._expander.set_expanded, True)
 
         providers = self.get_selected_providers()
         for prv in providers:
@@ -558,38 +537,47 @@ class PiconsDialog:
                 return
 
         try:
-            for prv in providers:
-                if self._terminate:
-                    return
-                self.process_provider(Provider(*prv))
+            picons_path = self._picons_dir_entry.get_text()
+            os.makedirs(os.path.dirname(picons_path), exist_ok=True)
+            picons = []
+
+            self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
+
+            import concurrent.futures
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                # Getting links to picons.
+                futures = {executor.submit(self.process_provider, Provider(*p), picons_path): p for p in providers}
+                for future in concurrent.futures.as_completed(futures):
+                    if not self._is_downloading:
+                        executor.shutdown()
+                        return
+
+                    picons.extend(future.result())
+                # Getting picon images.
+                futures = {executor.submit(download_picon, *pic, self.append_output): pic for pic in picons}
+                done, not_done = concurrent.futures.wait(futures, timeout=0)
+                while self._is_downloading and not_done:
+                    done, not_done = concurrent.futures.wait(not_done, timeout=5)
+
+                for future in not_done:
+                    future.cancel()
+                concurrent.futures.wait(not_done)
+
+            if not self._is_downloading:
+                return
 
             if not self._resize_no_radio_button.get_active():
-                self.resize(self._picons_dir_entry.get_text())
+                self.resize(picons_path)
             else:
                 self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
         finally:
             GLib.idle_add(self._cancel_button.hide)
-            self._terminate = False
+            self._is_downloading = False
 
-    def process_provider(self, prv):
-        url = prv.url
-        self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
-        self._current_process = subprocess.Popen(["wget", "-pkP", self._TMP_DIR, url],
-                                                 stdout=subprocess.PIPE,
-                                                 stderr=subprocess.PIPE,
-                                                 universal_newlines=True)
-        GLib.io_add_watch(self._current_process.stderr, GLib.IO_IN, self.write_to_buffer)
-        self._current_process.wait()
-        path = self._TMP_DIR + (url[url.find("//") + 2:] if prv.single else self._BASE_URL + url[url.rfind("/") + 1:])
-        PiconsParser.parse(path, self._picons_dir_entry.get_text(),
-                           self._TMP_DIR, prv, self._picon_ids, self.get_picons_format())
-
-    def write_to_buffer(self, fd, condition):
-        if condition == GLib.IO_IN:
-            char = fd.read(1)
-            self.append_output(char)
-            return True
-        return False
+    def process_provider(self, prv, picons_path):
+        self.append_output("Getting links to picons for: {}.\n".format(prv.name))
+        return PiconsParser.parse(prv, picons_path, self._picon_ids, self.get_picons_format())
 
     @run_idle
     def append_output(self, char):
@@ -615,7 +603,7 @@ class PiconsDialog:
             self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def on_cancel(self, item=None):
-        if self.is_task_running() and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        if self._is_downloading and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return True
 
         self.terminate_task()
@@ -623,16 +611,15 @@ class PiconsDialog:
     @run_task
     def terminate_task(self):
         self._terminate = True
-
-        if self._current_process:
-            self._current_process.terminate()
-            self.show_info_message(get_message("The task is canceled!"), Gtk.MessageType.WARNING)
+        self._is_downloading = False
+        self.show_info_message(get_message("The task is canceled!"), Gtk.MessageType.WARNING)
 
     def on_close(self, window, event):
         if self.on_cancel():
             return True
 
         self._terminate = True
+        self._is_downloading = False
         self.save_window_size(window)
         self.clean_data()
         self._app.update_picons()
@@ -667,9 +654,10 @@ class PiconsDialog:
 
     @run_idle
     def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(True)
-        self._info_bar.set_message_type(message_type)
+        self._info_bar.set_visible(False)
         self._message_label.set_text(get_message(text))
+        self._info_bar.set_message_type(message_type)
+        self._info_bar.set_visible(True)
 
     def on_picons_dir_open(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, settings=self._settings)
@@ -833,9 +821,6 @@ class PiconsDialog:
             picon_format = SettingsType.NEUTRINO_MP
 
         return picon_format
-
-    def is_task_running(self):
-        return self._current_process and self._current_process.poll() is None
 
 
 if __name__ == "__main__":
