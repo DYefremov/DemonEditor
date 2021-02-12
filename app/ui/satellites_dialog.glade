@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ Author: Dmitriy Yefremov
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1840,6 +1840,8 @@ Author: Dmitriy Yefremov
                     <property name="model">update_sat_list_model_sort</property>
                     <property name="search_column">0</property>
                     <property name="activate_on_single_click">True</property>
+                    <signal name="button-press-event" handler="on_popup_menu" object="satellites_update_popup_menu" swapped="no"/>
+                    <signal name="select-all" handler="on_select_all" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection">
                         <property name="mode">multiple</property>
@@ -2134,6 +2136,8 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
+                    <property name="left_margin">5</property>
+                    <property name="right_margin">5</property>
                   </object>
                 </child>
               </object>
