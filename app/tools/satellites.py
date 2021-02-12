@@ -203,14 +203,16 @@ class SatellitesParser(HTMLParser):
         self._rows.clear()
         url = "https://www.flysat.com/" + sat_url if self._source is SatelliteSource.FLYSAT else sat_url
         request = requests.get(url=url, headers=_HEADERS)
-        reason = request.reason
+
         trs = []
-        if reason == "OK":
+        if request.status_code == 200:
             self.feed(request.text)
             if self._source is SatelliteSource.FLYSAT:
                 self.get_transponders_for_fly_sat(trs)
             elif self._source is SatelliteSource.LYNGSAT:
                 self.get_transponders_for_lyng_sat(trs)
+        else:
+            log("SatellitesParser [get transponders] error: {}  {}".format(url, request.reason))
 
         return sorted(trs, key=lambda x: int(x.frequency))
 
@@ -266,37 +268,29 @@ class SatellitesParser(HTMLParser):
             trs.extend(n_trs)
 
     def get_transponders_for_lyng_sat(self, trs):
-        """ Parsing transponders for LyngSat """
+        """ Parsing transponders for LyngSat. """
         frq_pol_pattern = re.compile("(\\d{4,5})\\s+([RLHV]).*")
-        sr_fec_pattern = re.compile("^(\\d{4,5})-(\\d/\\d)(.+PSK)?(.*)?$")
-        sys_pattern = re.compile("(DVB-S[2]?) ?(PLS+ (Root|Gold|Combo)+ (\\d+))* ?(multistream stream (\\d+))?",
-                                 re.IGNORECASE)
+        sr_fec_pattern = re.compile(r"(DVB-S[2]?)\s+(.+PSK)?.*?(\d+)\s+(\d/\d)\s*(?:T2-MI\s+PLP\s+(\d+))?.*")
         zeros = "000"
-        pls_modes = {v: k for k, v in PLS_MODE.items()}
+        pls_mode, pls_code, pls_id = None, None, None
 
-        for r in filter(lambda x: len(x) > 8, self._rows):
-            for frq in r[1], r[2], r[3]:
+        for row in filter(lambda x: len(x) > 8, self._rows):
+            for frq in row[1], row[2], row[3]:
                 freq = re.match(frq_pol_pattern, frq)
                 if freq:
                     break
             if not freq:
                 continue
+
             frq, pol = freq.group(1), freq.group(2)
-            sr_fec = re.match(sr_fec_pattern, r[-3])
+            srf = " ".join(row[3:5])
+            sr_fec = re.search(sr_fec_pattern, srf)
             if not sr_fec:
                 continue
-            sr, fec, mod = sr_fec.group(1), sr_fec.group(2), sr_fec.group(3)
+
+            sys, mod, sr, fec = sr_fec.group(1), sr_fec.group(2), sr_fec.group(3), sr_fec.group(4)
             mod = mod.strip() if mod else "Auto"
-
-            res = re.match(sys_pattern, r[-4])
-            if not res:
-                continue
-
-            sys = res.group(1)
-            pls_mode = res.group(3)
-            pls_mode = pls_modes.get(pls_mode.capitalize(), None) if pls_mode else pls_mode
-            pls_code = res.group(4)
-            pls_id = res.group(6)
+            pls_id = sr_fec.group(5)
 
             tr = Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, pls_id)
             if is_transponder_valid(tr):

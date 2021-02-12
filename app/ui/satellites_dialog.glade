@@ -427,12 +427,12 @@ Author: Dmitriy Yefremov
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">Satellites edit tool</property>
-        <property name="spacing">1</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkBox" id="left_header_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkMenuButton" id="file_header_menu_button">
                 <property name="visible">True</property>
@@ -1370,7 +1370,6 @@ Author: Dmitriy Yefremov
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">Satellites update</property>
-        <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkBox" id="satellites_update_left_header_box">
@@ -1440,6 +1439,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox" id="satellites_update_right_header_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">2</property>
             <child>
               <object class="GtkButton" id="cancel_data_button">
                 <property name="visible">False</property>
@@ -2068,6 +2068,8 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
+                    <property name="left_margin">5</property>
+                    <property name="right_margin">5</property>
                   </object>
                 </child>
               </object>
