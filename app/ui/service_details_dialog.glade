@@ -1586,6 +1586,9 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-6">cancel_button</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkListStore" id="transponder_services_liststore">
     <columns>
