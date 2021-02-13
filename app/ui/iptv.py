@@ -686,6 +686,8 @@ class M3uImportDialog(IptvListDialog):
                 return
 
             self.download_picons(picons)
+        else:
+            GLib.idle_add(self._info_bar.set_visible, True, priority=GLib.PRIORITY_LOW)
 
         self._app.append_imported_services(services)
 
@@ -740,7 +742,7 @@ class M3uImportDialog(IptvListDialog):
             self._progress_bar.set_visible(False)
             self._progress_bar.set_fraction(0.0)
             self._apply_button.set_sensitive(True)
-            self._info_label.set_text("{}  Errors: {}.".format(get_message("Done!"), self._errors_count))
+            self._info_label.set_text("{} {}.".format(get_message("Errors:"), self._errors_count))
             self._is_download = False
 
             gen = self.update_fav_model()
@@ -755,6 +757,8 @@ class M3uImportDialog(IptvListDialog):
             if s:
                 model.set_value(r.iter, Column.FAV_PICON, picons.get(s.picon_id, None))
                 yield True
+        self._info_bar.set_visible(True)
+        yield True
 
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.APPLY:
