@@ -1052,6 +1052,9 @@ class Application(Gtk.Application):
 
     def on_fav_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         """  Sets detailed info about service in the tooltip [fav view]. """
+        if not self._main_window.is_active():
+            return False
+
         result = view.get_dest_row_at_pos(x, y)
         if not result or not self._settings.show_bq_hints:
             return False
@@ -1060,6 +1063,9 @@ class Application(Gtk.Application):
 
     def on_services_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         """  Sets short info about service in the tooltip [main services view]. """
+        if not self._main_window.is_active():
+            return False
+
         result = view.get_dest_row_at_pos(x, y)
         if not result or not self._settings.show_srv_hints:
             return False
