@@ -235,6 +235,8 @@ class Application(Gtk.Application):
         tool_bar = builder.get_object("top_toolbar")
         self._main_data_box.bind_property("visible", tool_bar, "visible")
         self._telnet_tool_button = builder.get_object("telnet_tool_button")
+        # Setting custom sort function for position column.
+        self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
@@ -1035,7 +1037,10 @@ class Application(Gtk.Application):
         index = int(str(rows[0].path))
         columns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-        for s_row, row in zip(sorted(map(lambda r: r[:], rows), key=lambda r: r[c_num] or nv, reverse=rev), rows):
+        for s_row, row in zip(sorted(map(
+                lambda r: r[:], rows),
+                key=lambda r: r[c_num] or nv if c_num != Column.FAV_POS else self.get_pos_num(r[c_num]),
+                reverse=rev), rows):
             self._fav_model.set(row.iter, columns, s_row)
             bq[index] = s_row[Column.FAV_ID]
             index += 1
@@ -1047,6 +1052,21 @@ class Application(Gtk.Application):
         for column in view.get_columns():
             column.set_sort_indicator(False)
             column.set_sort_order(Gtk.SortType.ASCENDING)
+
+    def position_sort_func(self, model, iter1, iter2, column):
+        """ Custom sort function for position column. """
+        return self.get_pos_num(model.get_value(iter1, column)) - self.get_pos_num(model.get_value(iter2, column))
+
+    def get_pos_num(self, pos):
+        """ Returns num [float] representation of satellite position. """
+        if not pos:
+            return -183.0
+
+        if len(pos) > 1:
+            m = -1 if pos[-1] == "W" else 1
+            return float(pos[:-1]) * m
+
+        return -181.0 if pos == "T" else -182.0
 
     # ********************* Hints *************************#
 
