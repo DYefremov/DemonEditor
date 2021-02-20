@@ -3,34 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-Author: Dmitriy Yefremov
-
--->
-<!--
-
-The MIT License (MIT)
-
-Copyright (c) 2018-2019 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -542,11 +515,14 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkTreeViewColumn" id="satellite_column">
                 <property name="resizable">True</property>
-                <property name="min_width">20</property>
+                <property name="min_width">250</property>
                 <property name="title" translatable="yes">Satellite</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
-                  <object class="GtkCellRendererText" id="satellite_cellrenderertext"/>
+                  <object class="GtkCellRendererText" id="satellite_cellrenderertext">
+                    <property name="ellipsize">end</property>
+                  </object>
                   <attributes>
                     <attribute name="text">0</attribute>
                   </attributes>
@@ -559,6 +535,7 @@ Author: Dmitriy Yefremov
                 <property name="min_width">20</property>
                 <property name="title" translatable="yes">Freq</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
                   <object class="GtkCellRendererText" id="frequency_cellrenderertext"/>
                   <attributes>
@@ -573,6 +550,7 @@ Author: Dmitriy Yefremov
                 <property name="min_width">20</property>
                 <property name="title" translatable="yes">Rate</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
                   <object class="GtkCellRendererText" id="sat_rate_cellrenderertext"/>
                   <attributes>
@@ -587,6 +565,7 @@ Author: Dmitriy Yefremov
                 <property name="min_width">20</property>
                 <property name="title" translatable="yes">Pol</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
                   <object class="GtkCellRendererText" id="sat_pol_cellrenderertext"/>
                   <attributes>
@@ -601,6 +580,7 @@ Author: Dmitriy Yefremov
                 <property name="min_width">20</property>
                 <property name="title" translatable="yes">FEC</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
                   <object class="GtkCellRendererText" id="set_fec_cellrenderertext"/>
                   <attributes>
@@ -615,6 +595,7 @@ Author: Dmitriy Yefremov
                 <property name="min_width">20</property>
                 <property name="title" translatable="yes">System</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
                   <object class="GtkCellRendererText" id="sys_cellrenderertext"/>
                   <attributes>
@@ -629,6 +610,7 @@ Author: Dmitriy Yefremov
                 <property name="min_width">20</property>
                 <property name="title" translatable="yes">Mod</property>
                 <property name="expand">True</property>
+                <property name="alignment">0.5</property>
                 <child>
                   <object class="GtkCellRendererText" id="mod_cellrenderertext"/>
                   <attributes>
@@ -1314,20 +1296,6 @@ Author: Dmitriy Yefremov
   <object class="GtkTreeModelSort" id="update_sat_list_model_sort">
     <property name="model">update_sat_list_model_filter</property>
   </object>
-  <object class="GtkListStore" id="update_source_store">
-    <columns>
-      <!-- column-name source -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">FlySat</col>
-      </row>
-      <row>
-        <col id="0">LyngSat</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkListStore" id="update_service_store">
     <columns>
       <!-- column-name picon -->
@@ -1392,22 +1360,20 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="source_combo_box">
+              <object class="GtkComboBoxText" id="source_combo_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="model">update_source_store</property>
                 <property name="active">0</property>
-                <child>
-                  <object class="GtkCellRendererText" id="source_cellrenderertext"/>
-                  <attributes>
-                    <attribute name="text">0</attribute>
-                  </attributes>
-                </child>
+                <items>
+                  <item id="FLYSAT" translatable="yes">FlySat</item>
+                  <item id="LYNGSAT" translatable="yes">LyngSat</item>
+                  <item id="KINGOFSAT" translatable="yes">KingOfSat</item>
+                </items>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>

@@ -14,13 +14,14 @@ from app.eparser import Satellite, Transponder, is_transponder_valid
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
                                   Service, CAS)
 
-_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/69.0"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"}
 
 
 class SatelliteSource(Enum):
     FLYSAT = ("https://www.flysat.com/satlist.php",)
     LYNGSAT = ("https://www.lyngsat.com/asia.html", "https://www.lyngsat.com/europe.html",
                "https://www.lyngsat.com/atlantic.html", "https://www.lyngsat.com/america.html")
+    KINGOFSAT = ("https://en.kingofsat.net/satellites.php",)
 
     @staticmethod
     def get_sources(src):
@@ -96,7 +97,9 @@ class SatellitesParser(HTMLParser):
         if tag == "tr":
             self._is_th = True
         if tag == "a":
-            self._current_row.append(attrs[0][1])
+            for atr in attrs:
+                if atr[0] == "href":
+                    self._current_row.append(atr[1])
 
     def handle_data(self, data):
         """ Save content to a cell """
@@ -182,6 +185,11 @@ class SatellitesParser(HTMLParser):
                     elif r_len == 5:
                         sats.append((row[2], current_pos, row[3], base_url + row[1], False))
                 return sats
+            elif source is SatelliteSource.KINGOFSAT:
+                def get_sat(r):
+                    return r[3], self.parse_position(r[1]), None, r[0], False
+
+                return list(map(get_sat, filter(lambda x: len(x) == 17, self._rows)))
 
     def get_satellite(self, sat):
         pos = sat[1]
@@ -201,18 +209,29 @@ class SatellitesParser(HTMLParser):
     def get_transponders(self, sat_url):
         """ Getting transponders(sorted by frequency). """
         self._rows.clear()
-        url = "https://www.flysat.com/" + sat_url if self._source is SatelliteSource.FLYSAT else sat_url
-        request = requests.get(url=url, headers=_HEADERS)
-
         trs = []
-        if request.status_code == 200:
-            self.feed(request.text)
-            if self._source is SatelliteSource.FLYSAT:
-                self.get_transponders_for_fly_sat(trs)
-            elif self._source is SatelliteSource.LYNGSAT:
-                self.get_transponders_for_lyng_sat(trs)
+
+        url = sat_url
+        if self._source is SatelliteSource.FLYSAT:
+            url = "https://www.flysat.com/" + sat_url
+        elif self._source is SatelliteSource.KINGOFSAT:
+            url = "https://en.kingofsat.net/" + sat_url
+
+        try:
+            request = requests.get(url=url, headers=_HEADERS)
+        except requests.exceptions.ConnectionError as e:
+            log("Getting transponders error: {}".format(e))
         else:
-            log("SatellitesParser [get transponders] error: {}  {}".format(url, request.reason))
+            if request.status_code == 200:
+                self.feed(request.text)
+                if self._source is SatelliteSource.FLYSAT:
+                    self.get_transponders_for_fly_sat(trs)
+                elif self._source is SatelliteSource.LYNGSAT:
+                    self.get_transponders_for_lyng_sat(trs)
+                elif self._source is SatelliteSource.KINGOFSAT:
+                    self.get_transponders_for_king_of_sat(trs)
+            else:
+                log("SatellitesParser [get transponders] error: {}  {}".format(url, request.reason))
 
         return sorted(trs, key=lambda x: int(x.frequency))
 
@@ -295,6 +314,26 @@ class SatellitesParser(HTMLParser):
             tr = Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, pls_id)
             if is_transponder_valid(tr):
                 trs.append(tr)
+
+    def get_transponders_for_king_of_sat(self, trs):
+        """ Getting transponders for KingOfSat source.
+
+            Since the *.ini file contains incomplete information, it is not used.
+        """
+        zeros = "000"
+        pos_pat = re.compile(r".*?(\d+\.\d°[EW]).*")
+        pat = re.compile(
+            r"(\d+).00\s+([RLHV])\s+(DVB-S[2]?)\s+(?:T2-MI, PLP (\d+)\s+)?(.*PSK).*?(?:Stream\s+(\d+))?\s+(\d+)\s+(\d+/\d+)$")
+
+        for row in filter(lambda r: len(r) == 16 and pos_pat.match(r[0]), self._rows):
+            res = pat.search(" ".join((row[0], row[2], row[3], row[8], row[9], row[10])))
+            if res:
+                freq, sr, pol, fec, sys = res.group(1), res.group(7), res.group(2), res.group(8), res.group(3)
+                mod, pls_id, pls_code = res.group(5), res.group(4), res.group(6)
+
+                tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, None, pls_code, pls_id)
+                if is_transponder_valid(tr):
+                    trs.append(tr)
 
 
 class ServicesParser(HTMLParser):
@@ -470,27 +509,8 @@ class ServicesParser(HTMLParser):
                     else:
                         flags = ",".join(filter(None, (flags, cas)))
 
-                    srv = Service(flags_cas=flags,
-                                  transponder_type="s",
-                                  coded=None,
-                                  service=name,
-                                  locked=None,
-                                  hide=None,
-                                  package=pkg,
-                                  service_type=_s_type,
-                                  picon=r[1].img,
-                                  picon_id=picon_id,
-                                  ssid=sid,
-                                  freq=freq,
-                                  rate=sr,
-                                  pol=pol,
-                                  fec=fec,
-                                  system=sys,
-                                  pos=pos,
-                                  data_id=data_id,
-                                  fav_id=fav_id,
-                                  transponder=tr)
-                    services.append(srv)
+                    services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, r[1].img, picon_id,
+                                            sid, freq, sr, pol, fec, sys, pos, data_id, fav_id, tr))
                 except ValueError as e:
                     log("ServicesParser error [get transponder services]: {}".format(e))
 
