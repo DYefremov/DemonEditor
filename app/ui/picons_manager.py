@@ -508,7 +508,8 @@ class PiconsDialog:
     @run_idle
     def append_providers(self, providers, model):
         for p in providers:
-            model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
+            print(p)
+            # model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
         self.update_receive_button_state()
 
     def get_pixbuf(self, img_data):
@@ -556,7 +557,7 @@ class PiconsDialog:
 
                     picons.extend(future.result())
                 # Getting picon images.
-                futures = {executor.submit(download_picon, *pic, self.append_output): pic for pic in picons}
+                futures = {executor.submit(download_picon, pic[0], pic[1], self.append_output): pic for pic in picons}
                 done, not_done = concurrent.futures.wait(futures, timeout=0)
                 while self._is_downloading and not_done:
                     done, not_done = concurrent.futures.wait(not_done, timeout=5)

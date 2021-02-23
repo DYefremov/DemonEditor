@@ -298,14 +298,14 @@ class IptvDialog:
             self._bouquet[self._paths[0][0]] = fav_id
             self._model.set(self._model.get_iter(self._paths), {Column.FAV_SERVICE: name, Column.FAV_ID: fav_id})
         else:
-            aggr = [None] * 10
             s_type = BqServiceType.IPTV.name
-            srv = (None, None, name, None, None, s_type, None, fav_id, *aggr[0:3])
+            srv = (None, None, name, None, None, s_type, None, fav_id, None, None, None)
             itr = self._model.insert_after(self._model.get_iter(self._paths[0]),
                                            srv) if self._paths else self._model.insert(0, srv)
             self._model.set_value(itr, 1, IPTV_ICON)
             self._bouquet.insert(self._model.get_path(itr)[0], fav_id)
-            self._services[fav_id] = Service(None, None, IPTV_ICON, name, *aggr[0:3], s_type, *aggr, fav_id, None)
+            self._services[fav_id] = Service(None, None, IPTV_ICON, name, None, None, None, s_type, None,
+                                             None, None, None, None, None, None, None, None, None, fav_id, None)
 
     @run_idle
     def on_info_bar_close(self, bar=None, resp=None):
@@ -920,13 +920,13 @@ class YtListImportDialog:
 
     @run_idle
     def append_services(self, links):
-        aggr = [None] * 9
         srvs = []
 
         if self._yt_list_title:
             title = self._yt_list_title
             fav_id = MARKER_FORMAT.format(0, title, title)
-            mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, 0, fav_id, None)
+            mk = Service(None, None, None, title, None, None, None, BqServiceType.MARKER.name, None,
+                         None, None, None, None, None, None, None, None, 0, fav_id, None)
             srvs.append(mk)
 
         act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)
@@ -936,7 +936,8 @@ class YtListImportDialog:
                 continue
             ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
             fav_id = get_fav_id(ln, title, self._s_type)
-            srv = Service(None, None, IPTV_ICON, title, *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
+            srv = Service(None, None, IPTV_ICON, title, None, None, None, BqServiceType.IPTV.name, None, None, None,
+                          None, None, None, None, None, None, None, fav_id, None)
             srvs.append(srv)
         self.appender(srvs)
 

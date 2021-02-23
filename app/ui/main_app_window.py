@@ -699,9 +699,10 @@ class Application(Gtk.Application):
         model, paths = view.get_selection().get_selected_rows()
 
         if target is ViewTarget.FAV:
-            self._rows_buffer.extend((0, *model.get(model.get_iter(path), Column.SRV_CODED, Column.SRV_SERVICE,
-                                                    Column.SRV_LOCKED, Column.SRV_HIDE, Column.SRV_TYPE, Column.SRV_POS,
-                                                    Column.SRV_FAV_ID, Column.SRV_PICON), None, None) for path in paths)
+            rows = []
+            for in_itr in [model.get_iter(path) for path in paths]:
+                v1, v2, v3, v4, v5, v6, v7, v8 = model.get(in_itr, 2, 3, 4, 5, 7, 16, 18, 8)
+                rows.append((0, v1, v2, v3, v4, v5, v6, v7, v8))
         elif target is ViewTarget.SERVICES:
             self._rows_buffer.extend(model[path][:] for path in paths)
         elif target is ViewTarget.BOUQUET:
@@ -1649,7 +1650,7 @@ class Application(Gtk.Application):
         bq_id = "{}:{}".format(name, bq_type)
         services = []
         extra_services = {}  # for services with different names in bouquet and main list
-        agr = [None] * 7
+
         for srv in bq.services:
             fav_id = srv.data
             # IPTV and MARKER services
@@ -1667,13 +1668,12 @@ class Application(Gtk.Application):
                         data_id = ":".join(fav_id_data[:11])
                         picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
                         locked = LOCKED_ICON if data_id in self._blacklist else None
-                srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
-                              self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
+                srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name, self._picons.get(picon_id, None), picon_id, None, None, None, None, None, None, None, data_id, fav_id, None)
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.ALT:
                 self._alt_file.add("{}:{}".format(srv.data, bq_type))
                 srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
-                              None, None, *agr, srv.data, fav_id, srv.num)
+                              None, None, None, None, None, None, None, None, None, srv.data, fav_id, srv.num)
                 self._services[fav_id] = srv
             elif srv.name:
                 extra_services[fav_id] = srv.name
@@ -1795,7 +1795,7 @@ class Application(Gtk.Application):
                     bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden, self._bq_file.get(bq_id, None))
                     bqs.append(bq)
             if len(b_path) == 1:
-                bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
+                bouquets.append(Bouquets(model.get_value(itr, 0), model.get_value(itr, 3), bqs if bqs else []))
 
         # Getting bouquets
         self._bouquets_view.get_model().foreach(parse_bouquets)
@@ -1990,7 +1990,9 @@ class Application(Gtk.Application):
 
     def delete_selection(self, view, *args):
         """ Used for clear selection on given view(s) """
-        for v in [view, *args]:
+        views = [view, ]
+        views.extend(args)
+        for v in views:
             v.get_selection().unselect_all()
 
     def on_settings(self, action, value=None):

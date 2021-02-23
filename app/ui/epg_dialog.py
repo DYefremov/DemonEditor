@@ -185,7 +185,7 @@ class EpgDialog:
 
     def init_bouquet_data(self):
         for r in self._ex_fav_model:
-            row = [*r[:]]
+            row = list(r[:])
             fav_id = r[Column.FAV_ID]
             self._services[fav_id] = self._ex_services[fav_id].fav_id
             yield self._bouquet_model.append(row)

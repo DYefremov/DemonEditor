@@ -6,7 +6,6 @@ import re
 import shutil
 import sys
 from html.parser import HTMLParser
-from json import JSONDecodeError
 from urllib.error import URLError
 from urllib.parse import unquote
 from urllib.request import Request, urlopen, urlretrieve
@@ -100,7 +99,7 @@ class YouTube:
             if player_resp:
                 try:
                     resp = json.loads(player_resp)
-                except JSONDecodeError as e:
+                except Exception as e:
                     log("{}: Parsing player response error: {}".format(__class__.__name__, e))
                 else:
                     det = resp.get("videoDetails", None)

@@ -379,7 +379,6 @@ class ServiceDetailsDialog:
 
     def on_new(self):
         """ Create new service. """
-        service = self.get_service(*self.get_srv_data(), self.get_satellite_transponder_data())
         show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
         return True
 

@@ -9,12 +9,13 @@ from pathlib import Path
 from pprint import pformat
 from textwrap import dedent
 
-HOME_PATH = str(Path.home())
+HOME_PATH = os.path.expanduser("~")
 CONFIG_PATH = HOME_PATH + "/.config/demon-editor/"
 CONFIG_FILE = CONFIG_PATH + "config.json"
 DATA_PATH = HOME_PATH + "/DemonEditor/data/"
 
 IS_DARWIN = sys.platform == "darwin"
+IS_WIN = sys.platform == "win32"
 
 
 class Defaults(Enum):
@@ -97,7 +98,8 @@ class SettingsType(IntEnum):
 
     def get_default_settings(self):
         """ Returns default settings for current type """
-        if self is self.ENIGMA_2:
+        print(self.value)
+        if self.value == 0:
             return {"setting_type": self.value,
                     "host": "127.0.0.1", "port": "21", "timeout": 5,
                     "user": "root", "password": "root",
@@ -108,7 +110,7 @@ class SettingsType(IntEnum):
                     "picons_path": "/usr/share/enigma2/picon/",
                     "picons_local_path": DATA_PATH + "enigma2/picons/",
                     "backup_local_path": DATA_PATH + "enigma2/backup/"}
-        elif self is self.NEUTRINO_MP:
+        elif self.value == 1:
             return {"setting_type": self,
                     "host": "127.0.0.1", "port": "21", "timeout": 5,
                     "user": "root", "password": "root",

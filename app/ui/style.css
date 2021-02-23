@@ -1,10 +1,16 @@
 #digit-entry {
   border-color: Red;
-  border-width: 0.15em;
 }
 
 #status-bar-button {
-  margin: 0.1em;
+  padding: 1px;
+  margin: 1px;
+}
+
+paned > separator {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 2px 24px;
 }
 
 .red-button {
@@ -27,27 +33,14 @@
   background-color: blue;
 }
 
-#textview-large {
-  font-size: 14px;
-}
-
 .time-entry {
   padding: 0px;
   margin: 0px;
 }
 
-.arrow-button {
-  padding: 0px;
-  margin: 1px;
-  min-width: 12px;
-  min-height: 12px;
-}
-
 .group {}
 
 .group :first-child {
-  padding-left: 0.5em;
-  padding-right: 0.5em;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }

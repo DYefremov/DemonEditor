@@ -6,7 +6,6 @@ import urllib
 import xml.etree.ElementTree as ETree
 from enum import Enum
 from ftplib import FTP, CRLF, Error, error_perm
-from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -654,7 +653,7 @@ def get_response(req_type, url, data=None):
         if req_type is HttpAPI.Request.TEST:
             raise e
         return {"error_code": e.code}
-    except (URLError, RemoteDisconnected, ConnectionResetError) as e:
+    except (URLError, ConnectionResetError) as e:
         if req_type is HttpAPI.Request.TEST:
             raise e
     except ETree.ParseError as e:

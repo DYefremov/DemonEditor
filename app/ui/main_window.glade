@@ -110,7 +110,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Cut</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_bouquets_cut" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="x" signal="activate" modifiers="Primary"/>
+        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -121,7 +121,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_bouquets_copy" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -132,7 +132,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Paste</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_bouquets_paste" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="v" signal="activate" modifiers="Primary"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -149,7 +149,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -223,7 +223,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Cut</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_fav_cut" object="fav_tree_view" swapped="no"/>
-        <accelerator key="x" signal="activate" modifiers="Primary"/>
+        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -234,7 +234,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_fav_copy" object="fav_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -245,7 +245,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Paste</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_fav_paste" object="fav_tree_view" swapped="no"/>
-        <accelerator key="v" signal="activate" modifiers="Primary"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -261,7 +261,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -805,7 +805,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -815,7 +815,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -1375,7 +1375,7 @@ Author: Dmitriy Yefremov
                         <property name="icon_name">input-gaming-symbolic</property>
                       </object>
                     </child>
-                    <accelerator key="t" signal="clicked" modifiers="Primary"/>
+                    <accelerator key="t" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

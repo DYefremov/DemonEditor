@@ -68,7 +68,8 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                     groups.add(grp_name)
                     fav_id = MARKER_FORMAT.format(marker_counter, grp_name, grp_name)
                     marker_counter += 1
-                    mr = Service(None, None, None, grp_name, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None)
+                    mr = Service(None, None, None, grp_name, None, None, None, BqServiceType.MARKER.name, None, None,
+                                 None, None, None, None, None, None, None, None, fav_id, None)
                     services.append(mr)
             elif line.startswith("#EXTGRP") and s_type is SettingsType.ENIGMA_2:
                 grp_name = line.strip("#EXTGRP:").strip()
@@ -76,7 +77,8 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                     groups.add(grp_name)
                     fav_id = MARKER_FORMAT.format(marker_counter, grp_name, grp_name)
                     marker_counter += 1
-                    mr = Service(None, None, None, grp_name, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None)
+                    mr = Service(None, None, None, grp_name, None, None, None, BqServiceType.MARKER.name, None, None,
+                                 None, None, None, None, None, None, None, None, fav_id, None)
                     services.append(mr)
             elif not line.startswith("#"):
                 url = line.strip()
@@ -84,7 +86,8 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                 sid_counter += 1
                 fav_id = get_fav_id(url, name, s_type, params)
                 if all((name, url, fav_id)):
-                    srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], st, picon, p_id, *s_aggr, url, fav_id, None)
+                    srv = Service(None, None, IPTV_ICON, name, None, None, None, st, picon, p_id, None, None, None,
+                                  None, None, None, None, url, fav_id, None)
                     services.append(srv)
                 else:
                     log("*.m3u* parse error ['{}']: name[{}], url[{}], fav id[{}]".format(path, name, url, fav_id))
@@ -120,7 +123,9 @@ def get_fav_id(url, service_name, settings_type, params=None, stream_type=None, 
     if settings_type is SettingsType.ENIGMA_2:
         stream_type = stream_type or StreamType.NONE_TS.value
         params = params or (0, 0, 0, 0)
-        return ENIGMA2_FAV_ID_FORMAT.format(stream_type, s_type, *params, quote(url), service_name, service_name, None)
+        v1, v2, v3, v4 = params
+        return ENIGMA2_FAV_ID_FORMAT.format(stream_type, s_type, v1, v2, v3, v4, quote(url),
+                                            service_name, service_name, None)
     elif settings_type is SettingsType.NEUTRINO_MP:
         return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
 

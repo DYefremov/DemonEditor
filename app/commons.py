@@ -67,7 +67,7 @@ def run_with_delay(timeout=5):
                 timer.cancel()
 
             def run():
-                GLib.idle_add(func, *args, **kwargs, priority=GLib.PRIORITY_LOW)
+                GLib.idle_add(func, priority=GLib.PRIORITY_LOW, *args, **kwargs)
 
             timer = Timer(interval=timeout, function=run)
             timer.start()

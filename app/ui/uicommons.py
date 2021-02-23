@@ -1,7 +1,7 @@
 import os
 from enum import Enum, IntEnum
 from functools import lru_cache
-from app.settings import Settings, SettingsException, IS_DARWIN
+from app.settings import Settings, SettingsException, IS_DARWIN, IS_WIN
 
 import gi
 
@@ -32,14 +32,8 @@ else:
     if settings.is_themes_support:
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
-    else:
-        style_provider = Gtk.CssProvider()
-        s_path = "{}default_style.css".format(GTK_PATH + "/" + UI_RESOURCES_PATH if GTK_PATH else UI_RESOURCES_PATH)
-        style_provider.load_from_path(s_path)
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
-                                                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-if IS_DARWIN:
+if IS_DARWIN or IS_WIN:
     import gettext
 
     if GTK_PATH:
@@ -53,6 +47,8 @@ else:
 
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
     # Init notify
+
+if IS_WIN or not IS_DARWIN:
     try:
         gi.require_version("Notify", "0.7")
         from gi.repository import Notify
