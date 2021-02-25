@@ -5,14 +5,14 @@ import os
 import sys
 from enum import Enum, IntEnum
 from functools import lru_cache
-from pathlib import Path
 from pprint import pformat
 from textwrap import dedent
 
+SEP = os.sep
 HOME_PATH = os.path.expanduser("~")
-CONFIG_PATH = HOME_PATH + "/.config/demon-editor/"
+CONFIG_PATH = HOME_PATH + "{}.config{}demon-editor{}".format(SEP, SEP, SEP)
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = HOME_PATH + "/DemonEditor/data/"
+DATA_PATH = HOME_PATH + "{}DemonEditor{}data{}".format(SEP, SEP, SEP)
 
 IS_DARWIN = sys.platform == "darwin"
 IS_WIN = sys.platform == "win32"
@@ -34,9 +34,9 @@ class Defaults(Enum):
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = DATA_PATH + "records/"
+    RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
-    ACTIVE_TRANSCODING_PRESET = "720p TV/device"
+    ACTIVE_TRANSCODING_PRESET = "720p TV{}device".format(SEP)
 
 
 def get_settings():
@@ -82,13 +82,13 @@ def write_settings(config):
 
 
 def set_local_paths(settings, profile_name, data_path=DATA_PATH, use_profile_folder=False):
-    settings["data_local_path"] = "{}{}/".format(data_path, profile_name)
+    settings["data_local_path"] = "{}{}{}".format(data_path, profile_name, SEP)
     if use_profile_folder:
-        settings["picons_local_path"] = "{}{}/{}/".format(data_path, profile_name, "picons")
-        settings["backup_local_path"] = "{}{}/{}/".format(data_path, profile_name, "backup")
+        settings["picons_local_path"] = "{}{}{}{}{}".format(data_path, profile_name, SEP, "picons", SEP)
+        settings["backup_local_path"] = "{}{}{}{}{}".format(data_path, profile_name, SEP, "backup", SEP)
     else:
-        settings["picons_local_path"] = "{}{}/{}/".format(data_path, "picons", profile_name)
-        settings["backup_local_path"] = "{}{}/{}/".format(data_path, "backup", profile_name)
+        settings["picons_local_path"] = "{}{}{}{}{}".format(data_path, "picons", SEP, profile_name, SEP)
+        settings["backup_local_path"] = "{}{}{}{}{}".format(data_path, "backup", SEP, profile_name, SEP)
 
 
 class SettingsType(IntEnum):
@@ -98,29 +98,29 @@ class SettingsType(IntEnum):
 
     def get_default_settings(self):
         """ Returns default settings for current type """
-        print(self.value)
-        if self.value == 0:
+        if self is SettingsType.ENIGMA_2:
             return {"setting_type": self.value,
                     "host": "127.0.0.1", "port": "21", "timeout": 5,
                     "user": "root", "password": "root",
                     "http_port": "80", "http_timeout": 5, "http_use_ssl": False,
                     "telnet_port": "23", "telnet_timeout": 5,
                     "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
-                    "satellites_xml_path": "/etc/tuxbox/", "data_local_path": DATA_PATH + "enigma2/",
+                    "satellites_xml_path": "/etc/tuxbox/", "data_local_path": "{}enigma2{}".format(DATA_PATH, SEP),
                     "picons_path": "/usr/share/enigma2/picon/",
-                    "picons_local_path": DATA_PATH + "enigma2/picons/",
-                    "backup_local_path": DATA_PATH + "enigma2/backup/"}
-        elif self.value == 1:
+                    "picons_local_path": "{}enigma2{}picons{}".format(DATA_PATH, SEP, SEP),
+                    "backup_local_path":  "{}enigma2{}backup{}".format(DATA_PATH, SEP, SEP)}
+        elif self is SettingsType.NEUTRINO_MP:
             return {"setting_type": self,
                     "host": "127.0.0.1", "port": "21", "timeout": 5,
                     "user": "root", "password": "root",
                     "http_port": "80", "http_timeout": 2, "http_use_ssl": False,
                     "telnet_port": "23", "telnet_timeout": 1,
                     "services_path": "/var/tuxbox/config/zapit/", "user_bouquet_path": "/var/tuxbox/config/zapit/",
-                    "satellites_xml_path": "/var/tuxbox/config/", "data_local_path": DATA_PATH + "neutrino/",
+                    "satellites_xml_path": "/var/tuxbox/config/",
+                    "data_local_path": "{}neutrino{}".format(DATA_PATH, SEP),
                     "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/",
-                    "picons_local_path": DATA_PATH + "neutrino/picons/",
-                    "backup_local_path": DATA_PATH + "neutrino/backup/"}
+                    "picons_local_path": "{}neutrino{}picons{}".format(DATA_PATH, SEP, SEP),
+                    "backup_local_path": "{}neutrino{}backup{}".format(DATA_PATH, SEP, SEP)}
 
 
 class SettingsException(Exception):
@@ -182,7 +182,7 @@ class Settings:
             self._cp_settings[k] = v
 
         def_path = self.default_data_path
-        def_path += "enigma2/" if self.setting_type is SettingsType.ENIGMA_2 else "neutrino/"
+        def_path += "enigma2{}".format(SEP) if self.setting_type is SettingsType.ENIGMA_2 else "neutrino{}".format(SEP)
         set_local_paths(self._cp_settings, self._current_profile, def_path, self.profile_folder_is_default)
 
         if force_write:

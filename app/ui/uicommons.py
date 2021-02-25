@@ -1,7 +1,7 @@
 import os
 from enum import Enum, IntEnum
 from functools import lru_cache
-from app.settings import Settings, SettingsException, IS_DARWIN, IS_WIN
+from app.settings import Settings, SettingsException, IS_WIN
 
 import gi
 
@@ -10,7 +10,7 @@ gi.require_version("Gdk", "3.0")
 from gi.repository import Gtk, Gdk, GLib
 
 # Setting mod mask for keyboard depending on platform
-MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
+MOD_MASK = Gdk.ModifierType.CONTROL_MASK
 # Path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
 LANG_PATH = UI_RESOURCES_PATH + "lang"
@@ -27,35 +27,30 @@ except SettingsException:
 else:
     os.environ["LANGUAGE"] = settings.language
     st = Gtk.Settings().get_default()
+    st.set_property("gtk-theme-name", "MS-Windows")
     st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
 
     if settings.is_themes_support:
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
 
-if IS_DARWIN or IS_WIN:
+if IS_WIN:
     import gettext
 
-    if GTK_PATH:
-        LANG_PATH = GTK_PATH + "/share/locale"
     gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
-    # For launching from the bundle.
-    if os.getcwd() == "/" and GTK_PATH:
-        os.chdir(GTK_PATH)
 else:
     import locale
 
     locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
-    # Init notify
 
-if IS_WIN or not IS_DARWIN:
-    try:
-        gi.require_version("Notify", "0.7")
-        from gi.repository import Notify
-    except ImportError:
-        pass
-    else:
-        NOTIFY_IS_INIT = Notify.init("DemonEditor")
+# Init notify
+try:
+    gi.require_version("Notify", "0.7")
+    from gi.repository import Notify
+except ImportError:
+    pass
+else:
+    NOTIFY_IS_INIT = Notify.init("DemonEditor")
 
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(GTK_PATH + "/share/icons" if GTK_PATH else UI_RESOURCES_PATH + "icons")
@@ -107,10 +102,7 @@ def show_notification(message, timeout=10000, urgency=1):
         @param timeout: milliseconds
         @param urgency: 0 - low, 1 - normal, 2 - critical
     """
-    if IS_DARWIN:
-        # Since NSUserNotification has been deprecated, osascript will be used.
-        os.system("""osascript -e 'display notification "{}" with title "DemonEditor"'""".format(message))
-    elif NOTIFY_IS_INIT:
+    if NOTIFY_IS_INIT:
         notify = Notify.Notification.new("DemonEditor", message, "demon-editor")
         notify.set_urgency(urgency)
         notify.set_timeout(timeout)
@@ -119,35 +111,33 @@ def show_notification(message, timeout=10000, urgency=1):
 
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys. """
-    F = 3 if IS_DARWIN else 41
-    E = 14 if IS_DARWIN else 26
-    R = 15 if IS_DARWIN else 27
-    T = 17 if IS_DARWIN else 28
-    P = 35 if IS_DARWIN else 33
-    S = 1 if IS_DARWIN else 39
-    H = 4 if IS_DARWIN else 43
-    L = 37 if IS_DARWIN else 46
-    X = 7 if IS_DARWIN else 53
-    C = 8 if IS_DARWIN else 54
-    V = 9 if IS_DARWIN else 55
-    W = 13 if IS_DARWIN else 25
-    Z = 6 if IS_DARWIN else 52
-    INSERT = -1 if IS_DARWIN else 118
-    HOME = -1 if IS_DARWIN else 110
-    END = -1 if IS_DARWIN else 115
-    UP = 126 if IS_DARWIN else 111
-    DOWN = 125 if IS_DARWIN else 116
-    PAGE_UP = -1 if IS_DARWIN else 112
-    PAGE_DOWN = -1 if IS_DARWIN else 117
-    LEFT = 123 if IS_DARWIN else 113
-    RIGHT = 123 if IS_DARWIN else 114
-    F2 = 120 if IS_DARWIN else 68
-    F7 = 98 if IS_DARWIN else 73
-    SPACE = 49 if IS_DARWIN else 65
-    DELETE = 51 if IS_DARWIN else 119
-    BACK_SPACE = 76 if IS_DARWIN else 22
-    CTRL_L = 55 if IS_DARWIN else 37
-    CTRL_R = 55 if IS_DARWIN else 105
+    E = 26
+    R = 27
+    T = 28
+    P = 33
+    S = 39
+    F = 41
+    X = 53
+    C = 54
+    V = 55
+    W = 25
+    Z = 52
+    INSERT = 118
+    HOME = 110
+    END = 115
+    UP = 111
+    DOWN = 116
+    PAGE_UP = 112
+    PAGE_DOWN = 117
+    LEFT = 113
+    RIGHT = 114
+    F2 = 68
+    F7 = 73
+    SPACE = 65
+    DELETE = 119
+    BACK_SPACE = 22
+    CTRL_L = 37
+    CTRL_R = 105
     # Laptop codes
     HOME_KP = 79
     END_KP = 87

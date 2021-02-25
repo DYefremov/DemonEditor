@@ -372,7 +372,6 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Options</property>
-                        <property name="valign">center</property>
                         <signal name="clicked" handler="on_settings" swapped="no"/>
                       </object>
                       <packing>

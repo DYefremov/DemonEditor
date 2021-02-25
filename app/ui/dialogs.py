@@ -5,6 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.commons import run_idle
+from app.settings import SEP
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
 
 
@@ -17,7 +18,7 @@ class Dialog(Enum):
         <property name="use-header-bar">{use_header}</property>
         <property name="can_focus">False</property>
         <property name="modal">True</property>
-        <property name="default_width">320</property>
+        <property name="width_request">250</property>
         <property name="destroy_with_parent">True</property>
         <property name="type_hint">dialog</property>
         <property name="skip_taskbar_hint">True</property>
@@ -104,10 +105,12 @@ def get_chooser_dialog(transient, settings, name, patterns, title=None):
 
 
 def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None, dirs=False):
+    text = get_message(text) if text else ""
     action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
-    dialog = Gtk.FileChooserNative.new(get_message(title) if title else "", transient, action_type)
+    buttons = buttons or (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+    dialog = Gtk.FileChooserDialog(text, transient, action_type, buttons, use_header_bar=IS_GNOME_SESSION)
+    dialog.set_title(get_message(title) if title else "")
     dialog.set_create_folders(dirs)
-    dialog.set_modal(True)
 
     if file_filter is not None:
         dialog.add_filter(file_filter)
@@ -115,10 +118,10 @@ def get_file_chooser_dialog(transient, text, settings, action_type, file_filter,
     dialog.set_current_folder(settings.data_local_path)
     response = dialog.run()
 
-    if response == Gtk.ResponseType.ACCEPT:
+    if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
         path = Path(dialog.get_filename() or dialog.get_current_folder())
         if path.is_dir():
-            response = "{}/".format(path.resolve())
+            response = "{}{}".format(path.resolve(), SEP)
         elif path.is_file():
             response = str(path.resolve())
     dialog.destroy()

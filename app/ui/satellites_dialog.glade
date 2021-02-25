@@ -296,7 +296,7 @@ Author: Dmitriy Yefremov
         <property name="image">popup_menu_add_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_satellite_add" swapped="no"/>
-        <accelerator key="s" signal="activate" modifiers="Primary"/>
+        <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -307,7 +307,7 @@ Author: Dmitriy Yefremov
         <property name="image">popup_menu_add_image_2</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_transponder_add" swapped="no"/>
-        <accelerator key="t" signal="activate" modifiers="Primary"/>
+        <accelerator key="t" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -324,7 +324,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="satellites_editor_tree_view" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -887,7 +887,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkEntry" id="sat_name_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="primary_icon_name">document-edit-symbolic</property>
+
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_activatable">False</property>
                     <property name="secondary_icon_sensitive">False</property>
@@ -1130,7 +1130,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="secondary_icon_sensitive">False</property>
@@ -1149,7 +1149,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <property name="placeholder_text" translatable="yes">27500000</property>
                         <property name="input_purpose">digits</property>
                         <signal name="changed" handler="on_entry_changed" swapped="no"/>
@@ -1305,7 +1305,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
                             <property name="max_width_chars">12</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <property name="primary_icon_activatable">False</property>
                             <property name="placeholder_text" translatable="yes">0 - 262142</property>
                             <property name="input_purpose">digits</property>
@@ -1322,7 +1322,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
                             <property name="max_width_chars">12</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <property name="primary_icon_activatable">False</property>
                             <property name="placeholder_text" translatable="yes">0 - 255</property>
                             <property name="input_purpose">digits</property>
@@ -1528,7 +1528,7 @@ Author: Dmitriy Yefremov
                     <property name="image">sat_update_filter_image</property>
                     <property name="always_show_image">True</property>
                     <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
-                    <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | Primary"/>
+                    <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1546,7 +1546,7 @@ Author: Dmitriy Yefremov
                     <property name="image">sat_update_search_image</property>
                     <property name="always_show_image">True</property>
                     <signal name="toggled" handler="on_find_toggled" swapped="no"/>
-                    <accelerator key="f" signal="clicked" modifiers="Primary"/>
+                    <accelerator key="f" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

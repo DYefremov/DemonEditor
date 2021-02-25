@@ -274,7 +274,7 @@ class LameDbWriter:
     def write(self):
         if self._fmt == 4:
             # Writing lamedb file ver.4
-            with open(self._path + _FILE_NAME, "w") as file:
+            with open(self._path + _FILE_NAME, "w", encoding="utf-8") as file:
                 file.writelines(LameDbReader.get_services_lines(self._services))
         elif self._fmt == 5:
             self.write_to_lamedb5()

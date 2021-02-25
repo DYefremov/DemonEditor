@@ -40,16 +40,16 @@ Author: Dmitriy Yefremov
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">1.0.5 Beta</property>
+    <property name="version">1.0.5 Alpha</property>
     <property name="copyright">2018-2021 Dmitriy Yefremov
-</property>
-    <property name="comments" translatable="yes">Enigma2 channel and satellite list editor for MacOS.
-    (Experimental)</property>
-    <property name="website">https://github.com/DYefremov/DemonEditor/tree/experimental-mac</property>
+    </property>
+    <property name="comments" translatable="yes">Enigma2 channel and satellite list editor for MS Windows.
+      (Experimental)</property>
+    <property name="website">https://github.com/DYefremov/DemonEditor/tree/experimental-win</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
-Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
+      Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
     <property name="authors">Dmitriy Yefremov
-</property>
+    </property>
     <property name="translator_credits" translatable="yes">translator-credits</property>
     <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt;mfgeg&lt;/a&gt;</property>
     <property name="logo_icon_name">demon-editor</property>
@@ -126,6 +126,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkButton" id="input_dialog_ok_button">
                 <property name="label" translatable="yes">OK</property>
+                <property name="width_request">100</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -153,7 +154,7 @@ Author: Dmitriy Yefremov
             <property name="margin_right">2</property>
             <property name="margin_top">2</property>
             <property name="margin_bottom">2</property>
-            <property name="primary_icon_name">document-edit-symbolic</property>
+
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="secondary_icon_sensitive">False</property>
@@ -182,9 +183,6 @@ Author: Dmitriy Yefremov
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
     <property name="gravity">center</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child>
       <object class="GtkBox" id="wait_dialog_box">
         <property name="width_request">100</property>
@@ -222,7 +220,7 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
       </object>
-    </child>
+    </child>                          <!-- NOP -->
     <style>
       <class name="app-notification"/>
     </style>

@@ -380,7 +380,6 @@ Author: Dmitriy Yefremov
                       <object class="GtkEntry" id="name_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -402,7 +401,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkEntry" id="package_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -426,7 +425,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">10</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -471,7 +470,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">7</property>
                             <property name="max_width_chars">7</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                             <signal name="changed" handler="update_reference" swapped="no"/>
                           </object>
@@ -909,7 +908,7 @@ Author: Dmitriy Yefremov
                             <property name="tooltip_text">C:0000,C:a1b2,etc.</property>
                             <property name="width_chars">15</property>
                             <property name="max_width_chars">26</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <property name="placeholder_text" translatable="yes">C:0000,C:a1b2,etc.</property>
                             <signal name="changed" handler="on_cas_entry_changed" swapped="no"/>
                           </object>
@@ -1012,7 +1011,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">12</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1038,7 +1037,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">12</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1117,7 +1116,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">12</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -1155,7 +1154,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">8</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -1182,7 +1181,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="width_chars">8</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -1391,7 +1390,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">8</property>
                             <property name="max_width_chars">10</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -1417,7 +1416,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">8</property>
                             <property name="max_width_chars">10</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -1443,7 +1442,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">8</property>
                             <property name="max_width_chars">10</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                             <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                           </object>
                           <packing>

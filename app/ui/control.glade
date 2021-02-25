@@ -1176,7 +1176,7 @@ audio-volume-medium-symbolic</property>
                       <object class="GtkEntry" id="timer_service_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1187,7 +1187,7 @@ audio-volume-medium-symbolic</property>
                       <object class="GtkEntry" id="timer_desc_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1198,7 +1198,7 @@ audio-volume-medium-symbolic</property>
                       <object class="GtkEntry" id="timer_name_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1485,7 +1485,7 @@ audio-volume-medium-symbolic</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                           </object>
                         </child>
                         <style>
@@ -1556,7 +1556,7 @@ audio-volume-medium-symbolic</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
+
                           </object>
                         </child>
                         <style>
@@ -1638,7 +1638,7 @@ audio-volume-medium-symbolic</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                         <property name="placeholder_text" translatable="yes">Default</property>
                       </object>
                       <packing>

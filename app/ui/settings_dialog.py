@@ -3,7 +3,7 @@ import re
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings, PlayStreamsMode
+from app.settings import SettingsType, Settings, PlayStreamsMode, IS_WIN
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
@@ -175,7 +175,7 @@ class SettingsDialog:
         self.init_ui_elements(self._s_type)
         self.init_profiles()
 
-        if self._settings.is_darwin:
+        if IS_WIN:
             # Appearance
             self._appearance_box = builder.get_object("appearance_box")
             self._appearance_box.set_visible(True)
@@ -338,7 +338,7 @@ class SettingsDialog:
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
 
-        if self._ext_settings.is_darwin:
+        if IS_WIN:
             self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
             self._ext_settings.alternate_layout = self._layout_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()

@@ -5,7 +5,7 @@ import gi
 from gi.repository import GLib
 
 from app.commons import log
-from app.settings import IS_DARWIN
+from app.settings import IS_WIN
 from app.connections import HttpAPI
 from app.tools.yt import YouTube
 from app.ui.iptv import get_yt_icon
@@ -48,7 +48,7 @@ class LinksTransmitter:
         self._status_passive = None
         self._yt = YouTube.get_instance(settings)
 
-        if IS_DARWIN:
+        if IS_WIN:
             self._tray = builder.get_object("status_icon")
         else:
             try:

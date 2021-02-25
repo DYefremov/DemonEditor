@@ -57,7 +57,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_restore_bouquets" swapped="no"/>
-        <accelerator key="r" signal="activate" modifiers="Primary"/>
+        <accelerator key="r" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -67,7 +67,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_restore_all" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -297,7 +297,7 @@ Author: Dmitriy Yefremov
                 <property name="always_show_image">True</property>
                 <property name="draw_indicator">False</property>
                 <signal name="toggled" handler="on_info_button_toggled" swapped="no"/>
-                <accelerator key="i" signal="clicked" modifiers="Primary"/>
+                <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>

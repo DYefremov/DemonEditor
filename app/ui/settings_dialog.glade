@@ -77,7 +77,7 @@ Author: Dmitriy Yefremov
                 <property name="tooltip_text" translatable="yes">Apply profile settings</property>
                 <property name="valign">center</property>
                 <signal name="clicked" handler="on_apply_profile_settings" swapped="no"/>
-                <accelerator key="s" signal="clicked" modifiers="Primary"/>
+                <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -367,7 +367,7 @@ Author: Dmitriy Yefremov
                                         <property name="icon_name">emblem-default</property>
                                       </object>
                                     </child>
-                                    <accelerator key="d" signal="clicked" modifiers="Primary"/>
+                                    <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -768,7 +768,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkSpinner" id="test_spinner">
-                                        <property name="visible">True</property>
+                                        <property name="visible">False</property>
                                         <property name="can_focus">False</property>
                                       </object>
                                       <packing>
@@ -948,7 +948,6 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="text">/etc/enigma2/</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -970,7 +969,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkEntry" id="user_bouquet_field">
                                 <property name="can_focus">True</property>
                                 <property name="text">/etc/enigma2/</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -994,7 +993,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="text">/etc/tuxbox/</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -1018,7 +1017,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="text">/usr/share/enigma2/picon</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -1073,7 +1072,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkEntry" id="picons_dir_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                                 <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1102,7 +1101,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkEntry" id="data_dir_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                                 <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1130,7 +1129,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkEntry" id="backup_dir_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                                 <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1266,7 +1265,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkEntry" id="default_data_dir_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                                 <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1328,7 +1327,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkEntry" id="record_data_dir_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
+
                                 <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
@@ -1549,7 +1548,7 @@ Author: Dmitriy Yefremov
                                       <object class="GtkEntry" id="video_bitrate_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                                         <property name="input_purpose">number</property>
                                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                       </object>
@@ -1575,7 +1574,7 @@ Author: Dmitriy Yefremov
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">
 </property>
-                                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                                         <property name="input_purpose">number</property>
                                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                       </object>
@@ -1625,7 +1624,7 @@ Author: Dmitriy Yefremov
                                       <object class="GtkEntry" id="video_height_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                                         <property name="input_purpose">number</property>
                                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                       </object>
@@ -1685,7 +1684,7 @@ Author: Dmitriy Yefremov
                                       <object class="GtkEntry" id="audio_bitrate_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="primary_icon_name">document-edit-symbolic</property>
+
                                         <property name="input_purpose">number</property>
                                         <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                       </object>
@@ -2401,7 +2400,6 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkBox" id="layout_box">
-                                <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes">Enables an alternate layout of the main window elements.</property>
                                 <child>

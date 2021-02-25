@@ -294,7 +294,6 @@ class Application(Gtk.Application):
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_positions_model = builder.get_object("filter_sat_positions_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
-        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Player
         self._player_box = builder.get_object("player_box")
         self._player_scale = builder.get_object("player_scale")
@@ -320,7 +319,6 @@ class Application(Gtk.Application):
         self._player_frame = builder.get_object("player_frame")
         # Search
         self._search_bar = builder.get_object("search_bar")
-        self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
         self._search_entry = builder.get_object("search_entry")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
@@ -334,59 +332,6 @@ class Application(Gtk.Application):
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        # Layout
-        if self._settings.is_darwin and self._settings.alternate_layout:
-            self._main_paned = builder.get_object("main_data_paned")
-            self._fav_paned = builder.get_object("fav_bouquets_paned")
-            self._fav_box = self._fav_paned.get_child1()
-            self._bouquets_box = self._fav_paned.get_child2()
-            self._left_ar_bq_button = builder.get_object("left_arrow_bq_button")
-            self._left_ar_bq_button.bind_property("visible", builder.get_object("right_arrow_bq_button"), "visible", 4)
-            self._left_ar_bq_button.set_visible(True)
-            self.init_layout(builder)
-
-    def init_layout(self, builder):
-        """ Initializes an alternate layout, if enabled. """
-        top_box = builder.get_object("top_box")
-        top_toolbar = builder.get_object("top_toolbar")
-        top_toolbar.set_margin_left(0)
-        top_toolbar.set_margin_right(10)
-
-        extra_box = builder.get_object("toolbar_extra_tools_box")
-        extra_box.set_margin_left(10)
-        extra_box.set_margin_right(0)
-        extra_box.reorder_child(self._ftp_button, 0)
-        extra_box.reorder_child(builder.get_object("add_bouquet_tool_button"), 2)
-
-        top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
-        top_box.set_child_packing(top_toolbar, False, True, 0, Gtk.PackType.END)
-        top_box.reorder_child(extra_box, 0)
-        top_box.reorder_child(top_toolbar, 1)
-
-        center_box = builder.get_object("center_box")
-        center_box.reorder_child(self._ftp_revealer, 0)
-        center_box.reorder_child(self._control_revealer, 1)
-        center_box.reorder_child(builder.get_object("main_box"), 2)
-
-        services_box = self._main_paned.get_child1()
-        self._main_paned.remove(services_box)
-        self._main_paned.remove(self._fav_paned)
-        self._main_paned.pack1(self._fav_paned, True, True)
-        self._main_paned.pack2(services_box, True, True)
-
-        self._left_ar_bq_button.set_visible(not self._settings.bq_details_first)
-        self.init_bq_position()
-
-    def init_bq_position(self):
-        self._fav_paned.remove(self._fav_box)
-        self._fav_paned.remove(self._bouquets_box)
-
-        if self._settings.bq_details_first:
-            self._fav_paned.pack1(self._fav_box, False, False)
-            self._fav_paned.pack2(self._bouquets_box, False, False)
-        else:
-            self._fav_paned.pack1(self._bouquets_box, False, False)
-            self._fav_paned.pack2(self._fav_box, False, False)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
@@ -1413,7 +1358,7 @@ class Application(Gtk.Application):
                 self.delete_selection(self._services_view, self._fav_view)
                 self.on_view_focus(self._bouquets_view)
 
-            menu.popup_at_pointer(None)
+            menu.popup(None, None, None, None, event.button, event.time)
             return True
 
     def on_satellite_editor_show(self, action, value=None):
@@ -2049,7 +1994,6 @@ class Application(Gtk.Application):
             self._profile_combo_box.append(p, p)
 
     def on_tree_view_key_press(self, view, event):
-        """  Handling  keystrokes on press """
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
@@ -2084,7 +2028,6 @@ class Application(Gtk.Application):
             self.on_delete(view)
 
     def on_tree_view_key_release(self, view, event):
-        """  Handling  keystrokes on release """
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
@@ -2953,7 +2896,7 @@ class Application(Gtk.Application):
         else:
             self.filter_set_default()
 
-        self._filter_bar.set_search_mode(value)
+        self._filter_bar.set_visible(value)
 
     def filter_set_default(self):
         """ Setting defaults for filter elements. """
@@ -3045,7 +2988,7 @@ class Application(Gtk.Application):
             return True
 
         action.set_state(value)
-        self._search_bar.set_search_mode(value)
+        self._search_bar.set_visible(value)
         if value:
             self._search_entry.grab_focus()
         else:
