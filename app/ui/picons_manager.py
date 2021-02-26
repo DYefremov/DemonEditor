@@ -508,8 +508,8 @@ class PiconsDialog:
     @run_idle
     def append_providers(self, providers, model):
         for p in providers:
-            print(p)
-            # model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
+            prv = p._replace(logo=self.get_pixbuf(p[0]) if p[0] else TV_ICON)
+            model.append(prv)
         self.update_receive_button_state()
 
     def get_pixbuf(self, img_data):
