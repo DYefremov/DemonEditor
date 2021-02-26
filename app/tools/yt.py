@@ -11,6 +11,7 @@ from urllib.parse import unquote
 from urllib.request import Request, urlopen, urlretrieve
 
 from app.commons import log
+from app.settings import SEP
 from app.ui.uicommons import show_notification
 
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
@@ -169,7 +170,7 @@ class PlayListParser(HTMLParser):
 
                 try:
                     resp = json.loads(data)
-                except JSONDecodeError as e:
+                except YouTubeException as e:
                     log("{}: Parsing data error: {}".format(__class__.__name__, e))
                 else:
                     sb = resp.get("sidebar", None)
@@ -229,7 +230,7 @@ class YouTubeDL:
                 "cookiefile": "cookies.txt"}  # File name where cookies should be read from and dumped to.
 
     def __init__(self, settings, callback):
-        self._path = settings.default_data_path + "tools/"
+        self._path = settings.default_data_path + "tools{}".format(SEP)
         self._update = settings.enable_yt_dl_update
         self._supported = {"22", "18"}
         self._dl = None
@@ -246,7 +247,7 @@ class YouTubeDL:
         return cls._DL_INSTANCE
 
     def init(self):
-        if not os.path.isfile(self._path + "youtube_dl/version.py"):
+        if not os.path.isfile(self._path + "youtube_dl{}version.py".format(SEP)):
             self.get_latest_release()
 
         if self._path not in sys.path:
@@ -313,7 +314,7 @@ class YouTubeDL:
                             os.makedirs(os.path.dirname(self._path), exist_ok=True)
 
                         for info in arch.infolist():
-                            pref, sep, f = info.filename.partition("/youtube_dl/")
+                            pref, sep, f = info.filename.partition("{}youtube_dl{}".format(SEP, SEP))
                             if sep:
                                 arch.extract(info.filename)
                                 shutil.move(info.filename, "{}{}{}".format(self._path, sep, f))

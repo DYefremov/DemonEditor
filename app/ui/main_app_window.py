@@ -17,7 +17,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException, IS_WIN
 from app.tools.media import Player, Recorder
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -304,12 +304,11 @@ class Application(Gtk.Application):
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
-        self._player_box.bind_property("visible", tool_bar, "visible", 4)
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
-        self._player_box.bind_property("visible", self._profile_combo_box, "sensitive", 4)
+        self._player_box.bind_property("visible", tool_bar, "sensitive", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         # Record
@@ -333,21 +332,23 @@ class Application(Gtk.Application):
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
+        # Menu bar
+        main_box = builder.get_object("main_window_box")
+        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
+        menu_bar = Gtk.MenuBar.new_from_model(builder.get_object("menu_bar"))
+        menu_bar.set_visible(True)
+        main_box.pack_start(menu_bar, False, False, 0)
+        main_box.reorder_child(menu_bar, 0)
+        self._main_data_box.bind_property("visible", menu_bar, "visible")
+        self._player_box.bind_property("visible", menu_bar, "sensitive", 4)
+        if self._settings.get("telnet"):
+            self.init_telnet(builder)
+
     def do_startup(self):
         Gtk.Application.do_startup(self)
 
         self.init_keys()
         self.set_accels()
-
-        builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
-        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
-        self.set_menubar(builder.get_object("menu_bar"))
-        self.set_app_menu(builder.get_object("app-menu"))
-
-        if self._settings.get("telnet"):
-            self.init_telnet(builder)
-
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_colors()
@@ -2445,7 +2446,7 @@ class Application(Gtk.Application):
 
     def on_player_stop(self, item=None):
         if self._player:
-            self._player.stop()
+            GLib.idle_add(self._player.stop)
 
     def on_player_previous(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
@@ -2498,12 +2499,12 @@ class Application(Gtk.Application):
         if not self._full_screen and self._player_rewind_box.get_visible():
             GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
 
-    def on_player_error(self):
+    def on_player_error(self, bus=None, msg=None):
         self.set_playback_elms_active()
         self.show_error_dialog("Can't Playback!")
 
     @run_idle
-    def set_playback_elms_active(self):
+    def set_playback_elms_active(self, bus=None, msg=None):
         self._fav_view.set_sensitive(True)
         self._fav_view.do_grab_focus(self._fav_view)
 
@@ -2525,8 +2526,8 @@ class Application(Gtk.Application):
                 self.show_error_dialog("No VLC is found. Check that it is installed!")
                 return True
             else:
-                if self._settings.is_darwin:
-                    self._player.set_nso(widget)
+                if IS_WIN:
+                    self._player.set_handle(widget)
                 else:
                     self._player.set_xwindow(widget.get_window().get_xid())
                 self._player.play(self._current_mrl)
@@ -2541,20 +2542,15 @@ class Application(Gtk.Application):
         widget.set_size_request(w * 0.6, -1)
 
     def on_player_drawing_area_draw(self, widget, cr):
-        """ Used for black background drawing in the player drawing area.
+        """ Used for black background drawing in the player drawing area. """
+        if not self._player.is_playing:
+            allocation = widget.get_allocation()
 
-            Required for Gtk >= 3.20.
-            More info: https://developer.gnome.org/gtk3/stable/ch32s10.html,
-            https://developer.gnome.org/gtk3/stable/GtkStyleContext.html#gtk-render-background
-        """
-        context = widget.get_style_context()
-        width = widget.get_allocated_width()
-        height = widget.get_allocated_height()
-        Gtk.render_background(context, cr, 0, 0, width, height)
-        r, g, b, a = 0, 0, 0, 1  # black color
-        cr.set_source_rgba(r, g, b, a)
-        cr.rectangle(0, 0, width, height)
-        cr.fill()
+            cr.set_source_rgb(0, 0, 0)
+            cr.rectangle(0, 0, allocation.width, allocation.height)
+            cr.fill()
+
+        return False
 
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
