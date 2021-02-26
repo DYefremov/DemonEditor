@@ -1,7 +1,8 @@
 import os
 from enum import Enum, IntEnum
 from functools import lru_cache
-from app.settings import Settings, SettingsException, IS_WIN
+
+from app.settings import Settings, SettingsException, IS_WIN, SEP
 
 import gi
 
@@ -12,7 +13,8 @@ from gi.repository import Gtk, Gdk, GLib
 # Setting mod mask for keyboard depending on platform
 MOD_MASK = Gdk.ModifierType.CONTROL_MASK
 # Path to *.glade files
-UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
+UI_PATH = "app{}ui{}".format(SEP, SEP)
+UI_RESOURCES_PATH = UI_PATH if os.path.exists(UI_PATH) else "ui{}".format(SEP)
 LANG_PATH = UI_RESOURCES_PATH + "lang"
 GTK_PATH = os.environ.get("GTK_PATH", None)
 NOTIFY_IS_INIT = False
@@ -25,7 +27,6 @@ try:
 except SettingsException:
     pass
 else:
-    os.environ["LANGUAGE"] = settings.language
     st = Gtk.Settings().get_default()
     st.set_property("gtk-theme-name", "MS-Windows")
     st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
@@ -34,26 +35,8 @@ else:
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
 
-if IS_WIN:
-    import gettext
-
-    gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
-else:
-    import locale
-
-    locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
-
-# Init notify
-try:
-    gi.require_version("Notify", "0.7")
-    from gi.repository import Notify
-except ImportError:
-    pass
-else:
-    NOTIFY_IS_INIT = Notify.init("DemonEditor")
-
 theme = Gtk.IconTheme.get_default()
-theme.append_search_path(GTK_PATH + "/share/icons" if GTK_PATH else UI_RESOURCES_PATH + "icons")
+theme.append_search_path(GTK_PATH + "{}share{}icons".format(SEP, SEP) if GTK_PATH else UI_RESOURCES_PATH + "icons")
 
 
 def get_theme_icon(icon_theme, name, size):
@@ -84,9 +67,11 @@ def get_yt_icon(icon_name, size=24):
         return default_theme.load_icon(icon_name, size, 0)
 
     n_theme = Gtk.IconTheme.new()
+    p_path = "{}usr{}share{}icons{}*".format(SEP, SEP, SEP, SEP)
+
     import glob
 
-    for theme_name in map(os.path.basename, filter(os.path.isdir, glob.glob("/usr/share/icons/*"))):
+    for theme_name in map(os.path.basename, filter(os.path.isdir, glob.glob(p_path))):
         theme.set_custom_theme(theme_name)
         if n_theme.has_icon(icon_name):
             return n_theme.load_icon(icon_name, size, 0)
@@ -102,42 +87,38 @@ def show_notification(message, timeout=10000, urgency=1):
         @param timeout: milliseconds
         @param urgency: 0 - low, 1 - normal, 2 - critical
     """
-    if NOTIFY_IS_INIT:
-        notify = Notify.Notification.new("DemonEditor", message, "demon-editor")
-        notify.set_urgency(urgency)
-        notify.set_timeout(timeout)
-        notify.show()
+    pass
 
 
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys. """
-    E = 26
-    R = 27
-    T = 28
-    P = 33
-    S = 39
-    F = 41
-    X = 53
-    C = 54
-    V = 55
-    W = 25
-    Z = 52
-    INSERT = 118
-    HOME = 110
-    END = 115
-    UP = 111
-    DOWN = 116
-    PAGE_UP = 112
-    PAGE_DOWN = 117
-    LEFT = 113
-    RIGHT = 114
-    F2 = 68
-    F7 = 73
-    SPACE = 65
-    DELETE = 119
-    BACK_SPACE = 22
-    CTRL_L = 37
-    CTRL_R = 105
+    E = 69 if IS_WIN else 26
+    R = 82 if IS_WIN else 27
+    T = 84 if IS_WIN else 28
+    P = 80 if IS_WIN else 33
+    S = 83 if IS_WIN else 39
+    F = 70 if IS_WIN else 41
+    X = 88 if IS_WIN else 53
+    C = 67 if IS_WIN else 54
+    V = 86 if IS_WIN else 55
+    W = 87 if IS_WIN else 25
+    Z = 90 if IS_WIN else 52
+    INSERT = 45 if IS_WIN else 118
+    HOME = 36 if IS_WIN else 110
+    END = 35 if IS_WIN else 115
+    UP = 38 if IS_WIN else 111
+    DOWN = 40 if IS_WIN else 116
+    PAGE_UP = 33 if IS_WIN else 112
+    PAGE_DOWN = 34 if IS_WIN else 117
+    LEFT = 37 if IS_WIN else 113
+    RIGHT = 39 if IS_WIN else 114
+    F2 = 113 if IS_WIN else 68
+    F7 = 118 if IS_WIN else 73
+    SPACE = 32 if IS_WIN else 65
+    DELETE = 46 if IS_WIN else 119
+    BACK_SPACE = 8 if IS_WIN else 22
+    CTRL_L = 17 if IS_WIN else 37
+    CTRL_R = 163 if IS_WIN else 105
     # Laptop codes
     HOME_KP = 79
     END_KP = 87
