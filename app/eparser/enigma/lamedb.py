@@ -299,7 +299,7 @@ class LameDbWriter:
         lines.extend(services_lines)
         lines.append(_END_LINE)
 
-        with open(self._path + "lamedb5", "w") as file:
+        with open(self._path + "lamedb5", "w", encoding="utf-8") as file:
             file.writelines(lines)
 
 

@@ -182,7 +182,7 @@ def get_message(message):
 
 @lru_cache(maxsize=5)
 def get_dialogs_string(path):
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         return "".join(f)
 
 

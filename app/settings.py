@@ -43,7 +43,7 @@ def get_settings():
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         write_settings(get_default_settings())
 
-    with open(CONFIG_FILE, "r") as config_file:
+    with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
         return json.load(config_file)
 
 
@@ -77,7 +77,7 @@ def get_default_transcoding_presets():
 
 def write_settings(config):
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-    with open(CONFIG_FILE, "w") as config_file:
+    with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
         json.dump(config, config_file, indent="    ")
 
 
