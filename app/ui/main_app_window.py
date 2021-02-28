@@ -36,7 +36,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK)
+                        FavClickMode, MOD_MASK, TEXT_DOMAIN)
 
 
 class Application(Gtk.Application):
@@ -334,6 +334,7 @@ class Application(Gtk.Application):
 
         # Menu bar
         main_box = builder.get_object("main_window_box")
+        builder.set_translation_domain(TEXT_DOMAIN)
         builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
         menu_bar = Gtk.MenuBar.new_from_model(builder.get_object("menu_bar"))
         menu_bar.set_visible(True)

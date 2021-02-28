@@ -27,6 +27,8 @@ try:
 except SettingsException:
     pass
 else:
+    os.environ["LANGUAGE"] = settings.language
+
     st = Gtk.Settings().get_default()
     st.set_property("gtk-theme-name", "MS-Windows")
     st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
