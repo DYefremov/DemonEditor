@@ -1615,7 +1615,9 @@ class Application(Gtk.Application):
                         data_id = ":".join(fav_id_data[:11])
                         picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
                         locked = LOCKED_ICON if data_id in self._blacklist else None
-                srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name, self._picons.get(picon_id, None), picon_id, None, None, None, None, None, None, None, data_id, fav_id, None)
+                srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
+                              self._picons.get(picon_id, None), picon_id, None, None, None, None, None, None, None,
+                              data_id, fav_id, None)
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.ALT:
                 self._alt_file.add("{}:{}".format(srv.data, bq_type))
@@ -2392,7 +2394,6 @@ class Application(Gtk.Application):
     def on_play_stream(self, item=None):
         self.on_player_play()
 
-    @run_idle
     def on_player_play(self, item=None):
         path, column = self._fav_view.get_cursor()
         if path:
@@ -2428,9 +2429,9 @@ class Application(Gtk.Application):
                     self.show_playback_window()
                 elif self._playback_window:
                     title = self.get_playback_title()
-                    GLib.idle_add(self._playback_window.set_title, title)
-                    GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
-                    GLib.idle_add(self._playback_window.show)
+                    self._playback_window.set_title(title)
+                    self._playback_window.show()
+                    GLib.idle_add(self._player.play, url)
                 else:
                     self.show_error_dialog("Init player error!")
             finally:
@@ -2442,19 +2443,22 @@ class Application(Gtk.Application):
                 if not self._player_box.get_visible():
                     self.set_player_area_size(self._player_box)
 
-                GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+                GLib.idle_add(self._player.play, url)
+
             self._player_box.set_visible(True)
 
     def on_player_stop(self, item=None):
         if self._player:
-            GLib.idle_add(self._player.stop)
+            self._player.stop()
 
     def on_player_previous(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
+            self._fav_view.set_sensitive(False)
             self.set_player_action()
 
     def on_player_next(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
+            self._fav_view.set_sensitive(False)
             self.set_player_action()
 
     @run_with_delay(1)
@@ -2500,12 +2504,13 @@ class Application(Gtk.Application):
         if not self._full_screen and self._player_rewind_box.get_visible():
             GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
 
-    def on_player_error(self, bus=None, msg=None):
+    @run_with_delay(2)
+    def on_player_error(self):
         self.set_playback_elms_active()
         self.show_error_dialog("Can't Playback!")
 
     @run_idle
-    def set_playback_elms_active(self, bus=None, msg=None):
+    def set_playback_elms_active(self):
         self._fav_view.set_sensitive(True)
         self._fav_view.do_grab_focus(self._fav_view)
 
@@ -2533,7 +2538,6 @@ class Application(Gtk.Application):
                     self._player.set_xwindow(widget.get_window().get_xid())
                 self._player.play(self._current_mrl)
             finally:
-                self.set_playback_elms_active()
                 if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
                     self.set_player_area_size(widget)
 
@@ -2567,7 +2571,6 @@ class Application(Gtk.Application):
             self._player_tool_bar.set_visible(not self._full_screen)
             self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
 
-    @run_idle
     def update_state_on_full_screen(self, visible):
         self._main_data_box.set_visible(visible)
         self._player_tool_bar.set_visible(visible)

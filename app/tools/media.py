@@ -20,7 +20,9 @@ class Player:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError
         else:
-            # initialize GStreamer
+            self._error_cb = error_cb
+            self._playing_cb = playing_cb
+            # Initialize GStreamer.
             Gst.init(sys.argv)
             self.STATE = Gst.State
             self.STAT_RETURN = Gst.StateChangeReturn
@@ -31,8 +33,9 @@ class Player:
 
             bus = self._player.get_bus()
             bus.add_signal_watch()
-            bus.connect("message::error", error_cb)
-            bus.connect("message::state-changed", playing_cb)
+            bus.connect("message::error", self.on_error)
+            bus.connect("message::state-changed", self.on_state_changed)
+            bus.connect("message::eos", self.on_eos)
 
     @classmethod
     def get_instance(cls, mode, rewind_cb=None, position_cb=None, error_cb=None, playing_cb=None):
@@ -44,11 +47,13 @@ class Player:
         return self._mode
 
     def play(self, mrl=None):
-        self.stop()
+        self._player.set_state(self.STATE.READY)
+        if not mrl:
+            return
 
-        if mrl:
-            self._player.set_property("uri", mrl)
+        self._player.set_property("uri", mrl)
 
+        log("Setting the URL for playback: : {}".format(mrl))
         ret = self._player.set_state(self.STATE.PLAYING)
 
         if ret == self.STAT_RETURN.FAILURE:
@@ -57,9 +62,9 @@ class Player:
             self._is_playing = True
 
     def stop(self):
-        if self._is_playing:
-            self._player.set_state(self.STATE.READY)
-            self._is_playing = False
+        log("Stop playback...")
+        self._player.set_state(self.STATE.READY)
+        self._is_playing = False
 
     def pause(self):
         self._player.set_state(self.STATE.PAUSED)
@@ -67,12 +72,11 @@ class Player:
     def set_time(self, time):
         pass
 
+    @run_task
     def release(self):
-        if self._player:
-            self._is_playing = False
-            self.stop()
-            self._player.set_state(self.STATE.NULL)
-            self.__INSTANCE = None
+        self._is_playing = False
+        self._player.set_state(self.STATE.NULL)
+        self.__INSTANCE = None
 
     def set_xwindow(self, xid):
         self._player.set_xwindow(xid)
@@ -106,8 +110,44 @@ class Player:
     def is_playing(self):
         return self._is_playing
 
-    def set_full_screen(self, full):
-        self._player.set_fullscreen(full)
+    def on_error(self, bus, msg):
+        err, dbg = msg.parse_error()
+        log(err)
+        self._error_cb()
+
+    def on_state_changed(self, bus, msg):
+        if not msg.src == self._player:
+            # Not from the player.
+            return
+
+        old_state, new_state, pending = msg.parse_state_changed()
+        if new_state is self.STATE.PLAYING:
+            log("Starting playback...")
+            self._playing_cb()
+            self.get_stream_info()
+
+    def on_eos(self, bus, msg):
+        """ Called when an end-of-stream message appears. """
+        self._player.set_state(self.STATE.READY)
+        self._is_playing = False
+
+    def get_stream_info(self):
+        log("Getting stream info...")
+        nr_video = self._player.get_property("n-video")
+        for i in range(nr_video):
+            # Retrieve the stream's video tags.
+            tags = self._player.emit("get-video-tags", i)
+            if tags:
+                _, cod = tags.get_string("video-codec")
+                log("Video codec: {}".format(cod or "unknown"))
+
+        nr_audio = self._player.get_property("n-audio")
+        for i in range(nr_audio):
+            # Retrieve the stream's video tags.
+            tags = self._player.emit("get-audio-tags", i)
+            if tags:
+                _, cod = tags.get_string("audio-codec")
+                log("Audio codec: {}".format(cod or "unknown"))
 
 
 class Recorder:
