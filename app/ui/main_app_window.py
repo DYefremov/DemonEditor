@@ -261,7 +261,7 @@ class Application(Gtk.Application):
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
-        self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
+        # self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
         # Alternatives
@@ -2453,16 +2453,15 @@ class Application(Gtk.Application):
 
     def on_player_previous(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
-            self._fav_view.set_sensitive(False)
             self.set_player_action()
 
     def on_player_next(self, item):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
-            self._fav_view.set_sensitive(False)
             self.set_player_action()
 
     @run_with_delay(1)
     def set_player_action(self):
+        self._fav_view.set_sensitive(False)
         if self._fav_click_mode is FavClickMode.PLAY:
             self.on_stream()
         elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
@@ -2529,7 +2528,7 @@ class Application(Gtk.Application):
                                                    error_cb=self.on_player_error,
                                                    playing_cb=self.set_playback_elms_active)
             except (ImportError, NameError, AttributeError):
-                self.show_error_dialog("No VLC is found. Check that it is installed!")
+                self.show_error_dialog("No GStreamer is found. Check that it is installed!")
                 return True
             else:
                 if IS_WIN:
@@ -2540,6 +2539,7 @@ class Application(Gtk.Application):
             finally:
                 if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
                     self.set_player_area_size(widget)
+                self._fav_view.do_grab_focus(self._fav_view)
 
     @run_idle
     def set_player_area_size(self, widget):
@@ -2699,7 +2699,7 @@ class Application(Gtk.Application):
         """ Switch to the channel and watch in the player """
         if not self._app_info_box.get_visible() and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
             self.set_player_area_size(self._player_box)
-            self._player_box.set_visible(True)
+            GLib.idle_add(self._player_box.set_visible, True)
             GLib.idle_add(self._app_info_box.set_visible, False)
 
         self._http_api.send(HttpAPI.Request.STREAM_CURRENT, None, self.watch)

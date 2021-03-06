@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.19.0 
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -30,8 +30,8 @@ Author: Dmitriy Yefremov
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-description Enigma2 channel and satellites list editor for macOS. -->
-  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-description Enigma2 channel and satellites list editor for MS Windows. -->
+  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkListStore" id="alt_list_store">
     <columns>
@@ -1017,9 +1017,9 @@ Author: Dmitriy Yefremov
               <object class="GtkComboBoxText" id="profile_combo_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
                 <property name="tooltip_text" translatable="yes">Profile</property>
                 <property name="active">0</property>
-                <property name="focus_on_click">False</property>
                 <signal name="changed" handler="on_profile_changed" swapped="no"/>
               </object>
               <packing>
@@ -1520,11 +1520,11 @@ Author: Dmitriy Yefremov
                           <object class="GtkButton" id="play_current_service_button">
                             <property name="width_request">28</property>
                             <property name="can_focus">False</property>
+                            <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
                             <property name="tooltip_text" translatable="yes">Play</property>
                             <property name="halign">center</property>
                             <property name="valign">center</property>
-                            <property name="focus_on_click">False</property>
                             <signal name="clicked" handler="on_watch" swapped="no"/>
                             <child>
                               <object class="GtkImage" id="play_current_service_image">
@@ -1602,6 +1602,8 @@ Author: Dmitriy Yefremov
                         <property name="spacing">1</property>
                         <child>
                           <object class="GtkDrawingArea" id="player_drawing_area">
+                            <property name="width_request">320</property>
+                            <property name="height_request">240</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <signal name="button-press-event" handler="on_player_press" swapped="no"/>
@@ -2978,9 +2980,10 @@ Author: Dmitriy Yefremov
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label" translatable="yes">label</property>
+                                            <property name="ellipsize">end</property>
                                           </object>
                                           <packing>
-                                            <property name="expand">False</property>
+                                            <property name="expand">True</property>
                                             <property name="fill">True</property>
                                             <property name="position">2</property>
                                           </packing>

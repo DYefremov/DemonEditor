@@ -53,7 +53,7 @@ class Player:
 
         self._player.set_property("uri", mrl)
 
-        log("Setting the URL for playback: : {}".format(mrl))
+        log("Setting the URL for playback: {}".format(mrl))
         ret = self._player.set_state(self.STATE.PLAYING)
 
         if ret == self.STAT_RETURN.FAILURE:
@@ -79,7 +79,7 @@ class Player:
         self.__INSTANCE = None
 
     def set_xwindow(self, xid):
-        self._player.set_xwindow(xid)
+        self._player.set_window_handle(xid)
 
     def set_handle(self, widget):
         """ Used on Windows to set window pointer.

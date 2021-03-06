@@ -712,7 +712,7 @@ def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message
 
     try:
         return get_response(HttpAPI.Request.TEST, "{}/web/{}".format(base_url, params), data).get("e2statetext", "")
-    except (RemoteDisconnected, URLError, HTTPError) as e:
+    except (URLError, HTTPError) as e:
         raise TestException(e)
 
 

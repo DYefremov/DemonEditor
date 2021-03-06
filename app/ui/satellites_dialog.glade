@@ -1490,7 +1490,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Cancel</property>
-                    <property name="valign">center</property>
                     <property name="image">sat_update_cancel_image</property>
                     <property name="always_show_image">True</property>
                     <signal name="clicked" handler="on_cancel_receive" swapped="no"/>
@@ -1566,13 +1565,11 @@ Author: Dmitriy Yefremov
               <object class="GtkButtonBox" id="satellites_update_right_action_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">center</property>
                 <property name="layout_style">expand</property>
                 <child>
                   <object class="GtkComboBox" id="source_combo_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="valign">center</property>
                     <property name="model">update_source_store</property>
                     <property name="active">0</property>
                     <child>
@@ -1595,7 +1592,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Update</property>
-                    <property name="valign">center</property>
                     <property name="image">sat_update_image</property>
                     <property name="always_show_image">True</property>
                     <signal name="clicked" handler="on_update_satellites_list" swapped="no"/>

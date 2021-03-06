@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 from gi.repository import GLib
 
+from app.settings import IS_WIN
 from .dialogs import get_dialogs_string, show_dialog, DialogType, get_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column
 from ..commons import run_task, run_with_delay, log, run_idle
@@ -313,18 +314,17 @@ class ControlBox(Gtk.HBox):
 
         img = data.get("img_data", None)
         if img:
-            is_darwin = self._settings.is_darwin
-            GLib.idle_add(self._screenshot_button_box.set_sensitive, is_darwin)
-            path = os.path.expanduser("~/Desktop") if is_darwin else None
+            GLib.idle_add(self._screenshot_button_box.set_sensitive, IS_WIN)
+            path = os.path.expanduser("~/Desktop") if IS_WIN else None
 
             try:
                 import tempfile
                 import subprocess
 
-                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg", dir=path, delete=not is_darwin) as tf:
+                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg", dir=path, delete=not IS_WIN) as tf:
                     tf.write(img)
-                    cmd = ["open" if is_darwin else "xdg-open", tf.name]
-                    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                    f_name = tf.name
+                subprocess.Popen([f_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
             finally:
                 GLib.idle_add(self._screenshot_button_box.set_sensitive, True)
 

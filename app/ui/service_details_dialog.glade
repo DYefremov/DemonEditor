@@ -1568,7 +1568,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkImage" id="tr_edit_switch_image">
-                        <property name="visible">True</property>
+                        <property name="visible">False</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>
                         <property name="icon_name">document-edit-symbolic</property>

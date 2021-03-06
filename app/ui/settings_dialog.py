@@ -716,7 +716,6 @@ class SettingsDialog:
             log("Unpacking end.")
         finally:
             self.update_theme_button(button, dst)
-            self._appearance_box.set_sensitive(True)
 
     @run_idle
     def update_theme_button(self, button, dst):
@@ -729,6 +728,7 @@ class SettingsDialog:
                 button.append(theme, theme)
                 button.set_active_id(theme)
         self.show_info_message("Done!", Gtk.MessageType.INFO)
+        self._appearance_box.set_sensitive(True)
 
     @run_idle
     def remove_theme(self, button, path):
