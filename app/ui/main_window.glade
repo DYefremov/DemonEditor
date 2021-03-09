@@ -1049,7 +1049,6 @@ Author: Dmitriy Yefremov
     <property name="gravity">center</property>
     <property name="startup_id">DemonEditor</property>
     <signal name="delete-event" handler="on_close_app" swapped="no"/>
-    <signal name="window-state-event" handler="on_main_window_state" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
@@ -1492,12 +1491,14 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkDrawingArea" id="player_drawing_area">
+                      <object class="GtkEventBox" id="player_event_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <signal name="button-press-event" handler="on_player_press" swapped="no"/>
-                        <signal name="draw" handler="on_player_drawing_area_draw" swapped="no"/>
-                        <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
+                        <signal name="realize" handler="on_player_box_realize" swapped="no"/>
+                        <child>
+                          <placeholder/>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
