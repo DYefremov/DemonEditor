@@ -4,6 +4,6 @@ Section: utils
 Priority: optional
 Architecture: all
 Essential: no
-Depends: python3 (>= 3.5)
+Depends: python3 (>= 3.5), python3-requests, gstreamer1.0-gtk3
 Maintainer: Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>
 Description: Enigma2 channel and satellite list editor
