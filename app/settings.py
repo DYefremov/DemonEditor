@@ -31,7 +31,7 @@ class Defaults(Enum):
     NEW_COLOR = "rgb(255,230,204)"
     EXTRA_COLOR = "rgb(179,230,204)"
     FAV_CLICK_MODE = 0
-    PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
+    PLAY_STREAMS_MODE = 0
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records/"
     ACTIVATE_TRANSCODING = False

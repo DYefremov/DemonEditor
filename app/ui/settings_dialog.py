@@ -602,7 +602,6 @@ class SettingsDialog:
 
     @run_idle
     def set_play_stream_mode(self, mode):
-        self._play_in_built_radio_button.set_sensitive(not self._settings.is_darwin)
         self._play_in_built_radio_button.set_active(mode is PlayStreamsMode.BUILT_IN)
         self._play_in_window_radio_button.set_active(mode is PlayStreamsMode.WINDOW)
         self._get_m3u_radio_button.set_active(mode is PlayStreamsMode.M3U)

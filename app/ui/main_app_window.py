@@ -157,8 +157,7 @@ class Application(Gtk.Application):
                           "on_player_close": self.on_player_close,
                           "on_player_press": self.on_player_press,
                           "on_full_screen": self.on_full_screen,
-                          "on_drawing_area_realize": self.on_drawing_area_realize,
-                          "on_player_drawing_area_draw": self.on_player_drawing_area_draw,
+                          "on_player_box_realize": self.on_player_box_realize,
                           "on_ftp_realize": self.on_ftp_realize,
                           "on_record": self.on_record,
                           "on_remove_all_unavailable": self.on_remove_all_unavailable,
@@ -232,9 +231,9 @@ class Application(Gtk.Application):
         self._bouquets_main_box = builder.get_object("bouquets_main_box")
         self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
-        tool_bar = builder.get_object("top_toolbar")
-        self._main_data_box.bind_property("visible", tool_bar, "visible")
+        self._main_data_box.bind_property("visible", builder.get_object("top_toolbar"), "visible")
         self._telnet_tool_button = builder.get_object("telnet_tool_button")
+        self._top_box = builder.get_object("top_box")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # App info
@@ -297,27 +296,23 @@ class Application(Gtk.Application):
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Player
         self._player_box = builder.get_object("player_box")
+        self._player_event_box = builder.get_object("player_event_box")
         self._player_scale = builder.get_object("player_scale")
         self._player_full_time_label = builder.get_object("player_full_time_label")
         self._player_current_time_label = builder.get_object("player_current_time_label")
         self._player_rewind_box = builder.get_object("player_rewind_box")
-        self._player_drawing_area = builder.get_object("player_drawing_area")
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
-        self._player_box.bind_property("visible", tool_bar, "visible", 4)
+        self._player_box.bind_property("visible", self._top_box, "visible", 4)
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
-        self._player_box.bind_property("visible", self._profile_combo_box, "sensitive", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         # Record
         self._record_image = builder.get_object("record_button_image")
-        # Enabling events for the drawing area
-        self._player_drawing_area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        self._player_frame = builder.get_object("player_frame")
         # Search
         self._search_bar = builder.get_object("search_bar")
         self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
@@ -347,7 +342,6 @@ class Application(Gtk.Application):
 
     def init_layout(self, builder):
         """ Initializes an alternate layout, if enabled. """
-        top_box = builder.get_object("top_box")
         top_toolbar = builder.get_object("top_toolbar")
         top_toolbar.set_margin_left(0)
         top_toolbar.set_margin_right(10)
@@ -358,10 +352,10 @@ class Application(Gtk.Application):
         extra_box.reorder_child(self._ftp_button, 0)
         extra_box.reorder_child(builder.get_object("add_bouquet_tool_button"), 2)
 
-        top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
-        top_box.set_child_packing(top_toolbar, False, True, 0, Gtk.PackType.END)
-        top_box.reorder_child(extra_box, 0)
-        top_box.reorder_child(top_toolbar, 1)
+        self._top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
+        self._top_box.set_child_packing(top_toolbar, False, True, 0, Gtk.PackType.END)
+        self._top_box.reorder_child(extra_box, 0)
+        self._top_box.reorder_child(top_toolbar, 1)
 
         center_box = builder.get_object("center_box")
         center_box.reorder_child(self._ftp_revealer, 0)
@@ -2428,7 +2422,7 @@ class Application(Gtk.Application):
         yield True
         self._wait_dialog.hide()
 
-    # ***************** Backup  ********************#
+    # ***************** Backup  ******************** #
 
     def on_backup_tool_show(self, action, value=None):
         """ Shows backup tool dialog """
@@ -2445,7 +2439,6 @@ class Application(Gtk.Application):
     def on_play_stream(self, item=None):
         self.on_player_play()
 
-    @run_idle
     def on_player_play(self, item=None):
         path, column = self._fav_view.get_cursor()
         if path:
@@ -2481,9 +2474,9 @@ class Application(Gtk.Application):
                     self.show_playback_window()
                 elif self._playback_window:
                     title = self.get_playback_title()
-                    GLib.idle_add(self._playback_window.set_title, title)
-                    GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
-                    GLib.idle_add(self._playback_window.show)
+                    self._playback_window.set_title(title)
+                    self._playback_window.show()
+                    GLib.idle_add(self._player.play, url)
                 else:
                     self.show_error_dialog("Init player error!")
             finally:
@@ -2495,7 +2488,8 @@ class Application(Gtk.Application):
                 if not self._player_box.get_visible():
                     self.set_player_area_size(self._player_box)
 
-                GLib.idle_add(self._player.play, url, priority=GLib.PRIORITY_LOW)
+                GLib.idle_add(self._player.play, url)
+
             self._player_box.set_visible(True)
 
     def on_player_stop(self, item=None):
@@ -2512,6 +2506,7 @@ class Application(Gtk.Application):
 
     @run_with_delay(1)
     def set_player_action(self):
+        self._fav_view.set_sensitive(False)
         if self._fav_click_mode is FavClickMode.PLAY:
             self.on_stream()
         elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
@@ -2547,12 +2542,15 @@ class Application(Gtk.Application):
         self._player_scale.get_adjustment().set_upper(duration)
         GLib.idle_add(self._player_rewind_box.set_visible, duration > 0, priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self._player_current_time_label.set_text, "0", priority=GLib.PRIORITY_LOW)
-        GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration), priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration),
+                      priority=GLib.PRIORITY_LOW)
 
     def on_player_time_changed(self, t):
         if not self._full_screen and self._player_rewind_box.get_visible():
-            GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t), priority=GLib.PRIORITY_LOW)
+            GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t),
+                          priority=GLib.PRIORITY_LOW)
 
+    @run_with_delay(2)
     def on_player_error(self):
         self.set_playback_elms_active()
         self.show_error_dialog("Can't Playback!")
@@ -2568,48 +2566,30 @@ class Application(Gtk.Application):
         h, m = divmod(m, 60)
         return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
 
-    def on_drawing_area_realize(self, widget):
+    def on_player_box_realize(self, widget):
         if not self._player:
             try:
-                self._player = Player.get_instance(mode=self._settings.play_streams_mode,
-                                                   rewind_cb=self.on_player_duration_changed,
-                                                   position_cb=self.on_player_time_changed,
-                                                   error_cb=self.on_player_error,
-                                                   playing_cb=self.set_playback_elms_active)
-            except (ImportError, NameError, AttributeError):
-                self.show_error_dialog("No VLC is found. Check that it is installed!")
+                self._player = Player.make(name="gst",
+                                           mode=self._settings.play_streams_mode,
+                                           widget=widget,
+                                           buf_cb=self.on_player_duration_changed,
+                                           position_cb=self.on_player_time_changed,
+                                           error_cb=self.on_player_error,
+                                           playing_cb=self.set_playback_elms_active)
+            except (ImportError, NameError) as e:
+                self.show_error_dialog(str(e))
                 return True
             else:
-                if self._settings.is_darwin:
-                    self._player.set_nso(widget)
-                else:
-                    self._player.set_xwindow(widget.get_window().get_xid())
                 self._player.play(self._current_mrl)
             finally:
-                self.set_playback_elms_active()
                 if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
                     self.set_player_area_size(widget)
+                self._fav_view.do_grab_focus(self._fav_view)
 
     @run_idle
     def set_player_area_size(self, widget):
         w, h = self._main_window.get_size()
         widget.set_size_request(w * 0.6, -1)
-
-    def on_player_drawing_area_draw(self, widget, cr):
-        """ Used for black background drawing in the player drawing area.
-
-            Required for Gtk >= 3.20.
-            More info: https://developer.gnome.org/gtk3/stable/ch32s10.html,
-            https://developer.gnome.org/gtk3/stable/GtkStyleContext.html#gtk-render-background
-        """
-        context = widget.get_style_context()
-        width = widget.get_allocated_width()
-        height = widget.get_allocated_height()
-        Gtk.render_background(context, cr, 0, 0, width, height)
-        r, g, b, a = 0, 0, 0, 1  # black color
-        cr.set_source_rgba(r, g, b, a)
-        cr.rectangle(0, 0, width, height)
-        cr.fill()
 
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
@@ -2625,7 +2605,6 @@ class Application(Gtk.Application):
             self._player_tool_bar.set_visible(not self._full_screen)
             self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
 
-    @run_idle
     def update_state_on_full_screen(self, visible):
         self._main_data_box.set_visible(visible)
         self._player_tool_bar.set_visible(visible)
@@ -2645,16 +2624,13 @@ class Application(Gtk.Application):
         self._playback_window.resize(width, height)
         self._playback_window.connect("delete-event", self.on_player_close)
 
-        if self._settings.is_darwin:
-            self._player_drawing_area.reparent(self._playback_window)
-        else:
-            self._player_prev_button.set_visible(False)
-            self._player_next_button.set_visible(False)
-            box = Gtk.HBox(visible=True, orientation="vertical")
-            self._player_drawing_area.reparent(box)
-            self._player_box.remove(self._player_tool_bar)
-            box.pack_end(self._player_tool_bar, False, False, 0)
-            self._playback_window.add(box)
+        self._player_prev_button.set_visible(False)
+        self._player_next_button.set_visible(False)
+        box = Gtk.HBox(visible=True, orientation="vertical")
+        self._player_event_box.reparent(box)
+        self._player_box.remove(self._player_tool_bar)
+        box.pack_end(self._player_tool_bar, False, False, 0)
+        self._playback_window.add(box)
 
         self._playback_window.set_application(self)
         self._playback_window.show()
@@ -2754,7 +2730,7 @@ class Application(Gtk.Application):
         """ Switch to the channel and watch in the player """
         if not self._app_info_box.get_visible() and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
             self.set_player_area_size(self._player_box)
-            self._player_box.set_visible(True)
+            GLib.idle_add(self._player_box.set_visible, True)
             GLib.idle_add(self._app_info_box.set_visible, False)
 
         self._http_api.send(HttpAPI.Request.STREAM_CURRENT, None, self.watch)

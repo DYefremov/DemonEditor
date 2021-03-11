@@ -1,32 +1,224 @@
 import os
 import sys
+from abc import ABC, abstractmethod
 from datetime import datetime
 
 from app.commons import run_task, log, _DATE_FORMAT
 
 
-class Player:
+class Player(ABC):
+    """ Base player class. Also used as a factory. """
+
+    @abstractmethod
+    def get_play_mode(self):
+        pass
+
+    @abstractmethod
+    def play(self, mrl=None):
+        pass
+
+    @abstractmethod
+    def stop(self):
+        pass
+
+    @abstractmethod
+    def pause(self):
+        pass
+
+    @abstractmethod
+    def set_time(self, time):
+        pass
+
+    @abstractmethod
+    def release(self):
+        pass
+
+    @abstractmethod
+    def is_playing(self):
+        pass
+
+    @abstractmethod
+    def get_instance(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+        pass
+
+    @staticmethod
+    def make(name, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
+        """ Factory method. We will not use a separate factory to return a specific implementation.
+
+            @param name: implementation name.
+            @param mode: current player mode [Built-in or windowed].
+            @param widget: parent of video widget.
+            @param buf_cb: buffering callback.
+            @param position_cb: time (position) callback.
+            @param error_cb: error callback.
+            @param playing_cb: playing state callback.
+
+            Throws a NameError if there is no implementation for the given name.
+        """
+        if name == "gst":
+            return GstPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+        elif name == "vlc":
+            return VlcPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+        else:
+            raise NameError("There is no such [{}] implementation.".format(name))
+
+
+class GstPlayer(Player):
+    """ Simple wrapper for GStreamer playbin. """
+
+    __INSTANCE = None
+
+    def __init__(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+        try:
+            import gi
+
+            gi.require_version("Gst", "1.0")
+            gi.require_version("GstVideo", "1.0")
+            from gi.repository import Gst, GstVideo
+            # Initialization of GStreamer.
+            Gst.init(sys.argv)
+            gtk_sink = Gst.ElementFactory.make("gtksink")
+            if not gtk_sink:
+                msg = "GStreamer error: gtksink plugin not installed!"
+                log(msg)
+                raise ImportError(msg)
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+            raise ImportError("No GStreamer is found. Check that it is installed!")
+        else:
+            self._error_cb = error_cb
+            self._playing_cb = playing_cb
+
+            self.STATE = Gst.State
+            self.STAT_RETURN = Gst.StateChangeReturn
+
+            self._mode = mode
+            self._is_playing = False
+            self._player = Gst.ElementFactory.make("playbin", "player")
+            # Initialization of the playback widget.
+            self._player.set_property("video-sink", gtk_sink)
+            vid_widget = gtk_sink.props.widget
+            widget.add(vid_widget)
+            vid_widget.show()
+
+            bus = self._player.get_bus()
+            bus.add_signal_watch()
+            bus.connect("message::error", self.on_error)
+            bus.connect("message::state-changed", self.on_state_changed)
+            bus.connect("message::eos", self.on_eos)
+
+    @classmethod
+    def get_instance(cls, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
+        if not cls.__INSTANCE:
+            cls.__INSTANCE = GstPlayer(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+        return cls.__INSTANCE
+
+    def get_play_mode(self):
+        return self._mode
+
+    def play(self, mrl=None):
+        self._player.set_state(self.STATE.READY)
+        if not mrl:
+            return
+
+        self._player.set_property("uri", mrl)
+
+        log("Setting the URL for playback: {}".format(mrl))
+        ret = self._player.set_state(self.STATE.PLAYING)
+
+        if ret == self.STAT_RETURN.FAILURE:
+            log("ERROR: Unable to set the 'PLAYING' state for '{}'.".format(mrl))
+        else:
+            self._is_playing = True
+
+    def stop(self):
+        log("Stop playback...")
+        self._player.set_state(self.STATE.READY)
+        self._is_playing = False
+
+    def pause(self):
+        self._player.set_state(self.STATE.PAUSED)
+
+    def set_time(self, time):
+        pass
+
+    @run_task
+    def release(self):
+        self._is_playing = False
+        self._player.set_state(self.STATE.NULL)
+        self.__INSTANCE = None
+
+    def set_mrl(self, mrl):
+        self._player.set_property("uri", mrl)
+
+    def is_playing(self):
+        return self._is_playing
+
+    def on_error(self, bus, msg):
+        err, dbg = msg.parse_error()
+        log(err)
+        self._error_cb()
+
+    def on_state_changed(self, bus, msg):
+        if not msg.src == self._player:
+            # Not from the player.
+            return
+
+        old_state, new_state, pending = msg.parse_state_changed()
+        if new_state is self.STATE.PLAYING:
+            log("Starting playback...")
+            self._playing_cb()
+            self.get_stream_info()
+
+    def on_eos(self, bus, msg):
+        """ Called when an end-of-stream message appears. """
+        self._player.set_state(self.STATE.READY)
+        self._is_playing = False
+
+    def get_stream_info(self):
+        log("Getting stream info...")
+        nr_video = self._player.get_property("n-video")
+        for i in range(nr_video):
+            # Retrieve the stream's video tags.
+            tags = self._player.emit("get-video-tags", i)
+            if tags:
+                _, cod = tags.get_string("video-codec")
+                log("Video codec: {}".format(cod or "unknown"))
+
+        nr_audio = self._player.get_property("n-audio")
+        for i in range(nr_audio):
+            # Retrieve the stream's video tags.
+            tags = self._player.emit("get-audio-tags", i)
+            if tags:
+                _, cod = tags.get_string("audio-codec")
+                log("Audio codec: {}".format(cod or "unknown"))
+
+
+class VlcPlayer(Player):
     """ Simple wrapper for VLC media player. """
+
     __VLC_INSTANCE = None
 
-    def __init__(self, mode, rewind_cb, position_cb, error_cb, playing_cb):
+    def __init__(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
         try:
             from app.tools import vlc
             from app.tools.vlc import EventType
-        except OSError as e:
+
+            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+            self._player = vlc.Instance(args).media_player_new()
+        except (OSError, AttributeError) as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
-            raise ImportError
+            raise ImportError("No VLC is found. Check that it is installed!")
         else:
             self._mode = mode
             self._is_playing = False
-            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
-            self._player = vlc.Instance(args).media_player_new()
+
             ev_mgr = self._player.event_manager()
 
-            if rewind_cb:
+            if buf_cb:
                 # TODO look other EventType options
                 ev_mgr.event_attach(EventType.MediaPlayerBuffering,
-                                    lambda et, p: rewind_cb(p.get_media().get_duration()),
+                                    lambda et, p: buf_cb(p.get_media().get_duration()),
                                     self._player)
             if position_cb:
                 ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
@@ -42,10 +234,12 @@ class Player:
                                     lambda et, p: playing_cb(),
                                     self._player)
 
+            self.init_video_widget(widget)
+
     @classmethod
-    def get_instance(cls, mode, rewind_cb=None, position_cb=None, error_cb=None, playing_cb=None):
+    def get_instance(cls, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
         if not cls.__VLC_INSTANCE:
-            cls.__VLC_INSTANCE = Player(mode, rewind_cb, position_cb, error_cb, playing_cb)
+            cls.__VLC_INSTANCE = VlcPlayer(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
         return cls.__VLC_INSTANCE
 
     def get_play_mode(self):
@@ -78,12 +272,24 @@ class Player:
             self._player.release()
             self.__VLC_INSTANCE = None
 
-    def set_xwindow(self, xid):
-        self._player.set_xwindow(xid)
+    def set_mrl(self, mrl):
+        self._player.set_mrl(mrl)
+
+    def is_playing(self):
+        return self._is_playing
+
+    def init_video_widget(self, widget):
+        from gi.repository import Gtk, Gdk
+
+        area = Gtk.DrawingArea(visible=True)
+        area.connect("draw", self.on_drawing_area_draw)
+        area.set_events(Gdk.ModifierType.BUTTON1_MASK)
+        widget.add(area)
+        if sys.platform == "linux":
+            self._player.set_xwindow(area.get_window().get_xid())
 
     def set_nso(self, widget):
         """ Used on MacOS to set NSObject.
-
             Based on gtkvlc.py[get_window_pointer] example from here:
             https://github.com/oaubert/python-vlc/tree/master/examples
         """
@@ -101,14 +307,14 @@ class Player:
             pointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
             self._player.set_nsobject(get_nsview(pointer))
 
-    def set_mrl(self, mrl):
-        self._player.set_mrl(mrl)
+    def on_drawing_area_draw(self,  widget, cr):
+        """ Used for black background drawing in the player drawing area. """
+        allocation = widget.get_allocation()
+        cr.set_source_rgb(0, 0, 0)
+        cr.rectangle(0, 0, allocation.width, allocation.height)
+        cr.fill()
 
-    def is_playing(self):
-        return self._is_playing
-
-    def set_full_screen(self, full):
-        self._player.set_fullscreen(full)
+        return False
 
 
 class Recorder:

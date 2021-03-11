@@ -1439,12 +1439,14 @@ Author: Dmitriy Yefremov
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
                         <child>
-                          <object class="GtkDrawingArea" id="player_drawing_area">
+                          <object class="GtkEventBox" id="player_event_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <signal name="button-press-event" handler="on_player_press" swapped="no"/>
-                            <signal name="draw" handler="on_player_drawing_area_draw" swapped="no"/>
-                            <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
+                            <signal name="realize" handler="on_player_box_realize" swapped="no"/>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
