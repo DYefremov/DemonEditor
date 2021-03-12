@@ -30,8 +30,11 @@ class Defaults(Enum):
     USE_COLORS = True
     NEW_COLOR = "rgb(255,230,204)"
     EXTRA_COLOR = "rgb(179,230,204)"
+    TOOLTIP_LOGO_SIZE = 96
+    LIST_PICON_SIZE = 32
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 0
+    STREAM_LIB = "gst"
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records/"
     ACTIVATE_TRANSCODING = False
@@ -436,6 +439,14 @@ class Settings:
     def play_streams_mode(self, value):
         self._settings["play_streams_mode"] = value
 
+    @property
+    def stream_lib(self):
+        return self._settings.get("stream_lib", Defaults.STREAM_LIB.value)
+
+    @stream_lib.setter
+    def stream_lib(self, value):
+        self._settings["stream_lib"] = value
+
     # *********** EPG ************ #
 
     @property
@@ -514,30 +525,6 @@ class Settings:
         self._settings["enable_send_to"] = value
 
     @property
-    def use_colors(self):
-        return self._settings.get("use_colors", Defaults.USE_COLORS.value)
-
-    @use_colors.setter
-    def use_colors(self, value):
-        self._settings["use_colors"] = value
-
-    @property
-    def new_color(self):
-        return self._settings.get("new_color", Defaults.NEW_COLOR.value)
-
-    @new_color.setter
-    def new_color(self, value):
-        self._settings["new_color"] = value
-
-    @property
-    def extra_color(self):
-        return self._settings.get("extra_color", Defaults.EXTRA_COLOR.value)
-
-    @extra_color.setter
-    def extra_color(self, value):
-        self._settings["extra_color"] = value
-
-    @property
     def fav_click_mode(self):
         return self._settings.get("fav_click_mode", Defaults.FAV_CLICK_MODE.value)
 
@@ -580,6 +567,54 @@ class Settings:
         self._settings["show_bq_hints"] = value
 
     # *********** Appearance *********** #
+
+    @property
+    def list_font(self):
+        return self._settings.get("list_font", "")
+
+    @list_font.setter
+    def list_font(self, value):
+        self._settings["list_font"] = value
+
+    @property
+    def list_picon_size(self):
+        return self._settings.get("list_picon_size", Defaults.LIST_PICON_SIZE.value)
+
+    @list_picon_size.setter
+    def list_picon_size(self, value):
+        self._settings["list_picon_size"] = value
+
+    @property
+    def tooltip_logo_size(self):
+        return self._settings.get("tooltip_logo_size", Defaults.TOOLTIP_LOGO_SIZE.value)
+
+    @tooltip_logo_size.setter
+    def tooltip_logo_size(self, value):
+        self._settings["tooltip_logo_size"] = value
+
+    @property
+    def use_colors(self):
+        return self._settings.get("use_colors", Defaults.USE_COLORS.value)
+
+    @use_colors.setter
+    def use_colors(self, value):
+        self._settings["use_colors"] = value
+
+    @property
+    def new_color(self):
+        return self._settings.get("new_color", Defaults.NEW_COLOR.value)
+
+    @new_color.setter
+    def new_color(self, value):
+        self._settings["new_color"] = value
+
+    @property
+    def extra_color(self):
+        return self._settings.get("extra_color", Defaults.EXTRA_COLOR.value)
+
+    @extra_color.setter
+    def extra_color(self, value):
+        self._settings["extra_color"] = value
 
     @property
     def dark_mode(self):

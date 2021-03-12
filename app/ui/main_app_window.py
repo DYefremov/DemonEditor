@@ -36,7 +36,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK)
+                        FavClickMode, MOD_MASK, APP_FONT)
 
 
 class Application(Gtk.Application):
@@ -206,7 +206,9 @@ class Application(Gtk.Application):
         self._links_transmitter = None
         self._control_box = None
         self._ftp_client = None
-        # Colors
+        # Appearance
+        self._current_font = APP_FONT
+        self._picons_size = self._settings.list_picon_size
         self._use_colors = False
         self._NEW_COLOR = None  # Color for new services in the main list
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
@@ -399,7 +401,7 @@ class Application(Gtk.Application):
 
         self.update_profile_label()
         self.init_drag_and_drop()
-        self.init_colors()
+        self.init_appearance()
 
         if self._settings.load_last_config:
             config = self._settings.get("last_config") or {}
@@ -601,11 +603,21 @@ class Application(Gtk.Application):
         self._fav_view.get_selection().set_select_function(lambda *args: self._select_enabled)
         self._bouquets_view.get_selection().set_select_function(lambda *args: self._select_enabled)
 
-    def init_colors(self, update=False):
-        """ Initialisation of background colors for the services.
+    def init_appearance(self, update=False):
+        """ Appearance initialisation.
 
             If update=False - first call on program start, else - after options changes!
         """
+        if self._current_font != self._settings.list_font:
+            from gi.repository import Pango
+
+            font_desc = Pango.FontDescription.from_string(self._settings.list_font)
+            list(map(lambda v: v.modify_font(font_desc), (self._services_view, self._fav_view, self._bouquets_view)))
+            self._current_font = self._settings.list_font
+
+        if self._picons_size != self._settings.list_picon_size:
+            self.update_picons_size()
+
         if self._s_type is SettingsType.ENIGMA_2:
             self._use_colors = self._settings.use_colors
 
@@ -620,6 +632,15 @@ class Application(Gtk.Application):
                 else:
                     self._NEW_COLOR = new_rgb
                     self._EXTRA_COLOR = extra_rgb
+
+    @run_idle
+    def update_picons_size(self):
+        self._picons_size = self._settings.list_picon_size
+        update_picons_data(self._settings.picons_local_path, self._picons, self._picons_size)
+        self._fav_model.foreach(lambda m, p, itr: m.set_value(itr, Column.FAV_PICON, self._picons.get(
+            self._services.get(m.get_value(itr, Column.FAV_ID)).picon_id, None)))
+        self._services_model.foreach(lambda m, p, itr: m.set_value(itr, Column.SRV_PICON, self._picons.get(
+            m.get_value(itr, Column.SRV_PICON_ID), None)))
 
     def update_background_colors(self, new_color, extra_color):
         if extra_color != self._EXTRA_COLOR:
@@ -1093,7 +1114,8 @@ class Application(Gtk.Application):
         target_column = Column.FAV_ID if target is ViewTarget.FAV else Column.SRV_FAV_ID
         srv = self._services.get(model[path][target_column], None)
         if srv and srv.picon_id:
-            tooltip.set_icon(get_picon_pixbuf(self._settings.picons_local_path + srv.picon_id, size=96))
+            tooltip.set_icon(get_picon_pixbuf(self._settings.picons_local_path + srv.picon_id,
+                                              size=self._settings.tooltip_logo_size))
             tooltip.set_text(
                 self.get_hint_for_bq_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv))
             view.set_tooltip_row(tooltip, path)
@@ -1576,7 +1598,7 @@ class Application(Gtk.Application):
             yield True
             services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
             yield True
-            update_picons_data(self._settings.picons_local_path, self._picons)
+            update_picons_data(self._settings.picons_local_path, self._picons, self._picons_size)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
@@ -2002,7 +2024,7 @@ class Application(Gtk.Application):
             c_gen = self.clear_current_data()
             yield from c_gen
 
-        self.init_colors(True)
+        self.init_appearance(True)
         self.init_profiles()
         yield True
         gen = self.init_http_api()
@@ -2569,7 +2591,7 @@ class Application(Gtk.Application):
     def on_player_box_realize(self, widget):
         if not self._player:
             try:
-                self._player = Player.make(name="gst",
+                self._player = Player.make(name=self._settings.stream_lib,
                                            mode=self._settings.play_streams_mode,
                                            widget=widget,
                                            buf_cb=self.on_player_duration_changed,
@@ -3190,7 +3212,7 @@ class Application(Gtk.Application):
 
     @run_task
     def update_picons(self):
-        update_picons_data(self._settings.picons_local_path, self._picons)
+        update_picons_data(self._settings.picons_local_path, self._picons, self._picons_size)
         append_picons(self._picons, self._services_model)
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):

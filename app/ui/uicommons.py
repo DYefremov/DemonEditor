@@ -19,6 +19,7 @@ NOTIFY_IS_INIT = False
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # Translation.
 TEXT_DOMAIN = "demon-editor"
+APP_FONT = None
 
 try:
     settings = Settings.get_instance()
@@ -27,6 +28,7 @@ except SettingsException:
 else:
     os.environ["LANGUAGE"] = settings.language
     st = Gtk.Settings().get_default()
+    APP_FONT = st.get_property("gtk-font-name")
     st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
 
     if settings.is_themes_support:
