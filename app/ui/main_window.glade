@@ -1490,6 +1490,8 @@ Author: Dmitriy Yefremov
                     <property name="width_request">320</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
+                    <signal name="hide" handler="on_player_box_visibility" swapped="no"/>
+                    <signal name="show" handler="on_player_box_visibility" swapped="no"/>
                     <child>
                       <object class="GtkEventBox" id="player_event_box">
                         <property name="visible">True</property>

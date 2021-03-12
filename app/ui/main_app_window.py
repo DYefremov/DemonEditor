@@ -158,6 +158,7 @@ class Application(Gtk.Application):
                     "on_full_screen": self.on_full_screen,
                     "on_http_status_visible": self.on_http_status_visible,
                     "on_player_box_realize": self.on_player_box_realize,
+                    "on_player_box_visibility": self.on_player_box_visibility,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_record": self.on_record,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
@@ -306,16 +307,18 @@ class Application(Gtk.Application):
         self._player_next_button = builder.get_object("player_next_button")
         self._player_play_button = builder.get_object("player_play_button")
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
-        self._player_box.bind_property("visible", self._bouquets_main_box, "visible", 4)
+        self._fav_bouquets_paned = builder.get_object("fav_bouquets_paned")
         self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
         self._player_box.bind_property("visible", builder.get_object("left_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("right_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("main_header_box"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
+        self._player_box.bind_property("visible", builder.get_object("tools_button_box"), "visible", 4)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
+        self._fav_view.bind_property("sensitive", self._bouquets_view, "sensitive")
         # Record
         self._record_image = builder.get_object("record_button_image")
         # Search
@@ -2376,6 +2379,7 @@ class Application(Gtk.Application):
 
     def on_player_stop(self, item=None):
         if self._player:
+            self._fav_view.set_sensitive(True)
             self._player.stop()
 
     def on_player_previous(self, item):
@@ -2408,7 +2412,7 @@ class Application(Gtk.Application):
 
     def on_player_close(self, window=None, event=None):
         if self._player:
-            self._player.stop()
+            GLib.idle_add(self._player.stop)
 
         self.set_playback_elms_active()
         if self._playback_window:
@@ -2466,7 +2470,10 @@ class Application(Gtk.Application):
             finally:
                 if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
                     self.set_player_area_size(widget)
-                self._fav_view.do_grab_focus(self._fav_view)
+
+    def on_player_box_visibility(self, box):
+        visible = box.get_visible()
+        self._fav_bouquets_paned.set_orientation(Gtk.Orientation.VERTICAL if visible else Gtk.Orientation.HORIZONTAL)
 
     @run_idle
     def set_player_area_size(self, widget):
