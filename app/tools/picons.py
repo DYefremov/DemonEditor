@@ -15,7 +15,7 @@ _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
 
 Provider = namedtuple("Provider", ["logo", "name", "pos", "url", "on_id", "ssid", "single", "selected"])
-Picon = namedtuple("Picon", ["ref", "ssid", "v_pid"])
+Picon = namedtuple("Picon", ["ref", "ssid"])
 
 
 class PiconsParser(HTMLParser):
@@ -63,18 +63,17 @@ class PiconsParser(HTMLParser):
             ln = len(row)
 
             if self._single and ln == 4 and row[0].startswith("/logo/"):
-                self.picons.append(Picon(row[0].strip(), "0", "0"))
+                self.picons.append(Picon(row[0].strip(), "0"))
             else:
-                if 9 < ln < 13:
+                if ln == 9:
                     url = None
                     if row[0].startswith("/logo/"):
                         url = row[0]
                     elif row[1].startswith("/logo/"):
                         url = row[1]
 
-                    ssid = row[-4]
-                    if url and len(ssid) > 2:
-                        self.picons.append(Picon(url, ssid, row[-3]))
+                    if url and row[-3].isdigit():
+                        self.picons.append(Picon(url, row[-3]))
 
             self._current_row = []
 
