@@ -6,7 +6,7 @@ from app.connections import test_telnet, test_ftp, TestException, test_http, Htt
 from app.settings import SettingsType, Settings, PlayStreamsMode
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT
 
 
 def show_settings_dialog(transient, options):
@@ -50,6 +50,7 @@ class SettingsDialog:
                     "on_apply_presets": self.on_apply_presets,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
                     "on_view_popup_menu": self.on_view_popup_menu,
+                    "on_list_font_reset": self.on_list_font_reset,
                     "on_theme_changed": self.on_theme_changed,
                     "on_theme_add": self.on_theme_add,
                     "on_theme_remove": self.on_theme_remove,
@@ -124,18 +125,23 @@ class SettingsDialog:
         self._play_in_built_radio_button = builder.get_object("play_in_built_radio_button")
         self._play_in_window_radio_button = builder.get_object("play_in_window_radio_button")
         self._get_m3u_radio_button = builder.get_object("get_m3u_radio_button")
+        self._gst_lib_button = builder.get_object("gst_lib_button")
+        self._vlc_lib_button = builder.get_object("vlc_lib_button")
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
-        self._enable_experimental_box = builder.get_object("enable_experimental_box")
-        self._colors_grid = builder.get_object("colors_grid")
-        self._set_color_switch = builder.get_object("set_color_switch")
-        self._new_color_button = builder.get_object("new_color_button")
-        self._extra_color_button = builder.get_object("extra_color_button")
         self._load_on_startup_switch = builder.get_object("load_on_startup_switch")
         self._bouquet_hints_switch = builder.get_object("bouquet_hints_switch")
         self._services_hints_switch = builder.get_object("services_hints_switch")
         self._lang_combo_box = builder.get_object("lang_combo_box")
+        # Appearance
+        self._list_font_button = builder.get_object("list_font_button")
+        self._picons_size_button = builder.get_object("picons_size_button")
+        self._tooltip_logo_size_button = builder.get_object("tooltip_logo_size_button")
+        self._colors_grid = builder.get_object("colors_grid")
+        self._set_color_switch = builder.get_object("set_color_switch")
+        self._new_color_button = builder.get_object("new_color_button")
+        self._extra_color_button = builder.get_object("extra_color_button")
         # Extra
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
         self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
@@ -178,19 +184,19 @@ class SettingsDialog:
         self.init_profiles()
 
         if self._settings.is_darwin:
-            # Appearance
-            self._appearance_box = builder.get_object("appearance_box")
-            self._appearance_box.set_visible(True)
+            # Themes
+            self._layout_switch = builder.get_object("layout_switch")
+            self._layout_switch.bind_property("active", builder.get_object("bouquet_box"), "sensitive")
+            self._layout_switch.set_active(self._ext_settings.alternate_layout)
+            self._theme_frame = builder.get_object("theme_frame")
+            self._theme_frame.set_visible(True)
             self._theme_thumbnail_image = builder.get_object("theme_thumbnail_image")
             self._theme_combo_box = builder.get_object("theme_combo_box")
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
             self._dark_mode_switch = builder.get_object("dark_mode_switch")
-            self._layout_switch = builder.get_object("layout_switch")
-            self._layout_switch.bind_property("active", builder.get_object("bouquet_box"), "sensitive")
             self._themes_support_switch = builder.get_object("themes_support_switch")
-            self._themes_support_switch.bind_property("active", builder.get_object("gtk_theme_frame"), "sensitive")
-            self._themes_support_switch.bind_property("active", builder.get_object("icon_theme_frame"), "sensitive")
-            self.init_appearance()
+            self._themes_support_switch.bind_property("active", self._theme_frame, "sensitive")
+            self.init_themes()
 
     @run_idle
     def init_ui_elements(self, s_type):
@@ -269,6 +275,7 @@ class SettingsDialog:
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
         self.set_play_stream_mode(self._settings.play_streams_mode)
+        self.set_stream_lib(self._settings.stream_lib)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
         self._bouquet_hints_switch.set_active(self._settings.show_bq_hints)
         self._services_hints_switch.set_active(self._settings.show_srv_hints)
@@ -276,6 +283,9 @@ class SettingsDialog:
         self._transcoding_switch.set_active(self._settings.activate_transcoding)
         self._presets_combo_box.set_active_id(self._settings.active_preset)
         self.on_transcoding_preset_changed(self._presets_combo_box)
+        self._picons_size_button.set_active_id(str(self._settings.list_picon_size))
+        self._tooltip_logo_size_button.set_active_id(str(self._settings.tooltip_logo_size))
+        self._list_font_button.set_font(self._settings.list_font)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._enable_exp_switch.set_active(self._settings.is_enable_experimental)
@@ -331,6 +341,7 @@ class SettingsDialog:
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
         self._ext_settings.fav_click_mode = self.get_fav_click_mode()
         self._ext_settings.play_streams_mode = self.get_play_stream_mode()
+        self._ext_settings.stream_lib = self.get_stream_lib()
         self._ext_settings.language = self._lang_combo_box.get_active_id()
         self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
@@ -340,6 +351,9 @@ class SettingsDialog:
         self._ext_settings.records_path = self._record_data_dir_field.get_text()
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
+        self._ext_settings.list_picon_size = int(self._picons_size_button.get_active_id())
+        self._ext_settings.tooltip_logo_size = int(self._tooltip_logo_size_button.get_active_id())
+        self._ext_settings.list_font = self._list_font_button.get_font()
 
         if self._ext_settings.is_darwin:
             self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
@@ -620,6 +634,13 @@ class SettingsDialog:
 
         return self._settings.play_streams_mode
 
+    def set_stream_lib(self, mode):
+        self._vlc_lib_button.set_active(mode == "vlc")
+        self._gst_lib_button.set_active(mode == "gst")
+
+    def get_stream_lib(self):
+        return "gst" if self._gst_lib_button.get_active() else "vlc"
+
     def on_transcoding_preset_changed(self, button):
         presets = self._settings.transcoding_presets
         prs = presets.get(button.get_active_id())
@@ -664,6 +685,11 @@ class SettingsDialog:
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
             menu.popup(None, None, None, None, event.button, event.time)
 
+    def on_list_font_reset(self, button):
+        self._list_font_button.set_font(APP_FONT)
+
+    # ******************* Themes *********************** #
+
     def on_theme_changed(self, button):
         if self._main_stack.get_visible_child_name() != "appearance":
             return
@@ -702,7 +728,7 @@ class SettingsDialog:
         response = get_chooser_dialog(self._dialog, self._settings, "Themes Archive [*.xz, *.zip]", ("*.xz", "*.zip"))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
-        self._appearance_box.set_sensitive(False)
+        self._theme_frame.set_sensitive(False)
         self.unpack_theme(response, path, button)
 
     @run_task
@@ -719,7 +745,6 @@ class SettingsDialog:
             log("Unpacking end.")
         finally:
             self.update_theme_button(button, dst)
-            self._appearance_box.set_sensitive(True)
 
     @run_idle
     def update_theme_button(self, button, dst):
@@ -732,6 +757,7 @@ class SettingsDialog:
                 button.append(theme, theme)
                 button.set_active_id(theme)
         self.show_info_message("Done!", Gtk.MessageType.INFO)
+        self._theme_frame.set_sensitive(True)
 
     @run_idle
     def remove_theme(self, button, path):
@@ -755,9 +781,8 @@ class SettingsDialog:
         button.set_active(0)
 
     @run_idle
-    def init_appearance(self):
+    def init_themes(self):
         self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
-        self._layout_switch.set_active(self._ext_settings.alternate_layout)
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
         if t_support:

@@ -2,7 +2,6 @@ import locale
 import os
 from enum import Enum, IntEnum
 from functools import lru_cache
-from app.settings import Settings, SettingsException, IS_DARWIN
 
 import gi
 
@@ -10,6 +9,8 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version("Notify", "0.7")
 from gi.repository import Gtk, Gdk, Notify
+
+from app.settings import Settings, SettingsException, IS_DARWIN
 
 # Init notify
 Notify.init("DemonEditor")
@@ -20,6 +21,7 @@ UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/demo
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # Translation.
 TEXT_DOMAIN = "demon-editor"
+APP_FONT = None
 
 try:
     settings = Settings.get_instance()
@@ -30,8 +32,12 @@ else:
     if UI_RESOURCES_PATH == "app/ui/":
         locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
 
+    st = Gtk.Settings().get_default()
+    APP_FONT = st.get_property("gtk-font-name")
+    if not settings.list_font:
+        settings.list_font = APP_FONT
+
     if settings.is_themes_support:
-        st = Gtk.Settings().get_default()
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
 

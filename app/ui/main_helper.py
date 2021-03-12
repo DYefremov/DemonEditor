@@ -353,12 +353,12 @@ def scroll_to(index, view, paths=None):
 
 # ***************** Picons *********************#
 
-def update_picons_data(path, picons):
+def update_picons_data(path, picons, size=32):
     if not os.path.exists(path):
         return
 
     for file in os.listdir(path):
-        pf = get_picon_pixbuf(path + file)
+        pf = get_picon_pixbuf(path + file, size)
         if pf:
             picons[file] = pf
 
