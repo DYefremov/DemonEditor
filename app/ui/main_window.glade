@@ -1438,6 +1438,8 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
+                        <signal name="hide" handler="on_player_box_visibility" swapped="no"/>
+                        <signal name="show" handler="on_player_box_visibility" swapped="no"/>
                         <child>
                           <object class="GtkEventBox" id="player_event_box">
                             <property name="visible">True</property>
