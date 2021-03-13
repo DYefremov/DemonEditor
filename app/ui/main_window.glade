@@ -1584,7 +1584,7 @@ Author: Dmitriy Yefremov
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes">Toggle in fullscreen</property>
                                 <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-fullscreen</property>
+                                <property name="icon_name">view-fullscreen</property>
                                 <signal name="clicked" handler="on_full_screen" swapped="no"/>
                               </object>
                               <packing>
