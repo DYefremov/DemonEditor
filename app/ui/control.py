@@ -61,19 +61,19 @@ class ControlBox(Gtk.HBox):
 
         @property
         def event_data(self):
-            return self._event_data
+            return self._event_data or {}
 
         @property
         def title(self):
-            return self._title
+            return self._title or ""
 
         @property
         def desc(self):
-            return self._desc
+            return self._desc or ""
 
         @property
         def time_header(self):
-            return self._time_header
+            return self._time_header or ""
 
     class TimerRow(Gtk.ListBoxRow):
 
@@ -357,7 +357,7 @@ class ControlBox(Gtk.HBox):
     def on_epg_filter_changed(self, entry):
         self._epg_list_box.invalidate_filter()
 
-    def epg_filter_function(self, row: EpgRow):
+    def epg_filter_function(self, row):
         txt = self._epg_filter_entry.get_text().upper()
         return any((not txt, txt in row.time_header.upper(), txt in row.title.upper(), txt in row.desc.upper()))
 
