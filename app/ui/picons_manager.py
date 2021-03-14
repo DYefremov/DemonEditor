@@ -72,6 +72,7 @@ class PiconsDialog:
                     "on_fiter_srcs_toggled": self.on_fiter_srcs_toggled,
                     "on_filter_services_switch": self.on_filter_services_switch,
                     "on_picon_activated": self.on_picon_activated,
+                    "on_view_query_tooltip": self.on_view_query_tooltip,
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_popup_menu": on_popup_menu}
 
@@ -753,6 +754,20 @@ class PiconsDialog:
         return "{}  {}: {}\n{}: {}  {}: {}\n{}".format(header.rstrip(), get_message("Package"), srv.package,
                                                        get_message("System"), srv.system, get_message("Freq"), srv.freq,
                                                        ref)
+
+    def on_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        dest = view.get_dest_row_at_pos(x, y)
+        if not dest:
+            return False
+
+        path, pos = dest
+        model = view.get_model()
+        row = model[path][:]
+        tooltip.set_icon(get_picon_pixbuf(row[-1], size=self._settings.tooltip_logo_size))
+        tooltip.set_text(row[1])
+        view.set_tooltip_row(tooltip, path)
+
+        return True
 
     def on_tree_view_key_press(self, view, event):
         key_code = event.hardware_keycode
