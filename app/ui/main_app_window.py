@@ -2649,14 +2649,16 @@ class Application(Gtk.Application):
         self._playback_window.resize(width, height)
         self._playback_window.connect("delete-event", self.on_player_close)
 
-        self._player_prev_button.set_visible(False)
-        self._player_next_button.set_visible(False)
         box = Gtk.HBox(visible=True, orientation="vertical")
         self._player_event_box.reparent(box)
-        self._player_box.remove(self._player_tool_bar)
-        box.pack_end(self._player_tool_bar, False, False, 0)
-        self._playback_window.add(box)
 
+        if not self._settings.is_darwin or self._settings.stream_lib == "gst":
+            self._player_prev_button.set_visible(False)
+            self._player_next_button.set_visible(False)
+            self._player_box.remove(self._player_tool_bar)
+            box.pack_end(self._player_tool_bar, False, False, 0)
+
+        self._playback_window.add(box)
         self._playback_window.set_application(self)
         self._playback_window.show()
 

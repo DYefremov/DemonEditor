@@ -1997,6 +1997,7 @@ Author: Dmitriy Yefremov
                                 <property name="receives_default">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">vlc_lib_button</property>
+                                <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2012,6 +2013,7 @@ Author: Dmitriy Yefremov
                                 <property name="receives_default">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">gst_lib_button</property>
+                                <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
