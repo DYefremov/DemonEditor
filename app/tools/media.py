@@ -287,6 +287,10 @@ class VlcPlayer(Player):
         widget.add(area)
         if sys.platform == "linux":
             self._player.set_xwindow(area.get_window().get_xid())
+        elif sys.platform == "darwin":
+            self.set_nso(area)
+        else:
+            log("Video widget initialization error: platform '{}' is not supported. ".format(sys.platform))
 
     def set_nso(self, widget):
         """ Used on MacOS to set NSObject.
@@ -307,7 +311,7 @@ class VlcPlayer(Player):
             pointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
             self._player.set_nsobject(get_nsview(pointer))
 
-    def on_drawing_area_draw(self,  widget, cr):
+    def on_drawing_area_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area. """
         allocation = widget.get_allocation()
         cr.set_source_rgb(0, 0, 0)

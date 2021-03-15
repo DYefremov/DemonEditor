@@ -614,6 +614,11 @@ class SettingsDialog:
         if self._main_stack.get_visible_child_name() != "streaming":
             return
 
+        if self._settings.is_darwin:
+            is_gst = self._gst_lib_button.get_active()
+            self._play_in_built_radio_button.set_sensitive(is_gst)
+            self._play_in_window_radio_button.set_active(not is_gst and self._play_in_built_radio_button.get_active())
+
         if button.get_active():
             self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
 
@@ -623,6 +628,9 @@ class SettingsDialog:
         self._play_in_built_radio_button.set_active(mode is PlayStreamsMode.BUILT_IN)
         self._play_in_window_radio_button.set_active(mode is PlayStreamsMode.WINDOW)
         self._get_m3u_radio_button.set_active(mode is PlayStreamsMode.M3U)
+
+        if self._settings.is_darwin and self._settings.stream_lib != "gst":
+            self._play_in_built_radio_button.set_sensitive(False)
 
     def get_play_stream_mode(self):
         if self._play_in_built_radio_button.get_active():
