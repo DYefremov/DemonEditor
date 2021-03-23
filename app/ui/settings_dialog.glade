@@ -1965,8 +1965,9 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">EXPERIMENTAL!</property>
                                 <property name="draw_indicator">True</property>
-                                <property name="group">vlc_lib_button</property>
+                                <property name="group">mpv_lib_button</property>
                                 <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
                               </object>
                               <packing>
@@ -1982,13 +1983,30 @@ Author: Dmitriy Yefremov
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="draw_indicator">True</property>
-                                <property name="group">gst_lib_button</property>
+                                <property name="group">mpv_lib_button</property>
                                 <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="mpv_lib_button">
+                                <property name="label" translatable="yes">MPV</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">EXPERIMENTAL!</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">gst_lib_button</property>
+                                <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                           </object>

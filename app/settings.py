@@ -34,7 +34,7 @@ class Defaults(Enum):
     LIST_PICON_SIZE = 32
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
-    STREAM_LIB = "gst"
+    STREAM_LIB = "vlc"
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records/"
     ACTIVATE_TRANSCODING = False

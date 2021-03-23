@@ -193,7 +193,7 @@ class Application(Gtk.Application):
         self._select_enabled = True  # Multiple selection
         # Current satellite positions in the services list
         self._sat_positions = []
-        self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
+        self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
         # Player
         self._player = None
         self._full_screen = False
@@ -316,6 +316,7 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("tools_button_box"), "visible", 4)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
+        self._player_box.bind_property("visible", self._player_event_box, "visible")
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._bouquets_view, "sensitive")
@@ -2466,6 +2467,7 @@ class Application(Gtk.Application):
                 self.show_error_dialog(str(e))
                 return True
             else:
+                self._main_window.connect("key-press-event", self.on_player_key_press)
                 self._player.play(self._current_mrl)
             finally:
                 if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
@@ -2483,6 +2485,12 @@ class Application(Gtk.Application):
     def on_player_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
             if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+                self.on_full_screen()
+
+    def on_player_key_press(self,  widget, event):
+        if self._player and self._player_event_box.get_visible():
+            key = event.keyval
+            if any((key == Gdk.KEY_F11, key == Gdk.KEY_f, self._full_screen and key == Gdk.KEY_Escape)):
                 self.on_full_screen()
 
     def on_full_screen(self, item=None):
@@ -2512,11 +2520,13 @@ class Application(Gtk.Application):
                                            icon_name="demon-editor")
         self._playback_window.resize(width, height)
         self._playback_window.connect("delete-event", self.on_player_close)
+        self._playback_window.connect("key-press-event", self.on_player_key_press)
 
         box = Gtk.HBox(visible=True, orientation="vertical")
         self._player_event_box.reparent(box)
+        self._playback_window.bind_property("visible", self._player_event_box, "visible")
 
-        if not self._settings.is_darwin or self._settings.stream_lib == "gst":
+        if not self._settings.is_darwin:
             self._player_prev_button.set_visible(False)
             self._player_next_button.set_visible(False)
             self._player_box.remove(self._player_tool_bar)
