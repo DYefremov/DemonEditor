@@ -41,6 +41,48 @@ class Player(ABC):
     def get_instance(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
         pass
 
+    def get_window_handle(self, widget):
+        """ Returns the identifier [pointer] for the window.
+
+            Based on gtkvlc.py[get_window_pointer] example from here:
+            https://github.com/oaubert/python-vlc/tree/master/examples
+        """
+        if sys.platform == "linux":
+            return widget.get_window().get_xid()
+        else:
+            is_darwin = sys.platform == "darwin"
+            try:
+                import ctypes
+
+                libgdk = ctypes.CDLL("libgdk-3.0.dylib" if is_darwin else "libgdk-3-0.dll")
+            except OSError as e:
+                log("{}: Load library error: {}".format(__class__.__name__, e))
+            else:
+                # https://gitlab.gnome.org/GNOME/pygobject/-/issues/112
+                ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+                ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
+                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
+                get_pointer = libgdk.gdk_quartz_window_get_nsview if is_darwin else libgdk.gdk_win32_window_get_handle
+                get_pointer.restype = ctypes.c_void_p
+                get_pointer.argtypes = [ctypes.c_void_p]
+
+                return get_pointer(gpointer)
+
+    def get_video_widget(self, widget):
+        from gi.repository import Gtk, Gdk
+
+        area = Gtk.DrawingArea(visible=True)
+        area.connect("draw", self.on_drawing_area_draw)
+        area.set_events(Gdk.ModifierType.BUTTON1_MASK)
+        widget.add(area)
+
+        return area
+
+    def on_drawing_area_draw(self, widget, cr):
+        """ Used for black background drawing in the player drawing area. """
+        cr.set_source_rgb(0, 0, 0)
+        cr.paint()
+
     @staticmethod
     def make(name, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
         """ Factory method. We will not use a separate factory to return a specific implementation.
@@ -55,12 +97,82 @@ class Player(ABC):
 
             Throws a NameError if there is no implementation for the given name.
         """
-        if name == "gst":
+        if name == "mpv":
+            return MpvPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+        elif name == "gst":
             return GstPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
         elif name == "vlc":
             return VlcPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
         else:
             raise NameError("There is no such [{}] implementation.".format(name))
+
+
+class MpvPlayer(Player):
+    """ Simple wrapper for MPV media player.
+
+        Uses python-mvp [https://github.com/jaseg/python-mpv].
+    """
+    __INSTANCE = None
+
+    def __init__(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+        try:
+            from app.tools import mpv
+
+            self._player = mpv.MPV(wid=str(self.get_window_handle(self.get_video_widget(widget))))
+        except OSError as e:
+            log("{}: Load library error: {}".format(__class__.__name__, e))
+            raise ImportError("No libmpv is found. Check that it is installed!")
+        else:
+            self._mode = mode
+            self._is_playing = False
+
+            @self._player.event_callback(mpv.MpvEventID.FILE_LOADED)
+            def on_open(event):
+                log("Starting playback...")
+                playing_cb()
+
+            @self._player.event_callback(mpv.MpvEventID.END_FILE)
+            def on_end(event):
+                event = event.get("event", {})
+                if event.get("reason", mpv.MpvEventEndFile.ERROR) == mpv.MpvEventEndFile.ERROR:
+                    log("Stream playback error: {}".format(event.get("error", mpv.ErrorCode.GENERIC)))
+                    error_cb()
+
+    @classmethod
+    def get_instance(cls, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+        if not cls.__INSTANCE:
+            cls.__INSTANCE = MpvPlayer(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+        return cls.__INSTANCE
+
+    def get_play_mode(self):
+        return self._mode
+
+    @run_task
+    def play(self, mrl=None):
+        if not mrl:
+            return
+
+        self._player.play(mrl)
+        self._is_playing = True
+
+    @run_task
+    def stop(self):
+        self._player.stop()
+        self._is_playing = True
+
+    def pause(self):
+        pass
+
+    def set_time(self, time):
+        pass
+
+    @run_task
+    def release(self):
+        self._player.terminate()
+        self.__INSTANCE = None
+
+    def is_playing(self):
+        return self._is_playing
 
 
 class GstPlayer(Player):
@@ -82,7 +194,7 @@ class GstPlayer(Player):
                 msg = "GStreamer error: gtksink plugin not installed!"
                 log(msg)
                 raise ImportError(msg)
-        except OSError as e:
+        except (OSError, ValueError) as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError("No GStreamer is found. Check that it is installed!")
         else:
@@ -195,7 +307,10 @@ class GstPlayer(Player):
 
 
 class VlcPlayer(Player):
-    """ Simple wrapper for VLC media player. """
+    """ Simple wrapper for VLC media player.
+
+        Uses python-vlc [https://github.com/oaubert/python-vlc].
+    """
 
     __VLC_INSTANCE = None
 
@@ -279,46 +394,13 @@ class VlcPlayer(Player):
         return self._is_playing
 
     def init_video_widget(self, widget):
-        from gi.repository import Gtk, Gdk
-
-        area = Gtk.DrawingArea(visible=True)
-        area.connect("draw", self.on_drawing_area_draw)
-        area.set_events(Gdk.ModifierType.BUTTON1_MASK)
-        widget.add(area)
+        video_widget = self.get_video_widget(widget)
         if sys.platform == "linux":
-            self._player.set_xwindow(area.get_window().get_xid())
+            self._player.set_xwindow(video_widget.get_window().get_xid())
         elif sys.platform == "darwin":
-            self.set_nso(area)
+            self._player.set_nsobject(self.get_window_handle(video_widget))
         else:
             log("Video widget initialization error: platform '{}' is not supported. ".format(sys.platform))
-
-    def set_nso(self, widget):
-        """ Used on MacOS to set NSObject.
-            Based on gtkvlc.py[get_window_pointer] example from here:
-            https://github.com/oaubert/python-vlc/tree/master/examples
-        """
-        try:
-            import ctypes
-            g_dll = ctypes.CDLL("libgdk-3.0.dylib")
-        except OSError as e:
-            log("{}: Load library error: {}".format(__class__.__name__, e))
-        else:
-            get_nsview = g_dll.gdk_quartz_window_get_nsview
-            get_nsview.restype, get_nsview.argtypes = ctypes.c_void_p, [ctypes.c_void_p]
-            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
-            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-            # Get the C void* pointer to the window
-            pointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
-            self._player.set_nsobject(get_nsview(pointer))
-
-    def on_drawing_area_draw(self, widget, cr):
-        """ Used for black background drawing in the player drawing area. """
-        allocation = widget.get_allocation()
-        cr.set_source_rgb(0, 0, 0)
-        cr.rectangle(0, 0, allocation.width, allocation.height)
-        cr.fill()
-
-        return False
 
 
 class Recorder:

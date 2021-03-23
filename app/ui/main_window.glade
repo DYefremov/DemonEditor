@@ -1442,7 +1442,6 @@ Author: Dmitriy Yefremov
                         <signal name="show" handler="on_player_box_visibility" swapped="no"/>
                         <child>
                           <object class="GtkEventBox" id="player_event_box">
-                            <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <signal name="button-press-event" handler="on_player_press" swapped="no"/>
                             <signal name="realize" handler="on_player_box_realize" swapped="no"/>

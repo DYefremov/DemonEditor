@@ -125,6 +125,7 @@ class SettingsDialog:
         self._get_m3u_radio_button = builder.get_object("get_m3u_radio_button")
         self._gst_lib_button = builder.get_object("gst_lib_button")
         self._vlc_lib_button = builder.get_object("vlc_lib_button")
+        self._mpv_lib_button = builder.get_object("mpv_lib_button")
         # Program
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
@@ -610,7 +611,7 @@ class SettingsDialog:
         return FavClickMode.DISABLED
 
     def on_play_mode_changed(self, button):
-        if self._main_stack.get_visible_child_name() != "streaming":
+        if self._main_stack.get_visible_child_name() != "streaming" or not button.get_active():
             return
 
         if self._settings.is_darwin:
@@ -643,9 +644,14 @@ class SettingsDialog:
     def set_stream_lib(self, mode):
         self._vlc_lib_button.set_active(mode == "vlc")
         self._gst_lib_button.set_active(mode == "gst")
+        self._mpv_lib_button.set_active(mode == "mpv")
 
     def get_stream_lib(self):
-        return "gst" if self._gst_lib_button.get_active() else "vlc"
+        if self._gst_lib_button.get_active():
+            return "gst"
+        elif self._vlc_lib_button.get_active():
+            return "vlc"
+        return "mpv"
 
     def on_transcoding_preset_changed(self, button):
         presets = self._settings.transcoding_presets
