@@ -22,7 +22,7 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPG from DVB or XML for IPTV services (only Enigma2, experimental).
-* Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).    
+* Preview (playback) of IPTV or other streams directly from the bouquet list.  
   [<img src="https://user-images.githubusercontent.com/7511379/103151911-89a52c00-4793-11eb-9941-8430f4e87eef.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103151911-89a52c00-4793-11eb-9941-8430f4e87eef.png)
 * Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).  
   [<img src="https://user-images.githubusercontent.com/7511379/103150898-c79d5280-4789-11eb-9d16-e7f89225738b.png" width="480"/>](https://user-images.githubusercontent.com/7511379/103150898-c79d5280-4789-11eb-9d16-e7f89225738b.png)
@@ -57,9 +57,9 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 
 ## Minimum requirements
-*Python >= 3.5.2, GTK+ >= 3.16 with PyGObject bindings, python3-requests.*   
-   
-***Optional:** python3-gi-cairo, python3-pil, python3-chardet.*                        
+*Python >= 3.5.2, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.*
+
+***Optional:** python3-pil, python3-chardet.*                      
 ## Installation and Launch
 * ### Linux                                                                                                          
 To start the program, in most cases it is enough to download the [archive](https://github.com/DYefremov/DemonEditor/archive/master.zip), unpack  
@@ -86,6 +86,8 @@ When using the multiple import feature, from *lamedb* will be taken data **only 
 If you need full set of the data, including *[satellites, terrestrial, cables].xml* (current files will be overwritten), 
 just load your data via *"File/Open"* and press *"Save"*. When importing separate bouquet files, only those services 
 (excluding IPTV) that are in the **current open lamedb** (main list of services) will be imported.
+
+For streams playback, this app supports [VLC](https://www.videolan.org/vlc/), [MPV](https://mpv.io/) and [GStreamer](https://gstreamer.freedesktop.org/). Depending on your distro, you may need to install additional packages and libraries. 
 #### Command line arguments:
 * **-l** - write logs to file.
 * **-d on/off** - turn on/off debug mode. Allows to display more information in the logs.
