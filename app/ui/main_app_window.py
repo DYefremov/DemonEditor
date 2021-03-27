@@ -137,6 +137,8 @@ class Application(Gtk.Application):
                           "on_locate_in_services": self.on_locate_in_services,
                           "on_picons_manager_show": self.on_picons_manager_show,
                           "on_filter_changed": self.on_filter_changed,
+                          "on_filter_type_toggled": self.on_filter_type_toggled,
+                          "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
                           "on_assign_picon": self.on_assign_picon,
                           "on_remove_picon": self.on_remove_picon,
                           "on_reference_picon": self.on_reference_picon,
@@ -192,7 +194,8 @@ class Application(Gtk.Application):
         self._bq_selected = ""  # Current selected bouquet
         self._select_enabled = True  # Multiple selection
         # Current satellite positions in the services list
-        self._sat_positions = []
+        self._sat_positions = set()
+        self._service_types = set()
         self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
         # Player
         self._player = None
@@ -289,10 +292,8 @@ class Application(Gtk.Application):
         self._services_model_filter.set_visible_func(self.services_filter_function)
         self._filter_entry = builder.get_object("filter_entry")
         self._filter_bar = builder.get_object("filter_bar")
-        self._filter_types_box = builder.get_object("filter_types_box")
-        self._filter_sat_positions_box = builder.get_object("filter_sat_positions_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
-        self._filter_sat_positions_model = builder.get_object("filter_sat_positions_list_store")
+        self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Player
@@ -402,6 +403,7 @@ class Application(Gtk.Application):
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_appearance()
+        self.filter_set_default()
 
         if self._settings.load_last_config:
             config = self._settings.get("last_config") or {}
@@ -1625,6 +1627,9 @@ class Application(Gtk.Application):
             yield True
             self._data_hash = self.get_data_hash()
             yield True
+            if self._filter_bar.get_visible():
+                self.on_filter_changed()
+            yield True
 
     def append_data(self, bouquets, services):
         if self._app_info_box.get_visible():
@@ -2623,7 +2628,7 @@ class Application(Gtk.Application):
             if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
                 self.on_full_screen()
 
-    def on_player_key_press(self,  widget, event):
+    def on_player_key_press(self, widget, event):
         if self._player and self._player_event_box.get_visible():
             key = event.keyval
             if any((key == Gdk.KEY_F11, key == Gdk.KEY_f, self._full_screen and key == Gdk.KEY_Escape)):
@@ -2958,32 +2963,29 @@ class Application(Gtk.Application):
             return True
 
         action.set_state(value)
-        if value:
-            self.update_filter_sat_positions()
-            self._filter_entry.grab_focus()
-        else:
-            self.filter_set_default()
 
+        self._filter_entry.grab_focus() if value else self.on_filter_changed()
+        self.filter_set_default()
         self._filter_bar.set_search_mode(value)
 
+    @run_idle
     def filter_set_default(self):
         """ Setting defaults for filter elements. """
         self._filter_entry.set_text("")
-        self._filter_sat_positions_box.set_active(0)
-        self._filter_types_box.set_active(0)
         self._filter_only_free_button.set_active(False)
+        self._filter_types_model.foreach(lambda m, p, i: m.set_value(i, 1, True))
+        self._service_types.update({r[0] for r in self._filter_types_model})
+        self.update_sat_positions()
 
     def init_sat_positions(self):
         self._sat_positions.clear()
-        first = (self._filter_sat_positions_model[0][0],)
-        self._filter_sat_positions_model.clear()
-        self._filter_sat_positions_model.append(first)
-        self._filter_sat_positions_box.set_active(0)
+        first = self._filter_sat_pos_model[0][:]
+        self._filter_sat_pos_model.clear()
+        self._filter_sat_pos_model.append(first)
 
     def update_sat_positions(self):
-        """ Updates positions values for the filtering function """
+        """ Updates positions values for the filtering function. """
         self._sat_positions.clear()
-        sat_positions = set()
 
         if self._s_type is SettingsType.ENIGMA_2:
             terrestrial = False
@@ -2992,64 +2994,72 @@ class Application(Gtk.Application):
             for srv in self._services.values():
                 tr_type = srv.transponder_type
                 if tr_type == "s" and srv.pos:
-                    sat_positions.add(srv.pos)
+                    self._sat_positions.add(srv.pos)
                 elif tr_type == "t":
                     terrestrial = True
                 elif tr_type == "c":
                     cable = True
 
             if terrestrial:
-                self._sat_positions.append("T")
+                self._sat_positions.add("T")
             if cable:
-                self._sat_positions.append("C")
+                self._sat_positions.add("C")
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            list(map(lambda s: sat_positions.add(s.pos), filter(lambda s: s.pos, self._services.values())))
+            list(map(lambda s: self._sat_positions.add(s.pos), filter(lambda s: s.pos, self._services.values())))
 
-        self._sat_positions.extend(map(str, sorted(sat_positions)))
-        if self._filter_bar.is_visible():
-            self.update_filter_sat_positions()
+        self.update_filter_sat_positions()
 
-    @run_idle
     def update_filter_sat_positions(self):
-        model = self._filter_sat_positions_model
-        if len(model) < 2:
-            list(map(self._filter_sat_positions_model.append, map(lambda x: (str(x),), self._sat_positions)))
-        else:
-            selected = self._filter_sat_positions_box.get_active_id()
-            active = self._filter_sat_positions_box.get_active()
-            itrs = list(filter(lambda it: model[it][0] not in self._sat_positions, [row.iter for row in model][1:]))
-            list(map(model.remove, itrs))
+        """ Updates the values for the satellite positions button model. """
+        first = self._filter_sat_pos_model[self._filter_sat_pos_model.get_iter_first()][:]
+        self._filter_sat_pos_model.clear()
+        self._filter_sat_pos_model.append((first[0], True))
+        self._sat_positions.discard(first[0])
+        list(map(lambda pos: self._filter_sat_pos_model.append((pos, True)),
+                 sorted(self._sat_positions, key=self.get_pos_num, reverse=True)))
 
-            if active != 0 and selected not in self._sat_positions:
-                self._filter_sat_positions_box.set_active(0)
-
-    @run_with_delay(1)
-    def on_filter_changed(self, item):
-        GLib.idle_add(self._services_model_filter.refilter, priority=GLib.PRIORITY_LOW)
+    @run_with_delay(2)
+    def on_filter_changed(self, item=None):
+        model = self._services_view.get_model()
+        self._services_view.set_model(None)
+        self._services_model_filter.refilter()
+        self._services_view.set_model(model)
 
     def services_filter_function(self, model, itr, data):
-        if self._services_model_filter is None or self._services_model_filter == "None":
+        if not self._filter_bar.is_visible():
             return True
         else:
             r_txt = str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE, Column.SRV_TYPE, Column.SRV_SSID,
                                   Column.SRV_FREQ, Column.SRV_RATE, Column.SRV_POL, Column.SRV_FEC, Column.SRV_SYSTEM,
                                   Column.SRV_POS)).upper()
             txt = self._filter_entry.get_text().upper() in r_txt
-            type_active = self._filter_types_box.get_active() > 0
-            pos_active = self._filter_sat_positions_box.get_active() > 0
             free = not model.get(itr, Column.SRV_CODED)[0] if self._filter_only_free_button.get_active() else True
+            srv_type, pos = model.get(itr, Column.SRV_TYPE, Column.SRV_POS)
 
-            if type_active and pos_active:
-                active_id = self._filter_types_box.get_active_id() == model.get(itr, Column.SRV_TYPE)[0]
-                pos = self._filter_sat_positions_box.get_active_id() == model.get(itr, Column.SRV_POS)[0]
-                return active_id and pos and txt and free
-            elif type_active:
-                return self._filter_types_box.get_active_id() == model.get(itr, Column.SRV_TYPE)[0] and txt and free
-            elif pos_active:
-                pos = self._filter_sat_positions_box.get_active_id() == model.get(itr, Column.SRV_POS)[0]
-                return pos and txt and free
+            return all((srv_type in self._service_types,
+                        pos in self._sat_positions,
+                        txt, free))
 
-            return txt and free
+    def on_filter_type_toggled(self, toggle, path):
+        self.update_filter_toogle_model(self._filter_types_model, toggle, path, self._service_types)
+
+    def on_filter_satellite_toggled(self, toggle, path):
+        self.update_filter_toogle_model(self._filter_sat_pos_model, toggle, path, self._sat_positions)
+
+    def update_filter_toogle_model(self, model, toggle, path, values_set):
+        active = not toggle.get_active()
+        if path == "0":
+            model.foreach(lambda m, p, i: m.set_value(i, 1, active))
+        else:
+            model.set_value(model.get_iter(path), 1, active)
+            if active:
+                model.set_value(model.get_iter_first(), 1, len({r[0] for r in model if r[1]}) == len(model) - 1)
+            else:
+                model.set_value(model.get_iter_first(), 1, False)
+
+        values_set.clear()
+        values_set.update({r[0] for r in model if r[1]})
+        self.on_filter_changed()
 
     def on_search_toggled(self, action, value):
         if self._app_info_box.get_visible():
