@@ -2990,12 +2990,13 @@ class Application(Gtk.Application):
         if self._s_type is SettingsType.ENIGMA_2:
             terrestrial = False
             cable = False
+            atsc = False
 
             for srv in self._services.values():
                 tr_type = srv.transponder_type
                 if tr_type == "s" and srv.pos:
                     self._sat_positions.add(srv.pos)
-                elif tr_type == "t":
+                elif tr_type == "t" or tr_type == "a":
                     terrestrial = True
                 elif tr_type == "c":
                     cable = True
