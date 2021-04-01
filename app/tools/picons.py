@@ -65,15 +65,13 @@ class PiconsParser(HTMLParser):
             if self._single and ln == 4 and row[0].startswith("/logo/"):
                 self.picons.append(Picon(row[0].strip(), "0"))
             else:
-                if ln == 9:
+                if ln > 8:
                     url = None
-                    if row[0].startswith("/logo/"):
-                        url = row[0]
-                    elif row[1].startswith("/logo/"):
-                        url = row[1]
+                    if row[2].startswith("/logo/"):
+                        url = row[2]
 
-                    if url and row[-3].isdigit():
-                        self.picons.append(Picon(url, row[-3]))
+                    if url and row[0].isdigit():
+                        self.picons.append(Picon(url, row[0]))
 
             self._current_row = []
 
