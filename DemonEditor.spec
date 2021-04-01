@@ -11,6 +11,13 @@ BUILD_DATE = datetime.datetime.now().strftime("%Y%m%d")
 
 block_cipher = None
 
+excludes = ['app.tools.mpv',
+            'gi.repository.Gst',
+            'gi.repository.GstBase',
+            'gi.repository.GstVideo',
+            'youtube_dl',
+            'tkinter']
+
 ui_files = [('app/ui/*.glade', 'ui'),
             ('app/ui/*.css', 'ui'),
             ('app/ui/*.ui', 'ui'),
@@ -25,7 +32,7 @@ a = Analysis([EXE_NAME],
              hiddenimports=['fileinput', 'uuid'],
              hookspath=[],
              runtime_hooks=[],
-             excludes=['youtube_dl', 'tkinter'],
+             excludes=excludes,
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher)
@@ -61,7 +68,7 @@ app = BUNDLE(coll,
                  'CFBundleDisplayName': 'DemonEditor',
                  'CFBundleGetInfoString': "Enigma2 channel and satellites editor",
                  'LSApplicationCategoryType': 'public.app-category.utilities',
-                 'CFBundleShortVersionString': "1.0.6 Beta (Build: {})".format(BUILD_DATE),
+                 'CFBundleShortVersionString': "1.0.7 Beta (Build: {})".format(BUILD_DATE),
                  'NSHumanReadableCopyright': u"Copyright © 2021, Dmitriy Yefremov",
                  'NSRequiresAquaSystemAppearance': 'false'
              })
