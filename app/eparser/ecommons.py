@@ -35,6 +35,7 @@ class TrType(Enum):
     Satellite = "s"
     Terrestrial = "t"
     Cable = "c"
+    ATSC = "a"
 
 
 class BqType(Enum):
@@ -146,6 +147,10 @@ T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "-1": "DVB-T/T2"}
 
 # Cable
 C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
+
+# ATSC
+A_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256", "6": "8VSB",
+                "7": "16VSB"}
 
 # CAS
 CAS = {"C:26": "BISS", "C:0B": "Conax", "C:06": "Irdeto", "C:18": "Nagravision", "C:05": "Viaccess", "C:01": "SECA",

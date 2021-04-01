@@ -40,37 +40,37 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
       <row>
-        <col id="0" translatable="yes">1/2</col>
+        <col id="0">1/2</col>
       </row>
       <row>
         <col id="0" translatable="yes">2/3</col>
       </row>
       <row>
-        <col id="0" translatable="yes">3/4</col>
+        <col id="0">3/4</col>
       </row>
       <row>
-        <col id="0" translatable="yes">5/6</col>
+        <col id="0">5/6</col>
       </row>
       <row>
-        <col id="0" translatable="yes">7/8</col>
+        <col id="0">7/8</col>
       </row>
       <row>
-        <col id="0" translatable="yes">8/9</col>
+        <col id="0">8/9</col>
       </row>
       <row>
-        <col id="0" translatable="yes">3/5</col>
+        <col id="0">3/5</col>
       </row>
       <row>
-        <col id="0" translatable="yes">4/5</col>
+        <col id="0">4/5</col>
       </row>
       <row>
-        <col id="0" translatable="yes">6/7</col>
+        <col id="0">6/7</col>
       </row>
       <row>
-        <col id="0" translatable="yes">9/10</col>
+        <col id="0">9/10</col>
       </row>
     </data>
   </object>
@@ -94,13 +94,13 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Off</col>
+        <col id="0">Off</col>
       </row>
       <row>
-        <col id="0" translatable="yes">On</col>
+        <col id="0">On</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
     </data>
   </object>
@@ -111,19 +111,19 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
       <row>
-        <col id="0" translatable="yes">QPSK</col>
+        <col id="0">QPSK</col>
       </row>
       <row>
-        <col id="0" translatable="yes">8PSK</col>
+        <col id="0">8PSK</col>
       </row>
       <row>
-        <col id="0" translatable="yes">16APSK</col>
+        <col id="0">16APSK</col>
       </row>
       <row>
-        <col id="0" translatable="yes">32APSK</col>
+        <col id="0">32APSK</col>
       </row>
     </data>
   </object>
@@ -134,13 +134,13 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Off</col>
+        <col id="0">Off</col>
       </row>
       <row>
-        <col id="0" translatable="yes">On</col>
+        <col id="0">On</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
     </data>
   </object>
@@ -151,13 +151,13 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Root</col>
+        <col id="0">Root</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Gold</col>
+        <col id="0">Gold</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Combo</col>
+        <col id="0">Combo</col>
       </row>
     </data>
   </object>
@@ -168,16 +168,16 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">H</col>
+        <col id="0">H</col>
       </row>
       <row>
-        <col id="0" translatable="yes">V</col>
+        <col id="0">V</col>
       </row>
       <row>
-        <col id="0" translatable="yes">R</col>
+        <col id="0">R</col>
       </row>
       <row>
-        <col id="0" translatable="yes">L</col>
+        <col id="0">L</col>
       </row>
     </data>
   </object>
@@ -188,16 +188,16 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">35%</col>
+        <col id="0">35%</col>
       </row>
       <row>
-        <col id="0" translatable="yes">25%</col>
+        <col id="0">25%</col>
       </row>
       <row>
-        <col id="0" translatable="yes">20%</col>
+        <col id="0">20%</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
     </data>
   </object>
@@ -253,10 +253,10 @@ Author: Dmitriy Yefremov
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">DVB-S</col>
+        <col id="0">DVB-S</col>
       </row>
       <row>
-        <col id="0" translatable="yes">DVB-S2</col>
+        <col id="0">DVB-S2</col>
       </row>
     </data>
   </object>
