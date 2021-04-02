@@ -255,13 +255,22 @@ class SatellitesDialog:
 
         return paths
 
-    @staticmethod
-    def on_remove(view):
+    @run_idle
+    def on_remove(self, view):
+        """ Removal of selected satellites and transponders.
+
+            The satellites are removed first! Then transponders.
+        """
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
-
-        for itr in [model.get_iter(path) for path in paths]:
-            model.remove(itr)
+        itrs = [model.get_iter(path) for path in paths]
+        satellites = list(filter(model.iter_has_child, itrs))
+        if len(satellites):
+            # Removing selected satellites.
+            list(map(model.remove, satellites))
+        else:
+            # Removing selected transponders.
+            list(map(model.remove, itrs))
 
     @run_idle
     def on_save(self, view):
@@ -533,7 +542,13 @@ class UpdateDialog:
 
     @run_task
     def get_sat_list(self, src, callback):
-        sats = self._parser.get_satellites_list(SatelliteSource.FLYSAT if src == 0 else SatelliteSource.LYNGSAT)
+        sat_src = SatelliteSource.FLYSAT
+        if src == 1:
+            sat_src = SatelliteSource.LYNGSAT
+        elif src == 2:
+            sat_src = SatelliteSource.KINGOFSAT
+
+        sats = self._parser.get_satellites_list(sat_src)
         if sats:
             callback(sats)
         self.is_download = False
@@ -733,8 +748,8 @@ class ServicesUpdateDialog(UpdateDialog):
         self._services_parser = ServicesParser(source=SatelliteSource.LYNGSAT)
 
         self._transponder_paned.set_visible(True)
-        s_model = self._source_box.get_model()
-        s_model.remove(s_model.get_iter_first())
+        self._source_box.remove(0)
+        self._source_box.remove(1)
         self._source_box.set_active(0)
         # Transponder view popup menu
         tr_popup_menu = Gtk.Menu()

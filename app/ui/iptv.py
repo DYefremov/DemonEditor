@@ -756,7 +756,7 @@ class M3uImportDialog(IptvListDialog):
         self._progress_bar.set_visible(False)
         self._progress_bar.set_fraction(0.0)
         self._apply_button.set_sensitive(True)
-        self._info_label.set_text("{}  Errors: {}.".format(get_message("Done!"), self._errors_count))
+        self._info_label.set_text("Errors: {}.".format(self._errors_count))
         self._is_download = False
 
         gen = self.update_fav_model()

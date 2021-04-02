@@ -1,8 +1,8 @@
-# Copyright (C) 2018-2020 Dmitriy Yefremov
+# Copyright (C) 2018-2021 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 # Charly, 2019.
-# Dmitriy Yefremov, 2020.
+# Dmitriy Yefremov, 2020-2021.
 msgid ""
 msgstr ""
 "Last-Translator: Dmitriy Yefremov\n"
@@ -31,7 +31,7 @@ msgid "Freq"
 msgstr "Freq"
 
 msgid "Rate"
-msgstr "Bewertung"
+msgstr "SR"
 
 msgid "Pol"
 msgstr "Pol."
@@ -1229,3 +1229,15 @@ msgstr "Download picons"
 
 msgid "Errors:"
 msgstr "Fehler:"
+
+msgid "Use to play streams:"
+msgstr "Zum Abspielen von Streams verwenden:"
+
+msgid "Font in the lists:"
+msgstr "Schrift in den Listen:"
+
+msgid "Picons size in the lists:"
+msgstr "Picons Größe in den Listen:"
+
+msgid "Logo size in tooltips:"
+msgstr "Logo-Größe in Tooltips:"

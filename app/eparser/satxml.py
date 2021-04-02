@@ -53,9 +53,9 @@ def write_satellites(satellites, data_path):
             transponder_child.setAttribute("frequency", tr.frequency)
             transponder_child.setAttribute("symbol_rate", tr.symbol_rate)
             transponder_child.setAttribute("polarization", get_key_by_value(POLARIZATION, tr.polarization))
-            transponder_child.setAttribute("fec_inner", get_key_by_value(FEC, tr.fec_inner))
-            transponder_child.setAttribute("system", get_key_by_value(SYSTEM, tr.system))
-            transponder_child.setAttribute("modulation", get_key_by_value(MODULATION, tr.modulation))
+            transponder_child.setAttribute("fec_inner", get_key_by_value(FEC, tr.fec_inner) or "0")
+            transponder_child.setAttribute("system", get_key_by_value(SYSTEM, tr.system) or "0")
+            transponder_child.setAttribute("modulation", get_key_by_value(MODULATION, tr.modulation) or "0")
             if tr.pls_mode:
                 transponder_child.setAttribute("pls_mode", tr.pls_mode)
             if tr.pls_code:
@@ -90,7 +90,6 @@ def parse_transponders(elem, sat_name):
                                  atr["is_id"].value if "is_id" in atr else None)
             except Exception as e:
                 message = "Error: can't parse transponder for '{}' satellite! {}".format(sat_name, repr(e))
-                print(message)
                 log(message)
             else:
                 transponders.append(tr)

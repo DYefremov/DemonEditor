@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.22.2
 
 The MIT License (MIT)
 
@@ -547,45 +547,146 @@ Author: Dmitriy Yefremov
     <property name="icon_name">edit-find-replace-symbolic</property>
     <property name="icon_size">1</property>
   </object>
-  <object class="GtkListStore" id="filter_sat_positions_list_store">
+  <object class="GtkListStore" id="filter_sat_pos_list_store">
     <columns>
       <!-- column-name satellite -->
       <column type="gchararray"/>
+      <!-- column-name selected -->
+      <column type="gboolean"/>
     </columns>
     <data>
       <row>
         <col id="0" translatable="yes">All positions</col>
+        <col id="1">True</col>
       </row>
     </data>
+  </object>
+  <object class="GtkPopover" id="filter_satellite_popover">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkScrolledWindow" id="filter_satellite_scrolled_window">
+        <property name="width_request">135</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="hscrollbar_policy">never</property>
+        <property name="max_content_height">350</property>
+        <property name="propagate_natural_height">True</property>
+        <child>
+          <object class="GtkTreeView" id="filter_satellite_view">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="model">filter_sat_pos_list_store</property>
+            <property name="headers_visible">False</property>
+            <property name="enable_search">False</property>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection"/>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn" id="fiter_satellite_column">
+                <property name="title" translatable="yes">Satellite</property>
+                <child>
+                  <object class="GtkCellRendererText" id="filter_satelliter_renderer_text"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+                <child>
+                  <object class="GtkCellRendererToggle" id="filter_satellite_renderer_toggle">
+                    <property name="xalign">0.98</property>
+                    <signal name="toggled" handler="on_filter_satellite_toggled" swapped="no"/>
+                  </object>
+                  <attributes>
+                    <attribute name="active">1</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="filter_types_list_store">
     <columns>
       <!-- column-name type -->
       <column type="gchararray"/>
+      <!-- column-name selected -->
+      <column type="gboolean"/>
     </columns>
     <data>
       <row>
         <col id="0" translatable="yes">All types</col>
+        <col id="1">False</col>
       </row>
       <row>
         <col id="0">TV</col>
+        <col id="1">False</col>
       </row>
       <row>
         <col id="0">TV (H264)</col>
+        <col id="1">False</col>
       </row>
       <row>
         <col id="0" translatable="yes">TV (HD)</col>
+        <col id="1">False</col>
       </row>
       <row>
         <col id="0" translatable="yes">TV (UHD)</col>
+        <col id="1">False</col>
       </row>
       <row>
         <col id="0" translatable="yes">Radio</col>
+        <col id="1">False</col>
       </row>
       <row>
         <col id="0" translatable="yes">Data</col>
+        <col id="1">False</col>
       </row>
     </data>
+  </object>
+  <object class="GtkPopover" id="filter_type_popover">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkTreeView" id="filter_type_view">
+        <property name="width_request">135</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="model">filter_types_list_store</property>
+        <property name="headers_visible">False</property>
+        <property name="enable_search">False</property>
+        <child internal-child="selection">
+          <object class="GtkTreeSelection"/>
+        </child>
+        <child>
+          <object class="GtkTreeViewColumn" id="fiter_type_column">
+            <property name="title" translatable="yes">Type</property>
+            <child>
+              <object class="GtkCellRendererText" id="filter_type_renderer_text"/>
+              <attributes>
+                <attribute name="text">0</attribute>
+              </attributes>
+            </child>
+            <child>
+              <object class="GtkCellRendererToggle" id="filter_type_renderer_toggle">
+                <property name="xalign">0.98000001907348633</property>
+                <signal name="toggled" handler="on_filter_type_toggled" swapped="no"/>
+              </object>
+              <attributes>
+                <attribute name="active">1</attribute>
+              </attributes>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="find_image">
     <property name="visible">True</property>
@@ -1600,15 +1701,16 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">1</property>
+                        <signal name="hide" handler="on_player_box_visibility" swapped="no"/>
+                        <signal name="show" handler="on_player_box_visibility" swapped="no"/>
                         <child>
-                          <object class="GtkDrawingArea" id="player_drawing_area">
-                            <property name="width_request">320</property>
-                            <property name="height_request">240</property>
-                            <property name="visible">True</property>
+                          <object class="GtkEventBox" id="player_event_box">
                             <property name="can_focus">False</property>
                             <signal name="button-press-event" handler="on_player_press" swapped="no"/>
-                            <signal name="draw" handler="on_player_drawing_area_draw" swapped="no"/>
-                            <signal name="realize" handler="on_drawing_area_realize" swapped="no"/>
+                            <signal name="realize" handler="on_player_box_realize" swapped="no"/>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -1744,7 +1846,7 @@ Author: Dmitriy Yefremov
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes">Toggle in fullscreen</property>
                                 <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-fullscreen</property>
+                                <property name="icon_name">view-fullscreen</property>
                                 <signal name="clicked" handler="on_full_screen" swapped="no"/>
                               </object>
                               <packing>
@@ -1892,8 +1994,6 @@ Author: Dmitriy Yefremov
                               <object class="GtkBox" id="filter_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">center</property>
-                                <property name="spacing">2</property>
                                 <child>
                                   <object class="GtkToggleButton" id="filter_only_free_button">
                                     <property name="label" translatable="yes">Only free</property>
@@ -1924,18 +2024,19 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBox" id="filter_types_box">
+                                  <object class="GtkMenuButton" id="filter_types_button">
+                                    <property name="width_request">75</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="model">filter_types_list_store</property>
-                                    <property name="active">0</property>
-                                    <property name="id_column">0</property>
-                                    <signal name="changed" handler="on_filter_changed" swapped="no"/>
+                                    <property name="can_focus">True</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="popover">filter_type_popover</property>
                                     <child>
-                                      <object class="GtkCellRendererText" id="filter_types_box_cellrenderertext"/>
-                                      <attributes>
-                                        <attribute name="text">0</attribute>
-                                      </attributes>
+                                      <object class="GtkLabel" id="filter_type_label">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Type</property>
+                                      </object>
                                     </child>
                                   </object>
                                   <packing>
@@ -1945,18 +2046,19 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBox" id="filter_sat_positions_box">
+                                  <object class="GtkMenuButton" id="filter_satellite_button">
+                                    <property name="width_request">75</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="model">filter_sat_positions_list_store</property>
-                                    <property name="active">0</property>
-                                    <property name="id_column">0</property>
-                                    <signal name="changed" handler="on_filter_changed" swapped="no"/>
+                                    <property name="can_focus">True</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="popover">filter_satellite_popover</property>
                                     <child>
-                                      <object class="GtkCellRendererText" id="filter_satellites_box_cellrenderertext"/>
-                                      <attributes>
-                                        <attribute name="text">0</attribute>
-                                      </attributes>
+                                      <object class="GtkLabel" id="filter_pos_label">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Pos</property>
+                                      </object>
                                     </child>
                                   </object>
                                   <packing>
@@ -1965,6 +2067,9 @@ Author: Dmitriy Yefremov
                                     <property name="position">3</property>
                                   </packing>
                                 </child>
+                                <style>
+                                  <class name="group"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -3241,7 +3346,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel" id="app_ver_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">1.0.5 Alpha</property>
+                        <property name="label" translatable="yes">1.0.7 Beta</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>

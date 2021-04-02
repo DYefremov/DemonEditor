@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Dmitriy Yefremov
+# Copyright (C) 2018-2021 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -909,7 +909,7 @@ msgid "Sample rate (Hz):"
 msgstr "Частата дыскр. (Гц):"
 
 msgid "Play streams mode:"
-msgstr "Рэжым прайгравання струменяў:"
+msgstr "Рэжым прайгравання патокаў:"
 
 msgid "Built-in player"
 msgstr "Убудаваны плэер"
@@ -1216,3 +1216,15 @@ msgstr "Загрузіць пiконы"
 
 msgid "Errors:"
 msgstr "Памылак:"
+
+msgid "Use to play streams:"
+msgstr "Скарыстаць для прайгравання патокаў:"
+
+msgid "Font in the lists:"
+msgstr "Шрыфт у спісах:"
+
+msgid "Picons size in the lists:"
+msgstr "Памер пiконаў у спісах:"
+
+msgid "Logo size in tooltips:"
+msgstr "Памер лагатыпа ва ўсплыўных падказках:"

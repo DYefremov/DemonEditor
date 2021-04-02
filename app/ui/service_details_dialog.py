@@ -6,7 +6,7 @@ from app.eparser import Service
 from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, Pids, POLARIZATION, get_key_by_value,
                                   get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION,
                                   TrType, SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, T_FEC,
-                                  HIERARCHY)
+                                  HIERARCHY, A_MODULATION)
 from app.settings import SettingsType
 from .dialogs import show_dialog, DialogType, Action, get_dialogs_string
 from .main_helper import get_base_model
@@ -206,6 +206,8 @@ class ServiceDetailsDialog:
             self.update_ui_for_terrestrial()
         elif self._tr_type is TrType.Cable:
             self.update_ui_for_cable()
+        elif self._tr_type is TrType.ATSC:
+            self.update_ui_for_atsc()
         else:
             self.set_sat_positions(srv.pos)
 
@@ -307,6 +309,11 @@ class ServiceDetailsDialog:
             self.select_active_text(self._pls_mode_combo_box, HIERARCHY.get(tr_data[7]))
             self.select_active_text(self._invertion_combo_box, Inversion(tr_data[8]).name)
             self.select_active_text(self._sys_combo_box, T_SYSTEM.get(tr_data[9]))
+        elif tr_type is TrType.ATSC:
+            self._sys_combo_box.set_active(0)
+            self.select_active_text(self._mod_combo_box, A_MODULATION.get(tr_data[2]))
+            self.select_active_text(self._invertion_combo_box, Inversion(tr_data[1]).name)
+
         # Should be called last to properly initialize the reference
         self._srv_type_entry.set_text(data[4])
 
@@ -395,6 +402,8 @@ class ServiceDetailsDialog:
                     transponder = self.get_terrestrial_transponder_data()
                 elif self._tr_type is TrType.Cable:
                     transponder = self.get_cable_transponder_data()
+                elif self._tr_type is TrType.ATSC:
+                    transponder = self.get_atsc_transponder_data()
             except Exception as e:
                 log("Edit service error: {}".format(e))
                 show_dialog(DialogType.ERROR, transient=self._dialog, text="Error getting transponder parameters!")
@@ -559,6 +568,7 @@ class ServiceDetailsDialog:
         freq = self._freq_entry.get_text()
         fec = self._fec_combo_box.get_active_id()
         system = self._sys_combo_box.get_active_id()
+        o_srv = self._old_service
 
         if self._tr_type is TrType.Satellite or self._s_type is SettingsType.NEUTRINO_MP:
             freq = self._freq_entry.get_text()
@@ -566,11 +576,9 @@ class ServiceDetailsDialog:
             pol = self._pol_combo_box.get_active_id()
             pos = "{}{}".format(round(self._sat_pos_button.get_value(), 1), self._pos_side_box.get_active_id())
             return freq, rate, pol, fec, system, pos
-        elif self._tr_type is TrType.Terrestrial:
-            o_srv = self._old_service
+        elif self._tr_type in (TrType.Terrestrial, TrType.ATSC):
             return freq, o_srv.rate, o_srv.pol, fec, system, o_srv.pos
         elif self._tr_type is TrType.Cable:
-            o_srv = self._old_service
             return freq, self._rate_entry.get_text(), o_srv.pol, fec, o_srv.system, o_srv.pos
 
     def get_satellite_transponder_data(self):
@@ -624,6 +632,7 @@ class ServiceDetailsDialog:
         tr_data[8] = self.get_value_from_combobox_id(self._pls_mode_combo_box, HIERARCHY)
         tr_data[9] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         tr_data[10] = self.get_value_from_combobox_id(self._sys_combo_box, T_SYSTEM)
+
         return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
 
     def get_cable_transponder_data(self):
@@ -635,6 +644,16 @@ class ServiceDetailsDialog:
         tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, C_MODULATION)
         tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
         tr_data[6] = get_value_by_name(SystemCable, self._sys_combo_box.get_active_id())
+
+        return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
+
+    def get_atsc_transponder_data(self):
+        tr_data = re.split("\s|:", self._old_service.transponder)
+        # frequency, inversion, modulation, system
+        tr_data[1] = "{}000".format(self._freq_entry.get_text())
+        tr_data[2] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
+        tr_data[3] = self.get_value_from_combobox_id(self._mod_combo_box, A_MODULATION)
+
         return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
 
     def update_transponder_services(self, transponder, sat_pos):
@@ -694,7 +713,7 @@ class ServiceDetailsDialog:
                 return
 
         self.update_dvb_s2_elements(active and (self._sys_combo_box.get_active_id() == "DVB-S2"
-                                                or self._old_service.transponder_type in "tc"))
+                                                or self._old_service.transponder_type in "tca"))
 
         for elem in self._TRANSPONDER_ELEMENTS:
             elem.set_sensitive(active)
@@ -824,6 +843,18 @@ class ServiceDetailsDialog:
         self._rate_entry.set_max_width_chars(10)
         self._transponder_id_entry.set_max_width_chars(8)
         self._network_id_entry.set_max_width_chars(8)
+
+    def update_ui_for_atsc(self):
+        self.update_ui_for_cable()
+        tr_grid = self._builder.get_object("tr_grid")
+        tr_grid.remove_column(1)
+        tr_grid.remove_column(1)
+        # Init models
+        fec_model, modulation_model, system_model = self.get_models_for_non_satellite()
+        system_model.append((TrType.ATSC.name,))
+        [modulation_model.append((v,)) for k, v in A_MODULATION.items()]
+        # Extra
+        self._namespace_entry.set_max_width_chars(25)
 
     def get_transponder_grid_for_non_satellite(self):
         self._pids_grid.set_visible(False)
