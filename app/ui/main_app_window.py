@@ -234,7 +234,8 @@ class Application(Gtk.Application):
         self._status_bar_box = builder.get_object("status_bar_box")
         self._services_main_box = builder.get_object("services_main_box")
         self._bq_name_label = builder.get_object("bq_name_label")
-        self._main_data_box.bind_property("visible", builder.get_object("top_toolbar"), "visible")
+        tool_bar = builder.get_object("top_toolbar")
+        self._main_data_box.bind_property("visible", tool_bar, "visible")
         self._telnet_tool_button = builder.get_object("telnet_tool_button")
         self._top_box = builder.get_object("top_box")
         # Setting custom sort function for position column.
@@ -294,7 +295,6 @@ class Application(Gtk.Application):
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
-        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Player
         self._player_box = builder.get_object("player_box")
         self._player_event_box = builder.get_object("player_event_box")
@@ -310,6 +310,7 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", self._player_event_box, "visible")
+        self._player_box.bind_property("visible", tool_bar, "sensitive", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         # Record
@@ -2918,7 +2919,7 @@ class Application(Gtk.Application):
 
         self._filter_entry.grab_focus() if value else self.on_filter_changed()
         self.filter_set_default()
-        self._filter_bar.set_search_mode(value)
+        self._filter_bar.set_visible(value)
 
     @run_idle
     def filter_set_default(self):
