@@ -3282,8 +3282,8 @@ class Application(Gtk.Application):
         self.create_bouquets(BqGenType.EACH_TYPE)
 
     def create_bouquets(self, g_type):
-        gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._TV_TYPES,
-                     self._s_type, self.append_bouquet)
+        gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._s_type,
+                     self.append_bouquet)
 
     # ***************** Alternatives ********************* #
 
