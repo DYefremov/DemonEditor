@@ -822,8 +822,8 @@ Author: Dmitriy Yefremov
                                         <signal name="cursor-changed" handler="on_picon_activated" swapped="no"/>
                                         <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
-                                        <signal name="realize" handler="on_picons_dest_view_realize" swapped="no"/>
                                         <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
+                                        <signal name="realize" handler="on_picons_dest_view_realize" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="picons_dest_view_selection"/>
                                         </child>
@@ -1185,7 +1185,9 @@ Author: Dmitriy Yefremov
                                               </attributes>
                                             </child>
                                             <child>
-                                              <object class="GtkCellRendererText" id="name_cellrenderertext"/>
+                                              <object class="GtkCellRendererText" id="name_cellrenderertext">
+                                                <property name="ellipsize">end</property>
+                                              </object>
                                               <attributes>
                                                 <attribute name="text">1</attribute>
                                               </attributes>
