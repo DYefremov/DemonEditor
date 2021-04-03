@@ -555,7 +555,10 @@ class PiconsDialog:
                         executor.shutdown()
                         return
 
-                    picons.extend(future.result())
+                    pic = future.result()
+                    if pic:
+                        picons.extend(pic)
+
                 # Getting picon images.
                 futures = {executor.submit(download_picon, *pic, self.append_output): pic for pic in picons}
                 done, not_done = concurrent.futures.wait(futures, timeout=0)

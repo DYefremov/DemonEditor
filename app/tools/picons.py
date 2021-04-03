@@ -109,6 +109,9 @@ class PiconsParser(HTMLParser):
                         namespace = "{:X}{:X}".format(int(pos), int(freq))
                     else:
                         namespace = "{:X}0000".format(int(pos))
+
+                    if single and not ssid.isdigit():
+                        ssid = "".join(c for c in ssid if c.isdigit()) or "0"
                     name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, s_type)
                     p_name = picons_path + (name if name else os.path.basename(p.ref))
                     picons_data.append(("{}{}".format(PiconsParser._BASE_URL, p.ref), p_name))
