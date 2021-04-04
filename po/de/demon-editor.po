@@ -5,14 +5,14 @@
 # Dmitriy Yefremov, 2020-2021.
 msgid ""
 msgstr ""
-"Last-Translator: Dmitriy Yefremov\n"
+"Last-Translator: Thomas Schmidt\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr "Charly\nDmitriy Yefremov"
+msgstr "Charly\nDmitriy Yefremov\nThomas Schmidt"
 
 # Main
 msgid "Service"
@@ -666,16 +666,16 @@ msgid "Test connection"
 msgstr "Test Verbindung"
 
 msgid "Double click on the service in the bouquet list:"
-msgstr "Doppelklicke auf das Service in der Bouquetliste:"
+msgstr "Doppelklick auf das Service in der Bouquet-Liste:"
 
 msgid "Zap"
 msgstr "Zap"
 
 msgid "Play  stream"
-msgstr "Play  Stream"
+msgstr "Stream abspielen"
 
 msgid "Disabled"
-msgstr "Ausgeschaltet"
+msgstr "Deaktiviert"
 
 msgid "Enable lamedb ver. 5 support"
 msgstr "Lamedb ver. 5 Unterstützung aktivieren"
@@ -693,7 +693,7 @@ msgid "Play IPTV or other stream in the program(Ctrl + P)"
 msgstr "Wiedergabe von IPTV oder anderen Streams im Programm(Strg + P)"
 
 msgid "Export to m3u"
-msgstr "Export nach m3u"
+msgstr "Exportieren nach m3u"
 
 msgid "EPG configuration"
 msgstr "EPG Konfiguration"
@@ -720,13 +720,13 @@ msgid "Url to *.xml.gz file:"
 msgstr "Url zur *.xml.gz Datei:"
 
 msgid "Enable filtering"
-msgstr "Filterung einschalten"
+msgstr "Filter aktivieren"
 
 msgid "Filter by presence in the epg.dat file."
 msgstr "Filtern nach dem Vorhandensein in der epg.dat Datei."
 
 msgid "Paths to the epg.dat file:"
-msgstr "Pfade zur epg.dat Datei:"
+msgstr "Pfad zur epg.dat Datei:"
 
 msgid "Local path:"
 msgstr "Local path:"
@@ -750,7 +750,7 @@ msgid "Unsupported file type:"
 msgstr "Nicht unterstützter Dateityp:"
 
 msgid "Unpacking data error."
-msgstr "Fehler beim Entpacken von Daten."
+msgstr "Fehler beim Entpacken der Daten."
 
 msgid "XML parsing error:"
 msgstr "XML Parsing-Fehler:"
@@ -765,7 +765,7 @@ msgid "Use HTTP"
 msgstr "HTTP verwenden"
 
 msgid "Close playback"
-msgstr "Wiedergabe schliessen"
+msgstr "Wiedergabe schließen"
 
 msgid "Import YouTube playlist"
 msgstr "YouTube-Wiedergabeliste importieren"
@@ -774,8 +774,8 @@ msgid ""
 "Found a link to the YouTube resource!\n"
 "Try to get a direct link to the video?"
 msgstr ""
-"Ich habe einen Link zur YouTube-Ressource gefunden!\n"
-"Versuchen einen direkten Link zum Video zu bekommen?"
+"Link zur YouTube-Ressource gefunden!\n"
+"Soll versucht werden, einen Direkt-Link zum Video zu erzeugen?"
 
 msgid "Playlist import"
 msgstr "Playlist-Import"
@@ -784,7 +784,7 @@ msgid "Getting link error:"
 msgstr "Link-Fehler erhalten:"
 
 msgid "Extra"
-msgstr "Extra"
+msgstr "Extras"
 
 msgid "Apply profile settings"
 msgstr "Profileinstellungen anwenden"
@@ -793,7 +793,7 @@ msgid "Settings type:"
 msgstr "Art der Einstellungen:"
 
 msgid "Set default"
-msgstr "Standard setzen"
+msgstr "Standard wiederherstellen"
 
 msgid "Language:"
 msgstr "Sprache:"
@@ -805,16 +805,16 @@ msgid "Enable direct playback bar"
 msgstr "Aktivieren der direkten Wiedergabeleiste"
 
 msgid "Enables direct sending and playback of media links on the receiver"
-msgstr "Ermöglicht das direkte Senden und Abspielen von Medienlinks auf dem Box"
+msgstr "Ermöglicht das direkte Senden und Abspielen von Medienlinks auf dem Receiver"
 
 msgid "Watch the channel in the program"
-msgstr "Gucken den Kanal im Programm an"
+msgstr "Kanal im Programm ansehen"
 
 msgid "Zap and Play"
 msgstr "Zap und Abspielen"
 
 msgid "Drag  or paste the link here"
-msgstr "Ziehe den Link hierher oder füge ihn ein"
+msgstr "Link hineinziehen oder einfügen"
 
 msgid "Remove added links in the playlist"
 msgstr "Hinzugefügte Links in der Wiedergabeliste entfernen"
@@ -832,13 +832,13 @@ msgid "Reset"
 msgstr "Reset"
 
 msgid "File"
-msgstr "Ablage"
+msgstr "Datei"
 
 msgid "Picons manager"
 msgstr "Picons-Manager"
 
 msgid "Explorer"
-msgstr ""
+msgstr "Explorer"
 
 msgid "Satellite url:"
 msgstr "Satellit URL:"
@@ -916,13 +916,13 @@ msgid "Height (px):"
 msgstr "Höhe (px):"
 
 msgid "Channels:"
-msgstr "Kanälen:"
+msgstr "Kanäle:"
 
 msgid "Sample rate (Hz):"
-msgstr "Samplerate (Hz):"
+msgstr "Sample-Rate (Hz):"
 
 msgid "Play streams mode:"
-msgstr "Streams Abspielen-Modus:"
+msgstr "Stream-Abspielmodus:"
 
 msgid "Built-in player"
 msgstr "Integrierter Player"
@@ -934,22 +934,22 @@ msgid "Only get m3u file"
 msgstr "Nur m3u-Datei erhalten"
 
 msgid "Save and restart the program to apply the settings."
-msgstr "Speicher und starte das Programm neu, um die Einstellungen zu übernehmen."
+msgstr "Änderungen speichern und anschließend das Programm neustarten, um die Einstellungen zu übernehmen."
 
 msgid "Some images may have problems displaying the favorites list!"
-msgstr "Einige Images können Probleme mit der Anzeige der Favoritenliste haben!"
+msgstr "Einige Bilder können Probleme in der Anzeige der Favoritenliste haben!"
 
 msgid "Operates in standby mode or current active transponder!"
-msgstr "Arbeitet im Standby-Modus oder auf dem aktuell aktiven Transponder!"
+msgstr "Arbeitet im Standby-Modus oder der Transponder ist bereits in Verwendung!"
 
 msgid "No connection to the receiver!"
-msgstr "Keine Verbindung zum Box!"
+msgstr "Keine Verbindung zum Receiver!"
 
 msgid "Signal level"
 msgstr "Signalpegel"
 
 msgid "Receiver info"
-msgstr "Box-Info"
+msgstr "Receiver-Info"
 
 msgid "A profile with that name exists!"
 msgstr "Ein Profil mit diesem Namen existiert!"
@@ -958,10 +958,10 @@ msgid "Show short info as hints in the main services list"
 msgstr "Kurzinfos als Tooltips in der Hauptliste anzeigen"
 
 msgid "Show detailed info as hints in the bouquet list"
-msgstr "Detaillierteinfos als Tooltips in der Bouquetliste anzeigen"
+msgstr "Detaillierte Informationen als Tooltips in der Bouquetliste anzeigen"
 
 msgid "Enable alternate bouquet file naming"
-msgstr "Aktivieren der Alternativerbenennung für Bouquet-Dateien"
+msgstr "Aktivieren der alternativen Benennung für Bouquet-Dateien"
 
 msgid "Allows you to name bouquet files using their names."
 msgstr "Ermöglicht Bouquet-Dateien mit ihren Namen zu benennen."
@@ -970,7 +970,7 @@ msgid "Appearance"
 msgstr "Aussehen"
 
 msgid "Enable Themes support"
-msgstr "Unterstützung von Themen aktivieren"
+msgstr "Theme Unterstützung aktivieren"
 
 msgid "Gtk3 Theme:"
 msgstr "Gtk3-Theme:"
@@ -979,7 +979,7 @@ msgid "Icon Theme:"
 msgstr "Icon-Theme:"
 
 msgid "Gtk3 Themes and Icons:"
-msgstr "Gtk3 Themes and Icons:"
+msgstr "Gtk3 Themes und Icons:"
 
 msgid "Deleting data..."
 msgstr "Daten löschen..."
@@ -988,7 +988,7 @@ msgid "Download from the receiver"
 msgstr "Downloaden vom Receiver"
 
 msgid "Remove all picons from the receiver"
-msgstr "Alle Picons aus dem Receiver entfernen"
+msgstr "Alle Picons vom dem Receiver entfernen"
 
 msgid "Service reference"
 msgstr "Kanalreferenz"
@@ -1021,7 +1021,7 @@ msgid "Are you sure you want to change the order\n\t of services in this bouquet
 msgstr "Bist du sicher, dass du die Reihenfolge der Dienstleistungen\n\t in diesem Bouquet ändern willst?"
 
 msgid "Remove from the receiver"
-msgstr "Aus dem Receiver entfernen"
+msgstr "Vom Receiver entfernen"
 
 msgid "Screenshot"
 msgstr "Screenshot"
@@ -1039,7 +1039,7 @@ msgid "Can't Playback!"
 msgstr "Kann nicht abgespielt werden!"
 
 msgid "Enable Dark Mode"
-msgstr "Dunkelmodus aktivieren"
+msgstr "Dunkler Modus aktivieren"
 
 msgid "Extract..."
 msgstr "Entpacken..."
@@ -1051,7 +1051,7 @@ msgid "Combine with the current data?"
 msgstr "Mit den aktuellen Daten kombinieren?"
 
 msgid "Importing data done!"
-msgstr "Daten importieren erledigt!"
+msgstr "Daten-Import abgeschlossen!"
 
 msgid "Current service"
 msgstr "Aktueller Service"
@@ -1063,13 +1063,13 @@ msgid "Open archive"
 msgstr "Archiv öffnen"
 
 msgid "Import from Web"
-msgstr "Import aus dem Web"
+msgstr "Import aus dem Internet"
 
 msgid "Control"
 msgstr "Steuerung"
 
 msgid "Timers"
-msgstr "Timers"
+msgstr "Timer"
 
 msgid "Timer"
 msgstr "Timer"
@@ -1111,7 +1111,7 @@ msgid "Auto"
 msgstr "Auto"
 
 msgid "Grab screenshot"
-msgstr "Screenshot schnappen"
+msgstr "Screenshot aufnehmen"
 
 msgid "Enabled:"
 msgstr "Aktiviert:"
@@ -1138,7 +1138,7 @@ msgid "Ends:"
 msgstr "Endet:"
 
 msgid "Repeated:"
-msgstr "Wiederhole:"
+msgstr "Wiederholt:"
 
 msgid "Action:"
 msgstr "Aktion:"
@@ -1216,7 +1216,7 @@ msgid "A similar service is already in this list!"
 msgstr "Ein ähnlicher Dienst ist bereits in dieser Liste enthalten!"
 
 msgid "Play mode has been changed!\nRestart the program to apply the settings."
-msgstr "Abspielen-Modus wurde geändert!\nStarte  das Programm neu, um die Einstellungen zu übernehmen."
+msgstr "Abspiel-Modus wurde geändert!\nStarte  das Programm neu, um die Einstellungen zu übernehmen."
 
 msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
 msgstr "Stelle die Werte für TID, NID und Namespace für die korrekte Benennung der Picons ein!"
