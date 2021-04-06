@@ -340,7 +340,7 @@ class ControlBox(Gtk.HBox):
 
     def on_service_changed(self, ref):
         self._app._wait_dialog.show()
-        self._http_api.send(HttpAPI.Request.EPG, ref, self.update_epg_data)
+        self._http_api.send(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
 
     @run_idle
     def update_epg_data(self, epg):

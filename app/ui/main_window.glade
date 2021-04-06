@@ -566,6 +566,7 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkScrolledWindow" id="filter_satellite_scrolled_window">
         <property name="width_request">135</property>
+        <property name="height_request">175</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_left">5</property>
@@ -573,8 +574,6 @@ Author: Dmitriy Yefremov
         <property name="margin_top">5</property>
         <property name="margin_bottom">5</property>
         <property name="hscrollbar_policy">never</property>
-        <property name="max_content_height">350</property>
-        <property name="propagate_natural_height">True</property>
         <child>
           <object class="GtkTreeView" id="filter_satellite_view">
             <property name="visible">True</property>
@@ -653,6 +652,7 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkTreeView" id="filter_type_view">
         <property name="width_request">135</property>
+        <property name="height_request">175</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="margin_left">5</property>
@@ -1906,8 +1906,8 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">False</property>
                             <property name="margin_left">10</property>
                             <property name="margin_right">10</property>
-                            <property name="margin_top">2</property>
-                            <property name="margin_bottom">2</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
                             <property name="spacing">10</property>
                             <child>
                               <object class="GtkBox" id="filter_bar">
