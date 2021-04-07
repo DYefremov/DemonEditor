@@ -35,7 +35,7 @@ class Defaults(Enum):
     LIST_PICON_SIZE = 32
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
-    STREAM_LIB = "vlc"
+    STREAM_LIB = "gst" if IS_WIN else "vlc"
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
@@ -111,7 +111,7 @@ class SettingsType(IntEnum):
                     "satellites_xml_path": "/etc/tuxbox/", "data_local_path": "{}enigma2{}".format(DATA_PATH, SEP),
                     "picons_path": "/usr/share/enigma2/picon/",
                     "picons_local_path": "{}enigma2{}picons{}".format(DATA_PATH, SEP, SEP),
-                    "backup_local_path":  "{}enigma2{}backup{}".format(DATA_PATH, SEP, SEP)}
+                    "backup_local_path": "{}enigma2{}backup{}".format(DATA_PATH, SEP, SEP)}
         elif self is SettingsType.NEUTRINO_MP:
             return {"setting_type": self,
                     "host": "127.0.0.1", "port": "21", "timeout": 5,
@@ -661,7 +661,7 @@ class Settings:
     @property
     @lru_cache(1)
     def themes_path(self):
-        return "{}/.themes/".format(HOME_PATH)
+        return "{}{}.themes{}".format(HOME_PATH, SEP, SEP)
 
     @property
     def icon_theme(self):
@@ -674,7 +674,7 @@ class Settings:
     @property
     @lru_cache(1)
     def icon_themes_path(self):
-        return "{}/.icons/".format(HOME_PATH)
+        return "{}{}.icons{}".format(HOME_PATH, SEP, SEP)
 
     @property
     def is_darwin(self):

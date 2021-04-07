@@ -183,6 +183,7 @@ class SettingsDialog:
         self.init_profiles()
 
         if IS_WIN:
+            builder.get_object("streams_lib_frame").set_visible(False)
             # Themes
             builder.get_object("style_frame").set_visible(True)
             builder.get_object("themes_support_frame").set_visible(True)
