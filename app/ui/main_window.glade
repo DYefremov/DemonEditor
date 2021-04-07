@@ -566,7 +566,7 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkScrolledWindow" id="filter_satellite_scrolled_window">
         <property name="width_request">135</property>
-        <property name="height_request">175</property>
+        <property name="height_request">150</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_left">5</property>
@@ -652,7 +652,6 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkTreeView" id="filter_type_view">
         <property name="width_request">135</property>
-        <property name="height_request">175</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="margin_left">5</property>

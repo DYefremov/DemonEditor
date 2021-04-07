@@ -185,12 +185,13 @@ class SettingsDialog:
         if IS_WIN:
             builder.get_object("streams_lib_frame").set_visible(False)
             # Themes
-            builder.get_object("style_frame").set_visible(True)
-            builder.get_object("themes_support_frame").set_visible(True)
+            enable_exp = self._settings.is_enable_experimental
+            builder.get_object("style_frame").set_visible(enable_exp)
+            builder.get_object("themes_support_frame").set_visible(enable_exp)
             self._layout_switch = builder.get_object("layout_switch")
             self._layout_switch.set_active(self._ext_settings.alternate_layout)
             self._theme_frame = builder.get_object("theme_frame")
-            self._theme_frame.set_visible(True)
+            self._theme_frame.set_visible(enable_exp)
             self._theme_thumbnail_image = builder.get_object("theme_thumbnail_image")
             self._theme_combo_box = builder.get_object("theme_combo_box")
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
