@@ -3,7 +3,9 @@ import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from app.commons import run_task, log, _DATE_FORMAT
+from gi.repository import Gdk, Gtk
+
+from app.commons import run_task, log, _DATE_FORMAT, run_with_delay
 
 
 class Player(ABC):
@@ -69,11 +71,10 @@ class Player(ABC):
                 return get_pointer(gpointer)
 
     def get_video_widget(self, widget):
-        from gi.repository import Gtk, Gdk
-
         area = Gtk.DrawingArea(visible=True)
         area.connect("draw", self.on_drawing_area_draw)
-        area.set_events(Gdk.ModifierType.BUTTON1_MASK)
+        area.connect("motion-notify-event", self.on_mouse_motion)
+        area.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
         widget.add(area)
 
         return area
@@ -82,6 +83,19 @@ class Player(ABC):
         """ Used for black background drawing in the player drawing area. """
         cr.set_source_rgb(0, 0, 0)
         cr.paint()
+
+    def on_mouse_motion(self, widget, event):
+        display = widget.get_display()
+        window = widget.get_window()
+        cursor = Gdk.Cursor.new_from_name(display, "default")
+        window.set_cursor(cursor)
+
+        self.hide_mouse_cursor(window, display)
+
+    @run_with_delay(3)
+    def hide_mouse_cursor(self, window, display):
+        cursor = Gdk.Cursor.new_for_display(display, Gdk.CursorType.BLANK_CURSOR)
+        window.set_cursor(cursor)
 
     @staticmethod
     def make(name, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
@@ -118,7 +132,10 @@ class MpvPlayer(Player):
         try:
             from app.tools import mpv
 
-            self._player = mpv.MPV(wid=str(self.get_window_handle(self.get_video_widget(widget))))
+            self._player = mpv.MPV(wid=str(self.get_window_handle(self.get_video_widget(widget), )),
+                                   input_default_bindings=False,
+                                   input_cursor=False,
+                                   cursor_autohide="no")
         except OSError as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError("No libmpv is found. Check that it is installed!")
@@ -209,7 +226,8 @@ class GstPlayer(Player):
             self._player = Gst.ElementFactory.make("playbin", "player")
             # Initialization of the playback widget.
             self._player.set_property("video-sink", gtk_sink)
-            vid_widget = gtk_sink.props.widget
+            vid_widget = gtk_sink.get_property("widget")
+            vid_widget.connect("motion-notify-event", self.on_mouse_motion)
             widget.add(vid_widget)
             vid_widget.show()
 
@@ -321,6 +339,8 @@ class VlcPlayer(Player):
 
             args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
             self._player = vlc.Instance(args).media_player_new()
+            vlc.libvlc_video_set_key_input(self._player, False)
+            vlc.libvlc_video_set_mouse_input(self._player, False)
         except (OSError, AttributeError) as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError("No VLC is found. Check that it is installed!")
