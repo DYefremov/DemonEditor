@@ -343,9 +343,10 @@ class ServicesParser(HTMLParser):
 
         HTMLParser.__init__(self)
 
-        self._S_TYPES = {"": "2", "MPEG-2 SD": "1", "SD": "1", "MPEG-4 SD": "22", "HEVC SD": "22", "MPEG-4 HD": "25",
-                         "MPEG-4 HD 1080": "25", "MPEG-4 HD 720": "25", "HEVC HD": "25", "HEVC UHD": "31",
-                         "HEVC UHD 4K": "31"}
+        self._S_TYPES = {"": "2", "MPEG-2 SD": "1", "MPEG-2/SD": "1", "SD": "1", "MPEG-4 SD": "22", "MPEG-4/SD": "22",
+                         "MPEG-4": "22", "HEVC SD": "22", "MPEG-4/HD": "25", "MPEG-4 HD": "25", "MPEG-4 HD 1080": "25",
+                         "MPEG-4 HD 720": "25", "HEVC HD": "25", "HEVC/HD": "25", "HEVC": "31", "HEVC/UHD": "31",
+                         "HEVC UHD": "31", "HEVC UHD 4K": "31"}
         self._TR_PAT = re.compile(
             r".*?(\d+)\s+([RLHV]).*(DVB-S[2]?)/?(.*PSK)?\s(T2-MI)?\s?SR-FEC:\s(\d+)-(\d/\d)\s+.*ONID-TID:\s+(\d+)-(\d+).*")
         self._POS_PAT = re.compile(r".*?(\d+\.\d°[EW]).*")
@@ -421,8 +422,8 @@ class ServicesParser(HTMLParser):
             log(e)
         else:
             url = "https://www.lyngsat.com/muxes/"
-            return [row[1] for row in
-                    filter(lambda x: x and len(x) > 8 and x[1].url and x[1].url.startswith(url), self._rows)]
+            return [row[0] for row in
+                    filter(lambda x: x and len(x) > 8 and x[0].url and x[0].url.startswith(url), self._rows)]
         return []
 
     def get_transponder_services(self, tr_url, sat_position=None, use_pids=False):
