@@ -173,20 +173,11 @@ class ProviderParser(HTMLParser):
             url = attrs[0][1]
             if any(d in url for d in self._DOMAINS):
                 self._current_row.append(url)
-        if tag == "font" and len(attrs) == 1:
-            atr = attrs[0]
-            if len(atr) == 2 and atr[1] == "darkgreen":
-                self._is_onid_tid = True
 
     def handle_data(self, data):
         """ Save content to a cell """
         if self._is_td or self._is_th:
             self._current_cell.append(data.strip())
-        if self._is_onid_tid:
-            m = self._ONID_TID_PATTERN.match(data)
-            if m:
-                self._on_id, tid = m.group().split("-")
-            self._is_onid_tid = False
 
     def handle_endtag(self, tag):
         if tag == 'td':
@@ -208,32 +199,34 @@ class ProviderParser(HTMLParser):
 
             len_row = len(row)
             if len_row > 2:
-                m = self._TRANSPONDER_FREQUENCY_PATTERN.match(row[1])
+                m = self._TRANSPONDER_FREQUENCY_PATTERN.match(row[0])
                 if m:
                     self._freq = m.group().split()[0]
 
-            if len_row == 14:
+            if len_row > 12:
                 # Providers
-                name = row[6]
+                name = row[5]
                 self._prv_names.add(name)
-                m = self._ONID_TID_PATTERN.match(str(row[9]))
+                m = self._ONID_TID_PATTERN.match(str(row[-5]))
                 if m:
                     on_id, tid = m.group().split("-")
                     if on_id not in self._ids:
+                        self._on_id = on_id
                         row[-2] = on_id
                         self._ids.add(on_id)
                         row[0] = self._positon
                     if name + on_id not in self._prv_names:
                         self._prv_names.add(name + on_id)
                         logo_data = None
-                        req = requests.get(self._BASE_URL + row[3], timeout=5)
-                        if req.status_code == 200:
-                            logo_data = req.content
-                        else:
-                            log("Downloading provider logo error: {}".format(req.reason))
-                        self.rows.append(Provider(logo=logo_data, name=name, pos=self._positon, url=row[5], on_id=on_id,
+                        if row[2].startswith("/logo/"):
+                            req = requests.get(self._BASE_URL + row[2], timeout=5)
+                            if req.status_code == 200:
+                                logo_data = req.content
+                            else:
+                                log("Downloading provider logo error: {}".format(req.reason))
+                        self.rows.append(Provider(logo=logo_data, name=name, pos=self._positon, url=row[6], on_id=on_id,
                                                   ssid=None, single=False, selected=True))
-            elif 6 < len_row < 14:
+            elif 6 < len_row < 12:
                 # Single services
                 name, url, ssid = None, None, None
                 if row[0].startswith("http"):
