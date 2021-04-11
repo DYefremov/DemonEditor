@@ -128,8 +128,15 @@ class ImportDialog:
                 for bq in bqs.bouquets:
                     self._main_model.append((bq.name, bq.type, True))
                     self._bq_services[(bq.name, bq.type)] = bq.services
-            # Note! Getting default format ver. 4
-            services = get_services(path, self._profile, 4 if self._profile is SettingsType.ENIGMA_2 else 0)
+                    
+            if self._profile is SettingsType.ENIGMA_2:
+                services = get_services(path, self._profile, 5 if self._settings.v5_support else 4)
+            elif self._profile is SettingsType.NEUTRINO_MP:
+                services = get_services(path, self._profile, 0)
+            else:
+                self.show_info_message("Setting format not supported!", Gtk.MessageType.ERROR)
+                return
+
             for srv in services:
                 self._services[srv.fav_id] = srv
         except FileNotFoundError as e:
