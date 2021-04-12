@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -1150,6 +1150,7 @@ Author: Dmitriy Yefremov
     <property name="gravity">center</property>
     <property name="startup_id">DemonEditor</property>
     <signal name="delete-event" handler="on_close_app" swapped="no"/>
+    <signal name="window-state-event" handler="on_main_window_state" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>

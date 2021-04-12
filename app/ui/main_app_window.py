@@ -158,6 +158,7 @@ class Application(Gtk.Application):
                     "on_player_close": self.on_player_close,
                     "on_player_press": self.on_player_press,
                     "on_full_screen": self.on_full_screen,
+                    "on_main_window_state": self.on_main_window_state,
                     "on_http_status_visible": self.on_http_status_visible,
                     "on_player_box_realize": self.on_player_box_realize,
                     "on_player_box_visibility": self.on_player_box_visibility,
@@ -566,7 +567,8 @@ class Application(Gtk.Application):
     def on_close_app(self, *args):
         """ Performing operations before closing the application. """
         # Saving the current size of the application window.
-        self._settings.add("window_size", self._main_window.get_size())
+        if not self._main_window.is_maximized():
+            self._settings.add("window_size", self._main_window.get_size())
 
         if self._recorder:
             if self._recorder.is_record():
@@ -2509,6 +2511,11 @@ class Application(Gtk.Application):
         self._main_data_box.set_visible(visible)
         self._player_tool_bar.set_visible(visible)
         self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
+
+    def on_main_window_state(self, window, event):
+        if event.new_window_state & Gdk.WindowState.FULLSCREEN or event.new_window_state & Gdk.WindowState.MAXIMIZED:
+            # Saving the current size of the application window.
+            self._settings.add("window_size", self._main_window.get_size())
 
     @run_idle
     def show_playback_window(self):
