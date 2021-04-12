@@ -291,11 +291,10 @@ class Application(Gtk.Application):
         self._services_model_filter = builder.get_object("services_model_filter")
         self._services_model_filter.set_visible_func(self.services_filter_function)
         self._filter_entry = builder.get_object("filter_entry")
-        self._filter_bar = builder.get_object("filter_bar")
+        self._filter_box = builder.get_object("filter_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
-        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Player
         self._player_box = builder.get_object("player_box")
         self._player_event_box = builder.get_object("player_event_box")
@@ -317,8 +316,7 @@ class Application(Gtk.Application):
         # Record
         self._record_image = builder.get_object("record_button_image")
         # Search
-        self._search_bar = builder.get_object("search_bar")
-        self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
+        self._search_box = builder.get_object("search_box")
         self._search_entry = builder.get_object("search_entry")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
@@ -364,6 +362,10 @@ class Application(Gtk.Application):
         center_box.reorder_child(self._ftp_revealer, 0)
         center_box.reorder_child(self._control_revealer, 1)
         center_box.reorder_child(builder.get_object("main_box"), 2)
+
+        builder.get_object("fs_box").set_child_packing(self._filter_box, False, True, 0, Gtk.PackType.END)
+        top_toolbar = builder.get_object("top_toolbar")
+        top_toolbar.set_child_packing(builder.get_object("toolbar_extra_box"), False, True, 0, Gtk.PackType.END)
 
         services_box = self._main_paned.get_child1()
         self._main_paned.remove(services_box)
@@ -1627,7 +1629,7 @@ class Application(Gtk.Application):
             yield True
             self._data_hash = self.get_data_hash()
             yield True
-            if self._filter_bar.get_visible():
+            if self._filter_box.get_visible():
                 self.on_filter_changed()
             yield True
 
@@ -2966,7 +2968,7 @@ class Application(Gtk.Application):
 
         self._filter_entry.grab_focus() if value else self.on_filter_changed()
         self.filter_set_default()
-        self._filter_bar.set_search_mode(value)
+        self._filter_box.set_visible(value)
 
     @run_idle
     def filter_set_default(self):
@@ -3027,7 +3029,7 @@ class Application(Gtk.Application):
         self._services_view.set_model(model)
 
     def services_filter_function(self, model, itr, data):
-        if not self._filter_bar.is_visible():
+        if not self._filter_box.is_visible():
             return True
         else:
             r_txt = str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE, Column.SRV_TYPE, Column.SRV_SSID,
@@ -3067,7 +3069,7 @@ class Application(Gtk.Application):
             return True
 
         action.set_state(value)
-        self._search_bar.set_search_mode(value)
+        self._search_box.set_visible(value)
         if value:
             self._search_entry.grab_focus()
         else:
