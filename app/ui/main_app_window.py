@@ -238,15 +238,18 @@ class Application(Gtk.Application):
         self._main_data_box.bind_property("visible", builder.get_object("top_toolbar"), "visible")
         self._telnet_tool_button = builder.get_object("telnet_tool_button")
         self._top_box = builder.get_object("top_box")
+        self._toolbar_extra_tools_box = builder.get_object("toolbar_extra_tools_box")
+        self._add_bouquet_button = builder.get_object("add_bouquet_tool_button")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("toolbar_search_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", self._toolbar_extra_tools_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_box"), "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("save_tool_button"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("add_bouquet_tool_button"), "visible", 4)
+        self._app_info_box.bind_property("visible", self._add_bouquet_button, "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
@@ -343,20 +346,17 @@ class Application(Gtk.Application):
 
     def init_layout(self, builder):
         """ Initializes an alternate layout, if enabled. """
-        top_toolbar = builder.get_object("top_toolbar")
-        top_toolbar.set_margin_left(0)
-        top_toolbar.set_margin_right(10)
+        control_box = builder.get_object("control_button_box")
+        control_box.set_child_packing(self._control_button, False, True, 0, Gtk.PackType.END)
 
-        extra_box = builder.get_object("toolbar_extra_tools_box")
-        extra_box.set_margin_left(10)
-        extra_box.set_margin_right(0)
-        extra_box.reorder_child(self._ftp_button, 0)
-        extra_box.reorder_child(builder.get_object("add_bouquet_tool_button"), 2)
+        extra_box = builder.get_object("toolbar_extra_box")
+        extra_box.set_child_packing(self._toolbar_extra_tools_box, False, True, 0, Gtk.PackType.END)
+        search_box = builder.get_object("toolbar_search_box")
+        search_box.reorder_child(builder.get_object("search_tool_button"), 0)
 
         self._top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
-        self._top_box.set_child_packing(top_toolbar, False, True, 0, Gtk.PackType.END)
+        self._top_box.set_child_packing(search_box, False, True, 0, Gtk.PackType.END)
         self._top_box.reorder_child(extra_box, 0)
-        self._top_box.reorder_child(top_toolbar, 1)
 
         center_box = builder.get_object("center_box")
         center_box.reorder_child(self._ftp_revealer, 0)
@@ -365,7 +365,7 @@ class Application(Gtk.Application):
 
         builder.get_object("fs_box").set_child_packing(self._filter_box, False, True, 0, Gtk.PackType.END)
         top_toolbar = builder.get_object("top_toolbar")
-        top_toolbar.set_child_packing(builder.get_object("toolbar_extra_box"), False, True, 0, Gtk.PackType.END)
+        top_toolbar.set_child_packing(builder.get_object("toolbar_search_box"), False, True, 0, Gtk.PackType.END)
 
         services_box = self._main_paned.get_child1()
         self._main_paned.remove(services_box)
@@ -386,6 +386,9 @@ class Application(Gtk.Application):
         else:
             self._fav_paned.pack1(self._bouquets_box, False, False)
             self._fav_paned.pack2(self._fav_box, False, False)
+
+        pack = Gtk.PackType.END if self._settings.bq_details_first else Gtk.PackType.START
+        self._toolbar_extra_tools_box.set_child_packing(self._add_bouquet_button, False, True, 0, pack)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)

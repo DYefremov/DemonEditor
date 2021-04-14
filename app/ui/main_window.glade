@@ -1112,6 +1112,56 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">10</property>
+            <child>
+              <object class="GtkButtonBox" id="toolbar_search_box">
+                <property name="can_focus">False</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="margin_left">20</property>
+                <property name="margin_right">20</property>
+                <property name="homogeneous">True</property>
+                <property name="layout_style">expand</property>
+                <child>
+                  <object class="GtkToggleButton" id="filter_tool_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Filter</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">win.filter</property>
+                    <property name="image">filter_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="search_tool_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Search</property>
+                    <property name="valign">center</property>
+                    <property name="action_name">win.search</property>
+                    <property name="image">find_image</property>
+                    <property name="always_show_image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
             <child type="center">
               <object class="GtkBox" id="top_toolbar">
                 <property name="visible">True</property>
@@ -1119,6 +1169,7 @@ Author: Dmitriy Yefremov
                 <property name="halign">center</property>
                 <property name="valign">center</property>
                 <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="spacing">10</property>
@@ -1240,91 +1291,6 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButtonBox" id="toolbar_extra_box">
-                    <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="layout_style">expand</property>
-                    <child>
-                      <object class="GtkToggleButton" id="filter_tool_button">
-                        <property name="label" translatable="yes">Filter</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Filter</property>
-                        <property name="valign">center</property>
-                        <property name="action_name">win.filter</property>
-                        <property name="image">filter_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToggleButton" id="search_tool_button">
-                        <property name="label" translatable="yes">Search</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Search</property>
-                        <property name="valign">center</property>
-                        <property name="action_name">win.search</property>
-                        <property name="image">find_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="lock_tool_button">
-                        <property name="label" translatable="yes">Lock</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Parent lock</property>
-                        <property name="valign">center</property>
-                        <property name="action_name">app.on_locked</property>
-                        <property name="image">lock_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="hide_tool_button">
-                        <property name="label" translatable="yes">Hide</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Hide/Skip</property>
-                        <property name="valign">center</property>
-                        <property name="action_name">app.on_hide</property>
-                        <property name="image">hide_image</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkButtonBox" id="toolbar_tools_box">
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
@@ -1413,7 +1379,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">5</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -1431,29 +1397,80 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButtonBox" id="toolbar_extra_tools_box">
+              <object class="GtkBox" id="toolbar_extra_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin_right">10</property>
-                <property name="homogeneous">True</property>
-                <property name="layout_style">expand</property>
+                <property name="margin_left">20</property>
+                <property name="margin_right">20</property>
                 <child>
-                  <object class="GtkButton" id="add_bouquet_tool_button">
-                    <property name="width_request">32</property>
-                    <property name="sensitive">False</property>
+                  <object class="GtkButtonBox" id="toolbar_extra_tools_box">
                     <property name="can_focus">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Create bouquet</property>
-                    <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+                    <property name="valign">center</property>
+                    <property name="margin_left">10</property>
+                    <property name="margin_right">10</property>
+                    <property name="homogeneous">True</property>
+                    <property name="layout_style">expand</property>
                     <child>
-                      <object class="GtkImage" id="add_bouquet_image">
+                      <object class="GtkButton" id="lock_tool_button">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="icon_name">bookmark-new-symbolic</property>
-                        <property name="icon_size">1</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Parent lock</property>
+                        <property name="valign">center</property>
+                        <property name="action_name">app.on_locked</property>
+                        <property name="image">lock_image</property>
+                        <property name="always_show_image">True</property>
                       </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="hide_tool_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Hide/Skip</property>
+                        <property name="valign">center</property>
+                        <property name="action_name">app.on_hide</property>
+                        <property name="image">hide_image</property>
+                        <property name="always_show_image">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="add_bouquet_tool_button">
+                        <property name="width_request">32</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Create bouquet</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
+                        <child>
+                          <object class="GtkImage" id="add_bouquet_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="icon_name">bookmark-new-symbolic</property>
+                            <property name="icon_size">1</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">2</property>
+                        <property name="secondary">True</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -1463,47 +1480,62 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="control_button">
-                    <property name="width_request">32</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Control</property>
-                    <property name="action_name">app.on_remote</property>
+                  <object class="GtkButtonBox" id="control_button_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="homogeneous">True</property>
+                    <property name="layout_style">expand</property>
                     <child>
-                      <object class="GtkImage" id="control_button_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="icon_name">input-gaming-symbolic</property>
+                      <object class="GtkToggleButton" id="control_button">
+                        <property name="width_request">32</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Control</property>
+                        <property name="action_name">app.on_remote</property>
+                        <child>
+                          <object class="GtkImage" id="control_button_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="icon_name">input-gaming-symbolic</property>
+                          </object>
+                        </child>
+                        <accelerator key="t" signal="clicked"/>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
-                    <accelerator key="t" signal="clicked" modifiers="Primary"/>
+                    <child>
+                      <object class="GtkToggleButton" id="ftp_button">
+                        <property name="width_request">32</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="ftp_tool_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">FTP client</property>
+                            <property name="icon_name">network-server-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="ftp_button">
-                    <property name="width_request">32</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="ftp_tool_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">FTP client</property>
-                        <property name="icon_name">network-server-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
