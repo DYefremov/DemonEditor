@@ -781,6 +781,11 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
   </object>
+  <object class="GtkImage" id="mark_duplicates_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-find-and-replace</property>
+  </object>
   <object class="GtkImage" id="network_transmit_receive_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -3598,6 +3603,17 @@ Author: Dmitriy Yefremov
         <property name="image">find_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_locate_in_services" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="fav_mark_dup_popup_item">
+        <property name="label" translatable="yes">Mark duplicates</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="image">mark_duplicates_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_mark_duplicates" swapped="no"/>
       </object>
     </child>
     <child>
