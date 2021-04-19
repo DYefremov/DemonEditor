@@ -58,8 +58,8 @@ class Application(Gtk.Application):
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
-                     "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item",
-                     "fav_epg_configuration_popup_item", "fav_add_alt_popup_item")
+                     "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item", "fav_add_alt_popup_item",
+                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "bouquet_import_popup_item",
@@ -135,6 +135,7 @@ class Application(Gtk.Application):
                           "on_insert_space": self.on_insert_space,
                           "on_fav_press": self.on_fav_press,
                           "on_locate_in_services": self.on_locate_in_services,
+                          "on_mark_duplicates": self.on_mark_duplicates,
                           "on_picons_manager_show": self.on_picons_manager_show,
                           "on_filter_changed": self.on_filter_changed,
                           "on_filter_type_toggled": self.on_filter_type_toggled,
@@ -3231,6 +3232,17 @@ class Application(Gtk.Application):
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)
+
+    def on_mark_duplicates(self, item):
+        """ Marks services with duplicate [names] in the fav list.  """
+        from collections import Counter
+
+        dup = Counter(r[Column.FAV_SERVICE] for r in self._fav_model if r[Column.FAV_TYPE] not in self._marker_types)
+        dup = {k for k, v in dup.items() if v > 1}
+
+        for r in self._fav_model:
+            if r[Column.FAV_SERVICE] in dup:
+                r[Column.FAV_BACKGROUND] = self._NEW_COLOR
 
     # ***************** Picons *********************#
 

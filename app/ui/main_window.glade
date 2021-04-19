@@ -309,6 +309,15 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="fav_mark_dup_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Mark duplicates</property>
+        <signal name="activate" handler="on_mark_duplicates" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
