@@ -673,7 +673,9 @@ class Application(Gtk.Application):
     def on_close_app(self, *args):
         """ Performing operations before closing the application. """
         # Saving the current size of the application window.
-        self._settings.add("window_size", self._main_window.get_size())
+        self._main_window.unfullscreen()
+        if not self._main_window.is_maximized():
+            self._settings.add("window_size", self._main_window.get_size())
 
         if self._recorder:
             if self._recorder.is_record():
