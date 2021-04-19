@@ -77,6 +77,8 @@ class Cell:
 class SatellitesParser(HTMLParser):
     """ Parser for satellite html page. """
 
+    POS_PAT = re.compile(r".*?(\d+\.\d°?[EW]).*")
+
     def __init__(self, source=SatelliteSource.FLYSAT, entities=False, separator=' '):
 
         HTMLParser.__init__(self)
@@ -150,40 +152,21 @@ class SatellitesParser(HTMLParser):
 
                 return list(map(get_sat, filter(lambda x: all(x) and len(x) == 5, self._rows)))
             elif self._source is SatelliteSource.LYNGSAT:
-                extra_pattern = re.compile(r"^https://www\.lyngsat\.com/[\w-]+\.html")
                 base_url = "https://www.lyngsat.com/"
                 sats = []
-                names = set()
-                current_pos = "0"
-                for row in filter(lambda x: len(x) in (5, 7, 8), self._rows):
-                    r_len = len(row)
-                    if r_len == 7:
-                        current_pos = self.parse_position(row[2])
-                        name = row[1].rsplit("/")[-1].rstrip(".html").replace("-", " ")
-                        if name not in names:
-                            # [all in one] satellites
-                            sats.append((name, current_pos, row[5], base_url + row[1], False))
-                            names.add(name)
-                        name = row[4]
-                        if name not in names:
-                            sats.append((name, current_pos, row[5], base_url + row[3], False))
-                            names.add(name)
-                    if r_len == 8:  # for a very limited number of satellites
-                        data = list(filter(None, row))
-                        urls = set()
-                        sat_type = ""
-                        for d in data:
-                            url = re.match(extra_pattern, d)
-                            if url:
-                                urls.add(url.group(0))
-                            if d in ("C", "Ku", "CKu"):
-                                sat_type = d
-                        current_pos = self.parse_position(data[1])
-                        for url in urls:
-                            name = url.rsplit("/")[-1].rstrip(".html").replace("-", " ")
-                            sats.append((name, current_pos, sat_type, base_url + url, False))
-                    elif r_len == 5:
-                        sats.append((row[2], current_pos, row[3], base_url + row[1], False))
+                cur_pos = "0"
+                for row in filter(lambda x: 3 < len(x) < 8, self._rows):
+                    if not row[0]:
+                        row = row[1:]
+
+                    pos = self.parse_position(row[1])
+                    if not self.POS_PAT.match(pos):
+                        if len(row) == 4 and row[0].endswith(".html"):
+                            sats.append((row[1], cur_pos, row[-2], base_url + row[0], False))
+                        continue
+
+                    sats.append((row[-3], pos, row[-2], base_url + row[0], False))
+                    cur_pos = pos
                 return sats
             elif source is SatelliteSource.KINGOFSAT:
                 def get_sat(r):
@@ -321,11 +304,10 @@ class SatellitesParser(HTMLParser):
             Since the *.ini file contains incomplete information, it is not used.
         """
         zeros = "000"
-        pos_pat = re.compile(r".*?(\d+\.\d°[EW]).*")
         pat = re.compile(
             r"(\d+).00\s+([RLHV])\s+(DVB-S[2]?)\s+(?:T2-MI, PLP (\d+)\s+)?(.*PSK).*?(?:Stream\s+(\d+))?\s+(\d+)\s+(\d+/\d+)$")
 
-        for row in filter(lambda r: len(r) == 16 and pos_pat.match(r[0]), self._rows):
+        for row in filter(lambda r: len(r) == 16 and self.POS_PAT.match(r[0]), self._rows):
             res = pat.search(" ".join((row[0], row[2], row[3], row[8], row[9], row[10])))
             if res:
                 freq, sr, pol, fec, sys = res.group(1), res.group(7), res.group(2), res.group(8), res.group(3)
