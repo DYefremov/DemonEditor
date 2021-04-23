@@ -617,8 +617,13 @@ class Settings:
         self._settings["extra_color"] = value
 
     @property
+    @lru_cache(1)
     def dark_mode(self):
-        return self._settings.get("dark_mode", False)
+        import subprocess
+
+        cmd = ["defaults", "read", "-g", "AppleInterfaceStyle"]
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        return "Dark" in str(p[0])
 
     @dark_mode.setter
     def dark_mode(self, value):

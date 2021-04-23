@@ -356,7 +356,6 @@ class SettingsDialog:
         self._ext_settings.list_font = self._list_font_button.get_font()
 
         if self._ext_settings.is_darwin:
-            self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
             self._ext_settings.alternate_layout = self._layout_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
@@ -794,7 +793,6 @@ class SettingsDialog:
 
     @run_idle
     def init_themes(self):
-        self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
         if t_support:
