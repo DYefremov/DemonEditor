@@ -23,6 +23,8 @@
   <menu id="menu_bar">
     <submenu>
       <attribute name="label" translatable="yes">File</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
       <section>
         <submenu>
           <attribute name="label" translatable="yes">Import</attribute>
@@ -69,6 +71,8 @@
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">Edit</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
       <section>
       <item>
         <attribute name="label" translatable="yes">Lock</attribute>
@@ -82,6 +86,8 @@
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">View</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
       <section>
         <item>
           <attribute name="label" translatable="yes">Search</attribute>
@@ -95,6 +101,8 @@
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">Tools</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
       <section>
         <item>
           <attribute name="label" translatable="yes">Satellites editor</attribute>
@@ -114,6 +122,8 @@
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">IPTV</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
       <item>
         <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
         <attribute name="action">app.on_iptv</attribute>
@@ -146,6 +156,15 @@
           <attribute name="action">app.on_remove_all_unavailable</attribute>
         </item>
       </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">FTP client</attribute>
+      <attribute name="action">app.show_ftp_menu</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Close</attribute>
+        <attribute name="action">app.on_ftp_client_close</attribute>
+      </item>
     </submenu>
   </menu>
 </interface>

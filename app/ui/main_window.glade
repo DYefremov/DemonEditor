@@ -184,6 +184,11 @@ Author: Dmitriy Yefremov
     <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
+  <object class="GtkImage" id="control_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">input-gaming-symbolic</property>
+  </object>
   <object class="GtkListStore" id="fav_list_store">
     <columns>
       <!-- column-name num -->
@@ -703,6 +708,11 @@ Author: Dmitriy Yefremov
     <property name="icon_name">edit-find-symbolic</property>
     <property name="icon_size">1</property>
   </object>
+  <object class="GtkImage" id="ftp_client_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-server-symbolic</property>
+  </object>
   <object class="GtkImage" id="ftp_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1126,12 +1136,13 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin_left">20</property>
-                <property name="margin_right">20</property>
+                <property name="margin_left">15</property>
+                <property name="margin_right">15</property>
                 <property name="homogeneous">True</property>
                 <property name="layout_style">expand</property>
                 <child>
                   <object class="GtkToggleButton" id="filter_tool_button">
+                    <property name="label" translatable="yes">Filter</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
@@ -1149,6 +1160,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="search_tool_button">
+                    <property name="label" translatable="yes">Search</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -1177,11 +1189,11 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
-                <property name="spacing">10</property>
+                <property name="spacing">5</property>
                 <child>
                   <object class="GtkComboBoxText" id="profile_combo_box">
                     <property name="visible">True</property>
@@ -1411,14 +1423,14 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin_left">20</property>
-                <property name="margin_right">20</property>
+                <property name="margin_left">15</property>
+                <property name="margin_right">15</property>
                 <child>
                   <object class="GtkButtonBox" id="toolbar_extra_tools_box">
                     <property name="can_focus">False</property>
                     <property name="valign">center</property>
-                    <property name="margin_left">10</property>
-                    <property name="margin_right">10</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
                     <property name="homogeneous">True</property>
                     <property name="layout_style">expand</property>
                     <child>
@@ -1503,13 +1515,8 @@ Author: Dmitriy Yefremov
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Control</property>
                         <property name="action_name">app.on_remote</property>
-                        <child>
-                          <object class="GtkImage" id="control_button_image">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">input-gaming-symbolic</property>
-                          </object>
-                        </child>
+                        <property name="image">control_image</property>
+                        <property name="always_show_image">True</property>
                         <accelerator key="t" signal="clicked"/>
                       </object>
                       <packing>
@@ -1520,19 +1527,14 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkToggleButton" id="ftp_button">
+                        <property name="label" translatable="yes">FTP</property>
                         <property name="width_request">32</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">FTP client</property>
+                        <property name="image">ftp_client_image</property>
                         <property name="always_show_image">True</property>
-                        <child>
-                          <object class="GtkImage" id="ftp_tool_image">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_text" translatable="yes">FTP client</property>
-                            <property name="icon_name">network-server-symbolic</property>
-                          </object>
-                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -3520,6 +3522,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -3534,7 +3537,7 @@ Author: Dmitriy Yefremov
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>

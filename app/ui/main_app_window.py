@@ -243,12 +243,18 @@ class Application(Gtk.Application):
         self._add_bouquet_button = builder.get_object("add_bouquet_tool_button")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
+        # Tool bar elements.
+        self._main_box = builder.get_object("main_box")
+        self._toolbar_search_box = builder.get_object("toolbar_search_box")
+        toolbar_tools_box = builder.get_object("toolbar_tools_box")
+        self._toolbar_search_box.bind_property("visible", toolbar_tools_box, "visible")
+        self._toolbar_search_box.bind_property("visible", self._toolbar_extra_tools_box, "visible")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_search_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", self._toolbar_search_box, "visible", 4)
         self._app_info_box.bind_property("visible", self._toolbar_extra_tools_box, "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", toolbar_tools_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("save_tool_button"), "visible", 4)
         self._app_info_box.bind_property("visible", self._add_bouquet_button, "visible", 4)
         # Status bar
@@ -284,6 +290,9 @@ class Application(Gtk.Application):
         self._ftp_button = builder.get_object("ftp_button")
         self._ftp_revealer = builder.get_object("ftp_revealer")
         self._ftp_button.bind_property("active", self._ftp_revealer, "visible")
+        self._ftp_revealer.bind_property("visible", self._main_box, "visible", 4)
+        self._ftp_revealer.bind_property("visible", builder.get_object("toolbar_main_box"), "visible", 4)
+        self._ftp_button.connect("toggled", self.on_ftp_toggle)
         # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -352,21 +361,21 @@ class Application(Gtk.Application):
 
         extra_box = builder.get_object("toolbar_extra_box")
         extra_box.set_child_packing(self._toolbar_extra_tools_box, False, True, 0, Gtk.PackType.END)
-        search_box = builder.get_object("toolbar_search_box")
-        search_box.reorder_child(builder.get_object("search_tool_button"), 0)
+        self._toolbar_search_box.reorder_child(builder.get_object("search_tool_button"), 0)
 
         self._top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
-        self._top_box.set_child_packing(search_box, False, True, 0, Gtk.PackType.END)
+        self._top_box.set_child_packing(self._toolbar_search_box, False, True, 0, Gtk.PackType.END)
         self._top_box.reorder_child(extra_box, 0)
 
         center_box = builder.get_object("center_box")
-        center_box.reorder_child(self._ftp_revealer, 0)
-        center_box.reorder_child(self._control_revealer, 1)
-        center_box.reorder_child(builder.get_object("main_box"), 2)
+        center_box.reorder_child(self._control_revealer, 0)
+        center_box.reorder_child(self._ftp_revealer, 1)
+        center_box.reorder_child(self._main_box, 2)
+        center_box.set_child_packing(self._control_revealer, False, True, 0, Gtk.PackType.START)
 
         builder.get_object("fs_box").set_child_packing(self._filter_box, False, True, 0, Gtk.PackType.END)
         top_toolbar = builder.get_object("top_toolbar")
-        top_toolbar.set_child_packing(builder.get_object("toolbar_search_box"), False, True, 0, Gtk.PackType.END)
+        top_toolbar.set_child_packing(self._toolbar_search_box, False, True, 0, Gtk.PackType.END)
 
         services_box = self._main_paned.get_child1()
         self._main_paned.remove(services_box)
@@ -476,6 +485,16 @@ class Application(Gtk.Application):
         remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
         remote_action.connect("change-state", self.on_control)
         self.add_action(remote_action)
+        # FTP client. Hiding the app menu bar when the client is shown.
+        # We are working with the "hidden-when" submenu attribute. See 'app_menu_bar.ui' file.
+        hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
+        self._ftp_revealer.bind_property("visible", hide_bar_action, "enabled", 4)
+        self.add_action(hide_bar_action)
+        show_ftp_menu_action = Gio.SimpleAction.new("show_ftp_menu", None)
+        show_ftp_menu_action.set_enabled(False)
+        self._ftp_revealer.bind_property("visible", show_ftp_menu_action, "enabled")
+        self.add_action(show_ftp_menu_action)
+        self.set_action("on_ftp_client_close", lambda a, v: self._ftp_button.set_active(False))
         # Layout
         self.set_action("on_switch_fav_position", self.on_switch_fav_position)
 
@@ -2956,6 +2975,10 @@ class Application(Gtk.Application):
         self._control_button.set_active(False)
 
     # ****************** FTP client ********************* #
+
+    def on_ftp_toggle(self, button):
+        if not self._app_info_box.get_visible():
+            self._toolbar_search_box.set_visible(not button.get_active())
 
     def on_ftp_realize(self, revealer):
         if not self._ftp_client:
