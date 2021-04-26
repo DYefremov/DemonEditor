@@ -17,7 +17,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException, IS_WIN
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
 from app.tools.media import Player, Recorder
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -36,7 +36,8 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, TEXT_DOMAIN, APP_FONT)
+                        FavClickMode, MOD_MASK, APP_FONT)
+
 
 class Application(Gtk.Application):
     SERVICE_MODEL_NAME = "services_list_store"
@@ -57,8 +58,8 @@ class Application(Gtk.Application):
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
-                     "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item",
-                     "fav_epg_configuration_popup_item", "fav_add_alt_popup_item")
+                     "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item", "fav_add_alt_popup_item",
+                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "bouquet_import_popup_item",
@@ -134,6 +135,7 @@ class Application(Gtk.Application):
                           "on_insert_space": self.on_insert_space,
                           "on_fav_press": self.on_fav_press,
                           "on_locate_in_services": self.on_locate_in_services,
+                          "on_mark_duplicates": self.on_mark_duplicates,
                           "on_picons_manager_show": self.on_picons_manager_show,
                           "on_filter_changed": self.on_filter_changed,
                           "on_filter_type_toggled": self.on_filter_type_toggled,
@@ -234,19 +236,27 @@ class Application(Gtk.Application):
         self._status_bar_box = builder.get_object("status_bar_box")
         self._services_main_box = builder.get_object("services_main_box")
         self._bq_name_label = builder.get_object("bq_name_label")
-        tool_bar = builder.get_object("top_toolbar")
-        self._main_data_box.bind_property("visible", tool_bar, "visible")
+        self._main_data_box.bind_property("visible", builder.get_object("top_toolbar"), "visible")
         self._telnet_tool_button = builder.get_object("telnet_tool_button")
         self._top_box = builder.get_object("top_box")
+        self._toolbar_extra_tools_box = builder.get_object("toolbar_extra_tools_box")
+        self._add_bouquet_button = builder.get_object("add_bouquet_tool_button")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
+        # Tool bar elements.
+        self._main_box = builder.get_object("main_box")
+        self._toolbar_search_box = builder.get_object("toolbar_search_box")
+        toolbar_tools_box = builder.get_object("toolbar_tools_box")
+        self._toolbar_search_box.bind_property("visible", toolbar_tools_box, "visible")
+        self._toolbar_search_box.bind_property("visible", self._toolbar_extra_tools_box, "visible")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_extra_box"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("toolbar_tools_box"), "visible", 4)
+        self._app_info_box.bind_property("visible", self._toolbar_search_box, "visible", 4)
+        self._app_info_box.bind_property("visible", self._toolbar_extra_tools_box, "visible", 4)
+        self._app_info_box.bind_property("visible", toolbar_tools_box, "visible", 4)
         self._app_info_box.bind_property("visible", builder.get_object("save_tool_button"), "visible", 4)
-        self._app_info_box.bind_property("visible", builder.get_object("add_bouquet_tool_button"), "visible", 4)
+        self._app_info_box.bind_property("visible", self._add_bouquet_button, "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
@@ -264,7 +274,7 @@ class Application(Gtk.Application):
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
-        # self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
+        self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
         # Alternatives
@@ -280,6 +290,9 @@ class Application(Gtk.Application):
         self._ftp_button = builder.get_object("ftp_button")
         self._ftp_revealer = builder.get_object("ftp_revealer")
         self._ftp_button.bind_property("active", self._ftp_revealer, "visible")
+        self._ftp_revealer.bind_property("visible", self._main_box, "visible", 4)
+        self._ftp_revealer.bind_property("visible", builder.get_object("toolbar_main_box"), "visible", 4)
+        self._ftp_button.connect("toggled", self.on_ftp_toggle)
         # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -291,7 +304,7 @@ class Application(Gtk.Application):
         self._services_model_filter = builder.get_object("services_model_filter")
         self._services_model_filter.set_visible_func(self.services_filter_function)
         self._filter_entry = builder.get_object("filter_entry")
-        self._filter_bar = builder.get_object("filter_bar")
+        self._filter_box = builder.get_object("filter_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
@@ -305,18 +318,18 @@ class Application(Gtk.Application):
         self._player_tool_bar = builder.get_object("player_tool_bar")
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
+        self._player_box.bind_property("visible", self._top_box, "visible", 4)
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._fav_bouquets_paned = builder.get_object("fav_bouquets_paned")
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("fav_pos_column"), "visible", 4)
         self._player_box.bind_property("visible", self._player_event_box, "visible")
-        self._player_box.bind_property("visible", tool_bar, "sensitive", 4)
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         # Record
         self._record_image = builder.get_object("record_button_image")
         # Search
-        self._search_bar = builder.get_object("search_bar")
+        self._search_box = builder.get_object("search_box")
         self._search_entry = builder.get_object("search_entry")
         self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
                                                builder.get_object("search_down_button"),
@@ -330,25 +343,78 @@ class Application(Gtk.Application):
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        # Layout
+        if self._settings.is_darwin and self._settings.alternate_layout:
+            self._main_paned = builder.get_object("main_data_paned")
+            self._fav_paned = builder.get_object("fav_bouquets_paned")
+            self._fav_box = self._fav_paned.get_child1()
+            self._bouquets_box = self._fav_paned.get_child2()
+            self._left_ar_bq_button = builder.get_object("left_arrow_bq_button")
+            self._left_ar_bq_button.bind_property("visible", builder.get_object("right_arrow_bq_button"), "visible", 4)
+            self._left_ar_bq_button.set_visible(True)
+            self.init_layout(builder)
 
-        # Menu bar
-        main_box = builder.get_object("main_window_box")
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
-        menu_bar = Gtk.MenuBar.new_from_model(builder.get_object("menu_bar"))
-        menu_bar.set_visible(True)
-        main_box.pack_start(menu_bar, False, False, 0)
-        main_box.reorder_child(menu_bar, 0)
-        self._main_data_box.bind_property("visible", menu_bar, "visible")
-        self._player_box.bind_property("visible", menu_bar, "sensitive", 4)
-        if self._settings.get("telnet"):
-            self.init_telnet(builder)
+    def init_layout(self, builder):
+        """ Initializes an alternate layout, if enabled. """
+        control_box = builder.get_object("control_button_box")
+        control_box.set_child_packing(self._control_button, False, True, 0, Gtk.PackType.END)
+
+        extra_box = builder.get_object("toolbar_extra_box")
+        extra_box.set_child_packing(self._toolbar_extra_tools_box, False, True, 0, Gtk.PackType.END)
+        self._toolbar_search_box.reorder_child(builder.get_object("search_tool_button"), 0)
+
+        self._top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
+        self._top_box.set_child_packing(self._toolbar_search_box, False, True, 0, Gtk.PackType.END)
+        self._top_box.reorder_child(extra_box, 0)
+
+        center_box = builder.get_object("center_box")
+        center_box.reorder_child(self._control_revealer, 0)
+        center_box.reorder_child(self._ftp_revealer, 1)
+        center_box.reorder_child(self._main_box, 2)
+        center_box.set_child_packing(self._control_revealer, False, True, 0, Gtk.PackType.START)
+
+        builder.get_object("fs_box").set_child_packing(self._filter_box, False, True, 0, Gtk.PackType.END)
+        top_toolbar = builder.get_object("top_toolbar")
+        top_toolbar.set_child_packing(self._toolbar_search_box, False, True, 0, Gtk.PackType.END)
+
+        services_box = self._main_paned.get_child1()
+        self._main_paned.remove(services_box)
+        self._main_paned.remove(self._fav_paned)
+        self._main_paned.pack1(self._fav_paned, True, True)
+        self._main_paned.pack2(services_box, True, True)
+
+        self._left_ar_bq_button.set_visible(not self._settings.bq_details_first)
+        self.init_bq_position()
+
+    def init_bq_position(self):
+        self._fav_paned.remove(self._fav_box)
+        self._fav_paned.remove(self._bouquets_box)
+
+        if self._settings.bq_details_first:
+            self._fav_paned.pack1(self._fav_box, False, False)
+            self._fav_paned.pack2(self._bouquets_box, False, False)
+        else:
+            self._fav_paned.pack1(self._bouquets_box, False, False)
+            self._fav_paned.pack2(self._fav_box, False, False)
+
+        pack = Gtk.PackType.END if self._settings.bq_details_first else Gtk.PackType.START
+        self._toolbar_extra_tools_box.set_child_packing(self._add_bouquet_button, False, True, 0, pack)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
 
         self.init_keys()
         self.set_accels()
+
+        builder = Gtk.Builder()
+        builder.set_translation_domain("demon-editor")
+        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
+        self.set_menubar(builder.get_object("menu_bar"))
+        self.set_app_menu(builder.get_object("app-menu"))
+
+        if self._settings.get("telnet"):
+            self.init_telnet(builder)
+
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_appearance()
@@ -419,6 +485,16 @@ class Application(Gtk.Application):
         remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
         remote_action.connect("change-state", self.on_control)
         self.add_action(remote_action)
+        # FTP client. Hiding the app menu bar when the client is shown.
+        # We are working with the "hidden-when" submenu attribute. See 'app_menu_bar.ui' file.
+        hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
+        self._ftp_revealer.bind_property("visible", hide_bar_action, "enabled", 4)
+        self.add_action(hide_bar_action)
+        show_ftp_menu_action = Gio.SimpleAction.new("show_ftp_menu", None)
+        show_ftp_menu_action.set_enabled(False)
+        self._ftp_revealer.bind_property("visible", show_ftp_menu_action, "enabled")
+        self.add_action(show_ftp_menu_action)
+        self.set_action("on_ftp_client_close", lambda a, v: self._ftp_button.set_active(False))
         # Layout
         self.set_action("on_switch_fav_position", self.on_switch_fav_position)
 
@@ -617,7 +693,9 @@ class Application(Gtk.Application):
     def on_close_app(self, *args):
         """ Performing operations before closing the application. """
         # Saving the current size of the application window.
-        self._settings.add("window_size", self._main_window.get_size())
+        self._main_window.unfullscreen()
+        if not self._main_window.is_maximized():
+            self._settings.add("window_size", self._main_window.get_size())
 
         if self._recorder:
             if self._recorder.is_record():
@@ -665,10 +743,9 @@ class Application(Gtk.Application):
         model, paths = view.get_selection().get_selected_rows()
 
         if target is ViewTarget.FAV:
-            rows = []
-            for in_itr in [model.get_iter(path) for path in paths]:
-                v1, v2, v3, v4, v5, v6, v7, v8 = model.get(in_itr, 2, 3, 4, 5, 7, 16, 18, 8)
-                rows.append((0, v1, v2, v3, v4, v5, v6, v7, v8))
+            self._rows_buffer.extend((0, *model.get(model.get_iter(path), Column.SRV_CODED, Column.SRV_SERVICE,
+                                                    Column.SRV_LOCKED, Column.SRV_HIDE, Column.SRV_TYPE, Column.SRV_POS,
+                                                    Column.SRV_FAV_ID, Column.SRV_PICON), None, None) for path in paths)
         elif target is ViewTarget.SERVICES:
             self._rows_buffer.extend(model[path][:] for path in paths)
         elif target is ViewTarget.BOUQUET:
@@ -1380,7 +1457,7 @@ class Application(Gtk.Application):
                 self.delete_selection(self._services_view, self._fav_view)
                 self.on_view_focus(self._bouquets_view)
 
-            menu.popup(None, None, None, None, event.button, event.time)
+            menu.popup_at_pointer(None)
             return True
 
     def on_satellite_editor_show(self, action, value=None):
@@ -1577,7 +1654,7 @@ class Application(Gtk.Application):
             yield True
             self._data_hash = self.get_data_hash()
             yield True
-            if self._filter_bar.get_visible():
+            if self._filter_box.get_visible():
                 self.on_filter_changed()
             yield True
 
@@ -1620,7 +1697,7 @@ class Application(Gtk.Application):
         bq_id = "{}:{}".format(name, bq_type)
         services = []
         extra_services = {}  # for services with different names in bouquet and main list
-
+        agr = [None] * 7
         for srv in bq.services:
             fav_id = srv.data
             # IPTV and MARKER services
@@ -1639,13 +1716,12 @@ class Application(Gtk.Application):
                         picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
                         locked = LOCKED_ICON if data_id in self._blacklist else None
                 srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
-                              self._picons.get(picon_id, None), picon_id, None, None, None, None, None, None, None,
-                              data_id, fav_id, None)
+                              self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.ALT:
                 self._alt_file.add("{}:{}".format(srv.data, bq_type))
                 srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
-                              None, None, None, None, None, None, None, None, None, srv.data, fav_id, srv.num)
+                              None, None, *agr, srv.data, fav_id, srv.num)
                 self._services[fav_id] = srv
             elif srv.name:
                 extra_services[fav_id] = srv.name
@@ -1767,7 +1843,7 @@ class Application(Gtk.Application):
                     bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden, self._bq_file.get(bq_id, None))
                     bqs.append(bq)
             if len(b_path) == 1:
-                bouquets.append(Bouquets(model.get_value(itr, 0), model.get_value(itr, 3), bqs if bqs else []))
+                bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
 
         # Getting bouquets
         self._bouquets_view.get_model().foreach(parse_bouquets)
@@ -1962,9 +2038,7 @@ class Application(Gtk.Application):
 
     def delete_selection(self, view, *args):
         """ Used for clear selection on given view(s) """
-        views = [view, ]
-        views.extend(args)
-        for v in views:
+        for v in [view, *args]:
             v.get_selection().unselect_all()
 
     def on_settings(self, action, value=None):
@@ -2902,6 +2976,10 @@ class Application(Gtk.Application):
 
     # ****************** FTP client ********************* #
 
+    def on_ftp_toggle(self, button):
+        if not self._app_info_box.get_visible():
+            self._toolbar_search_box.set_visible(not button.get_active())
+
     def on_ftp_realize(self, revealer):
         if not self._ftp_client:
             from app.ui.ftp import FtpClientBox
@@ -2919,7 +2997,7 @@ class Application(Gtk.Application):
 
         self._filter_entry.grab_focus() if value else self.on_filter_changed()
         self.filter_set_default()
-        self._filter_bar.set_visible(value)
+        self._filter_box.set_visible(value)
 
     @run_idle
     def filter_set_default(self):
@@ -2980,7 +3058,7 @@ class Application(Gtk.Application):
         self._services_view.set_model(model)
 
     def services_filter_function(self, model, itr, data):
-        if not self._filter_bar.is_visible():
+        if not self._filter_box.is_visible():
             return True
         else:
             r_txt = str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE, Column.SRV_TYPE, Column.SRV_SSID,
@@ -3020,7 +3098,7 @@ class Application(Gtk.Application):
             return True
 
         action.set_state(value)
-        self._search_bar.set_visible(value)
+        self._search_box.set_visible(value)
         if value:
             self._search_entry.grab_focus()
         else:
@@ -3177,6 +3255,17 @@ class Application(Gtk.Application):
 
     def on_locate_in_services(self, view):
         locate_in_services(view, self._services_view, self._main_window)
+
+    def on_mark_duplicates(self, item):
+        """ Marks services with duplicate [names] in the fav list.  """
+        from collections import Counter
+
+        dup = Counter(r[Column.FAV_SERVICE] for r in self._fav_model if r[Column.FAV_TYPE] not in self._marker_types)
+        dup = {k for k, v in dup.items() if v > 1}
+
+        for r in self._fav_model:
+            if r[Column.FAV_SERVICE] in dup:
+                r[Column.FAV_BACKGROUND] = self._NEW_COLOR
 
     # ***************** Picons *********************#
 
