@@ -8,13 +8,14 @@ from enum import Enum
 from urllib.error import HTTPError, URLError
 
 from gi.repository import GLib
+
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.tools.epg import EPG, ChannelsParser
-from app.ui.dialogs import get_message, show_dialog, DialogType
+from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from .main_helper import on_popup_menu, update_entry_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TEXT_DOMAIN, Column, EPG_ICON, KeyboardKey, MOD_MASK
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, MOD_MASK
 
 
 class RefsSource(Enum):
@@ -66,10 +67,7 @@ class EpgDialog:
         self._show_tooltips = True
         self._download_xml_is_active = False
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_from_file(UI_RESOURCES_PATH + "epg_dialog.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "epg_dialog.glade", handlers)
 
         self._dialog = builder.get_object("epg_dialog_window")
         self._dialog.set_transient_for(transient)

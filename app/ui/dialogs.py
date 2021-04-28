@@ -5,7 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.commons import run_idle
-from app.settings import SEP
+from app.settings import SEP, IS_WIN
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
 
 
@@ -183,6 +183,49 @@ def get_message(message):
 def get_dialogs_string(path):
     with open(path, "r", encoding="utf-8") as f:
         return "".join(f)
+
+
+def get_builder(path, handlers=None, use_str=False, objects=None):
+    """ Creates and returns a Gtk.Builder instance. """
+    builder = Gtk.Builder()
+    builder.set_translation_domain(TEXT_DOMAIN)
+
+    if use_str:
+        if objects:
+            builder.add_objects_from_string(get_dialogs_string(path).format(use_header=IS_GNOME_SESSION), objects)
+        else:
+            builder.add_from_string(get_dialogs_string(path).format(use_header=IS_GNOME_SESSION))
+    else:
+        if objects:
+            builder.add_objects_from_file(path, objects)
+        else:
+            builder.add_from_file(path)
+
+    builder.connect_signals(handlers or {})
+    if IS_WIN:
+        translate_objects(builder.get_objects())
+
+    return builder
+
+
+def translate_objects(objects):
+    """
+        Used to translate GUI from * .glade files in MS Windows.
+
+        More info: https://gitlab.gnome.org/GNOME/gtk/-/issues/569
+    """
+    for o in objects:
+        if hasattr(o, "get_label"):
+            label = o.get_label()
+            if label:
+                o.set_label(get_message(label))
+            t_text = o.get_tooltip_text()
+            if t_text:
+                o.set_tooltip_text(get_message(t_text))
+        elif hasattr(o, "get_title"):
+            title = o.get_title()
+            if title:
+                o.set_title(get_message(title))
 
 
 if __name__ == "__main__":

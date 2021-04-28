@@ -8,7 +8,7 @@ from enum import Enum
 
 from app.commons import run_idle
 from app.settings import SettingsType
-from app.ui.dialogs import show_dialog, DialogType
+from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
 
@@ -30,10 +30,7 @@ class BackupDialog:
                     "on_resize": self.on_resize,
                     "on_key_release": self.on_key_release}
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
-        builder.add_from_file(UI_RESOURCES_PATH + "backup_dialog.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "backup_dialog.glade", handlers)
 
         self._settings = settings
         self._s_type = settings.setting_type
