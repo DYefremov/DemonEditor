@@ -182,8 +182,9 @@ class SettingsDialog:
         self.init_ui_elements(self._s_type)
         self.init_profiles()
 
-        if IS_WIN:
-            builder.get_object("streams_lib_frame").set_visible(False)
+        if IS_WIN or True:
+            self._gst_lib_button.set_visible(False)
+            self._vlc_lib_button.set_sensitive(self._settings.is_enable_experimental)
             # Themes
             enable_exp = self._settings.is_enable_experimental
             builder.get_object("style_frame").set_visible(enable_exp)

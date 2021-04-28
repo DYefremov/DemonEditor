@@ -1,3 +1,4 @@
+import locale
 import os
 from enum import Enum, IntEnum
 from functools import lru_cache
@@ -28,11 +29,11 @@ try:
 except SettingsException:
     pass
 else:
+    locale.setlocale(locale.LC_NUMERIC, "C")
     os.environ["LANGUAGE"] = settings.language
 
     st = Gtk.Settings().get_default()
     APP_FONT = st.get_property("gtk-font-name")
-    st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
 
     if settings.is_themes_support:
         st.set_property("gtk-theme-name", settings.theme)

@@ -23,7 +23,6 @@ class Dialog(Enum):
         <property name="type_hint">dialog</property>
         <property name="skip_taskbar_hint">True</property>
         <property name="skip_pager_hint">True</property>
-        <property name="gravity">center</property>
         <property name="message_type">{message_type}</property>
         <property name="buttons">{buttons_type}</property>
       </object>

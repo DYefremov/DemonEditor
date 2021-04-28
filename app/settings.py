@@ -25,7 +25,7 @@ class Defaults(Enum):
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
     FORCE_BQ_NAMES = False
-    HTTP_API_SUPPORT = False
+    HTTP_API_SUPPORT = IS_WIN
     ENABLE_YT_DL = False
     ENABLE_SEND_TO = False
     USE_COLORS = True
@@ -35,7 +35,7 @@ class Defaults(Enum):
     LIST_PICON_SIZE = 32
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
-    STREAM_LIB = "gst" if IS_WIN else "vlc"
+    STREAM_LIB = "mpv" if IS_WIN else "vlc"
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
@@ -619,13 +619,8 @@ class Settings:
         self._settings["extra_color"] = value
 
     @property
-    @lru_cache(1)
     def dark_mode(self):
-        import subprocess
-
-        cmd = ["defaults", "read", "-g", "AppleInterfaceStyle"]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        return "Dark" in str(p[0])
+        return self._settings.get("dark_mode", False)
 
     @dark_mode.setter
     def dark_mode(self, value):

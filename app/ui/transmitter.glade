@@ -42,7 +42,6 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
-    <property name="gravity">center</property>
     <property name="has_resize_grip">True</property>
     <child>
       <placeholder/>

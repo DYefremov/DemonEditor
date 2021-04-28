@@ -436,7 +436,6 @@ Author: Dmitriy Yefremov
     <property name="icon_name">applications-utilities</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
     <child>
       <object class="GtkBox" id="sat_editor_main_box">
@@ -779,7 +778,6 @@ Author: Dmitriy Yefremov
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="satelitte_dialog_vbox">
         <property name="can_focus">False</property>
@@ -969,7 +967,6 @@ Author: Dmitriy Yefremov
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="tr_dialog_vbox">
         <property name="can_focus">False</property>
@@ -1403,7 +1400,6 @@ Author: Dmitriy Yefremov
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <signal name="delete-event" handler="on_quit" swapped="no"/>
     <child>
       <placeholder/>

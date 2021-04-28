@@ -55,7 +55,6 @@ Author: Dmitriy Yefremov
     <property name="icon_name">mail-send-receive</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child type="titlebar">
       <placeholder/>
     </child>

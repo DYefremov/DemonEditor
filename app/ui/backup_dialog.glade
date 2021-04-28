@@ -115,7 +115,6 @@ Author: Dmitriy Yefremov
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">document-revert</property>
-    <property name="gravity">center</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
     <child>
       <placeholder/>

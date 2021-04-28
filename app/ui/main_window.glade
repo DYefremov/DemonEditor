@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -110,7 +110,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Cut</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_bouquets_cut" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="x" signal="activate" modifiers="Primary"/>
+        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -121,7 +121,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_bouquets_copy" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -132,7 +132,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Paste</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_bouquets_paste" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="v" signal="activate" modifiers="Primary"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -149,7 +149,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -166,7 +166,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Remove</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_delete" object="bouquets_tree_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
+        <accelerator key="Delete" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
   </object>
@@ -228,7 +228,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Cut</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_fav_cut" object="fav_tree_view" swapped="no"/>
-        <accelerator key="x" signal="activate" modifiers="Primary"/>
+        <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -239,7 +239,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_fav_copy" object="fav_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -250,7 +250,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Paste</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_fav_paste" object="fav_tree_view" swapped="no"/>
-        <accelerator key="v" signal="activate" modifiers="Primary"/>
+        <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -266,7 +266,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -610,7 +610,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkCellRendererToggle" id="filter_satellite_renderer_toggle">
-                    <property name="xalign">0.98</property>
+                    <property name="xalign">0.98000001907348633</property>
                     <signal name="toggled" handler="on_filter_satellite_toggled" swapped="no"/>
                   </object>
                   <attributes>
@@ -925,7 +925,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Copy</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_services_copy" object="services_tree_view" swapped="no"/>
-        <accelerator key="c" signal="activate" modifiers="Primary"/>
+        <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -935,7 +935,7 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
       </object>
     </child>
     <child>
@@ -1115,10 +1115,9 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
     <property name="icon_name">demon-editor</property>
-    <property name="gravity">center</property>
     <property name="startup_id">DemonEditor</property>
     <signal name="delete-event" handler="on_close_app" swapped="no"/>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child>
@@ -1132,65 +1131,13 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkButtonBox" id="toolbar_search_box">
-                <property name="can_focus">False</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="margin_left">15</property>
-                <property name="margin_right">15</property>
-                <property name="homogeneous">True</property>
-                <property name="layout_style">expand</property>
-                <child>
-                  <object class="GtkToggleButton" id="filter_tool_button">
-                    <property name="label" translatable="yes">Filter</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Filter</property>
-                    <property name="valign">center</property>
-                    <property name="action_name">win.filter</property>
-                    <property name="image">filter_image</property>
-                    <property name="always_show_image">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToggleButton" id="search_tool_button">
-                    <property name="label" translatable="yes">Search</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Search</property>
-                    <property name="valign">center</property>
-                    <property name="action_name">win.search</property>
-                    <property name="image">find_image</property>
-                    <property name="always_show_image">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child type="center">
               <object class="GtkBox" id="top_toolbar">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="spacing">5</property>
@@ -1200,7 +1147,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="focus_on_click">False</property>
                     <property name="tooltip_text" translatable="yes">Profile</property>
-                    <property name="valign">center</property>
                     <property name="active">0</property>
                     <signal name="changed" handler="on_profile_changed" swapped="no"/>
                   </object>
@@ -1215,7 +1161,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
-                    <property name="valign">center</property>
                     <property name="layout_style">expand</property>
                     <child>
                       <object class="GtkButton" id="open_tool_button">
@@ -1223,7 +1168,6 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Open</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_data_open</property>
                         <property name="image">open_image</property>
                         <property name="always_show_image">True</property>
@@ -1242,7 +1186,6 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">FTP-transfer</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_download</property>
                         <property name="image">ftp_image</property>
                         <property name="always_show_image">True</property>
@@ -1275,7 +1218,6 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Save</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_data_save</property>
                         <property name="image">save_image</property>
                         <property name="always_show_image">True</property>
@@ -1293,7 +1235,6 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Backups</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_backup_tool_show</property>
                         <property name="image">backups_image</property>
                         <property name="always_show_image">True</property>
@@ -1312,19 +1253,67 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkButtonBox" id="toolbar_search_box">
+                    <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="margin_left">10</property>
+                    <property name="margin_right">10</property>
+                    <property name="homogeneous">True</property>
+                    <property name="layout_style">expand</property>
+                    <child>
+                      <object class="GtkToggleButton" id="filter_tool_button">
+                        <property name="label" translatable="yes">Filter</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Filter</property>
+                        <property name="action_name">win.filter</property>
+                        <property name="image">filter_image</property>
+                        <property name="always_show_image">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="search_tool_button">
+                        <property name="label" translatable="yes">Search</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Search</property>
+                        <property name="action_name">win.search</property>
+                        <property name="image">find_image</property>
+                        <property name="always_show_image">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButtonBox" id="toolbar_tools_box">
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
-                    <property name="valign">center</property>
+                    <property name="homogeneous">True</property>
                     <property name="layout_style">expand</property>
                     <child>
                       <object class="GtkButton" id="sat_editor_tool_button">
                         <property name="label" translatable="yes">Satellites</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Satellites editor</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_satellite_editor_show</property>
                         <property name="image">sat_editor_image</property>
                         <property name="always_show_image">True</property>
@@ -1339,10 +1328,9 @@ Author: Dmitriy Yefremov
                       <object class="GtkButton" id="picons_manager_tool_button">
                         <property name="label" translatable="yes">Picons</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Picons manager</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_picons_manager_show</property>
                         <property name="image">picons_image</property>
                         <property name="always_show_image">True</property>
@@ -1356,10 +1344,9 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkMenuButton" id="iptv_tools_menu_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">IPTV tools</property>
-                        <property name="valign">center</property>
                         <property name="popup">toolbar_iptv_menu</property>
                         <child>
                           <object class="GtkBox" id="iptv_tools_menu_button_box">
@@ -1422,27 +1409,28 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
-                <property name="valign">center</property>
                 <property name="margin_left">15</property>
                 <property name="margin_right">15</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="spacing">20</property>
                 <child>
                   <object class="GtkButtonBox" id="toolbar_extra_tools_box">
                     <property name="can_focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
+                    <property name="halign">center</property>
                     <property name="homogeneous">True</property>
                     <property name="layout_style">expand</property>
                     <child>
                       <object class="GtkButton" id="lock_tool_button">
+                        <property name="width_request">48</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Parent lock</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_locked</property>
                         <property name="image">lock_image</property>
                         <property name="always_show_image">True</property>
+                        <accelerator key="l" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1456,10 +1444,10 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Hide/Skip</property>
-                        <property name="valign">center</property>
                         <property name="action_name">app.on_hide</property>
                         <property name="image">hide_image</property>
                         <property name="always_show_image">True</property>
+                        <accelerator key="h" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1469,7 +1457,6 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkButton" id="add_bouquet_tool_button">
-                        <property name="width_request">32</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
@@ -1505,22 +1492,20 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
-                    <property name="valign">center</property>
                     <property name="homogeneous">True</property>
                     <property name="layout_style">expand</property>
                     <child>
                       <object class="GtkToggleButton" id="control_button">
-                        <property name="width_request">32</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Control</property>
                         <property name="action_name">app.on_remote</property>
                         <property name="image">control_image</property>
                         <property name="always_show_image">True</property>
-                        <accelerator key="t" signal="clicked"/>
+                        <accelerator key="t" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
+                        <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
@@ -1528,7 +1513,6 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkToggleButton" id="ftp_button">
                         <property name="label" translatable="yes">FTP</property>
-                        <property name="width_request">32</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -1546,6 +1530,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
+                    <property name="pack_type">end</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -1554,7 +1539,7 @@ Author: Dmitriy Yefremov
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>

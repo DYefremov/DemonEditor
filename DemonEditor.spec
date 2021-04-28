@@ -6,6 +6,15 @@ PATH_EXE = [os.path.join(DIR_PATH, EXE_NAME)]
 
 block_cipher = None
 
+
+excludes = ['app.tools.mpv',
+            'gi.repository.Gst',
+            'gi.repository.GstBase',
+            'gi.repository.GstVideo',
+            'youtube_dl',
+            'tkinter']
+
+
 ui_files = [('app\\ui\\*.glade', 'ui'),
             ('app\\ui\\*.css', 'ui'),
             ('app\\ui\\*.ui', 'ui'),
@@ -21,7 +30,7 @@ a = Analysis([EXE_NAME],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
-             excludes=['youtube_dl', 'tkinter'],
+             excludes=excludes,
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,

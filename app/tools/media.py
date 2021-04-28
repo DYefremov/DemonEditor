@@ -206,11 +206,6 @@ class GstPlayer(Player):
             from gi.repository import Gst, GstVideo
             # Initialization of GStreamer.
             Gst.init(sys.argv)
-            gtk_sink = Gst.ElementFactory.make("gtksink")
-            if not gtk_sink:
-                msg = "GStreamer error: gtksink plugin not installed!"
-                log(msg)
-                raise ImportError(msg)
         except (OSError, ValueError) as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError("No GStreamer is found. Check that it is installed!")
@@ -225,11 +220,10 @@ class GstPlayer(Player):
             self._is_playing = False
             self._player = Gst.ElementFactory.make("playbin", "player")
             # Initialization of the playback widget.
-            self._player.set_property("video-sink", gtk_sink)
-            vid_widget = gtk_sink.get_property("widget")
-            vid_widget.connect("motion-notify-event", self.on_mouse_motion)
+            vid_widget = self.get_video_widget(widget)
             widget.add(vid_widget)
             vid_widget.show()
+            self._player.set_window_handle(self.get_window_handle(vid_widget))
 
             bus = self._player.get_bus()
             bus.add_signal_watch()

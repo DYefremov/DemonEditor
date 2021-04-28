@@ -92,7 +92,6 @@ Author: Dmitriy Yefremov
     <property name="type_hint">utility</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -182,7 +181,6 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
-    <property name="gravity">center</property>
     <child>
       <object class="GtkBox" id="wait_dialog_box">
         <property name="width_request">100</property>

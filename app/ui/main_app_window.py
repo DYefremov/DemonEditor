@@ -36,7 +36,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT)
+                        FavClickMode, MOD_MASK, TEXT_DOMAIN, APP_FONT)
 
 
 class Application(Gtk.Application):
@@ -343,78 +343,25 @@ class Application(Gtk.Application):
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        # Layout
-        if self._settings.is_darwin and self._settings.alternate_layout:
-            self._main_paned = builder.get_object("main_data_paned")
-            self._fav_paned = builder.get_object("fav_bouquets_paned")
-            self._fav_box = self._fav_paned.get_child1()
-            self._bouquets_box = self._fav_paned.get_child2()
-            self._left_ar_bq_button = builder.get_object("left_arrow_bq_button")
-            self._left_ar_bq_button.bind_property("visible", builder.get_object("right_arrow_bq_button"), "visible", 4)
-            self._left_ar_bq_button.set_visible(True)
-            self.init_layout(builder)
 
-    def init_layout(self, builder):
-        """ Initializes an alternate layout, if enabled. """
-        control_box = builder.get_object("control_button_box")
-        control_box.set_child_packing(self._control_button, False, True, 0, Gtk.PackType.END)
-
-        extra_box = builder.get_object("toolbar_extra_box")
-        extra_box.set_child_packing(self._toolbar_extra_tools_box, False, True, 0, Gtk.PackType.END)
-        self._toolbar_search_box.reorder_child(builder.get_object("search_tool_button"), 0)
-
-        self._top_box.set_child_packing(extra_box, False, True, 0, Gtk.PackType.START)
-        self._top_box.set_child_packing(self._toolbar_search_box, False, True, 0, Gtk.PackType.END)
-        self._top_box.reorder_child(extra_box, 0)
-
-        center_box = builder.get_object("center_box")
-        center_box.reorder_child(self._control_revealer, 0)
-        center_box.reorder_child(self._ftp_revealer, 1)
-        center_box.reorder_child(self._main_box, 2)
-        center_box.set_child_packing(self._control_revealer, False, True, 0, Gtk.PackType.START)
-
-        builder.get_object("fs_box").set_child_packing(self._filter_box, False, True, 0, Gtk.PackType.END)
-        top_toolbar = builder.get_object("top_toolbar")
-        top_toolbar.set_child_packing(self._toolbar_search_box, False, True, 0, Gtk.PackType.END)
-
-        services_box = self._main_paned.get_child1()
-        self._main_paned.remove(services_box)
-        self._main_paned.remove(self._fav_paned)
-        self._main_paned.pack1(self._fav_paned, True, True)
-        self._main_paned.pack2(services_box, True, True)
-
-        self._left_ar_bq_button.set_visible(not self._settings.bq_details_first)
-        self.init_bq_position()
-
-    def init_bq_position(self):
-        self._fav_paned.remove(self._fav_box)
-        self._fav_paned.remove(self._bouquets_box)
-
-        if self._settings.bq_details_first:
-            self._fav_paned.pack1(self._fav_box, False, False)
-            self._fav_paned.pack2(self._bouquets_box, False, False)
-        else:
-            self._fav_paned.pack1(self._bouquets_box, False, False)
-            self._fav_paned.pack2(self._fav_box, False, False)
-
-        pack = Gtk.PackType.END if self._settings.bq_details_first else Gtk.PackType.START
-        self._toolbar_extra_tools_box.set_child_packing(self._add_bouquet_button, False, True, 0, pack)
+        # Menu bar
+        main_box = builder.get_object("main_window_box")
+        builder.set_translation_domain(TEXT_DOMAIN)
+        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
+        menu_bar = Gtk.MenuBar.new_from_model(builder.get_object("menu_bar"))
+        menu_bar.set_visible(True)
+        main_box.pack_start(menu_bar, False, False, 0)
+        main_box.reorder_child(menu_bar, 0)
+        self._main_data_box.bind_property("visible", menu_bar, "visible")
+        self._player_box.bind_property("visible", menu_bar, "sensitive", 4)
+        if self._settings.get("telnet"):
+            self.init_telnet(builder)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
 
         self.init_keys()
         self.set_accels()
-
-        builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
-        builder.add_from_file(UI_RESOURCES_PATH + "app_menu_bar.ui")
-        self.set_menubar(builder.get_object("menu_bar"))
-        self.set_app_menu(builder.get_object("app-menu"))
-
-        if self._settings.get("telnet"):
-            self.init_telnet(builder)
-
         self.update_profile_label()
         self.init_drag_and_drop()
         self.init_appearance()
