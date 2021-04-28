@@ -8,7 +8,7 @@ from app.settings import SettingsType
 from app.ui.backup import backup_data, restore_data
 from app.ui.main_helper import append_text_to_tview
 from app.ui.settings_dialog import show_settings_dialog
-from .dialogs import show_dialog, DialogType, get_message
+from .dialogs import show_dialog, DialogType, get_message, get_builder
 from .uicommons import Gtk, UI_RESOURCES_PATH
 
 
@@ -27,9 +27,7 @@ class DownloadDialog:
                     "on_remove_unused_bouquets_toggled": self.on_remove_unused_bouquets_toggled,
                     "on_info_bar_close": self.on_info_bar_close}
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "download_dialog.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "download_dialog.glade", handlers)
 
         self._dialog_window = builder.get_object("download_dialog_window")
         self._dialog_window.set_transient_for(transient)

@@ -4,7 +4,7 @@ import re
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
 from app.settings import SettingsType, Settings, PlayStreamsMode
-from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog
+from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT
 
@@ -64,9 +64,7 @@ class SettingsDialog:
         self._profiles = self._settings.profiles
         self._s_type = self._settings.setting_type
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "settings_dialog.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "settings_dialog.glade", handlers)
 
         self._dialog = builder.get_object("settings_dialog")
         self._dialog.set_transient_for(transient)

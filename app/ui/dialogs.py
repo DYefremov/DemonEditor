@@ -183,5 +183,26 @@ def get_dialogs_string(path):
         return "".join(f)
 
 
+def get_builder(path, handlers=None, use_str=False, objects=None):
+    """ Creates and returns a Gtk.Builder instance. """
+    builder = Gtk.Builder()
+    builder.set_translation_domain(TEXT_DOMAIN)
+
+    if use_str:
+        if objects:
+            builder.add_objects_from_string(get_dialogs_string(path).format(use_header=IS_GNOME_SESSION), objects)
+        else:
+            builder.add_from_string(get_dialogs_string(path).format(use_header=IS_GNOME_SESSION))
+    else:
+        if objects:
+            builder.add_objects_from_file(path, objects)
+        else:
+            builder.add_from_file(path)
+
+    builder.connect_signals(handlers or {})
+
+    return builder
+
+
 if __name__ == "__main__":
     pass

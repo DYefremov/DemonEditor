@@ -12,7 +12,7 @@ from gi.repository import GLib
 
 from app.commons import log, run_task, run_idle
 from app.connections import UtfFTP
-from app.ui.dialogs import show_dialog, DialogType
+from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
 
@@ -68,9 +68,7 @@ class FtpClientBox(Gtk.HBox):
                     "on_view_press": self.on_view_press,
                     "on_view_release": self.on_view_release}
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "ftp.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "ftp.glade", handlers)
 
         self.add(builder.get_object("main_frame"))
         self._ftp_info_label = builder.get_object("ftp_info_label")

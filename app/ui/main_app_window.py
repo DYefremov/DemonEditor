@@ -22,7 +22,7 @@ from app.tools.media import Player, Recorder
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
-from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message
+from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
 from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
@@ -218,9 +218,7 @@ class Application(Gtk.Application):
         self._NEW_COLOR = None  # Color for new services in the main list
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "main_window.glade")
-        builder.connect_signals(self._handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "main_window.glade", self._handlers)
         self._main_window = builder.get_object("main_window")
         main_window_size = self._settings.get("window_size")
         # Setting the last size of the window if it was saved

@@ -12,10 +12,10 @@ from app.connections import upload_data, DownloadType, download_data, remove_pic
 from app.settings import SettingsType, Settings
 from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to, download_picon
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .dialogs import show_dialog, DialogType, get_message
+from .dialogs import show_dialog, DialogType, get_message, get_builder
 from .main_helper import update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon, \
     get_picon_pixbuf
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, GTK_PATH, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey
 
 
 class PiconsDialog:
@@ -76,9 +76,7 @@ class PiconsDialog:
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_popup_menu": on_popup_menu}
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "picons_manager.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "picons_manager.glade", handlers)
 
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)

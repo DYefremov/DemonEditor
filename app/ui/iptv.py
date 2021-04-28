@@ -15,10 +15,9 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
                               parse_m3u)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
-from app.ui.dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
+from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
 from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu, get_picon_pixbuf
-from app.ui.uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION,
-                              KeyboardKey, get_yt_icon)
+from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -67,11 +66,8 @@ class IptvDialog:
         self._yt_links = None
         self._yt_dl = None
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True,
+                              objects=("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
 
         self._dialog = builder.get_object("iptv_dialog")
         self._dialog.set_transient_for(transient)
@@ -323,10 +319,8 @@ class SearchUnavailableDialog:
     def __init__(self, transient, model, fav_bouquet, iptv_rows, s_type):
         handlers = {"on_response": self.on_response}
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade", ("search_unavailable_streams_dialog",))
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "iptv.glade", handlers,
+                              objects=("search_unavailable_streams_dialog",))
 
         self._dialog = builder.get_object("search_unavailable_streams_dialog")
         self._dialog.set_transient_for(transient)
@@ -421,11 +415,8 @@ class IptvListDialog:
 
         self._s_type = s_type
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("iptv_list_configuration_dialog", "stream_type_liststore"))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True,
+                              objects=("iptv_list_configuration_dialog", "stream_type_liststore"))
 
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
         self._dialog.set_transient_for(transient)
@@ -813,13 +804,10 @@ class YtListImportDialog:
         self._settings = settings
         self._yt = None
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
-                                         "yt_popup_menu", "remove_selection_image", "yt_receive_image",
-                                         "yt_import_image"))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True,
+                              objects=("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
+                                       "yt_popup_menu", "remove_selection_image", "yt_receive_image",
+                                       "yt_import_image"))
 
         self._dialog = builder.get_object("yt_import_dialog_window")
         self._dialog.set_transient_for(transient)

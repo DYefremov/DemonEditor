@@ -8,9 +8,9 @@ from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, 
                                   TrType, SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, T_FEC,
                                   HIERARCHY, A_MODULATION)
 from app.settings import SettingsType
-from .dialogs import show_dialog, DialogType, Action, get_dialogs_string
+from .dialogs import show_dialog, DialogType, Action, get_builder
 from .main_helper import get_base_model
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, TEXT_DOMAIN, CODED_ICON, Column, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, CODED_ICON, Column
 
 _UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
 
@@ -46,10 +46,7 @@ class ServiceDetailsDialog:
                     "on_non_empty_entry_changed": self.on_non_empty_entry_changed,
                     "on_cancel": lambda item: self._dialog.destroy()}
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True)
         self._builder = builder
 
         self._dialog = builder.get_object("service_details_dialog")
@@ -875,10 +872,7 @@ class ServiceDetailsDialog:
 
 class TransponderServicesDialog:
     def __init__(self, transient, services_view, transponder, tr_iters):
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("tr_services_dialog", "transponder_services_liststore"))
+        builder = get_builder(_UI_PATH, use_str=True, objects=("tr_services_dialog", "transponder_services_liststore"))
         self._dialog = builder.get_object("tr_services_dialog")
         self._dialog.set_transient_for(transient)
         self._srv_model = builder.get_object("transponder_services_liststore")
