@@ -2,6 +2,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![platform](https://img.shields.io/badge/platform-windows-lightgrey)
 ## Enigma2 channel and satellite list editor for MS Windows (experimental).  
 
+[<img src="https://user-images.githubusercontent.com/7511379/116426009-6bd3fa80-a84b-11eb-81ea-3407396a0c4b.png" width="850"/>](https://user-images.githubusercontent.com/7511379/116426009-6bd3fa80-a84b-11eb-81ea-3407396a0c4b.png)   
+
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).  
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).                                
 **The functionality and performance of this version may be different from the [Linux version](https://github.com/DYefremov/DemonEditor)!**
@@ -16,7 +18,7 @@ Focused on the convenience of working in lists from the keyboard. The mouse is a
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
-* Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
+* Preview (playback) of IPTV or other streams directly from the bouquet list.
 * Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
 * Simple FTP client (experimental). 
 
@@ -48,7 +50,7 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 
 ## Minimum requirements
-*Python >= 3.4.4, GTK+ >= 3.16 with PyGObject bindings, python3-requests.*
+*Python >= 3.5.2, GTK+ >= 3.22 with PyGObject bindings, python3-requests.*
                                                                     
 ## Important
 **This version is not fully tested and has experimental status!**
