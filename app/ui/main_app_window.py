@@ -17,7 +17,7 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
+from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException, IS_WIN
 from app.tools.media import Player, Recorder
 from app.ui.epg_dialog import EpgDialog
 from app.ui.transmitter import LinksTransmitter
@@ -1473,8 +1473,12 @@ class Application(Gtk.Application):
         """ Opening the data archive via "File/Open archive". """
         file_filter = Gtk.FileFilter()
         file_filter.set_name("*.zip, *.gz")
-        file_filter.add_mime_type("application/zip")
-        file_filter.add_mime_type("application/gzip")
+        if IS_WIN:
+            file_filter.add_pattern("*.zip")
+            file_filter.add_pattern("*.gz")
+        else:
+            file_filter.add_mime_type("application/zip")
+            file_filter.add_mime_type("application/gzip")
 
         response = show_dialog(DialogType.CHOOSER, self._main_window,
                                action_type=Gtk.FileChooserAction.OPEN,
@@ -1518,8 +1522,10 @@ class Application(Gtk.Application):
                         except (UnicodeEncodeError, UnicodeDecodeError) as e:
                             log("Filename [{}] error in zip archive: {}".format(zip_info.filename, e))
                         else:
-                            zip_info.filename = os.path.basename(f_name)
-                            zip_file.extract(zip_info, path=tmp_path_name)
+                            base_name = os.path.basename(f_name)
+                            if base_name:
+                                zip_info.filename = os.path.basename(f_name)
+                                zip_file.extract(zip_info, path=tmp_path_name)
         elif tarfile.is_tarfile(data_path):
             with tarfile.open(data_path) as tar:
                 for mb in tar.getmembers():
