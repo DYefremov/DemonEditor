@@ -1242,15 +1242,18 @@ class Application(Gtk.Application):
 
         if txt:
             if txt.startswith("file://") and name == self.SERVICE_MODEL_NAME:
-                self.on_import_data(urlparse(unquote(txt)).path.strip())
+                path = urlparse(unquote(txt)).path
+                self.on_import_data(path.lstrip("/") if IS_WIN else path.strip())
             elif name == self.FAV_MODEL_NAME:
                 self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
 
         if uris:
             src, sep, dest = uris[0].partition("::::")
             src_path = urlparse(unquote(src)).path
+            src_path = src_path.lstrip("/") if IS_WIN else src_path.strip()
             if dest:
-                dest_path = urlparse(unquote(dest)).path + "/"
+                dest_path = urlparse(unquote(dest)).path
+                dest_path = dest_path.lstrip("/") + "/" if IS_WIN else dest_path.strip()
                 self.picons_buffer = self.on_assign_picon(view, src_path, dest_path)
             elif name == self.SERVICE_MODEL_NAME:
                 self.on_import_data(src_path)
@@ -1262,7 +1265,9 @@ class Application(Gtk.Application):
 
         uris = data.get_uris()
         if uris:
-            self.on_import_bouquet(None, file_path=urlparse(unquote(uris[0])).path.strip())
+            path = urlparse(unquote(uris[0])).path
+            path = path.lstrip("/") if IS_WIN else path.strip()
+            self.on_import_bouquet(None, file_path=path)
             return
 
         data = data.get_text()
@@ -1270,7 +1275,9 @@ class Application(Gtk.Application):
             return
 
         if data.startswith("file://"):
-            self.on_import_bouquet(None, file_path=urlparse(unquote(data)).path.strip())
+            path = urlparse(unquote(data)).path
+            path = path.lstrip("/") if IS_WIN else path.strip()
+            self.on_import_bouquet(None, file_path=path)
             return
 
         itr_str, sep, source = data.partition(self.DRAG_SEP)
@@ -2374,6 +2381,7 @@ class Application(Gtk.Application):
         self.import_data(response)
 
     def import_data(self, path, force=None, callback=None):
+        path = os.path.normpath(path)
         if os.path.isdir(path) and not path.endswith(os.sep):
             path += os.sep
         elif os.path.isfile(path):

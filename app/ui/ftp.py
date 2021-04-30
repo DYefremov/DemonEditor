@@ -12,6 +12,7 @@ from gi.repository import GLib
 
 from app.commons import log, run_task, run_idle
 from app.connections import UtfFTP
+from app.settings import IS_WIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
@@ -231,22 +232,21 @@ class FtpClientBox(Gtk.HBox):
     def open_file(self, path):
         GLib.idle_add(self._file_view.set_sensitive, False)
         try:
-            cmd = ["open" if self._settings.is_darwin else "xdg-open", path]
-            subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            cmd = ["start" if IS_WIN else "xdg-open", path]
+            subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=IS_WIN).communicate()
         finally:
             GLib.idle_add(self._file_view.set_sensitive, True)
 
     @run_task
     def open_ftp_file(self, f_path):
-        is_darwin = self._settings.is_darwin
         GLib.idle_add(self._ftp_view.set_sensitive, False)
 
         try:
             import tempfile
             import os
-            path = os.path.expanduser("~/Desktop") if is_darwin else None
+            path = os.path.expanduser("~/Desktop") if IS_WIN else None
 
-            with tempfile.NamedTemporaryFile(mode="wb", dir=path, delete=not is_darwin) as tf:
+            with tempfile.NamedTemporaryFile(mode="wb", dir=path, delete=not IS_WIN) as tf:
                 msg = "Downloading file: {}.   Status: {}"
                 try:
                     status = self._ftp.retrbinary("RETR " + f_path, tf.write)
@@ -255,8 +255,8 @@ class FtpClientBox(Gtk.HBox):
                     self.update_ftp_info(msg.format(f_path, e))
 
                 tf.flush()
-                cmd = ["open" if is_darwin else "xdg-open", tf.name]
-                subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                cmd = ["start" if IS_WIN else "xdg-open", tf.name]
+                subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=IS_WIN).communicate()
         finally:
             GLib.idle_add(self._ftp_view.set_sensitive, True)
 
@@ -427,11 +427,12 @@ class FtpClientBox(Gtk.HBox):
     def on_ftp_drag_data_get(self, view, context, data, info, time):
         model, paths = view.get_selection().get_selected_rows()
         if len(paths) > 0:
-            sep = self.URI_SEP if self._settings.is_darwin else "\n"
+            sep = self.URI_SEP if IS_WIN else "\n"
             uris = []
             for r in [model[p][:] for p in paths]:
                 if r[self.Column.SIZE] != self.LINK and r[self.Column.NAME] != self.ROOT:
-                    uris.append(Path("/{}:{}".format(r[self.Column.NAME], r[self.Column.ATTR])).as_uri())
+                    path = Path("/{}:{}".format(r[self.Column.NAME], r[self.Column.ATTR]))
+                    uris.append(str(path.resolve()) if IS_WIN else path.as_uri())
             data.set_uris([sep.join(uris)])
 
     @run_task
@@ -444,12 +445,12 @@ class FtpClientBox(Gtk.HBox):
             GLib.idle_add(self._app._wait_dialog.show)
 
             uris = data.get_uris()
-            if self._settings.is_darwin and len(uris) == 1:
+            if IS_WIN and len(uris) == 1:
                 uris = uris[0].split(self.URI_SEP)
 
             for uri in uris:
-                uri = urlparse(unquote(uri)).path
-                path = Path(uri)
+                uri = urlparse(unquote(uri)).path.strip()
+                path = Path(uri.lstrip("/") if IS_WIN else uri)
                 if path.is_dir():
                     try:
                         self._ftp.mkd(path.name)
@@ -471,18 +472,18 @@ class FtpClientBox(Gtk.HBox):
     def on_file_drag_data_get(self, view, context, data: Gtk.SelectionData, info, time):
         model, paths = view.get_selection().get_selected_rows()
         if len(paths) > 0:
-            sep = self.URI_SEP if self._settings.is_darwin else "\n"
+            sep = self.URI_SEP if IS_WIN else "\n"
             uris = [sep.join([Path(model[p][self.Column.ATTR]).as_uri() for p in paths])]
             data.set_uris(uris)
 
     @run_task
     def on_file_drag_data_received(self, view, context, x, y, data, info, time):
-        cur_path = self._file_model.get_value(self._file_model.get_iter_first(), self.Column.ATTR) + "/"
+        cur_path = self._file_model.get_value(self._file_model.get_iter_first(), self.Column.ATTR) + SEP
         try:
             GLib.idle_add(self._app._wait_dialog.show)
 
             uris = data.get_uris()
-            if self._settings.is_darwin and len(uris) == 1:
+            if IS_WIN and len(uris) == 1:
                 uris = uris[0].split(self.URI_SEP)
 
             for uri in uris:
