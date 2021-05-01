@@ -6,6 +6,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
 
+import requests
 from gi.repository import GLib, Gio, GdkPixbuf
 
 from app.commons import run_idle, run_task, log
@@ -694,50 +695,63 @@ class M3uImportDialog(IptvListDialog):
         self._max_count = self._url_count
         self._cancellable.reset()
 
-        for p in filter(None, picons):
-            if not self._is_download:
-                return
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(self.download_picon, p, picons.get(p, None)): p for p in filter(None, picons)}
+            done, not_done = concurrent.futures.wait(futures, timeout=0)
+            while self._is_download and not_done:
+                done, not_done = concurrent.futures.wait(not_done, timeout=5)
 
-            f = Gio.File.new_for_uri(p)
-            try:
-                GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(f.read(cancellable=self._cancellable), 220, 132, False,
-                                                                self._cancellable,
-                                                                self.on_picon_load_done,
-                                                                picons.get(p, None))
-            except GLib.GError as e:
-                self.update_progress()
-                self._errors_count += 1
-                if e.code != Gio.IOErrorEnum.CANCELLED:
-                    log(str("Picon download error: {}  [{}]").format(p, e))
+            for future in not_done:
+                future.cancel()
+            concurrent.futures.wait(not_done)
 
-    def on_picon_load_done(self, file, result, user_data):
+            self.update_progress(self._url_count)
+            self.on_done()
+
+    def download_picon(self, url, pic_data):
+        err_msg = "Picon download error: {}  [{}]"
+        timeout = (3, 5)  # connect and read timeouts
+
+        req = requests.get(url, timeout=timeout)
+        if req.status_code != 200:
+            log(err_msg.format(url, req.reason))
+            self.update_progress(1)
+        else:
+            self.on_picon_load_done(req.content, pic_data)
+
+    @run_idle
+    def on_picon_load_done(self, data, user_data):
         try:
             self._info_label.set_text("Processing: {}".format(user_data))
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(result)
+            f = Gio.MemoryInputStream.new_from_data(data)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, 220, 132, False, self._cancellable)
             path = "{}{}".format(self._pic_path, user_data)
             pixbuf.savev(path, "png", [], [])
             self._picons[user_data] = get_picon_pixbuf(path)
         except GLib.GError as e:
-            self._errors_count += 1
+            self.update_progress(1)
             if e.code != Gio.IOErrorEnum.CANCELLED:
                 log("Loading picon [{}] data error: {}".format(user_data, e))
-        finally:
+        else:
             self.update_progress()
 
-    def update_progress(self):
+    @run_idle
+    def update_progress(self, error=0):
+        self._errors_count += error
         self._url_count -= 1
         frac = 1 - self._url_count / self._max_count
         self._progress_bar.set_fraction(frac)
 
-        if self._url_count == 0:
-            self._progress_bar.set_visible(False)
-            self._progress_bar.set_fraction(0.0)
-            self._apply_button.set_sensitive(True)
-            self._info_label.set_text("{} {}.".format(get_message("Errors:"), self._errors_count))
-            self._is_download = False
+    @run_idle
+    def on_done(self):
+        self._progress_bar.set_visible(False)
+        self._progress_bar.set_fraction(0.0)
+        self._apply_button.set_sensitive(True)
+        self._info_label.set_text("Errors: {}.".format(self._errors_count))
+        self._is_download = False
 
-            gen = self.update_fav_model()
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        gen = self.update_fav_model()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_fav_model(self):
         services = self._app._services
