@@ -300,6 +300,9 @@ class YouTubeDL:
                 r = json.loads(resp.read().decode("utf-8"))
                 zip_url = r.get("zipball_url", None)
                 if zip_url:
+                    if os.path.isdir(self._path):
+                        shutil.rmtree(self._path)
+
                     zip_file = self._path + "yt.zip"
                     os.makedirs(os.path.dirname(self._path), exist_ok=True)
                     f_name, headers = urlretrieve(zip_url, filename=zip_file)
@@ -307,14 +310,8 @@ class YouTubeDL:
                     import zipfile
 
                     with zipfile.ZipFile(f_name) as arch:
-
-                        if os.path.isdir(self._path):
-                            shutil.rmtree(self._path)
-                        else:
-                            os.makedirs(os.path.dirname(self._path), exist_ok=True)
-
                         for info in arch.infolist():
-                            pref, sep, f = info.filename.partition("{}youtube_dl{}".format(SEP, SEP))
+                            pref, sep, f = info.filename.partition("{}youtube_dl{}".format("/", "/"))
                             if sep:
                                 arch.extract(info.filename)
                                 shutil.move(info.filename, "{}{}{}".format(self._path, sep, f))
@@ -323,7 +320,10 @@ class YouTubeDL:
                         show_notification(msg)
                         log(msg)
                         self._callback(msg, False)
-                        return True
+
+                    if os.path.isfile(zip_file):
+                        os.remove(zip_file)
+                    return True
         except URLError as e:
             log("YouTubeDLHelper error: {}".format(e))
             raise YouTubeException(e)
