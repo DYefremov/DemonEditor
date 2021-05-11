@@ -107,7 +107,7 @@ class PiconsCzDownloader:
     def get_sat_providers(self, url):
         return self._providers.get(url, [])
 
-    def download(self, provider, picons_path):
+    def download(self, provider, picons_path, picon_ids=None):
         self._HEADER["Referer"] = provider.url
         with requests.get(url=provider.url, headers=self._HEADER, stream=True) as request:
             if request.reason == "OK":
@@ -117,11 +117,11 @@ class PiconsCzDownloader:
                     for data in request.iter_content(chunk_size=1024):
                         f.write(data)
                 self._appender("Extracting: {}\n".format(provider.on_id))
-                self.extract(dest, picons_path)
+                self.extract(dest, picons_path, picon_ids)
             else:
                 log("{} [download] error: {}".format(self.__class__.__name__, request.reason))
 
-    def extract(self, src, dest):
+    def extract(self, src, dest, picon_ids=None):
         """ Extracts 7z archives. """
         # TODO: think about https://github.com/miurahr/py7zr
         cmd = ["7zr", "l", src]
@@ -134,11 +134,19 @@ class PiconsCzDownloader:
             log("{} [extract] error: {}".format(self.__class__.__name__, e))
             raise PiconsError(e)
 
+        is_filter = bool(picon_ids)
+        ids = picon_ids or self._picon_ids
         to_extract = []
+
         for o in re.finditer(self._FILE_PATTERN, out):
             p_id = o.group(1).decode("utf-8", errors="ignore")
-            if p_id in self._picon_ids:
+            if p_id in ids:
                 to_extract.append(p_id)
+
+        if is_filter and not to_extract:
+            if os.path.isfile(src):
+                os.remove(src)
+            raise PiconsError("No matching picons found!")
 
         cmd = ["7zr", "e", src, "-o{}".format(dest), "-y", "-r"]
         cmd.extend(to_extract)
