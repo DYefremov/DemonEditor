@@ -39,7 +39,7 @@ from gi.repository import GLib, Gio
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
 from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
                              HttpApiException, STC_XML_FILE)
-from app.eparser import get_blacklist, write_blacklist
+from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
@@ -154,6 +154,7 @@ class Application(Gtk.Application):
                     "on_model_changed": self.on_model_changed,
                     "on_import_yt_list": self.on_import_yt_list,
                     "on_import_m3u": self.on_import_m3u,
+                    "on_bouquet_export": self.on_bouquet_export,
                     "on_export_to_m3u": self.on_export_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
                     "on_import_bouquets": self.on_import_bouquets,
@@ -1710,19 +1711,7 @@ class Application(Gtk.Application):
                 bqs = []
                 num_of_children = model.iter_n_children(itr)
                 for num in range(num_of_children):
-                    bq_itr = model.iter_nth_child(itr, num)
-                    bq_name, locked, hidden, bq_type = model.get(bq_itr, Column.BQ_NAME, Column.BQ_LOCKED,
-                                                                 Column.BQ_HIDDEN, Column.BQ_TYPE)
-                    bq_id = "{}:{}".format(bq_name, bq_type)
-                    favs = self._bouquets[bq_id]
-                    ex_s = self._extra_bouquets.get(bq_id, None)
-                    bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
-
-                    if profile is SettingsType.ENIGMA_2:
-                        bq_s = self.get_enigma_bq_services(bq_s, ex_s)
-
-                    bq = Bouquet(bq_name, bq_type, bq_s, locked, hidden, self._bq_file.get(bq_id, None))
-                    bqs.append(bq)
+                    bqs.append(self.get_bouquet(model.iter_nth_child(itr, num), model))
             if len(b_path) == 1:
                 bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
 
@@ -1746,6 +1735,20 @@ class Application(Gtk.Application):
         yield True
         if callback:
             callback()
+
+    def get_bouquet(self, itr, model):
+        """ Constructs and returns Bouquet class instance. """
+        bq_name, locked, hidden, bq_type = model.get(itr, Column.BQ_NAME, Column.BQ_LOCKED, Column.BQ_HIDDEN,
+                                                     Column.BQ_TYPE)
+        bq_id = "{}:{}".format(bq_name, bq_type)
+        favs = self._bouquets[bq_id]
+        ex_s = self._extra_bouquets.get(bq_id, None)
+        bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
+
+        if self._s_type is SettingsType.ENIGMA_2:
+            bq_s = self.get_enigma_bq_services(bq_s, ex_s)
+
+        return Bouquet(bq_name, bq_type, bq_s, locked, hidden, self._bq_file.get(bq_id, None))
 
     def get_enigma_bq_services(self, services, ext_services):
         """ Preparing a list of services for the Enigma2 bouquet. """
@@ -2224,7 +2227,7 @@ class Application(Gtk.Application):
         bq = self._bouquets.get(self._bq_selected)
         EpgDialog(self._main_window, self._settings, self._services, bq, self._fav_model, self._current_bq_name).show()
 
-    # ***************** Import  ********************#
+    # ***************** Import ******************** #
 
     def on_import_yt_list(self, action, value=None):
         """ Import playlist from YouTube """
@@ -2255,30 +2258,6 @@ class Application(Gtk.Application):
 
         gen = self.update_bouquet_services(self._fav_model, None, self._bq_selected)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-    @run_idle
-    def on_export_to_m3u(self, action, value=None):
-        i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
-        bq_services = [BouquetService(r[Column.FAV_SERVICE],
-                                      BqServiceType(r[Column.FAV_TYPE]),
-                                      r[Column.FAV_ID],
-                                      r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
-
-        if not any(s.type is BqServiceType.IPTV for s in bq_services):
-            self.show_error_dialog("This list does not contains IPTV streams!")
-            return
-
-        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
-        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
-            return
-
-        try:
-            bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
-            export_to_m3u(response, bq, self._s_type)
-        except Exception as e:
-            self.show_error_dialog(str(e))
-        else:
-            show_dialog(DialogType.INFO, self._main_window, "Done!")
 
     def on_import_data(self, path):
         msg = "Combine with the current data?"
@@ -2360,6 +2339,61 @@ class Application(Gtk.Application):
         self.update_sat_positions()
         yield True
         self._wait_dialog.hide()
+
+    # ***************** Export  ******************** #
+
+    def on_bouquet_export(self, item=None):
+        """ Exports single bouquet to file. """
+        bq_selected = self.check_bouquet_selection()
+        if not bq_selected:
+            return
+
+        model, paths = self._bouquets_view.get_selection().get_selected_rows()
+        if len(paths) > 1:
+            self.show_error_dialog("Please, select only one bouquet!")
+            return
+
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
+                               buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        try:
+            itr = model.get_iter(paths)
+            bq = self.get_bouquet(itr, model)
+            if self._s_type is SettingsType.NEUTRINO_MP:
+                bq = Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), [bq])
+                response += bq.name
+            write_bouquet(response, bq, self._s_type)
+        except OSError as e:
+            self.show_error_dialog(str(e))
+        else:
+            show_dialog(DialogType.INFO, self._main_window, "Done!")
+
+    @run_idle
+    def on_export_to_m3u(self, action, value=None):
+        i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
+        bq_services = [BouquetService(r[Column.FAV_SERVICE],
+                                      BqServiceType(r[Column.FAV_TYPE]),
+                                      r[Column.FAV_ID],
+                                      r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
+
+        if not any(s.type is BqServiceType.IPTV for s in bq_services):
+            self.show_error_dialog("This list does not contains IPTV streams!")
+            return
+
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
+                               buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        try:
+            bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
+            export_to_m3u(response, bq, self._s_type)
+        except Exception as e:
+            self.show_error_dialog(str(e))
+        else:
+            show_dialog(DialogType.INFO, self._main_window, "Done!")
 
     # ***************** Backup  ******************** #
 

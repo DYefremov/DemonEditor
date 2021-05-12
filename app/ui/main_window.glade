@@ -359,6 +359,16 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkImageMenuItem" id="bouquet_export_popup_item">
+        <property name="label">gtk-save-as</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_bouquet_export" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
