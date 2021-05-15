@@ -54,12 +54,6 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="icon_name">emblem-important-symbolic</property>
   </object>
-  <object class="GtkImage" id="load_providers">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">network-server-symbolic</property>
-    <property name="icon_size">1</property>
-  </object>
   <object class="GtkListStore" id="picons_dest_list_store">
     <columns>
       <!-- column-name picon -->
@@ -818,6 +812,24 @@ Author: Dmitriy Yefremov
                     <property name="orientation">vertical</property>
                     <property name="spacing">2</property>
                     <child>
+                      <object class="GtkComboBoxText" id="download_source_button">
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Source:</property>
+                        <property name="halign">center</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item id="piconcz" translatable="yes">Picon.cz</item>
+                          <item id="lyngsat" translatable="yes">LyngSat</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkFrame" id="downloader_frame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -834,7 +846,7 @@ Author: Dmitriy Yefremov
                             <property name="wide_handle">True</property>
                             <child>
                               <object class="GtkBox" id="satellites_box">
-                                <property name="width_request">180</property>
+                                <property name="width_request">250</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="margin_right">2</property>
@@ -879,6 +891,46 @@ Author: Dmitriy Yefremov
                                         <property name="expand">False</property>
                                         <property name="fill">True</property>
                                         <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkGrid" id="satellite_filter_grid">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="column_spacing">2</property>
+                                        <child>
+                                          <object class="GtkCheckButton" id="satellite_filter_button">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="focus_on_click">False</property>
+                                            <property name="receives_default">False</property>
+                                            <property name="valign">center</property>
+                                            <property name="image_position">right</property>
+                                            <property name="active">True</property>
+                                            <property name="draw_indicator">True</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel" id="satellite_filter_label">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Filter</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">3</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -965,31 +1017,16 @@ Author: Dmitriy Yefremov
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="provider_header_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Satellite url:</property>
+                                    <property name="halign">start</property>
+                                    <property name="margin_left">10</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkEntry" id="url_entry">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="primary_icon_name">network-workgroup-symbolic</property>
-                                    <property name="primary_icon_activatable">False</property>
-                                    <property name="placeholder_text" translatable="yes">https://www.lyngsat.com/*satellite*.html</property>
-                                    <property name="input_purpose">url</property>
-                                    <signal name="changed" handler="on_url_changed" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -1224,7 +1261,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -1665,25 +1702,6 @@ Author: Dmitriy Yefremov
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="load_providers_button">
-                    <property name="label" translatable="yes">Load providers</property>
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Load providers</property>
-                    <property name="valign">center</property>
-                    <property name="image">load_providers</property>
-                    <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="on_load_providers" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
