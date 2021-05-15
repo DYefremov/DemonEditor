@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 import sys
 from contextlib import suppress
@@ -1996,7 +2024,8 @@ class Application(Gtk.Application):
                     alt_servs = srv.transponder
                     if alt_servs:
                         alt_srv = self._services.get(alt_servs[0].data, None)
-                        picon = self._picons.get(alt_srv.picon_id, None) if srv else None
+                        if alt_srv:
+                            picon = self._picons.get(alt_srv.picon_id, None) if srv else None
 
                 self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
                                         srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
@@ -2437,6 +2466,7 @@ class Application(Gtk.Application):
 
         dialog = ImportDialog(self._main_window, path, self._settings, self._services.keys(), append)
         dialog.import_data() if force else dialog.show()
+        self.update_picons()
 
     def append_imported_data(self, bouquets, services, callback=None):
         try:
