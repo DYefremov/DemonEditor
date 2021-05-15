@@ -26,7 +26,6 @@
 #
 
 
-import concurrent.futures
 import os
 import re
 import shutil
@@ -161,10 +160,13 @@ class PiconsDialog:
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
+        self._explorer_action_box = builder.get_object("explorer_action_box")
         self._satellite_label = builder.get_object("satellite_label")
         self._provider_header_label = builder.get_object("provider_header_label")
-        self._satellite_filter_button = builder.get_object("satellite_filter_button")
-        self._explorer_action_box = builder.get_object("explorer_action_box")
+        self._satellite_filter_switch = builder.get_object("satellite_filter_switch")
+        self._bouquet_filter_switch = builder.get_object("bouquet_filter_switch")
+        self._bouquet_filter_grid = builder.get_object("bouquet_filter_grid")
+        self._header_download_box = builder.get_object("header_download_box")
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_label"), "visible", 4)
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_spinner"), "visible", 4)
         self._satellite_label.bind_property("visible", self._download_source_button, "sensitive")
@@ -509,6 +511,7 @@ class PiconsDialog:
     def on_download_source_changed(self, button):
         self._download_src = self.DownloadSource(button.get_active_id())
         self.set_providers_header()
+        self._bouquet_filter_grid.set_sensitive(self._download_src is self.DownloadSource.PICON_CZ)
         GLib.idle_add(self._providers_view.get_model().clear)
         self.init_satellites(self._satellites_view)
 
@@ -554,14 +557,18 @@ class PiconsDialog:
     @run_idle
     def set_providers_header(self):
         msg = "{} [{}]"
+        tooltip = ""
         if self._download_src is self.DownloadSource.PICON_CZ:
-            msg = msg.format(get_message("Package"), "https://picon.cz (by Chocholoušek)")
+            tooltip = "https://picon.cz (by Chocholoušek)"
+            msg = msg.format(get_message("Package"), tooltip)
         elif self._download_src is self.DownloadSource.LYNG_SAT:
-            msg = msg.format(get_message("Providers"), "https://www.lyngsat.com")
+            tooltip = "https://www.lyngsat.com"
+            msg = msg.format(get_message("Providers"), tooltip)
         else:
             msg = ""
 
         self._provider_header_label.set_text(msg)
+        self._provider_header_label.set_tooltip_text(tooltip)
 
     @run_task
     def get_satellites(self, view):
@@ -588,7 +595,7 @@ class PiconsDialog:
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_satellites(self, model, sats):
-        is_filter = self._satellite_filter_button.get_active()
+        is_filter = self._satellite_filter_switch.get_active()
         model.clear()
         try:
             for sat in sorted(sats):
@@ -679,13 +686,13 @@ class PiconsDialog:
 
             if not self._resize_no_radio_button.get_active():
                 self.resize(picons_path)
-            else:
-                self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
         finally:
             GLib.idle_add(self._cancel_button.hide)
             self._is_downloading = False
 
     def get_picons_for_lyngsat(self, path, providers):
+        import concurrent.futures
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             picons = []
             # Getting links to picons.
@@ -707,27 +714,39 @@ class PiconsDialog:
             for future in not_done:
                 future.cancel()
             concurrent.futures.wait(not_done)
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     def get_picons_for_picon_cz(self, path, providers):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            futures = {executor.submit(self._picon_cz_downloader.download, p, path): p for p in providers}
-            for future in concurrent.futures.as_completed(futures):
-                if not self._is_downloading:
-                    executor.shutdown()
-                    return
+        p_ids = None
+        if self._bouquet_filter_switch.get_active():
+            p_ids = self.get_bouquet_picon_ids()
+            if not p_ids:
+                return
 
-                try:
-                    future.result()
-                except PiconsError as e:
-                    self.append_output("Error: {}\n".format(str(e)))
+        try:
+            # We download it sequentially.
+            for p in providers:
+                self._picon_cz_downloader.download(p, path, p_ids)
+        except PiconsError as e:
+            self.append_output("Error: {}\n".format(str(e)))
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
-            done, not_done = concurrent.futures.wait(futures, timeout=0)
-            while self._is_downloading and not_done:
-                done, not_done = concurrent.futures.wait(not_done, timeout=5)
+    def get_bouquet_picon_ids(self):
+        """ Returns picon ids for selected bouquet or None. """
+        bq_selected = self._app.check_bouquet_selection()
+        if not bq_selected:
+            return
 
-            for future in not_done:
-                future.cancel()
-            concurrent.futures.wait(not_done)
+        model, paths = self._app.bouquets_view.get_selection().get_selected_rows()
+        if len(paths) > 1:
+            self.show_dialog("Please, select only one bouquet!", DialogType.ERROR)
+            return
+
+        fav_bouquet = self._app.current_bouquets[bq_selected]
+        services = self._app.current_services
+        return {services.get(fav_id).picon_id for fav_id in fav_bouquet}
 
     def process_provider(self, prv, picons_path):
         self.append_output("Getting links to picons for: {}.\n".format(prv.name))

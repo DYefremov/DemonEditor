@@ -3572,6 +3572,10 @@ class Application(Gtk.Application):
         return self._services
 
     @property
+    def current_bouquets(self):
+        return self._bouquets
+
+    @property
     def picons_buffer(self):
         """ Returns a copy and clears the current buffer. """
         buf = list(self._picons_buffer)
