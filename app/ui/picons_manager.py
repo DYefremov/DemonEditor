@@ -29,7 +29,6 @@
 import os
 import re
 import shutil
-import tempfile
 from enum import Enum
 from pathlib import Path
 from urllib.parse import urlparse, unquote
@@ -57,7 +56,6 @@ class PiconsDialog:
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
         self._app = app
-        self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile(r"^https://www\.lyngsat\.com/[\w-]+\.html$")
         self._POS_PATTERN = re.compile(r"^\d+\.\d+[EW]?$")
@@ -139,8 +137,6 @@ class PiconsDialog:
         self._src_filter_button = builder.get_object("src_filter_button")
         self._dst_filter_button = builder.get_object("dst_filter_button")
         self._picons_filter_entry = builder.get_object("picons_filter_entry")
-        self._ip_entry = builder.get_object("ip_entry")
-        self._picons_entry = builder.get_object("picons_entry")
         self._picons_dir_entry = builder.get_object("picons_dir_entry")
         self._info_bar = builder.get_object("info_bar")
         self._info_bar = builder.get_object("info_bar")
@@ -192,8 +188,6 @@ class PiconsDialog:
         # Settings
         self._settings = settings
         self._s_type = settings.setting_type
-        self._ip_entry.set_text(self._settings.host)
-        self._picons_entry.set_text(self._settings.picons_path)
         self._picons_dir_entry.set_text(self._settings.picons_local_path)
 
         window_size = self._settings.get("picons_downloader_window_size")
@@ -517,7 +511,7 @@ class PiconsDialog:
         self.set_providers_header()
         self.get_satellites(view)
 
-    def on_satellite_filter_toggled(self, button):
+    def on_satellite_filter_toggled(self, button, state):
         self.init_satellites(self._satellites_view)
 
     def on_providers_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
@@ -599,10 +593,9 @@ class PiconsDialog:
             for sat in sorted(sats):
                 pos = sat[1]
                 name = "{} ({})".format(sat[0], pos)
-                if not self._terminate and model:
-                    if is_filter and pos not in self._sat_positions:
-                        continue
-                    yield model.append((name, sat[3], pos))
+                if is_filter and pos not in self._sat_positions:
+                    continue
+                yield model.append((name, sat[3], pos))
         finally:
             self._satellite_label.show()
 
@@ -792,7 +785,6 @@ class PiconsDialog:
         self._terminate = True
         self._is_downloading = False
         self.save_window_size(window)
-        self.clean_data()
         self._app.update_picons()
         GLib.idle_add(self._dialog.destroy)
 
@@ -800,12 +792,6 @@ class PiconsDialog:
         size = window.get_size()
         height = size.height - self._text_view.get_allocated_height() - self._info_bar.get_allocated_height()
         self._settings.add("picons_downloader_window_size", (size.width, height))
-
-    @run_task
-    def clean_data(self):
-        path = self._TMP_DIR + "www.lyngsat.com"
-        if os.path.exists(path):
-            shutil.rmtree(path)
 
     @run_task
     def run_func(self, func, update=False):

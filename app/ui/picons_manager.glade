@@ -231,19 +231,6 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="show_close_button">True</property>
         <child>
-          <object class="GtkComboBoxText" id="download_source_button">
-            <property name="sensitive">False</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Source:</property>
-            <property name="active">0</property>
-            <items>
-              <item id="piconcz" translatable="yes">Picon.cz</item>
-              <item id="lyngsat" translatable="yes">LyngSat</item>
-            </items>
-            <signal name="changed" handler="on_download_source_changed" swapped="no"/>
-          </object>
-        </child>
-        <child>
           <object class="GtkButton" id="cancel_button">
             <property name="can_focus">False</property>
             <property name="receives_default">True</property>
@@ -268,6 +255,24 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">2</property>
+            <child>
+              <object class="GtkComboBoxText" id="download_source_button">
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Source:</property>
+                <property name="active">0</property>
+                <items>
+                  <item id="piconcz" translatable="yes">Picon.cz</item>
+                  <item id="lyngsat" translatable="yes">LyngSat</item>
+                </items>
+                <signal name="changed" handler="on_download_source_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkButton" id="receive_button">
                 <property name="sensitive">False</property>
@@ -1059,6 +1064,7 @@ Author: Dmitriy Yefremov
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="active">True</property>
+                                            <signal name="state-set" handler="on_satellite_filter_toggled" swapped="no"/>
                                           </object>
                                           <packing>
                                             <property name="left_attach">1</property>
@@ -1347,66 +1353,6 @@ Author: Dmitriy Yefremov
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkGrid" id="grid">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="margin_top">2</property>
-                                    <property name="margin_bottom">2</property>
-                                    <property name="column_spacing">2</property>
-                                    <property name="column_homogeneous">True</property>
-                                    <child>
-                                      <object class="GtkEntry" id="ip_entry">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="primary_icon_name">network-transmit-receive-symbolic</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="picons_entry">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="ip_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Receiver IP:</property>
-                                        <property name="xalign">0.05000000074505806</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="res_picons_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Receiver picons path:</property>
-                                        <property name="xalign">0.05000000074505806</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">3</property>
                                   </packing>
                                 </child>
                                 <child>
