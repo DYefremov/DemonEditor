@@ -97,6 +97,14 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="bouquet_export_popup_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Save as</property>
+        <signal name="activate" handler="on_bouquet_export" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkSeparatorMenuItem" id="bouquets_popup_separator">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
