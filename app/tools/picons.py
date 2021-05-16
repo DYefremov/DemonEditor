@@ -173,13 +173,16 @@ class PiconsCzDownloader:
         if logo:
             return logo
 
-        with requests.get(url=url, stream=True) as logo_request:
-            if logo_request.reason == "OK":
-                data = logo_request.content
-                self._provider_logos[url] = data
-                return data
-            else:
-                log("Downloading package logo error: {}".format(logo_request.reason))
+        try:
+            with requests.get(url=url, stream=True) as logo_request:
+                if logo_request.reason == "OK":
+                    data = logo_request.content
+                    self._provider_logos[url] = data
+                    return data
+                else:
+                    log("Downloading package logo error: {}".format(logo_request.reason))
+        except requests.exceptions.ConnectionError as e:
+            log("{} error [get provider logo]: {}".format(self.__class__.__name__, e))
 
     def get_logos_map(self):
         return {"piconblack": "b50",
