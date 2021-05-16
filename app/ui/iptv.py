@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import concurrent.futures
 import os
 import re
@@ -437,6 +465,7 @@ class IptvListDialog:
         self._list_nid_entry = builder.get_object("list_nid_entry")
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
         self._apply_button = builder.get_object("list_configuration_apply_button")
+        self._cancel_button = builder.get_object("cancel_config_list_button")
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -625,6 +654,11 @@ class M3uImportDialog(IptvListDialog):
         frame = Gtk.Frame(visible=True)
         frame.add(extra_box)
         self._data_box.add(frame)
+        # Buttons
+        self._ok_button = Gtk.Button.new_from_stock(Gtk.STOCK_OK)
+        self._ok_button.bind_property("visible", self._apply_button, "visible", 4)
+        self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
+        self._dialog.add_action_widget(self._ok_button, Gtk.ResponseType.OK)
 
         self.get_m3u(m3_path, s_type)
 
@@ -679,6 +713,7 @@ class M3uImportDialog(IptvListDialog):
 
             self.download_picons(picons)
         else:
+            GLib.idle_add(self._ok_button.set_visible, True)
             GLib.idle_add(self._info_bar.set_visible, True, priority=GLib.PRIORITY_LOW)
 
         self._app.append_imported_services(services)
@@ -762,7 +797,9 @@ class M3uImportDialog(IptvListDialog):
             if s:
                 model.set_value(r.iter, Column.FAV_PICON, picons.get(s.picon_id, None))
                 yield True
+
         self._info_bar.set_visible(True)
+        self._ok_button.set_visible(True)
         yield True
 
     def on_response(self, dialog, response):
