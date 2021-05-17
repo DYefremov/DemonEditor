@@ -1569,6 +1569,9 @@ class Application(Gtk.Application):
 
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
+        if self._ftp_button.get_active():
+            return
+
         if data_path and os.path.isfile(data_path):
             self.open_compressed_data(data_path)
         else:
