@@ -270,14 +270,14 @@ class Application(Gtk.Application):
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # Header bar elements.
         main_header_box = builder.get_object("main_header_box")
-        right_header_box = builder.get_object("right_header_box")
-        left_header_box = builder.get_object("left_header_box")
         main_popover_menu_box = builder.get_object("main_popover_menu_box")
+        self._right_header_box = builder.get_object("right_header_box")
+        self._left_header_box = builder.get_object("left_header_box")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", right_header_box, "visible", 4)
-        self._app_info_box.bind_property("visible", left_header_box, "visible", 4)
+        self._app_info_box.bind_property("visible", self._right_header_box, "visible", 4)
+        self._app_info_box.bind_property("visible", self._left_header_box, "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
@@ -316,12 +316,11 @@ class Application(Gtk.Application):
         self._ftp_button.bind_property("active", self._ftp_revealer, "visible")
         self._ftp_revealer.bind_property("visible", builder.get_object("main_box"), "visible", 4)
         self._ftp_revealer.bind_property("visible", main_header_box, "visible", 4)
-        self._ftp_revealer.bind_property("visible", right_header_box, "visible", 4)
-        self._ftp_revealer.bind_property("visible", left_header_box, "visible", 4)
         self._ftp_revealer.bind_property("visible", main_popover_menu_box, "visible", 4)
         close_ftp_menu_button = builder.get_object("close_ftp_menu_button")
         self._ftp_revealer.bind_property("visible", close_ftp_menu_button, "visible")
         close_ftp_menu_button.connect("clicked", lambda b: self._ftp_button.set_active(False))
+        self._ftp_button.connect("toggled", self.on_ftp_toggle)
         # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -351,8 +350,8 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._fav_bouquets_paned = builder.get_object("fav_bouquets_paned")
         self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
-        self._player_box.bind_property("visible", left_header_box, "visible", 4)
-        self._player_box.bind_property("visible", right_header_box, "visible", 4)
+        self._player_box.bind_property("visible", self._left_header_box, "visible", 4)
+        self._player_box.bind_property("visible", self._right_header_box, "visible", 4)
         self._player_box.bind_property("visible", main_popover_menu_box, "visible", 4)
         self._player_box.bind_property("visible", main_header_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
@@ -1428,6 +1427,9 @@ class Application(Gtk.Application):
 
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
+        if self._ftp_button.get_active():
+            return
+
         if data_path and os.path.isfile(data_path):
             self.open_compressed_data(data_path)
         else:
@@ -2894,6 +2896,12 @@ class Application(Gtk.Application):
 
     # ****************** FTP client ********************* #
 
+    def on_ftp_toggle(self, button):
+        if not self._app_info_box.get_visible():
+            active = not button.get_active()
+            self._right_header_box.set_visible(active)
+            self._left_header_box.set_visible(active)
+
     def on_ftp_realize(self, revealer):
         if not self._ftp_client:
             from app.ui.ftp import FtpClientBox
@@ -2935,7 +2943,6 @@ class Application(Gtk.Application):
         if self._s_type is SettingsType.ENIGMA_2:
             terrestrial = False
             cable = False
-            atsc = False
 
             for srv in self._services.values():
                 tr_type = srv.transponder_type
