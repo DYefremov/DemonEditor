@@ -576,6 +576,8 @@ class PiconsDialog:
     def init_satellites(self, view):
         sats = self._sats
         if self._download_src is self.DownloadSource.PICON_CZ:
+            if not self._picon_cz_downloader:
+                return
             try:
                 self._picon_cz_downloader.init()
             except PiconsError as e:
@@ -588,13 +590,17 @@ class PiconsDialog:
 
     def append_satellites(self, model, sats):
         is_filter = self._satellite_filter_switch.get_active()
-        model.clear()
+        if model:
+            model.clear()
+
         try:
             for sat in sorted(sats):
                 pos = sat[1]
                 name = "{} ({})".format(sat[0], pos)
                 if is_filter and pos not in self._sat_positions:
                     continue
+                if not model:
+                    return
                 yield model.append((name, sat[3], pos))
         finally:
             self._satellite_label.show()
