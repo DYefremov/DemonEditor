@@ -37,7 +37,7 @@ from html.parser import HTMLParser
 import requests
 
 from app.commons import run_task, log
-from app.settings import SettingsType
+from app.settings import SettingsType, GTK_PATH
 from .satellites import _HEADERS
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
@@ -124,7 +124,8 @@ class PiconsCzDownloader:
     def extract(self, src, dest, picon_ids=None):
         """ Extracts 7z archives. """
         # TODO: think about https://github.com/miurahr/py7zr
-        cmd = ["7zr", "l", src]
+        exe = "./7zr" if GTK_PATH else "7zr"
+        cmd = [exe, "l", src]
         try:
             out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             if err:
@@ -148,7 +149,7 @@ class PiconsCzDownloader:
                 os.remove(src)
             raise PiconsError("No matching picons found!")
 
-        cmd = ["7zr", "e", src, "-o{}".format(dest), "-y", "-r"]
+        cmd = [exe, "e", src, "-o{}".format(dest), "-y", "-r"]
         cmd.extend(to_extract)
         try:
             out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
