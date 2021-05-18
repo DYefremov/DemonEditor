@@ -307,6 +307,19 @@ Author: Dmitriy Yefremov
                 <property name="position">1</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkButton" id="list_configuration_ok_button">
+                <property name="label" translatable="yes">OK</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -764,6 +777,7 @@ Author: Dmitriy Yefremov
     <action-widgets>
       <action-widget response="-6">cancel_config_list_button</action-widget>
       <action-widget response="-10">list_configuration_apply_button</action-widget>
+      <action-widget response="-5">list_configuration_ok_button</action-widget>
     </action-widgets>
   </object>
   <object class="GtkImage" id="yt_import_image">

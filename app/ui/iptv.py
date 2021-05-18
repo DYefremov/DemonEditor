@@ -466,6 +466,7 @@ class IptvListDialog:
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
         self._apply_button = builder.get_object("list_configuration_apply_button")
         self._cancel_button = builder.get_object("cancel_config_list_button")
+        self._ok_button = builder.get_object("list_configuration_ok_button")
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -627,6 +628,8 @@ class M3uImportDialog(IptvListDialog):
         self._dialog.set_title(get_message("Playlist import"))
         self._dialog.connect("delete-event", self.on_close)
         self._apply_button.set_label(get_message("Import"))
+        self._ok_button.bind_property("visible", self._apply_button, "visible", 4)
+        self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
         # Progress
         self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
         self._spinner = Gtk.Spinner(active=False)
@@ -654,11 +657,6 @@ class M3uImportDialog(IptvListDialog):
         frame = Gtk.Frame(visible=True)
         frame.add(extra_box)
         self._data_box.add(frame)
-        # Buttons
-        self._ok_button = Gtk.Button.new_from_stock(Gtk.STOCK_OK)
-        self._ok_button.bind_property("visible", self._apply_button, "visible", 4)
-        self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
-        self._dialog.add_action_widget(self._ok_button, Gtk.ResponseType.OK)
 
         self.get_m3u(m3_path, s_type)
 
