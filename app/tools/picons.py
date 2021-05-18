@@ -37,7 +37,7 @@ from html.parser import HTMLParser
 import requests
 
 from app.commons import run_task, log
-from app.settings import SettingsType
+from app.settings import SettingsType, IS_WIN
 from .satellites import _HEADERS
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
@@ -59,7 +59,7 @@ class PiconsCzDownloader:
     _BASE_LOGO_URL = "https://picon.cz/picon/0/"
     _HEADER = {"User-Agent": "DemonEditor/1.0.8", "Referer": ""}
     _LINK_PATTERN = re.compile(r"((.*)-\d+x\d+)-(.*)_by_chocholousek.7z$")
-    _FILE_PATTERN = re.compile(b"\\s+(1_.*\\.png).*")
+    _FILE_PATTERN = re.compile("\\s+(1_.*\\.png).*")
 
     def __init__(self, picon_ids=set(), appender=log):
         self._perm_links = {}
@@ -124,9 +124,17 @@ class PiconsCzDownloader:
     def extract(self, src, dest, picon_ids=None):
         """ Extracts 7z archives. """
         # TODO: think about https://github.com/miurahr/py7zr
-        cmd = ["7zr", "l", src]
+        exe = "7zr"
+        if IS_WIN:
+            exe = "C:\\Program Files\\7-Zip\\7z.exe"
+            if not os.path.isfile(exe):
+                raise PiconsError("7-Zip executable not found!")
+
+        cmd = [exe, "l", src]
         try:
-            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        encoding="utf-8").communicate()
             if err:
                 log("{} [extract] error: {}".format(self.__class__.__name__, err))
                 raise PiconsError(err)
@@ -139,7 +147,7 @@ class PiconsCzDownloader:
         to_extract = []
 
         for o in re.finditer(self._FILE_PATTERN, out):
-            p_id = o.group(1).decode("utf-8", errors="ignore")
+            p_id = o.group(1)
             if p_id in ids:
                 to_extract.append(p_id)
 
@@ -148,10 +156,12 @@ class PiconsCzDownloader:
                 os.remove(src)
             raise PiconsError("No matching picons found!")
 
-        cmd = ["7zr", "e", src, "-o{}".format(dest), "-y", "-r"]
+        cmd = [exe, "e", src, "-o{}".format(dest), "-y", "-r"]
         cmd.extend(to_extract)
         try:
-            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        encoding="utf-8").communicate()
             if err:
                 log("{} [extract] error: {}".format(self.__class__.__name__, err))
                 raise PiconsError(err)
