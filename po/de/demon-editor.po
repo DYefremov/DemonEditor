@@ -3,9 +3,10 @@
 #
 # Charly, 2019.
 # Dmitriy Yefremov, 2020-2021.
+# Thomas Schmidt, 2021
 msgid ""
 msgstr ""
-"Last-Translator: Thomas Schmidt\n"
+"Last-Translator: Dmitriy Yefremov\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1241,3 +1242,15 @@ msgstr "Picons Größe in den Listen:"
 
 msgid "Logo size in tooltips:"
 msgstr "Logo-Größe in Tooltips:"
+
+msgid "Save as"
+msgstr "Speichern als"
+
+msgid "Mark duplicates"
+msgstr "Duplikate markieren"
+
+msgid "Load only for selected bouquet"
+msgstr "Nur für ausgewähltes Bouquet laden"
+
+msgid "The task is canceled!"
+msgstr "Der Task wird abgebrochen!"
