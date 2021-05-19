@@ -345,7 +345,7 @@ Author: Dmitriy Yefremov
                 <property name="margin_right">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">2</property>
+                <property name="spacing">5</property>
                 <child>
                   <object class="GtkGrid" id="srv_grid">
                     <property name="visible">True</property>
@@ -807,10 +807,14 @@ Author: Dmitriy Yefremov
                   <object class="GtkBox" id="flags_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="spacing">10</property>
                     <child>
                       <object class="GtkGrid" id="flags_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="valign">center</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">10</property>
                         <property name="column_spacing">2</property>
                         <child>
                           <object class="GtkLabel" id="flags_label">
@@ -884,6 +888,47 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkBox" id="extra_flags_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">2</property>
+                        <child>
+                          <object class="GtkLabel" id="extra_pids_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Extra:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="extra_pids_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">20</property>
+                            <property name="max_width_chars">20</property>
+                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="placeholder_text">c:000000,etc.</property>
+                            <signal name="changed" handler="on_extra_pids_entry_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkGrid" id="caids_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -893,10 +938,10 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text">C:0000,C:a1b2,etc.</property>
-                            <property name="width_chars">15</property>
-                            <property name="max_width_chars">26</property>
+                            <property name="width_chars">20</property>
+                            <property name="max_width_chars">20</property>
                             <property name="primary_icon_stock">gtk-edit</property>
-                            <property name="placeholder_text" translatable="yes">C:0000,C:a1b2,etc.</property>
+                            <property name="placeholder_text">C:0000,C:a1b2,etc.</property>
                             <signal name="changed" handler="on_cas_entry_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -920,7 +965,7 @@ Author: Dmitriy Yefremov
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="pack_type">end</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
