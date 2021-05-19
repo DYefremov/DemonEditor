@@ -124,7 +124,11 @@ class PiconsCzDownloader:
     def extract(self, src, dest, picon_ids=None):
         """ Extracts 7z archives. """
         # TODO: think about https://github.com/miurahr/py7zr
-        cmd = ["7zr", "l", src]
+        exe = "7zr"
+        if not os.path.isfile("/usr/bin/7zr"):
+            raise PiconsError("7-zip [7zr] archiver not found!")
+
+        cmd = [exe, "l", src]
         try:
             out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             if err:
@@ -148,7 +152,7 @@ class PiconsCzDownloader:
                 os.remove(src)
             raise PiconsError("No matching picons found!")
 
-        cmd = ["7zr", "e", src, "-o{}".format(dest), "-y", "-r"]
+        cmd = [exe, "e", src, "-o{}".format(dest), "-y", "-r"]
         cmd.extend(to_extract)
         try:
             out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
