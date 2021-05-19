@@ -3,7 +3,10 @@
 }
 
 #status-bar-button {
-  padding: 1px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 3px;
+  padding-right: 3px;
   margin: 1px;
 }
 
