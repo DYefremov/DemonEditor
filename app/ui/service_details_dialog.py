@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 import re
 
@@ -42,6 +70,7 @@ class ServiceDetailsDialog:
                     "on_tr_edit_toggled": self.on_tr_edit_toggled,
                     "update_reference": self.update_reference,
                     "on_cas_entry_changed": self.on_cas_entry_changed,
+                    "on_extra_pids_entry_changed": self.on_extra_pids_entry_changed,
                     "on_digit_entry_changed": self.on_digit_entry_changed,
                     "on_non_empty_entry_changed": self.on_non_empty_entry_changed,
                     "on_cancel": lambda item: self._dialog.destroy()}
@@ -69,6 +98,7 @@ class ServiceDetailsDialog:
         self._DIGIT_PATTERN = re.compile("\\D")
         self._NON_EMPTY_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
         self._CAID_PATTERN = re.compile("(?:^[\\s]*$)|(C:[0-9a-fA-F]{1,4})(,C:[0-9a-fA-F]{1,4})*")
+        self._PIDS_PATTERN = re.compile("(?:^[\\s]*$)|(c:[0-9]{2}[0-9a-fA-F]{4})(,c:[0-9]{2}[0-9a-fA-F]{4})*")
         # Buttons
         self._apply_button = builder.get_object("apply_button")
         self._create_button = builder.get_object("create_button")
@@ -104,6 +134,7 @@ class ServiceDetailsDialog:
         self._stream_id_entry = self._digit_elements.get("stream_id_entry")
         self._tr_flag_entry = self._digit_elements.get("tr_flag_entry")
         self._namespace_entry = self._non_empty_elements.get("namespace_entry")
+        self._extra_pids_entry = builder.get_object("extra_pids_entry")
         # Service elements
         self._name_entry = builder.get_object("name_entry")
         self._package_entry = builder.get_object("package_entry")
@@ -244,6 +275,7 @@ class ServiceDetailsDialog:
     def init_enigma2_pids(self, flags):
         pids = list(filter(lambda x: x.startswith("c:"), flags))
         if pids:
+            extra_pids = []
             for pid in pids:
                 if pid.startswith(Pids.VIDEO.value):
                     self._video_pid_entry.set_text(str(int(pid[4:], 16)))
@@ -256,15 +288,19 @@ class ServiceDetailsDialog:
                 elif pid.startswith(Pids.AC3.value):
                     self._ac3_pid_entry.set_text(str(int(pid[4:], 16)))
                 elif pid.startswith(Pids.VIDEO_TYPE.value):
-                    pass
+                    extra_pids.append(pid)
                 elif pid.startswith(Pids.AUDIO_CHANNEL.value):
-                    pass
+                    extra_pids.append(pid)
                 elif pid.startswith(Pids.BIT_STREAM_DELAY.value):
                     self._bitstream_entry.set_text(str(int(pid[4:], 16)))
                 elif pid.startswith(Pids.PCM_DELAY.value):
                     self._pcm_entry.set_text(str(int(pid[4:], 16)))
                 elif pid.startswith(Pids.SUBTITLE.value):
-                    pass
+                    extra_pids.append(pid)
+                else:
+                    extra_pids.append(pid)
+
+            self._extra_pids_entry.set_text(",".join(extra_pids))
 
     def init_enigma2_transponder_data(self, srv):
         """ Transponder data initialisation """
@@ -533,6 +569,9 @@ class ServiceDetailsDialog:
         pcm_pid = self._pcm_entry.get_text()
         if pcm_pid:
             flags.append("{}{:04x}".format(Pids.PCM_DELAY.value, int(pcm_pid)))
+        extra_pids = self._extra_pids_entry.get_text()
+        if extra_pids:
+            flags.append(extra_pids)
         # flags
         f_flags = Flag.KEEP.value if self._keep_check_button.get_active() else 0
         f_flags = f_flags + Flag.HIDE.value if self._hide_check_button.get_active() else f_flags
@@ -692,6 +731,9 @@ class ServiceDetailsDialog:
     def on_cas_entry_changed(self, entry):
         entry.set_name("GtkEntry" if self._CAID_PATTERN.fullmatch(entry.get_text()) else self._DIGIT_ENTRY_NAME)
 
+    def on_extra_pids_entry_changed(self, entry):
+        entry.set_name("GtkEntry" if self._PIDS_PATTERN.fullmatch(entry.get_text()) else self._DIGIT_ENTRY_NAME)
+
     def get_value_from_combobox_id(self, box: Gtk.ComboBox, dc: dict):
         cb_id = box.get_active_id()
         return get_key_by_value(dc, cb_id)
@@ -723,6 +765,8 @@ class ServiceDetailsDialog:
             if elem.get_name() == self._DIGIT_ENTRY_NAME:
                 return False
         if self._cas_entry.get_name() == self._DIGIT_ENTRY_NAME:
+            return False
+        if self._extra_pids_entry.get_name() == self._DIGIT_ENTRY_NAME:
             return False
         return True
 
