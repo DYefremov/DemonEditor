@@ -924,7 +924,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">20</property>
                             <property name="max_width_chars">20</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <property name="placeholder_text">c:000000,etc.</property>
                             <signal name="changed" handler="on_extra_pids_entry_changed" swapped="no"/>
                           </object>
