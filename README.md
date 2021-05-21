@@ -1,26 +1,33 @@
 # <img src="app/ui/icons/hicolor/96x96/apps/demon-editor.png" width="32" /> DemonEditor
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![platform](https://img.shields.io/badge/platform-macos-lightgrey)
-## Enigma2 channel and satellite list editor for macOS (experimental).  
-
-![Main app window in macOS Big Sur.](https://user-images.githubusercontent.com/7511379/92320982-9b20c780-f02e-11ea-8a43-fc0c70503573.png)  
+## Enigma2 channel and satellite list editor for macOS.
+[<img src="https://user-images.githubusercontent.com/7511379/119127827-76924180-ba3d-11eb-8ba8-1dc3bdc7f191.png" width="655"/>](https://user-images.githubusercontent.com/7511379/119127827-76924180-ba3d-11eb-8ba8-1dc3bdc7f191.png)  
 
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).  
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).                                
 **The functionality and performance of this version may be different from the [Linux version](https://github.com/DYefremov/DemonEditor)!**
 
 ## Main features of the program
-* Editing bouquets, channels, satellites.
-* Import function.
-* Backup function.
+* Editing bouquets, channels, satellites.  
+  [<img src="https://user-images.githubusercontent.com/7511379/119127978-b822ec80-ba3d-11eb-8720-e458f0ccf60e.png" width="480"/>](https://user-images.githubusercontent.com/7511379/119127978-b822ec80-ba3d-11eb-8720-e458f0ccf60e.png)
+* Import function.  
+   [<img src="https://user-images.githubusercontent.com/7511379/119128084-d852ab80-ba3d-11eb-8bf9-d40f4f59314b.png" width="480"/>](https://user-images.githubusercontent.com/7511379/119128084-d852ab80-ba3d-11eb-8bf9-d40f4f59314b.png)
+* Backup function.  
+  [<img src="https://user-images.githubusercontent.com/7511379/119128119-e4d70400-ba3d-11eb-88b4-86e6bea21314.png" width="480"/>](https://user-images.githubusercontent.com/7511379/119128119-e4d70400-ba3d-11eb-88b4-86e6bea21314.png)
+* Support of picons.  
+  [<img src="https://user-images.githubusercontent.com/7511379/119128127-e99bb800-ba3d-11eb-93d9-3444b7332778.png" width="480"/>](https://user-images.githubusercontent.com/7511379/119128127-e99bb800-ba3d-11eb-93d9-3444b7332778.png)
+* Importing services, downloading picons and updating satellites from the Web.  
+   [<img src="https://user-images.githubusercontent.com/7511379/119128104-de488c80-ba3d-11eb-800c-e070f476f6a8.png" width="250"/>](https://user-images.githubusercontent.com/7511379/119128104-de488c80-ba3d-11eb-800c-e070f476f6a8.png)
+  [<img src="https://user-images.githubusercontent.com/7511379/119128066-d2f56100-ba3d-11eb-864a-bf2c22c74d5e.png" width="259"/>](https://user-images.githubusercontent.com/7511379/119128066-d2f56100-ba3d-11eb-864a-bf2c22c74d5e.png)
 * Extended support of IPTV.
-* Support of picons.
-* Importing services, downloading picons and updating satellites from the Web.
 * Import to bouquet(Neutrino WEBTV) from m3u.
 * Export of bouquets with IPTV services in m3u.
 * Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
-* Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
-* Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
-* Simple FTP client (experimental). 
+* Playback of IPTV or other streams directly from the bouquet list (should be installed [VLC](https://www.videolan.org/vlc/)).
+* Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).  
+  [<img src="https://user-images.githubusercontent.com/7511379/119128157-f28c8980-ba3d-11eb-975e-cdbac32349ed.png" width="480"/>](https://user-images.githubusercontent.com/7511379/119128157-f28c8980-ba3d-11eb-975e-cdbac32349ed.png)
+* Simple FTP client (experimental).   
+[<img src="https://user-images.githubusercontent.com/7511379/119128176-f7e9d400-ba3d-11eb-813d-08972d103cce.png" width="480"/>](https://user-images.githubusercontent.com/7511379/119128176-f7e9d400-ba3d-11eb-813d-08972d103cce.png)
 
 #### Keyboard shortcuts                                                                                                                                                                                            
 * **&#8984; + X** - only in bouquet list.
@@ -45,15 +52,14 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 For **multiple** selection with the mouse, press and hold the **&#8984;** key!
 
 ## Minimum requirements
-*Python >= 3.5.2, GTK+ >= 3.16 with PyGObject bindings, python3-requests.*
+*Python >= 3.5.2, GTK+ >= 3.22 with PyGObject bindings, python3-requests.*
                                                                     
 ## Installation and Launch                                                                          
 To run the program on macOS, you need to install [brew](https://brew.sh/).  
 Then install the required components via terminal:  
 ```brew install python3 gtk+3 pygobject3 adwaita-icon-theme```                                                                  
 ```pip3 install requests```                                                                                                                                                                                          
-#### Optional:                                                                                                         
-```brew install wget```                                                                                                                                                                                                                                                                                                      
+#### Optional:                                                                                                          
 ```pip3 install pillow, pyobjc```
 
 To start the program, just download the [archive](https://github.com/DYefremov/DemonEditor/archive/experimental-mac.zip), unpack and run it from the terminal   
@@ -78,7 +84,7 @@ and in the root dir run command:
                                                                                         
 ```pyinstaller DemonEditor.spec``` 
 ## Important
-**This version is not fully tested and has experimental status!**
+**This version may not be fully tested!**
 
 Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2.                                                                                                
 Main supported *lamedb* format is version **4**. Versions **3** and **5** has only **experimental** support!                                                                                                                                                        
