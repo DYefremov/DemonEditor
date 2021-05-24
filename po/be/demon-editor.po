@@ -1228,3 +1228,18 @@ msgstr "Памер пiконаў у спісах:"
 
 msgid "Logo size in tooltips:"
 msgstr "Памер лагатыпа ва ўсплыўных падказках:"
+
+msgid "Save as"
+msgstr "Захаваць як"
+
+msgid "Mark duplicates"
+msgstr "Адзначыць дублікаты"
+
+msgid "Load only for selected bouquet"
+msgstr "Загрузіць толькі для абранага букета"
+
+msgid "The task is canceled!"
+msgstr "Заданне скасавана!"
+
+msgid "Help"
+msgstr "Даведка"
