@@ -1,8 +1,37 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Common module for showing dialogs """
 import gettext
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 from app.commons import run_idle
 from app.settings import SEP, IS_WIN
@@ -180,52 +209,48 @@ def get_message(message):
 
 
 @lru_cache(maxsize=5)
-def get_dialogs_string(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return "".join(f)
+def get_dialogs_string(path, tag="property"):
+    if IS_WIN:
+        return translate_xml(path, tag)
+    else:
+        with open(path, "r", encoding="utf-8") as f:
+            return "".join(f)
 
 
-def get_builder(path, handlers=None, use_str=False, objects=None):
+def get_builder(path, handlers=None, use_str=False, objects=None, tag="property"):
     """ Creates and returns a Gtk.Builder instance. """
     builder = Gtk.Builder()
     builder.set_translation_domain(TEXT_DOMAIN)
 
     if use_str:
         if objects:
-            builder.add_objects_from_string(get_dialogs_string(path).format(use_header=IS_GNOME_SESSION), objects)
+            builder.add_objects_from_string(get_dialogs_string(path, tag).format(use_header=IS_GNOME_SESSION), objects)
         else:
-            builder.add_from_string(get_dialogs_string(path).format(use_header=IS_GNOME_SESSION))
+            builder.add_from_string(get_dialogs_string(path, tag).format(use_header=IS_GNOME_SESSION))
     else:
         if objects:
-            builder.add_objects_from_file(path, objects)
+            builder.add_objects_from_string(get_dialogs_string(path, tag), objects)
         else:
-            builder.add_from_file(path)
+            builder.add_from_string(get_dialogs_string(path, tag))
 
     builder.connect_signals(handlers or {})
-    if IS_WIN:
-        translate_objects(builder.get_objects())
 
     return builder
 
 
-def translate_objects(objects):
+def translate_xml(path, tag="property"):
     """
         Used to translate GUI from * .glade files in MS Windows.
 
         More info: https://gitlab.gnome.org/GNOME/gtk/-/issues/569
     """
-    for o in objects:
-        if hasattr(o, "get_label"):
-            label = o.get_label()
-            if label:
-                o.set_label(get_message(label))
-            t_text = o.get_tooltip_text()
-            if t_text:
-                o.set_tooltip_text(get_message(t_text))
-        elif hasattr(o, "get_title"):
-            title = o.get_title()
-            if title:
-                o.set_title(get_message(title))
+    et = ET.parse(path)
+    root = et.getroot()
+    for e in root.iter(tag):
+        if e.attrib.get("translatable", None) == "yes":
+            e.text = get_message(e.text)
+
+    return ET.tostring(root, encoding="unicode", method="xml")
 
 
 if __name__ == "__main__":
