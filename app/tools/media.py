@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 import sys
 from abc import ABC, abstractmethod
@@ -341,7 +369,7 @@ class VlcPlayer(Player):
             self._player = vlc.Instance(args).media_player_new()
             vlc.libvlc_video_set_key_input(self._player, False)
             vlc.libvlc_video_set_mouse_input(self._player, False)
-        except (OSError, AttributeError) as e:
+        except (OSError, AttributeError, NameError) as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError("No VLC is found. Check that it is installed!")
         else:
@@ -420,7 +448,7 @@ class VlcPlayer(Player):
         elif sys.platform == "darwin":
             self._player.set_nsobject(self.get_window_handle(video_widget))
         else:
-            log("Video widget initialization error: platform '{}' is not supported. ".format(sys.platform))
+            self._player.set_hwnd(self.get_window_handle(video_widget))
 
 
 class Recorder:
