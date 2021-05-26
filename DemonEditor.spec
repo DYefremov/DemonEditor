@@ -68,7 +68,8 @@ app = BUNDLE(coll,
                  'CFBundleDisplayName': 'DemonEditor',
                  'CFBundleGetInfoString': "Enigma2 channel and satellites editor",
                  'LSApplicationCategoryType': 'public.app-category.utilities',
-                 'CFBundleShortVersionString': "1.0.8 Beta (Build: {})".format(BUILD_DATE),
+                 'LSMinimumSystemVersion': '10.13',
+                 'CFBundleShortVersionString': "1.0.9 Beta (Build: {})".format(BUILD_DATE),
                  'NSHumanReadableCopyright': u"Copyright © 2021, Dmitriy Yefremov",
                  'NSRequiresAquaSystemAppearance': 'false'
              })

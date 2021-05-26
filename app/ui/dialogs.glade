@@ -40,11 +40,10 @@ Author: Dmitriy Yefremov
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">1.0.8 Beta</property>
+    <property name="version">1.0.9 Beta</property>
     <property name="copyright">2018-2021 Dmitriy Yefremov
 </property>
-    <property name="comments" translatable="yes">Enigma2 channel and satellite list editor for MacOS.
-    (Experimental)</property>
+    <property name="comments" translatable="yes">Enigma2 channel and satellite list editor for MacOS.</property>
     <property name="website">https://github.com/DYefremov/DemonEditor/tree/experimental-mac</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
 Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
