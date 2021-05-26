@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.22.2
 
 The MIT License (MIT)
 
@@ -3279,7 +3279,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel" id="app_ver_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label">1.0.8 Alpha</property>
+                        <property name="label">1.0.9 Alpha</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
