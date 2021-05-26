@@ -10,13 +10,15 @@ Main features of the program:
    Editing bouquets, channels, satellites.
    Import function.
    Backup function.
-   Extended support of IPTV.
    Support of picons.
-   Downloading of picons and updating of satellites (transponders) from the web.
+   Importing services, downloading picons and updating satellites from the Web.
+   Extended support of IPTV.
    Import to bouquet(Neutrino WEBTV) from m3u.
    Export of bouquets with IPTV services in m3u.
    Assignment of EPGs from DVB or XML for IPTV services (only Enigma2, experimental).
-   Preview (playback) of IPTV or other streams directly from the bouquet list (should be installed VLC).
+   Playback of IPTV or other streams directly from the bouquet list.
+   Control panel with the ability to view EPG and manage timers (via HTTP API, experimental).
+   Simple FTP client (experimental).
 
 Keyboard shortcuts:
     Ctrl + Insert - copies the selected channels from the main list to the the bouquet beginning or inserts (creates) a new bouquet.
@@ -43,7 +45,7 @@ Keyboard shortcuts:
     For multiple selection with the mouse, press and hold the Ctrl key!
 
 Minimum requirements:
-    Python >= 3.5.2 and GTK+ >= 3.16 with PyGObject bindings, python3-requests.
+    Python >= 3.5.2, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.
 
 Important:
     Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!
@@ -55,4 +57,6 @@ Important:
     just load your data via *"File/Open"* and press *"Save"*. When importing separate bouquet files, only those services
     (excluding IPTV) that are in the **current open lamedb** (main list of services) will be imported.
 
+    For streams playback, this app supports VLC, MPV and GStreamer.
+    Depending on your distro, you may need to install additional packages and libraries.
 
