@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Module for working with Enigma2 bouquets. """
 import re
 from collections import Counter
@@ -166,6 +194,11 @@ class BouquetsReader:
 
             for num, srv in enumerate(srvs, start=1):
                 srv_data = srv.strip().split(":")
+                data_len = len(srv_data)
+                if data_len < 10:
+                    log("The bouquet [{}] service [{}] has the wrong data format: [{}]".format(bq_name, num, srv))
+                    continue
+
                 s_type = srv_data[1]
                 if s_type == "64":
                     m_data, sep, desc = srv.partition("#DESCRIPTION")
@@ -186,7 +219,7 @@ class BouquetsReader:
                 else:
                     fav_id = "{}:{}:{}:{}".format(srv_data[3], srv_data[4], srv_data[5], srv_data[6])
                     name = None
-                    if len(srv_data) == 12:
+                    if data_len == 12:
                         name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
                     services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), num))
 
