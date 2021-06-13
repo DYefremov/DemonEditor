@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2021-02-22 23:53+0300\n"
+"PO-Revision-Date: 2021-06-13 14:54+0300\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1023,7 +1023,7 @@ msgid ""
 msgstr ""
 "Kaydedilmemiş değişiklikler var.\n"
 "\n"
-"\tŞimdi kaydedilsin mi?"
+"\t Şimdi kaydedilsin mi?"
 
 msgid ""
 "Are you sure you want to change the order\n"
@@ -1245,3 +1245,27 @@ msgstr "Picon'lar indirin"
 
 msgid "Errors:"
 msgstr "Hatalar:"
+
+msgid "Use to play streams:"
+msgstr "Akışları oynatmak için kullanın:"
+
+msgid "Font in the lists:"
+msgstr "Listelerdeki yazı tipi:"
+
+msgid "Picons size in the lists:"
+msgstr "Listelerdeki Piconların boyutu:"
+
+msgid "Logo size in tooltips:"
+msgstr "Araç ipuçlarındaki logo boyutu:"
+
+msgid "Save as"
+msgstr "Farklı kaydet"
+
+msgid "Mark duplicates"
+msgstr "Yinelenenleri işaretle"
+
+msgid "Load only for selected bouquet"
+msgstr "Yalnızca seçilen buket için yükle"
+
+msgid "The task is canceled!"
+msgstr "Görev iptal edildi!"
