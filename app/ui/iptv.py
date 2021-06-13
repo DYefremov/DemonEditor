@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import concurrent.futures
 import os
 import re
@@ -6,6 +34,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
 
+import requests
 from gi.repository import GLib, Gio, GdkPixbuf
 
 from app.commons import run_idle, run_task, log
@@ -14,10 +43,9 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
                               parse_m3u)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
-from app.ui.dialogs import Action, show_dialog, DialogType, get_dialogs_string, get_message
+from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
 from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu, get_picon_pixbuf
-from app.ui.uicommons import (Gtk, Gdk, TEXT_DOMAIN, UI_RESOURCES_PATH, IPTV_ICON, Column, IS_GNOME_SESSION,
-                              KeyboardKey, get_yt_icon)
+from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -66,11 +94,8 @@ class IptvDialog:
         self._yt_links = None
         self._yt_dl = None
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True,
+                              objects=("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
 
         self._dialog = builder.get_object("iptv_dialog")
         self._dialog.set_transient_for(transient)
@@ -322,10 +347,8 @@ class SearchUnavailableDialog:
     def __init__(self, transient, model, fav_bouquet, iptv_rows, s_type):
         handlers = {"on_response": self.on_response}
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "iptv.glade", ("search_unavailable_streams_dialog",))
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "iptv.glade", handlers,
+                              objects=("search_unavailable_streams_dialog",))
 
         self._dialog = builder.get_object("search_unavailable_streams_dialog")
         self._dialog.set_transient_for(transient)
@@ -420,11 +443,8 @@ class IptvListDialog:
 
         self._s_type = s_type
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("iptv_list_configuration_dialog", "stream_type_liststore"))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True,
+                              objects=("iptv_list_configuration_dialog", "stream_type_liststore"))
 
         self._dialog = builder.get_object("iptv_list_configuration_dialog")
         self._dialog.set_transient_for(transient)
@@ -445,6 +465,8 @@ class IptvListDialog:
         self._list_nid_entry = builder.get_object("list_nid_entry")
         self._list_namespace_entry = builder.get_object("list_namespace_entry")
         self._apply_button = builder.get_object("list_configuration_apply_button")
+        self._cancel_button = builder.get_object("cancel_config_list_button")
+        self._ok_button = builder.get_object("list_configuration_ok_button")
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -606,6 +628,8 @@ class M3uImportDialog(IptvListDialog):
         self._dialog.set_title(get_message("Playlist import"))
         self._dialog.connect("delete-event", self.on_close)
         self._apply_button.set_label(get_message("Import"))
+        self._ok_button.bind_property("visible", self._apply_button, "visible", 4)
+        self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
         # Progress
         self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
         self._spinner = Gtk.Spinner(active=False)
@@ -687,6 +711,7 @@ class M3uImportDialog(IptvListDialog):
 
             self.download_picons(picons)
         else:
+            GLib.idle_add(self._ok_button.set_visible, True)
             GLib.idle_add(self._info_bar.set_visible, True, priority=GLib.PRIORITY_LOW)
 
         self._app.append_imported_services(services)
@@ -703,50 +728,63 @@ class M3uImportDialog(IptvListDialog):
         self._max_count = self._url_count
         self._cancellable.reset()
 
-        for p in filter(None, picons):
-            if not self._is_download:
-                return
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(self.download_picon, p, picons.get(p, None)): p for p in filter(None, picons)}
+            done, not_done = concurrent.futures.wait(futures, timeout=0)
+            while self._is_download and not_done:
+                done, not_done = concurrent.futures.wait(not_done, timeout=5)
 
-            f = Gio.File.new_for_uri(p)
-            try:
-                GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(f.read(cancellable=self._cancellable), 220, 132, False,
-                                                                self._cancellable,
-                                                                self.on_picon_load_done,
-                                                                picons.get(p, None))
-            except GLib.GError as e:
-                self.update_progress()
-                self._errors_count += 1
-                if e.code != Gio.IOErrorEnum.CANCELLED:
-                    log(str("Picon download error: {}  [{}]").format(p, e))
+            for future in not_done:
+                future.cancel()
+            concurrent.futures.wait(not_done)
 
-    def on_picon_load_done(self, file, result, user_data):
+            self.update_progress(self._url_count)
+            self.on_done()
+
+    def download_picon(self, url, pic_data):
+        err_msg = "Picon download error: {}  [{}]"
+        timeout = (3, 5)  # connect and read timeouts
+
+        req = requests.get(url, timeout=timeout)
+        if req.status_code != 200:
+            log(err_msg.format(url, req.reason))
+            self.update_progress(1)
+        else:
+            self.on_picon_load_done(req.content, pic_data)
+
+    @run_idle
+    def on_picon_load_done(self, data, user_data):
         try:
             self._info_label.set_text("Processing: {}".format(user_data))
-            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_finish(result)
+            f = Gio.MemoryInputStream.new_from_data(data)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, 220, 132, False, self._cancellable)
             path = "{}{}".format(self._pic_path, user_data)
             pixbuf.savev(path, "png", [], [])
             self._picons[user_data] = get_picon_pixbuf(path)
         except GLib.GError as e:
-            self._errors_count += 1
+            self.update_progress(1)
             if e.code != Gio.IOErrorEnum.CANCELLED:
                 log("Loading picon [{}] data error: {}".format(user_data, e))
-        finally:
+        else:
             self.update_progress()
 
-    def update_progress(self):
+    @run_idle
+    def update_progress(self, error=0):
+        self._errors_count += error
         self._url_count -= 1
         frac = 1 - self._url_count / self._max_count
         self._progress_bar.set_fraction(frac)
 
-        if self._url_count == 0:
-            self._progress_bar.set_visible(False)
-            self._progress_bar.set_fraction(0.0)
-            self._apply_button.set_sensitive(True)
-            self._info_label.set_text("{} {}.".format(get_message("Errors:"), self._errors_count))
-            self._is_download = False
+    @run_idle
+    def on_done(self):
+        self._progress_bar.set_visible(False)
+        self._progress_bar.set_fraction(0.0)
+        self._apply_button.set_sensitive(True)
+        self._info_label.set_text("Errors: {}.".format(self._errors_count))
+        self._is_download = False
 
-            gen = self.update_fav_model()
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        gen = self.update_fav_model()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_fav_model(self):
         services = self._app._services
@@ -757,7 +795,9 @@ class M3uImportDialog(IptvListDialog):
             if s:
                 model.set_value(r.iter, Column.FAV_PICON, picons.get(s.picon_id, None))
                 yield True
+
         self._info_bar.set_visible(True)
+        self._ok_button.set_visible(True)
         yield True
 
     def on_response(self, dialog, response):
@@ -799,12 +839,9 @@ class YtListImportDialog:
         self._settings = settings
         self._yt = None
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain(TEXT_DOMAIN)
-        builder.add_objects_from_string(get_dialogs_string(_UI_PATH).format(use_header=IS_GNOME_SESSION),
-                                        ("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
-                                         "yt_popup_menu", "remove_selection_image"))
-        builder.connect_signals(handlers)
+        builder = get_builder(_UI_PATH, handlers, use_str=True,
+                              objects=("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
+                                       "yt_popup_menu", "remove_selection_image"))
 
         self._dialog = builder.get_object("yt_import_dialog_window")
         self._dialog.set_transient_for(transient)

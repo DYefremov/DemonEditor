@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Dmitriy Yefremov
+# Copyright (C) 2018-2021 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1213,3 +1213,27 @@ msgstr "Загрузить пиконы"
 
 msgid "Errors:"
 msgstr "Ошибок:"
+
+msgid "Use to play streams:"
+msgstr "Использовать для воспроизведения потоков:"
+
+msgid "Font in the lists:"
+msgstr "Шрифт в списках:"
+
+msgid "Picons size in the lists:"
+msgstr "Размер пиконов в списках:"
+
+msgid "Logo size in tooltips:"
+msgstr "Размер логотипа во всплывающих подсказках:"
+
+msgid "Save as"
+msgstr "Сохранить как"
+
+msgid "Mark duplicates"
+msgstr "Отметить дубликаты"
+
+msgid "Load only for selected bouquet"
+msgstr "Загрузить только для выбранного букета"
+
+msgid "The task is canceled!"
+msgstr "Задание отменено!"

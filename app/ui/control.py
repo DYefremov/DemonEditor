@@ -6,7 +6,7 @@ from urllib.parse import quote
 
 from gi.repository import GLib
 
-from .dialogs import get_dialogs_string, show_dialog, DialogType, get_message
+from .dialogs import show_dialog, DialogType, get_message, get_builder
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI
@@ -61,19 +61,19 @@ class ControlBox(Gtk.HBox):
 
         @property
         def event_data(self):
-            return self._event_data
+            return self._event_data or {}
 
         @property
         def title(self):
-            return self._title
+            return self._title or ""
 
         @property
         def desc(self):
-            return self._desc
+            return self._desc or ""
 
         @property
         def time_header(self):
-            return self._time_header
+            return self._time_header or ""
 
     class TimerRow(Gtk.ListBoxRow):
 
@@ -84,8 +84,7 @@ class ControlBox(Gtk.HBox):
 
             self._timer = timer
 
-            builder = Gtk.Builder()
-            builder.add_from_string(get_dialogs_string(self._UI_PATH))
+            builder = get_builder(self._UI_PATH, None, use_str=True)
             row_box = builder.get_object("timer_row_box")
             name_label = builder.get_object("timer_name_label")
             description_label = builder.get_object("timer_description_label")
@@ -130,9 +129,7 @@ class ControlBox(Gtk.HBox):
                     "on_timers_press": self.on_timers_press,
                     "on_timers_drag_data_received": self.on_timers_drag_data_received}
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "control.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers)
 
         self.add(builder.get_object("main_box_frame"))
         self._stack = builder.get_object("stack")
@@ -340,7 +337,7 @@ class ControlBox(Gtk.HBox):
 
     def on_service_changed(self, ref):
         self._app._wait_dialog.show()
-        self._http_api.send(HttpAPI.Request.EPG, ref, self.update_epg_data)
+        self._http_api.send(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
 
     @run_idle
     def update_epg_data(self, epg):
@@ -357,7 +354,7 @@ class ControlBox(Gtk.HBox):
     def on_epg_filter_changed(self, entry):
         self._epg_list_box.invalidate_filter()
 
-    def epg_filter_function(self, row: EpgRow):
+    def epg_filter_function(self, row):
         txt = self._epg_filter_entry.get_text().upper()
         return any((not txt, txt in row.time_header.upper(), txt in row.title.upper(), txt in row.desc.upper()))
 

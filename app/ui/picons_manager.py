@@ -1,7 +1,35 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 import re
 import shutil
-import tempfile
+from enum import Enum
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 
@@ -10,20 +38,24 @@ from gi.repository import GLib, GdkPixbuf, Gio
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
 from app.settings import SettingsType, Settings
-from app.tools.picons import PiconsParser, parse_providers, Provider, convert_to, download_picon
+from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
+                              PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .dialogs import show_dialog, DialogType, get_message
+from .dialogs import show_dialog, DialogType, get_message, get_builder
 from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
                           get_picon_pixbuf)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey
 
 
 class PiconsDialog:
+    class DownloadSource(Enum):
+        LYNG_SAT = "lyngsat"
+        PICON_CZ = "piconcz"
+
     def __init__(self, transient, settings, picon_ids, sat_positions, app):
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
         self._app = app
-        self._TMP_DIR = tempfile.gettempdir() + "/"
         self._BASE_URL = "www.lyngsat.com/packages/"
         self._PATTERN = re.compile(r"^https://www\.lyngsat\.com/[\w-]+\.html$")
         self._POS_PATTERN = re.compile(r"^\d+\.\d+[EW]?$")
@@ -33,9 +65,13 @@ class PiconsDialog:
         self._filter_binding = None
         self._services = None
         self._current_picon_info = None
+        # Downloader
+        self._sats = None
+        self._sat_names = None
+        self._download_src = self.DownloadSource.PICON_CZ
+        self._picon_cz_downloader = None
 
         handlers = {"on_receive": self.on_receive,
-                    "on_load_providers": self.on_load_providers,
                     "on_cancel": self.on_cancel,
                     "on_close": self.on_close,
                     "on_send": self.on_send,
@@ -64,7 +100,10 @@ class PiconsDialog:
                     "on_selective_remove": self.on_selective_remove,
                     "on_local_remove": self.on_local_remove,
                     "on_picons_dest_view_realize": self.on_picons_dest_view_realize,
+                    "on_download_source_changed": self.on_download_source_changed,
                     "on_satellites_view_realize": self.on_satellites_view_realize,
+                    "on_satellite_filter_toggled": self.on_satellite_filter_toggled,
+                    "on_providers_view_query_tooltip": self.on_providers_view_query_tooltip,
                     "on_satellite_selection": self.on_satellite_selection,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
@@ -72,12 +111,11 @@ class PiconsDialog:
                     "on_fiter_srcs_toggled": self.on_fiter_srcs_toggled,
                     "on_filter_services_switch": self.on_filter_services_switch,
                     "on_picon_activated": self.on_picon_activated,
+                    "on_view_query_tooltip": self.on_view_query_tooltip,
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_popup_menu": on_popup_menu}
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "picons_manager.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "picons_manager.glade", handlers)
 
         self._dialog = builder.get_object("picons_dialog")
         self._dialog.set_transient_for(transient)
@@ -99,9 +137,6 @@ class PiconsDialog:
         self._src_filter_button = builder.get_object("src_filter_button")
         self._dst_filter_button = builder.get_object("dst_filter_button")
         self._picons_filter_entry = builder.get_object("picons_filter_entry")
-        self._ip_entry = builder.get_object("ip_entry")
-        self._picons_entry = builder.get_object("picons_entry")
-        self._url_entry = builder.get_object("url_entry")
         self._picons_dir_entry = builder.get_object("picons_dir_entry")
         self._info_bar = builder.get_object("info_bar")
         self._info_bar = builder.get_object("info_bar")
@@ -109,7 +144,7 @@ class PiconsDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._picon_info_image = builder.get_object("picon_info_image")
         self._picon_info_label = builder.get_object("picon_info_label")
-        self._load_providers_button = builder.get_object("load_providers_button")
+        self._download_source_button = builder.get_object("download_source_button")
         self._receive_button = builder.get_object("receive_button")
         self._convert_button = builder.get_object("convert_button")
         self._enigma2_path_button = builder.get_object("enigma2_path_button")
@@ -124,12 +159,18 @@ class PiconsDialog:
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
         self._satellite_label = builder.get_object("satellite_label")
+        self._provider_header_label = builder.get_object("provider_header_label")
+        self._satellite_filter_switch = builder.get_object("satellite_filter_switch")
+        self._bouquet_filter_switch = builder.get_object("bouquet_filter_switch")
+        self._bouquet_filter_grid = builder.get_object("bouquet_filter_grid")
         self._header_download_box = builder.get_object("header_download_box")
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_label"), "visible", 4)
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_spinner"), "visible", 4)
+        self._satellite_label.bind_property("visible", self._download_source_button, "sensitive")
+        self._satellite_label.bind_property("visible", self._satellites_view, "sensitive")
         self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
-        self._load_providers_button.bind_property("visible", self._receive_button, "visible")
+        self._download_source_button.bind_property("visible", self._receive_button, "visible")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._explorer_src_path_button.bind_property("sensitive", builder.get_object("picons_view_sw"), "sensitive")
         self._filter_button.bind_property("active", builder.get_object("filter_service_box"), "visible")
@@ -144,15 +185,9 @@ class PiconsDialog:
         self._info_check_button.bind_property("active", explorer_info_bar, "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
-        # Style
-        self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
-                                                                    Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        # Settings
         self._settings = settings
         self._s_type = settings.setting_type
-        self._ip_entry.set_text(self._settings.host)
-        self._picons_entry.set_text(self._settings.picons_path)
         self._picons_dir_entry.set_text(self._settings.picons_local_path)
 
         window_size = self._settings.get("picons_downloader_window_size")
@@ -465,72 +500,168 @@ class PiconsDialog:
 
     # ******************** Downloader ************************* #
 
+    def on_download_source_changed(self, button):
+        self._download_src = self.DownloadSource(button.get_active_id())
+        self.set_providers_header()
+        self._bouquet_filter_grid.set_sensitive(self._download_src is self.DownloadSource.PICON_CZ)
+        GLib.idle_add(self._providers_view.get_model().clear)
+        self.init_satellites(self._satellites_view)
+
     def on_satellites_view_realize(self, view):
+        self.set_providers_header()
         self.get_satellites(view)
+
+    def on_satellite_filter_toggled(self, button, state):
+        self.init_satellites(self._satellites_view)
+
+    def on_providers_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        if self._download_src is self.DownloadSource.LYNG_SAT:
+            return False
+
+        dest = view.get_dest_row_at_pos(x, y)
+        if not dest:
+            return False
+
+        path, pos = dest
+        model = view.get_model()
+        itr = model.get_iter(path)
+        logo_url = model.get_value(itr, 5)
+        if logo_url:
+            pix_data = self._picon_cz_downloader.get_logo_data(logo_url)
+            if pix_data:
+                pix = self.get_pixbuf(pix_data)
+                model.set_value(itr, 0, pix if pix else TV_ICON)
+                size = self._settings.tooltip_logo_size
+                tooltip.set_icon(self.get_pixbuf(pix_data, size, size))
+            else:
+                self.update_logo_data(itr, model, logo_url)
+        tooltip.set_text(model.get_value(itr, 1))
+        view.set_tooltip_row(tooltip, path)
+        return True
+
+    @run_task
+    def update_logo_data(self, itr, model, url):
+        pix_data = self._picon_cz_downloader.get_provider_logo(url)
+        if pix_data:
+            pix = self.get_pixbuf(pix_data)
+            GLib.idle_add(model.set_value, itr, 0, pix if pix else TV_ICON)
+
+    @run_idle
+    def set_providers_header(self):
+        msg = "{} [{}]"
+        tooltip = ""
+        if self._download_src is self.DownloadSource.PICON_CZ:
+            tooltip = "https://picon.cz (by Chocholoušek)"
+            msg = msg.format(get_message("Package"), tooltip)
+        elif self._download_src is self.DownloadSource.LYNG_SAT:
+            tooltip = "https://www.lyngsat.com"
+            msg = msg.format(get_message("Providers"), tooltip)
+        else:
+            msg = ""
+
+        self._provider_header_label.set_text(msg)
+        self._provider_header_label.set_tooltip_text(tooltip)
 
     @run_task
     def get_satellites(self, view):
-        sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
-        if not sats:
+        self._sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
+        if not self._sats:
             self.show_info_message("Getting satellites list error!", Gtk.MessageType.ERROR)
+
+        self._sat_names = {s[1]: s[0] for s in self._sats}  # position -> satellite name
+        self._picon_cz_downloader = PiconsCzDownloader(self._picon_ids, self.append_output)
+        self.init_satellites(view)
+
+    @run_task
+    def init_satellites(self, view):
+        sats = self._sats
+        if self._download_src is self.DownloadSource.PICON_CZ:
+            if not self._picon_cz_downloader:
+                return
+            try:
+                self._picon_cz_downloader.init()
+            except PiconsError as e:
+                self.show_info_message(str(e), Gtk.MessageType.ERROR)
+            else:
+                providers = self._picon_cz_downloader.providers
+                sats = ((self._sat_names.get(p, p), p, None, p, False) for p in providers)
         gen = self.append_satellites(view.get_model(), sats)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def append_satellites(self, model, sats):
+        is_filter = self._satellite_filter_switch.get_active()
+        if model:
+            model.clear()
+
         try:
-            for sat in sats:
+            for sat in sorted(sats):
                 pos = sat[1]
                 name = "{} ({})".format(sat[0], pos)
-
-                if not self._terminate and model:
-                    if pos in self._sat_positions:
-                        yield model.append((name, sat[3], pos))
+                if is_filter and pos not in self._sat_positions:
+                    continue
+                if not model:
+                    return
+                yield model.append((name, sat[3], pos))
         finally:
             self._satellite_label.show()
 
     def on_satellite_selection(self, view, path, column):
-        model = view.get_model()
-        self._url_entry.set_text(model.get(model.get_iter(path), 1)[0])
-
-    def on_load_providers(self, item):
         self.on_info_bar_close()
         model = self._providers_view.get_model()
         model.clear()
-        self.get_providers(model)
+        self._satellite_label.set_visible(False)
+        self.get_providers(view.get_model()[path][1], model)
 
     @run_task
-    def get_providers(self, model):
-        providers = parse_providers(self._url_entry.get_text())
-        if providers:
-            self.append_providers(providers, model)
+    def get_providers(self, url, model):
+        if self._download_src is self.DownloadSource.LYNG_SAT:
+            providers = parse_providers(url)
+        elif self._download_src is self.DownloadSource.PICON_CZ:
+            providers = self._picon_cz_downloader.get_sat_providers(url)
+        else:
+            return
+
+        self.append_providers(providers or [], model)
 
     @run_idle
     def append_providers(self, providers, model):
-        for p in providers:
-            model.append((self.get_pixbuf(p[0]) if p[0] else TV_ICON, *p[1:]))
-        self.update_receive_button_state()
+        if self._download_src is self.DownloadSource.LYNG_SAT:
+            for p in providers:
+                model.append(p._replace(logo=self.get_pixbuf(p.logo) if p.logo else TV_ICON))
+        elif self._download_src is self.DownloadSource.PICON_CZ:
+            for p in providers:
+                logo_data = self._picon_cz_downloader.get_logo_data(p.ssid)
+                model.append(p._replace(logo=self.get_pixbuf(logo_data) if logo_data else TV_ICON))
 
-    def get_pixbuf(self, img_data):
+        self.update_receive_button_state()
+        GLib.idle_add(self._satellite_label.set_visible, True)
+
+    def get_pixbuf(self, img_data, w=48, h=32):
         if img_data:
             f = Gio.MemoryInputStream.new_from_data(img_data)
-            return GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, 48, 32, True, None)
+            return GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, w, h, True, None)
 
     def on_receive(self, item):
-        self._cancel_button.show()
-        self.start_download()
-
-    @run_task
-    def start_download(self):
         if self._is_downloading:
             self.show_dialog("The task is already running!", DialogType.ERROR)
             return
 
+        providers = self.get_selected_providers()
+
+        if self._download_src is self.DownloadSource.PICON_CZ and len(providers) > 1:
+            self.show_dialog("Please, select only one item!", DialogType.ERROR)
+            return
+
+        self._cancel_button.show()
+        self.start_download(providers)
+
+    @run_task
+    def start_download(self, providers):
         self._is_downloading = True
         GLib.idle_add(self._expander.set_expanded, True)
 
-        providers = self.get_selected_providers()
         for prv in providers:
-            if not self._POS_PATTERN.match(prv[2]):
+            if self._download_src is self.DownloadSource.LYNG_SAT and not self._POS_PATTERN.match(prv[2]):
                 self.show_info_message(
                     get_message("Specify the correct position value for the provider!"), Gtk.MessageType.ERROR)
                 scroll_to(prv.path, self._providers_view)
@@ -539,41 +670,80 @@ class PiconsDialog:
         try:
             picons_path = self._picons_dir_entry.get_text()
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
-            picons = []
-
             self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
+            providers = (Provider(*p) for p in providers)
 
-            import concurrent.futures
-
-            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                # Getting links to picons.
-                futures = {executor.submit(self.process_provider, Provider(*p), picons_path): p for p in providers}
-                for future in concurrent.futures.as_completed(futures):
-                    if not self._is_downloading:
-                        executor.shutdown()
-                        return
-
-                    picons.extend(future.result())
-                # Getting picon images.
-                futures = {executor.submit(download_picon, *pic, self.append_output): pic for pic in picons}
-                done, not_done = concurrent.futures.wait(futures, timeout=0)
-                while self._is_downloading and not_done:
-                    done, not_done = concurrent.futures.wait(not_done, timeout=5)
-
-                for future in not_done:
-                    future.cancel()
-                concurrent.futures.wait(not_done)
+            if self._download_src is self.DownloadSource.LYNG_SAT:
+                self.get_picons_for_lyngsat(picons_path, providers)
+            elif self._download_src is self.DownloadSource.PICON_CZ:
+                self.get_picons_for_picon_cz(picons_path, providers)
 
             if not self._is_downloading:
                 return
 
             if not self._resize_no_radio_button.get_active():
                 self.resize(picons_path)
-            else:
-                self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
         finally:
             GLib.idle_add(self._cancel_button.hide)
             self._is_downloading = False
+
+    def get_picons_for_lyngsat(self, path, providers):
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            picons = []
+            # Getting links to picons.
+            futures = {executor.submit(self.process_provider, p, path): p for p in providers}
+            for future in concurrent.futures.as_completed(futures):
+                if not self._is_downloading:
+                    executor.shutdown()
+                    return
+
+                pic = future.result()
+                if pic:
+                    picons.extend(pic)
+            # Getting picon images.
+            futures = {executor.submit(download_picon, *pic, self.append_output): pic for pic in picons}
+            done, not_done = concurrent.futures.wait(futures, timeout=0)
+            while self._is_downloading and not_done:
+                done, not_done = concurrent.futures.wait(not_done, timeout=5)
+
+            for future in not_done:
+                future.cancel()
+            concurrent.futures.wait(not_done)
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+
+    def get_picons_for_picon_cz(self, path, providers):
+        p_ids = None
+        if self._bouquet_filter_switch.get_active():
+            p_ids = self.get_bouquet_picon_ids()
+            if not p_ids:
+                return
+
+        try:
+            # We download it sequentially.
+            for p in providers:
+                self._picon_cz_downloader.download(p, path, p_ids)
+        except PiconsError as e:
+            self.append_output("Error: {}\n".format(str(e)))
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+
+    def get_bouquet_picon_ids(self):
+        """ Returns picon ids for selected bouquet or None. """
+        bq_selected = self._app.check_bouquet_selection()
+        if not bq_selected:
+            return
+
+        model, paths = self._app.bouquets_view.get_selection().get_selected_rows()
+        if len(paths) > 1:
+            self.show_dialog("Please, select only one bouquet!", DialogType.ERROR)
+            return
+
+        fav_bouquet = self._app.current_bouquets[bq_selected]
+        services = self._app.current_services
+        return {services.get(fav_id).picon_id for fav_id in fav_bouquet}
 
     def process_provider(self, prv, picons_path):
         self.append_output("Getting links to picons for: {}.\n".format(prv.name))
@@ -621,7 +791,6 @@ class PiconsDialog:
         self._terminate = True
         self._is_downloading = False
         self.save_window_size(window)
-        self.clean_data()
         self._app.update_picons()
         GLib.idle_add(self._dialog.destroy)
 
@@ -629,12 +798,6 @@ class PiconsDialog:
         size = window.get_size()
         height = size.height - self._text_view.get_allocated_height() - self._info_bar.get_allocated_height()
         self._settings.add("picons_downloader_window_size", (size.width, height))
-
-    @run_task
-    def clean_data(self):
-        path = self._TMP_DIR + "www.lyngsat.com"
-        if os.path.exists(path):
-            shutil.rmtree(path)
 
     @run_task
     def run_func(self, func, update=False):
@@ -753,6 +916,20 @@ class PiconsDialog:
                                                        get_message("System"), srv.system, get_message("Freq"), srv.freq,
                                                        ref)
 
+    def on_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        dest = view.get_dest_row_at_pos(x, y)
+        if not dest:
+            return False
+
+        path, pos = dest
+        model = view.get_model()
+        row = model[path][:]
+        tooltip.set_icon(get_picon_pixbuf(row[-1], size=self._settings.tooltip_logo_size))
+        tooltip.set_text(row[1])
+        view.set_tooltip_row(tooltip, path)
+
+        return True
+
     def on_tree_view_key_press(self, view, event):
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
@@ -765,7 +942,7 @@ class PiconsDialog:
     def on_url_changed(self, entry):
         suit = self._PATTERN.search(entry.get_text())
         entry.set_name("GtkEntry" if suit else "digit-entry")
-        self._load_providers_button.set_sensitive(suit if suit else False)
+        self._download_source_button.set_sensitive(suit if suit else False)
 
     def on_position_edited(self, render, path, value):
         model = self._providers_view.get_model()
@@ -775,7 +952,7 @@ class PiconsDialog:
     def on_visible_page(self, stack: Gtk.Stack, param):
         name = stack.get_visible_child_name()
         self._convert_button.set_visible(name == "converter")
-        self._load_providers_button.set_visible(name == "downloader")
+        self._download_source_button.set_visible(name == "downloader")
         is_explorer = name == "explorer"
         self._filter_button.set_visible(is_explorer)
         if is_explorer:

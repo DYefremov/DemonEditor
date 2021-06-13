@@ -353,12 +353,12 @@ def scroll_to(index, view, paths=None):
 
 # ***************** Picons *********************#
 
-def update_picons_data(path, picons):
+def update_picons_data(path, picons, size=32):
     if not os.path.exists(path):
         return
 
     for file in os.listdir(path):
-        pf = get_picon_pixbuf(path + file)
+        pf = get_picon_pixbuf(path + file, size)
         if pf:
             picons[file] = pf
 
@@ -530,7 +530,7 @@ def get_picon_pixbuf(path, size=32):
 
 # ***************** Bouquets *********************#
 
-def gen_bouquets(view, bq_view, transient, gen_type, tv_types, s_type, callback):
+def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
     """ Auto-generate and append list of bouquets """
     fav_id_index = Column.SRV_FAV_ID
     index = Column.SRV_TYPE
@@ -545,8 +545,6 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, s_type, callback)
         if not is_only_one_item_selected(paths, transient):
             return
         service = Service(*model[paths][:Column.SRV_TOOLTIP])
-        if service.service_type not in tv_types:
-            bq_type = BqType.RADIO.value
         append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
                         [service.package if gen_type is BqGenType.PACKAGE else
                          service.pos if gen_type is BqGenType.SAT else service.service_type], s_type)

@@ -6,7 +6,7 @@ from app.eparser import get_bouquets, get_services, BouquetsReader
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.settings import SettingsType
-from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message
+from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
 
@@ -80,10 +80,7 @@ class ImportDialog:
                     "on_resize": self.on_resize,
                     "on_key_press": self.on_key_press}
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
-        builder.add_from_file(UI_RESOURCES_PATH + "import_dialog.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "import_dialog.glade", handlers)
 
         self._bq_services = {}
         self._services = {}
@@ -124,8 +121,15 @@ class ImportDialog:
                 for bq in bqs.bouquets:
                     self._main_model.append((bq.name, bq.type, True))
                     self._bq_services[(bq.name, bq.type)] = bq.services
-            # Note! Getting default format ver. 4
-            services = get_services(path, self._profile, 4 if self._profile is SettingsType.ENIGMA_2 else 0)
+
+            if self._profile is SettingsType.ENIGMA_2:
+                services = get_services(path, self._profile, 5 if self._settings.v5_support else 4)
+            elif self._profile is SettingsType.NEUTRINO_MP:
+                services = get_services(path, self._profile, 0)
+            else:
+                self.show_info_message("Setting format not supported!", Gtk.MessageType.ERROR)
+                return
+
             for srv in services:
                 self._services[srv.fav_id] = srv
         except FileNotFoundError as e:

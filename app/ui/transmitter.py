@@ -7,6 +7,7 @@ from gi.repository import GLib
 from app.commons import log
 from app.connections import HttpAPI
 from app.tools.yt import YouTube
+from app.ui.dialogs import get_builder
 from app.ui.iptv import get_yt_icon
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
 
@@ -34,9 +35,7 @@ class LinksTransmitter:
         self._app_window = app_window
         self._is_status_icon = True
 
-        builder = Gtk.Builder()
-        builder.add_from_file(UI_RESOURCES_PATH + "transmitter.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "transmitter.glade", handlers)
 
         self._main_window = builder.get_object("main_window")
         self._url_entry = builder.get_object("url_entry")

@@ -47,7 +47,7 @@ class LameDbReader:
             tr_type = tr[0:1]
             if tr_type == "c":
                 tr += ":0:0:0"
-            elif tr_type == "t":
+            elif tr_type == "t" or tr_type == "a":
                 tr += ":0:0"
             else:
                 tr_data = tr.split(_SEP)
@@ -81,7 +81,7 @@ class LameDbReader:
             lns = file.readlines()
 
             if lns and not lns[0].endswith("/5/\n"):
-                raise SyntaxError("lamedb v.5 parsing error: unsupported format.")
+                raise SyntaxError("lamedb ver.5 parsing error: unsupported format.")
 
             trs, srvs = {}, [""]
             for line in lns:
@@ -95,8 +95,13 @@ class LameDbReader:
                         srv_data.append("p:")
                     srvs.extend(srv_data)
                 elif line.startswith("t:"):
-                    tr, srv = line.split(",")
-                    trs[tr.strip("t:")] = srv.strip().replace(":", " ", 1)
+                    data = line.split(",")
+                    len_data = len(data)
+                    if len_data > 1:
+                        tr, srv = data[0].strip("t:"), data[1].strip().replace(":", " ", 1)
+                        trs[tr] = srv
+                    else:
+                        log("Error while parsing transponder data [ver. 5] for line: {}".format(line))
 
             return self.parse_services(srvs, trs)
 
@@ -177,6 +182,10 @@ class LameDbReader:
                     system = "DVB-C"
                     pos = "C"
                     fec = FEC_DEFAULT.get(tr[4])
+                elif tr_type is TrType.ATSC:
+                    system = "ATSC"
+                    pos = "T"
+                    fec = FEC_DEFAULT.get("0")
 
                 # Formatting displayed values.
                 try:
