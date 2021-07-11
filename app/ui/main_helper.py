@@ -625,7 +625,7 @@ def get_base_paths(paths, model):
 def get_model_data(view):
     """ Returns model name and base model from the given view """
     model = get_base_model(view.get_model())
-    model_name = model.get_name()
+    model_name = model.get_name() if model else ""
     return model_name, model
 
 

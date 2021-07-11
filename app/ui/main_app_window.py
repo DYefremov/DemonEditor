@@ -300,6 +300,7 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
+        self._services_load_spinner = builder.get_object("services_load_spinner")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
@@ -669,6 +670,11 @@ class Application(Gtk.Application):
         self._main_window.unfullscreen()
         if not self._main_window.is_maximized():
             self._settings.add("window_size", self._main_window.get_size())
+
+        if self._services_load_spinner.get_property("active"):
+            msg = "{}\n\n\t{}".format(get_message("Data loading in progress!"), get_message("Are you sure?"))
+            if show_dialog(DialogType.QUESTION, self._main_window, msg) == Gtk.ResponseType.CANCEL:
+                return True
 
         if self._recorder:
             if self._recorder.is_record():
@@ -1633,8 +1639,6 @@ class Application(Gtk.Application):
         else:
             self.append_blacklist(black_list)
             yield from self.append_data(bouquets, services)
-        finally:
-            self._wait_dialog.hide()
             self._profile_combo_box.set_sensitive(True)
             if callback:
                 callback()
@@ -1646,6 +1650,8 @@ class Application(Gtk.Application):
             if self._filter_box.get_visible():
                 self.on_filter_changed()
             yield True
+        finally:
+            self._wait_dialog.hide()
 
     def append_data(self, bouquets, services):
         if self._app_info_box.get_visible():
@@ -1737,7 +1743,9 @@ class Application(Gtk.Application):
             #  Adding channels to dict with fav_id as keys.
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
-        factor = self.DEL_FACTOR * 2
+        self._wait_dialog.hide()
+        self._services_load_spinner.start()
+        factor = self.DEL_FACTOR
 
         for index, srv in enumerate(services):
             tooltip, background = None, None
@@ -1752,6 +1760,8 @@ class Application(Gtk.Application):
             self._services_model.append(s)
             if index % factor == 0:
                 yield True
+
+        self._services_load_spinner.stop()
         yield True
 
     def clear_current_data(self):
@@ -2156,7 +2166,7 @@ class Application(Gtk.Application):
 
     def on_view_focus(self, view, focus_event=None):
         model_name, model = get_model_data(view)
-        not_empty = len(model) > 0  # if  > 0 model has items
+        not_empty = len(model) > 0 if model else False
         is_service = model_name == self.SERVICE_MODEL_NAME
 
         if model_name == self.BQ_MODEL_NAME:
