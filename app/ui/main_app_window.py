@@ -74,8 +74,8 @@ class Application(Gtk.Application):
     ALT_MODEL_NAME = "alt_list_store"
     DRAG_SEP = "::::"
 
-    DEL_FACTOR = 50  # Batch size to delete in one pass.
-    FAV_FACTOR = DEL_FACTOR * 2
+    DEL_FACTOR = 100  # Batch size to delete in one pass.
+    FAV_FACTOR = DEL_FACTOR * 5
 
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
@@ -785,11 +785,16 @@ class Application(Gtk.Application):
                         yield True
                 self.update_fav_num_column(model)
 
+        self.on_model_changed(self._fav_model)
         self._wait_dialog.hide()
         yield True
 
     def delete_services(self, itrs, model, rows):
         """ Deleting services """
+        if self._services_load_spinner.get_property("active"):
+            show_dialog(DialogType.ERROR, self._main_window, get_message("Data loading in progress!"))
+            return
+
         for index, s_itr in enumerate(get_base_itrs(itrs, model)):
             self._services_model.remove(s_itr)
             if index % self.DEL_FACTOR == 0:
@@ -811,6 +816,7 @@ class Application(Gtk.Application):
         for f_itr in filter(lambda r: r[Column.FAV_ID] in srv_ids_to_delete, self._fav_model):
             self._fav_model.remove(f_itr.iter)
 
+        self.on_model_changed(self._services_model)
         self.update_fav_num_column(self._fav_model)
         self.update_sat_positions()
         self._wait_dialog.hide()
@@ -834,6 +840,7 @@ class Application(Gtk.Application):
 
         self._bq_selected = ""
         self._bq_name_label.set_text(self._bq_selected)
+        self.on_model_changed(model)
         self._wait_dialog.hide()
         yield True
 
@@ -2119,8 +2126,7 @@ class Application(Gtk.Application):
             value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
             model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
 
-    @run_idle
-    def on_model_changed(self, model, path, itr=None):
+    def on_model_changed(self, model, path=None, itr=None):
         model_name = model.get_name()
 
         if model_name == self.FAV_MODEL_NAME:

@@ -84,7 +84,6 @@ Author: Dmitriy Yefremov
       <!-- column-name type -->
       <column type="gchararray"/>
     </columns>
-    <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkImage" id="clear_image">
@@ -172,7 +171,6 @@ Author: Dmitriy Yefremov
       <!-- column-name background -->
       <column type="GdkRGBA"/>
     </columns>
-    <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkListStore" id="filter_sat_pos_list_store">
@@ -1160,7 +1158,6 @@ Author: Dmitriy Yefremov
       <!-- column-name background -->
       <column type="GdkRGBA"/>
     </columns>
-    <signal name="row-deleted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkTreeModelFilter" id="services_model_filter">
     <property name="child_model">services_list_store</property>
