@@ -41,6 +41,10 @@
           <attribute name="label" translatable="yes">Save</attribute>
           <attribute name="action">app.on_data_save</attribute>
         </item>
+         <item>
+          <attribute name="label" translatable="yes">Save as</attribute>
+          <attribute name="action">app.on_data_save_as</attribute>
+        </item>
       </section>
       <section>
         <item>

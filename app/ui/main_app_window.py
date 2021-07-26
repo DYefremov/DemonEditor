@@ -455,6 +455,9 @@ class Application(Gtk.Application):
         # Save
         self._app_info_box.bind_property("visible", self.set_action("on_data_save", self.on_data_save, False),
                                          "enabled", 4)
+        self._app_info_box.bind_property("visible", self.set_action("on_data_save_as", self.on_data_save_as, False),
+                                         "enabled", 4)
+
         # Control
         remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
         remote_action.connect("change-state", self.on_control)
@@ -1821,12 +1824,32 @@ class Application(Gtk.Application):
         gen = self.save_data()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def save_data(self, callback=None):
+    def on_data_save_as(self, action=None, value=None):
+        if len(self._bouquets_model) == 0:
+            self.show_error_dialog("No data to save!")
+            return
+
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
+                               buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
+                               create_dir=True)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        if os.listdir(response):
+            msg = "{}\n\n\t\t{}".format(get_message("The selected folder already contains files!"),
+                                        get_message("Are you sure?"))
+            if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
+                return
+
+        gen = self.save_data(lambda: show_dialog(DialogType.INFO, self._main_window, "Done!"), response)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def save_data(self, callback=None, ext_path=None):
         profile = self._s_type
-        path = self._settings.data_local_path
+        path = ext_path or self._settings.data_local_path
         backup_path = self._settings.backup_local_path
         # Backup data or clearing data path
-        backup_data(path, backup_path) if self._settings.backup_before_save else clear_data_path(path)
+        backup_data(path, backup_path) if not ext_path and self._settings.backup_before_save else clear_data_path(path)
         yield True
 
         bouquets = []
