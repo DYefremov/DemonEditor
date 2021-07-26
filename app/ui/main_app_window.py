@@ -813,6 +813,10 @@ class Application(Gtk.Application):
 
             returns deleted rows list!
         """
+        if self._services_load_spinner.get_property("active"):
+            show_dialog(DialogType.ERROR, self._main_window, get_message("Data loading in progress!"))
+            return
+
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
         model_name = get_base_model(model).get_name()
@@ -857,10 +861,6 @@ class Application(Gtk.Application):
 
     def delete_services(self, itrs, model, rows):
         """ Deleting services """
-        if self._services_load_spinner.get_property("active"):
-            show_dialog(DialogType.ERROR, self._main_window, get_message("Data loading in progress!"))
-            return
-
         for index, s_itr in enumerate(get_base_itrs(itrs, model)):
             self._services_model.remove(s_itr)
             if index % self.DEL_FACTOR == 0:
@@ -1004,6 +1004,8 @@ class Application(Gtk.Application):
             if not is_marker:
                 num += 1
             row[Column.FAV_NUM] = 0 if is_marker else num
+
+        self.on_model_changed(model)
         yield True
 
     def update_bouquet_list(self):
@@ -1773,7 +1775,7 @@ class Application(Gtk.Application):
 
     def clear_current_data(self):
         """ Clearing current data from lists """
-        if len(self._services_model) > self.DEL_FACTOR * 100:
+        if len(self._services_model) > self.DEL_FACTOR * 50:
             self._wait_dialog.set_text("Deleting data...")
 
         self._bouquets_model.clear()
@@ -2015,6 +2017,7 @@ class Application(Gtk.Application):
 
         yield True
         self._fav_view.set_model(self._fav_model)
+        self.on_model_changed(self._fav_model)
         self._bouquets_view.set_sensitive(True)
         self._bouquets_view.grab_focus()
         yield True

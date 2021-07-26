@@ -221,7 +221,6 @@ Author: Dmitriy Yefremov
       <!-- column-name background -->
       <column type="GdkRGBA"/>
     </columns>
-    <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
   </object>
   <object class="GtkMenu" id="fav_popup_menu">
     <property name="visible">True</property>
