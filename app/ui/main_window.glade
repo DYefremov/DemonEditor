@@ -658,6 +658,19 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
+              <object class="GtkModelButton" id="save_as_menu_button">
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">app.on_data_save_as</property>
+                <property name="text" translatable="yes">Save as</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">7</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -666,7 +679,7 @@ Author: Dmitriy Yefremov
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">2</property>
-                <property name="position">7</property>
+                <property name="position">8</property>
               </packing>
             </child>
             <child>
@@ -680,7 +693,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">8</property>
+                <property name="position">9</property>
               </packing>
             </child>
             <child>
@@ -691,7 +704,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">9</property>
+                <property name="position">10</property>
               </packing>
             </child>
             <child>
@@ -706,7 +719,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">10</property>
+                <property name="position">11</property>
               </packing>
             </child>
           </object>
