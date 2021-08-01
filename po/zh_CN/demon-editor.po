@@ -1,0 +1,1243 @@
+# Copyright (C) 2018-2021 Dmitriy Yefremov
+# This file is distributed under the MIT license.
+#
+#
+msgid ""
+msgstr ""
+"Last-Translator: @Roctv\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "translator-credits"
+msgstr "yangpengfei <rocfm888@gmail.com>"
+
+# Main
+msgid "Service"
+msgstr "服务"
+
+msgid "Package"
+msgstr "供应商"
+
+msgid "Type"
+msgstr "类型"
+
+msgid "Picon"
+msgstr "Picon"
+
+msgid "Freq"
+msgstr "频率"
+
+msgid "Rate"
+msgstr "符号率"
+
+msgid "Pol"
+msgstr "朋友"
+
+msgid "System"
+msgstr "系统"
+
+msgid "Pos"
+msgstr "卡槽"
+
+msgid "Num"
+msgstr "编号"
+
+msgid "Current IP:"
+msgstr "当前 IP:"
+
+msgid "Assign"
+msgstr "指定"
+
+msgid "Bouquet details"
+msgstr "花束 详情"
+
+msgid "Bouquets"
+msgstr "花束"
+
+msgid "Copy"
+msgstr "复制"
+
+msgid "Copy reference"
+msgstr "复制 参考"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "Edit"
+msgstr "编辑"
+
+msgid "Edit mаrker text"
+msgstr "编辑标记文本"
+
+msgid "FTP-transfer"
+msgstr "FTP传输"
+
+msgid "Global search"
+msgstr "全局搜索"
+
+msgid "Hide"
+msgstr "隐藏"
+
+msgid "Hide/Skip On/Off     Ctrl + H"
+msgstr "隐藏/跳过 开/关     Ctrl + H"
+
+msgid "Add IPTV or stream service"
+msgstr "添加IPTV或串流服务"
+
+msgid "Import m3u"
+msgstr "导入 m3u"
+
+msgid "Import m3u file"
+msgstr "导入m3u文件"
+
+msgid "List configuration"
+msgstr "列表配置"
+
+msgid "Rename for this bouquet"
+msgstr "重命名此花束"
+
+msgid "Set default name"
+msgstr "设置默认名称"
+
+msgid "Insert marker"
+msgstr "插入标记"
+
+msgid "Insert space"
+msgstr "插入空格"
+
+msgid "Locate in services"
+msgstr "在服务列表中查找"
+
+msgid "Locked"
+msgstr "锁定"
+
+msgid "Move"
+msgstr "移动"
+
+msgid "New"
+msgstr "新"
+
+msgid "New bouquet"
+msgstr "新花束"
+
+msgid "Create bouquet"
+msgstr "制作花束"
+
+msgid "For current satellite"
+msgstr "对于当前卫星"
+
+msgid "For current package"
+msgstr "对于当前供应商"
+
+msgid "For current type"
+msgstr "对于当前类型"
+
+msgid "For each satellite"
+msgstr "对于每一个卫星"
+
+msgid "For each package"
+msgstr "对于每一个供应商"
+
+msgid "For each type"
+msgstr "对于每一种类型"
+
+msgid "Open"
+msgstr "打开"
+
+msgid "Parent lock On/Off     Ctrl + L"
+msgstr "父母锁 开/关     Ctrl + L"
+
+msgid "Picons"
+msgstr "Picons"
+
+msgid "Picons downloader"
+msgstr "Picons下载器"
+
+msgid "Satellites downloader"
+msgstr "卫星列表下载器"
+
+msgid "Remove"
+msgstr "清除"
+
+msgid "Remove all unavailable"
+msgstr "清除所有不可用的"
+
+msgid "Satellites editor"
+msgstr "卫星列表编辑器"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Search"
+msgstr "搜索"
+
+msgid "Services"
+msgstr "服务"
+
+msgid "Services filter"
+msgstr "服务过滤器"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Up"
+msgstr "上"
+
+msgid "Down"
+msgstr "下"
+
+msgid "Active profile:"
+msgstr "活动简介:"
+
+msgid "All"
+msgstr "全部"
+
+msgid "Are you sure?"
+msgstr "你确定吗?"
+
+msgid "Current data path:"
+msgstr "当前数据路径:"
+
+msgid "Data:"
+msgstr "数据:"
+
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "用于 GNU/Linux 的 Enigma2 频道和卫星列表编辑器."
+
+msgid "Host:"
+msgstr "接收地址:"
+
+msgid "Loading data..."
+msgstr "数据加载中..."
+
+msgid "Receive"
+msgstr "接收"
+
+msgid "Receive files from receiver"
+msgstr "从接收器接收文件"
+
+msgid "Receiver IP:"
+msgstr "接收器IP:"
+
+msgid "Remove unused bouquets"
+msgstr "清除未使用的花束"
+
+msgid "Reset profile"
+msgstr "重置配置文件"
+
+msgid "Satellites"
+msgstr "卫星"
+
+msgid "Satellites.xml file:"
+msgstr "Satellites.xml文件:"
+
+msgid "Selected"
+msgstr "已选"
+
+msgid "Send"
+msgstr "发送"
+
+msgid "Send files to receiver"
+msgstr "发送文件到接收器"
+
+msgid "Services and Bouquets files:"
+msgstr "服务和花束文件:"
+
+msgid "User bouquet files:"
+msgstr "用户花束文件:"
+
+msgid "Extra:"
+msgstr "额外:"
+
+# Filter bar
+msgid "Only free"
+msgstr "只有免费"
+
+msgid "All positions"
+msgstr "所有职位"
+
+msgid "All types"
+msgstr "所有类型"
+
+# Streams player
+msgid "Play"
+msgstr "播放"
+
+msgid "Stop playback"
+msgstr "停止播放"
+
+msgid "Previous stream in the list"
+msgstr "列表中的上一个流"
+
+msgid "Next stream in the list"
+msgstr "列表中的下一个流"
+
+msgid "Toggle in fullscreen"
+msgstr "切换全屏"
+
+msgid "Close"
+msgstr "关闭"
+
+# Picons dialog
+msgid "Load providers"
+msgstr "加载提供者"
+
+msgid "Providers"
+msgstr "提供者"
+
+msgid "Receive picons"
+msgstr "接收picons"
+
+msgid "Picons name format:"
+msgstr "Picons名称格式:"
+
+msgid "Resize:"
+msgstr "调整大小:"
+
+msgid "Current picons path:"
+msgstr "当前picons路径:"
+
+msgid "Receiver picons path:"
+msgstr "接收器picons路径:"
+
+msgid "Picons download tool"
+msgstr "Picons下载工具"
+
+msgid "Transfer to receiver"
+msgstr "转移到接收器"
+
+msgid "Downloader"
+msgstr "下载器"
+
+msgid "Converter"
+msgstr "转换器"
+
+msgid "Convert"
+msgstr "兑换"
+
+msgid "Path to save:"
+msgstr "保存路径:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Enigma2 picons的路径:"
+
+msgid "Specify the correct position value for the provider!"
+msgstr "为供应商指定正确的位置值!"
+
+msgid "Converter between name formats"
+msgstr "名称格式转换器"
+
+msgid "Receive picons for providers"
+msgstr "接收供应商的picons"
+
+msgid "Load satellite providers."
+msgstr "加载卫星提供商"
+
+msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
+msgstr "要自动设置 picons 的标识符，\n首先将所需的服务列表加载到主应用程序窗口中."
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "卫星编辑工具"
+
+msgid "Add"
+msgstr "添加"
+
+msgid "Satellite"
+msgstr "卫星"
+
+msgid "Transponder"
+msgstr "转发器"
+
+msgid "Satellite properties:"
+msgstr "卫星属性:"
+
+msgid "Transponder properties:"
+msgstr "转发器属性:"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Position"
+msgstr "位置"
+
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "卫星更新"
+
+msgid "Remove selection"
+msgstr "删除选择"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "服务数据:"
+
+msgid "Transponder data:"
+msgstr "转发器数据:"
+
+msgid "Service data"
+msgstr "服务数据"
+
+msgid "Transponder details"
+msgstr "转发器详情"
+
+msgid "Changes will be applied to all services of this transponder!\nContinue?"
+msgstr "更改将应用于此转发器的所有服务！\n继续?"
+
+msgid "Reference"
+msgstr "关联"
+
+msgid "Namespace"
+msgstr "空间名称"
+
+msgid "Flags:"
+msgstr "旗帜:"
+
+msgid "Delays (ms):"
+msgstr "延迟（毫秒）"
+
+msgid "Bitstream"
+msgstr "比特率"
+
+msgid "Description"
+msgstr "描述"
+
+msgid "Source:"
+msgstr "来源:"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Filter"
+msgstr "筛选"
+
+msgid "Find"
+msgstr "寻找"
+
+# IPTV dialog
+msgid "Stream data"
+msgstr "流数据"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "起始值"
+
+msgid "Reset to default"
+msgstr "重置为默认"
+
+msgid "IPTV streams list configuration"
+msgstr "IPTV流列表配置"
+
+#Settings dialog
+msgid "Preferences"
+msgstr "喜好"
+
+msgid "Profile:"
+msgstr "轮廓:"
+
+msgid "Timeout between commands in seconds"
+msgstr "命令之间的超时（以秒为单位）."
+
+msgid "Timeout:"
+msgstr "超时:"
+
+msgid "Login:"
+msgstr "登录:"
+
+msgid "Options"
+msgstr "选项"
+
+msgid "Password:"
+msgstr "密码:"
+
+msgid "Picons:"
+msgstr "Picons:"
+
+msgid "Port:"
+msgstr "端口:"
+
+msgid "Data path:"
+msgstr "数据路径:"
+
+msgid "Picons path:"
+msgstr "Picons路径:"
+
+msgid "Network settings:"
+msgstr "网络设置:"
+
+msgid "STB file paths:"
+msgstr "接收器文件的路径:"
+
+msgid "Local file paths:"
+msgstr "本地文件路径:"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "错误.没有选择花束!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "不允许删除此项目!"
+
+msgid "This item is not allowed to edit!"
+msgstr "此项目不允许编辑!"
+
+msgid "Not allowed in this context!"
+msgstr "在这种情况下不允许!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "请从接收器下载文件或设置读取数据的路径!"
+
+msgid "Reading data error!"
+msgstr "读取数据错误!"
+
+msgid "No m3u file is selected!"
+msgstr "没有选择m3u文件!"
+
+msgid "Not implemented yet!"
+msgstr "尚未执行!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "标记的文本是空的，请重试!"
+
+msgid "Please, select only one item!"
+msgstr "请只选择一个项目!"
+
+msgid "No png file is selected!"
+msgstr "没有选择png文件!"
+
+msgid "No profile selected!"
+msgstr "没有选择配置文件!"
+
+msgid "No reference is present!"
+msgstr "不存在参考资料!"
+
+msgid "No selected item!"
+msgstr "没有选择的项目!"
+
+msgid "The task is already running!"
+msgstr "该任务已在运行!"
+
+msgid "Done!"
+msgstr "已完成!"
+
+msgid "Please, wait..."
+msgstr "请等待..."
+
+msgid "Resizing..."
+msgstr "调整大小..."
+
+msgid "Select paths!"
+msgstr "选择路径!"
+
+msgid "No satellite is selected!"
+msgstr "没有选择卫星!"
+
+msgid "Please, select only one satellite!"
+msgstr "请只选择一个卫星!"
+
+msgid "Please check your parameters and try again."
+msgstr "请检查您的参数并再次尝试!"
+
+msgid "No satellites.xml file is selected!"
+msgstr "没有选择satellites.xml文件!"
+
+msgid "Error. Verify the data!"
+msgstr "错误.核实数据!"
+
+msgid "Operation not allowed in this context!"
+msgstr "在这种情况下不允许进行操作!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "没有找到VLC.检查它是否已安装!"
+
+# Search unavailable streams dialog
+msgid "Please wait,  streams testing  in progress..."
+msgstr "请等待，流媒体测试正在进行中..."
+
+msgid "Found"
+msgstr "发现"
+
+msgid "unavailable streams."
+msgstr "不可用的流."
+
+msgid "No changes required!"
+msgstr "不需要更改!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "此列表不包含IPTV流!"
+
+msgid "New empty configuration"
+msgstr "新的空配置"
+
+msgid "No data to save!"
+msgstr "没有数据可以保存!"
+
+msgid "Network"
+msgstr "网络"
+
+msgid "Paths"
+msgstr "路径"
+
+msgid "Program"
+msgstr "节目"
+
+msgid "Backup:"
+msgstr "备份:"
+
+msgid "Backup"
+msgstr "备份"
+
+msgid "Backups"
+msgstr "备份"
+
+msgid "Backup path:"
+msgstr "备份路径:"
+
+msgid "Restore bouquets"
+msgstr "恢复花束"
+
+msgid "Restore all"
+msgstr "恢复所有"
+
+msgid "Before saving"
+msgstr "在保存前"
+
+msgid "Before downloading from the receiver"
+msgstr "在从接收器下载之前"
+
+msgid "Set background color for the services"
+msgstr "设置服务的背景颜色"
+
+msgid "Marked as new:"
+msgstr "标记为新的:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "花束中多了一个名字:"
+
+msgid "Select"
+msgstr "选择"
+
+msgid "About"
+msgstr "关于"
+
+msgid "Exit"
+msgstr "退出"
+
+msgid "Tools"
+msgstr "工具"
+
+#Import
+msgid "Import"
+msgstr "导入"
+
+msgid "Bouquet"
+msgstr "花束"
+
+msgid "Bouquets and services"
+msgstr "花束和服务"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "主列表中不包含此花束的服务!"
+
+msgid "No bouquet file is selected!"
+msgstr "没有选择花束文件!"
+
+msgid "Remove all unused"
+msgstr "删除所有未使用的"
+
+msgid "Test"
+msgstr "测试"
+
+msgid "Test connection"
+msgstr "测试连接"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "双击花束列表中的服务:"
+
+msgid "Zap"
+msgstr "切换"
+
+msgid "Play  stream"
+msgstr "播放流媒体"
+
+msgid "Disabled"
+msgstr "失能."
+
+msgid "Enable lamedb ver. 5 support"
+msgstr "启用lamedb版本5支持"
+
+msgid "Enable HTTP API"
+msgstr "启用HTTP API"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "切换通道(Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "在观看节目中切换频道（Ctrl + W）。."
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "在节目中播放IPTV或其他流媒体(Ctrl + P)"
+
+msgid "Export to m3u"
+msgstr "导出到m3u"
+
+msgid "EPG configuration"
+msgstr "EPG配置"
+
+msgid "Apply"
+msgstr "申请"
+
+msgid "EPG source"
+msgstr "EPG来源"
+
+msgid "Service names source:"
+msgstr "服务名称来源:"
+
+msgid "Main service list"
+msgstr "主要服务清单:"
+
+msgid "XML file"
+msgstr "XML文件"
+
+msgid "Use web source"
+msgstr "使用网络资源"
+
+msgid "Url to *.xml.gz file:"
+msgstr "*.xml.gz文件的网址:"
+
+msgid "Enable filtering"
+msgstr "启用过滤功能"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "按epg.dat文件中的存在情况进行过滤."
+
+msgid "Paths to the epg.dat file:"
+msgstr "epg.dat文件的路径:"
+
+msgid "Local path:"
+msgstr "本地路径:"
+
+msgid "STB path:"
+msgstr "机顶盒路径:"
+
+msgid "Update on start"
+msgstr "开始时更新"
+
+msgid "Auto configuration by service names."
+msgstr "按服务名称自动配置."
+
+msgid "Save list to xml."
+msgstr "保存列表到xml."
+
+msgid "Download XML file error."
+msgstr "下载XML文件错误."
+
+msgid "Unsupported file type:"
+msgstr "不支持的文件类型:"
+
+msgid "Unpacking data error."
+msgstr "解压数据错误."
+
+msgid "XML parsing error:"
+msgstr "XML解析错误:"
+
+msgid "Count of successfully configured services:"
+msgstr "成功配置的服务的数量:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "当前的EPG.DAT文件不包含对该花束服务的参考!"
+
+msgid "Use HTTP"
+msgstr "使用HTTP"
+
+msgid "Close playback"
+msgstr "关闭播放"
+
+msgid "Import YouTube playlist"
+msgstr "导入YouTube播放列表"
+
+msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+msgstr "找到了一个YouTube资源的链接!\n尝试获得视频的直接链接?"
+
+msgid "Playlist import"
+msgstr "播放列表导入"
+
+msgid "Getting link error:"
+msgstr "获得链接错误:"
+
+msgid "Extra"
+msgstr "额外的"
+
+msgid "Apply profile settings"
+msgstr "应用配置文件设置"
+
+msgid "Settings type:"
+msgstr "设置类型:"
+
+msgid "Set default"
+msgstr "设置默认值"
+
+msgid "Language:"
+msgstr "语言:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "在程序启动时加载最后打开的配置"
+
+msgid "Enable direct playback bar"
+msgstr "启用直接播放栏"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "能够在接收器上直接发送和播放媒体链接"
+
+msgid "Watch the channel in the program"
+msgstr "观看节目中的频道"
+
+msgid "Zap and Play"
+msgstr "切换和播放"
+
+msgid "Drag  or paste the link here"
+msgstr "拖动或粘贴链接到这里"
+
+msgid "Remove added links in the playlist"
+msgstr "移除播放列表中添加的链接"
+
+msgid "A bouquet with that name exists!"
+msgstr "有这种名字的花束存在!"
+
+msgid "Details"
+msgstr "详细内容"
+
+msgid "Profile"
+msgstr "概况"
+
+msgid "Reset"
+msgstr "重置"
+
+msgid "File"
+msgstr "文件"
+
+msgid "Picons manager"
+msgstr "Picons经理"
+
+msgid "Explorer"
+msgstr "探测器"
+
+msgid "Satellite url:"
+msgstr "卫星网址:"
+
+msgid "Cut"
+msgstr "剪切"
+
+msgid "Paste"
+msgstr "粘贴"
+
+msgid "To the top"
+msgstr "到顶部"
+
+msgid "To the end"
+msgstr "到底部"
+
+msgid "View"
+msgstr "查看"
+
+msgid "Lock"
+msgstr "锁定"
+
+msgid "Parent lock"
+msgstr "父母锁"
+
+msgid "Hide/Skip"
+msgstr "隐藏/跳过"
+
+msgid "IPTV tools"
+msgstr "IPTV工具"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "将配置文件文件夹作为额外数据的默认文件夹"
+
+msgid "Default data path:"
+msgstr "默认的数据路径:"
+
+msgid "Streams record path:"
+msgstr "流媒体记录路径:"
+
+msgid "Record"
+msgstr "记录"
+
+msgid "Record:"
+msgstr "记录:"
+
+msgid "Record to disk:"
+msgstr "记录到磁盘:"
+
+msgid "Streaming"
+msgstr "流媒体"
+
+msgid "Activate transcoding"
+msgstr "激活转码功能"
+
+msgid "Presets:"
+msgstr "预设:"
+
+msgid "Video options:"
+msgstr "视频选项:"
+
+msgid "Audio options:"
+msgstr "音频选项:"
+
+msgid "Bitrate (kb/s):"
+msgstr "比特率(kb/s):"
+
+msgid "Codec:"
+msgstr "编解码器:"
+
+msgid "Width (px):"
+msgstr "宽度(px):"
+
+msgid "Height (px):"
+msgstr "高度(px):"
+
+msgid "Channels:"
+msgstr "频道:"
+
+msgid "Sample rate (Hz):"
+msgstr "采样率(Hz):"
+
+msgid "Play streams mode:"
+msgstr "播放流媒体模式:"
+
+msgid "Built-in player"
+msgstr "内置播放器"
+
+msgid "In a separate window"
+msgstr "在一个单独的窗口中"
+
+msgid "Only get m3u file"
+msgstr "只获得m3u文件"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "保存并重新启动程序以应用设置."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "有些图片在显示收藏夹列表时可能会出现问题!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "在待机模式或当前激活的转发器中操作!"
+
+msgid "No connection to the receiver!"
+msgstr "没有连接到接收器!"
+
+msgid "Signal level"
+msgstr "信号电平"
+
+msgid "Receiver info"
+msgstr "接收器信息"
+
+msgid "A profile with that name exists!"
+msgstr "存在具有该名称的配置文件!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "在主服务列表中显示简短信息作为提示"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "在花束列表中显示详细的信息作为提示"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "启用备用花束文件的命名"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "允许你用花束文件的名称来命名它们."
+
+msgid "Appearance"
+msgstr "外观"
+
+msgid "Enable Themes support"
+msgstr "启用主题支持"
+
+msgid "Gtk3 Theme:"
+msgstr "Gtk3主题:"
+
+msgid "Icon Theme:"
+msgstr "图标主题:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Gtk3 和图标主题:"
+
+msgid "Deleting data..."
+msgstr "删除数据..."
+
+msgid "Download from the receiver"
+msgstr "从接收器中下载"
+
+msgid "Remove all picons from the receiver"
+msgstr "从接收器中移除所有picons"
+
+msgid "Service reference"
+msgstr "服务指南"
+
+msgid "Enable support for"
+msgstr "启用支持"
+
+msgid "Auto-check for updates"
+msgstr "自动检查更新"
+
+msgid "Filter services"
+msgstr "过滤服务"
+
+msgid "Filter services in the main list."
+msgstr "在主列表中过滤服务."
+
+msgid "Destination:"
+msgstr "目标地址:"
+
+msgid "EXPERIMENTAL!"
+msgstr "实验性的!"
+
+msgid "Sorting data..."
+msgstr "对数据进行分类..."
+
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "有未保存的更改.\n\n\t 现在保存它们?"
+
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "你确定你要改变这个\n\t花束中的服务顺序吗?"
+
+msgid "Remove from the receiver"
+msgstr "从接收器中取出"
+
+msgid "Screenshot"
+msgstr "屏幕截图"
+
+msgid "Video"
+msgstr "视频"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino只有实验性的支持。不是所有的功能都被支持!"
+
+msgid "Enable experimental features"
+msgstr "启用实验性功能"
+
+msgid "Can't Playback!"
+msgstr "不能回放!"
+
+msgid "Enable Dark Mode"
+msgstr "启用黑暗模式"
+
+msgid "Extract..."
+msgstr "取出..."
+
+msgid "Unsupported format!"
+msgstr "不支持的格式!"
+
+msgid "Combine with the current data?"
+msgstr "与当前数据相结合?"
+
+msgid "Importing data done!"
+msgstr "导入数据完成!"
+
+msgid "Current service"
+msgstr "目前的服务"
+
+msgid "Open folder"
+msgstr "打开文件夹"
+
+msgid "Open archive"
+msgstr "打开档案"
+
+msgid "Import from Web"
+msgstr "从网络导入"
+
+msgid "Control"
+msgstr "控制"
+
+msgid "Timers"
+msgstr "计时器"
+
+msgid "Timer"
+msgstr "计时器"
+
+msgid "Add timer"
+msgstr "添加定时器"
+
+msgid "Hr."
+msgstr "小时."
+
+msgid "Min."
+msgstr "分钟."
+
+msgid "Power"
+msgstr "电源"
+
+msgid "Standby"
+msgstr "待机"
+
+msgid "Wake Up"
+msgstr "唤醒"
+
+msgid "Reboot"
+msgstr "重启"
+
+msgid "Restart GUI"
+msgstr "重启GUI"
+
+msgid "Shutdown"
+msgstr "关机"
+
+msgid "Shut down"
+msgstr "关机"
+
+msgid "Do Nothing"
+msgstr "什么都不做"
+
+msgid "Auto"
+msgstr "自动"
+
+msgid "Grab screenshot"
+msgstr "抓取屏幕截图"
+
+msgid "Enabled:"
+msgstr "已启用:"
+
+msgid "Name:"
+msgstr "名称:"
+
+msgid "Description:"
+msgstr "描述:"
+
+msgid "Service:"
+msgstr "服务:"
+
+msgid "Service reference:"
+msgstr "服务参考:"
+
+msgid "Event ID:"
+msgstr "活动ID:"
+
+msgid "Begins:"
+msgstr "开始:"
+
+msgid "Ends:"
+msgstr "结束:"
+
+msgid "Repeated:"
+msgstr "重复的:"
+
+msgid "Action:"
+msgstr "行动:"
+
+msgid "After event:"
+msgstr "活动结束后:"
+
+msgid "Location:"
+msgstr "位置:"
+
+msgid "Mo"
+msgstr "星期一"
+
+msgid "Tu"
+msgstr "星期二"
+
+msgid "We"
+msgstr "星期三"
+
+msgid "Th"
+msgstr "星期四"
+
+msgid "Fr"
+msgstr "星期五"
+
+msgid "Sa"
+msgstr "星期六"
+
+msgid "Su"
+msgstr "星期日"
+
+msgid "Set"
+msgstr "设置"
+
+msgid "Services update"
+msgstr "服务更新"
+
+msgid "Create folder"
+msgstr "创建文件夹"
+
+msgid "FTP client"
+msgstr "FTP客户端"
+
+msgid "The file size is too large!"
+msgstr "文件大小太大!"
+
+msgid "Connect"
+msgstr "连接"
+
+msgid "Disconnect"
+msgstr "断开连接"
+
+msgid "Size"
+msgstr "大小"
+
+msgid "Date"
+msgstr "数据"
+
+msgid "Attr."
+msgstr "属性."
+
+msgid "Toggle display position"
+msgstr "切换显示位置"
+
+msgid "Alternatives"
+msgstr "替代品"
+
+msgid "Add alternatives"
+msgstr "添加替代品"
+
+msgid "DreamOS only!"
+msgstr "仅限DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "类似的服务已经在这个列表中出现了!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "播放模式已被改变!\n重新启动程序以应用设置。."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "设置TID、NID和名称空间的值，以便对picons进行正确命名!"
+
+msgid "Streams detected:"
+msgstr "探测流媒体:"
+
+msgid "Download picons"
+msgstr "下载picons"
+
+msgid "Errors:"
+msgstr "错误:"
+
+msgid "Use to play streams:"
+msgstr "用于播放流媒体:"
+
+msgid "Font in the lists:"
+msgstr "列表中的字体:"
+
+msgid "Picons size in the lists:"
+msgstr "列表中的Picons尺寸:"
+
+msgid "Logo size in tooltips:"
+msgstr "工具提示中的标志尺寸:"
+
+msgid "Save as"
+msgstr "另存为"
+
+msgid "Mark duplicates"
+msgstr "标记重复的内容"
+
+msgid "Load only for selected bouquet"
+msgstr "只为选定的花束加载"
+
+msgid "The task is canceled!"
+msgstr "他的任务被取消了!"
