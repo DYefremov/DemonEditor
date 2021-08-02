@@ -12,11 +12,11 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "translator-credits"
-msgstr "yangpengfei <rocfm888@gmail.com>"
+msgstr "roc <rocfm888@gmail.com>"
 
 # Main
 msgid "Service"
-msgstr "服务"
+msgstr "频道"
 
 msgid "Package"
 msgstr "供应商"
@@ -34,13 +34,13 @@ msgid "Rate"
 msgstr "符号率"
 
 msgid "Pol"
-msgstr "朋友"
+msgstr "极化"
 
 msgid "System"
-msgstr "系统"
+msgstr "调制系统"
 
 msgid "Pos"
-msgstr "卡槽"
+msgstr "卫星"
 
 msgid "Num"
 msgstr "编号"
@@ -52,10 +52,10 @@ msgid "Assign"
 msgstr "指定"
 
 msgid "Bouquet details"
-msgstr "花束 详情"
+msgstr "自定义分组 详情"
 
 msgid "Bouquets"
-msgstr "花束"
+msgstr "自定义分组"
 
 msgid "Copy"
 msgstr "复制"
@@ -85,7 +85,7 @@ msgid "Hide/Skip On/Off     Ctrl + H"
 msgstr "隐藏/跳过 开/关     Ctrl + H"
 
 msgid "Add IPTV or stream service"
-msgstr "添加IPTV或串流服务"
+msgstr "添加IPTV或串流频道"
 
 msgid "Import m3u"
 msgstr "导入 m3u"
@@ -97,7 +97,7 @@ msgid "List configuration"
 msgstr "列表配置"
 
 msgid "Rename for this bouquet"
-msgstr "重命名此花束"
+msgstr "重命名此自定义分组"
 
 msgid "Set default name"
 msgstr "设置默认名称"
@@ -109,7 +109,7 @@ msgid "Insert space"
 msgstr "插入空格"
 
 msgid "Locate in services"
-msgstr "在服务列表中查找"
+msgstr "在频道列表中查找"
 
 msgid "Locked"
 msgstr "锁定"
@@ -118,13 +118,13 @@ msgid "Move"
 msgstr "移动"
 
 msgid "New"
-msgstr "新"
+msgstr "新建"
 
 msgid "New bouquet"
-msgstr "新花束"
+msgstr "新建自定义分组"
 
 msgid "Create bouquet"
-msgstr "制作花束"
+msgstr "创建自定义分组"
 
 msgid "For current satellite"
 msgstr "对于当前卫星"
@@ -175,10 +175,10 @@ msgid "Search"
 msgstr "搜索"
 
 msgid "Services"
-msgstr "服务"
+msgstr "频道"
 
 msgid "Services filter"
-msgstr "服务过滤器"
+msgstr "频道过滤器"
 
 msgid "Settings"
 msgstr "设置"
@@ -190,7 +190,7 @@ msgid "Down"
 msgstr "下"
 
 msgid "Active profile:"
-msgstr "活动简介:"
+msgstr "有效的配置文件:"
 
 msgid "All"
 msgstr "全部"
@@ -223,7 +223,7 @@ msgid "Receiver IP:"
 msgstr "接收器IP:"
 
 msgid "Remove unused bouquets"
-msgstr "清除未使用的花束"
+msgstr "清除未使用的自定义分组"
 
 msgid "Reset profile"
 msgstr "重置配置文件"
@@ -244,20 +244,20 @@ msgid "Send files to receiver"
 msgstr "发送文件到接收器"
 
 msgid "Services and Bouquets files:"
-msgstr "服务和花束文件:"
+msgstr "频道和自定义分组文件:"
 
 msgid "User bouquet files:"
-msgstr "用户花束文件:"
+msgstr "用户自定义分组文件:"
 
 msgid "Extra:"
 msgstr "额外:"
 
 # Filter bar
 msgid "Only free"
-msgstr "只有免费"
+msgstr "仅选免费"
 
 msgid "All positions"
-msgstr "所有职位"
+msgstr "所有位置"
 
 msgid "All types"
 msgstr "所有类型"
@@ -337,7 +337,7 @@ msgid "Load satellite providers."
 msgstr "加载卫星提供商"
 
 msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
-msgstr "要自动设置 picons 的标识符，\n首先将所需的服务列表加载到主应用程序窗口中."
+msgstr "要自动设置 picons 的标识符，\n首先将所需的频道列表加载到主应用程序窗口中."
 
 # Satellites editor
 msgid "Satellites edit tool"
@@ -351,6 +351,9 @@ msgstr "卫星"
 
 msgid "Transponder"
 msgstr "转发器"
+
+msgid "Transponder:"
+msgstr "转发器:"
 
 msgid "Satellite properties:"
 msgstr "卫星属性:"
@@ -373,22 +376,22 @@ msgstr "删除选择"
 
 # Service details dialog
 msgid "Service data:"
-msgstr "服务数据:"
+msgstr "频道数据:"
 
 msgid "Transponder data:"
 msgstr "转发器数据:"
 
 msgid "Service data"
-msgstr "服务数据"
+msgstr "频道数据"
 
 msgid "Transponder details"
 msgstr "转发器详情"
 
 msgid "Changes will be applied to all services of this transponder!\nContinue?"
-msgstr "更改将应用于此转发器的所有服务！\n继续?"
+msgstr "更改将应用于此转发器的所有频道！\n继续?"
 
 msgid "Reference"
-msgstr "关联"
+msgstr "参考号"
 
 msgid "Namespace"
 msgstr "空间名称"
@@ -439,7 +442,7 @@ msgid "Preferences"
 msgstr "喜好"
 
 msgid "Profile:"
-msgstr "轮廓:"
+msgstr "配置文件:"
 
 msgid "Timeout between commands in seconds"
 msgstr "命令之间的超时（以秒为单位）."
@@ -448,7 +451,7 @@ msgid "Timeout:"
 msgstr "超时:"
 
 msgid "Login:"
-msgstr "登录:"
+msgstr "用户名:"
 
 msgid "Options"
 msgstr "选项"
@@ -479,7 +482,7 @@ msgstr "本地文件路径:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
-msgstr "错误.没有选择花束!"
+msgstr "错误.没有选择自定义分组!"
 
 msgid "This item is not allowed to be removed!"
 msgstr "不允许删除此项目!"
@@ -573,7 +576,7 @@ msgid "This list does not contains IPTV streams!"
 msgstr "此列表不包含IPTV流!"
 
 msgid "New empty configuration"
-msgstr "新的空配置"
+msgstr "新建空配置"
 
 msgid "No data to save!"
 msgstr "没有数据可以保存!"
@@ -600,7 +603,7 @@ msgid "Backup path:"
 msgstr "备份路径:"
 
 msgid "Restore bouquets"
-msgstr "恢复花束"
+msgstr "恢复自定义分组"
 
 msgid "Restore all"
 msgstr "恢复所有"
@@ -612,13 +615,13 @@ msgid "Before downloading from the receiver"
 msgstr "在从接收器下载之前"
 
 msgid "Set background color for the services"
-msgstr "设置服务的背景颜色"
+msgstr "设置频道的背景颜色"
 
 msgid "Marked as new:"
 msgstr "标记为新的:"
 
 msgid "With an extra name in the bouquet:"
-msgstr "花束中多了一个名字:"
+msgstr "自定义分组中多了一个名字:"
 
 msgid "Select"
 msgstr "选择"
@@ -637,16 +640,16 @@ msgid "Import"
 msgstr "导入"
 
 msgid "Bouquet"
-msgstr "花束"
+msgstr "自定义分组"
 
 msgid "Bouquets and services"
-msgstr "花束和服务"
+msgstr "自定义分组和频道"
 
 msgid "The main list does not contain services for this bouquet!"
-msgstr "主列表中不包含此花束的服务!"
+msgstr "主列表中不包含此自定义分组的频道!"
 
 msgid "No bouquet file is selected!"
-msgstr "没有选择花束文件!"
+msgstr "没有选择自定义分组文件!"
 
 msgid "Remove all unused"
 msgstr "删除所有未使用的"
@@ -658,7 +661,7 @@ msgid "Test connection"
 msgstr "测试连接"
 
 msgid "Double click on the service in the bouquet list:"
-msgstr "双击花束列表中的服务:"
+msgstr "双击自定义分组列表中的频道:"
 
 msgid "Zap"
 msgstr "切换"
@@ -691,16 +694,16 @@ msgid "EPG configuration"
 msgstr "EPG配置"
 
 msgid "Apply"
-msgstr "申请"
+msgstr "应用"
 
 msgid "EPG source"
 msgstr "EPG来源"
 
 msgid "Service names source:"
-msgstr "服务名称来源:"
+msgstr "频道名称来源:"
 
 msgid "Main service list"
-msgstr "主要服务清单:"
+msgstr "主要频道清单:"
 
 msgid "XML file"
 msgstr "XML文件"
@@ -730,7 +733,7 @@ msgid "Update on start"
 msgstr "开始时更新"
 
 msgid "Auto configuration by service names."
-msgstr "按服务名称自动配置."
+msgstr "按频道名称自动配置."
 
 msgid "Save list to xml."
 msgstr "保存列表到xml."
@@ -748,10 +751,10 @@ msgid "XML parsing error:"
 msgstr "XML解析错误:"
 
 msgid "Count of successfully configured services:"
-msgstr "成功配置的服务的数量:"
+msgstr "成功配置的频道的数量:"
 
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
-msgstr "当前的EPG.DAT文件不包含对该花束服务的参考!"
+msgstr "当前的EPG.DAT文件不包含对该自定义分组频道的参考!"
 
 msgid "Use HTTP"
 msgstr "使用HTTP"
@@ -808,7 +811,7 @@ msgid "Remove added links in the playlist"
 msgstr "移除播放列表中添加的链接"
 
 msgid "A bouquet with that name exists!"
-msgstr "有这种名字的花束存在!"
+msgstr "有这种名字的自定义分组存在!"
 
 msgid "Details"
 msgstr "详细内容"
@@ -823,7 +826,7 @@ msgid "File"
 msgstr "文件"
 
 msgid "Picons manager"
-msgstr "Picons经理"
+msgstr "Picons管理"
 
 msgid "Explorer"
 msgstr "探测器"
@@ -868,13 +871,13 @@ msgid "Streams record path:"
 msgstr "流媒体记录路径:"
 
 msgid "Record"
-msgstr "记录"
+msgstr "录制"
 
 msgid "Record:"
-msgstr "记录:"
+msgstr "录制:"
 
 msgid "Record to disk:"
-msgstr "记录到磁盘:"
+msgstr "录制到磁盘:"
 
 msgid "Streaming"
 msgstr "流媒体"
@@ -943,16 +946,16 @@ msgid "A profile with that name exists!"
 msgstr "存在具有该名称的配置文件!"
 
 msgid "Show short info as hints in the main services list"
-msgstr "在主服务列表中显示简短信息作为提示"
+msgstr "在主频道列表中显示简短信息作为提示"
 
 msgid "Show detailed info as hints in the bouquet list"
-msgstr "在花束列表中显示详细的信息作为提示"
+msgstr "在自定义分组列表中显示详细的信息作为提示"
 
 msgid "Enable alternate bouquet file naming"
-msgstr "启用备用花束文件的命名"
+msgstr "启用备用自定义分组文件的命名"
 
 msgid "Allows you to name bouquet files using their names."
-msgstr "允许你用花束文件的名称来命名它们."
+msgstr "允许你用自定义分组文件的名称来命名它们."
 
 msgid "Appearance"
 msgstr "外观"
@@ -979,7 +982,7 @@ msgid "Remove all picons from the receiver"
 msgstr "从接收器中移除所有picons"
 
 msgid "Service reference"
-msgstr "服务指南"
+msgstr "频道参考"
 
 msgid "Enable support for"
 msgstr "启用支持"
@@ -988,10 +991,10 @@ msgid "Auto-check for updates"
 msgstr "自动检查更新"
 
 msgid "Filter services"
-msgstr "过滤服务"
+msgstr "过滤频道"
 
 msgid "Filter services in the main list."
-msgstr "在主列表中过滤服务."
+msgstr "在主列表中过滤频道."
 
 msgid "Destination:"
 msgstr "目标地址:"
@@ -1006,10 +1009,10 @@ msgid "There are unsaved changes.\n\n\t Save them now?"
 msgstr "有未保存的更改.\n\n\t 现在保存它们?"
 
 msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
-msgstr "你确定你要改变这个\n\t花束中的服务顺序吗?"
+msgstr "你确定你要改变这个\n\t自定义分组中的频道顺序吗?"
 
 msgid "Remove from the receiver"
-msgstr "从接收器中取出"
+msgstr "从接收器中提取"
 
 msgid "Screenshot"
 msgstr "屏幕截图"
@@ -1030,7 +1033,7 @@ msgid "Enable Dark Mode"
 msgstr "启用黑暗模式"
 
 msgid "Extract..."
-msgstr "取出..."
+msgstr "提取..."
 
 msgid "Unsupported format!"
 msgstr "不支持的格式!"
@@ -1042,7 +1045,7 @@ msgid "Importing data done!"
 msgstr "导入数据完成!"
 
 msgid "Current service"
-msgstr "目前的服务"
+msgstr "目前的频道"
 
 msgid "Open folder"
 msgstr "打开文件夹"
@@ -1111,10 +1114,10 @@ msgid "Description:"
 msgstr "描述:"
 
 msgid "Service:"
-msgstr "服务:"
+msgstr "频道:"
 
 msgid "Service reference:"
-msgstr "服务参考:"
+msgstr "频道参考:"
 
 msgid "Event ID:"
 msgstr "活动ID:"
@@ -1162,7 +1165,7 @@ msgid "Set"
 msgstr "设置"
 
 msgid "Services update"
-msgstr "服务更新"
+msgstr "频道更新"
 
 msgid "Create folder"
 msgstr "创建文件夹"
@@ -1201,7 +1204,7 @@ msgid "DreamOS only!"
 msgstr "仅限DreamOS!"
 
 msgid "A similar service is already in this list!"
-msgstr "类似的服务已经在这个列表中出现了!"
+msgstr "类似的频道已经在这个列表中出现了!"
 
 msgid "Play mode has been changed!\nRestart the program to apply the settings."
 msgstr "播放模式已被改变!\n重新启动程序以应用设置。."
@@ -1237,7 +1240,7 @@ msgid "Mark duplicates"
 msgstr "标记重复的内容"
 
 msgid "Load only for selected bouquet"
-msgstr "只为选定的花束加载"
+msgstr "只为选定的自定义分组加载"
 
 msgid "The task is canceled!"
-msgstr "他的任务被取消了!"
+msgstr "任务被取消了!"
