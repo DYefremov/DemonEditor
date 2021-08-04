@@ -65,6 +65,7 @@ class PiconsDialog:
         self._filter_binding = None
         self._services = None
         self._current_picon_info = None
+        self._filter_cache = {}
         # Downloader
         self._sats = None
         self._sat_names = None
@@ -865,8 +866,13 @@ class PiconsDialog:
                 self._filter_binding.unbind()
                 self._app.filter_entry.set_text("")
 
-    @run_with_delay(1)
+    @run_with_delay(0.5)
     def on_picons_filter_changed(self, entry):
+        txt = entry.get_text().upper()
+        self._filter_cache.clear()
+        for s in self._app.current_services.values():
+            self._filter_cache[s.picon_id] = txt in s.service.upper()
+
         GLib.idle_add(self._picons_src_filter_model.refilter, priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self._picons_dst_filter_model.refilter, priority=GLib.PRIORITY_LOW)
 
@@ -886,8 +892,7 @@ class PiconsDialog:
             return True
 
         txt = self._picons_filter_entry.get_text().upper()
-        return txt in t.upper() or t in (
-            map(lambda s: s.picon_id, filter(lambda s: txt in s.service.upper(), self._app.current_services.values())))
+        return txt in t.upper() or self._filter_cache.get(t, False)
 
     def on_picon_activated(self, view):
         if self._info_toggle_button.get_active():

@@ -216,6 +216,7 @@ class Application(Gtk.Application):
         self._alt_file = set()
         self._alt_counter = 1
         self._data_hash = 0
+        self._filter_cache = {}
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
         self._picons = {}
@@ -331,11 +332,14 @@ class Application(Gtk.Application):
         # Filter
         self._services_model_filter = builder.get_object("services_model_filter")
         self._services_model_filter.set_visible_func(self.services_filter_function)
+        self._filter_tool_button = builder.get_object("filter_tool_button")
         self._filter_entry = builder.get_object("filter_entry")
         self._filter_box = builder.get_object("filter_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
+        self._services_load_spinner.bind_property("active", self._filter_tool_button, "sensitive", 4)
+        self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
         # Player
         self._player_box = builder.get_object("player_box")
         self._player_event_box = builder.get_object("player_event_box")
@@ -1640,6 +1644,7 @@ class Application(Gtk.Application):
     def update_data(self, data_path, callback=None):
         self._profile_combo_box.set_sensitive(False)
         self._alt_revealer.set_visible(False)
+        self._filter_tool_button.set_active(False)
         self._wait_dialog.show()
 
         yield from self.clear_current_data()
@@ -3097,7 +3102,7 @@ class Application(Gtk.Application):
     # ***************** Filter and search ********************* #
 
     def on_filter_toggled(self, action, value):
-        if self._app_info_box.get_visible():
+        if self._app_info_box.get_visible() or self._services_load_spinner.get_property("active"):
             return True
 
         action.set_state(value)
@@ -3159,25 +3164,36 @@ class Application(Gtk.Application):
 
     @run_with_delay(2)
     def on_filter_changed(self, item=None):
+        self._services_load_spinner.start()
         model = self._services_view.get_model()
         self._services_view.set_model(None)
+        self.update_filter_cache()
+        self.update_filter_state(model)
+
+    @run_idle
+    def update_filter_state(self, model):
         self._services_model_filter.refilter()
         self._services_view.set_model(model)
+        GLib.idle_add(self._services_load_spinner.stop)
+
+    def update_filter_cache(self):
+        self._filter_cache.clear()
+        if not self._filter_box.is_visible():
+            return
+
+        txt = self._filter_entry.get_text().upper()
+        for r in self._services_model:
+            free = not r[Column.SRV_CODED] if self._filter_only_free_button.get_active() else True
+            self._filter_cache[r[Column.SRV_FAV_ID]] = all((r[Column.SRV_TYPE] in self._service_types,
+                                                            r[Column.SRV_POS] in self._sat_positions, free,
+                                                            txt in "".join((r[Column.SRV_SERVICE],
+                                                                            r[Column.SRV_PACKAGE],
+                                                                            r[Column.SRV_TYPE],
+                                                                            r[Column.SRV_SSID],
+                                                                            r[Column.SRV_POS])).upper()))
 
     def services_filter_function(self, model, itr, data):
-        if not self._filter_box.is_visible():
-            return True
-        else:
-            r_txt = str(model.get(itr, Column.SRV_SERVICE, Column.SRV_PACKAGE, Column.SRV_TYPE, Column.SRV_SSID,
-                                  Column.SRV_FREQ, Column.SRV_RATE, Column.SRV_POL, Column.SRV_FEC, Column.SRV_SYSTEM,
-                                  Column.SRV_POS)).upper()
-            txt = self._filter_entry.get_text().upper() in r_txt
-            free = not model.get(itr, Column.SRV_CODED)[0] if self._filter_only_free_button.get_active() else True
-            srv_type, pos = model.get(itr, Column.SRV_TYPE, Column.SRV_POS)
-
-            return all((srv_type in self._service_types,
-                        pos in self._sat_positions,
-                        txt, free))
+        return self._filter_cache.get(model.get_value(itr, Column.SRV_FAV_ID), True)
 
     def on_filter_type_toggled(self, toggle, path):
         self.update_filter_toogle_model(self._filter_types_model, toggle, path, self._service_types)
