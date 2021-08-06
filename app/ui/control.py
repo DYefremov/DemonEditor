@@ -9,7 +9,7 @@ from gi.repository import GLib
 from .dialogs import show_dialog, DialogType, get_message, get_builder
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column
 from ..commons import run_task, run_with_delay, log, run_idle
-from ..connections import HttpAPI
+from ..connections import HttpAPI, UtfFTP
 from ..eparser.ecommons import BqServiceType
 
 
@@ -22,6 +22,7 @@ class ControlBox(Gtk.HBox):
         EPG = "epg"
         TIMERS = "timers"
         TIMER = "timer"
+        RECORDINGS = "recordings"
 
     class EpgRow(Gtk.ListBoxRow):
         def __init__(self, event: dict, **properties):
@@ -111,6 +112,75 @@ class ControlBox(Gtk.HBox):
         EVENT = 1
         CHANGE = 2
 
+    class RecordingsRow(Gtk.ListBoxRow):
+        def __init__(self, movie: dict, **properties):
+            super().__init__(**properties)
+
+            self._movie = movie
+            h_box = Gtk.HBox()
+            h_box.set_orientation(Gtk.Orientation.VERTICAL)
+
+            self._service = movie.get("e2servicename")
+            service_label = Gtk.Label()
+            service_label.set_markup("<b>{}</b>".format(self._service))
+
+            self._title = movie.get("e2title", "")
+            title_label = Gtk.Label(self._title)
+
+            self._desc = movie.get("e2description", "")
+            description = Gtk.Label()
+            description.set_markup("<i>{}</i>".format(self._desc))
+            description.set_line_wrap(True)
+            description.set_max_width_chars(25)
+
+            start_time = datetime.fromtimestamp(int(movie.get("e2time", "0")))
+            start_time_label = Gtk.Label()
+            start_time_label.set_margin_top(5)
+            start_time_label.set_markup("<b>{}</b>".format(start_time.strftime("%A, %H:%M")))
+
+            time_label = Gtk.Label()
+            time_label.set_margin_top(5)
+            time_label.set_markup("<b>{}</b>".format(movie.get("e2length", "0")))
+
+            info_box = Gtk.HBox()
+            info_box.set_orientation(Gtk.Orientation.HORIZONTAL)
+            info_box.set_spacing(10)
+            info_box.pack_start(start_time_label, False, True, 5)
+            info_box.pack_end(time_label, False, True, 5)
+
+            h_box.add(service_label)
+            h_box.add(title_label)
+            h_box.add(description)
+            h_box.add(info_box)
+            sep = Gtk.Separator()
+            sep.set_margin_top(5)
+            h_box.add(sep)
+            h_box.set_spacing(5)
+
+            self.set_tooltip_text(movie.get("e2filename", ""))
+            self.add(h_box)
+            self.show_all()
+
+        @property
+        def movie(self):
+            return self._movie
+
+        @property
+        def service(self):
+            return self._service or ""
+
+        @property
+        def title(self):
+            return self._title or ""
+
+        @property
+        def desc(self):
+            return self._desc or ""
+
+        @property
+        def file(self):
+            return self._movie.get("e2filename", "")
+
     def __init__(self, app, http_api, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -127,7 +197,10 @@ class ControlBox(Gtk.HBox):
                     "on_epg_press": self.on_epg_press,
                     "on_epg_filter_changed": self.on_epg_filter_changed,
                     "on_timers_press": self.on_timers_press,
-                    "on_timers_drag_data_received": self.on_timers_drag_data_received}
+                    "on_timers_drag_data_received": self.on_timers_drag_data_received,
+                    "on_recordings_press": self.on_recordings_press,
+                    "on_recording_filter_changed": self.on_recording_filter_changed,
+                    "on_recordings_dir_changed": self.on_recordings_dir_changed}
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers)
 
@@ -183,6 +256,11 @@ class ControlBox(Gtk.HBox):
         # DnD initialization for the timer list.
         self._timers_list_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY)
         self._timers_list_box.drag_dest_add_text_targets()
+        # Recordings.
+        self._recordings_list_box = builder.get_object("recordings_list_box")
+        self._recordings_list_box.set_filter_func(self.recording_filter_function)
+        self._recordings_filter_entry = builder.get_object("recordings_filter_entry")
+        self._recordings_dir_box = builder.get_object("recordings_dir_box")
 
         self.init_actions(app)
         self.connect("hide", self.on_hide)
@@ -220,6 +298,8 @@ class ControlBox(Gtk.HBox):
         app.set_action("on_timer_cancel", self.on_timer_cancel)
         app.set_action("on_timer_begins_set", self.on_timer_begins_set)
         app.set_action("on_timer_ends_set", self.on_timer_ends_set)
+        # Recordings
+        app.set_action("on_recording_remove", self.on_recording_remove)
 
     @property
     def update_epg(self):
@@ -231,6 +311,9 @@ class ControlBox(Gtk.HBox):
 
         if tool is self.Tool.TIMERS:
             self.update_timer_list()
+
+        if tool is self.Tool.RECORDINGS:
+            self.update_recordings_list()
 
         if tool is not self.Tool.TIMER:
             self._last_tool = tool
@@ -678,3 +761,66 @@ class ControlBox(Gtk.HBox):
                 self._timer_service_ref_entry.set_text(service.picon_id.rstrip(".png").replace("_", ":"))
                 self.on_timer_add()
             context.finish(True, False, time)
+
+    # *********************** Recordings *************************** #
+
+    def on_recordings_press(self, list_box, event):
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(list_box) > 0:
+            row = list_box.get_selected_row()
+            if row:
+                self._http_api.send(HttpAPI.Request.STREAM_TS,
+                                    row.movie.get("e2filename", ""),
+                                    self.on_play_recording)
+
+    def on_recording_filter_changed(self, entry):
+        self._recordings_list_box.invalidate_filter()
+
+    def recording_filter_function(self, row):
+        txt = self._recordings_filter_entry.get_text().upper()
+        return any((not txt, txt in row.service.upper(), txt in row.title.upper(), txt in row.desc.upper()))
+
+    def on_recording_remove(self, action, value=None):
+        """ Removes recordings via FTP. """
+        if show_dialog(DialogType.QUESTION, self._app._main_window) != Gtk.ResponseType.OK:
+            return
+
+        rows = self._recordings_list_box.get_selected_rows()
+        if rows:
+            settings = self._app._settings
+
+            with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+                ftp.encoding = "utf-8"
+                for r in rows:
+                    resp = ftp.delete_file(r.file)
+                    if resp.startswith("2"):
+                        GLib.idle_add(self._recordings_list_box.remove, r)
+                    else:
+                        show_dialog(DialogType.ERROR, transient=self._app._main_window, text=resp)
+                        break
+
+    def on_recordings_dir_changed(self, box: Gtk.ComboBoxText):
+        self._http_api.send(HttpAPI.Request.RECORDINGS, quote(box.get_active_id()), self.update_recordings_data)
+
+    def update_recordings_list(self):
+        if not len(self._recordings_dir_box.get_model()):
+            self._http_api.send(HttpAPI.Request.REC_CURRENT, "", self.update_current_rec_dir)
+
+    def update_current_rec_dir(self, current):
+        cur = current.get("e2location", None)
+        if cur:
+            self._recordings_dir_box.append(cur, cur)
+            self._http_api.send(HttpAPI.Request.REC_DIRS, "", self.update_rec_dirs)
+
+    def update_rec_dirs(self, dirs):
+        for d in dirs.get("rec_dirs", []):
+            self._recordings_dir_box.append(d, d)
+
+    @run_idle
+    def update_recordings_data(self, recordings):
+        list(map(self._recordings_list_box.remove, (r for r in self._recordings_list_box)))
+        list(map(lambda r: self._recordings_list_box.add(self.RecordingsRow(r)), recordings.get("recordings", [])))
+
+    def on_play_recording(self, m3u):
+        url = self._app.get_url_from_m3u(m3u)
+        if url:
+            self._app.play(url)
