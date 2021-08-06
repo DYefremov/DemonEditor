@@ -2745,6 +2745,7 @@ class Application(Gtk.Application):
     def update_state_on_full_screen(self, visible):
         self._main_data_box.set_visible(visible)
         self._player_tool_bar.set_visible(visible)
+        self._control_box.set_visible(visible)
         self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
 
     @run_idle
@@ -2874,7 +2875,7 @@ class Application(Gtk.Application):
             GLib.idle_add(self._player_box.set_visible, True)
             GLib.idle_add(self._app_info_box.set_visible, False)
 
-        self._http_api.send(HttpAPI.Request.STREAM_CURRENT, None, self.watch)
+        self._http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
 
     def watch(self, data):
         url = self.get_url_from_m3u(data)
