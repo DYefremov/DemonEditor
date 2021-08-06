@@ -510,6 +510,7 @@ class HttpAPI:
         INFO = "about"
         SIGNAL = "signal"
         STREAM = "stream.m3u?ref="
+        STREAM_TS = "ts.m3u?file="
         STREAM_CURRENT = "streamcurrent.m3u"
         CURRENT = "getcurrent"
         TEST = None
@@ -531,6 +532,10 @@ class HttpAPI:
         # Timer
         TIMER = ""
         TIMER_LIST = "timerlist"
+        # Recordings
+        RECORDINGS = "movielist?dirname="
+        REC_DIRS = "getlocations"
+        REC_CURRENT = "getcurrlocation"
         # Screenshot
         GRUB = "grab?format=jpg&"
 
@@ -557,6 +562,17 @@ class HttpAPI:
         WAKEUP = "4"
         STANDBY = "5"
 
+    PARAM_REQUESTS = {Request.REMOTE,
+                      Request.POWER,
+                      Request.VOL,
+                      Request.EPG,
+                      Request.TIMER,
+                      Request.RECORDINGS}
+
+    STREAM_REQUESTS = {Request.STREAM,
+                       Request.STREAM_CURRENT,
+                       Request.STREAM_TS}
+
     def __init__(self, settings):
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
         self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
@@ -577,18 +593,14 @@ class HttpAPI:
         url = self._base_url + req_type.value
         data = self._data
 
-        if req_type is self.Request.ZAP or req_type is self.Request.STREAM:
+        if req_type is self.Request.ZAP or req_type in self.STREAM_REQUESTS:
             url += urllib.parse.quote(ref)
         elif req_type is self.Request.PLAY or req_type is self.Request.PLAYER_REMOVE:
             url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
         elif req_type is self.Request.GRUB:
             data = None  # Must be disabled for token-based security.
             url = "{}/{}{}".format(self._main_url, req_type.value, ref)
-        elif req_type in (self.Request.REMOTE,
-                          self.Request.POWER,
-                          self.Request.VOL,
-                          self.Request.EPG,
-                          self.Request.TIMER):
+        elif req_type in self.PARAM_REQUESTS:
             url += ref
 
         def done_callback(f):
@@ -632,7 +644,7 @@ class HttpAPI:
 def get_response(req_type, url, data=None):
     try:
         with urlopen(Request(url, data=data), timeout=10) as f:
-            if req_type is HttpAPI.Request.STREAM or req_type is HttpAPI.Request.STREAM_CURRENT:
+            if req_type in HttpAPI.STREAM_REQUESTS:
                 return {"m3u": f.read().decode("utf-8")}
             elif req_type is HttpAPI.Request.GRUB:
                 return {"img_data": f.read()}
@@ -648,6 +660,11 @@ def get_response(req_type, url, data=None):
             elif req_type is HttpAPI.Request.TIMER_LIST:
                 return {"timer_list": [{el.tag: el.text for el in el.iter()} for el in
                                        ETree.fromstring(f.read().decode("utf-8")).iter("e2timer")]}
+            elif req_type is HttpAPI.Request.REC_DIRS:
+                return {"rec_dirs": [el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2location")]}
+            elif req_type is HttpAPI.Request.RECORDINGS:
+                return {"recordings": [{el.tag: el.text for el in el.iter()} for el in
+                                       ETree.fromstring(f.read().decode("utf-8")).iter("e2movie")]}
             else:
                 return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
     except HTTPError as e:
