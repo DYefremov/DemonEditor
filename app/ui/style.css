@@ -59,3 +59,14 @@ paned > separator {
   border-left-width: 0;
   border-right-width: 1px;
 }
+
+.stack-switcher > button > label {
+  padding-left: 2px;
+  padding-right: 2px;
+  min-width: 75px;
+}
+
+.stack-switcher > button.text-button {
+  padding-left: 2px;
+  padding-right: 2px;
+}
