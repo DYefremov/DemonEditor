@@ -63,3 +63,10 @@
   border-left-width: 0;
   border-right-width: 1px;
 }
+
+.stack-switcher > button {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  min-width: 5em;
+  min-height: 1.5em;
+}
