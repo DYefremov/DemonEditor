@@ -1237,3 +1237,9 @@ msgstr "Загрузить только для выбранного букета
 
 msgid "The task is canceled!"
 msgstr "Задание отменено!"
+
+msgid "Data loading in progress!"
+msgstr "Выполняется загрузка данных!"
+
+msgid "Recordings"
+msgstr "Записи"

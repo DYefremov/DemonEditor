@@ -1240,3 +1240,9 @@ msgstr "Загрузіць толькі для абранага букета"
 
 msgid "The task is canceled!"
 msgstr "Заданне скасавана!"
+
+msgid "Data loading in progress!"
+msgstr "Выконваецца загрузка дадзеных!"
+
+msgid "Recordings"
+msgstr "Запісы"
