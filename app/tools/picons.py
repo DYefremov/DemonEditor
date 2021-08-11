@@ -57,7 +57,7 @@ class PiconsCzDownloader:
     _PERM_URL = "https://picon.cz/download/7337"
     _BASE_URL = "https://picon.cz/download/"
     _BASE_LOGO_URL = "https://picon.cz/picon/0/"
-    _HEADER = {"User-Agent": "DemonEditor/1.0.9", "Referer": ""}
+    _HEADER = {"User-Agent": "DemonEditor/1.0.10", "Referer": ""}
     _LINK_PATTERN = re.compile(r"((.*)-\d+x\d+)-(.*)_by_chocholousek.7z$")
     _FILE_PATTERN = re.compile("\\s+(1_.*\\.png).*")
 
