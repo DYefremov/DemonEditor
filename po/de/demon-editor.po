@@ -1254,3 +1254,12 @@ msgstr "Nur für ausgewähltes Bouquet laden"
 
 msgid "The task is canceled!"
 msgstr "Der Task wird abgebrochen!"
+
+msgid "Data loading in progress!"
+msgstr "Daten werden geladen!"
+
+msgid "Recordings"
+msgstr "Aufnahmen"
+
+msgid "Help"
+msgstr "Hilfe"
