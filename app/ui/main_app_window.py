@@ -2634,7 +2634,8 @@ class Application(Gtk.Application):
     def update_state_on_full_screen(self, visible):
         self._main_data_box.set_visible(visible)
         self._player_tool_bar.set_visible(visible)
-        self._control_box.set_visible(visible)
+        if self._control_box:
+            self._control_box.set_visible(visible)
         self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
 
     def on_main_window_state(self, window, event):
