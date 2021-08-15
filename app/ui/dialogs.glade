@@ -40,7 +40,7 @@ Author: Dmitriy Yefremov
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">1.0.10 Beta</property>
+    <property name="version">2.0.0 Alpha</property>
     <property name="copyright">2018-2021 Dmitriy Yefremov
 </property>
     <property name="comments" translatable="yes">Enigma2 channel and satellite list editor for GNU/Linux.</property>
@@ -63,7 +63,7 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="aboutdialog_action_area">
+          <object class="GtkButtonBox" id="about_dialog_action_area">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>

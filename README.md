@@ -57,7 +57,7 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
 For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 
 ## Minimum requirements
-*Python >= 3.5.2, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.*
+*Python >= 3.6, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.*
 
 ***Optional:** python3-pil, python3-chardet.*                      
 ## Installation and Launch

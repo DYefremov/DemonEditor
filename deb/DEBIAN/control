@@ -1,10 +1,10 @@
 Package: demon-editor
-Version: 1.0.10-Beta
+Version: 2.0.0-Alpha
 Section: utils
 Priority: optional
 Architecture: all
 Essential: no
-Depends: python3 (>= 3.5),
+Depends: python3 (>= 3.6),
          python3-requests,
          python3-gi,
          python3-gi-cairo

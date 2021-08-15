@@ -1,7 +1,7 @@
 demon-editor for Debian
 ----------------------
 DemonEditor
-Enigma2 channel and satellites list editor for GNU/Linux.
+Enigma2 channel and satellite list editor for GNU/Linux.
 
 Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
 Focused on the convenience of working in lists from the keyboard. The mouse is also fully supported (Drag and Drop etc).
@@ -45,7 +45,7 @@ Keyboard shortcuts:
     For multiple selection with the mouse, press and hold the Ctrl key!
 
 Minimum requirements:
-    Python >= 3.5.2, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.
+    Python >= 3.6, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.
 
 Important:
     Terrestrial(DVB-T/T2) and cable(DVB-C) channels are only supported for Enigma2!
