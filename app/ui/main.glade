@@ -1446,29 +1446,6 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="search_header_button">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Search</property>
-                <property name="halign">center</property>
-                <property name="action_name">win.search</property>
-                <child>
-                  <object class="GtkImage" id="search_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-find</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkBox" id="search_box">
                 <property name="can_focus">False</property>
                 <child>
@@ -1533,6 +1510,29 @@ Author: Dmitriy Yefremov
                 <style>
                   <class name="group"/>
                 </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="search_header_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Search</property>
+                <property name="halign">center</property>
+                <property name="action_name">win.search</property>
+                <child>
+                  <object class="GtkImage" id="search_header_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-find</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1653,28 +1653,6 @@ Author: Dmitriy Yefremov
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
                 <property name="position">8</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="picons_downloader_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Picons manager</property>
-                <signal name="clicked" handler="on_picons_manager_show" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="picons_downloader_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">insert-image</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">9</property>
               </packing>
             </child>
           </object>

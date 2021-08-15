@@ -27,7 +27,7 @@ Author: Dmitriy Yefremov
 
 -->
 <interface domain="demon-editor">
-  <requires lib="gtk+" version="3.16"/>
+  <requires lib="gtk+" version="3.22"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
@@ -83,7 +83,6 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Remove</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_local_remove" object="picons_dest_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
     <child>
@@ -145,7 +144,6 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Remove</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_local_remove" object="picons_src_view" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
     <child>
@@ -217,55 +215,44 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkWindow" id="picons_dialog">
+  <object class="GtkFrame" id="picon_manager_frame">
+    <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="window_position">center-on-parent</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
-    <signal name="delete-event" handler="on_close" swapped="no"/>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header">
+    <property name="label_xalign">0</property>
+    <property name="shadow_type">in</property>
+    <child>
+      <object class="GtkBox" id="main_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="show_close_button">True</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">5</property>
         <child>
-          <object class="GtkButton" id="cancel_button">
-            <property name="can_focus">False</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Cancel</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_cancel" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="cancel_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-cancel</property>
-              </object>
-            </child>
-            <accelerator key="z" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="header_download_box">
+          <object class="GtkBox" id="header_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="spacing">2</property>
+            <property name="margin_left">15</property>
+            <property name="margin_right">15</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">5</property>
+            <property name="spacing">5</property>
             <child>
-              <object class="GtkComboBoxText" id="download_source_button">
-                <property name="sensitive">False</property>
+              <object class="GtkButton" id="cancel_button">
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Source:</property>
-                <property name="active">0</property>
-                <items>
-                  <item id="piconcz" translatable="yes">Picon.cz</item>
-                  <item id="lyngsat" translatable="yes">LyngSat</item>
-                </items>
-                <signal name="changed" handler="on_download_source_changed" swapped="no"/>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Cancel</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_cancel" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="cancel_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-cancel</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -274,20 +261,117 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="receive_button">
-                <property name="sensitive">False</property>
+              <object class="GtkBox" id="header_download_box">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Receive picons</property>
-                <property name="halign">center</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_receive" swapped="no"/>
+                <property name="spacing">2</property>
                 <child>
-                  <object class="GtkImage" id="receive_button_image">
+                  <object class="GtkComboBoxText" id="download_source_button">
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Source:</property>
+                    <property name="active">0</property>
+                    <items>
+                      <item id="piconcz" translatable="yes">Picon.cz</item>
+                      <item id="lyngsat" translatable="yes">LyngSat</item>
+                    </items>
+                    <signal name="changed" handler="on_download_source_changed" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="receive_button">
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Receive picons</property>
+                    <property name="halign">center</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_receive" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="receive_button_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-goto-bottom</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="send_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-goto-bottom</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Transfer to receiver</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_send" swapped="no"/>
+                    <signal name="drag-data-received" handler="on_send_button_drag_data_received" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="send_button_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-go-up</property>
+                      </object>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="download_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Download from the receiver</property>
+                    <signal name="clicked" handler="on_download" swapped="no"/>
+                    <signal name="drag-data-received" handler="on_download_button_drag_data_received" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="download_button_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-go-down</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="remove_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Remove all picons from the receiver</property>
+                    <signal name="clicked" handler="on_remove" swapped="no"/>
+                    <signal name="drag-data-received" handler="on_remove_button_drag_data_received" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="remove_button_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-delete</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">6</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -296,44 +380,11 @@ Author: Dmitriy Yefremov
                 <property name="position">1</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkButton" id="send_button">
+            <child type="center">
+              <object class="GtkStackSwitcher" id="sctack">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Transfer to receiver</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_send" swapped="no"/>
-                <signal name="drag-data-received" handler="on_send_button_drag_data_received" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="send_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-go-up</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="download_button">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Download from the receiver</property>
-                <signal name="clicked" handler="on_download" swapped="no"/>
-                <signal name="drag-data-received" handler="on_download_button_drag_data_received" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="download_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-go-down</property>
-                  </object>
-                </child>
+                <property name="stack">stack</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -342,110 +393,80 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="remove_button">
-                <property name="visible">True</property>
+              <object class="GtkButton" id="convert_button">
                 <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Remove all picons from the receiver</property>
-                <signal name="clicked" handler="on_remove" swapped="no"/>
-                <signal name="drag-data-received" handler="on_remove_button_drag_data_received" swapped="no"/>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Convert</property>
+                <property name="halign">center</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_convert" swapped="no"/>
                 <child>
-                  <object class="GtkImage" id="remove_button_image">
+                  <object class="GtkImage" id="convert_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-delete</property>
+                    <property name="stock">gtk-execute</property>
                   </object>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="filter_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Filter</property>
+                <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="filter_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Filter</property>
+                    <property name="stock">gtk-select-all</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="info_check_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Details</property>
+                <property name="draw_indicator">False</property>
+                <child>
+                  <object class="GtkImage" id="info_check_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-dialog-info</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="position">6</property>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
           </packing>
         </child>
-        <child type="title">
-          <object class="GtkStackSwitcher" id="sctack">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stack">stack</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="convert_button">
-            <property name="can_focus">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Convert</property>
-            <property name="halign">center</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_convert" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="convert_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-execute</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleButton" id="filter_button">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Filter</property>
-            <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="filter_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Filter</property>
-                <property name="stock">gtk-select-all</property>
-              </object>
-            </child>
-            <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="info_check_button">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Details</property>
-            <property name="draw_indicator">False</property>
-            <child>
-              <object class="GtkImage" id="info_check_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-dialog-info</property>
-              </object>
-            </child>
-            <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox" id="main_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkFrame" id="stack_frame">
             <property name="visible">True</property>
@@ -1702,7 +1723,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -1741,7 +1762,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -1798,10 +1819,13 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
+    </child>
+    <child type="label_item">
+      <placeholder/>
     </child>
   </object>
 </interface>

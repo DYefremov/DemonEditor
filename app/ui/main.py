@@ -61,7 +61,7 @@ from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_fla
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picons,
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
                           get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs)
-from .picons_manager import PiconsDialog
+from .picons import PiconManager
 from .satellites import SatellitesTool, ServicesUpdateDialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
@@ -166,7 +166,6 @@ class Application(Gtk.Application):
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_mark_duplicates": self.on_mark_duplicates,
-                    "on_picons_manager_show": self.on_picons_manager_show,
                     "on_filter_changed": self.on_filter_changed,
                     "on_filter_type_toggled": self.on_filter_type_toggled,
                     "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
@@ -204,7 +203,7 @@ class Application(Gtk.Application):
                     "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type,
                     "on_add_alternatives": self.on_add_alternatives,
                     "on_satellites_realize": self.on_satellites_realize,
-                    "on_picons_realize": self. on_picons_realize,
+                    "on_picons_realize": self.on_picons_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_visible_page": self.on_visible_page}
@@ -237,7 +236,7 @@ class Application(Gtk.Application):
         # Tools
         self._links_transmitter = None
         self._satellite_tool = None
-        self._picons_manager = None
+        self._picon_manager = None
         self._control_box = None
         self._ftp_client = None
         # Player
@@ -266,7 +265,6 @@ class Application(Gtk.Application):
 
         self._fav_paned = builder.get_object("fav_paned")
         self._tool_box = builder.get_object("tool_box")
-        self._fav_paned.bind_property("visible", self._tool_box, "visible")
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")
@@ -392,28 +390,6 @@ class Application(Gtk.Application):
             self.init_profiles()
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-    # ************** Pages initialization *************** #
-
-    def on_satellites_realize(self, box):
-        self._satellite_tool = SatellitesTool(self, self._settings)
-        box.pack_start(self._satellite_tool, True, True, 0)
-
-    def on_picons_realize(self, box):
-        self._picons_manager = None
-
-    def on_ftp_realize(self, box):
-        self._ftp_client = FtpClientBox(self, self._settings)
-        box.pack_start(self._ftp_client, True, True, 0)
-
-    def on_control_realize(self, box: Gtk.HBox):
-        self._control_box = ControlBox(self, self._http_api, self._settings)
-        box.pack_start(self._control_box, True, True, 0)
-
-    def on_visible_page(self, stack, param):
-        page = Page(stack.get_visible_child_name())
-        self._fav_paned.set_visible(page in (Page.SERVICES, Page.PLAYBACK))
-        self._save_header_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
 
     def init_keys(self):
         self.set_action("on_close_app", self.on_close_app)
@@ -653,7 +629,37 @@ class Application(Gtk.Application):
             return
         move_items(key, self._fav_view if self._fav_view.is_focus() else self._bouquets_view)
 
-    # ***************** Copy - Cut - Paste *********************#
+    # ************** Pages initialization *************** #
+
+    def on_satellites_realize(self, box):
+        self._satellite_tool = SatellitesTool(self, self._settings)
+        box.pack_start(self._satellite_tool, True, True, 0)
+
+    def on_picons_realize(self, box):
+        ids = {}
+        if self._s_type is SettingsType.ENIGMA_2:
+            for r in self._services_model:
+                data = r[Column.SRV_PICON_ID].split("_")
+                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
+
+        self._picon_manager = PiconManager(self, self._settings, ids, self._sat_positions)
+        box.pack_start(self._picon_manager, True, True, 0)
+
+    def on_ftp_realize(self, box):
+        self._ftp_client = FtpClientBox(self, self._settings)
+        box.pack_start(self._ftp_client, True, True, 0)
+
+    def on_control_realize(self, box: Gtk.HBox):
+        self._control_box = ControlBox(self, self._http_api, self._settings)
+        box.pack_start(self._control_box, True, True, 0)
+
+    def on_visible_page(self, stack, param):
+        page = Page(stack.get_visible_child_name())
+        self._fav_paned.set_visible(page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
+        self._save_header_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
+        self._tool_box.set_visible(page is Page.SERVICES)
+
+    # ***************** Copy - Cut - Paste ********************* #
 
     def on_services_copy(self, view):
         self.on_copy(view, target=ViewTarget.FAV)
@@ -1371,7 +1377,6 @@ class Application(Gtk.Application):
 
             menu.popup(None, None, None, None, event.button, event.time)
             return True
-
 
     def on_download(self, action=None, value=None):
         dialog = DownloadDialog(self._main_window, self._settings, self.open_data, self.update_settings)
@@ -3211,15 +3216,6 @@ class Application(Gtk.Application):
                 r[Column.FAV_BACKGROUND] = self._NEW_COLOR
 
     # ***************** Picons *********************#
-
-    def on_picons_manager_show(self, action, value=None):
-        ids = {}
-        if self._s_type is SettingsType.ENIGMA_2:
-            for r in self._services_model:
-                data = r[Column.SRV_PICON_ID].split("_")
-                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
-
-        PiconsDialog(self._main_window, self._settings, ids, self._sat_positions, self).show()
 
     @run_task
     def update_picons(self):
