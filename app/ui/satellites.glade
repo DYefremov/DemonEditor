@@ -275,11 +275,7 @@ Author: Dmitriy Yefremov
   <object class="GtkFrame" id="satellite_tool_frame">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_left">1</property>
-    <property name="margin_right">1</property>
-    <property name="margin_top">1</property>
-    <property name="margin_bottom">1</property>
-    <property name="label_xalign">0</property>
+    <property name="label_xalign">0.49</property>
     <property name="shadow_type">in</property>
     <child>
       <object class="GtkBox" id="satellites_box">
@@ -298,6 +294,7 @@ Author: Dmitriy Yefremov
             <property name="margin_left">15</property>
             <property name="margin_right">15</property>
             <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkButton" id="update_header_button">
@@ -540,8 +537,12 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
-    <child type="label_item">
-      <placeholder/>
+    <child type="label">
+      <object class="GtkLabel" id="editor_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Satellites editor</property>
+      </object>
     </child>
   </object>
   <object class="GtkListStore" id="side_store">

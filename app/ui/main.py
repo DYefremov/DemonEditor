@@ -115,6 +115,7 @@ class Application(Gtk.Application):
 
         handlers = {"on_close_app": self.on_close_app,
                     "on_about_app": self.on_about_app,
+                    "on_info_bar_close": self.on_info_bar_close,
                     "on_settings": self.on_settings,
                     "on_profile_changed": self.on_profile_changed,
                     "on_new_configuration": self.on_new_configuration,
@@ -264,7 +265,6 @@ class Application(Gtk.Application):
             self._main_window.resize(*main_window_size)
 
         self._fav_paned = builder.get_object("fav_paned")
-        self._tool_box = builder.get_object("tool_box")
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")
@@ -285,6 +285,9 @@ class Application(Gtk.Application):
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
+        # Info bar.
+        self._info_bar = builder.get_object("info_bar")
+        self._info_label = builder.get_object("info_label")
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
@@ -657,7 +660,6 @@ class Application(Gtk.Application):
         page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
         self._save_header_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
-        self._tool_box.set_visible(page is Page.SERVICES)
 
     # ***************** Copy - Cut - Paste ********************* #
 
@@ -741,7 +743,7 @@ class Application(Gtk.Application):
     def bouquet_paste(self, selection):
         model, paths = selection.get_selected_rows()
         if len(paths) > 1:
-            self.show_error_dialog("Please, select only one item!")
+            self.show_error_message("Please, select only one item!")
             return
 
         path = paths[0]
@@ -843,7 +845,7 @@ class Application(Gtk.Application):
     def delete_bouquets(self, itrs, model):
         """ Deleting bouquets """
         if len(itrs) == 1 and len(model.get_path(itrs[0])) < 2:
-            self.show_error_dialog("This item is not allowed to be removed!")
+            self.show_error_message("This item is not allowed to be removed!")
             return
 
         for itr in itrs:
@@ -893,7 +895,7 @@ class Application(Gtk.Application):
             key = "{}:{}".format(response, bq_type)
 
             while key in self._bouquets:
-                self.show_error_dialog(get_message("A bouquet with that name exists!"))
+                self.show_error_message(get_message("A bouquet with that name exists!"))
                 response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
                 if response == Gtk.ResponseType.CANCEL:
                     return
@@ -1334,7 +1336,7 @@ class Application(Gtk.Application):
                     model.remove(in_itr)
             self.update_fav_num_column(model)
         except ValueError as e:
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
 
     def on_view_press(self, view, event):
         """ Handles a mouse click (press) to view. """
@@ -1396,7 +1398,7 @@ class Application(Gtk.Application):
         except Exception as e:
             msg = "Downloading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
         else:
             GLib.idle_add(self.open_data)
 
@@ -1429,7 +1431,7 @@ class Application(Gtk.Application):
         except Exception as e:
             msg = "Uploading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
 
     def on_data_open(self, action=None, value=None):
         """ Opening data via "File/Open". """
@@ -1493,7 +1495,7 @@ class Application(Gtk.Application):
         else:
             tmp_path.cleanup()
             log("Error getting the path for the archive. Unsupported file format: {}".format(data_path))
-            self.show_error_dialog("Unsupported format!")
+            self.show_error_message("Unsupported format!")
             return
 
         return tmp_path
@@ -1513,7 +1515,7 @@ class Application(Gtk.Application):
         try:
             current_profile = self._profile_combo_box.get_active_text()
             if not current_profile:
-                self.show_error_dialog("No profile selected!")
+                self.show_error_message("No profile selected!")
                 return
 
             if current_profile != self._settings.current_profile:
@@ -1541,15 +1543,15 @@ class Application(Gtk.Application):
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
-            self.show_error_dialog(getattr(e, "message", str(e)) + "\n\n" + msg)
+            self.show_error_message(getattr(e, "message", str(e)) + "\n\n" + msg)
             return
         except SyntaxError as e:
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
             return
         except Exception as e:
             msg = "Reading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
-            self.show_error_dialog("{}\n{}".format(get_message("Reading data error!"), e))
+            self.show_error_message("{}\n{}".format(get_message("Reading data error!"), e))
             return
         else:
             self.append_blacklist(black_list)
@@ -1718,7 +1720,7 @@ class Application(Gtk.Application):
             return
 
         if len(self._bouquets_model) == 0:
-            self.show_error_dialog("No data to save!")
+            self.show_error_message("No data to save!")
             return
 
         if show_dialog(DialogType.QUESTION, self._main_window) != Gtk.ResponseType.OK:
@@ -1729,7 +1731,7 @@ class Application(Gtk.Application):
 
     def on_data_save_as(self, action=None, value=None):
         if len(self._bouquets_model) == 0:
-            self.show_error_dialog("No data to save!")
+            self.show_error_message("No data to save!")
             return
 
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
@@ -1954,11 +1956,11 @@ class Application(Gtk.Application):
     def check_bouquet_selection(self):
         """ Checks and returns bouquet if selected """
         if not self._bq_selected:
-            self.show_error_dialog("Error. No bouquet is selected!")
+            self.show_error_message("Error. No bouquet is selected!")
             return
 
         if self._s_type is SettingsType.NEUTRINO_MP and self._bq_selected.endswith(BqType.WEBTV.value):
-            self.show_error_dialog("Operation not allowed in this context!")
+            self.show_error_message("Operation not allowed in this context!")
             return
 
         return self._bq_selected
@@ -2229,12 +2231,12 @@ class Application(Gtk.Application):
     @run_idle
     def on_iptv_list_configuration(self, action, value=None):
         if self._s_type is SettingsType.NEUTRINO_MP:
-            self.show_error_dialog("Neutrino at the moment not supported!")
+            self.show_error_message("Neutrino at the moment not supported!")
             return
 
         iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
-            self.show_error_dialog("This list does not contains IPTV streams!")
+            self.show_error_message("This list does not contains IPTV streams!")
             return
 
         if not self._bq_selected:
@@ -2248,7 +2250,7 @@ class Application(Gtk.Application):
     def on_remove_all_unavailable(self, action, value=None):
         iptv_rows = list(filter(lambda r: r[Column.FAV_TYPE] == BqServiceType.IPTV.value, self._fav_model))
         if not iptv_rows:
-            self.show_error_dialog("This list does not contains IPTV streams!")
+            self.show_error_message("This list does not contains IPTV streams!")
             return
 
         if not self._bq_selected:
@@ -2267,11 +2269,11 @@ class Application(Gtk.Application):
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
-            self.show_error_dialog("Only Enigma2 is supported!")
+            self.show_error_message("Only Enigma2 is supported!")
             return
 
         if not any(r[Column.FAV_TYPE] == BqServiceType.IPTV.value for r in self._fav_model):
-            self.show_error_dialog("This list does not contains IPTV streams!")
+            self.show_error_message("This list does not contains IPTV streams!")
             return
 
         bq = self._bouquets.get(self._bq_selected)
@@ -2293,7 +2295,7 @@ class Application(Gtk.Application):
             return
 
         if not str(response).endswith(("m3u", "m3u8")):
-            self.show_error_dialog("No m3u file is selected!")
+            self.show_error_message("No m3u file is selected!")
             return
 
         if self._bq_selected:
@@ -2322,7 +2324,7 @@ class Application(Gtk.Application):
     def on_import_bouquet(self, action, value=None, file_path=None):
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
-            self.show_error_dialog("No selected item!")
+            self.show_error_message("No selected item!")
             return
 
         appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
@@ -2366,7 +2368,7 @@ class Application(Gtk.Application):
 
     def on_import_from_web(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
-            self.show_error_dialog("Not allowed in this context!")
+            self.show_error_message("Not allowed in this context!")
             return
         ServicesUpdateDialog(self._main_window, self._settings, self.on_import_data_from_web).show()
 
@@ -2400,7 +2402,7 @@ class Application(Gtk.Application):
 
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if len(paths) > 1:
-            self.show_error_dialog("Please, select only one bouquet!")
+            self.show_error_message("Please, select only one bouquet!")
             return
 
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
@@ -2416,7 +2418,7 @@ class Application(Gtk.Application):
                 response += bq.name
             write_bouquet(response, bq, self._s_type)
         except OSError as e:
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
@@ -2429,7 +2431,7 @@ class Application(Gtk.Application):
                                       r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
 
         if not any(s.type is BqServiceType.IPTV for s in bq_services):
-            self.show_error_dialog("This list does not contains IPTV streams!")
+            self.show_error_message("This list does not contains IPTV streams!")
             return
 
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
@@ -2441,7 +2443,7 @@ class Application(Gtk.Application):
             bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
             export_to_m3u(response, bq, self._s_type)
         except Exception as e:
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
@@ -2461,14 +2463,14 @@ class Application(Gtk.Application):
         if path:
             row = self._fav_model[path][:]
             if row[Column.FAV_TYPE] != BqServiceType.IPTV.name:
-                self.show_error_dialog("Not allowed in this context!")
+                self.show_error_message("Not allowed in this context!")
                 self.set_playback_elms_active()
                 return
 
             url = get_iptv_url(row, self._s_type)
             self.update_player_buttons()
             if not url:
-                self.show_error_dialog("No reference is present!")
+                self.show_error_message("No reference is present!")
                 self.set_playback_elms_active()
                 return
             self.play(url)
@@ -2480,7 +2482,7 @@ class Application(Gtk.Application):
             return
 
         if self._player and self._player.get_play_mode() is not mode:
-            self.show_error_dialog("Play mode has been changed!\nRestart the program to apply the settings.")
+            self.show_error_message("Play mode has been changed!\nRestart the program to apply the settings.")
             self.set_playback_elms_active()
             return
 
@@ -2495,7 +2497,7 @@ class Application(Gtk.Application):
                     self._playback_window.show()
                     GLib.idle_add(self._player.play, url)
                 else:
-                    self.show_error_dialog("Init player error!")
+                    self.show_error_message("Init player error!")
             finally:
                 self.set_playback_elms_active()
         else:
@@ -2571,7 +2573,7 @@ class Application(Gtk.Application):
     @run_with_delay(2)
     def on_player_error(self):
         self.set_playback_elms_active()
-        self.show_error_dialog("Can't Playback!")
+        self.show_error_message("Can't Playback!")
 
     @run_idle
     def set_playback_elms_active(self):
@@ -2595,7 +2597,7 @@ class Application(Gtk.Application):
                                            error_cb=self.on_player_error,
                                            playing_cb=self.set_playback_elms_active)
             except (ImportError, NameError) as e:
-                self.show_error_dialog(str(e))
+                self.show_error_message(str(e))
                 return True
             else:
                 self._main_window.connect("key-press-event", self.on_player_key_press)
@@ -2690,7 +2692,7 @@ class Application(Gtk.Application):
             try:
                 self._recorder = Recorder.get_instance(self._settings)
             except (ImportError, NameError, AttributeError):
-                self.show_error_dialog("No VLC is found. Check that it is installed!")
+                self.show_error_message("No VLC is found. Check that it is installed!")
                 return
 
         is_record = self._recorder.is_record()
@@ -2782,7 +2784,7 @@ class Application(Gtk.Application):
     def get_url_from_m3u(self, data):
         error_code = data.get("error_code", 0)
         if error_code or self._http_status_image.get_visible():
-            self.show_error_dialog("No connection to the receiver!")
+            self.show_error_message("No connection to the receiver!")
             self.set_playback_elms_active()
             return
 
@@ -2802,7 +2804,7 @@ class Application(Gtk.Application):
             with open("{}{}.m3u".format(response, s_name), "w", encoding="utf-8") as file:
                 file.writelines("#EXTM3U\n#EXTVLCOPT--http-reconnect=true\n#EXTINF:-1,{}\n{}\n".format(s_name, url))
         except IOError as e:
-            self.show_error_dialog(str(e))
+            self.show_error_message(str(e))
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
         finally:
@@ -2834,7 +2836,7 @@ class Application(Gtk.Application):
                 if callback:
                     callback()
             else:
-                self.show_error_dialog("No connection to the receiver!")
+                self.show_error_message("No connection to the receiver!")
             self.set_playback_elms_active()
 
         self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
@@ -2844,7 +2846,7 @@ class Application(Gtk.Application):
         srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
 
         if srv_type in self._marker_types:
-            self.show_error_dialog("Not allowed in this context!")
+            self.show_error_message("Not allowed in this context!")
             self.set_playback_elms_active()
             return
 
@@ -3071,7 +3073,7 @@ class Application(Gtk.Application):
             if model_name == self.FAV_MODEL_NAME:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
                 if srv_type == BqServiceType.ALT.name:
-                    return self.show_error_dialog("Operation not allowed in this context!")
+                    return self.show_error_message("Operation not allowed in this context!")
 
                 if srv_type in self._marker_types:
                     return self.on_rename(view)
@@ -3106,7 +3108,7 @@ class Application(Gtk.Application):
     def on_bouquets_edit(self, view):
         """ Renaming bouquets. """
         if not self._bq_selected:
-            self.show_error_dialog("This item is not allowed to edit!")
+            self.show_error_message("This item is not allowed to edit!")
             return
 
         model, paths = view.get_selection().get_selected_rows()
@@ -3120,7 +3122,7 @@ class Application(Gtk.Application):
 
             bq = "{}:{}".format(response, bq_type)
             if bq in self._bouquets:
-                self.show_error_dialog(get_message("A bouquet with that name exists!"))
+                self.show_error_message(get_message("A bouquet with that name exists!"))
                 return
 
             model.set_value(itr, 0, response)
@@ -3155,7 +3157,7 @@ class Application(Gtk.Application):
         cur_name, srv_type, fav_id = data[Column.FAV_SERVICE], data[Column.FAV_TYPE], data[Column.FAV_ID]
 
         if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
-            self.show_error_dialog("Not allowed in this context!")
+            self.show_error_message("Not allowed in this context!")
             return
 
         response = show_dialog(DialogType.INPUT, self._main_window, cur_name)
@@ -3189,11 +3191,11 @@ class Application(Gtk.Application):
         ex_bq = self._extra_bouquets.get(self._bq_selected, None)
 
         if not ex_bq:
-            self.show_error_dialog("No changes required!")
+            self.show_error_message("No changes required!")
             return
         else:
             if not ex_bq.pop(fav_id, None):
-                self.show_error_dialog("No changes required!")
+                self.show_error_message("No changes required!")
                 return
             if not ex_bq:
                 self._extra_bouquets.pop(self._bq_selected, None)
@@ -3275,13 +3277,13 @@ class Application(Gtk.Application):
             return
 
         if len(paths) > 1:
-            self.show_error_dialog("Please, select only one item!")
+            self.show_error_message("Please, select only one item!")
             return
 
         row = model[paths][:]
         s_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name, BqServiceType.IPTV.name}
         if row[Column.FAV_TYPE] in s_types:
-            self.show_error_dialog("Operation not allowed in this context!")
+            self.show_error_message("Operation not allowed in this context!")
             return
 
         srv = self._services.get(row[Column.FAV_ID], None)
@@ -3301,7 +3303,7 @@ class Application(Gtk.Application):
         alt_name = "de{:02d}".format(self._alt_counter)
         alt_id = "alternatives_{}_{}".format(self._bq_selected, fav_id)
         if alt_id in bq:
-            self.show_error_dialog("A similar service is already in this list!")
+            self.show_error_message("A similar service is already in this list!")
             return
 
         dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
@@ -3443,9 +3445,19 @@ class Application(Gtk.Application):
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4
 
-    @run_idle
-    def show_error_dialog(self, message):
+    def show_error_message(self, message):
         show_dialog(DialogType.ERROR, self._main_window, message)
+
+    @run_idle
+    def show_info_message(self, text, message_type):
+        self._info_bar.set_visible(False)
+        self._info_label.set_text(get_message(text))
+        # self._message_label.set_text(get_message(text))
+        self._info_bar.set_message_type(message_type)
+        self._info_bar.set_visible(True)
+
+    def on_info_bar_close(self, bar=None, resp=None):
+        self._info_bar.set_visible(False)
 
     def is_data_saved(self):
         if self._data_hash != 0 and self._data_hash != self.get_data_hash():

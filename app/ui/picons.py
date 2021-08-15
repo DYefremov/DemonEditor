@@ -79,7 +79,6 @@ class PiconManager(Gtk.Box):
                     "on_send": self.on_send,
                     "on_download": self.on_download,
                     "on_remove": self.on_remove,
-                    "on_info_bar_close": self.on_info_bar_close,
                     "on_picons_dir_open": self.on_picons_dir_open,
                     "on_selected_toggled": self.on_selected_toggled,
                     "on_url_changed": self.on_url_changed,
@@ -132,16 +131,12 @@ class PiconManager(Gtk.Box):
         self._explorer_dest_path_button = builder.get_object("explorer_dest_path_button")
         self._expander = builder.get_object("expander")
         self._text_view = builder.get_object("text_view")
-        self._info_bar = builder.get_object("info_bar")
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_button = builder.get_object("filter_button")
         self._src_filter_button = builder.get_object("src_filter_button")
         self._dst_filter_button = builder.get_object("dst_filter_button")
         self._picons_filter_entry = builder.get_object("picons_filter_entry")
         self._picons_dir_entry = builder.get_object("picons_dir_entry")
-        self._info_bar = builder.get_object("info_bar")
-        self._info_bar = builder.get_object("info_bar")
-        self._message_label = builder.get_object("info_bar_message_label")
         self._info_check_button = builder.get_object("info_check_button")
         self._picon_info_image = builder.get_object("picon_info_image")
         self._picon_info_label = builder.get_object("picon_info_label")
@@ -803,15 +798,8 @@ class PiconManager(Gtk.Box):
             if update:
                 self.on_picons_dest_changed(self._explorer_dest_path_button)
 
-    def on_info_bar_close(self, bar=None, resp=None):
-        self._info_bar.set_visible(False)
-
-    @run_idle
     def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(False)
-        self._message_label.set_text(get_message(text))
-        self._info_bar.set_message_type(message_type)
-        self._info_bar.set_visible(True)
+        self._app.show_info_message(text, message_type)
 
     def on_picons_dir_open(self, entry, icon, event_button):
         update_entry_data(entry, self._app_window, settings=self._settings)

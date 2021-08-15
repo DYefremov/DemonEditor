@@ -443,7 +443,7 @@ class ControlBox(Gtk.HBox):
     def on_timer_add_from_event(self, action, value=None):
         rows = self._epg_list_box.get_selected_rows()
         if not rows:
-            self._app.show_error_dialog("No selected item!")
+            self._app.show_error_message("No selected item!")
             return
 
         refs = []
@@ -602,14 +602,14 @@ class ControlBox(Gtk.HBox):
     def timer_add_edit_callback(self, resp):
         if "error_code" in resp:
             msg = "Error getting timer status.\n{}".format(resp.get("error_code"))
-            self._app.show_error_dialog(msg)
+            self._app.show_error_message(msg)
             log(msg)
             return
 
         state = resp.get("e2state", None)
         if state == "False":
             msg = resp.get("e2statetext", "")
-            self._app.show_error_dialog(msg)
+            self._app.show_error_message(msg)
             log(msg)
         if state == "True":
             log(resp.get("e2statetext", ""))
@@ -736,7 +736,7 @@ class ControlBox(Gtk.HBox):
 
             itrs = itr_str.split(",")
             if len(itrs) > 1:
-                self._app.show_error_dialog("Please, select only one item!")
+                self._app.show_error_message("Please, select only one item!")
                 return
 
             fav_id = None

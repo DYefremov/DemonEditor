@@ -213,7 +213,7 @@ class FtpClientBox(Gtk.HBox):
         else:
             b_size = row[self.Column.EXTRA]
             if b_size.isdigit() and int(b_size) > self.MAX_SIZE:
-                self._app.show_error_dialog("The file size is too large!")
+                self._app.show_error_message("The file size is too large!")
             else:
                 self.open_ftp_file(f_path)
 
@@ -266,7 +266,7 @@ class FtpClientBox(Gtk.HBox):
             return
 
         if len(paths) > 1:
-            self._app.show_error_dialog("Please, select only one item!")
+            self._app.show_error_message("Please, select only one item!")
             return
 
         renderer.set_property("editable", True)
@@ -287,7 +287,7 @@ class FtpClientBox(Gtk.HBox):
     def on_file_edit(self, renderer):
         model, paths = self._file_view.get_selection().get_selected_rows()
         if len(paths) > 1:
-            self._app.show_error_dialog("Please, select only one item!")
+            self._app.show_error_message("Please, select only one item!")
             return
 
         renderer.set_property("editable", True)
@@ -306,7 +306,7 @@ class FtpClientBox(Gtk.HBox):
                 new_path = path.rename("{}/{}".format(path.parent, new_value))
             except ValueError as e:
                 log(e)
-                self._app.show_error_dialog(str(e))
+                self._app.show_error_message(str(e))
             else:
                 if new_path.name == new_value:
                     row[self.Column.NAME] = new_value
@@ -363,7 +363,7 @@ class FtpClientBox(Gtk.HBox):
             path.mkdir()
         except OSError as e:
             log(e)
-            self._app.show_error_dialog(str(e))
+            self._app.show_error_message(str(e))
         else:
             itr = self._file_model.append(File(self._folder_icon, path.name, self.FOLDER, "", str(path.resolve()), "0"))
             renderer.set_property("editable", True)
