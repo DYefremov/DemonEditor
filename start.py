@@ -23,7 +23,7 @@ def update_icon():
 
 
 if __name__ == "__main__":
-    from app.ui.main_app_window import start_app
+    from app.ui.main import start_app
 
     update_icon()
     start_app()

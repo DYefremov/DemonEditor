@@ -47,7 +47,10 @@ from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
 from app.tools.media import Player, Recorder
+from app.ui.control import ControlBox
 from app.ui.epg_dialog import EpgDialog
+from app.ui.ftp import FtpClientBox
+from app.ui.satellites import SatellitesTool
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
@@ -59,12 +62,12 @@ from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_fla
                           remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
                           get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs)
 from .picons_manager import PiconsDialog
-from .satellites_dialog import show_satellites_dialog, ServicesUpdateDialog
+from .satellites import SatellitesTool, ServicesUpdateDialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT)
+                        FavClickMode, MOD_MASK, APP_FONT, Page)
 
 
 class Application(Gtk.Application):
@@ -118,7 +121,6 @@ class Application(Gtk.Application):
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_tree_view_key_release": self.on_tree_view_key_release,
                     "on_bouquets_selection": self.on_bouquets_selection,
-                    "on_satellite_editor_show": self.on_satellite_editor_show,
                     "on_fav_selection": self.on_fav_selection,
                     "on_alt_selection": self.on_alt_selection,
                     "on_services_selection": self.on_services_selection,
@@ -189,10 +191,8 @@ class Application(Gtk.Application):
                     "on_player_press": self.on_player_press,
                     "on_full_screen": self.on_full_screen,
                     "on_main_window_state": self.on_main_window_state,
-                    "on_http_status_visible": self.on_http_status_visible,
                     "on_player_box_realize": self.on_player_box_realize,
                     "on_player_box_visibility": self.on_player_box_visibility,
-                    "on_ftp_realize": self.on_ftp_realize,
                     "on_record": self.on_record,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
@@ -202,7 +202,12 @@ class Application(Gtk.Application):
                     "on_create_bouquet_for_each_package": self.on_create_bouquet_for_each_package,
                     "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
                     "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type,
-                    "on_add_alternatives": self.on_add_alternatives}
+                    "on_add_alternatives": self.on_add_alternatives,
+                    "on_satellites_realize": self.on_satellites_realize,
+                    "on_picons_realize": self. on_picons_realize,
+                    "on_control_realize": self.on_control_realize,
+                    "on_ftp_realize": self.on_ftp_realize,
+                    "on_visible_page": self.on_visible_page}
 
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
@@ -229,6 +234,12 @@ class Application(Gtk.Application):
         self._sat_positions = set()
         self._service_types = set()
         self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
+        # Tools
+        self._links_transmitter = None
+        self._satellite_tool = None
+        self._picons_manager = None
+        self._control_box = None
+        self._ftp_client = None
         # Player
         self._player = None
         self._full_screen = False
@@ -239,9 +250,6 @@ class Application(Gtk.Application):
         # http api
         self._http_api = None
         self._fav_click_mode = None
-        self._links_transmitter = None
-        self._control_box = None
-        self._ftp_client = None
         # Appearance
         self._current_font = APP_FONT
         self._picons_size = self._settings.list_picon_size
@@ -249,12 +257,16 @@ class Application(Gtk.Application):
         self._NEW_COLOR = None  # Color for new services in the main list
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
 
-        builder = get_builder(UI_RESOURCES_PATH + "main_window.glade", handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
         main_window_size = self._settings.get("window_size")
         # Setting the last size of the window if it was saved
         if main_window_size:
             self._main_window.resize(*main_window_size)
+
+        self._fav_paned = builder.get_object("fav_paned")
+        self._tool_box = builder.get_object("tool_box")
+        self._fav_paned.bind_property("visible", self._tool_box, "visible")
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")
@@ -272,13 +284,9 @@ class Application(Gtk.Application):
         # Header bar elements.
         main_header_box = builder.get_object("main_header_box")
         main_popover_menu_box = builder.get_object("main_popover_menu_box")
-        self._right_header_box = builder.get_object("right_header_box")
-        self._left_header_box = builder.get_object("left_header_box")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
-        self._app_info_box.bind_property("visible", self._right_header_box, "visible", 4)
-        self._app_info_box.bind_property("visible", self._left_header_box, "visible", 4)
         # Status bar
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
@@ -297,7 +305,6 @@ class Application(Gtk.Application):
         self._data_count_label = builder.get_object("data_count_label")
         self._services_load_spinner = builder.get_object("services_load_spinner")
         self._save_header_button = builder.get_object("save_header_button")
-        self._app_info_box.bind_property("visible", self._save_header_button, "visible", 4)
         self._save_header_button.bind_property("visible", builder.get_object("save_menu_button"), "visible")
         self._save_header_button.bind_property("visible", builder.get_object("save_as_menu_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
@@ -309,21 +316,6 @@ class Application(Gtk.Application):
         self._alt_model = builder.get_object("alt_list_store")
         self._alt_revealer = builder.get_object("alt_revealer")
         self._alt_revealer.bind_property("visible", self._alt_revealer, "reveal-child")
-        # Control
-        self._control_button = builder.get_object("control_button")
-        self._receiver_info_box.bind_property("visible", self._control_button, "visible")
-        self._control_revealer = builder.get_object("control_revealer")
-        # FTP client
-        self._ftp_button = builder.get_object("ftp_button")
-        self._ftp_revealer = builder.get_object("ftp_revealer")
-        self._ftp_button.bind_property("active", self._ftp_revealer, "visible")
-        self._ftp_revealer.bind_property("visible", builder.get_object("main_box"), "visible", 4)
-        self._ftp_revealer.bind_property("visible", main_header_box, "visible", 4)
-        self._ftp_revealer.bind_property("visible", main_popover_menu_box, "visible", 4)
-        close_ftp_menu_button = builder.get_object("close_ftp_menu_button")
-        self._ftp_revealer.bind_property("visible", close_ftp_menu_button, "visible")
-        close_ftp_menu_button.connect("clicked", lambda b: self._ftp_button.set_active(False))
-        self._ftp_button.connect("toggled", self.on_ftp_toggle)
         # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
@@ -353,15 +345,11 @@ class Application(Gtk.Application):
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
         self._player_play_button = builder.get_object("player_play_button")
-        self._player_box.bind_property("visible", self._services_main_box, "visible", 4)
         self._fav_bouquets_paned = builder.get_object("fav_bouquets_paned")
         self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
-        self._player_box.bind_property("visible", self._left_header_box, "visible", 4)
-        self._player_box.bind_property("visible", self._right_header_box, "visible", 4)
         self._player_box.bind_property("visible", main_popover_menu_box, "visible", 4)
         self._player_box.bind_property("visible", main_header_box, "visible", 4)
         self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
-        self._player_box.bind_property("visible", builder.get_object("tools_button_box"), "visible", 4)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
         self._player_box.bind_property("visible", self._player_event_box, "visible")
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
@@ -405,6 +393,28 @@ class Application(Gtk.Application):
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
+    # ************** Pages initialization *************** #
+
+    def on_satellites_realize(self, box):
+        self._satellite_tool = SatellitesTool(self, self._settings)
+        box.pack_start(self._satellite_tool, True, True, 0)
+
+    def on_picons_realize(self, box):
+        self._picons_manager = None
+
+    def on_ftp_realize(self, box):
+        self._ftp_client = FtpClientBox(self, self._settings)
+        box.pack_start(self._ftp_client, True, True, 0)
+
+    def on_control_realize(self, box: Gtk.HBox):
+        self._control_box = ControlBox(self, self._http_api, self._settings)
+        box.pack_start(self._control_box, True, True, 0)
+
+    def on_visible_page(self, stack, param):
+        page = Page(stack.get_visible_child_name())
+        self._fav_paned.set_visible(page in (Page.SERVICES, Page.PLAYBACK))
+        self._save_header_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
+
     def init_keys(self):
         self.set_action("on_close_app", self.on_close_app)
         self.set_action("on_data_save", self.on_data_save)
@@ -430,10 +440,6 @@ class Application(Gtk.Application):
         self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
         # Edit
         self.set_action("on_edit", self.on_edit)
-        # Control
-        remote_action = Gio.SimpleAction.new_stateful("on_remote", None, GLib.Variant.new_boolean(False))
-        remote_action.connect("change-state", self.on_control)
-        self.add_action(remote_action)
 
     def set_action(self, name, fun, enabled=True):
         ac = Gio.SimpleAction.new(name, None)
@@ -1366,9 +1372,6 @@ class Application(Gtk.Application):
             menu.popup(None, None, None, None, event.button, event.time)
             return True
 
-    def on_satellite_editor_show(self, action, value=None):
-        """ Shows satellites editor dialog """
-        show_satellites_dialog(self._main_window, self._settings)
 
     def on_download(self, action=None, value=None):
         dialog = DownloadDialog(self._main_window, self._settings, self.open_data, self.update_settings)
@@ -1448,9 +1451,6 @@ class Application(Gtk.Application):
 
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
-        if self._ftp_button.get_active():
-            return
-
         if data_path and os.path.isfile(data_path):
             self.open_compressed_data(data_path)
         else:
@@ -2011,11 +2011,8 @@ class Application(Gtk.Application):
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-        if self._ftp_button.get_active() and self._ftp_client:
+        if self._ftp_client:
             self._ftp_client.init_ftp()
-
-        if self._app_info_box.get_visible():
-            return
 
         if changed:
             self.open_data()
@@ -2922,40 +2919,6 @@ class Application(Gtk.Application):
             dsc = "{} {}:{} - {}:{}".format(title, s_time.hour, s_time.minute, end_time.hour, end_time.minute)
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
-
-    # ******************* Control *********************** #
-
-    def on_control(self, action, state=False):
-        """ Shows/Hides [R key] remote controller. """
-        action.set_state(state)
-        self._control_revealer.set_visible(state)
-        self._control_revealer.set_reveal_child(state)
-
-        if not self._control_box:
-            from app.ui.control import ControlBox
-            self._control_box = ControlBox(self, self._http_api, self._settings)
-            self._control_revealer.add(self._control_box)
-
-        if state:
-            self._http_api.send(HttpAPI.Request.VOL, "state", self._control_box.update_volume)
-
-    def on_http_status_visible(self, img):
-        self._control_button.set_active(False)
-
-    # ****************** FTP client ********************* #
-
-    def on_ftp_toggle(self, button):
-        if not self._app_info_box.get_visible():
-            active = not button.get_active()
-            self._right_header_box.set_visible(active)
-            self._left_header_box.set_visible(active)
-
-    def on_ftp_realize(self, revealer):
-        if not self._ftp_client:
-            from app.ui.ftp import FtpClientBox
-            revealer.set_visible(True)
-            self._ftp_client = FtpClientBox(self, self._settings)
-            revealer.add(self._ftp_client)
 
     # ***************** Filter and search ********************* #
 

@@ -14,24 +14,20 @@ from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_m
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK
 
-_UI_PATH = UI_RESOURCES_PATH + "satellites_dialog.glade"
+_UI_PATH = UI_RESOURCES_PATH + "satellites.glade"
 
 
-def show_satellites_dialog(transient, options):
-    SatellitesDialog(transient, options).show()
-
-
-class SatellitesDialog:
+class SatellitesTool(Gtk.Box):
     _aggr = [None for x in range(9)]  # aggregate
 
-    def __init__(self, transient, settings):
+    def __init__(self, app, settings, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._app = app
         self._data_path = settings.data_local_path + "satellites.xml"
         self._settings = settings
 
-        handlers = {"on_open": self.on_open,
-                    "on_remove": self.on_remove,
-                    "on_save": self.on_save,
-                    "on_save_as": self.on_save_as,
+        handlers = {"on_remove": self.on_remove,
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
@@ -40,44 +36,25 @@ class SatellitesDialog:
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
-                    "on_row_activated": self.on_row_activated,
-                    "on_resize": self.on_resize,
-                    "on_quit": self.on_quit}
+                    "on_row_activated": self.on_row_activated}
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
-                              objects=("satellites_editor_window", "satellites_tree_store", "popup_menu",
+                              objects=("satellite_tool_frame", "satellites_tree_store", "popup_menu",
                                        "left_header_menu", "popup_menu_add_image", "popup_menu_add_image_2"))
 
-        self._window = builder.get_object("satellites_editor_window")
-        self._window.set_transient_for(transient)
         self._sat_view = builder.get_object("satellites_editor_tree_view")
-        # Setting the last size of the dialog window if it was saved
-        window_size = self._settings.get("sat_editor_window_size")
-        if window_size:
-            self._window.resize(*window_size)
-
         self._stores = {3: builder.get_object("pol_store"),
                         4: builder.get_object("fec_store"),
                         5: builder.get_object("system_store"),
                         6: builder.get_object("mod_store")}
 
+        self.pack_start(builder.get_object("satellite_tool_frame"), True, True, 0)
+        self.show()
         self.load_satellites_list(self._sat_view.get_model())
 
     def load_satellites_list(self, model):
         gen = self.on_satellites_list_load(model)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-    def show(self):
-        self._window.show()
-
-    def on_resize(self, window):
-        """ Stores new size properties for dialog window after resize """
-        if self._settings:
-            self._settings.add("sat_editor_window_size", window.get_size())
-
-    @run_idle
-    def on_quit(self, *args):
-        self._window.destroy()
 
     @run_idle
     def on_open(self, model):
@@ -170,7 +147,7 @@ class SatellitesDialog:
 
     def on_satellite(self, satellite=None, edited_itr=None):
         """ Create or edit satellite"""
-        sat_dialog = SatelliteDialog(self._window, satellite)
+        sat_dialog = SatelliteDialog(self._app.get_active_window(), satellite)
         sat = sat_dialog.run()
         sat_dialog.destroy()
 
@@ -194,7 +171,7 @@ class SatellitesDialog:
             show_dialog(DialogType.ERROR, self._window, "No satellite is selected!")
             return
 
-        dialog = TransponderDialog(self._window, transponder)
+        dialog = TransponderDialog(self._app.get_active_window(), transponder)
         tr = dialog.run()
         dialog.destroy()
 
@@ -285,7 +262,7 @@ class SatellitesDialog:
 
     @run_idle
     def on_update(self, item):
-        SatellitesUpdateDialog(self._window, self._settings, self._sat_view.get_model()).show()
+        SatellitesUpdateDialog(self._app.get_active_window(), self._settings, self._sat_view.get_model()).show()
 
     @staticmethod
     def parse_data(model, path, itr, sats):
@@ -454,7 +431,7 @@ class UpdateDialog:
         self._parser = None
         self._size_name = "{}_window_size".format("_".join(re.findall("[A-Z][^A-Z]*", self.__class__.__name__))).lower()
 
-        builder = get_builder(UI_RESOURCES_PATH + "satellites_dialog.glade", handlers,
+        builder = get_builder(UI_RESOURCES_PATH + "satellites.glade", handlers,
                               objects=("satellites_update_window", "update_source_store", "update_sat_list_store",
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
                                        "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",

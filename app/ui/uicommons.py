@@ -90,6 +90,17 @@ def show_notification(message, timeout=10000, urgency=1):
     notify.show()
 
 
+class Page(Enum):
+    """ Main stack widget page. """
+    INFO = "info"
+    SERVICES = "services"
+    SATELLITE = "satellite"
+    PICONS = "picons"
+    PLAYBACK = "playback"
+    FTP = "ftp"
+    CONTROL = "control"
+
+
 class KeyboardKey(Enum):
     """ The raw(hardware) codes of the keyboard keys. """
     E = 26

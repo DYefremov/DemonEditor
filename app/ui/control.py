@@ -204,7 +204,7 @@ class ControlBox(Gtk.HBox):
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers)
 
-        self.add(builder.get_object("main_box_frame"))
+        self.add(builder.get_object("control_box"))
         self._stack = builder.get_object("stack")
         self._screenshot_image = builder.get_object("screenshot_image")
         self._screenshot_button_box = builder.get_object("screenshot_button_box")
@@ -218,7 +218,6 @@ class ControlBox(Gtk.HBox):
         self._epg_list_box.set_filter_func(self.epg_filter_function)
         self._epg_filter_entry = builder.get_object("epg_filter_entry")
         self._timers_list_box = builder.get_object("timers_list_box")
-        self._app._control_revealer.bind_property("visible", self, "visible")
         # Timers
         self._timer_remove_button = builder.get_object("timer_remove_button")
         self._timer_remove_button.bind_property("visible", builder.get_object("timer_edit_button"), "visible")
