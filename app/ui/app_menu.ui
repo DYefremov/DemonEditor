@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="mac_app_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">About</attribute>
+        <attribute name="action">app.on_about_app</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Settings</attribute>
+        <attribute name="action">app.on_settings</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Exit</attribute>
+        <attribute name="action">app.on_close_app</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="mac_menu_bar">
+    <submenu>
+      <attribute name="label" translatable="yes">File</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu>
+          <attribute name="label" translatable="yes">Import</attribute>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Bouquet</attribute>
+              <attribute name="action">app.on_import_bouquet</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Bouquets and services</attribute>
+              <attribute name="action">app.on_import_bouquets</attribute>
+            </item>
+          </section>
+        </submenu>
+        <item>
+          <attribute name="label" translatable="yes">Import from Web</attribute>
+          <attribute name="action">app.on_import_from_web</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">New empty configuration</attribute>
+          <attribute name="action">app.on_new_configuration</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Open</attribute>
+          <attribute name="action">app.on_data_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Extract...</attribute>
+          <attribute name="action">app.on_archive_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Save</attribute>
+          <attribute name="action">app.on_data_save</attribute>
+        </item>
+         <item>
+          <attribute name="label" translatable="yes">Save as</attribute>
+          <attribute name="action">app.on_data_save_as</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">FTP-transfer</attribute>
+          <attribute name="action">app.on_download</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Edit</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+      <item>
+        <attribute name="label" translatable="yes">Lock</attribute>
+        <attribute name="action">app.on_locked</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Hide</attribute>
+        <attribute name="action">app.on_hide</attribute>
+      </item>
+    </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">View</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Search</attribute>
+          <attribute name="action">win.search</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Filter</attribute>
+          <attribute name="action">win.filter</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Tools</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Satellites editor</attribute>
+          <attribute name="action">app.on_satellite_editor_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Picons manager</attribute>
+          <attribute name="action">app.on_picons_manager_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Backups</attribute>
+          <attribute name="action">app.on_backup_tool_show</attribute>
+        </item>
+      </section>
+      <section id="telnet_section">
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">IPTV</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
+        <attribute name="action">app.on_iptv</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
+        <attribute name="action">app.on_import_yt_list</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Import m3u</attribute>
+        <attribute name="action">app.on_import_m3u</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Export to m3u</attribute>
+        <attribute name="action">app.on_export_to_m3u</attribute>
+      </item>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">EPG configuration</attribute>
+          <attribute name="action">app.on_epg_list_configuration</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">List configuration</attribute>
+          <attribute name="action">app.on_iptv_list_configuration</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Remove all unavailable</attribute>
+          <attribute name="action">app.on_remove_all_unavailable</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">FTP client</attribute>
+      <attribute name="action">app.show_ftp_menu</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Close</attribute>
+        <attribute name="action">app.on_ftp_client_close</attribute>
+      </item>
+    </submenu>
+  </menu>
+</interface>

@@ -45,12 +45,12 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException
+from app.settings import (SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException,
+                          IS_DARWIN, IS_LINUX)
 from app.tools.media import Player, Recorder
 from app.ui.control import ControlBox
 from app.ui.epg_dialog import EpgDialog
 from app.ui.ftp import FtpClientBox
-from app.ui.satellites import SatellitesTool
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
@@ -279,9 +279,6 @@ class Application(Gtk.Application):
         self._bq_name_label = builder.get_object("bq_name_label")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
-        # Header bar elements.
-        main_header_box = builder.get_object("main_header_box")
-        main_popover_menu_box = builder.get_object("main_popover_menu_box")
         # App info
         self._app_info_box = builder.get_object("app_info_box")
         self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
@@ -306,8 +303,6 @@ class Application(Gtk.Application):
         self._data_count_label = builder.get_object("data_count_label")
         self._services_load_spinner = builder.get_object("services_load_spinner")
         self._save_header_button = builder.get_object("save_header_button")
-        self._save_header_button.bind_property("visible", builder.get_object("save_menu_button"), "visible")
-        self._save_header_button.bind_property("visible", builder.get_object("save_as_menu_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
@@ -347,10 +342,6 @@ class Application(Gtk.Application):
         self._player_next_button = builder.get_object("player_next_button")
         self._player_play_button = builder.get_object("player_play_button")
         self._fav_bouquets_paned = builder.get_object("fav_bouquets_paned")
-        self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
-        self._player_box.bind_property("visible", main_popover_menu_box, "visible", 4)
-        self._player_box.bind_property("visible", main_header_box, "visible", 4)
-        self._player_box.bind_property("visible", builder.get_object("left_header_separator"), "visible", 4)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
         self._player_box.bind_property("visible", self._player_event_box, "visible")
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
@@ -373,11 +364,19 @@ class Application(Gtk.Application):
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        # Header bar.
+        builder.get_object("file_header_button").set_visible(not IS_DARWIN)
+        builder.get_object("left_header_separator").set_visible(not IS_DARWIN)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
+        # App menu.
+        if IS_DARWIN:
+            builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
+            self.set_app_menu(builder.get_object("mac_app_menu"))
+            self.set_menubar(builder.get_object("mac_menu_bar"))
 
-        self.init_keys()
+        self.init_actions()
         self.set_accels()
 
         self.init_drag_and_drop()
@@ -394,31 +393,40 @@ class Application(Gtk.Application):
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def init_keys(self):
-        self.set_action("on_close_app", self.on_close_app)
-        self.set_action("on_data_save", self.on_data_save)
-        self.set_action("on_data_save_as", self.on_data_save_as)
-        self.set_action("on_download", self.on_download)
-        self.set_action("on_data_open", self.on_data_open)
-        self.set_action("on_archive_open", self.on_archive_open)
+    def init_actions(self):
+        self.set_action("on_import_bouquet", self.on_import_bouquet)
+        self.set_action("on_import_bouquets", self.on_import_bouquets)
+        self.set_action("on_new_configuration", self.on_new_configuration)
         self.set_action("on_import_from_web", self.on_import_from_web)
-        # Search, Filter
+        self.set_action("on_settings", self.on_settings)
+        self.set_action("on_close_app", self.on_close_app)
+        # Search, Filter.
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
         search_action.connect("change-state", self.on_search_toggled)
         self._main_window.add_action(search_action)  # For "win.*" actions!
         filter_action = Gio.SimpleAction.new_stateful("filter", None, GLib.Variant.new_boolean(False))
         filter_action.connect("change-state", self.on_filter_toggled)
         self._main_window.add_action(filter_action)
-        # Lock, Hide
+        # Lock, Hide.
         self.set_action("on_hide", self.on_hide)
         self.set_action("on_locked", self.on_locked)
-        # Open and download/upload data
+        # Open and download/upload data.
         self.set_action("open_data", lambda a, v: self.open_data())
         self.set_action("on_download_data", self.on_download_data)
         self.set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
         self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
-        # Edit
+        self.set_action("on_data_save", self.on_data_save)
+        self.set_action("on_data_save_as", self.on_data_save_as)
+        self.set_action("on_download", self.on_download)
+        self.set_action("on_data_open", self.on_data_open)
+        self.set_action("on_archive_open", self.on_archive_open)
+        # Edit.
         self.set_action("on_edit", self.on_edit)
+        # Menu bar.
+        if not IS_LINUX:
+            # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
+            hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
+            self.add_action(hide_bar_action)
 
     def set_action(self, name, fun, enabled=True):
         ac = Gio.SimpleAction.new(name, None)
