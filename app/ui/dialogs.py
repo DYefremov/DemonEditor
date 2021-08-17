@@ -1,5 +1,5 @@
 """ Common module for showing dialogs """
-import locale
+import gettext
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
@@ -176,7 +176,7 @@ def get_dialog_from_xml(dialog_type, transient, use_header=0, title=""):
 
 def get_message(message):
     """ returns translated message """
-    return locale.dgettext(TEXT_DOMAIN, message)
+    return gettext.dgettext(TEXT_DOMAIN, message)
 
 
 @lru_cache(maxsize=5)

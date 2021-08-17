@@ -7,17 +7,16 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-gi.require_version("Notify", "0.7")
-from gi.repository import Gtk, Gdk, Notify
+from gi.repository import Gtk, Gdk
 
-from app.settings import Settings, SettingsException, IS_DARWIN
+from app.settings import Settings, SettingsException, IS_DARWIN, GTK_PATH, IS_LINUX
 
-# Init notify
-Notify.init("DemonEditor")
-# Setting mod mask for the keyboard depending on the platform.
+# Setting mod mask for keyboard depending on platform
 MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
-# Path to *.glade files.
-UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/demoneditor/app/ui/"
+# Path to *.glade files
+UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
+LANG_PATH = UI_RESOURCES_PATH + "lang"
+NOTIFY_IS_INIT = False
 IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 # Translation.
 TEXT_DOMAIN = "demon-editor"
@@ -29,18 +28,44 @@ except SettingsException:
     pass
 else:
     os.environ["LANGUAGE"] = settings.language
-    if UI_RESOURCES_PATH == "app/ui/":
-        locale.bindtextdomain(TEXT_DOMAIN, UI_RESOURCES_PATH + "lang")
-
     st = Gtk.Settings().get_default()
     APP_FONT = st.get_property("gtk-font-name")
-    if not settings.list_font:
-        settings.list_font = APP_FONT
+    st.set_property("gtk-application-prefer-dark-theme", settings.dark_mode)
 
     if settings.is_themes_support:
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
+    else:
+        if IS_DARWIN:
+            style_provider = Gtk.CssProvider()
+            s_path = "{}mac_style.css".format(GTK_PATH + "/" + UI_RESOURCES_PATH if GTK_PATH else UI_RESOURCES_PATH)
+            style_provider.load_from_path(s_path)
+            Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
+                                                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+if IS_LINUX:
+    locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+    # Init notify
+    try:
+        gi.require_version("Notify", "0.7")
+        from gi.repository import Notify
+    except ImportError:
+        pass
+    else:
+        NOTIFY_IS_INIT = Notify.init("DemonEditor")
+elif IS_DARWIN:
+    import gettext
+
+    if GTK_PATH:
+        LANG_PATH = GTK_PATH + "/share/locale"
+    gettext.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+    # For launching from the bundle.
+    if os.getcwd() == "/" and GTK_PATH:
+        os.chdir(GTK_PATH)
+else:
+    locale.setlocale(locale.LC_NUMERIC, "C")
+
+# Icons.
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(UI_RESOURCES_PATH + "icons")
 
@@ -84,10 +109,14 @@ def show_notification(message, timeout=10000, urgency=1):
         @param timeout: milliseconds
         @param urgency: 0 - low, 1 - normal, 2 - critical
     """
-    notify = Notify.Notification.new("DemonEditor", message, "demon-editor")
-    notify.set_urgency(urgency)
-    notify.set_timeout(timeout)
-    notify.show()
+    if IS_DARWIN:
+        # Since NSUserNotification has been deprecated, osascript will be used.
+        os.system("""osascript -e 'display notification "{}" with title "DemonEditor"'""".format(message))
+    elif NOTIFY_IS_INIT:
+        notify = Notify.Notification.new("DemonEditor", message, "demon-editor")
+        notify.set_urgency(urgency)
+        notify.set_timeout(timeout)
+        notify.show()
 
 
 class Page(Enum):
