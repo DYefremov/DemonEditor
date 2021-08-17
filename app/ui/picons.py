@@ -598,7 +598,6 @@ class PiconManager(Gtk.Box):
             self._satellite_label.show()
 
     def on_satellite_selection(self, view, path, column):
-        self.on_info_bar_close()
         model = self._providers_view.get_model()
         model.clear()
         self._satellite_label.set_visible(False)
@@ -635,13 +634,13 @@ class PiconManager(Gtk.Box):
 
     def on_receive(self, item):
         if self._is_downloading:
-            self.show_dialog("The task is already running!", DialogType.ERROR)
+            self._app.show_error_message("The task is already running!")
             return
 
         providers = self.get_selected_providers()
 
         if self._download_src is self.DownloadSource.PICON_CZ and len(providers) > 1:
-            self.show_dialog("Please, select only one item!", DialogType.ERROR)
+            self._app.show_error_message("Please, select only one item!")
             return
 
         self._cancel_button.show()
@@ -730,7 +729,7 @@ class PiconManager(Gtk.Box):
 
         model, paths = self._app.bouquets_view.get_selection().get_selected_rows()
         if len(paths) > 1:
-            self.show_dialog("Please, select only one bouquet!", DialogType.ERROR)
+            self._app.show_error_message("Please, select only one bouquet!")
             return
 
         fav_bouquet = self._app.current_bouquets[bq_selected]
@@ -949,7 +948,7 @@ class PiconManager(Gtk.Box):
         picons_path = self._enigma2_path_button.get_filename()
         save_path = self._save_to_button.get_filename()
         if not picons_path or not save_path:
-            show_dialog(DialogType.ERROR, transient=self._app_window, text="Select paths!")
+            self._app.show_error_message("Select paths!")
             return
 
         self._expander.set_expanded(True)

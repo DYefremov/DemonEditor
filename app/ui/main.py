@@ -3454,13 +3454,12 @@ class Application(Gtk.Application):
         return 5 if self._settings.v5_support else 4
 
     def show_error_message(self, message):
-        show_dialog(DialogType.ERROR, self._main_window, message)
+        self.show_info_message(message, Gtk.MessageType.ERROR)
 
     @run_idle
     def show_info_message(self, text, message_type):
         self._info_bar.set_visible(False)
         self._info_label.set_text(get_message(text))
-        # self._message_label.set_text(get_message(text))
         self._info_bar.set_message_type(message_type)
         self._info_bar.set_visible(True)
 
