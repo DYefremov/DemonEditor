@@ -15,6 +15,7 @@ class BqServiceType(Enum):
     MARKER = "MARKER"  # 64
     SPACE = "SPACE"  # 832 [hidden marker]
     ALT = "ALT"  # Service with alternatives
+    BOUQUET = "BOUQUET"  # Sub bouquet.
 
 
 Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden", "file"])

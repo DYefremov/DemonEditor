@@ -29,6 +29,7 @@
 """ Module for working with Enigma2 bouquets. """
 import re
 from collections import Counter
+from enum import Enum
 from pathlib import Path
 
 from app.commons import log
@@ -127,10 +128,24 @@ class BouquetsWriter:
             file.writelines(bouquet)
 
 
+class ServiceType(Enum):
+    SERVICE = "0"
+    BOUQUET = "7"  # Sub bouquet.
+    MARKER = "64"
+    SPACE = "832"  # Hidden marker.
+    ALT = "134"  # Alternatives.
+
+    @classmethod
+    def _missing_(cls, value):
+        log("Error. No matching service type [{} {}] was found.".format(cls.__name__, value))
+        return cls.SERVICE
+
+
 class BouquetsReader:
     """ Class for reading and parsing bouquets. """
     _ALT_PAT = re.compile(".*alternatives\\.+(.*)\\.([tv|radio]+).*")
     _BQ_PAT = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
+    _SUB_BQ_PAT = re.compile(".*subbouquet\\.+(.*)\\.([tv|radio]+).*")
     _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
     __slots__ = ["_path"]
@@ -199,19 +214,26 @@ class BouquetsReader:
                     log("The bouquet [{}] service [{}] has the wrong data format: [{}]".format(bq_name, num, srv))
                     continue
 
-                s_type = srv_data[1]
-                if s_type == "64":
+                s_type = ServiceType(srv_data[1])
+                if s_type is ServiceType.MARKER:
                     m_data, sep, desc = srv.partition("#DESCRIPTION")
                     services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, num))
-                elif s_type == "832":
+                elif s_type is ServiceType.SPACE:
                     m_data, sep, desc = srv.partition("#DESCRIPTION")
                     services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
-                elif s_type == "134":
+                elif s_type is ServiceType.ALT:
                     alt = re.match(BouquetsReader._ALT_PAT, srv)
                     if alt:
                         alt_name, alt_type = alt.group(1), alt.group(2)
                         alt_bq_name, alt_srvs = BouquetsReader.get_bouquet(path, alt_name, alt_type, "alternatives")
                         services.append(BouquetService(alt_bq_name, BqServiceType.ALT, alt_name, tuple(alt_srvs)))
+                elif s_type is ServiceType.BOUQUET:
+                    sub = re.match(BouquetsReader._SUB_BQ_PAT, srv)
+                    if sub:
+                        sub_name, sub_type = sub.group(1), sub.group(2)
+                        sub_bq_name, sub_srvs = BouquetsReader.get_bouquet(path, sub_name, sub_type, "subbouquet")
+                        bq = Bouquet(sub_bq_name, sub_type, tuple(sub_srvs), None, None, sub_name)
+                        services.append(BouquetService(sub_bq_name, BqServiceType.BOUQUET, bq, num))
                 elif srv_data[0].strip() in BouquetsReader._STREAM_TYPES or srv_data[10].startswith(("http", "rtsp")):
                     stream_data, sep, desc = srv.partition("#DESCRIPTION")
                     desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()

@@ -264,6 +264,7 @@ class Application(Gtk.Application):
         if main_window_size:
             self._main_window.resize(*main_window_size)
 
+        self._stack = builder.get_object("stack")
         self._fav_paned = builder.get_object("fav_paned")
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
@@ -271,7 +272,6 @@ class Application(Gtk.Application):
         self._fav_model = builder.get_object("fav_list_store")
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
-        self._main_data_box = builder.get_object("main_data_box")
         self._status_bar_box = builder.get_object("status_bar_box")
         self._services_main_box = builder.get_object("services_main_box")
         self._bouquets_main_box = builder.get_object("bouquets_main_box")
@@ -341,7 +341,6 @@ class Application(Gtk.Application):
         self._player_prev_button = builder.get_object("player_prev_button")
         self._player_next_button = builder.get_object("player_next_button")
         self._player_play_button = builder.get_object("player_play_button")
-        self._fav_bouquets_paned = builder.get_object("fav_bouquets_paned")
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
         self._player_box.bind_property("visible", self._player_event_box, "visible")
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
@@ -1613,7 +1612,7 @@ class Application(Gtk.Application):
 
     def append_bouquet(self, bq, parent):
         name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
-        self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
+        bouquet = self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
         bq_id = "{}:{}".format(name, bq_type)
         services = []
         extra_services = {}  # for services with different names in bouquet and main list
@@ -1643,6 +1642,11 @@ class Application(Gtk.Application):
                 srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
                               None, None, *agr, srv.data, fav_id, srv.num)
                 self._services[fav_id] = srv
+            elif s_type is BqServiceType.BOUQUET:
+                # Sub bouquets!
+                msg = "Detected sub-bouquets! This feature is not fully supported. Saving may cause bouquet data loss!"
+                self.show_info_message(msg, Gtk.MessageType.WARNING)
+                self.append_bouquet(srv.data, bouquet)
             elif srv.name:
                 extra_services[fav_id] = srv.name
             services.append(fav_id)
@@ -2518,6 +2522,7 @@ class Application(Gtk.Application):
                 GLib.idle_add(self._player.play, url)
 
             self._player_box.set_visible(True)
+            self._stack.set_visible_child(self._player_box)
 
     def on_player_stop(self, item=None):
         if self._player:
@@ -2616,7 +2621,7 @@ class Application(Gtk.Application):
 
     def on_player_box_visibility(self, box):
         visible = box.get_visible()
-        self._fav_bouquets_paned.set_orientation(Gtk.Orientation.VERTICAL if visible else Gtk.Orientation.HORIZONTAL)
+        self._fav_paned.set_orientation(Gtk.Orientation.VERTICAL if visible else Gtk.Orientation.HORIZONTAL)
 
     @run_idle
     def set_player_area_size(self, widget):
@@ -2644,10 +2649,8 @@ class Application(Gtk.Application):
             self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
 
     def update_state_on_full_screen(self, visible):
-        self._main_data_box.set_visible(visible)
         self._player_tool_bar.set_visible(visible)
-        if self._control_box:
-            self._control_box.set_visible(visible)
+        self._fav_paned.set_visible(visible)
         self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
 
     def on_main_window_state(self, window, event):
