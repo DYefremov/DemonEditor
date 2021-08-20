@@ -46,7 +46,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException,
-                          IS_DARWIN, IS_LINUX)
+                          IS_DARWIN)
 from app.tools.media import Player, Recorder
 from app.ui.control import ControlBox
 from app.ui.epg_dialog import EpgDialog
@@ -67,7 +67,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import show_settings_dialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT, Page)
+                        FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION)
 
 
 class Application(Gtk.Application):
@@ -114,11 +114,8 @@ class Application(Gtk.Application):
         self.add_main_option("debug", ord("d"), GLib.OptionFlags.NONE, GLib.OptionArg.STRING, "", None)
 
         handlers = {"on_close_app": self.on_close_app,
-                    "on_about_app": self.on_about_app,
                     "on_info_bar_close": self.on_info_bar_close,
-                    "on_settings": self.on_settings,
                     "on_profile_changed": self.on_profile_changed,
-                    "on_new_configuration": self.on_new_configuration,
                     "on_tree_view_key_press": self.on_tree_view_key_press,
                     "on_tree_view_key_release": self.on_tree_view_key_release,
                     "on_bouquets_selection": self.on_bouquets_selection,
@@ -159,9 +156,6 @@ class Application(Gtk.Application):
                     "on_import_m3u": self.on_import_m3u,
                     "on_bouquet_export": self.on_bouquet_export,
                     "on_export_to_m3u": self.on_export_to_m3u,
-                    "on_import_bouquet": self.on_import_bouquet,
-                    "on_import_bouquets": self.on_import_bouquets,
-                    "on_backup_tool_show": self.on_backup_tool_show,
                     "on_insert_marker": self.on_insert_marker,
                     "on_insert_space": self.on_insert_space,
                     "on_fav_press": self.on_fav_press,
@@ -302,7 +296,7 @@ class Application(Gtk.Application):
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
         self._services_load_spinner = builder.get_object("services_load_spinner")
-        self._save_header_button = builder.get_object("save_header_button")
+        self._save_tool_button = builder.get_object("save_tool_button")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
@@ -358,22 +352,45 @@ class Application(Gtk.Application):
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
                       self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
+
+        # Header bar.
+        if IS_GNOME_SESSION:
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            header_bar.pack_start(builder.get_object("file_header_button"))
+            header_bar.pack_start(Gtk.Separator(visible=True))
+            header_bar.pack_start(builder.get_object("profile_combo_box"))
+            header_bar.pack_start(builder.get_object("toolbar_main_box"))
+            header_bar.set_custom_title(builder.get_object("stack_switcher"))
+            self._main_window.set_titlebar(header_bar)
+        else:
+            tool_bar = Gtk.Box(visible=True, spacing=6, margin=6, valign=Gtk.Align.CENTER)
+            tool_bar.add(builder.get_object("profile_combo_box"))
+            tool_bar.add(builder.get_object("toolbar_main_box"))
+            tool_bar.set_center_widget(builder.get_object("stack_switcher"))
+
+            main_header_box = Gtk.Box(visible=True, spacing=6)
+            main_header_box.get_style_context().add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
+            main_header_box.pack_start(tool_bar, True, True, 0)
+            main_box = builder.get_object("main_window_box")
+            main_box.add(main_header_box)
+            main_box.reorder_child(main_header_box, 0)
+
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        # Header bar.
-        builder.get_object("file_header_button").set_visible(not IS_DARWIN)
-        builder.get_object("left_header_separator").set_visible(not IS_DARWIN)
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
         # App menu.
-        if IS_DARWIN:
+        if not IS_GNOME_SESSION:
             builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
-            self.set_app_menu(builder.get_object("mac_app_menu"))
-            self.set_menubar(builder.get_object("mac_menu_bar"))
+            if IS_DARWIN:
+                self.set_app_menu(builder.get_object("mac_app_menu"))
+                self.set_menubar(builder.get_object("mac_menu_bar"))
+            else:
+                self.set_menubar(builder.get_object("menu_bar"))
 
         self.init_actions()
         self.set_accels()
@@ -398,6 +415,8 @@ class Application(Gtk.Application):
         self.set_action("on_new_configuration", self.on_new_configuration)
         self.set_action("on_import_from_web", self.on_import_from_web)
         self.set_action("on_settings", self.on_settings)
+        self.set_action("on_backup_tool_show", self.on_backup_tool_show)
+        self.set_action("on_about_app", self.on_about_app)
         self.set_action("on_close_app", self.on_close_app)
         # Search, Filter.
         search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
@@ -422,7 +441,7 @@ class Application(Gtk.Application):
         # Edit.
         self.set_action("on_edit", self.on_edit)
         # Menu bar.
-        if not IS_LINUX:
+        if not IS_GNOME_SESSION:
             # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
             hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
             self.add_action(hide_bar_action)
@@ -666,7 +685,7 @@ class Application(Gtk.Application):
     def on_visible_page(self, stack, param):
         page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
-        self._save_header_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
+        self._save_tool_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
 
     # ***************** Copy - Cut - Paste ********************* #
 
@@ -1762,7 +1781,7 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def save_data(self, callback=None, ext_path=None):
-        self._save_header_button.set_sensitive(False)
+        self._save_tool_button.set_sensitive(False)
         profile = self._s_type
         path = ext_path or self._settings.data_local_path
         backup_path = self._settings.backup_local_path
@@ -1796,7 +1815,7 @@ class Application(Gtk.Application):
             # blacklist
             write_blacklist(path, self._blacklist)
 
-        self._save_header_button.set_sensitive(True)
+        self._save_tool_button.set_sensitive(True)
         yield True
         self._data_hash = self.get_data_hash()
         yield True
@@ -3449,9 +3468,10 @@ class Application(Gtk.Application):
         msg = get_message("Profile:")
 
         if self._s_type is SettingsType.ENIGMA_2:
-            self._header_bar.set_subtitle("{} {} [Enigma2 v.{}]".format(msg, profile_name, self.get_format_version()))
+            title = "DemonEditor [{} {} - Enigma2 v.{}]".format(msg, profile_name, self.get_format_version())
+            self._main_window.set_title(title)
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._header_bar.set_subtitle("{} {} [Neutrino-MP]".format(msg, profile_name))
+            self._main_window.set_title("DemonEditor [{} {} - Neutrino-MP]".format(msg, profile_name))
 
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4

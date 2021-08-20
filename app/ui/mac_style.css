@@ -43,3 +43,11 @@ combobox {
   min-height: 1em;
   padding: 0.2em;
 }
+
+buttonbox {
+  padding: 0.2em;
+}
+
+stackswitcher {
+  padding: 0.2em;
+}
