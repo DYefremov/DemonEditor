@@ -17,7 +17,7 @@ from app.commons import log, run_task
 from app.settings import SettingsType
 
 BQ_FILES_LIST = ("tv", "radio",  # enigma 2
-                 "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
+                 "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
 
 DATA_FILES_LIST = ("lamedb", "lamedb5", "blacklist", "whitelist",)
 
