@@ -204,9 +204,9 @@ class Settings:
         """ Adds extra options """
         self._settings[name] = value
 
-    def get(self, name):
+    def get(self, name, default=None):
         """ Returns extra options or None """
-        return self._settings.get(name, None)
+        return self._settings.get(name, default)
 
     @property
     def settings(self):

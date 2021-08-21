@@ -340,6 +340,7 @@ class Application(Gtk.Application):
         self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
         self._fav_view.bind_property("sensitive", self._bouquets_view, "sensitive")
+        self._player_tool_bar.bind_property("visible", builder.get_object("fs_box"), "visible")
         # Record
         self._record_image = builder.get_object("record_button_image")
         # Search
@@ -352,7 +353,17 @@ class Application(Gtk.Application):
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
                       self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
-
+        # Stack page widgets.
+        self._stack_services_frame = builder.get_object("services_frame")
+        self._stack_services_frame.set_visible(self._settings.get("show_bouquets", True))
+        self._stack_satellite_box = builder.get_object("satellite_box")
+        self._stack_satellite_box.set_visible(self._settings.get("show_satellites", True))
+        self._stack_picon_box = builder.get_object("picon_box")
+        self._stack_picon_box.set_visible(self._settings.get("show_picons", True))
+        self._stack_ftp_box = builder.get_object("ftp_box")
+        self._stack_ftp_box.set_visible(self._settings.get("show_ftp", True))
+        self._stack_control_box = builder.get_object("control_box")
+        self._stack_control_box.set_visible(self._settings.get("show_control", True))
         # Header bar.
         if IS_GNOME_SESSION:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
@@ -374,7 +385,7 @@ class Application(Gtk.Application):
             main_box = builder.get_object("main_window_box")
             main_box.add(main_header_box)
             main_box.reorder_child(main_header_box, 0)
-
+            self._player_tool_bar.bind_property("visible", main_header_box, "visible")
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -384,13 +395,18 @@ class Application(Gtk.Application):
     def do_startup(self):
         Gtk.Application.do_startup(self)
         # App menu.
+        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
         if not IS_GNOME_SESSION:
-            builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
             if IS_DARWIN:
                 self.set_app_menu(builder.get_object("mac_app_menu"))
                 self.set_menubar(builder.get_object("mac_menu_bar"))
             else:
                 self.set_menubar(builder.get_object("menu_bar"))
+        else:
+            view_menu = builder.get_object("view_menu")
+            view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
+            view_button.set_tooltip_text(get_message("View"))
+            self._main_window.get_titlebar().pack_end(view_button)
 
         self.init_actions()
         self.set_accels()
@@ -440,6 +456,19 @@ class Application(Gtk.Application):
         self.set_action("on_archive_open", self.on_archive_open)
         # Edit.
         self.set_action("on_edit", self.on_edit)
+        # View actions.
+        sa = self.set_state_action("show_bouquets", self.on_page_show, self._settings.get("show_bouquets", True))
+        sa.connect("change-state", lambda a, v: self._stack_services_frame.set_visible(v))
+        sa = self.set_state_action("show_satellites", self.on_page_show, self._settings.get("show_satellites", True))
+        sa.connect("change-state", lambda a, v: self._stack_satellite_box.set_visible(v))
+        sa = self.set_state_action("show_picons", self.on_page_show, self._settings.get("show_picons", True))
+        sa.connect("change-state", lambda a, v: self._stack_picon_box.set_visible(v))
+        sa = self.set_state_action("show_timers", self.on_page_show, self._settings.get("show_timers", True))
+        sa = self.set_state_action("show_recordings", self.on_page_show, self._settings.get("show_recordings", True))
+        sa = self.set_state_action("show_ftp", self.on_page_show, self._settings.get("show_ftp", True))
+        sa.connect("change-state", lambda a, v: self._stack_ftp_box.set_visible(v))
+        sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
+        sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
         # Menu bar.
         if not IS_GNOME_SESSION:
             # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
@@ -451,7 +480,15 @@ class Application(Gtk.Application):
         ac.connect("activate", fun)
         ac.set_enabled(enabled)
         self.add_action(ac)
+
         return ac
+
+    def set_state_action(self, name, fun, enabled=True):
+        action = Gio.SimpleAction.new_stateful(name, None, GLib.Variant.new_boolean(enabled))
+        action.connect("change-state", fun)
+        self.add_action(action)
+
+        return action
 
     def set_accels(self):
         """ Setting accelerators for the actions. """
@@ -686,6 +723,10 @@ class Application(Gtk.Application):
         page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
         self._save_tool_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
+
+    def on_page_show(self, action, value):
+        action.set_state(value)
+        self._settings.add(action.get_name(), bool(value))
 
     # ***************** Copy - Cut - Paste ********************* #
 
@@ -2671,6 +2712,8 @@ class Application(Gtk.Application):
         self._player_tool_bar.set_visible(visible)
         self._fav_paned.set_visible(visible)
         self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
+        if not IS_GNOME_SESSION:
+            self._main_window.set_show_menubar(visible)
 
     def on_main_window_state(self, window, event):
         if event.new_window_state & Gdk.WindowState.FULLSCREEN or event.new_window_state & Gdk.WindowState.MAXIMIZED:

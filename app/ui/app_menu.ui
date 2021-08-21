@@ -80,18 +80,38 @@
         </item>
       </section>
     </submenu>
-    <submenu>
+    <submenu id="view_menu">
       <attribute name="label" translatable="yes">View</attribute>
       <attribute name="action">app.hide_menu_bar</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
       <section>
         <item>
-          <attribute name="label" translatable="yes">Search</attribute>
-          <attribute name="action">win.search</attribute>
+          <attribute name="label" translatable="yes">Bouquets</attribute>
+          <attribute name="action">app.show_bouquets</attribute>
         </item>
         <item>
-          <attribute name="label" translatable="yes">Filter</attribute>
-          <attribute name="action">win.filter</attribute>
+          <attribute name="label" translatable="yes">Satellites</attribute>
+          <attribute name="action">app.show_satellites</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Picons</attribute>
+          <attribute name="action">app.show_picons</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Timers</attribute>
+          <attribute name="action">app.show_timers</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Recordings</attribute>
+          <attribute name="action">app.show_recordings</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">FTP</attribute>
+          <attribute name="action">app.show_ftp</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Control</attribute>
+          <attribute name="action">app.show_control</attribute>
         </item>
       </section>
     </submenu>
@@ -100,14 +120,6 @@
       <attribute name="action">app.hide_menu_bar</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
       <section>
-        <item>
-          <attribute name="label" translatable="yes">Satellites editor</attribute>
-          <attribute name="action">app.on_satellite_editor_show</attribute>
-        </item>
-        <item>
-          <attribute name="label" translatable="yes">Picons manager</attribute>
-          <attribute name="action">app.on_picons_manager_show</attribute>
-        </item>
         <item>
           <attribute name="label" translatable="yes">Backups</attribute>
           <attribute name="action">app.on_backup_tool_show</attribute>
@@ -266,12 +278,32 @@
       <attribute name="hidden-when">action-disabled</attribute>
       <section>
         <item>
-          <attribute name="label" translatable="yes">Search</attribute>
-          <attribute name="action">win.search</attribute>
+          <attribute name="label" translatable="yes">Bouquets</attribute>
+          <attribute name="action">app.show_bouquets</attribute>
         </item>
         <item>
-          <attribute name="label" translatable="yes">Filter</attribute>
-          <attribute name="action">win.filter</attribute>
+          <attribute name="label" translatable="yes">Satellites</attribute>
+          <attribute name="action">app.show_satellites</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Picons</attribute>
+          <attribute name="action">app.show_picons</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Timers</attribute>
+          <attribute name="action">app.show_timers</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Recordings</attribute>
+          <attribute name="action">app.show_recordings</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">FTP</attribute>
+          <attribute name="action">app.show_ftp</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Control</attribute>
+          <attribute name="action">app.show_control</attribute>
         </item>
       </section>
     </submenu>
@@ -280,14 +312,6 @@
       <attribute name="action">app.hide_menu_bar</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
       <section>
-        <item>
-          <attribute name="label" translatable="yes">Satellites editor</attribute>
-          <attribute name="action">app.on_satellite_editor_show</attribute>
-        </item>
-        <item>
-          <attribute name="label" translatable="yes">Picons manager</attribute>
-          <attribute name="action">app.on_picons_manager_show</attribute>
-        </item>
         <item>
           <attribute name="label" translatable="yes">Backups</attribute>
           <attribute name="action">app.on_backup_tool_show</attribute>
