@@ -35,6 +35,7 @@ from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, 
                                   get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION,
                                   TrType, SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, T_FEC,
                                   HIERARCHY, A_MODULATION)
+from app.eparser.neutrino.services import NeutrinoServiceWriter, SP, KSP
 from app.settings import SettingsType
 from .dialogs import show_dialog, DialogType, Action, get_builder
 from .main_helper import get_base_model
@@ -51,8 +52,6 @@ class ServiceDetailsDialog:
     _ENIGMA2_TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
 
     _NEUTRINO_FAV_ID = "{:x}:{:x}:{:x}"
-
-    _NEUTRINO_TRANSPONDER_DATA = "{:04x}:{:04x}:{}:{}:{}:{}:{}:{}:{}"
 
     _DIGIT_ENTRY_ELEMENTS = ("bitstream_entry", "pcm_entry", "video_pid_entry", "pcr_pid_entry", "srv_type_entry",
                              "ac3_pid_entry", "ac3plus_pid_entry", "acc_pid_entry", "he_acc_pid_entry",
@@ -223,8 +222,7 @@ class ServiceDetailsDialog:
         self._package_entry.set_text(srv.package)
         self._sid_entry.set_text(str(int(srv.ssid, 16)))
         # Transponder
-        if self._s_type is SettingsType.ENIGMA_2:
-            self._tr_type = TrType(srv.transponder_type)
+        self._tr_type = TrType(srv.transponder_type)
         self._freq_entry.set_text(srv.freq)
         self._rate_entry.set_text(srv.rate)
         self.select_active_text(self._pol_combo_box, srv.pol)
@@ -353,10 +351,12 @@ class ServiceDetailsDialog:
     # ***************** Init Neutrino data *********************#
 
     def init_neutrino_data(self, srv):
-        tr_data = srv.transponder.split(":")
-        self._transponder_id_entry.set_text(str(int(tr_data[0], 16)))
-        self._network_id_entry.set_text(str(int(tr_data[1], 16)))
-        self.select_active_text(self._invertion_combo_box, Inversion(tr_data[3]).name)
+        if self._tr_type is not TrType.Satellite:
+            return
+        tr_data = NeutrinoServiceWriter.get_attributes(srv.transponder)
+        self._transponder_id_entry.set_text(str(int(tr_data.get("id", "0"), 16)))
+        self._network_id_entry.set_text(str(int(tr_data.get("on", "0"), 16)))
+        self.select_active_text(self._invertion_combo_box, Inversion(tr_data.get("inv", "2")).name)
         self.select_active_text(self._service_type_combo_box, srv.service_type)
         self.update_reference_entry()
 
@@ -368,6 +368,7 @@ class ServiceDetailsDialog:
         tr_grid.set_margin_bottom(5)
         self._builder.get_object("tr_extra_expander").set_visible(False)
         self._builder.get_object("srv_separator").set_visible(False)
+        self._package_entry.set_sensitive(False)
 
     # ***************** Init Sat positions *********************#
 
@@ -407,6 +408,10 @@ class ServiceDetailsDialog:
         self.save_data()
 
     def save_data(self):
+        if self._s_type is SettingsType.NEUTRINO_MP and self._tr_type is not TrType.Satellite:
+            show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+            return
+
         if not self.is_data_correct():
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
@@ -538,9 +543,9 @@ class ServiceDetailsDialog:
         if self._s_type is SettingsType.ENIGMA_2:
             return self.get_enigma2_flags()
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            flags = self._old_service.flags_cas.split(":")
-            flags[1] = self.get_sat_position()
-            return ":".join(flags)
+            flags = NeutrinoServiceWriter.get_attributes(self._old_service.flags_cas)
+            flags["position"] = self.get_sat_position()
+            return SP.join("{}{}{}".format(k, KSP, v) for k, v in flags.items())
 
     def get_enigma2_flags(self):
         flags = ["p:{}".format(self._package_entry.get_text())]
@@ -594,10 +599,12 @@ class ServiceDetailsDialog:
             fav_id = self._ENIGMA2_FAV_ID.format(ssid, tr_id, net_id, namespace)
             return fav_id, data_id
         elif self._s_type is SettingsType.NEUTRINO_MP:
+            data = NeutrinoServiceWriter.get_attributes(self._old_service.data_id)
+            data["n"] = self._name_entry.get_text()
+            data["t"] = "{:x}".format(int(service_type))
+            data["i"] = "{:04x}".format(ssid)
             fav_id = self._NEUTRINO_FAV_ID.format(tr_id, net_id, ssid)
-            data_id = self._old_service.data_id.split(":")
-            data_id[1] = "{:x}".format(int(service_type))
-            return fav_id, ":".join(data_id)
+            return fav_id, SP.join("{}{}{}".format(k, KSP, v) for k, v in data.items())
 
     # ***************** Transponder ********************* #
 
@@ -642,12 +649,19 @@ class ServiceDetailsDialog:
                 pls_code = self._pls_code_entry.get_text()
                 st_id = self._stream_id_entry.get_text()
                 pls = ":{}:{}:{}".format(st_id, pls_code, pls_mode) if pls_mode and pls_code and st_id else ""
+
                 return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            on_id, tr_id = int(self._network_id_entry.get_text()), int(self._transponder_id_entry.get_text())
-            mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION) if sys == "DVB-S2" else None
-            srv_sys = None
-            return self._NEUTRINO_TRANSPONDER_DATA.format(tr_id, on_id, freq, inv, rate, fec, pol, mod, srv_sys)
+            tr_data = NeutrinoServiceWriter.get_attributes(self._old_service.transponder)
+            tr_data["frq"] = freq
+            tr_data["sr"] = rate
+            tr_data["pol"] = pol
+            tr_data["fec"] = fec
+            tr_data["on"] = "{:04x}".format(int(self._network_id_entry.get_text()))
+            tr_data["id"] = "{:04x}".format(int(self._transponder_id_entry.get_text()))
+            tr_data["inv"] = inv
+
+            return SP.join("{}{}{}".format(k, KSP, v) for k, v in tr_data.items())
 
     def get_sat_position(self):
         sat_pos = self._sat_pos_button.get_value() * (-1 if self._pos_side_box.get_active_id() == "W" else 1)
@@ -707,9 +721,9 @@ class ServiceDetailsDialog:
                 continue
 
             if self._s_type is SettingsType.NEUTRINO_MP:
-                flags = srv[Column.SRV_CAS_FLAGS].split(":")
-                flags[1] = sat_pos
-                srv[Column.SRV_CAS_FLAGS] = ":".join(flags)
+                flags = NeutrinoServiceWriter.get_attributes(srv[Column.SRV_CAS_FLAGS])
+                flags["position"] = sat_pos
+                srv[Column.SRV_CAS_FLAGS] = SP.join("{}{}{}".format(k, KSP, v) for k, v in flags.items())
 
             self._services[fav_id] = Service(*srv[:Column.SRV_TOOLTIP])
             self._current_model.set_row(itr, srv)

@@ -1762,15 +1762,11 @@ class Application(Gtk.Application):
         yield True
         self._fav_model.clear()
         yield True
-        s_model = self._services_view.get_model()
-        self._services_view.set_model(None)
-        yield True
         for index, itr in enumerate([row.iter for row in self._services_model]):
             self._services_model.remove(itr)
             if index % self.DEL_FACTOR == 0:
                 yield True
         yield True
-        self._services_view.set_model(s_model)
         self._blacklist.clear()
         self._services.clear()
         self._rows_buffer.clear()
