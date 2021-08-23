@@ -10,7 +10,7 @@ from app.commons import run_idle
 from app.settings import SettingsType
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
 
 
 class RestoreType(Enum):
@@ -173,7 +173,7 @@ class BackupDialog:
         if not KeyboardKey.value_exist(key_code):
             return
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:
             self.on_remove(view)

@@ -3,7 +3,7 @@ import re
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings, PlayStreamsMode
+from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT
@@ -68,7 +68,8 @@ class SettingsDialog:
 
         self._dialog = builder.get_object("settings_dialog")
         self._dialog.set_transient_for(transient)
-        self._header_bar = builder.get_object("header_bar")
+        self._dialog.set_border_width(0)
+        self._dialog.set_margin_left(0)
         self._main_stack = builder.get_object("main_stack")
         # Network
         self._host_field = builder.get_object("host_field")
@@ -103,7 +104,6 @@ class SettingsDialog:
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
         self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
         # Streaming
-        header_separator = builder.get_object("header_separator")
         self._apply_presets_button = builder.get_object("apply_presets_button")
         self._transcoding_switch = builder.get_object("transcoding_switch")
         self._edit_preset_switch = builder.get_object("edit_preset_switch")
@@ -115,7 +115,6 @@ class SettingsDialog:
         self._audio_channels_combo_box = builder.get_object("audio_channels_combo_box")
         self._audio_sample_rate_combo_box = builder.get_object("audio_sample_rate_combo_box")
         self._audio_codec_combo_box = builder.get_object("audio_codec_combo_box")
-        self._apply_presets_button.bind_property("visible", header_separator, "visible")
         self._transcoding_switch.bind_property("active", builder.get_object("record_box"), "sensitive")
         self._edit_preset_switch.bind_property("active", self._apply_presets_button, "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("video_options_frame"), "sensitive")
@@ -170,7 +169,7 @@ class SettingsDialog:
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
         self._apply_profile_button = builder.get_object("apply_profile_button")
-        self._apply_profile_button.bind_property("visible", header_separator, "visible")
+        self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
         # Style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -182,10 +181,11 @@ class SettingsDialog:
         self.init_ui_elements(self._s_type)
         self.init_profiles()
 
-        if self._settings.is_darwin:
+        if not IS_LINUX:
             # Themes
+            builder.get_object("style_frame").set_visible(True)
+            builder.get_object("themes_support_frame").set_visible(True)
             self._layout_switch = builder.get_object("layout_switch")
-            self._layout_switch.bind_property("active", builder.get_object("bouquet_box"), "sensitive")
             self._layout_switch.set_active(self._ext_settings.alternate_layout)
             self._theme_frame = builder.get_object("theme_frame")
             self._theme_frame.set_visible(True)
@@ -201,7 +201,7 @@ class SettingsDialog:
     def init_ui_elements(self, s_type):
         is_enigma_profile = s_type is SettingsType.ENIGMA_2
         self._neutrino_radio_button.set_active(s_type is SettingsType.NEUTRINO_MP)
-        self.update_header_bar()
+        self.update_title()
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
         self._lang_combo_box.set_active_id(self._ext_settings.language)
@@ -219,12 +219,12 @@ class SettingsDialog:
                 self.on_profile_selected(self._profile_view, False)
         self._profile_remove_button.set_sensitive(len(self._profile_view.get_model()) > 1)
 
-    def update_header_bar(self):
-        label, sep, st = self._header_bar.get_subtitle().partition(":")
+    def update_title(self):
+        title = "{} [{}]"
         if self._s_type is SettingsType.ENIGMA_2:
-            self._header_bar.set_subtitle("{}: {}".format(label, self._enigma_radio_button.get_label()))
+            self._dialog.set_title(title.format(get_message("Options"), self._enigma_radio_button.get_label()))
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._header_bar.set_subtitle("{}: {}".format(label, self._neutrino_radio_button.get_label()))
+            self._dialog.set_title(title.format(get_message("Options"), self._neutrino_radio_button.get_label()))
 
     def show(self):
         self._dialog.run()
@@ -354,8 +354,7 @@ class SettingsDialog:
         self._ext_settings.tooltip_logo_size = int(self._tooltip_logo_size_button.get_active_id())
         self._ext_settings.list_font = self._list_font_button.get_font()
 
-        if self._ext_settings.is_darwin:
-            self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
+        if not IS_LINUX:
             self._ext_settings.alternate_layout = self._layout_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
@@ -623,7 +622,6 @@ class SettingsDialog:
 
     @run_idle
     def set_play_stream_mode(self, mode):
-        self._play_in_built_radio_button.set_sensitive(not self._settings.is_darwin)
         self._play_in_built_radio_button.set_active(mode is PlayStreamsMode.BUILT_IN)
         self._play_in_window_radio_button.set_active(mode is PlayStreamsMode.WINDOW)
         self._get_m3u_radio_button.set_active(mode is PlayStreamsMode.M3U)
@@ -794,7 +792,6 @@ class SettingsDialog:
 
     @run_idle
     def init_themes(self):
-        self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
         t_support = self._ext_settings.is_themes_support
         self._themes_support_switch.set_active(t_support)
         if t_support:

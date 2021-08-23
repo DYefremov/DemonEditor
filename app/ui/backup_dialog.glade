@@ -33,6 +33,12 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage" id="details_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">emblem-important-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
   <object class="GtkListStore" id="main_list_store">
     <columns>
       <!-- column-name date -->
@@ -41,41 +47,148 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="restore_bouquets_popup_menu_item">
+        <property name="label" translatable="yes">Restore bouquets</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_restore_bouquets" swapped="no"/>
+        <accelerator key="r" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="restore_all_popup_menu_item">
+        <property name="label" translatable="yes">Restore all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_restore_all" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_menu_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="remove_popup_menu_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="remove_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">user-trash-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="restore_all_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-select-all-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
+  <object class="GtkImage" id="restore_bouquets_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-revert-symbolic</property>
+    <property name="icon_size">1</property>
+  </object>
   <object class="GtkWindow" id="dialog_window">
     <property name="width_request">560</property>
     <property name="height_request">320</property>
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Backups</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">document-revert</property>
-    <property name="gravity">center</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header_bar">
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox" id="main_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Backups</property>
-        <property name="spacing">2</property>
-        <property name="show_close_button">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">5</property>
         <child>
-          <object class="GtkBox" id="header_box">
+          <object class="GtkBox" id="header_bar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="spacing">2</property>
             <child>
-              <object class="GtkButton" id="restore_bouquets_header_button">
+              <object class="GtkButtonBox" id="main_button_box">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Restore bouquets</property>
-                <signal name="clicked" handler="on_restore_bouquets" swapped="no"/>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="margin_left">15</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="layout_style">expand</property>
                 <child>
-                  <object class="GtkImage" id="restore_bouquets_header_button_image">
+                  <object class="GtkButton" id="restore_bouquets_header_button">
+                    <property name="label" translatable="yes">Restore bouquets</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">document-revert</property>
+                    <property name="receives_default">True</property>
+                    <property name="valign">center</property>
+                    <property name="image">restore_bouquets_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_restore_bouquets" swapped="no"/>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="restore_all_header_button">
+                    <property name="label" translatable="yes">Restore all</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="valign">center</property>
+                    <property name="image">restore_all_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_restore_all" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="remove_header_button">
+                    <property name="label" translatable="yes">Remove</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="receives_default">True</property>
+                    <property name="valign">center</property>
+                    <property name="image">remove_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_remove" swapped="no"/>
+                    <accelerator key="Delete" signal="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -85,93 +198,43 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="restore_all_header_button">
+              <object class="GtkCheckButton" id="info_check_button">
+                <property name="label" translatable="yes">Details</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Restore all</property>
-                <signal name="clicked" handler="on_restore_all" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="restore_all_header_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">edit-select-all</property>
-                  </object>
-                </child>
+                <property name="can_focus">False</property>
+                <property name="receives_default">False</property>
+                <property name="valign">center</property>
+                <property name="margin_right">15</property>
+                <property name="image">details_image</property>
+                <property name="always_show_image">True</property>
+                <property name="draw_indicator">False</property>
+                <signal name="toggled" handler="on_info_button_toggled" swapped="no"/>
+                <accelerator key="i" signal="clicked" modifiers="Primary"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="remove_header_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Remove</property>
-                <signal name="clicked" handler="on_remove" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="remove_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">user-trash</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="info_check_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Details</property>
-            <property name="draw_indicator">False</property>
-            <signal name="toggled" handler="on_info_button_toggled" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="info_check_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-dialog-info</property>
-              </object>
-            </child>
-            <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+            <style>
+              <class name="primary-toolbar"/>
+            </style>
           </object>
           <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
           </packing>
         </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox" id="main_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkPaned" id="main_paned">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="margin_bottom">5</property>
             <property name="wide_handle">True</property>
             <child>
               <object class="GtkScrolledWindow" id="main_view_scrolled_window">
@@ -248,7 +311,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -276,6 +339,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel" id="message_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
                     <property name="label" translatable="yes">message</property>
                   </object>
                   <packing>
@@ -298,59 +362,6 @@ Author: Dmitriy Yefremov
             <property name="position">2</property>
           </packing>
         </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="restore_popup_menu_item_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-revert-to-saved</property>
-  </object>
-  <object class="GtkImage" id="restore_popup_menu_item_image2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-select-all</property>
-  </object>
-  <object class="GtkMenu" id="popup_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="restore_bouquets_popup_menu_item">
-        <property name="label" translatable="yes">Restore bouquets</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">restore_popup_menu_item_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_restore_bouquets" swapped="no"/>
-        <accelerator key="r" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="restore_all_popup_menu_item">
-        <property name="label" translatable="yes">Restore all</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">restore_popup_menu_item_image2</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_restore_all" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="popup_menu_separator">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="remove_popup_menu_item">
-        <property name="label">gtk-remove</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_remove" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
