@@ -9,10 +9,11 @@ from pathlib import Path
 from pprint import pformat
 from textwrap import dedent
 
+SEP = os.sep
 HOME_PATH = str(Path.home())
-CONFIG_PATH = HOME_PATH + "/.config/demon-editor/"
+CONFIG_PATH = HOME_PATH + "{}.config{}demon-editor{}".format(SEP, SEP, SEP)
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = HOME_PATH + "/DemonEditor/data/"
+DATA_PATH = HOME_PATH + "{}DemonEditor{}data{}".format(SEP, SEP, SEP)
 GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_DARWIN = sys.platform == "darwin"
@@ -27,7 +28,7 @@ class Defaults(Enum):
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
     FORCE_BQ_NAMES = False
-    HTTP_API_SUPPORT = False
+    HTTP_API_SUPPORT = True
     ENABLE_YT_DL = False
     ENABLE_SEND_TO = False
     USE_COLORS = True
@@ -37,18 +38,18 @@ class Defaults(Enum):
     LIST_PICON_SIZE = 32
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
-    STREAM_LIB = "vlc"
+    STREAM_LIB = "mpv" if IS_WIN else "vlc"
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = DATA_PATH + "records/"
+    RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
-    ACTIVE_TRANSCODING_PRESET = "720p TV/device"
+    ACTIVE_TRANSCODING_PRESET = "720p TV{}device".format(SEP)
 
 
 def get_settings():
     if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
         write_settings(get_default_settings())
 
-    with open(CONFIG_FILE, "r") as config_file:
+    with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
         return json.load(config_file)
 
 
@@ -82,18 +83,18 @@ def get_default_transcoding_presets():
 
 def write_settings(config):
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-    with open(CONFIG_FILE, "w") as config_file:
+    with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
         json.dump(config, config_file, indent="    ")
 
 
 def set_local_paths(settings, profile_name, data_path=DATA_PATH, use_profile_folder=False):
-    settings["data_local_path"] = "{}{}/".format(data_path, profile_name)
+    settings["data_local_path"] = "{}{}{}".format(data_path, profile_name, SEP)
     if use_profile_folder:
-        settings["picons_local_path"] = "{}{}/{}/".format(data_path, profile_name, "picons")
-        settings["backup_local_path"] = "{}{}/{}/".format(data_path, profile_name, "backup")
+        settings["picons_local_path"] = "{}{}{}{}{}".format(data_path, profile_name, SEP, "picons", SEP)
+        settings["backup_local_path"] = "{}{}{}{}{}".format(data_path, profile_name, SEP, "backup", SEP)
     else:
-        settings["picons_local_path"] = "{}{}/{}/".format(data_path, "picons", profile_name)
-        settings["backup_local_path"] = "{}{}/{}/".format(data_path, "backup", profile_name)
+        settings["picons_local_path"] = "{}{}{}{}{}".format(data_path, "picons", SEP, profile_name, SEP)
+        settings["backup_local_path"] = "{}{}{}{}{}".format(data_path, "backup", SEP, profile_name, SEP)
 
 
 class SettingsType(IntEnum):
@@ -110,11 +111,11 @@ class SettingsType(IntEnum):
                     "http_port": "80", "http_timeout": 5, "http_use_ssl": False,
                     "telnet_port": "23", "telnet_timeout": 5,
                     "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
-                    "satellites_xml_path": "/etc/tuxbox/", "data_local_path": DATA_PATH + "enigma2/",
+                    "satellites_xml_path": "/etc/tuxbox/", "data_local_path": "{}enigma2{}".format(DATA_PATH, SEP),
                     "picons_path": "/usr/share/enigma2/picon/",
-                    "picons_local_path": DATA_PATH + "enigma2/picons/",
-                    "backup_local_path": DATA_PATH + "enigma2/backup/"}
-        elif self is self.NEUTRINO_MP:
+                    "picons_local_path": "{}enigma2{}picons{}".format(DATA_PATH, SEP, SEP),
+                    "backup_local_path": "{}enigma2{}backup{}".format(DATA_PATH, SEP, SEP)}
+        elif self is SettingsType.NEUTRINO_MP:
             return {"setting_type": self,
                     "host": "127.0.0.1", "port": "21", "timeout": 5,
                     "user": "root", "password": "root",
