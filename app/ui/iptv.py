@@ -841,7 +841,8 @@ class YtListImportDialog:
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
                               objects=("yt_import_dialog_window", "yt_liststore", "yt_quality_liststore",
-                                       "yt_popup_menu", "remove_selection_image"))
+                                       "yt_popup_menu", "remove_selection_image", "yt_receive_image",
+                                       "yt_import_image"))
 
         self._dialog = builder.get_object("yt_import_dialog_window")
         self._dialog.set_transient_for(transient)
