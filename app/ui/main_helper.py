@@ -1,16 +1,16 @@
 """ Helper module for the ui. """
 import os
 import shutil
+from collections import defaultdict
 from urllib.parse import unquote
 
 from gi.repository import GdkPixbuf, GLib
 
-from app.commons import run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.settings import SettingsType
-from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
+from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
 
@@ -528,10 +528,16 @@ def get_picon_pixbuf(path, size=32):
         pass
 
 
-# ***************** Bouquets *********************#
+# ***************** Bouquets ********************* #
 
 def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
-    """ Auto-generate and append list of bouquets """
+    """ Auto-generate and append list of bouquets. """
+    model, paths = view.get_selection().get_selected_rows()
+    single_types = (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE)
+    if gen_type in single_types:
+        if not is_only_one_item_selected(paths, transient):
+            return
+
     fav_id_index = Column.SRV_FAV_ID
     index = Column.SRV_TYPE
     if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE):
@@ -539,50 +545,41 @@ def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
     elif gen_type in (BqGenType.SAT, BqGenType.EACH_SAT):
         index = Column.SRV_POS
 
-    model, paths = view.get_selection().get_selected_rows()
+    # Splitting services [caching] by column value.
+    s_data = defaultdict(list)
+    for row in model:
+        s_data[row[index]].append(BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0))
+
     bq_type = BqType.BOUQUET.value if s_type is SettingsType.NEUTRINO_MP else BqType.TV.value
-    if gen_type in (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE):
-        if not is_only_one_item_selected(paths, transient):
-            return
-        service = Service(*model[paths][:Column.SRV_TOOLTIP])
-        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
-                        [service.package if gen_type is BqGenType.PACKAGE else
-                         service.pos if gen_type is BqGenType.SAT else service.service_type], s_type)
-    else:
-        wait_dialog = WaitDialog(transient)
-        wait_dialog.show()
-        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
-                        {row[index] for row in model}, s_type, wait_dialog)
-
-
-@run_task
-def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names, s_type, wait_dialog=None):
     bq_index = 0 if s_type is SettingsType.ENIGMA_2 else 1
+    bq_root_iter = bq_view.get_model().get_iter(bq_index)
+    srv = Service(*model[paths][:Column.SRV_TOOLTIP])
+    cond = srv.package if gen_type is BqGenType.PACKAGE else srv.pos if gen_type is BqGenType.SAT else srv.service_type
     bq_view.expand_row(Gtk.TreePath(bq_index), 0)
-    bqs_model = bq_view.get_model()
-    bouquets_names = get_bouquets_names(bqs_model)
 
-    for pos, name in enumerate(sorted(names)):
-        if name not in bouquets_names:
-            services = [BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0)
-                        for row in model if row[index] == name]
-            callback(Bouquet(name=name, type=bq_type, services=services, locked=None, hidden=None),
-                     bqs_model.get_iter(bq_index))
+    bq_names = get_bouquets_names(bq_view.get_model())
 
-    if wait_dialog is not None:
-        wait_dialog.destroy()
+    if gen_type in single_types:
+        if cond in bq_names:
+            show_dialog(DialogType.ERROR, transient, "A bouquet with that name exists!")
+        else:
+            callback(Bouquet(cond, bq_type, s_data.get(cond)), bq_root_iter)
+    else:
+        # We add a bouquet only if the given name is missing [keys - names]!
+        for name in sorted(s_data.keys() - bq_names):
+            callback(Bouquet(name, BqType.TV.value, s_data.get(name)), bq_root_iter)
 
 
 def get_bouquets_names(model):
     """ Returns all current bouquets names """
-    bouquets_names = []
+    bouquets_names = set()
     for row in model:
         itr = row.iter
         if model.iter_has_child(itr):
             num_of_children = model.iter_n_children(itr)
             for num in range(num_of_children):
                 child_itr = model.iter_nth_child(itr, num)
-                bouquets_names.append(model[child_itr][0])
+                bouquets_names.add(model[child_itr][0])
     return bouquets_names
 
 

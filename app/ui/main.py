@@ -3334,6 +3334,10 @@ class Application(Gtk.Application):
         self.create_bouquets(BqGenType.EACH_TYPE)
 
     def create_bouquets(self, g_type):
+        if self._services_load_spinner.get_property("active"):
+            self.show_error_message("Data loading in progress!")
+            return
+
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._s_type,
                      self.append_bouquet)
 
