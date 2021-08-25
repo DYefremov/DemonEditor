@@ -26,17 +26,16 @@
 #
 
 
-import re
 from collections import defaultdict
-from xml.dom.minidom import Document, parseString
+from xml.dom.minidom import Document, parse
+from xml.parsers.expat import ExpatError
 
 from app.commons import log
 from app.eparser.ecommons import (Service, POLARIZATION, FEC, SYSTEM, SERVICE_TYPE, PROVIDER, T_SYSTEM, TrType,
                                   SystemCable)
+from app.eparser.neutrino import get_xml_attributes, SP, KSP, get_attributes, API_VER
 
 _FILE = "services.xml"
-SP = "_:::_"
-KSP = "_::_"
 
 
 def write_services(path, services):
@@ -53,7 +52,7 @@ class NeutrinoServiceWriter:
         self._path = path
         self._services = services
 
-        self._api = "4"
+        self._api = API_VER
         self._doc = Document()
         self._root = self._doc.createElement("zapit")
         self._root.setAttribute("api", self._api)
@@ -81,7 +80,7 @@ class NeutrinoServiceWriter:
 
         for sat in sats:
             sat_elem = self._doc.createElement(s_type)
-            attrs = self.get_attributes(sat)
+            attrs = get_attributes(sat)
             for k, v in attrs.items():
                 sat_elem.setAttribute(k, v)
 
@@ -93,13 +92,13 @@ class NeutrinoServiceWriter:
 
             for tr in transponders:
                 tr_elem = self._doc.createElement("TS")
-                for k, v in self.get_attributes(tr).items():
+                for k, v in get_attributes(tr).items():
                     tr_elem.setAttribute(k, v)
                 sat_elem.appendChild(tr_elem)
 
                 for srv in transponders.get(tr):
                     srv_elem = self._doc.createElement("S")
-                    s_attrs = self.get_attributes(srv.data_id)
+                    s_attrs = get_attributes(srv.data_id)
                     api = s_attrs.pop("api", self._api)
                     if api != self._api:
                         self._root.setAttribute("api", api)
@@ -108,10 +107,6 @@ class NeutrinoServiceWriter:
                         srv_elem.setAttribute(k, v)
 
                     tr_elem.appendChild(srv_elem)
-
-    @staticmethod
-    def get_attributes(data):
-        return {el[0]: el[1] for el in (e.split(KSP) for e in data.split(SP))}
 
 
 class NeutrinoServicesReader:
@@ -124,56 +119,60 @@ class NeutrinoServicesReader:
         self._services = []
 
     def get_services(self):
-        with open(self._path + _FILE, "rb") as f:
-            # Pre-processing is required to replace the '&' character.
-            dom = parseString(re.sub("&", "&amp;", f.read().decode(encoding="utf-8", errors="ignore")))
+        try:
+            dom = parse(self._path + _FILE)
+        except ExpatError as e:
+            # Some neutrino configuration files may contain text data with invalid characters ['&', etc].
+            # https://www.w3.org/TR/xml/#syntax
+            # Apparently there is an error in Neutrino itself and the document is not initially formed correctly.
+            # TODO: Come up with a way to handle this case.
+            msg = "The file [{}] is not formatted correctly or contains invalid characters! Cause: {}"
 
-            for root in dom.getElementsByTagName("zapit"):
-                if root.hasAttributes():
-                    api = root.attributes["api"]
-                    self._api = api.value if api else self._api
+            raise ValueError(msg.format(self._path + _FILE, e))
 
-                for elem in root.getElementsByTagName("sat"):
-                    if elem.hasAttributes():
-                        sat_attrs = self.get_attributes(elem)
-                        sat_attrs["name"] = re.sub("&amp;", "&", sat_attrs.get("name", ""))
-                        sat_pos = 0
-                        try:
-                            sat_pos = int(sat_attrs.get("position", "0"))
-                            sat_pos = "{:0.1f}{}".format(abs(sat_pos / 10), "W" if sat_pos < 0 else "E")
-                        except ValueError as e:
-                            log("Neutrino parsing error [parse sat position]: {}".format(e))
-                        sat = SP.join("{}{}{}".format(k, KSP, v) for k, v in sat_attrs.items())
-                        for tr_elem in elem.getElementsByTagName("TS"):
-                            if tr_elem.hasAttributes():
-                                self.parse_sat_transponder(sat, sat_pos, tr_elem)
+        for root in dom.getElementsByTagName("zapit"):
+            if root.hasAttributes():
+                api = root.attributes["api"]
+                self._api = api.value if api else self._api
 
-                # Terrestrial DVB-T[2].
-                for elem in root.getElementsByTagName("terrestrial"):
-                    if elem.hasAttributes():
-                        terr_attrs = self.get_attributes(elem)
-                        terr_attrs["name"] = re.sub("&amp;", "&", terr_attrs.get("name", ""))
-                        terr = SP.join("{}{}{}".format(k, KSP, v) for k, v in terr_attrs.items())
+            for elem in root.getElementsByTagName("sat"):
+                if elem.hasAttributes():
+                    sat_attrs = get_xml_attributes(elem)
+                    sat_pos = 0
+                    try:
+                        sat_pos = int(sat_attrs.get("position", "0"))
+                        sat_pos = "{:0.1f}{}".format(abs(sat_pos / 10), "W" if sat_pos < 0 else "E")
+                    except ValueError as e:
+                        log("Neutrino parsing error [parse sat position]: {}".format(e))
+                    sat = SP.join("{}{}{}".format(k, KSP, v) for k, v in sat_attrs.items())
+                    for tr_elem in elem.getElementsByTagName("TS"):
+                        if tr_elem.hasAttributes():
+                            self.parse_sat_transponder(sat, sat_pos, tr_elem)
 
-                        for tr_elem in elem.getElementsByTagName("TS"):
-                            if tr_elem.hasAttributes():
-                                self.parse_ct_transponder(terr, tr_elem, TrType.Terrestrial)
+            # Terrestrial DVB-T[2].
+            for elem in root.getElementsByTagName("terrestrial"):
+                if elem.hasAttributes():
+                    terr_attrs = get_xml_attributes(elem)
+                    terr = SP.join("{}{}{}".format(k, KSP, v) for k, v in terr_attrs.items())
 
-                # Cable.
-                for elem in root.getElementsByTagName("cable"):
-                    if elem.hasAttributes():
-                        cable_attrs = self.get_attributes(elem)
-                        terr_attrs["name"] = re.sub("&amp;", "&", cable_attrs.get("name", ""))
-                        cable = SP.join("{}{}{}".format(k, KSP, v) for k, v in cable_attrs.items())
+                    for tr_elem in elem.getElementsByTagName("TS"):
+                        if tr_elem.hasAttributes():
+                            self.parse_ct_transponder(terr, tr_elem, TrType.Terrestrial)
 
-                        for tr_elem in elem.getElementsByTagName("TS"):
-                            if tr_elem.hasAttributes():
-                                self.parse_ct_transponder(cable, tr_elem, TrType.Cable)
+            # Cable.
+            for elem in root.getElementsByTagName("cable"):
+                if elem.hasAttributes():
+                    cable_attrs = get_xml_attributes(elem)
+                    cable = SP.join("{}{}{}".format(k, KSP, v) for k, v in cable_attrs.items())
 
-            return self._services
+                    for tr_elem in elem.getElementsByTagName("TS"):
+                        if tr_elem.hasAttributes():
+                            self.parse_ct_transponder(cable, tr_elem, TrType.Cable)
+
+        return self._services
 
     def parse_sat_transponder(self, sat, sat_pos, tr_elem):
-        tr_attr = self.get_attributes(tr_elem)
+        tr_attr = get_xml_attributes(tr_elem)
         tr = SP.join("{}{}{}".format(k, KSP, v) for k, v in tr_attr.items())
         tr_id = tr_attr.get("id", "0").lstrip("0")
         on = tr_attr.get("on", "0")
@@ -191,11 +190,9 @@ class NeutrinoServicesReader:
 
         for srv_elem in tr_elem.getElementsByTagName("S"):
             if srv_elem.hasAttributes():
-                at = self.get_attributes(srv_elem)
+                at = get_xml_attributes(srv_elem)
                 at["api"] = self._api
                 ssid, name, s_type, sys = at.get("i", "0"), at.get("n", ""), at.get("t", "3"), at.get("s", "0")
-                name = re.sub("amp;", "", name)
-                at["n"] = name
                 data_id = SP.join("{}{}{}".format(k, KSP, v) for k, v in at.items())
                 fav_id = "{}:{}:{}".format(tr_id, on.lstrip("0"), ssid.lstrip("0"))
                 picon_id = "{}{}{}.png".format(tr_id, on, ssid)
@@ -207,17 +204,15 @@ class NeutrinoServicesReader:
                 self._services.append(srv)
 
     def parse_ct_transponder(self, terr, tr_elem, tr_type):
-        attrs = self.get_attributes(tr_elem)
+        attrs = get_xml_attributes(tr_elem)
         tr = SP.join("{}{}{}".format(k, KSP, v) for k, v in attrs.items())
         tr_id, on, freq = attrs.get("id", "0").lstrip("0"), attrs.get("on", "0"), attrs.get("frq", "0")
 
         for srv_elem in tr_elem.getElementsByTagName("S"):
             if srv_elem.hasAttributes():
-                s_at = self.get_attributes(srv_elem)
+                s_at = get_xml_attributes(srv_elem)
                 s_at["api"] = self._api
                 ssid, name, s_type, sys = s_at.get("i", "0"), s_at.get("n", ""), s_at.get("t", "3"), s_at.get("s", "0")
-                name = re.sub("amp;", "", name)
-                s_at["n"] = name
                 data_id = SP.join("{}{}{}".format(k, KSP, v) for k, v in s_at.items())
                 fav_id = "{}:{}:{}".format(tr_id, on.lstrip("0"), ssid.lstrip("0"))
                 picon_id = "{}{}{}.png".format(tr_id, on, ssid)
@@ -237,11 +232,6 @@ class NeutrinoServicesReader:
                 srv = Service(terr, tr_type.value, None, name, None, None, prv, st, None, picon_id, ssid,
                               freq, "0", None, None, sys, pos, data_id, fav_id, tr)
                 self._services.append(srv)
-
-    @staticmethod
-    def get_attributes(attr):
-        attrs = attr.attributes
-        return {t: attrs[t].value for t in attrs.keys()}
 
 
 if __name__ == "__main__":

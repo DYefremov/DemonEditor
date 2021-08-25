@@ -35,7 +35,7 @@ from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, 
                                   get_value_by_name, FEC_DEFAULT, PLS_MODE, SERVICE_TYPE, T_MODULATION, C_MODULATION,
                                   TrType, SystemCable, T_SYSTEM, BANDWIDTH, TRANSMISSION_MODE, GUARD_INTERVAL, T_FEC,
                                   HIERARCHY, A_MODULATION)
-from app.eparser.neutrino.services import NeutrinoServiceWriter, SP, KSP
+from app.eparser.neutrino import get_attributes, SP, KSP
 from app.settings import SettingsType
 from .dialogs import show_dialog, DialogType, Action, get_builder
 from .main_helper import get_base_model
@@ -353,7 +353,7 @@ class ServiceDetailsDialog:
     def init_neutrino_data(self, srv):
         if self._tr_type is not TrType.Satellite:
             return
-        tr_data = NeutrinoServiceWriter.get_attributes(srv.transponder)
+        tr_data = get_attributes(srv.transponder)
         self._transponder_id_entry.set_text(str(int(tr_data.get("id", "0"), 16)))
         self._network_id_entry.set_text(str(int(tr_data.get("on", "0"), 16)))
         self.select_active_text(self._invertion_combo_box, Inversion(tr_data.get("inv", "2")).name)
@@ -543,7 +543,7 @@ class ServiceDetailsDialog:
         if self._s_type is SettingsType.ENIGMA_2:
             return self.get_enigma2_flags()
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            flags = NeutrinoServiceWriter.get_attributes(self._old_service.flags_cas)
+            flags = get_attributes(self._old_service.flags_cas)
             flags["position"] = self.get_sat_position()
             return SP.join("{}{}{}".format(k, KSP, v) for k, v in flags.items())
 
@@ -599,7 +599,7 @@ class ServiceDetailsDialog:
             fav_id = self._ENIGMA2_FAV_ID.format(ssid, tr_id, net_id, namespace)
             return fav_id, data_id
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            data = NeutrinoServiceWriter.get_attributes(self._old_service.data_id)
+            data = get_attributes(self._old_service.data_id)
             data["n"] = self._name_entry.get_text()
             data["t"] = "{:x}".format(int(service_type))
             data["i"] = "{:04x}".format(ssid)
@@ -652,7 +652,7 @@ class ServiceDetailsDialog:
 
                 return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            tr_data = NeutrinoServiceWriter.get_attributes(self._old_service.transponder)
+            tr_data = get_attributes(self._old_service.transponder)
             tr_data["frq"] = freq
             tr_data["sr"] = rate
             tr_data["pol"] = pol
@@ -721,7 +721,7 @@ class ServiceDetailsDialog:
                 continue
 
             if self._s_type is SettingsType.NEUTRINO_MP:
-                flags = NeutrinoServiceWriter.get_attributes(srv[Column.SRV_CAS_FLAGS])
+                flags = get_attributes(srv[Column.SRV_CAS_FLAGS])
                 flags["position"] = sat_pos
                 srv[Column.SRV_CAS_FLAGS] = SP.join("{}{}{}".format(k, KSP, v) for k, v in flags.items())
 
