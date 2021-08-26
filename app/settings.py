@@ -43,6 +43,12 @@ class Defaults(Enum):
     RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
     ACTIVE_TRANSCODING_PRESET = "720p TV{}device".format(SEP)
+    ENIGMA_2_PICONS_PATHS = ("/usr/share/enigma2/picon/",
+                             "/media/hdd/picon/",
+                             "/media/usb/picon/",
+                             "/media/mmc/picon/",
+                             "/media/cf/picon/")
+    NEUTRINO_PICONS_PATHS = ("/usr/share/tuxbox/neutrino/icons/logo/",)
 
 
 def get_settings():
@@ -186,7 +192,7 @@ class Settings:
         for k, v in self.setting_type.get_default_settings().items():
             self._cp_settings[k] = v
 
-        def_path = self.default_data_path
+        def_path = DATA_PATH
         def_path += "enigma2/" if self.setting_type is SettingsType.ENIGMA_2 else "neutrino/"
         set_local_paths(self._cp_settings, self._current_profile, def_path, self.profile_folder_is_default)
 
@@ -359,6 +365,12 @@ class Settings:
     def picons_path(self, value):
         self._cp_settings["picons_path"] = value
 
+    @property
+    def picons_paths(self):
+        if self.setting_type is SettingsType.NEUTRINO_MP:
+            return Defaults.NEUTRINO_PICONS_PATHS.value
+        return Defaults.ENIGMA_2_PICONS_PATHS.value
+
     # ***** Local paths ***** #
 
     @property
@@ -368,14 +380,6 @@ class Settings:
     @profile_folder_is_default.setter
     def profile_folder_is_default(self, value):
         self._settings["profile_folder_is_default"] = value
-
-    @property
-    def default_data_path(self):
-        return self._settings.get("default_data_path", DATA_PATH)
-
-    @default_data_path.setter
-    def default_data_path(self, value):
-        self._settings["default_data_path"] = value
 
     @property
     def data_local_path(self):

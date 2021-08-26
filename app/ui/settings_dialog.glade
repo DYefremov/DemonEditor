@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -99,7 +99,7 @@ Author: Dmitriy Yefremov
         <property name="image">set_default_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_profile_set_default" swapped="no"/>
-        <accelerator key="d" signal="activate" modifiers="Primary"/>
+        <accelerator key="d" signal="activate"/>
       </object>
     </child>
     <child>
@@ -143,7 +143,7 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="response" handler="on_response" swapped="no"/>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
@@ -157,17 +157,18 @@ Author: Dmitriy Yefremov
             <property name="valign">center</property>
             <property name="margin_left">15</property>
             <property name="margin_right">15</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="layout_style">start</property>
             <child>
-              <object class="GtkButton" id="apply_profile_button">
-                <property name="label" translatable="yes">Apply</property>
+              <object class="GtkButton" id="reset_button">
+                <property name="label" translatable="yes">Reset</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Apply profile settings</property>
+                <property name="tooltip_text" translatable="yes">Reset profile</property>
                 <property name="valign">center</property>
-                <signal name="clicked" handler="on_apply_profile_settings" swapped="no"/>
-                <accelerator key="s" signal="clicked" modifiers="Primary"/>
+                <signal name="clicked" handler="on_reset" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -193,23 +194,7 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="reset_button">
-                <property name="label" translatable="yes">Reset</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Reset profile</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_reset" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="apply_button">
+              <object class="GtkButton">
                 <property name="label" translatable="yes">Save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -217,28 +202,27 @@ Author: Dmitriy Yefremov
                 <property name="tooltip_text" translatable="yes">Save</property>
                 <property name="valign">center</property>
                 <signal name="clicked" handler="apply_settings" swapped="no"/>
+                <accelerator key="s" signal="clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">6</property>
+                <property name="position">2</property>
                 <property name="secondary">True</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="ok_button">
-                <property name="label">gtk-ok</property>
+                <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Ok</property>
                 <property name="valign">center</property>
-                <property name="use_stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">7</property>
+                <property name="position">3</property>
                 <property name="secondary">True</property>
               </packing>
             </child>
@@ -276,402 +260,404 @@ Author: Dmitriy Yefremov
             <property name="margin_bottom">5</property>
             <signal name="notify::visible-child" handler="on_main_settings_visible" swapped="no"/>
             <child>
-              <object class="GtkBox" id="profiles_box">
+              <object class="GtkBox" id="profiles_net_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
+                <property name="spacing">5</property>
                 <child>
-                  <object class="GtkBox" id="profiles_net_box">
+                  <object class="GtkFrame" id="profile_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="label_xalign">0.05000000074505806</property>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkFrame" id="profile_frame">
+                      <object class="GtkBox" id="profile_box">
+                        <property name="width_request">220</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
-                        <property name="label_xalign">0.05000000074505806</property>
-                        <property name="shadow_type">in</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">2</property>
                         <child>
-                          <object class="GtkBox" id="profile_box">
-                            <property name="width_request">155</property>
+                          <object class="GtkScrolledWindow" id="profile_tree_view_scrolled">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
+                            <property name="can_focus">True</property>
+                            <property name="margin_left">1</property>
+                            <property name="margin_right">1</property>
+                            <property name="margin_bottom">1</property>
+                            <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkScrolledWindow" id="profile_tree_view_scrolled">
+                              <object class="GtkTreeView" id="profile_tree_view">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="margin_left">1</property>
                                 <property name="margin_right">1</property>
-                                <property name="margin_bottom">1</property>
-                                <property name="shadow_type">in</property>
+                                <property name="model">profile_lists_tore</property>
+                                <property name="headers_visible">False</property>
+                                <property name="search_column">0</property>
+                                <signal name="button-press-event" handler="on_view_popup_menu" object="profiles_popup_menu" swapped="no"/>
+                                <signal name="cursor-changed" handler="on_profile_selected" swapped="no"/>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection"/>
+                                </child>
                                 <child>
-                                  <object class="GtkTreeView" id="profile_tree_view">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="margin_left">1</property>
-                                    <property name="margin_right">1</property>
-                                    <property name="model">profile_lists_tore</property>
-                                    <property name="headers_visible">False</property>
-                                    <property name="search_column">0</property>
-                                    <signal name="button-press-event" handler="on_view_popup_menu" object="profiles_popup_menu" swapped="no"/>
-                                    <signal name="cursor-changed" handler="on_profile_selected" swapped="no"/>
-                                    <child internal-child="selection">
-                                      <object class="GtkTreeSelection"/>
-                                    </child>
+                                  <object class="GtkTreeViewColumn" id="prifile_column">
+                                    <property name="sizing">autosize</property>
+                                    <property name="min_width">70</property>
+                                    <property name="title" translatable="yes">Profile</property>
+                                    <property name="expand">True</property>
+                                    <property name="clickable">True</property>
+                                    <property name="reorderable">True</property>
+                                    <property name="sort_column_id">0</property>
                                     <child>
-                                      <object class="GtkTreeViewColumn" id="prifile_column">
-                                        <property name="sizing">autosize</property>
-                                        <property name="min_width">70</property>
-                                        <property name="title" translatable="yes">Profile</property>
-                                        <property name="expand">True</property>
-                                        <property name="clickable">True</property>
-                                        <property name="reorderable">True</property>
-                                        <property name="sort_column_id">0</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="profile_renderer">
-                                            <property name="editable">True</property>
-                                            <property name="ellipsize">end</property>
-                                            <signal name="edited" handler="on_profile_edited" swapped="no"/>
-                                          </object>
-                                          <attributes>
-                                            <attribute name="text">0</attribute>
-                                          </attributes>
-                                        </child>
+                                      <object class="GtkCellRendererText" id="profile_renderer">
+                                        <property name="editable">True</property>
+                                        <property name="ellipsize">end</property>
+                                        <signal name="edited" handler="on_profile_edited" swapped="no"/>
                                       </object>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
                                     </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn">
+                                    <property name="sizing">fixed</property>
+                                    <property name="title" translatable="yes">Default</property>
                                     <child>
-                                      <object class="GtkTreeViewColumn">
-                                        <property name="sizing">fixed</property>
-                                        <property name="title" translatable="yes">Default</property>
-                                        <child>
-                                          <object class="GtkCellRendererPixbuf" id="emblem_render">
-                                            <property name="xpad">5</property>
-                                          </object>
-                                          <attributes>
-                                            <attribute name="pixbuf">1</attribute>
-                                          </attributes>
-                                        </child>
+                                      <object class="GtkCellRendererPixbuf" id="emblem_render">
+                                        <property name="xpad">5</property>
                                       </object>
+                                      <attributes>
+                                        <attribute name="pixbuf">1</attribute>
+                                      </attributes>
                                     </child>
                                   </object>
                                 </child>
                               </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButtonBox" id="profile_button_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="margin_left">1</property>
+                            <property name="margin_right">1</property>
+                            <property name="margin_bottom">1</property>
+                            <property name="layout_style">expand</property>
+                            <child>
+                              <object class="GtkButton" id="profile_add_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Add</property>
+                                <property name="valign">center</property>
+                                <signal name="clicked" handler="on_profile_add" swapped="no"/>
+                                <child>
+                                  <object class="GtkImage" id="profile_add_button_image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="icon_name">list-add-symbolic</property>
+                                  </object>
+                                </child>
+                                <accelerator key="Insert" signal="clicked"/>
+                              </object>
                               <packing>
-                                <property name="expand">True</property>
+                                <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButtonBox" id="profile_button_box">
+                              <object class="GtkButton" id="profile_edit_button">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Rename</property>
                                 <property name="valign">center</property>
-                                <property name="margin_left">1</property>
-                                <property name="margin_right">1</property>
-                                <property name="margin_bottom">1</property>
-                                <property name="layout_style">expand</property>
+                                <signal name="clicked" handler="on_profile_edit" swapped="no"/>
                                 <child>
-                                  <object class="GtkButton" id="profile_add_button">
+                                  <object class="GtkImage" id="profile_edit_button_image">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="tooltip_text" translatable="yes">Add</property>
-                                    <property name="valign">center</property>
-                                    <signal name="clicked" handler="on_profile_add" swapped="no"/>
-                                    <child>
-                                      <object class="GtkImage" id="profile_add_button_image">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">list-add-symbolic</property>
-                                      </object>
-                                    </child>
-                                    <accelerator key="Insert" signal="clicked"/>
+                                    <property name="icon_name">document-edit-symbolic</property>
                                   </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
                                 </child>
-                                <child>
-                                  <object class="GtkButton" id="profile_edit_button">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="tooltip_text" translatable="yes">Rename</property>
-                                    <property name="valign">center</property>
-                                    <signal name="clicked" handler="on_profile_edit" swapped="no"/>
-                                    <child>
-                                      <object class="GtkImage" id="profile_edit_button_image">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">document-edit-symbolic</property>
-                                      </object>
-                                    </child>
-                                    <accelerator key="F2" signal="clicked"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="profile_remove_button">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="tooltip_text" translatable="yes">Remove</property>
-                                    <property name="valign">center</property>
-                                    <signal name="clicked" handler="on_profile_remove" swapped="no"/>
-                                    <child>
-                                      <object class="GtkImage" id="profile_remove_button_image">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">list-remove-symbolic</property>
-                                      </object>
-                                    </child>
-                                    <accelerator key="Delete" signal="clicked"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="profile_set_default_button">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="tooltip_text" translatable="yes">Set default</property>
-                                    <property name="valign">center</property>
-                                    <signal name="clicked" handler="on_profile_set_default" swapped="no"/>
-                                    <child>
-                                      <object class="GtkImage" id="profile_set_default_button_image">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="icon_name">emblem-default</property>
-                                      </object>
-                                    </child>
-                                    <accelerator key="d" signal="clicked"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="pack_type">end</property>
-                                    <property name="position">3</property>
-                                    <property name="secondary">True</property>
-                                  </packing>
-                                </child>
+                                <accelerator key="F2" signal="clicked"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="profile_remove_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Remove</property>
+                                <property name="valign">center</property>
+                                <signal name="clicked" handler="on_profile_remove" swapped="no"/>
+                                <child>
+                                  <object class="GtkImage" id="profile_remove_button_image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="icon_name">list-remove-symbolic</property>
+                                  </object>
+                                </child>
+                                <accelerator key="Delete" signal="clicked"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="profile_set_default_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Set default</property>
+                                <property name="valign">center</property>
+                                <signal name="clicked" handler="on_profile_set_default" swapped="no"/>
+                                <child>
+                                  <object class="GtkImage" id="profile_set_default_button_image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="icon_name">emblem-default</property>
+                                  </object>
+                                </child>
+                                <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
                                 <property name="position">3</property>
+                                <property name="secondary">True</property>
                               </packing>
                             </child>
                           </object>
-                        </child>
-                        <child type="label">
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Profile:</property>
-                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">3</property>
+                          </packing>
                         </child>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
-                    <child>
-                      <object class="GtkBox" id="prifile_box">
+                    <child type="label">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="orientation">vertical</property>
+                        <property name="label" translatable="yes">Profile:</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="prifile_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkFrame" id="network_settings_frame">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="label_xalign">0.019999999552965164</property>
+                        <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkFrame" id="network_settings_frame">
+                          <object class="GtkBox" id="network_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="margin_left">5</property>
+                            <property name="margin_right">5</property>
+                            <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
-                            <property name="label_xalign">0.019999999552965164</property>
-                            <property name="shadow_type">in</property>
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkBox" id="network_box">
+                              <object class="GtkGrid">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">5</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_top">5</property>
+                                <property name="margin_bottom">5</property>
+                                <property name="row_spacing">5</property>
+                                <property name="column_spacing">5</property>
                                 <child>
-                                  <object class="GtkGrid">
+                                  <object class="GtkLabel" id="label4">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="margin_left">5</property>
-                                    <property name="margin_right">5</property>
-                                    <property name="margin_bottom">5</property>
-                                    <property name="row_spacing">2</property>
-                                    <property name="column_spacing">5</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label4">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="valign">end</property>
-                                        <property name="label" translatable="yes">Host:</property>
-                                        <property name="xalign">0.019999999552965164</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="host_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="valign">center</property>
-                                        <property name="text">127.0.0.1</property>
-                                        <property name="primary_icon_name">network-transmit-receive-symbolic</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="label13">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="valign">end</property>
-                                        <property name="label" translatable="yes">Login:</property>
-                                        <property name="xalign">0.019999999552965164</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="login_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="valign">center</property>
-                                        <property name="text">root</property>
-                                        <property name="primary_icon_name">avatar-default-symbolic</property>
-                                        <property name="primary_icon_activatable">False</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="label14">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="valign">end</property>
-                                        <property name="label" translatable="yes">Password:</property>
-                                        <property name="xalign">0.019999999552965164</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">4</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="password_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="valign">center</property>
-                                        <property name="hexpand">False</property>
-                                        <property name="visibility">False</property>
-                                        <property name="invisible_char">●</property>
-                                        <property name="text">root</property>
-                                        <property name="primary_icon_name">emblem-readonly</property>
-                                        <property name="primary_icon_activatable">False</property>
-                                        <property name="input_purpose">password</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">5</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="port_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="tooltip_text" translatable="yes">Default 21</property>
-                                        <property name="valign">center</property>
-                                        <property name="width_chars">6</property>
-                                        <property name="max_width_chars">6</property>
-                                        <property name="text">21</property>
-                                        <property name="primary_icon_name">network-workgroup-symbolic</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="ftp_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">FTP:</property>
-                                        <property name="xalign">1</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="telnet_port_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="tooltip_text" translatable="yes">Default 23</property>
-                                        <property name="valign">center</property>
-                                        <property name="width_chars">6</property>
-                                        <property name="max_width_chars">6</property>
-                                        <property name="text" translatable="yes">23</property>
-                                        <property name="primary_icon_name">network-workgroup-symbolic</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">5</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkSpinButton" id="telnet_timeout_spin_button">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="tooltip_text" translatable="yes">Timeout between commands in seconds</property>
-                                        <property name="valign">center</property>
-                                        <property name="max_length">2</property>
-                                        <property name="width_chars">6</property>
-                                        <property name="max_width_chars">6</property>
-                                        <property name="text" translatable="yes">1</property>
-                                        <property name="primary_icon_name">alarm-symbolic</property>
-                                        <property name="input_purpose">number</property>
-                                        <property name="adjustment">telnet_timeout_adjustment</property>
-                                        <property name="numeric">True</property>
-                                        <property name="value">1</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">5</property>
-                                      </packing>
-                                    </child>
+                                    <property name="valign">end</property>
+                                    <property name="label" translatable="yes">Host:</property>
+                                    <property name="xalign">0.019999999552965164</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="host_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">center</property>
+                                    <property name="text">127.0.0.1</property>
+                                    <property name="primary_icon_name">network-transmit-receive-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label13">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="valign">end</property>
+                                    <property name="label" translatable="yes">Login:</property>
+                                    <property name="xalign">0.019999999552965164</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="login_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">center</property>
+                                    <property name="text">root</property>
+                                    <property name="primary_icon_name">avatar-default-symbolic</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label14">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="valign">end</property>
+                                    <property name="label" translatable="yes">Password:</property>
+                                    <property name="xalign">0.019999999552965164</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="password_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">center</property>
+                                    <property name="hexpand">False</property>
+                                    <property name="visibility">False</property>
+                                    <property name="invisible_char">●</property>
+                                    <property name="text">root</property>
+                                    <property name="primary_icon_name">emblem-readonly</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                    <property name="input_purpose">password</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="http_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">HTTP:</property>
+                                    <property name="xalign">1</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">5</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="ftp_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">FTP:</property>
+                                    <property name="xalign">1</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="port_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="tooltip_text" translatable="yes">Default 21</property>
+                                    <property name="halign">start</property>
+                                    <property name="width_chars">6</property>
+                                    <property name="max_width_chars">6</property>
+                                    <property name="text">21</property>
+                                    <property name="primary_icon_name">network-workgroup-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="port_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">Port:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="spacing">5</property>
                                     <child>
                                       <object class="GtkEntry" id="http_port_field">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Default 80</property>
-                                        <property name="valign">center</property>
+                                        <property name="halign">start</property>
                                         <property name="max_length">5</property>
                                         <property name="width_chars">6</property>
                                         <property name="max_width_chars">6</property>
@@ -679,56 +665,9 @@ Author: Dmitriy Yefremov
                                         <property name="primary_icon_name">network-workgroup-symbolic</property>
                                       </object>
                                       <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="http_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">HTTP:</property>
-                                        <property name="xalign">1</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="telnet_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Telnet:</property>
-                                        <property name="xalign">1</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">5</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="timeout_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="valign">end</property>
-                                        <property name="label" translatable="yes">Timeout:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">4</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="port_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="valign">end</property>
-                                        <property name="label" translatable="yes">Port:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">0</property>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -743,99 +682,48 @@ Author: Dmitriy Yefremov
                                         <signal name="toggled" handler="on_http_use_ssl_toggled" swapped="no"/>
                                       </object>
                                       <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">3</property>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <placeholder/>
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">5</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkBox" id="stack_switcher_box">
+                                  <object class="GtkLabel" id="telnet_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="margin_left">5</property>
-                                    <property name="margin_right">5</property>
-                                    <property name="margin_bottom">5</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">Telnet:</property>
+                                    <property name="xalign">1</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">6</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="telnet_port_box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="spacing">5</property>
                                     <child>
-                                      <object class="GtkButtonBox" id="test_button_box">
+                                      <object class="GtkEntry" id="telnet_port_field">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="homogeneous">True</property>
-                                        <property name="layout_style">expand</property>
-                                        <child>
-                                          <object class="GtkRadioButton" id="ftp_radio_button">
-                                            <property name="label" translatable="yes">FTP</property>
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="draw_indicator">False</property>
-                                            <property name="group">telnet_radio_button</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">True</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkRadioButton" id="http_radio_button">
-                                            <property name="label" translatable="yes">HTTP</property>
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="draw_indicator">False</property>
-                                            <property name="group">telnet_radio_button</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">True</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkRadioButton" id="telnet_radio_button">
-                                            <property name="label" translatable="yes">Telnet</property>
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="draw_indicator">False</property>
-                                            <property name="group">ftp_radio_button</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">True</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">2</property>
-                                          </packing>
-                                        </child>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip_text" translatable="yes">Default 23</property>
+                                        <property name="halign">start</property>
+                                        <property name="width_chars">6</property>
+                                        <property name="max_width_chars">6</property>
+                                        <property name="text" translatable="yes">23</property>
+                                        <property name="primary_icon_name">network-workgroup-symbolic</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -844,12 +732,212 @@ Author: Dmitriy Yefremov
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkAlignment">
+                                      <object class="GtkLabel" id="timeout_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
+                                        <property name="margin_left">5</property>
+                                        <property name="label" translatable="yes">Timeout:</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="telnet_timeout_spin_button">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip_text" translatable="yes">Timeout between commands in seconds</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">center</property>
+                                        <property name="max_length">2</property>
+                                        <property name="width_chars">6</property>
+                                        <property name="max_width_chars">6</property>
+                                        <property name="text" translatable="yes">1</property>
+                                        <property name="primary_icon_name">alarm-symbolic</property>
+                                        <property name="input_purpose">number</property>
+                                        <property name="adjustment">telnet_timeout_adjustment</property>
+                                        <property name="numeric">True</property>
+                                        <property name="value">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">6</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="stb_paths_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">STB file paths:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">7</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="services_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Services and Bouquets files:</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">8</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="services_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="text">/etc/enigma2/</property>
+                                    <property name="primary_icon_name">document-edit-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">8</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="user_bouquet_label">
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">User bouquet files:</property>
+                                    <property name="xalign">2.2351741291171123e-10</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">9</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="user_bouquet_field">
+                                    <property name="can_focus">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="text">/etc/enigma2/</property>
+                                    <property name="primary_icon_name">document-edit-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">9</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="satellites_xml_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Satellites.xml file:</property>
+                                    <property name="xalign">0.019999999552965164</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">10</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="satellites_xml_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="text">/etc/tuxbox/</property>
+                                    <property name="primary_icon_name">document-edit-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">10</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="picons_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Picons:</property>
+                                    <property name="xalign">2.2351741291171123e-10</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">11</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="picons_paths_box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="active">0</property>
+                                    <property name="has_entry">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry">
+                                        <property name="can_focus">False</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">11</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox" id="test_box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_top">5</property>
+                                <property name="margin_bottom">5</property>
+                                <child>
+                                  <object class="GtkButtonBox" id="test_button_box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="homogeneous">True</property>
+                                    <property name="layout_style">expand</property>
+                                    <child>
+                                      <object class="GtkRadioButton" id="ftp_radio_button">
+                                        <property name="label" translatable="yes">FTP</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="draw_indicator">False</property>
+                                        <property name="group">telnet_radio_button</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioButton" id="http_radio_button">
+                                        <property name="label" translatable="yes">HTTP</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="draw_indicator">False</property>
+                                        <property name="group">telnet_radio_button</property>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
@@ -858,49 +946,45 @@ Author: Dmitriy Yefremov
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinner" id="test_spinner">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">2</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkButton" id="test_connection_button">
-                                        <property name="label" translatable="yes">Test</property>
-                                        <property name="width_request">110</property>
+                                      <object class="GtkRadioButton" id="telnet_radio_button">
+                                        <property name="label" translatable="yes">Telnet</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="receives_default">True</property>
-                                        <property name="tooltip_text" translatable="yes">Test connection</property>
-                                        <property name="image">test_button_image</property>
-                                        <property name="always_show_image">True</property>
-                                        <signal name="clicked" handler="on_connection_test" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="pack_type">end</property>
-                                        <property name="position">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkAlignment">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
+                                        <property name="receives_default">False</property>
+                                        <property name="draw_indicator">False</property>
+                                        <property name="group">ftp_radio_button</property>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
                                         <property name="fill">True</property>
-                                        <property name="position">4</property>
+                                        <property name="position">2</property>
                                       </packing>
                                     </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkAlignment">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinner" id="test_spinner">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -908,221 +992,54 @@ Author: Dmitriy Yefremov
                                     <property name="position">2</property>
                                   </packing>
                                 </child>
-                              </object>
-                            </child>
-                            <child type="label">
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Network settings:</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkFrame" id="settings_type_frame">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_bottom">5</property>
-                            <property name="label_xalign">0.019999999552965164</property>
-                            <property name="shadow_type">in</property>
-                            <child>
-                              <object class="GtkBox" id="settings_type_box">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">center</property>
-                                <property name="valign">center</property>
-                                <property name="margin_bottom">5</property>
-                                <property name="spacing">5</property>
                                 <child>
-                                  <object class="GtkRadioButton" id="enigma_radio_button">
-                                    <property name="label">Enigma2 </property>
+                                  <object class="GtkButton" id="test_connection_button">
+                                    <property name="label" translatable="yes">Test</property>
+                                    <property name="width_request">110</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="draw_indicator">True</property>
-                                    <property name="group">neutrino_radio_button</property>
-                                    <signal name="toggled" handler="on_settings_type_changed" swapped="no"/>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Test connection</property>
+                                    <property name="valign">center</property>
+                                    <property name="image">test_button_image</property>
+                                    <property name="always_show_image">True</property>
+                                    <signal name="clicked" handler="on_connection_test" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">3</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkRadioButton" id="neutrino_radio_button">
-                                    <property name="label">Neutrino-MP</property>
+                                  <object class="GtkAlignment">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="draw_indicator">True</property>
-                                    <property name="group">enigma_radio_button</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">False</property>
+                                    <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">4</property>
                                   </packing>
                                 </child>
                               </object>
-                            </child>
-                            <child type="label">
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Settings type:</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="profiles_paths_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="spacing">5</property>
-                    <property name="homogeneous">True</property>
-                    <child>
-                      <object class="GtkFrame" id="stb_paths_frame">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label_xalign">0.05000000074505806</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkGrid" id="stb_dirs_grid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
-                            <property name="margin_bottom">5</property>
-                            <property name="row_spacing">2</property>
-                            <property name="column_homogeneous">True</property>
-                            <child>
-                              <object class="GtkLabel" id="services_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Services and Bouquets files:</property>
-                                <property name="xalign">0</property>
-                              </object>
                               <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="services_field">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text">/etc/enigma2/</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="user_bouquet_label">
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">User bouquet files:</property>
-                                <property name="xalign">2.2351741291171123e-10</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="user_bouquet_field">
-                                <property name="can_focus">True</property>
-                                <property name="text">/etc/enigma2/</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="satellites_xml_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Satellites.xml file:</property>
-                                <property name="xalign">0.019999999552965164</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="satellites_xml_field">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text">/etc/tuxbox/</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">5</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="picons_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Picons:</property>
-                                <property name="xalign">2.2351741291171123e-10</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">6</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="picons_field">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="text">/usr/share/enigma2/picon</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">7</property>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="stb_paths_label">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">STB file paths:</property>
+                            <property name="label" translatable="yes">Network settings:</property>
                           </object>
                         </child>
                       </object>
@@ -1133,104 +1050,49 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="local_file_paths_frame">
+                      <object class="GtkFrame" id="settings_type_frame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label_xalign">0.05000000074505806</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="label_xalign">0.019999999552965164</property>
                         <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkGrid" id="local_paths_grid">
+                          <object class="GtkBox" id="settings_type_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
                             <property name="margin_bottom">5</property>
-                            <property name="row_spacing">2</property>
-                            <property name="column_homogeneous">True</property>
+                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkLabel" id="picons_dir_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Picons path:</property>
-                                <property name="xalign">0.019999999552965164</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="picons_dir_field">
+                              <object class="GtkRadioButton" id="enigma_radio_button">
+                                <property name="label">Enigma2 </property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">neutrino_radio_button</property>
+                                <signal name="toggled" handler="on_settings_type_changed" swapped="no"/>
                               </object>
                               <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="data_dir_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Data path:</property>
-                                <property name="lines">0</property>
-                                <property name="xalign">0.019999999552965164</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="data_dir_field">
+                              <object class="GtkRadioButton" id="neutrino_radio_button">
+                                <property name="label">Neutrino-MP</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">enigma_radio_button</property>
                               </object>
                               <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="backup_dir_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Backup path:</property>
-                                <property name="xalign">0.019999999552965164</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="backup_dir_field">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">5</property>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>
@@ -1239,12 +1101,12 @@ Author: Dmitriy Yefremov
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Local file paths:</property>
+                            <property name="label" translatable="yes">Settings type:</property>
                           </object>
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
+                        <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
@@ -1263,92 +1125,59 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="paths_frame">
+              <object class="GtkBox" id="paths_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_top">5</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
+                <property name="margin_left">5</property>
+                <property name="margin_right">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">2</property>
                 <child>
-                  <object class="GtkBox" id="paths_box">
+                  <object class="GtkFrame" id="local_file_paths_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">2</property>
+                    <property name="label_xalign">0.05000000074505806</property>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkFrame" id="default_data_paths_frame">
+                      <object class="GtkBox" id="local_paths_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">10</property>
-                        <property name="label_xalign">0.019999999552965164</property>
-                        <property name="shadow_type">in</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkBox" id="default_paths_box">
+                          <object class="GtkBox" id="default_data_paths_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
+                            <property name="tooltip_text" translatable="yes">Sets the profile folder as default to store picons, backups, etc.</property>
+                            <property name="valign">center</property>
+                            <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">2</property>
                             <child>
-                              <object class="GtkBox" id="default_data_paths_box">
+                              <object class="GtkLabel" id="default_data_paths_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Sets the profile folder as default to store picons, backups, etc.</property>
-                                <property name="valign">center</property>
                                 <property name="margin_top">5</property>
                                 <property name="margin_bottom">5</property>
-                                <child>
-                                  <object class="GtkLabel" id="default_data_paths_label">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="margin_left">5</property>
-                                    <property name="margin_right">5</property>
-                                    <property name="margin_top">5</property>
-                                    <property name="margin_bottom">5</property>
-                                    <property name="label" translatable="yes">Make profile folder as default for the additional data</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkSwitch" id="default_data_paths_switch">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="valign">center</property>
-                                    <signal name="state-set" handler="on_default_path_mode_switch" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="pack_type">end</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
+                                <property name="label" translatable="yes">Make profile folder as default for the additional data</property>
+                                <property name="xalign">0</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="default_data_dir_labe">
+                              <object class="GtkSwitch" id="default_data_paths_switch">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Default data path:</property>
-                                <property name="lines">0</property>
-                                <property name="xalign">0.019999999552965164</property>
+                                <property name="can_focus">True</property>
+                                <property name="halign">end</property>
+                                <property name="valign">center</property>
+                                <signal name="state-set" handler="on_default_path_mode_switch" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1356,62 +1185,26 @@ Author: Dmitriy Yefremov
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                            <child>
-                              <object class="GtkEntry" id="default_data_dir_field">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="changed" handler="on_default_data_path_changed" swapped="no"/>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
                         </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame" id="record_frame">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="label_xalign">0.019999999552965164</property>
-                        <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkGrid" id="record_grid">
+                          <object class="GtkGrid" id="local_paths_grid">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
-                            <property name="margin_bottom">5</property>
-                            <property name="row_spacing">2</property>
-                            <property name="column_homogeneous">True</property>
+                            <property name="row_spacing">5</property>
+                            <property name="column_spacing">10</property>
                             <child>
-                              <object class="GtkLabel" id="record_dir_label">
+                              <object class="GtkLabel" id="data_dir_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Streams record path:</property>
-                                <property name="xalign">0.019999999552965164</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Data path:</property>
+                                <property name="lines">0</property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
@@ -1419,9 +1212,34 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="record_data_dir_field">
+                              <object class="GtkLabel" id="picons_dir_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Picons path:</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="backup_dir_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Backup path:</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="data_dir_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="hexpand">True</property>
                                 <property name="primary_icon_name">document-edit-symbolic</property>
                                 <property name="secondary_icon_name">folder-open-symbolic</property>
                                 <property name="primary_icon_activatable">False</property>
@@ -1430,30 +1248,128 @@ Author: Dmitriy Yefremov
                                 <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
                               </object>
                               <packing>
-                                <property name="left_attach">0</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="picons_dir_field">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="hexpand">True</property>
+                                <property name="primary_icon_name">document-edit-symbolic</property>
+                                <property name="secondary_icon_name">folder-open-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
+                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
+                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
                                 <property name="top_attach">1</property>
                               </packing>
                             </child>
+                            <child>
+                              <object class="GtkEntry" id="backup_dir_field">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="hexpand">True</property>
+                                <property name="primary_icon_name">document-edit-symbolic</property>
+                                <property name="secondary_icon_name">folder-open-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
+                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
+                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">2</property>
+                              </packing>
+                            </child>
                           </object>
-                        </child>
-                        <child type="label">
-                          <object class="GtkLabel" id="record_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Record:</property>
-                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Local file paths:</property>
+                      </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
-                <child type="label_item">
-                  <placeholder/>
+                <child>
+                  <object class="GtkFrame" id="record_frame">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkGrid" id="record_grid">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="column_spacing">10</property>
+                        <child>
+                          <object class="GtkLabel" id="record_dir_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Streams record path:</property>
+                            <property name="xalign">0.019999999552965164</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="record_data_dir_field">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="hexpand">True</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <property name="secondary_icon_name">folder-open-symbolic</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
+                            <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
+                            <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="record_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Record:</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -2353,6 +2269,179 @@ Author: Dmitriy Yefremov
                     <property name="position">3</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkFrame" id="http_frame">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkBox" id="enable_http_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
+                        <child>
+                          <object class="GtkLabel" id="enable_http_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="hexpand">True</property>
+                            <property name="label" translatable="yes">Enable HTTP API</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="support_http_api_switch">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="halign">end</property>
+                            <signal name="state-set" handler="on_http_mode_switch" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label_item">
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="double_click_frame">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkAlignment">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="left_padding">12</property>
+                        <child>
+                          <object class="GtkGrid" id="double_click_mode_grid">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">center</property>
+                            <property name="margin_bottom">5</property>
+                            <property name="column_spacing">5</property>
+                            <child>
+                              <object class="GtkRadioButton" id="click_mode_zap_button">
+                                <property name="label" translatable="yes">Zap</property>
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Switch(zap) the channel(Ctrl + Z)</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">click_mode_play_button</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="click_mode_disabled_button">
+                                <property name="label" translatable="yes">Disabled</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Disabled</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">click_mode_zap_button</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">4</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="click_mode_stream_button">
+                                <property name="label" translatable="yes">Play  stream</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Play IPTV or other stream in the program(Ctrl + P)</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">click_mode_disabled_button</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">3</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="click_mode_zap_and_play_button">
+                                <property name="label" translatable="yes">Zap and Play</property>
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Switch the channel and watch in the program(Ctrl + W)</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">click_mode_stream_button</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="click_mode_play_button">
+                                <property name="label" translatable="yes">Play</property>
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Watch the channel in the program</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">click_mode_zap_and_play_button</property>
+                                <signal name="toggled" handler="on_click_mode_togged" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Double click on the service in the bouquet list:</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="name">program</property>
@@ -3114,7 +3203,7 @@ Author: Dmitriy Yefremov
                 <property name="margin_right">5</property>
                 <property name="margin_top">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">10</property>
+                <property name="spacing">5</property>
                 <child>
                   <object class="GtkFrame" id="bq_naming_frame">
                     <property name="visible">True</property>
@@ -3167,177 +3256,6 @@ Author: Dmitriy Yefremov
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="http_frame">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0.019999999552965164</property>
-                    <property name="shadow_type">in</property>
-                    <child>
-                      <object class="GtkBox" id="enable_http_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <child>
-                          <object class="GtkLabel" id="enable_http_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">start</property>
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">Enable HTTP API</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSwitch" id="support_http_api_switch">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="halign">end</property>
-                            <signal name="state-set" handler="on_http_mode_switch" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label_item">
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="double_click_frame">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0.019999999552965164</property>
-                    <property name="shadow_type">in</property>
-                    <child>
-                      <object class="GtkAlignment">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="left_padding">12</property>
-                        <child>
-                          <object class="GtkGrid" id="double_click_mode_grid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">center</property>
-                            <property name="margin_bottom">5</property>
-                            <property name="column_spacing">5</property>
-                            <child>
-                              <object class="GtkRadioButton" id="click_mode_zap_button">
-                                <property name="label" translatable="yes">Zap</property>
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Switch(zap) the channel(Ctrl + Z)</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">click_mode_play_button</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="click_mode_disabled_button">
-                                <property name="label" translatable="yes">Disabled</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Disabled</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">click_mode_zap_button</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">4</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="click_mode_stream_button">
-                                <property name="label" translatable="yes">Play  stream</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Play IPTV or other stream in the program(Ctrl + P)</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">click_mode_disabled_button</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">3</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="click_mode_zap_and_play_button">
-                                <property name="label" translatable="yes">Zap and Play</property>
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Switch the channel and watch in the program(Ctrl + W)</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">click_mode_stream_button</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">2</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="click_mode_play_button">
-                                <property name="label" translatable="yes">Play</property>
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Watch the channel in the program</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">click_mode_zap_and_play_button</property>
-                                <signal name="toggled" handler="on_click_mode_togged" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="top_attach">0</property>
-                              </packing>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Double click on the service in the bouquet list:</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>

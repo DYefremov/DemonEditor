@@ -23,7 +23,6 @@ class SettingsDialog:
                     "on_reset": self.on_reset,
                     "on_response": self.on_response,
                     "apply_settings": self.apply_settings,
-                    "on_apply_profile_settings": self.on_apply_profile_settings,
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_set_color_switch": self.on_set_color_switch,
@@ -32,7 +31,6 @@ class SettingsDialog:
                     "on_experimental_switch": self.on_experimental_switch,
                     "on_yt_dl_switch": self.on_yt_dl_switch,
                     "on_default_path_mode_switch": self.on_default_path_mode_switch,
-                    "on_default_data_path_changed": self.on_default_data_path_changed,
                     "on_profile_add": self.on_profile_add,
                     "on_profile_edit": self.on_profile_edit,
                     "on_profile_remove": self.on_profile_remove,
@@ -71,7 +69,7 @@ class SettingsDialog:
         self._dialog.set_border_width(0)
         self._dialog.set_margin_left(0)
         self._main_stack = builder.get_object("main_stack")
-        # Network
+        # Network.
         self._host_field = builder.get_object("host_field")
         self._port_field = builder.get_object("port_field")
         self._login_field = builder.get_object("login_field")
@@ -80,25 +78,26 @@ class SettingsDialog:
         self._http_use_ssl_check_button = builder.get_object("http_use_ssl_check_button")
         self._telnet_port_field = builder.get_object("telnet_port_field")
         self._telnet_timeout_spin_button = builder.get_object("telnet_timeout_spin_button")
-        # Test
+        # Test.
         self._ftp_radio_button = builder.get_object("ftp_radio_button")
         self._http_radio_button = builder.get_object("http_radio_button")
-        # Paths
+        # Network paths.
         self._services_field = builder.get_object("services_field")
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
-        self._data_dir_field = builder.get_object("data_dir_field")
-        self._picons_field = builder.get_object("picons_field")
+        self._picons_paths_box = builder.get_object("picons_paths_box")
+        # Paths.
         self._picons_dir_field = builder.get_object("picons_dir_field")
+        self._data_dir_field = builder.get_object("data_dir_field")
         self._backup_dir_field = builder.get_object("backup_dir_field")
         self._default_data_dir_field = builder.get_object("default_data_dir_field")
         self._record_data_dir_field = builder.get_object("record_data_dir_field")
         self._default_data_paths_switch = builder.get_object("default_data_paths_switch")
-        # Info bar
+        # Info bar.
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._test_spinner = builder.get_object("test_spinner")
-        # Settings type
+        # Settings type.
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
@@ -125,14 +124,14 @@ class SettingsDialog:
         self._gst_lib_button = builder.get_object("gst_lib_button")
         self._vlc_lib_button = builder.get_object("vlc_lib_button")
         self._mpv_lib_button = builder.get_object("mpv_lib_button")
-        # Program
+        # Program.
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
         self._load_on_startup_switch = builder.get_object("load_on_startup_switch")
         self._bouquet_hints_switch = builder.get_object("bouquet_hints_switch")
         self._services_hints_switch = builder.get_object("services_hints_switch")
         self._lang_combo_box = builder.get_object("lang_combo_box")
-        # Appearance
+        # Appearance.
         self._list_font_button = builder.get_object("list_font_button")
         self._picons_size_button = builder.get_object("picons_size_button")
         self._tooltip_logo_size_button = builder.get_object("tooltip_logo_size_button")
@@ -140,7 +139,7 @@ class SettingsDialog:
         self._set_color_switch = builder.get_object("set_color_switch")
         self._new_color_button = builder.get_object("new_color_button")
         self._extra_color_button = builder.get_object("extra_color_button")
-        # Extra
+        # Extra.
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
         self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
         self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
@@ -152,25 +151,23 @@ class SettingsDialog:
         self._click_mode_zap_and_play_button = builder.get_object("click_mode_zap_and_play_button")
         self._click_mode_zap_button.bind_property("sensitive", self._click_mode_play_button, "sensitive")
         self._click_mode_zap_button.bind_property("sensitive", self._click_mode_zap_and_play_button, "sensitive")
-        # EXPERIMENTAL
+        # EXPERIMENTAL.
         self._enable_exp_switch = builder.get_object("enable_experimental_switch")
         self._enable_exp_switch.bind_property("active", builder.get_object("yt_dl_box"), "sensitive")
         self._enable_yt_dl_switch.bind_property("active", builder.get_object("yt_dl_update_box"), "sensitive")
         self._enable_exp_switch.bind_property("active", builder.get_object("v5_support_box"), "sensitive")
         self._enable_exp_switch.bind_property("active", builder.get_object("enable_direct_playback_box"), "sensitive")
-        # Enigma2 only
+        # Enigma2 only.
         self._enigma_radio_button.bind_property("active", builder.get_object("bq_naming_grid"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("enable_http_box"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("enable_experimental_box"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("program_frame"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("experimental_box"), "sensitive")
-        # Profiles
+        # Profiles.
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
-        self._apply_profile_button = builder.get_object("apply_profile_button")
-        self._apply_profile_button.bind_property("visible", builder.get_object("reset_button"), "visible")
-        # Style
+        # Style.
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._digit_elems = (self._port_field, self._http_port_field, self._telnet_port_field, self._video_width_field,
@@ -178,11 +175,11 @@ class SettingsDialog:
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self.init_ui_elements(self._s_type)
+        self.init_ui_elements()
         self.init_profiles()
 
         if not IS_LINUX:
-            # Themes
+            # Themes.
             builder.get_object("style_frame").set_visible(True)
             builder.get_object("themes_support_frame").set_visible(True)
             self._layout_switch = builder.get_object("layout_switch")
@@ -197,10 +194,10 @@ class SettingsDialog:
             self._themes_support_switch.bind_property("active", self._theme_frame, "sensitive")
             self.init_themes()
 
-    @run_idle
-    def init_ui_elements(self, s_type):
-        is_enigma_profile = s_type is SettingsType.ENIGMA_2
-        self._neutrino_radio_button.set_active(s_type is SettingsType.NEUTRINO_MP)
+    def init_ui_elements(self):
+        is_enigma_profile = self._s_type is SettingsType.ENIGMA_2
+        self._neutrino_radio_button.set_active(self._s_type is SettingsType.NEUTRINO_MP)
+        self.update_picon_paths()
         self.update_title()
         http_active = self._support_http_api_switch.get_active()
         self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
@@ -226,6 +223,12 @@ class SettingsDialog:
         elif self._s_type is SettingsType.NEUTRINO_MP:
             self._dialog.set_title(title.format(get_message("Options"), self._neutrino_radio_button.get_label()))
 
+    def update_picon_paths(self):
+        model = self._picons_paths_box.get_model()
+        model.clear()
+        list(map(lambda p: model.append((p, p)), self._settings.picons_paths))
+        self._picons_paths_box.set_active_id(self._settings.picons_path)
+
     def show(self):
         self._dialog.run()
 
@@ -245,7 +248,7 @@ class SettingsDialog:
             self._settings.setting_type = s_type
             self._s_type = s_type
             self.on_reset()
-        self.init_ui_elements(s_type)
+        self.init_ui_elements()
 
     def on_reset(self, item=None):
         self._settings.reset()
@@ -264,11 +267,10 @@ class SettingsDialog:
         self._services_field.set_text(self._settings.services_path)
         self._user_bouquet_field.set_text(self._settings.user_bouquet_path)
         self._satellites_xml_field.set_text(self._settings.satellites_xml_path)
-        self._picons_field.set_text(self._settings.picons_path)
+        self._picons_paths_box.set_active_id(self._settings.picons_path)
         self._data_dir_field.set_text(self._settings.data_local_path)
         self._picons_dir_field.set_text(self._settings.picons_local_path)
         self._backup_dir_field.set_text(self._settings.backup_local_path)
-        self._default_data_dir_field.set_text(self._settings.default_data_path)
         self._record_data_dir_field.set_text(self._settings.records_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
@@ -325,7 +327,7 @@ class SettingsDialog:
         self._settings.services_path = self._services_field.get_text()
         self._settings.user_bouquet_path = self._user_bouquet_field.get_text()
         self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
-        self._settings.picons_path = self._picons_field.get_text()
+        self._settings.picons_path = self._picons_paths_box.get_active_id()
         self._settings.data_local_path = self._data_dir_field.get_text()
         self._settings.picons_local_path = self._picons_dir_field.get_text()
         self._settings.backup_local_path = self._backup_dir_field.get_text()
@@ -346,7 +348,6 @@ class SettingsDialog:
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
         self._ext_settings.show_srv_hints = self._services_hints_switch.get_active()
         self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
-        self._ext_settings.default_data_path = self._default_data_dir_field.get_text()
         self._ext_settings.records_path = self._record_data_dir_field.get_text()
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
@@ -468,9 +469,6 @@ class SettingsDialog:
     def on_default_path_mode_switch(self, switch, state):
         self._settings.profile_folder_is_default = state
 
-    def on_default_data_path_changed(self, entry):
-        self._settings.default_data_path = entry.get_text()
-
     def on_profile_add(self, item):
         model = self._profile_view.get_model()
         count = 0
@@ -567,7 +565,6 @@ class SettingsDialog:
 
     def on_main_settings_visible(self, stack, param):
         name = stack.get_visible_child_name()
-        self._apply_profile_button.set_visible(name == "profiles")
         self._apply_presets_button.set_visible(name == "streaming")
 
     def on_http_use_ssl_toggled(self, button):
