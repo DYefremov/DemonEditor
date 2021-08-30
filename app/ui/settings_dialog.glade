@@ -1199,7 +1199,7 @@ Author: Dmitriy Yefremov
                             <property name="row_spacing">5</property>
                             <property name="column_spacing">10</property>
                             <child>
-                              <object class="GtkLabel" id="data_dir_label">
+                              <object class="GtkLabel" id="data_path_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
@@ -1212,7 +1212,7 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="picons_dir_label">
+                              <object class="GtkLabel" id="picons_path_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
@@ -1224,7 +1224,7 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="backup_dir_label">
+                              <object class="GtkLabel" id="backup_path_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
@@ -1236,7 +1236,7 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="data_dir_field">
+                              <object class="GtkEntry" id="data_path_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hexpand">True</property>
@@ -1253,7 +1253,7 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="picons_dir_field">
+                              <object class="GtkEntry" id="picons_path_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hexpand">True</property>
@@ -1270,7 +1270,7 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="backup_dir_field">
+                              <object class="GtkEntry" id="backup_path_field">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hexpand">True</property>
@@ -1327,7 +1327,7 @@ Author: Dmitriy Yefremov
                         <property name="margin_bottom">5</property>
                         <property name="column_spacing">10</property>
                         <child>
-                          <object class="GtkLabel" id="record_dir_label">
+                          <object class="GtkLabel" id="record_path_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Streams record path:</property>
@@ -1339,7 +1339,7 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="record_data_dir_field">
+                          <object class="GtkEntry" id="record_data_path_field">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="hexpand">True</property>

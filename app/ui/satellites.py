@@ -52,7 +52,7 @@ class SatellitesTool(Gtk.Box):
         super().__init__(*args, **kwargs)
 
         self._app = app
-        self._data_path = settings.data_local_path + "satellites.xml"
+        self._data_path = settings.profile_data_path + "satellites.xml"
         self._settings = settings
 
         handlers = {"on_remove": self.on_remove,

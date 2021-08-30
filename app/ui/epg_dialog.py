@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import gzip
 import locale
 import os
@@ -12,6 +40,7 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task
 from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
+from app.settings import SEP
 from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from .main_helper import on_popup_menu, update_entry_data
@@ -480,7 +509,7 @@ class EpgDialog:
     # ***************** Options *********************#
 
     def init_options(self):
-        epg_dat_path = self._settings.data_local_path + "epg/"
+        epg_dat_path = "{}epg{}".format(self._settings.profile_data_path, SEP)
         self._epg_dat_path_entry.set_text(epg_dat_path)
         default_epg_data_stb_path = "/etc/enigma2"
         epg_options = self._settings.epg_options

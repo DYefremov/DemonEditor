@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 
 from gi.repository import GLib
@@ -58,7 +86,7 @@ class DownloadDialog:
 
     def init_ui_settings(self):
         self._host_entry.set_text(self._settings.host)
-        self._data_path_entry.set_text(self._settings.data_local_path)
+        self._data_path_entry.set_text(self._settings.profile_data_path)
         is_enigma = self._s_type is SettingsType.ENIGMA_2
         self._webtv_radio_button.set_visible(not is_enigma)
         self._use_http_box.set_visible(is_enigma)
@@ -128,9 +156,9 @@ class DownloadDialog:
         try:
             if download:
                 if backup and d_type is not DownloadType.SATELLITES:
-                    data_path = self._settings.data_local_path or self._data_path_entry.get_text()
+                    data_path = self._settings.profile_data_path or self._data_path_entry.get_text()
                     os.makedirs(os.path.dirname(data_path), exist_ok=True)
-                    backup_path = self._settings.backup_local_path or data_path + "backup/"
+                    backup_path = self._settings.profile_backup_path or self._settings.default_backup_path
                     backup_src = backup_data(data_path, backup_path, d_type is DownloadType.ALL)
 
                 download_data(settings=self._settings, download_type=d_type, callback=self.append_output)

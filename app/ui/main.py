@@ -632,7 +632,7 @@ class Application(Gtk.Application):
     @run_idle
     def update_picons_size(self):
         self._picons_size = self._settings.list_picon_size
-        update_picons_data(self._settings.picons_local_path, self._picons, self._picons_size)
+        update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
         self._fav_model.foreach(lambda m, p, itr: m.set_value(itr, Column.FAV_PICON, self._picons.get(
             self._services.get(m.get_value(itr, Column.FAV_ID)).picon_id, None)))
         self._services_model.foreach(lambda m, p, itr: m.set_value(itr, Column.SRV_PICON, self._picons.get(
@@ -1146,7 +1146,7 @@ class Application(Gtk.Application):
         target_column = Column.FAV_ID if target is ViewTarget.FAV else Column.SRV_FAV_ID
         srv = self._services.get(model[path][target_column], None)
         if srv and srv.picon_id:
-            tooltip.set_icon(get_picon_pixbuf(self._settings.picons_local_path + srv.picon_id,
+            tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
                                               size=self._settings.tooltip_logo_size))
             tooltip.set_text(
                 self.get_hint_for_bq_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv))
@@ -1588,8 +1588,8 @@ class Application(Gtk.Application):
             if current_profile != self._settings.current_profile:
                 self.init_profiles(self._settings.current_profile)
 
-            data_path = self._settings.data_local_path if data_path is None else data_path
-            local_path = self._settings.data_local_path
+            data_path = self._settings.profile_data_path if data_path is None else data_path
+            local_path = self._settings.profile_data_path
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
 
             if data_path != local_path:
@@ -1606,7 +1606,7 @@ class Application(Gtk.Application):
             yield True
             services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
             yield True
-            update_picons_data(self._settings.picons_local_path, self._picons, self._picons_size)
+            update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
@@ -1820,8 +1820,8 @@ class Application(Gtk.Application):
     def save_data(self, callback=None, ext_path=None):
         self._save_tool_button.set_sensitive(False)
         profile = self._s_type
-        path = ext_path or self._settings.data_local_path
-        backup_path = self._settings.backup_local_path
+        path = ext_path or self._settings.profile_data_path
+        backup_path = self._settings.profile_backup_path
         # Backup data or clearing data path
         backup_data(path, backup_path) if not ext_path and self._settings.backup_before_save else clear_data_path(path)
         yield True
@@ -3290,7 +3290,7 @@ class Application(Gtk.Application):
 
     @run_task
     def update_picons(self):
-        update_picons_data(self._settings.picons_local_path, self._picons, self._picons_size)
+        update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
         append_picons(self._picons, self._services_model)
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):

@@ -141,7 +141,7 @@ def get_file_chooser_dialog(transient, text, settings, action_type, file_filter,
     if file_filter is not None:
         dialog.add_filter(file_filter)
 
-    dialog.set_current_folder(settings.data_local_path)
+    dialog.set_current_folder(settings.profile_data_path)
     response = dialog.run()
 
     if response == Gtk.ResponseType.ACCEPT:

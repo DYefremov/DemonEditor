@@ -81,8 +81,8 @@ class ServiceDetailsDialog:
         self._dialog.set_transient_for(transient)
         self._s_type = settings.setting_type
         self._tr_type = TrType.Satellite
-        self._satellites_xml_path = settings.data_local_path + "satellites.xml"
-        self._picons_dir_path = settings.picons_local_path
+        self._satellites_xml_path = settings.profile_data_path + "satellites.xml"
+        self._picons_path = settings.profile_picons_path
         self._services_view = srv_view
         self._fav_view = fav_view
         self._action = action
@@ -504,13 +504,13 @@ class ServiceDetailsDialog:
                             Column.FAV_PICON: new_service.picon})
 
     def update_picon_name(self, old_name, new_name):
-        if not os.path.isdir(self._picons_dir_path):
+        if not os.path.isdir(self._picons_path):
             return
 
-        for file_name in os.listdir(self._picons_dir_path):
+        for file_name in os.listdir(self._picons_path):
             if file_name == old_name:
-                old_file = os.path.join(self._picons_dir_path, old_name)
-                new_file = os.path.join(self._picons_dir_path, new_name)
+                old_file = os.path.join(self._picons_path, old_name)
+                new_file = os.path.join(self._picons_path, new_name)
                 os.rename(old_file, new_file)
                 break
 

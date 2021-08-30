@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Helper module for the ui. """
 import os
 import shutil
@@ -9,7 +37,7 @@ from gi.repository import GdkPixbuf, GLib
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.settings import SettingsType
+from app.settings import SettingsType, SEP
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
@@ -402,7 +430,7 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
         picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
 
         if picon_id:
-            picons_path = dst_path or settings.picons_local_path
+            picons_path = dst_path or settings.profile_picons_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
             try:
@@ -499,8 +527,8 @@ def remove_all_unused_picons(settings, picons, services):
 
 
 def remove_picons(settings, picon_ids, picons):
-    pions_path = settings.picons_local_path
-    backup_path = settings.backup_local_path + "picons/"
+    pions_path = settings.profile_picons_path
+    backup_path = "{}{}{}".format(settings.profile_backup_path, "picons", SEP)
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     for p_id in picon_ids:
         picons[p_id] = None

@@ -618,7 +618,7 @@ class M3uImportDialog(IptvListDialog):
 
         self._app = app
         self._picons = app._picons
-        self._pic_path = app._settings.picons_local_path
+        self._pic_path = app._settings.profile_picons_path
         self._services = None
         self._url_count = 0
         self._errors_count = 0

@@ -328,7 +328,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
     with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.\n")
-        save_path = settings.data_local_path
+        save_path = settings.profile_data_path
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         # bouquets
         if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
@@ -342,7 +342,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
             ftp.download_xml(save_path, settings.satellites_xml_path, WEB_TV_XML_FILE, callback)
 
         if download_type is DownloadType.PICONS:
-            picons_path = settings.picons_local_path
+            picons_path = settings.profile_picons_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             ftp.download_picons(settings.picons_path, picons_path, callback, files_filter)
         # epg.dat
@@ -362,7 +362,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
 def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
                 callback=log, done_callback=None, use_http=False, files_filter=None):
     s_type = settings.setting_type
-    data_path = settings.data_local_path
+    data_path = settings.profile_data_path
     host = settings.host
     base_url = "http{}://{}:{}".format("s" if settings.http_use_ssl else "", host, settings.http_port)
     url = "{}/web/".format(base_url)
@@ -428,7 +428,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 ftp.upload_files(data_path, DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                ftp.upload_picons(settings.picons_local_path, settings.picons_path, callback, files_filter)
+                ftp.upload_picons(settings.profile_picons_path, settings.picons_path, callback, files_filter)
 
             if tn and not use_http:
                 # resume enigma or restart neutrino

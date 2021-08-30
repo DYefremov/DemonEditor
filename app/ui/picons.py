@@ -37,7 +37,7 @@ from gi.repository import GLib, GdkPixbuf, Gio
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import upload_data, DownloadType, download_data, remove_picons
-from app.settings import SettingsType, Settings
+from app.settings import SettingsType, Settings, SEP
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
                               PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
@@ -184,7 +184,7 @@ class PiconManager(Gtk.Box):
         # Settings
         self._settings = settings
         self._s_type = settings.setting_type
-        self._picons_dir_entry.set_text(self._settings.picons_local_path)
+        self._picons_dir_entry.set_text(self._settings.profile_picons_path)
 
         self.pack_start(builder.get_object("picon_manager_frame"), True, True, 0)
         self.show()
@@ -197,7 +197,7 @@ class PiconManager(Gtk.Box):
 
     def on_picons_dest_view_realize(self, view):
         self._services = {s.picon_id: s for s in self._app.current_services.values() if s.picon_id}
-        self._explorer_dest_path_button.select_filename(self._settings.picons_local_path)
+        self._explorer_dest_path_button.select_filename(self._settings.profile_picons_path)
 
     def on_picons_src_changed(self, button):
         self.update_picons_data(self._picons_src_view, button)
@@ -234,7 +234,7 @@ class PiconManager(Gtk.Box):
             if self._terminate:
                 return
 
-            p_path = "{}/{}".format(path, file)
+            p_path = "{}{}{}".format(path, SEP, file)
             p = self.get_pixbuf_at_scale(p_path, 72, 48, True)
             if p:
                 yield model.append((p, file, p_path))
@@ -327,7 +327,7 @@ class PiconManager(Gtk.Box):
             c_id = Column.SRV_FAV_ID
 
         t_mod = target_view.get_model()
-        dest_path = self._explorer_dest_path_button.get_filename() + "/"
+        dest_path = self._explorer_dest_path_button.get_filename() + SEP
         self.update_picons_dest_view(self._app.on_assign_picon(target_view, model[path][-1], dest_path))
         self.show_assign_info([t_mod.get_value(t_mod.get_iter_from_string(itr), c_id) for itr in itr_str.split(",")])
 
@@ -371,7 +371,7 @@ class PiconManager(Gtk.Box):
         if len(uris) == 2:
             name, fav_id = self._current_picon_info
             src = urlparse(unquote(uris[0])).path
-            dst = "{}/{}".format(urlparse(unquote(uris[1])).path, name)
+            dst = "{}{}{}".format(urlparse(unquote(uris[1])).path, SEP, name)
             if src != dst:
                 shutil.copy(src, dst)
                 for row in get_base_model(self._picons_dest_view.get_model()):
@@ -443,7 +443,7 @@ class PiconManager(Gtk.Box):
             return
 
         settings = Settings(self._settings.settings)
-        settings.picons_local_path = "{}/".format(dest_path)
+        settings.profile_picons_path = "{}{}".format(dest_path, SEP)
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
@@ -458,7 +458,7 @@ class PiconManager(Gtk.Box):
             return
 
         settings = Settings(self._settings.settings)
-        settings.picons_local_path = path + "/"
+        settings.profile_picons_path = path + SEP
         self.run_func(lambda: download_data(settings=settings,
                                             download_type=DownloadType.PICONS,
                                             callback=self.append_output,

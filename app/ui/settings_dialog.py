@@ -1,9 +1,37 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 import re
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX
+from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT
@@ -78,6 +106,7 @@ class SettingsDialog:
         self._http_use_ssl_check_button = builder.get_object("http_use_ssl_check_button")
         self._telnet_port_field = builder.get_object("telnet_port_field")
         self._telnet_timeout_spin_button = builder.get_object("telnet_timeout_spin_button")
+        self._reset_button = builder.get_object("reset_button")
         # Test.
         self._ftp_radio_button = builder.get_object("ftp_radio_button")
         self._http_radio_button = builder.get_object("http_radio_button")
@@ -87,12 +116,13 @@ class SettingsDialog:
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
         self._picons_paths_box = builder.get_object("picons_paths_box")
         # Paths.
-        self._picons_dir_field = builder.get_object("picons_dir_field")
-        self._data_dir_field = builder.get_object("data_dir_field")
-        self._backup_dir_field = builder.get_object("backup_dir_field")
-        self._default_data_dir_field = builder.get_object("default_data_dir_field")
-        self._record_data_dir_field = builder.get_object("record_data_dir_field")
+        self._picons_path_field = builder.get_object("picons_path_field")
+        self._data_path_field = builder.get_object("data_path_field")
+        self._backup_path_field = builder.get_object("backup_path_field")
+        self._record_data_path_field = builder.get_object("record_data_path_field")
         self._default_data_paths_switch = builder.get_object("default_data_paths_switch")
+        self._default_data_paths_switch.bind_property("active", self._backup_path_field, "sensitive", 4)
+        self._default_data_paths_switch.bind_property("active", self._picons_path_field, "sensitive", 4)
         # Info bar.
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
@@ -268,10 +298,10 @@ class SettingsDialog:
         self._user_bouquet_field.set_text(self._settings.user_bouquet_path)
         self._satellites_xml_field.set_text(self._settings.satellites_xml_path)
         self._picons_paths_box.set_active_id(self._settings.picons_path)
-        self._data_dir_field.set_text(self._settings.data_local_path)
-        self._picons_dir_field.set_text(self._settings.picons_local_path)
-        self._backup_dir_field.set_text(self._settings.backup_local_path)
-        self._record_data_dir_field.set_text(self._settings.records_path)
+        self._data_path_field.set_text(self._settings.default_data_path)
+        self._picons_path_field.set_text(self._settings.default_picon_path)
+        self._backup_path_field.set_text(self._settings.default_backup_path)
+        self._record_data_path_field.set_text(self._settings.records_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
@@ -328,9 +358,6 @@ class SettingsDialog:
         self._settings.user_bouquet_path = self._user_bouquet_field.get_text()
         self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
         self._settings.picons_path = self._picons_paths_box.get_active_id()
-        self._settings.data_local_path = self._data_dir_field.get_text()
-        self._settings.picons_local_path = self._picons_dir_field.get_text()
-        self._settings.backup_local_path = self._backup_dir_field.get_text()
 
     def apply_settings(self, item=None):
         if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
@@ -348,7 +375,10 @@ class SettingsDialog:
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
         self._ext_settings.show_srv_hints = self._services_hints_switch.get_active()
         self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
-        self._ext_settings.records_path = self._record_data_dir_field.get_text()
+        self._ext_settings.default_data_path = self._data_path_field.get_text()
+        self._ext_settings.default_backup_path = self._backup_path_field.get_text()
+        self._ext_settings.default_picon_path = self._picons_path_field.get_text()
+        self._ext_settings.records_path = self._record_data_path_field.get_text()
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
         self._ext_settings.list_picon_size = int(self._picons_size_button.get_active_id())
@@ -515,28 +545,7 @@ class SettingsDialog:
         if p_settings:
             row[0] = new_value
             self._profiles[new_value] = p_settings
-            self.update_local_paths(new_value, old_name)
         self.on_profile_selected(self._profile_view, False)
-
-    def update_local_paths(self, p_name, old_name, force_rename=False):
-        data_path = self._settings.data_local_path
-        picons_path = self._settings.picons_local_path
-        backup_path = self._settings.backup_local_path
-
-        self._settings.data_local_path = p_name.join(data_path.rsplit(old_name, 1))
-        self._settings.picons_local_path = p_name.join(picons_path.rsplit(old_name, 1))
-        self._settings.backup_local_path = p_name.join(backup_path.rsplit(old_name, 1))
-
-        if force_rename:
-            try:
-                if os.path.isdir(picons_path):
-                    os.rename(picons_path, self._settings.picons_local_path)
-                if os.path.isdir(data_path):
-                    os.rename(data_path, self._settings.data_local_path)
-                if os.path.isdir(backup_path):
-                    os.rename(backup_path, self._settings.backup_local_path)
-            except OSError as e:
-                self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_profile_selected(self, view, force=True):
         if force:
@@ -566,6 +575,7 @@ class SettingsDialog:
     def on_main_settings_visible(self, stack, param):
         name = stack.get_visible_child_name()
         self._apply_presets_button.set_visible(name == "streaming")
+        self._reset_button.set_visible(name == "profiles")
 
     def on_http_use_ssl_toggled(self, button):
         active = button.get_active()
@@ -706,7 +716,7 @@ class SettingsDialog:
 
     @run_idle
     def set_theme_thumbnail_image(self, theme_name):
-        img_path = "{}{}/gtk-3.0/thumbnail.png".format(self._ext_settings.themes_path, theme_name)
+        img_path = "{}{}{}gtk-3.0{}thumbnail.png".format(self._ext_settings.themes_path, theme_name, SEP, SEP)
         self._theme_thumbnail_image.set_from_pixbuf(get_picon_pixbuf(img_path, 96))
 
     def on_theme_add(self, button):

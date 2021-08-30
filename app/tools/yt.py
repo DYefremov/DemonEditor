@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Module for working with YouTube service """
 import gzip
 import json
@@ -12,6 +40,7 @@ from urllib.parse import unquote
 from urllib.request import Request, urlopen, urlretrieve
 
 from app.commons import log
+from app.settings import SEP
 from app.ui.uicommons import show_notification
 
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
@@ -230,7 +259,7 @@ class YouTubeDL:
                 "cookiefile": "cookies.txt"}  # File name where cookies should be read from and dumped to.
 
     def __init__(self, settings, callback):
-        self._path = settings.default_data_path + "tools/"
+        self._path = "{}tools{}".format(settings.default_data_path, SEP)
         self._update = settings.enable_yt_dl_update
         self._supported = {"22", "18"}
         self._dl = None
@@ -247,7 +276,7 @@ class YouTubeDL:
         return cls._DL_INSTANCE
 
     def init(self):
-        if not os.path.isfile(self._path + "youtube_dl/version.py"):
+        if not os.path.isfile("{}youtube_dl{}version.py".format(self._path, SEP)):
             self.get_latest_release()
 
         if self._path not in sys.path:
