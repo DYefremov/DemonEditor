@@ -34,7 +34,7 @@ from functools import lru_cache
 from itertools import chain
 from urllib.parse import urlparse, unquote
 
-from gi.repository import GLib, Gio
+from gi.repository import GLib, Gio, GObject
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger
 from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
@@ -250,6 +250,11 @@ class Application(Gtk.Application):
         self._use_colors = False
         self._NEW_COLOR = None  # Color for new services in the main list
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
+        # Current page.
+        self._page = Page.INFO
+        # Signals.
+        GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -720,9 +725,9 @@ class Application(Gtk.Application):
         box.pack_start(self._control_box, True, True, 0)
 
     def on_visible_page(self, stack, param):
-        page = Page(stack.get_visible_child_name())
-        self._fav_paned.set_visible(page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
-        self._save_tool_button.set_visible(page in (Page.SERVICES, Page.SATELLITE))
+        self._page = Page(stack.get_visible_child_name())
+        self._fav_paned.set_visible(self._page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
+        self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
 
     def on_page_show(self, action, value):
         action.set_state(value)
@@ -1502,10 +1507,13 @@ class Application(Gtk.Application):
 
     def on_data_open(self, action=None, value=None):
         """ Opening data via "File/Open". """
-        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, title="Open folder")
-        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
-            return
-        self.open_data(response)
+        if self._page is Page.SERVICES:
+            response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, title="Open folder")
+            if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+                return
+            self.open_data(response)
+        elif self._page is Page.SATELLITE:
+            self._satellite_tool.on_open()
 
     def on_archive_open(self, action=None, value=None):
         """ Opening the data archive via "File/Open archive". """
@@ -1784,6 +1792,18 @@ class Application(Gtk.Application):
         yield True
 
     def on_data_save(self, *args):
+        if self._page is Page.SERVICES:
+            self.on_services_save()
+        elif self._page is Page.SATELLITE:
+            self._satellite_tool.on_save()
+
+    def on_data_save_as(self, action=None, value=None):
+        if self._page is Page.SERVICES:
+            self.on_services_save_as()
+        elif self._page is Page.SATELLITE:
+            self._satellite_tool.on_save_as()
+
+    def on_services_save(self):
         if self._app_info_box.get_visible():
             return
 
@@ -1797,7 +1817,7 @@ class Application(Gtk.Application):
         gen = self.save_data()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def on_data_save_as(self, action=None, value=None):
+    def on_services_save_as(self):
         if len(self._bouquets_model) == 0:
             self.show_error_message("No data to save!")
             return
@@ -2091,6 +2111,7 @@ class Application(Gtk.Application):
 
         if changed:
             self.open_data()
+            self.emit("profile-changed", None)
 
     def set_profile(self, active):
         self._settings.current_profile = active
@@ -3581,6 +3602,10 @@ class Application(Gtk.Application):
     @picons_buffer.setter
     def picons_buffer(self, value):
         self._picons_buffer.extend(value)
+
+    @property
+    def app_window(self):
+        return self._main_window
 
 
 def start_app():

@@ -52,8 +52,8 @@ class SatellitesTool(Gtk.Box):
         super().__init__(*args, **kwargs)
 
         self._app = app
-        self._data_path = settings.profile_data_path + "satellites.xml"
         self._settings = settings
+        self._current_sat_path = None
 
         handlers = {"on_remove": self.on_remove,
                     "on_update": self.on_update,
@@ -64,29 +64,35 @@ class SatellitesTool(Gtk.Box):
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
-                    "on_row_activated": self.on_row_activated}
+                    "on_satellite_selection": self.on_satellite_selection}
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
-                              objects=("satellite_tool_frame", "satellites_tree_store", "popup_menu",
-                                       "left_header_menu", "popup_menu_add_image", "popup_menu_add_image_2"))
+                              objects=("satellite_editor_box", "satellite_view_model", "transponder_view_model",
+                                       "satellite_popup_menu", "transponder_popup_menu", "left_header_menu",
+                                       "popup_menu_add_image", "popup_menu_add_image_2"))
 
-        self._sat_view = builder.get_object("satellites_editor_tree_view")
+        self._satellite_view = builder.get_object("satellite_view")
+        self._transponder_view = builder.get_object("transponder_view")
+        builder.get_object("sat_pos_column").set_cell_data_func(builder.get_object("sat_pos_renderer"),
+                                                                self.sat_pos_func)
+
         self._stores = {3: builder.get_object("pol_store"),
                         4: builder.get_object("fec_store"),
                         5: builder.get_object("system_store"),
                         6: builder.get_object("mod_store")}
 
-        self.pack_start(builder.get_object("satellite_tool_frame"), True, True, 0)
+        self.pack_start(builder.get_object("satellite_editor_box"), True, True, 0)
+        self._app.connect("profile-changed", lambda a, m: self.load_satellites_list())
         self.show()
-        self.load_satellites_list(self._sat_view.get_model())
+        self.load_satellites_list()
 
-    def load_satellites_list(self, model):
-        gen = self.on_satellites_list_load(model)
+    def load_satellites_list(self, path=None):
+        gen = self.on_satellites_list_load(path)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     @run_idle
-    def on_open(self, model):
-        response = get_chooser_dialog(self._window, self._settings, "satellites.xml", ("*.xml",))
+    def on_open(self):
+        response = get_chooser_dialog(self._app.app_window, self._settings, "satellites.xml", ("*.xml",))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -94,21 +100,21 @@ class SatellitesTool(Gtk.Box):
             self._app.show_error_message("No satellites.xml file is selected!")
             return
 
-        self._data_path = response
-        self.load_satellites_list(model)
+        self.load_satellites_list(response)
 
-    @staticmethod
-    def on_row_activated(view, path, column):
-        if view.row_expanded(path):
-            view.collapse_row(path)
-        else:
-            view.expand_row(path, column)
+    def on_satellite_selection(self, view):
+        model = self._transponder_view.get_model()
+        model.clear()
+
+        self._current_sat_path, column = view.get_cursor()
+        if self._current_sat_path:
+            list(map(model.append, view.get_model()[self._current_sat_path][-1]))
 
     def on_up(self, item):
-        move_items(KeyboardKey.UP, self._sat_view)
+        move_items(KeyboardKey.UP, self._satellite_view)
 
     def on_down(self, item):
-        move_items(KeyboardKey.DOWN, self._sat_view)
+        move_items(KeyboardKey.DOWN, self._satellite_view)
 
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
@@ -129,24 +135,24 @@ class SatellitesTool(Gtk.Box):
         elif ctrl and key is KeyboardKey.T:
             self.on_transponder()
         elif ctrl and key in MOVE_KEYS:
-            move_items(key, self._sat_view)
+            move_items(key, self._satellite_view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
 
-    def on_satellites_list_load(self, model):
+    def on_satellites_list_load(self, path=None):
         """ Load satellites data into model """
         try:
-            satellites = get_satellites(self._data_path)
+            satellites = get_satellites(path or self._settings.profile_data_path + "satellites.xml")
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
             self._app.show_error_message("{}\n{}".format(e, msg))
             return
         else:
+            model = self._satellite_view.get_model()
             model.clear()
             for sat in satellites:
-                append_satellite(model, sat)
-                yield True
+                yield model.append(sat)
 
     def on_add(self, view):
         """ Common adding """
@@ -165,13 +171,13 @@ class SatellitesTool(Gtk.Box):
             return
 
         model = view.get_model()
-        itr = model.get_iter(paths[0])
-        row = model.get(itr, *[x for x in range(view.get_n_columns())])
+        row = model[paths][:]
+        itr = model.get_iter(paths)
 
-        if row[-1]:  # satellite
-            self.on_satellite(None if force else Satellite(row[0], None, row[-1], None), itr)
-        else:
-            self.on_transponder(None if force else Transponder(*row[1:-2]), itr)
+        if view is self._satellite_view:
+            self.on_satellite(None if force else Satellite(*row), itr)
+        elif view is self._transponder_view:
+            self.on_transponder(None if force else Transponder(*row), itr)
 
     def on_satellite(self, satellite=None, edited_itr=None):
         """ Create or edit satellite"""
@@ -180,19 +186,21 @@ class SatellitesTool(Gtk.Box):
         sat_dialog.destroy()
 
         if sat:
-            view = self._sat_view
-            model = view.get_model()
+            model, paths = self._satellite_view.get_selection().get_selected_rows()
             if satellite and edited_itr:
-                model.set(edited_itr, {0: sat.name, 10: sat.flags, 11: sat.position})
+                model.set(edited_itr, {i: v for i, v in enumerate(sat)})
             else:
-                index = self.get_sat_position_index(sat.position, model)
-                model.insert(None, index, [sat.name, *self._aggr, sat.flags, sat.position])
-                scroll_to(index, view)
+                if len(model):
+                    index = paths[0].get_indices()[0] + 1
+                    model.insert(index, sat)
+                else:
+                    print(sat)
+                    model.append(sat)
 
     def on_transponder(self, transponder=None, edited_itr=None):
         """ Create or edit transponder """
 
-        paths = self.check_selection(self._sat_view, "Please, select only one satellite!")
+        paths = self.check_selection(self._satellite_view, "Please, select only one satellite!")
         if paths is None:
             return
         elif len(paths) == 0:
@@ -204,49 +212,22 @@ class SatellitesTool(Gtk.Box):
         dialog.destroy()
 
         if tr:
-            view = self._sat_view
-            model = view.get_model()
+            sat_model = self._satellite_view.get_model()
+            transponders = sat_model[paths][-1]
+            tr_model, tr_paths = self._transponder_view.get_selection().get_selected_rows()
+
             if transponder and edited_itr:
-                model.set(edited_itr, {1: tr.frequency, 2: tr.symbol_rate, 3: tr.polarization,
-                                       4: tr.fec_inner, 5: tr.system, 6: tr.modulation,
-                                       7: tr.pls_mode, 8: tr.pls_code, 9: tr.is_id})
+                tr_model.set(edited_itr, {i: v for i, v in enumerate(tr)})
+                transponders[tr_model.get_path(edited_itr).get_indices()[0]] = tr
             else:
-                row = ["Transponder:", *tr, None, None]
-                model, paths = view.get_selection().get_selected_rows()
-                itr = model.get_iter(paths[0])
-                view.expand_row(paths[0], 0)
-                # Get parent iter if selected transponder
-                parent_itr = model.iter_parent(itr)
-                if parent_itr:
-                    itr = parent_itr
-                freq = int(tr.frequency if tr.frequency else 0)
-                tr_itr = model.iter_children(itr)
-                # Inserting according to frequency value.
-                while tr_itr:
-                    cur_freq = int(model.get_value(tr_itr, 1))
-                    if freq <= cur_freq:
-                        path = model.get_path(tr_itr)
-                        index = path.get_indices()[1]
-                        model.insert(model.iter_parent(tr_itr), index, row)
-                        scroll_to(path, view)
-                        break
-                    else:
-                        tr_itr = model.iter_next(tr_itr)
-                else:
-                    itr = model.append(itr, row)
-                    scroll_to(model.get_path(itr), view)
-
-    def get_sat_position_index(self, pos, model):
-        """ Search and returns index after given position """
-        pos = int(pos)
-        row = next(filter(lambda r: int(r[-1]) >= pos, model), None)
-
-        return row.path[0] if row else len(model)
+                index = paths[0].get_indices()[0] + 1
+                tr_model.insert(index, tr)
+                transponders.insert(index, tr)
 
     def check_selection(self, view, message):
         """ Checks if any row is selected. Shows error dialog if selected more than one.
 
-        returns selected path or None
+            Returns selected path or None.
         """
         model, paths = view.get_selection().get_selected_rows()
         if len(paths) > 1:
@@ -255,58 +236,40 @@ class SatellitesTool(Gtk.Box):
 
         return paths
 
-    @run_idle
     def on_remove(self, view):
-        """ Removal of selected satellites and transponders.
-
-            The satellites are removed first! Then transponders.
-        """
+        """ Removes selected satellites and transponders. """
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
-        itrs = [model.get_iter(path) for path in paths]
-        satellites = list(filter(model.iter_has_child, itrs))
-        if len(satellites):
-            # Removing selected satellites.
-            list(map(model.remove, satellites))
-        else:
-            # Removing selected transponders.
-            list(map(model.remove, itrs))
+
+        if view is self._satellite_view:
+            list(map(model.remove, [model.get_iter(path) for path in paths]))
+        elif view is self._transponder_view:
+            if self._current_sat_path:
+                trs = self._satellite_view.get_model()[self._current_sat_path][-1]
+                list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
+                list(map(model.remove, [model.get_iter(path) for path in paths]))
+            else:
+                self._app.show_error_message("No satellite is selected!")
+
+    def sat_pos_func(self, column, renderer, model, itr, data):
+        """ Converts and sets the satellite position value to a readable format. """
+        pos = int(model.get_value(itr, 2))
+        renderer.set_property("text", "{:0.1f}{}".format(abs(pos / 10), "W" if pos < 0 else "E"))
 
     @run_idle
-    def on_save(self, view):
-        if show_dialog(DialogType.QUESTION, self._window) == Gtk.ResponseType.CANCEL:
+    def on_save(self):
+        if show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.CANCEL:
             return
 
-        model = view.get_model()
-        satellites = []
-        model.foreach(self.parse_data, satellites)
-        write_satellites(satellites, self._data_path)
+        write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
+                         self._settings.profile_data_path + "satellites.xml")
 
-    def on_save_as(self, item):
-        response = self.get_file_dialog_response(Gtk.FileChooserAction.SAVE)
-        if response == Gtk.ResponseType.CANCEL:
-            return
-        show_dialog(DialogType.ERROR, transient=self._window, text="Not implemented yet!")
+    def on_save_as(self):
+        show_dialog(DialogType.ERROR, transient=self._app.app_window, text="Not implemented yet!")
 
     @run_idle
     def on_update(self, item):
-        SatellitesUpdateDialog(self._app.get_active_window(), self._settings, self._sat_view.get_model()).show()
-
-    @staticmethod
-    def parse_data(model, path, itr, sats):
-        if model.iter_has_child(itr):
-            num_of_children = model.iter_n_children(itr)
-            transponders = []
-            num_columns = model.get_n_columns()
-
-            for num in range(num_of_children):
-                transponder_itr = model.iter_nth_child(itr, num)
-                transponder = model.get(transponder_itr, *[item for item in range(num_columns)])
-                transponders.append(Transponder(*transponder[1:-2]))
-
-            sat = model.get(itr, *[item for item in range(num_columns)])
-            satellite = Satellite(sat[0], sat[-2], sat[-1], transponders)
-            sats.append(satellite)
+        SatellitesUpdateDialog(self._app.get_active_window(), self._settings, self._satellite_view.get_model()).show()
 
 
 # ***************** Transponder dialog *******************#
@@ -396,7 +359,7 @@ class TransponderDialog:
 class SatelliteDialog:
     """ Shows dialog for adding or edit satellite """
 
-    def __init__(self, transient, satellite: Satellite = None):
+    def __init__(self, transient, satellite=None):
         builder = get_builder(_UI_PATH, use_str=True, objects=("satellite_dialog", "side_store", "pos_adjustment"))
 
         self._dialog = builder.get_object("satellite_dialog")
@@ -404,9 +367,10 @@ class SatelliteDialog:
         self._sat_name = builder.get_object("sat_name_entry")
         self._sat_position = builder.get_object("sat_position_button")
         self._side = builder.get_object("side_box")
+        self._transponders = satellite.transponders if satellite else []
 
         if satellite:
-            self._sat_name.set_text(satellite.name[0:satellite.name.find("(")].strip())
+            self._sat_name.set_text(satellite.name)
             pos = satellite.position
             pos = float("{}.{}".format(pos[:-1], pos[-1:]))
             self._sat_position.set_value(fabs(pos))
@@ -425,10 +389,9 @@ class SatelliteDialog:
         name = self._sat_name.get_text()
         pos = round(self._sat_position.get_value(), 1)
         side = self._side.get_active()
-        name = "{} ({}{})".format(name, pos, self._side.get_active_id())
         pos = "{}{}{}".format("-" if side == 1 else "", *str(pos).split("."))
 
-        return Satellite(name=name, flags="0", position=pos, transponders=None)
+        return Satellite(name=name, flags="0", position=pos, transponders=self._transponders)
 
 
 # ********************** Update dialogs ************************ #
@@ -463,7 +426,9 @@ class UpdateDialog:
                               objects=("satellites_update_window", "update_source_store", "update_sat_list_store",
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
                                        "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",
-                                       "remove_selection_image", "update_transponder_store", "update_service_store"))
+                                       "remove_selection_image", "sat_update_cancel_image", "sat_receive_image",
+                                       "sat_update_filter_image", "sat_update_search_image", "sat_update_image",
+                                       "update_transponder_store", "update_service_store"))
 
         self._window = builder.get_object("satellites_update_window")
         self._window.set_transient_for(transient)
@@ -692,32 +657,29 @@ class SatellitesUpdateDialog(UpdateDialog):
                 sats.append(data)
 
             appender.send("-" * 75 + "\n")
-            appender.send("Consumed: {:0.0f}s, {} satellites received.".format(time.time() - start, len(sats)))
-            appender.close()
+            sat_count = len(sats)
 
             sats = {s[2]: s for s in sats}  # key = position, v = satellite
 
             for row in self._main_model:
-                pos = row[-1]
+                pos = row[2]
                 if pos in sats:
                     sat = sats.pop(pos)
-                    itr = row.iter
-                    self.update_satellite(itr, row, sat)
+                    appender.send("Updating satellite: {}\n".format(row[0]))
+                    GLib.idle_add(self._main_model.set, row.iter, {i: v for i, v in enumerate(sat)})
 
-            for sat in sats.values():
-                append_satellite(self._main_model, sat)
+            for p, s in sats.items():
+                appender.send("Adding satellite: {}\n".format(s.name))
+                self.append_satellite(s)
 
+            appender.send("-" * 75 + "\n")
+            appender.send("Consumed: {:0.0f}s, {} satellites received.\n".format(time.time() - start, sat_count))
+            appender.close()
             self.is_download = False
 
     @run_idle
-    def update_satellite(self, itr, row, sat):
-        if self._main_model.iter_has_child(itr):
-            children = row.iterchildren()
-            for ch in children:
-                self._main_model.remove(ch.iter)
-
-        for tr in sat[3]:
-            self._main_model.append(itr, ["Transponder:", *tr, None, None])
+    def append_satellite(self, sat):
+        self._main_model.append(sat)
 
 
 class ServicesUpdateDialog(UpdateDialog):
@@ -935,18 +897,6 @@ class ServicesUpdateDialog(UpdateDialog):
         s_path = self._satellite_paths.get({self.update_transponder_state(r.iter, m, select) for r in m}.pop(), None)
         if s_path:
             self.update_sat_state(m, s_path, select)
-
-
-# ************************* Commons ************************* #
-
-
-@run_idle
-def append_satellite(model, sat):
-    """ Common function for append satellite to the model """
-    name, flags, pos, transponders = sat
-    parent = model.append(None, [name, *(None,) * 9, flags, pos])
-    for transponder in transponders:
-        model.append(parent, ["Transponder:", *transponder, None, None])
 
 
 if __name__ == "__main__":
