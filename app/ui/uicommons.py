@@ -126,6 +126,9 @@ class Page(Enum):
     SATELLITE = "satellite"
     PICONS = "picons"
     PLAYBACK = "playback"
+    EPG = "epg"
+    TIMERS = "timers"
+    RECORDINGS = "recordings"
     FTP = "ftp"
     CONTROL = "control"
 

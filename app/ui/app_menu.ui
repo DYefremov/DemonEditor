@@ -98,6 +98,10 @@
           <attribute name="action">app.show_picons</attribute>
         </item>
         <item>
+          <attribute name="label" translatable="yes">EPG</attribute>
+          <attribute name="action">app.show_epg</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">Timers</attribute>
           <attribute name="action">app.show_timers</attribute>
         </item>

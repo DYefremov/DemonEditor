@@ -48,7 +48,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException,
                           IS_DARWIN)
 from app.tools.media import Player, Recorder
-from app.ui.control import ControlBox
+from app.ui.control import ControlBox, EpgBox
 from app.ui.epg_dialog import EpgDialog
 from app.ui.ftp import FtpClientBox
 from app.ui.transmitter import LinksTransmitter
@@ -199,6 +199,7 @@ class Application(Gtk.Application):
                     "on_add_alternatives": self.on_add_alternatives,
                     "on_satellites_realize": self.on_satellites_realize,
                     "on_picons_realize": self.on_picons_realize,
+                    "on_epg_realize": self.on_epg_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_visible_page": self.on_visible_page}
@@ -232,6 +233,7 @@ class Application(Gtk.Application):
         self._links_transmitter = None
         self._satellite_tool = None
         self._picon_manager = None
+        self._epg_box = None
         self._control_box = None
         self._ftp_client = None
         # Player
@@ -254,6 +256,8 @@ class Application(Gtk.Application):
         self._page = Page.INFO
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("fav-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
@@ -365,6 +369,12 @@ class Application(Gtk.Application):
         self._stack_satellite_box.set_visible(self._settings.get("show_satellites", True))
         self._stack_picon_box = builder.get_object("picon_box")
         self._stack_picon_box.set_visible(self._settings.get("show_picons", True))
+        self._stack_epg_box = builder.get_object("epg_box")
+        self._stack_epg_box.set_visible(self._settings.get("show_epg", True))
+        self._stack_timers_box = builder.get_object("timers_box")
+        self._stack_timers_box.set_visible(self._settings.get("show_timers", True))
+        self._stack_recordings_box = builder.get_object("recordings_box")
+        self._stack_timers_box.set_visible(self._settings.get("show_recordings", True))
         self._stack_ftp_box = builder.get_object("ftp_box")
         self._stack_ftp_box.set_visible(self._settings.get("show_ftp", True))
         self._stack_control_box = builder.get_object("control_box")
@@ -468,8 +478,12 @@ class Application(Gtk.Application):
         sa.connect("change-state", lambda a, v: self._stack_satellite_box.set_visible(v))
         sa = self.set_state_action("show_picons", self.on_page_show, self._settings.get("show_picons", True))
         sa.connect("change-state", lambda a, v: self._stack_picon_box.set_visible(v))
+        sa = self.set_state_action("show_epg", self.on_page_show, self._settings.get("show_epg", True))
+        sa.connect("change-state", lambda a, v: self._stack_epg_box.set_visible(v))
         sa = self.set_state_action("show_timers", self.on_page_show, self._settings.get("show_timers", True))
+        sa.connect("change-state", lambda a, v: self._stack_timers_box.set_visible(v))
         sa = self.set_state_action("show_recordings", self.on_page_show, self._settings.get("show_recordings", True))
+        sa.connect("change-state", lambda a, v: self._stack_recordings_box.set_visible(v))
         sa = self.set_state_action("show_ftp", self.on_page_show, self._settings.get("show_ftp", True))
         sa.connect("change-state", lambda a, v: self._stack_ftp_box.set_visible(v))
         sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
@@ -716,6 +730,10 @@ class Application(Gtk.Application):
         self._picon_manager = PiconManager(self, self._settings, ids, self._sat_positions)
         box.pack_start(self._picon_manager, True, True, 0)
 
+    def on_epg_realize(self, box):
+        self._epg_box = EpgBox(self, self._http_api)
+        box.pack_start(self._epg_box, True, True, 0)
+
     def on_ftp_realize(self, box):
         self._ftp_client = FtpClientBox(self, self._settings)
         box.pack_start(self._ftp_client, True, True, 0)
@@ -726,7 +744,7 @@ class Application(Gtk.Application):
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
-        self._fav_paned.set_visible(self._page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK))
+        self._fav_paned.set_visible(self._page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK, Page.EPG))
         self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
 
     def on_page_show(self, action, value):
@@ -1952,11 +1970,12 @@ class Application(Gtk.Application):
         else:
             self._alt_revealer.set_visible(False)
 
-            if self._control_box and self._control_box.update_epg:
+            if self._page is Page.EPG:
                 ref = self.get_service_ref(path)
                 if not ref:
                     return
-                self._control_box.on_service_changed(ref)
+
+                self.emit("fav-changed", ref)
 
     def on_services_selection(self, model, path, column):
         self.update_service_bar(model, path)

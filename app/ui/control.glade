@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2
+<!-- Generated with glade 3.22.2 
 
 The MIT License (MIT)
 
@@ -34,114 +34,165 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
   <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
-  <object class="GtkImage" id="add_timer_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">alarm-symbolic</property>
-  </object>
-  <object class="GtkBox" id="epg_box">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="orientation">vertical</property>
-    <property name="spacing">5</property>
-    <child>
-      <object class="GtkScrolledWindow" id="epg_view_scrolled_window">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
-        <child>
-          <object class="GtkViewport" id="epg_view_port">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkListBox" id="epg_list_box">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="selection_mode">multiple</property>
-                <property name="activate_on_single_click">False</property>
-                <signal name="button-press-event" handler="on_epg_press" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkBox" id="epg_action_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkSearchEntry" id="epg_filter_entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="tooltip_text" translatable="yes">Filter</property>
-            <property name="primary_icon_stock">gtk-spell-check</property>
-            <property name="primary_icon_name">tools-check-spelling</property>
-            <property name="primary_icon_activatable">False</property>
-            <property name="primary_icon_sensitive">False</property>
-            <property name="placeholder_text" translatable="yes">Filter</property>
-            <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="epg_add_timer_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Add timer</property>
-            <property name="action_name">app.on_timer_add_from_event</property>
-            <property name="image">add_timer_image</property>
-            <property name="always_show_image">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-  </object>
-  <object class="GtkImage" id="back_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-go-back</property>
-  </object>
   <object class="GtkAdjustment" id="begins_hour_adjustment">
     <property name="upper">23</property>
     <property name="step_increment">1</property>
     <property name="page_increment">1</property>
-  </object>
-  <object class="GtkImage" id="down_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-go-down</property>
   </object>
   <object class="GtkAdjustment" id="end_hour_adjustment">
     <property name="upper">23</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkImage" id="forward_image">
+  <object class="GtkListStore" id="epg_model">
+    <columns>
+      <!-- column-name title -->
+      <column type="gchararray"/>
+      <!-- column-name time -->
+      <column type="gchararray"/>
+      <!-- column-name description -->
+      <column type="gchararray"/>
+      <!-- column-name data -->
+      <column type="PyObject"/>
+    </columns>
+  </object>
+  <object class="GtkFrame" id="epg_frame">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-go-forward</property>
+    <property name="margin_top">2</property>
+    <property name="label_xalign">0.49000000953674316</property>
+    <property name="shadow_type">in</property>
+    <child>
+      <object class="GtkBox" id="epg_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_top">7</property>
+        <property name="margin_bottom">5</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="epg_action_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">15</property>
+            <property name="margin_right">15</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkButton" id="epg_add_timer_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Add timer</property>
+                <property name="action_name">app.on_timer_add_from_event</property>
+                <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage" id="add_timer_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">alarm-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="epg_view_scrolled_window">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTreeView" id="epg_view">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="model">epg_model</property>
+                <property name="enable_grid_lines">both</property>
+                <property name="tooltip_column">2</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="epg_selection"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="epg_title_column">
+                    <property name="min_width">25</property>
+                    <property name="title" translatable="yes">Title</property>
+                    <property name="alignment">0.49000000953674316</property>
+                    <property name="sort_column_id">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="epg_title_renderer">
+                        <property name="xpad">5</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="epg_time_column">
+                    <property name="min_width">25</property>
+                    <property name="title" translatable="yes">Time</property>
+                    <property name="alignment">0.49000000953674316</property>
+                    <property name="sort_column_id">1</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="epg_time_renderer">
+                        <property name="xpad">10</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="epg_desc_column">
+                    <property name="title" translatable="yes">Description</property>
+                    <property name="expand">True</property>
+                    <property name="alignment">0.49000000953674316</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="epg_desc_renderer">
+                        <property name="ellipsize">end</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">2</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="label">
+      <object class="GtkLabel" id="epg_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">EPG</property>
+      </object>
+    </child>
   </object>
   <object class="GtkAdjustment" id="min_begins_adjustment">
     <property name="upper">59</property>
@@ -1007,18 +1058,6 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
   </object>
-  <object class="GtkImage" id="reboot_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">16</property>
-    <property name="icon_name">view-refresh</property>
-    <property name="icon_size">1</property>
-  </object>
-  <object class="GtkImage" id="remove_recording_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">user-trash</property>
-  </object>
   <object class="GtkBox" id="recordings_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1091,8 +1130,14 @@ Author: Dmitriy Yefremov
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Remove</property>
             <property name="action_name">app.on_recording_remove</property>
-            <property name="image">remove_recording_image</property>
             <property name="always_show_image">True</property>
+            <child>
+              <object class="GtkImage" id="remove_recording_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">user-trash</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1108,26 +1153,6 @@ Author: Dmitriy Yefremov
         <property name="position">2</property>
       </packing>
     </child>
-  </object>
-  <object class="GtkImage" id="restart_gui_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">16</property>
-    <property name="icon_name">window-new</property>
-    <property name="icon_size">1</property>
-  </object>
-  <object class="GtkImage" id="shutdown_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">16</property>
-    <property name="icon_name">application-exit</property>
-  </object>
-  <object class="GtkImage" id="standby_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">16</property>
-    <property name="icon_name">system-log-out</property>
-    <property name="icon_size">1</property>
   </object>
   <object class="GtkBox" id="timers_box">
     <property name="visible">True</property>
@@ -1216,22 +1241,10 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
   </object>
-  <object class="GtkImage" id="up_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-go-up</property>
-  </object>
   <object class="GtkAdjustment" id="volume_adjustment">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
-  </object>
-  <object class="GtkImage" id="wake_up_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">16</property>
-    <property name="icon_name">document-revert</property>
-    <property name="icon_size">1</property>
   </object>
   <object class="GtkBox" id="control_box">
     <property name="visible">True</property>
@@ -1256,7 +1269,15 @@ Author: Dmitriy Yefremov
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Standby</property>
             <property name="action_name">app.on_standby</property>
-            <property name="image">standby_image</property>
+            <child>
+              <object class="GtkImage" id="standby_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixel_size">16</property>
+                <property name="icon_name">system-log-out</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1272,7 +1293,15 @@ Author: Dmitriy Yefremov
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Wake Up</property>
             <property name="action_name">app.on_wake_up</property>
-            <property name="image">wake_up_image</property>
+            <child>
+              <object class="GtkImage" id="wake_up_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixel_size">16</property>
+                <property name="icon_name">document-revert</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1281,14 +1310,22 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="reboot_butto">
+          <object class="GtkButton" id="reboot_button">
             <property name="width_request">70</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Reboot</property>
             <property name="action_name">app.on_reboot</property>
-            <property name="image">reboot_image</property>
+            <child>
+              <object class="GtkImage" id="reboot_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixel_size">16</property>
+                <property name="icon_name">view-refresh</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1304,7 +1341,15 @@ Author: Dmitriy Yefremov
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Restart GUI</property>
             <property name="action_name">app.on_restart_gui</property>
-            <property name="image">restart_gui_image</property>
+            <child>
+              <object class="GtkImage" id="restart_gui_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixel_size">16</property>
+                <property name="icon_name">window-new</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1320,7 +1365,14 @@ Author: Dmitriy Yefremov
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Shutdown</property>
             <property name="action_name">app.on_shutdown</property>
-            <property name="image">shutdown_image</property>
+            <child>
+              <object class="GtkImage" id="shutdown_image">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixel_size">16</property>
+                <property name="icon_name">application-exit</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1554,7 +1606,13 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="action_name">app.on_up</property>
-                        <property name="image">up_image</property>
+                        <child>
+                          <object class="GtkImage" id="up_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-go-up</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1567,7 +1625,13 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="action_name">app.on_down</property>
-                        <property name="image">down_image</property>
+                        <child>
+                          <object class="GtkImage" id="down_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-go-down</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1580,8 +1644,14 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="action_name">app.on_right</property>
-                        <property name="image">forward_image</property>
                         <property name="always_show_image">True</property>
+                        <child>
+                          <object class="GtkImage" id="forward_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-go-forward</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -1594,7 +1664,13 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="action_name">app.on_left</property>
-                        <property name="image">back_image</property>
+                        <child>
+                          <object class="GtkImage" id="back_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-go-back</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>

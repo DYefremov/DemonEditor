@@ -2381,6 +2381,64 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkBox" id="epg_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="orientation">vertical</property>
+                    <signal name="realize" handler="on_epg_realize" swapped="no"/>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">epg</property>
+                    <property name="title" translatable="yes">EPG</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="timers_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">timers</property>
+                    <property name="title" translatable="yes">Timers</property>
+                    <property name="position">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="recordings_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">recordings</property>
+                    <property name="title" translatable="yes">Recordings</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkBox" id="ftp_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -2397,7 +2455,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="name">ftp</property>
                     <property name="title" translatable="yes">FTP</property>
-                    <property name="position">5</property>
+                    <property name="position">8</property>
                   </packing>
                 </child>
                 <child>
@@ -2416,7 +2474,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="name">control</property>
                     <property name="title" translatable="yes">Control</property>
-                    <property name="position">6</property>
+                    <property name="position">9</property>
                   </packing>
                 </child>
               </object>
