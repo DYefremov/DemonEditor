@@ -48,7 +48,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException,
                           IS_DARWIN)
 from app.tools.media import Player, Recorder
-from app.ui.control import ControlBox, EpgBox
+from app.ui.control import ControlBox, EpgBox, TimersBox
 from app.ui.epg_dialog import EpgDialog
 from app.ui.ftp import FtpClientBox
 from app.ui.transmitter import LinksTransmitter
@@ -200,6 +200,7 @@ class Application(Gtk.Application):
                     "on_satellites_realize": self.on_satellites_realize,
                     "on_picons_realize": self.on_picons_realize,
                     "on_epg_realize": self.on_epg_realize,
+                    "on_timers_realize": self.on_timers_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_visible_page": self.on_visible_page}
@@ -234,6 +235,7 @@ class Application(Gtk.Application):
         self._satellite_tool = None
         self._picon_manager = None
         self._epg_box = None
+        self._timers_box = None
         self._control_box = None
         self._ftp_client = None
         # Player
@@ -254,10 +256,13 @@ class Application(Gtk.Application):
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
         # Current page.
         self._page = Page.INFO
+        self._fav_pages = {Page.SERVICES, Page.PICONS, Page.PLAYBACK, Page.EPG, Page.TIMERS}
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("page-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
@@ -734,6 +739,10 @@ class Application(Gtk.Application):
         self._epg_box = EpgBox(self, self._http_api)
         box.pack_start(self._epg_box, True, True, 0)
 
+    def on_timers_realize(self, box):
+        self._epg_box = TimersBox(self, self._http_api)
+        box.pack_start(self._epg_box, True, True, 0)
+
     def on_ftp_realize(self, box):
         self._ftp_client = FtpClientBox(self, self._settings)
         box.pack_start(self._ftp_client, True, True, 0)
@@ -744,8 +753,9 @@ class Application(Gtk.Application):
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
-        self._fav_paned.set_visible(self._page in (Page.SERVICES, Page.PICONS, Page.PLAYBACK, Page.EPG))
+        self._fav_paned.set_visible(self._page in self._fav_pages)
         self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
+        self.emit("page-changed", self._page)
 
     def on_page_show(self, action, value):
         action.set_state(value)

@@ -1154,78 +1154,182 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
   </object>
-  <object class="GtkBox" id="timers_box">
+  <object class="GtkListStore" id="timer_model">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name service -->
+      <column type="gchararray"/>
+      <!-- column-name time -->
+      <column type="gchararray"/>
+      <!-- column-name desc -->
+      <column type="gchararray"/>
+      <!-- column-name data -->
+      <column type="PyObject"/>
+    </columns>
+  </object>
+  <object class="GtkFrame" id="timers_frame">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="orientation">vertical</property>
-    <property name="spacing">5</property>
+    <property name="margin_top">2</property>
+    <property name="label_xalign">0.49000000953674316</property>
+    <property name="shadow_type">in</property>
     <child>
-      <object class="GtkScrolledWindow" id="timers_screlled_window">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
-        <child>
-          <object class="GtkViewport" id="timers_viewport">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkListBox" id="timers_list_box">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="selection_mode">multiple</property>
-                <property name="activate_on_single_click">False</property>
-                <signal name="button-press-event" handler="on_timers_press" swapped="no"/>
-                <signal name="drag-data-received" handler="on_timers_drag_data_received" swapped="no"/>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkButtonBox" id="timers_button_box">
+      <object class="GtkBox" id="timers_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="valign">end</property>
-        <property name="homogeneous">True</property>
-        <property name="layout_style">expand</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkButton" id="timer_add_button">
-            <property name="label" translatable="yes">Add</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.on_timer_add</property>
+          <object class="GtkBox" id="timers_header_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">15</property>
+            <property name="margin_right">15</property>
+            <property name="margin_top">7</property>
+            <property name="margin_bottom">5</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkButton" id="timer_add_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkImage" id="timer_add_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">document-new-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="timer_remove_button">
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkImage" id="timer_remove_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">user-trash-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="timer_edit_button">
+                <property name="label" translatable="yes">Edit</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">app.on_timer_edit</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="timer_remove_button">
-            <property name="label" translatable="yes">Remove</property>
+          <object class="GtkScrolledWindow" id="timers_screlled_window">
+            <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.on_timer_remove</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="timer_edit_button">
-            <property name="label" translatable="yes">Edit</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.on_timer_edit</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTreeView" id="timer_view">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="model">timer_model</property>
+                <property name="enable_grid_lines">both</property>
+                <property name="tooltip_column">3</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="timer_selection"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="timer_name_column">
+                    <property name="min_width">150</property>
+                    <property name="title" translatable="yes">Name</property>
+                    <property name="alignment">0.5</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="timer_name_renderer">
+                        <property name="xpad">5</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="timer_service_column">
+                    <property name="min_width">150</property>
+                    <property name="title" translatable="yes">Service</property>
+                    <property name="alignment">0.5</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="timer_service_renderer">
+                        <property name="xpad">5</property>
+                        <property name="xalign">0.49000000953674316</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="timer_time_column">
+                    <property name="min_width">100</property>
+                    <property name="title" translatable="yes">Time</property>
+                    <property name="alignment">0.5</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="timer_time_renderer">
+                        <property name="xpad">5</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">2</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="timer_desc_column">
+                    <property name="title" translatable="yes">Description</property>
+                    <property name="expand">True</property>
+                    <property name="alignment">0.5</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="timer_desc_renderer">
+                        <property name="ellipsize">end</property>
+                      </object>
+                      <attributes>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -1234,11 +1338,13 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">2</property>
-      </packing>
+    </child>
+    <child type="label">
+      <object class="GtkLabel" id="timers_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Timers</property>
+      </object>
     </child>
   </object>
   <object class="GtkAdjustment" id="volume_adjustment">

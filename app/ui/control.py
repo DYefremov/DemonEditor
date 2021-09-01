@@ -34,7 +34,7 @@ from urllib.parse import quote
 from gi.repository import GLib
 
 from .dialogs import get_builder
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI
 
@@ -81,6 +81,46 @@ class EpgBox(Gtk.Box):
         time = "{} - {}".format(start_time.strftime("%A, %H:%M"), end_time.strftime("%H:%M"))
 
         return title, time, desc, event
+
+
+class TimersBox(Gtk.Box):
+    def __init__(self, app, http_api, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._http_api = http_api
+        self._app = app
+        self._app.connect("page-changed", self.update_timer_list)
+
+        handlers = {}
+
+        builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers, objects=("timers_frame", "timer_model"))
+        self._view = builder.get_object("timer_view")
+        self._remove_button = builder.get_object("timer_remove_button")
+        self.add(builder.get_object("timers_frame"))
+        self.show()
+
+    def update_timer_list(self, app, page):
+        if page is Page.TIMERS:
+            self._app._wait_dialog.show()
+            self._http_api.send(HttpAPI.Request.TIMER_LIST, "", self.update_timers_data)
+
+    @run_idle
+    def update_timers_data(self, timers):
+        model = self._view.get_model()
+        model.clear()
+        list(map(model.append, (self.get_timer_row(t) for t in timers.get("timer_list", []))))
+        self._remove_button.set_visible(len(model))
+        self._app._wait_dialog.hide()
+
+    def get_timer_row(self, timer):
+        name = timer.get("e2name", "") or ""
+        description = timer.get("e2description", "") or ""
+        service = timer.get("e2servicename", "") or ""
+        start_time = datetime.fromtimestamp(int(timer.get("e2timebegin", "0")))
+        end_time = datetime.fromtimestamp(int(timer.get("e2timeend", "0")))
+        time = "{} - {}".format(start_time.strftime("%A, %H:%M"), end_time.strftime("%H:%M"))
+
+        return name, service, time, description, timer
 
 
 class ControlBox(Gtk.HBox):

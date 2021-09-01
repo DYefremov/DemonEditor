@@ -2385,7 +2385,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
                     <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
@@ -2405,10 +2404,10 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
                     <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
+                    <signal name="realize" handler="on_timers_realize" swapped="no"/>
                     <child>
                       <placeholder/>
                     </child>
