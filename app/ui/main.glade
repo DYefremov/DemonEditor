@@ -1480,7 +1480,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="label_xalign">0.49000000953674316</property>
                     <property name="shadow_type">in</property>
@@ -2160,7 +2159,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <signal name="realize" handler="on_satellites_realize" swapped="no"/>
@@ -2179,7 +2177,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <signal name="realize" handler="on_picons_realize" swapped="no"/>
@@ -2385,7 +2382,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <signal name="realize" handler="on_epg_realize" swapped="no"/>
@@ -2404,7 +2400,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <signal name="realize" handler="on_timers_realize" swapped="no"/>
@@ -2424,9 +2419,9 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
+                    <signal name="realize" handler="on_recordings_realize" swapped="no"/>
                     <child>
                       <placeholder/>
                     </child>
@@ -2443,7 +2438,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <property name="orientation">vertical</property>
                     <signal name="realize" handler="on_ftp_realize" swapped="no"/>
@@ -2463,7 +2457,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="margin_left">5</property>
                     <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
                     <signal name="realize" handler="on_control_realize" swapped="no"/>
                     <child>
@@ -2486,7 +2479,6 @@ Author: Dmitriy Yefremov
               <object class="GtkPaned" id="fav_paned">
                 <property name="can_focus">False</property>
                 <property name="margin_right">5</property>
-                <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="wide_handle">True</property>
                 <child>

@@ -29,14 +29,15 @@
 """ Receiver control module via HTTP API. """
 import os
 from datetime import datetime
+from ftplib import all_errors
 from urllib.parse import quote
 
 from gi.repository import GLib
 
-from .dialogs import get_builder
+from .dialogs import get_builder, show_dialog, DialogType
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page
 from ..commons import run_task, run_with_delay, log, run_idle
-from ..connections import HttpAPI
+from ..connections import HttpAPI, UtfFTP
 
 
 class EpgBox(Gtk.Box):
@@ -51,7 +52,7 @@ class EpgBox(Gtk.Box):
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers, objects=("epg_frame", "epg_model"))
         self._view = builder.get_object("epg_view")
-        self.add(builder.get_object("epg_frame"))
+        self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         self.show()
 
     def on_epg_press(self, list_box, event):
@@ -96,7 +97,7 @@ class TimersBox(Gtk.Box):
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers, objects=("timers_frame", "timer_model"))
         self._view = builder.get_object("timer_view")
         self._remove_button = builder.get_object("timer_remove_button")
-        self.add(builder.get_object("timers_frame"))
+        self.pack_start(builder.get_object("timers_frame"), True, True, 0)
         self.show()
 
     def update_timer_list(self, app, page):
@@ -123,7 +124,143 @@ class TimersBox(Gtk.Box):
         return name, service, time, description, timer
 
 
-class ControlBox(Gtk.HBox):
+class RecordingsBox(Gtk.Box):
+    ROOT = ".."
+    DEFAULT_PATH = "/hdd"
+
+    def __init__(self, app, http_api, settings, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._http_api = http_api
+        self._app = app
+        self._app.connect("profile-changed", self.init)
+        self._settings = settings
+        self._ftp = None
+        # Icon.
+        theme = Gtk.IconTheme.get_default()
+        icon = "folder-symbolic"
+        self._icon = theme.load_icon(icon, 32, 0) if theme.lookup_icon(icon, 32, 0) else None
+
+        handlers = {"on_path_press": self.on_path_press,
+                    "on_path_activated": self.on_path_activated,
+                    "on_recordings_activated": self.on_recordings_activated,
+                    "on_recording_remove": self.on_recording_remove}
+
+        builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
+                              objects=("recordings_frame", "recordings_model", "rec_paths_model"))
+        self._rec_view = builder.get_object("recordings_view")
+        self._paths_view = builder.get_object("recordings_paths_view")
+        self.pack_start(builder.get_object("recordings_frame"), True, True, 0)
+
+        self.init()
+        self.show()
+
+    def clear_data(self):
+        self._rec_view.get_model().clear()
+        self._paths_view.get_model().clear()
+
+    @run_task
+    def init(self, app=None, arg=None):
+        GLib.idle_add(self.clear_data)
+        try:
+            if self._ftp:
+                self._ftp.close()
+
+            self._ftp = UtfFTP(host=self._settings.host, user=self._settings.user, passwd=self._settings.password)
+            self._ftp.encoding = "utf-8"
+        except all_errors:
+            pass  # NOP
+        else:
+            self.init_paths(self.DEFAULT_PATH)
+
+    @run_idle
+    def init_paths(self, path=None):
+        self.clear_data()
+        if not self._ftp:
+            return
+
+        if path:
+            try:
+                self._ftp.cwd(path)
+            except all_errors as e:
+                pass
+
+        files = []
+        try:
+            self._ftp.dir(files.append)
+        except all_errors as e:
+            log(e)
+        else:
+            self.append_paths(files)
+
+    @run_idle
+    def append_paths(self, files):
+        model = self._paths_view.get_model()
+        model.clear()
+        model.append((None, self.ROOT, self._ftp.pwd()))
+
+        for f in files:
+            f_data = f.split()
+            f_type = f_data[0][0]
+
+            if f_type == "d":
+                model.append((self._icon, f_data[-1], self._ftp.pwd()))
+
+    def on_path_activated(self, view, path, column):
+        row = view.get_model()[path][:]
+        path = "{}/{}".format(row[-1], row[1])
+        self._http_api.send(HttpAPI.Request.RECORDINGS, quote(path), self.update_recordings_data)
+
+    def on_path_press(self, view, event):
+        target = view.get_path_at_pos(event.x, event.y)
+        if not target or event.button != Gdk.BUTTON_PRIMARY:
+            return
+
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            self.init_paths(self._paths_view.get_model()[target[0]][1])
+
+    @run_idle
+    def update_recordings_data(self, recordings):
+        model = self._rec_view.get_model()
+        model.clear()
+        list(map(model.append, (self.get_recordings_row(r) for r in recordings.get("recordings", []))))
+
+    def get_recordings_row(self, rec):
+        service = rec.get("e2servicename")
+        title = rec.get("e2title", "")
+        time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%A, %H:%M")
+        length = rec.get("e2length", "0")
+        file = rec.get("e2filename", "")
+        desc = rec.get("e2description", "")
+
+        return service, title, time, length, file, desc, rec
+
+    def on_recordings_activated(self, view, path, column):
+        rec = view.get_model()[path][-1]
+        self._http_api.send(HttpAPI.Request.STREAM_TS, rec.get("e2filename", ""), self.on_play_recording)
+
+    def on_play_recording(self, m3u):
+        url = self._app.get_url_from_m3u(m3u)
+        if url:
+            self._app.play(url)
+
+    def on_recording_remove(self, action, value=None):
+        """ Removes recordings via FTP. """
+        if show_dialog(DialogType.QUESTION, self._app.app_window) != Gtk.ResponseType.OK:
+            return
+
+        model, paths = self._rec_view.get_selection().get_selected_rows()
+        if paths and self._ftp:
+            for file, itr in ((model[p][-1].get("e2filename", ""), model.get_iter(p)) for p in paths):
+                resp = self._ftp.delete_file(file)
+                if resp.startswith("2"):
+                    GLib.idle_add(model.remove, itr)
+                else:
+                    self._app.show_error_message(resp)
+                    break
+
+
+class ControlBox(Gtk.Box):
 
     def __init__(self, app, http_api, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,7 +274,7 @@ class ControlBox(Gtk.HBox):
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
                               objects=("control_box", "volume_adjustment"))
 
-        self.add(builder.get_object("control_box"))
+        self.pack_start(builder.get_object("control_box"), True, True, 0)
         self._stack = builder.get_object("stack")
         self._screenshot_image = builder.get_object("screenshot_image")
         self._screenshot_button_box = builder.get_object("screenshot_button_box")

@@ -48,7 +48,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException,
                           IS_DARWIN)
 from app.tools.media import Player, Recorder
-from app.ui.control import ControlBox, EpgBox, TimersBox
+from app.ui.control import ControlBox, EpgBox, TimersBox, RecordingsBox
 from app.ui.epg_dialog import EpgDialog
 from app.ui.ftp import FtpClientBox
 from app.ui.transmitter import LinksTransmitter
@@ -201,6 +201,7 @@ class Application(Gtk.Application):
                     "on_picons_realize": self.on_picons_realize,
                     "on_epg_realize": self.on_epg_realize,
                     "on_timers_realize": self.on_timers_realize,
+                    "on_recordings_realize": self.on_recordings_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_visible_page": self.on_visible_page}
@@ -236,6 +237,7 @@ class Application(Gtk.Application):
         self._picon_manager = None
         self._epg_box = None
         self._timers_box = None
+        self._recordings_box = None
         self._control_box = None
         self._ftp_client = None
         # Player
@@ -742,6 +744,10 @@ class Application(Gtk.Application):
     def on_timers_realize(self, box):
         self._epg_box = TimersBox(self, self._http_api)
         box.pack_start(self._epg_box, True, True, 0)
+
+    def on_recordings_realize(self, box):
+        self._recordings_box = RecordingsBox(self, self._http_api, self._settings)
+        box.pack_start(self._recordings_box, True, True, 0)
 
     def on_ftp_realize(self, box):
         self._ftp_client = FtpClientBox(self, self._settings)
