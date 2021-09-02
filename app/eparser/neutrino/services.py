@@ -27,13 +27,12 @@
 
 
 from collections import defaultdict
-from xml.dom.minidom import Document, parse
-from xml.parsers.expat import ExpatError
 
 from app.commons import log
 from app.eparser.ecommons import (Service, POLARIZATION, FEC, SYSTEM, SERVICE_TYPE, PROVIDER, T_SYSTEM, TrType,
                                   SystemCable)
 from app.eparser.neutrino import get_xml_attributes, SP, KSP, get_attributes, API_VER
+from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
 
 _FILE = "services.xml"
 
@@ -49,11 +48,11 @@ def get_services(path):
 class NeutrinoServiceWriter:
 
     def __init__(self, path, services):
-        self._path = path
+        self._path = path + _FILE
         self._services = services
 
         self._api = API_VER
-        self._doc = Document()
+        self._doc = NeutrinoDocument()
         self._root = self._doc.createElement("zapit")
         self._root.setAttribute("api", self._api)
         self._doc.appendChild(self._root)
@@ -67,7 +66,7 @@ class NeutrinoServiceWriter:
         self.append_services(srvs.get(TrType.Terrestrial.value), "terrestrial")
         self.append_services(srvs.get(TrType.Cable.value), "cable")
 
-        self._doc.writexml(open(self._path + _FILE, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+        self._doc.write_xml(self._path)
         self._doc.unlink()
 
     def append_services(self, services, s_type):
@@ -112,23 +111,14 @@ class NeutrinoServiceWriter:
 class NeutrinoServicesReader:
 
     def __init__(self, path):
-        self._path = path
+        self._path = path + _FILE
         self._attrs = None
         self._tr = None
         self._api = "4"
         self._services = []
 
     def get_services(self):
-        try:
-            dom = parse(self._path + _FILE)
-        except ExpatError as e:
-            # Some neutrino configuration files may contain text data with invalid characters ['&', etc].
-            # https://www.w3.org/TR/xml/#syntax
-            # Apparently there is an error in Neutrino itself and the document is not initially formed correctly.
-            # TODO: Come up with a way to handle this case.
-            msg = "The file [{}] is not formatted correctly or contains invalid characters! Cause: {}"
-
-            raise ValueError(msg.format(self._path + _FILE, e))
+        dom = XmlHandler.parse(self._path)
 
         for root in dom.getElementsByTagName("zapit"):
             if root.hasAttributes():

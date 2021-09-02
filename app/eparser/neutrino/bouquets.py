@@ -27,10 +27,10 @@
 
 
 import os
-from xml.dom.minidom import parse, Document
 
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
 from app.eparser.neutrino import KSP, SP, get_xml_attributes, get_attributes, API_VER
+from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
 from app.ui.uicommons import LOCKED_ICON, HIDE_ICON
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER, BqType
 
@@ -52,7 +52,7 @@ def parse_bouquets(file, name, bq_type):
     if not os.path.exists(file):
         return bouquets
 
-    dom = parse(file)
+    dom = XmlHandler.parse(file)
 
     for elem in dom.getElementsByTagName("Bouquet"):
         if elem.hasAttributes():
@@ -92,7 +92,7 @@ def parse_webtv(path, name, bq_type):
     if not os.path.exists(path):
         return bouquets
 
-    dom = parse(path)
+    dom = XmlHandler.parse(path)
     services = []
     for elem in dom.getElementsByTagName("webtv"):
         if elem.hasAttributes():
@@ -128,7 +128,7 @@ def write_bouquets(path, bouquets):
 
 
 def write_bouquet(file, bouquet):
-    doc = Document()
+    doc = NeutrinoDocument()
     root = doc.createElement("zapit")
     root.setAttribute("api", API_VER)
     doc.appendChild(root)
@@ -164,11 +164,11 @@ def write_bouquet(file, bouquet):
             srv_elem.setAttribute("s", get_attributes(srv.flags_cas).get("position", "0"))
             bq_elem.appendChild(srv_elem)
 
-    doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+    doc.write_xml(file)
 
 
 def write_webtv(file, bouquet):
-    doc = Document()
+    doc = NeutrinoDocument()
     root = doc.createElement("webtvs")
     doc.appendChild(root)
     comment = doc.createComment(_COMMENT)
@@ -202,7 +202,7 @@ def write_webtv(file, bouquet):
 
             root.appendChild(srv_elem)
 
-    doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+    doc.write_xml(file)
 
 
 if __name__ == "__main__":
