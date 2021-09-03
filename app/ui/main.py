@@ -98,11 +98,10 @@ class Application(Gtk.Application):
 
     _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item", "import_bq_menu_button")
 
-    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item",
-                            "epg_configuration_header_button")
+    _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item")
 
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_header_button",
-                          "epg_configuration_header_button")
+                          "iptv_menu_button")
 
     _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
 
@@ -282,11 +281,8 @@ class Application(Gtk.Application):
         self._fav_model = builder.get_object("fav_list_store")
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
-        self._status_bar_box = builder.get_object("status_bar_box")
-        self._services_main_box = builder.get_object("services_main_box")
-        self._bouquets_main_box = builder.get_object("bouquets_main_box")
-        self._header_bar = builder.get_object("header_bar")
         self._bq_name_label = builder.get_object("bq_name_label")
+        self._iptv_menu_button = builder.get_object("iptv_menu_button")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # App info
@@ -295,7 +291,8 @@ class Application(Gtk.Application):
         # Info bar.
         self._info_bar = builder.get_object("info_bar")
         self._info_label = builder.get_object("info_label")
-        # Status bar
+        # Status bar.
+        self._status_bar_box = builder.get_object("status_bar_box")
         self._profile_combo_box = builder.get_object("profile_combo_box")
         self._receiver_info_box = builder.get_object("receiver_info_box")
         self._receiver_info_label = builder.get_object("receiver_info_label")
@@ -429,6 +426,13 @@ class Application(Gtk.Application):
             view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
             view_button.set_tooltip_text(get_message("View"))
             self._main_window.get_titlebar().pack_end(view_button)
+
+        # IPTV menu.
+        self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
+        iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
+        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_to_m3u,
+                  self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
+            iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
 
         self.init_actions()
         self.set_accels()

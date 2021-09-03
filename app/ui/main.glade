@@ -2509,7 +2509,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkButton" id="import_m3u_header_button">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Import m3u file</property>
                                 <signal name="clicked" handler="on_import_m3u" swapped="no"/>
@@ -2531,7 +2531,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkButton" id="export_to_m3u_header_button">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Export to m3u</property>
                                 <signal name="clicked" handler="on_export_to_m3u" swapped="no"/>
@@ -2550,18 +2550,18 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="epg_configuration_header_button">
+                              <object class="GtkMenuButton" id="iptv_menu_button">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="focus_on_click">False</property>
                                 <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes">EPG configuration</property>
-                                <signal name="clicked" handler="on_epg_list_configuration" swapped="no"/>
+                                <property name="tooltip_text" translatable="yes">IPTV</property>
                                 <child>
-                                  <object class="GtkImage" id="epg_configuration_header_button_image">
+                                  <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="icon_name">insert-text-symbolic</property>
+                                    <property name="icon_name">network-wired-symbolic</property>
                                   </object>
                                 </child>
                               </object>
@@ -3065,7 +3065,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkButton" id="new_header_button">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">New bouquet</property>
                                 <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>

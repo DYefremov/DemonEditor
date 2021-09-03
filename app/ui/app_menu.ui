@@ -133,43 +133,6 @@
       </section>
     </submenu>
     <submenu>
-      <attribute name="label" translatable="yes">IPTV</attribute>
-      <attribute name="action">app.hide_menu_bar</attribute>
-      <attribute name="hidden-when">action-disabled</attribute>
-      <item>
-        <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
-        <attribute name="action">app.on_iptv</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
-        <attribute name="action">app.on_import_yt_list</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Import m3u</attribute>
-        <attribute name="action">app.on_import_m3u</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Export to m3u</attribute>
-        <attribute name="action">app.on_export_to_m3u</attribute>
-      </item>
-      <section>
-        <item>
-          <attribute name="label" translatable="yes">EPG configuration</attribute>
-          <attribute name="action">app.on_epg_list_configuration</attribute>
-        </item>
-        <item>
-          <attribute name="label" translatable="yes">List configuration</attribute>
-          <attribute name="action">app.on_iptv_list_configuration</attribute>
-        </item>
-      </section>
-      <section>
-        <item>
-          <attribute name="label" translatable="yes">Remove all unavailable</attribute>
-          <attribute name="action">app.on_remove_all_unavailable</attribute>
-        </item>
-      </section>
-    </submenu>
-    <submenu>
       <attribute name="label" translatable="yes">FTP client</attribute>
       <attribute name="action">app.show_ftp_menu</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
@@ -294,6 +257,10 @@
           <attribute name="action">app.show_picons</attribute>
         </item>
         <item>
+          <attribute name="label" translatable="yes">EPG</attribute>
+          <attribute name="action">app.show_epg</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">Timers</attribute>
           <attribute name="action">app.show_timers</attribute>
         </item>
@@ -325,43 +292,6 @@
       </section>
     </submenu>
     <submenu>
-      <attribute name="label" translatable="yes">IPTV</attribute>
-      <attribute name="action">app.hide_menu_bar</attribute>
-      <attribute name="hidden-when">action-disabled</attribute>
-      <item>
-        <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
-        <attribute name="action">app.on_iptv</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
-        <attribute name="action">app.on_import_yt_list</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Import m3u</attribute>
-        <attribute name="action">app.on_import_m3u</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Export to m3u</attribute>
-        <attribute name="action">app.on_export_to_m3u</attribute>
-      </item>
-      <section>
-        <item>
-          <attribute name="label" translatable="yes">EPG configuration</attribute>
-          <attribute name="action">app.on_epg_list_configuration</attribute>
-        </item>
-        <item>
-          <attribute name="label" translatable="yes">List configuration</attribute>
-          <attribute name="action">app.on_iptv_list_configuration</attribute>
-        </item>
-      </section>
-      <section>
-        <item>
-          <attribute name="label" translatable="yes">Remove all unavailable</attribute>
-          <attribute name="action">app.on_remove_all_unavailable</attribute>
-        </item>
-      </section>
-    </submenu>
-    <submenu>
       <attribute name="label" translatable="yes">FTP client</attribute>
       <attribute name="action">app.show_ftp_menu</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
@@ -370,5 +300,39 @@
         <attribute name="action">app.on_ftp_client_close</attribute>
       </item>
     </submenu>
+  </menu>
+  <menu id="iptv_menu">
+    <item>
+      <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
+      <attribute name="action">app.on_iptv</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
+      <attribute name="action">app.on_import_yt_list</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Import m3u</attribute>
+      <attribute name="action">app.on_import_m3u</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Export to m3u</attribute>
+      <attribute name="action">app.on_export_to_m3u</attribute>
+    </item>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">EPG configuration</attribute>
+        <attribute name="action">app.on_epg_list_configuration</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">List configuration</attribute>
+        <attribute name="action">app.on_iptv_list_configuration</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Remove all unavailable</attribute>
+        <attribute name="action">app.on_remove_all_unavailable</attribute>
+      </item>
+    </section>
   </menu>
 </interface>
