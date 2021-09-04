@@ -103,7 +103,7 @@ class Application(Gtk.Application):
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_header_button",
                           "iptv_menu_button")
 
-    _LOCK_HIDE_ELEMENTS = ("locked_tool_button", "hide_tool_button")
+    _LOCK_HIDE_ELEMENTS = ("enigma_lock_hide_box", "bouquet_lock_hide_box")
 
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
@@ -207,6 +207,7 @@ class Application(Gtk.Application):
 
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
+        self._is_enigma = self._s_type is SettingsType.ENIGMA_2
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -366,23 +367,18 @@ class Application(Gtk.Application):
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
                       self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
+        # Lock, Hide.
+        self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[0]), "visible")
+        self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[1]), "visible", 4)
         # Stack page widgets.
         self._stack_services_frame = builder.get_object("services_frame")
-        self._stack_services_frame.set_visible(self._settings.get("show_bouquets", True))
         self._stack_satellite_box = builder.get_object("satellite_box")
-        self._stack_satellite_box.set_visible(self._settings.get("show_satellites", True))
         self._stack_picon_box = builder.get_object("picon_box")
-        self._stack_picon_box.set_visible(self._settings.get("show_picons", True))
         self._stack_epg_box = builder.get_object("epg_box")
-        self._stack_epg_box.set_visible(self._settings.get("show_epg", True))
         self._stack_timers_box = builder.get_object("timers_box")
-        self._stack_timers_box.set_visible(self._settings.get("show_timers", True))
         self._stack_recordings_box = builder.get_object("recordings_box")
-        self._stack_timers_box.set_visible(self._settings.get("show_recordings", True))
         self._stack_ftp_box = builder.get_object("ftp_box")
-        self._stack_ftp_box.set_visible(self._settings.get("show_ftp", True))
         self._stack_control_box = builder.get_object("control_box")
-        self._stack_control_box.set_visible(self._settings.get("show_control", True))
         # Header bar.
         if IS_GNOME_SESSION:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
@@ -491,14 +487,18 @@ class Application(Gtk.Application):
         sa.connect("change-state", lambda a, v: self._stack_picon_box.set_visible(v))
         sa = self.set_state_action("show_epg", self.on_page_show, self._settings.get("show_epg", True))
         sa.connect("change-state", lambda a, v: self._stack_epg_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
         sa = self.set_state_action("show_timers", self.on_page_show, self._settings.get("show_timers", True))
         sa.connect("change-state", lambda a, v: self._stack_timers_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
         sa = self.set_state_action("show_recordings", self.on_page_show, self._settings.get("show_recordings", True))
         sa.connect("change-state", lambda a, v: self._stack_recordings_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
         sa = self.set_state_action("show_ftp", self.on_page_show, self._settings.get("show_ftp", True))
         sa.connect("change-state", lambda a, v: self._stack_ftp_box.set_visible(v))
         sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
         sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
         # Menu bar.
         if not IS_GNOME_SESSION:
             # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
@@ -2156,11 +2156,25 @@ class Application(Gtk.Application):
         self._settings.current_profile = active
         self._s_type = self._settings.setting_type
         self.update_profile_label()
+        is_enigma = self._s_type is SettingsType.ENIGMA_2
+        self.set_property("is-enigma", is_enigma)
+        self.update_stack_elements_visibility(is_enigma)
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()
         for p in self._settings.profiles:
             self._profile_combo_box.append(p, p)
+
+    @run_idle
+    def update_stack_elements_visibility(self, is_enigma=False):
+        self._stack_services_frame.set_visible(self._settings.get("show_bouquets", True))
+        self._stack_satellite_box.set_visible(self._settings.get("show_satellites", True))
+        self._stack_picon_box.set_visible(self._settings.get("show_picons", True))
+        self._stack_ftp_box.set_visible(self._settings.get("show_ftp", True))
+        self._stack_epg_box.set_visible(is_enigma and self._settings.get("show_epg", True))
+        self._stack_timers_box.set_visible(is_enigma and self._settings.get("show_timers", True))
+        self._stack_recordings_box.set_visible(is_enigma and self._settings.get("show_recordings", True))
+        self._stack_control_box.set_visible(is_enigma and self._settings.get("show_control", True))
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
@@ -3645,6 +3659,18 @@ class Application(Gtk.Application):
     @property
     def app_window(self):
         return self._main_window
+
+    @property
+    def app_settings(self):
+        return self._settings
+
+    @GObject.Property(type=bool, default=True)
+    def is_enigma(self):
+        return self._is_enigma
+
+    @is_enigma.setter
+    def is_enigma(self, value):
+        self._is_enigma = value
 
 
 def start_app():

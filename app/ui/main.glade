@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.22.2
 
 The MIT License (MIT)
 
@@ -1546,42 +1546,54 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="hide_tool_button">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
-                                <property name="action_name">app.on_hide</property>
-                                <child>
-                                  <object class="GtkImage">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">go-jump-symbolic</property>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="pack_type">end</property>
-                                <property name="position">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="locked_tool_button">
-                                <property name="visible">True</property>
+                              <object class="GtkBox" id="enigma_lock_hide_box">
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
-                                <property name="receives_default">True</property>
-                                <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
-                                <property name="action_name">app.on_locked</property>
+                                <property name="spacing">5</property>
                                 <child>
-                                  <object class="GtkImage" id="locked_tool_button_image">
+                                  <object class="GtkButton" id="enigma_locked_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="icon_name">changes-prevent-symbolic</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
+                                    <property name="action_name">app.on_locked</property>
+                                    <child>
+                                      <object class="GtkImage" id="enigma_locked_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">changes-prevent-symbolic</property>
+                                      </object>
+                                    </child>
                                   </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="enigma_hide_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
+                                    <property name="action_name">app.on_hide</property>
+                                    <child>
+                                      <object class="GtkImage" id="enigma_hide_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">go-jump-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">1</property>
+                                  </packing>
                                 </child>
                               </object>
                               <packing>
@@ -2510,6 +2522,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="focus_on_click">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Import m3u file</property>
                                 <signal name="clicked" handler="on_import_m3u" swapped="no"/>
@@ -2532,6 +2545,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="focus_on_click">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Export to m3u</property>
                                 <signal name="clicked" handler="on_export_to_m3u" swapped="no"/>
@@ -3066,6 +3080,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="focus_on_click">False</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">New bouquet</property>
                                 <signal name="clicked" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
@@ -3084,7 +3099,62 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkBox" id="bouquet_lock_hide_box">
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">False</property>
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkButton" id="bouquet_locked_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Parent lock On/Off     Ctrl + L</property>
+                                    <property name="action_name">app.on_locked</property>
+                                    <child>
+                                      <object class="GtkImage" id="bouquet_locked_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">changes-prevent-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="bouquet_hide_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Hide/Skip On/Off     Ctrl + H</property>
+                                    <property name="action_name">app.on_hide</property>
+                                    <child>
+                                      <object class="GtkImage" id="bouquet_hide_button_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">go-jump-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>

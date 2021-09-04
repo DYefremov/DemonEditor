@@ -100,14 +100,17 @@
         <item>
           <attribute name="label" translatable="yes">EPG</attribute>
           <attribute name="action">app.show_epg</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Timers</attribute>
           <attribute name="action">app.show_timers</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Recordings</attribute>
           <attribute name="action">app.show_recordings</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">FTP</attribute>
@@ -116,6 +119,7 @@
         <item>
           <attribute name="label" translatable="yes">Control</attribute>
           <attribute name="action">app.show_control</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
       </section>
     </submenu>
@@ -259,14 +263,17 @@
         <item>
           <attribute name="label" translatable="yes">EPG</attribute>
           <attribute name="action">app.show_epg</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Timers</attribute>
           <attribute name="action">app.show_timers</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Recordings</attribute>
           <attribute name="action">app.show_recordings</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">FTP</attribute>
@@ -275,6 +282,7 @@
         <item>
           <attribute name="label" translatable="yes">Control</attribute>
           <attribute name="action">app.show_control</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
       </section>
     </submenu>
