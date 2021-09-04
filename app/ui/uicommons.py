@@ -99,7 +99,7 @@ def get_yt_icon(icon_name, size=24):
         if n_theme.has_icon(icon_name):
             return n_theme.load_icon(icon_name, size, 0)
 
-    return default_theme.load_icon("info", size, 0)
+    return default_theme.load_icon("emblem-important-symbolic", size, 0)
 
 
 def show_notification(message, timeout=10000, urgency=1):
@@ -131,51 +131,6 @@ class Page(Enum):
     RECORDINGS = "recordings"
     FTP = "ftp"
     CONTROL = "control"
-
-
-class KeyboardKey(Enum):
-    """ The raw(hardware) codes of the keyboard keys. """
-    E = 26
-    R = 27
-    T = 28
-    P = 33
-    S = 39
-    F = 41
-    X = 53
-    C = 54
-    V = 55
-    W = 25
-    Z = 52
-    INSERT = 118
-    HOME = 110
-    END = 115
-    UP = 111
-    DOWN = 116
-    PAGE_UP = 112
-    PAGE_DOWN = 117
-    LEFT = 113
-    RIGHT = 114
-    F2 = 68
-    F7 = 73
-    SPACE = 65
-    DELETE = 119
-    BACK_SPACE = 22
-    CTRL_L = 37
-    CTRL_R = 105
-    # Laptop codes
-    HOME_KP = 79
-    END_KP = 87
-    PAGE_UP_KP = 81
-    PAGE_DOWN_KP = 89
-
-    @classmethod
-    def value_exist(cls, value):
-        return value in (val.value for val in cls.__members__.values())
-
-
-# Keys for move in lists. KEY_KP_(NAME) for laptop!!!
-MOVE_KEYS = (KeyboardKey.UP, KeyboardKey.PAGE_UP, KeyboardKey.DOWN, KeyboardKey.PAGE_DOWN, KeyboardKey.HOME,
-             KeyboardKey.END, KeyboardKey.HOME_KP, KeyboardKey.END_KP, KeyboardKey.PAGE_UP_KP, KeyboardKey.PAGE_DOWN_KP)
 
 
 class FavClickMode(IntEnum):
@@ -260,6 +215,131 @@ class Column(IntEnum):
         """ Overridden to get the index in slices directly """
         return self.value
 
+
+# *************** Keyboard keys *************** #
+
+class BaseKeyboardKey(Enum):
+    @classmethod
+    def value_exist(cls, value):
+        return value in (val.value for val in cls.__members__.values())
+
+
+if IS_LINUX:
+    class KeyboardKey(BaseKeyboardKey):
+        """ The raw(hardware) codes [Linux] of the keyboard keys. """
+        E = 26
+        R = 27
+        T = 28
+        P = 33
+        S = 39
+        F = 41
+        X = 53
+        C = 54
+        V = 55
+        W = 25
+        Z = 52
+        INSERT = 118
+        HOME = 110
+        END = 115
+        UP = 111
+        DOWN = 116
+        PAGE_UP = 112
+        PAGE_DOWN = 117
+        LEFT = 113
+        RIGHT = 114
+        F2 = 68
+        F7 = 73
+        SPACE = 65
+        DELETE = 119
+        BACK_SPACE = 22
+        CTRL_L = 37
+        CTRL_R = 105
+        # Laptop codes
+        HOME_KP = 79
+        END_KP = 87
+        PAGE_UP_KP = 81
+        PAGE_DOWN_KP = 89
+
+elif IS_DARWIN:
+    class KeyboardKey(BaseKeyboardKey):
+        """ The raw(hardware) codes [macOS] of the keyboard keys. """
+        F = 3
+        E = 14
+        R = 15
+        T = 17
+        P = 35
+        S = 1
+        H = 4
+        L = 37
+        X = 7
+        C = 8
+        V = 9
+        W = 13
+        Z = 6
+        INSERT = -1
+        HOME = -1
+        END = -1
+        UP = 126
+        DOWN = 125
+        PAGE_UP = -1
+        PAGE_DOWN = -1
+        LEFT = 123
+        RIGHT = 123
+        F2 = 120
+        F7 = 98
+        SPACE = 49
+        DELETE = 51
+        BACK_SPACE = 76
+        CTRL_L = 55
+        CTRL_R = 55
+        # Laptop codes.
+        HOME_KP = -1
+        END_KP = -1
+        PAGE_UP_KP = -1
+        PAGE_DOWN_KP = -1
+
+else:
+    class KeyboardKey(BaseKeyboardKey):
+        """ The raw(hardware) codes [Windows] of the keyboard keys. """
+        E = 69
+        R = 82
+        T = 84
+        P = 80
+        S = 83
+        F = 70
+        X = 88
+        C = 67
+        V = 86
+        W = 87
+        Z = 90
+        INSERT = 45
+        HOME = 36
+        END = 35
+        UP = 38
+        DOWN = 40
+        PAGE_UP = 33
+        PAGE_DOWN = 34
+        LEFT = 37
+        RIGHT = 39
+        F2 = 113
+        F7 = 118
+        SPACE = 32
+        DELETE = 46
+        BACK_SPACE = 8
+        CTRL_L = 17
+        CTRL_R = 163
+        # Laptop codes.
+        HOME_KP = -1
+        END_KP = -1
+        PAGE_UP_KP = -1
+        PAGE_DOWN_KP = -1
+
+# Keys for move in lists. KEY_KP_(NAME) for laptop!
+MOVE_KEYS = {KeyboardKey.UP, KeyboardKey.PAGE_UP,
+             KeyboardKey.DOWN, KeyboardKey.PAGE_DOWN,
+             KeyboardKey.HOME, KeyboardKey.END,
+             KeyboardKey.HOME_KP, KeyboardKey.END_KP,
+             KeyboardKey.PAGE_UP_KP, KeyboardKey.PAGE_DOWN_KP}
 
 if __name__ == "__main__":
     pass
