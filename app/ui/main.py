@@ -1545,13 +1545,15 @@ class Application(Gtk.Application):
 
     def on_data_open(self, action=None, value=None):
         """ Opening data via "File/Open". """
-        if self._page is Page.SERVICES:
+        if self._page is Page.SERVICES or self._page is Page.INFO:
             response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, title="Open folder")
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
             self.open_data(response)
         elif self._page is Page.SATELLITE:
             self._satellite_tool.on_open()
+        elif self._page is Page.PICONS:
+            self._picon_manager.on_open()
 
     def on_archive_open(self, action=None, value=None):
         """ Opening the data archive via "File/Open archive". """

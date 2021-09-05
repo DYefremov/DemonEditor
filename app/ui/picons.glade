@@ -363,7 +363,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkImage" id="remove_button_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="stock">gtk-delete</property>
+                        <property name="icon_name">user-trash-symbolic</property>
                       </object>
                     </child>
                   </object>
@@ -427,7 +427,7 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Filter</property>
-                    <property name="stock">gtk-select-all</property>
+                    <property name="icon_name">edit-find-replace-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -449,7 +449,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="info_check_button_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-dialog-info</property>
+                    <property name="icon_name">emblem-important-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -477,8 +477,6 @@ Author: Dmitriy Yefremov
               <object class="GtkStack" id="stack">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
                 <property name="margin_bottom">5</property>
                 <signal name="notify::visible-child" handler="on_visible_page" swapped="no"/>
                 <child>
@@ -487,50 +485,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
-                    <child>
-                      <object class="GtkBox" id="filter_service_box">
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Filter services in the main list.</property>
-                        <property name="halign">end</property>
-                        <property name="valign">end</property>
-                        <property name="margin_right">5</property>
-                        <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkLabel" id="filter_services_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <property name="label" translatable="yes">Filter services</property>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSwitch" id="filter_services_switch">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <signal name="state-set" handler="on_filter_services_switch" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="pack_type">end</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkSearchBar" id="filter_bar">
                         <property name="can_focus">False</property>
@@ -548,30 +502,28 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">3</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="explorer_paths_frame">
+                      <object class="GtkPaned" id="explorer_paned">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_top">5</property>
-                        <property name="label_xalign">0.5</property>
-                        <property name="shadow_type">in</property>
+                        <property name="can_focus">True</property>
+                        <property name="orientation">vertical</property>
+                        <property name="wide_handle">True</property>
                         <child>
-                          <object class="GtkPaned" id="explorer_paned">
+                          <object class="GtkFrame" id="src_picon_box_frame">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
-                            <property name="margin_bottom">5</property>
-                            <property name="orientation">vertical</property>
-                            <property name="wide_handle">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label_xalign">0.49000000953674316</property>
+                            <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkBox" id="src_picons_box">
+                              <object class="GtkBox" id="src_picon_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_bottom">5</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
@@ -581,7 +533,18 @@ Author: Dmitriy Yefremov
                                     <child>
                                       <object class="GtkGrid" id="src_title_grid">
                                         <property name="can_focus">False</property>
-                                        <property name="column_spacing">2</property>
+                                        <property name="column_spacing">5</property>
+                                        <child>
+                                          <object class="GtkLabel" id="src_filter_label">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="label" translatable="yes">Filter</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">0</property>
+                                            <property name="top_attach">0</property>
+                                          </packing>
+                                        </child>
                                         <child>
                                           <object class="GtkCheckButton" id="src_filter_button">
                                             <property name="visible">True</property>
@@ -593,17 +556,6 @@ Author: Dmitriy Yefremov
                                             <signal name="toggled" handler="on_fiter_srcs_toggled" object="picons_src_filter_model" swapped="no"/>
                                           </object>
                                           <packing>
-                                            <property name="left_attach">0</property>
-                                            <property name="top_attach">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel" id="src_filter_label">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="label" translatable="yes">Filter</property>
-                                          </object>
-                                          <packing>
                                             <property name="left_attach">1</property>
                                             <property name="top_attach">0</property>
                                           </packing>
@@ -612,19 +564,8 @@ Author: Dmitriy Yefremov
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
                                         <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child type="center">
-                                      <object class="GtkLabel" id="explorer_src_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Source:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">3</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -632,20 +573,6 @@ Author: Dmitriy Yefremov
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkFileChooserButton" id="explorer_src_path_button">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="action">select-folder</property>
-                                    <property name="title" translatable="yes"/>
-                                    <signal name="selection-changed" handler="on_picons_src_changed" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -715,37 +642,43 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                               </object>
-                              <packing>
-                                <property name="resize">True</property>
-                                <property name="shrink">True</property>
-                              </packing>
                             </child>
-                            <child>
-                              <object class="GtkBox" id="dest_picons_box">
+                            <child type="label">
+                              <object class="GtkLabel" id="explorer_src_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Source:</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="resize">True</property>
+                            <property name="shrink">True</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkFrame" id="dest_picon_box_frame">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label_xalign">0.49000000953674316</property>
+                            <property name="shadow_type">in</property>
+                            <child>
+                              <object class="GtkBox" id="dest_picon_box">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_bottom">5</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">2</property>
                                 <child>
                                   <object class="GtkBox" id="dst_title_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <child type="center">
-                                      <object class="GtkLabel" id="explorer_dest_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Destination:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">3</property>
-                                      </packing>
-                                    </child>
                                     <child>
                                       <object class="GtkGrid" id="dst_title_grid">
                                         <property name="can_focus">False</property>
-                                        <property name="column_spacing">2</property>
+                                        <property name="column_spacing">5</property>
                                         <child>
                                           <object class="GtkCheckButton" id="dst_filter_button">
                                             <property name="visible">True</property>
@@ -790,20 +723,6 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkFileChooserButton" id="explorer_dest_path_button">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="action">select-folder</property>
-                                    <property name="title" translatable="yes"/>
-                                    <signal name="selection-changed" handler="on_picons_dest_changed" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                                <child>
                                   <object class="GtkScrolledWindow" id="picons_dest_view_sw">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -821,7 +740,6 @@ Author: Dmitriy Yefremov
                                         <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
                                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
-                                        <signal name="realize" handler="on_picons_dest_view_realize" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="picons_dest_view_selection"/>
                                         </child>
@@ -869,25 +787,25 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                               </object>
-                              <packing>
-                                <property name="resize">True</property>
-                                <property name="shrink">True</property>
-                              </packing>
+                            </child>
+                            <child type="label">
+                              <object class="GtkLabel" id="explorer_dest_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Destination:</property>
+                              </object>
                             </child>
                           </object>
-                        </child>
-                        <child type="label">
-                          <object class="GtkLabel" id="explorer_paths_frame_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Current picons path:</property>
-                          </object>
+                          <packing>
+                            <property name="resize">True</property>
+                            <property name="shrink">True</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">4</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -935,6 +853,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkLabel" id="picon_info_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="ellipsize">end</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
