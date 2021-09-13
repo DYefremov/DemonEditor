@@ -35,9 +35,10 @@ from urllib.parse import quote
 from gi.repository import GLib
 
 from .dialogs import get_builder, show_dialog, DialogType
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page, Column
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI, UtfFTP
+from ..settings import IS_DARWIN, PlayStreamsMode
 
 
 class EpgBox(Gtk.Box):
@@ -131,15 +132,14 @@ class RecordingsBox(Gtk.Box):
     def __init__(self, app, http_api, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._http_api = http_api
         self._app = app
         self._app.connect("profile-changed", self.init)
         self._settings = settings
         self._ftp = None
         # Icon.
         theme = Gtk.IconTheme.get_default()
-        icon = "folder-symbolic"
-        self._icon = theme.load_icon(icon, 32, 0) if theme.lookup_icon(icon, 32, 0) else None
+        icon = "folder-symbolic" if IS_DARWIN else "folder"
+        self._icon = theme.load_icon(icon, 24, 0) if theme.lookup_icon(icon, 24, 0) else None
 
         handlers = {"on_path_press": self.on_path_press,
                     "on_path_activated": self.on_path_activated,
@@ -150,6 +150,7 @@ class RecordingsBox(Gtk.Box):
                               objects=("recordings_frame", "recordings_model", "rec_paths_model"))
         self._rec_view = builder.get_object("recordings_view")
         self._paths_view = builder.get_object("recordings_paths_view")
+        self._paned = builder.get_object("recordings_paned")
         self.pack_start(builder.get_object("recordings_frame"), True, True, 0)
 
         self.init()
@@ -209,7 +210,7 @@ class RecordingsBox(Gtk.Box):
     def on_path_activated(self, view, path, column):
         row = view.get_model()[path][:]
         path = "{}/{}".format(row[-1], row[1])
-        self._http_api.send(HttpAPI.Request.RECORDINGS, quote(path), self.update_recordings_data)
+        self._app.http_api.send(HttpAPI.Request.RECORDINGS, quote(path), self.update_recordings_data)
 
     def on_path_press(self, view, event):
         target = view.get_path_at_pos(event.x, event.y)
@@ -237,12 +238,12 @@ class RecordingsBox(Gtk.Box):
 
     def on_recordings_activated(self, view, path, column):
         rec = view.get_model()[path][-1]
-        self._http_api.send(HttpAPI.Request.STREAM_TS, rec.get("e2filename", ""), self.on_play_recording)
+        self._app.http_api.send(HttpAPI.Request.STREAM_TS, rec.get("e2filename", ""), self.on_play_recording)
 
     def on_play_recording(self, m3u):
         url = self._app.get_url_from_m3u(m3u)
         if url:
-            self._app.play(url)
+            self._app.emit("play-recording", url)
 
     def on_recording_remove(self, action, value=None):
         """ Removes recordings via FTP. """
@@ -258,6 +259,21 @@ class RecordingsBox(Gtk.Box):
                 else:
                     self._app.show_error_message(resp)
                     break
+
+    def on_playback(self, box, state):
+        """ Updates state of the UI elements for playback mode. """
+        if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+            self._paned.set_orientation(Gtk.Orientation.VERTICAL)
+            self.update_rec_columns_visibility(False)
+
+    def on_playback_close(self, box, state):
+        """ Restores UI elements state after playback mode. """
+        self._paned.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.update_rec_columns_visibility(True)
+
+    def update_rec_columns_visibility(self, state):
+        for c in (Column.REC_SERVICE, Column.REC_TIME, Column.REC_LEN, Column.REC_FILE, Column.REC_DESC):
+            self._rec_view.get_column(c).set_visible(state)
 
 
 class ControlBox(Gtk.Box):

@@ -45,12 +45,13 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import (SettingsType, Settings, SettingsException, PlayStreamsMode, SettingsReadException,
-                          IS_DARWIN)
-from app.tools.media import Player, Recorder
+from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
+                          IS_DARWIN, PlayStreamsMode)
+from app.tools.media import Recorder
 from app.ui.control import ControlBox, EpgBox, TimersBox, RecordingsBox
 from app.ui.epg_dialog import EpgDialog
 from app.ui.ftp import FtpClientBox
+from app.ui.playback import PlayerBox
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
@@ -59,8 +60,9 @@ from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
                           scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picons,
-                          remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, get_iptv_url, append_picons,
-                          get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs)
+                          remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, append_picons,
+                          get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs,
+                          get_iptv_url)
 from .picons import PiconManager
 from .satellites import SatellitesTool, ServicesUpdateDialog
 from .search import SearchProvider
@@ -174,18 +176,8 @@ class Application(Gtk.Application):
                     "on_epg_list_configuration": self.on_epg_list_configuration,
                     "on_iptv_list_configuration": self.on_iptv_list_configuration,
                     "on_play_stream": self.on_play_stream,
-                    "on_watch": self.on_watch,
-                    "on_player_play": self.on_player_play,
-                    "on_player_stop": self.on_player_stop,
-                    "on_player_previous": self.on_player_previous,
-                    "on_player_next": self.on_player_next,
-                    "on_player_rewind": self.on_player_rewind,
-                    "on_player_close": self.on_player_close,
-                    "on_player_press": self.on_player_press,
-                    "on_full_screen": self.on_full_screen,
+                    "on_play_current": self.on_play_current,
                     "on_main_window_state": self.on_main_window_state,
-                    "on_player_box_realize": self.on_player_box_realize,
-                    "on_player_box_visibility": self.on_player_box_visibility,
                     "on_record": self.on_record,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
@@ -240,11 +232,6 @@ class Application(Gtk.Application):
         self._recordings_box = None
         self._control_box = None
         self._ftp_client = None
-        # Player
-        self._player = None
-        self._full_screen = False
-        self._current_mrl = None
-        self._playback_window = None
         # Record
         self._recorder = None
         # http api
@@ -258,13 +245,19 @@ class Application(Gtk.Application):
         self._EXTRA_COLOR = None  # Color for services with a extra name for the bouquet
         # Current page.
         self._page = Page.INFO
-        self._fav_pages = {Page.SERVICES, Page.PICONS, Page.PLAYBACK, Page.EPG, Page.TIMERS}
+        self._fav_pages = {Page.SERVICES, Page.PICONS, Page.EPG, Page.TIMERS}
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("fav-clicked", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("page-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("play-recording", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("play-current", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
@@ -288,7 +281,7 @@ class Application(Gtk.Application):
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # App info
         self._app_info_box = builder.get_object("app_info_box")
-        self._app_info_box.bind_property("visible", builder.get_object("main_paned"), "visible", 4)
+        self._app_info_box.bind_property("visible", builder.get_object("data_paned"), "visible", 4)
         # Info bar.
         self._info_bar = builder.get_object("info_bar")
         self._info_label = builder.get_object("info_label")
@@ -338,23 +331,20 @@ class Application(Gtk.Application):
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         self._services_load_spinner.bind_property("active", self._filter_header_button, "sensitive", 4)
         self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
-        # Player
-        self._player_box = builder.get_object("player_box")
-        self._player_event_box = builder.get_object("player_event_box")
-        self._player_scale = builder.get_object("player_scale")
-        self._player_full_time_label = builder.get_object("player_full_time_label")
-        self._player_current_time_label = builder.get_object("player_current_time_label")
-        self._player_rewind_box = builder.get_object("player_rewind_box")
-        self._player_tool_bar = builder.get_object("player_tool_bar")
-        self._player_prev_button = builder.get_object("player_prev_button")
-        self._player_next_button = builder.get_object("player_next_button")
-        self._player_play_button = builder.get_object("player_play_button")
+        # Playback.
+        self._player_box = PlayerBox(self)
+        paned = builder.get_object("main_paned")
+        data_paned = paned.get_child1()
+        paned.remove(data_paned)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
-        self._player_box.bind_property("visible", self._player_event_box, "visible")
-        self._fav_view.bind_property("sensitive", self._player_prev_button, "sensitive")
-        self._fav_view.bind_property("sensitive", self._player_next_button, "sensitive")
-        self._fav_view.bind_property("sensitive", self._bouquets_view, "sensitive")
-        self._player_tool_bar.bind_property("visible", builder.get_object("fs_box"), "visible")
+        paned.pack1(self._player_box, True, True)
+        paned.pack2(data_paned, True, False)
+        self._player_box.connect("show", self.on_playback_show)
+        self._player_box.connect("playback-close", self.on_playback_close)
+        self._player_box.connect("playback-full-screen", self.on_playback_full_screen)
+        self._data_paned = builder.get_object("data_paned")
+        self._data_paned.bind_property("visible", self._status_bar_box, "visible")
+        self._data_paned.bind_property("visible", builder.get_object("fs_box"), "visible")
         # Record
         self._record_image = builder.get_object("record_button_image")
         # Search
@@ -380,27 +370,32 @@ class Application(Gtk.Application):
         self._stack_ftp_box = builder.get_object("ftp_box")
         self._stack_control_box = builder.get_object("control_box")
         # Header bar.
+        profile_box = builder.get_object("profile_combo_box")
+        toolbar_box = builder.get_object("toolbar_main_box")
         if IS_GNOME_SESSION:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
             header_bar.pack_start(builder.get_object("file_header_button"))
             header_bar.pack_start(Gtk.Separator(visible=True))
-            header_bar.pack_start(builder.get_object("profile_combo_box"))
-            header_bar.pack_start(builder.get_object("toolbar_main_box"))
+            header_bar.pack_start(profile_box)
+            header_bar.pack_start(toolbar_box)
             header_bar.set_custom_title(builder.get_object("stack_switcher"))
+            self._player_box.bind_property("visible", builder.get_object("main_popover_menu_box"), "visible", 4)
+            self._player_box.bind_property("visible", builder.get_object("close_player_menu_button"), "visible")
             self._main_window.set_titlebar(header_bar)
         else:
             tool_bar = Gtk.Box(visible=True, spacing=6, margin=6, valign=Gtk.Align.CENTER)
-            tool_bar.add(builder.get_object("profile_combo_box"))
-            tool_bar.add(builder.get_object("toolbar_main_box"))
+            tool_bar.add(profile_box)
+            tool_bar.add(toolbar_box)
             tool_bar.set_center_widget(builder.get_object("stack_switcher"))
-
             main_header_box = Gtk.Box(visible=True, spacing=6)
             main_header_box.get_style_context().add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
             main_header_box.pack_start(tool_bar, True, True, 0)
             main_box = builder.get_object("main_window_box")
             main_box.add(main_header_box)
             main_box.reorder_child(main_header_box, 0)
-            self._player_tool_bar.bind_property("visible", main_header_box, "visible")
+            self._data_paned.bind_property("visible", main_header_box, "visible")
+        self._player_box.bind_property("visible", profile_box, "visible", 4)
+        self._player_box.bind_property("visible", toolbar_box, "visible", 4)
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -499,11 +494,17 @@ class Application(Gtk.Application):
         sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
         sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
         self.bind_property("is-enigma", sa, "enabled")
-        # Menu bar.
+        # Menu bar and playback.
+        self.set_action("on_playback_close", self._player_box.on_close)
         if not IS_GNOME_SESSION:
             # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
             hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
+            self._player_box.bind_property("visible", hide_bar_action, "enabled", 4)
             self.add_action(hide_bar_action)
+            hide_media_bar = Gio.SimpleAction.new("hide_media_bar", None)
+            hide_media_bar.set_enabled(False)
+            self._player_box.bind_property("visible", hide_media_bar, "enabled")
+            self.add_action(hide_media_bar)
 
     def set_action(self, name, fun, enabled=True):
         ac = Gio.SimpleAction.new(name, None)
@@ -545,9 +546,6 @@ class Application(Gtk.Application):
             self._settings.add("last_config", {"last_profile": self._settings.current_profile,
                                                "last_bouquet": self._current_bq_name})
         self._settings.save()  # storing current settings
-
-        if self._player:
-            self._player.release()
 
         if self._http_api:
             self._http_api.close()
@@ -714,6 +712,11 @@ class Application(Gtk.Application):
         else:
             GLib.idle_add(self.quit)
 
+    def on_main_window_state(self, window, event):
+        if event.new_window_state & Gdk.WindowState.FULLSCREEN or event.new_window_state & Gdk.WindowState.MAXIMIZED:
+            # Saving the current size of the application window.
+            self._settings.add("window_size", self._main_window.get_size())
+
     @run_idle
     def on_about_app(self, action, value=None):
         show_dialog(DialogType.ABOUT, self._main_window)
@@ -752,6 +755,8 @@ class Application(Gtk.Application):
     def on_recordings_realize(self, box):
         self._recordings_box = RecordingsBox(self, self._http_api, self._settings)
         box.pack_start(self._recordings_box, True, True, 0)
+        self._player_box.connect("play", self._recordings_box.on_playback)
+        self._player_box.connect("playback-close", self._recordings_box.on_playback_close)
 
     def on_ftp_realize(self, box):
         self._ftp_client = FtpClientBox(self, self._settings)
@@ -2237,9 +2242,9 @@ class Application(Gtk.Application):
             view.do_unselect_all(view)
         elif ctrl and model_name == self.FAV_MODEL_NAME:
             if key is KeyboardKey.P:
-                self.on_play_stream()
+                self.emit("fav-clicked", FavClickMode.STREAM)
             if key is KeyboardKey.W:
-                self.on_zap(self.on_watch)
+                self.emit("fav-clicked", FavClickMode.ZAP_PLAY)
             if key is KeyboardKey.Z:
                 self.on_zap()
             elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
@@ -2347,16 +2352,10 @@ class Application(Gtk.Application):
             if self._fav_click_mode is FavClickMode.DISABLED:
                 return
 
-            self._fav_view.set_sensitive(False)
-
-            if self._fav_click_mode is FavClickMode.STREAM:
-                self.on_play_stream()
-            elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
-                self.on_zap(self.on_watch)
-            elif self._fav_click_mode is FavClickMode.ZAP:
+            if self._fav_click_mode is FavClickMode.ZAP:
                 self.on_zap()
-            elif self._fav_click_mode is FavClickMode.PLAY:
-                self.on_stream()
+            else:
+                self.emit("fav-clicked", self._fav_click_mode)
         else:
             return self.on_view_popup_menu(menu, event)
 
@@ -2597,237 +2596,31 @@ class Application(Gtk.Application):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window, self._settings, self.open_data).show()
 
-    # ***************** Player ********************* #
+    # ************************* Streams ***************************** #
 
     def on_play_stream(self, item=None):
-        self.on_player_play()
+        self.emit("fav-clicked", FavClickMode.STREAM)
 
-    def on_player_play(self, item=None):
-        path, column = self._fav_view.get_cursor()
-        if path:
-            row = self._fav_model[path][:]
-            if row[Column.FAV_TYPE] != BqServiceType.IPTV.name:
-                self.show_error_message("Not allowed in this context!")
-                self.set_playback_elms_active()
-                return
+    def on_play_current(self, item=None):
+        """  starts playback of the current channel. """
+        self.emit("play-current", None)
 
-            url = get_iptv_url(row, self._s_type)
-            self.update_player_buttons()
-            if not url:
-                self.show_error_message("No reference is present!")
-                self.set_playback_elms_active()
-                return
-            self.play(url)
-
-    def play(self, url):
-        mode = self._settings.play_streams_mode
-        if mode is PlayStreamsMode.M3U:
-            self.save_stream_to_m3u(url)
-            return
-
-        if self._player and self._player.get_play_mode() is not mode:
-            self.show_error_message("Play mode has been changed!\nRestart the program to apply the settings.")
-            self.set_playback_elms_active()
-            return
-
-        if mode is PlayStreamsMode.WINDOW:
-            try:
-                if not self._player:
-                    self._current_mrl = url
-                    self.show_playback_window()
-                elif self._playback_window:
-                    title = self.get_playback_title()
-                    self._playback_window.set_title(title)
-                    self._playback_window.show()
-                    GLib.idle_add(self._player.play, url)
-                else:
-                    self.show_error_message("Init player error!")
-            finally:
-                self.set_playback_elms_active()
-        else:
-            if not self._player:
-                self._current_mrl = url
-            else:
-                if not self._player_box.get_visible():
-                    self.set_player_area_size(self._player_box)
-
-                GLib.idle_add(self._player.play, url)
-
-            self._player_box.set_visible(True)
-            self._stack.set_visible_child(self._player_box)
-
-    def on_player_stop(self, item=None):
-        if self._player:
-            self._fav_view.set_sensitive(True)
-            self._player.stop()
-
-    def on_player_previous(self, item):
-        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
-            self.set_player_action()
-
-    def on_player_next(self, item):
-        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
-            self.set_player_action()
-
-    @run_with_delay(1)
-    def set_player_action(self):
-        self._fav_view.set_sensitive(False)
-        if self._fav_click_mode is FavClickMode.PLAY:
-            self.on_stream()
-        elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
-            self.on_zap(self.on_watch)
-        elif self._fav_click_mode is FavClickMode.STREAM:
-            self.on_play_stream()
-
-    def on_player_rewind(self, scale, scroll_type, value):
-        self._player.set_time(int(value))
-
-    def update_player_buttons(self):
-        if self._player:
-            path, column = self._fav_view.get_cursor()
-            current_index = path[0]
-            self._player_prev_button.set_sensitive(current_index != 0)
-            self._player_next_button.set_sensitive(len(self._fav_model) != current_index + 1)
-
-    def on_player_close(self, window=None, event=None):
-        if self._player:
-            GLib.idle_add(self._player.stop)
-
-        self.set_playback_elms_active()
-        if self._playback_window:
-            self._settings.add("playback_window_size", self._playback_window.get_size())
-            self._playback_window.hide()
-        else:
-            GLib.idle_add(self._player_box.set_visible, False, priority=GLib.PRIORITY_LOW)
-        return True
-
-    @lru_cache(maxsize=1)
-    def on_player_duration_changed(self, duration):
-        self._player_scale.set_value(0)
-        self._player_scale.get_adjustment().set_upper(duration)
-        GLib.idle_add(self._player_rewind_box.set_visible, duration > 0, priority=GLib.PRIORITY_LOW)
-        GLib.idle_add(self._player_current_time_label.set_text, "0", priority=GLib.PRIORITY_LOW)
-        GLib.idle_add(self._player_full_time_label.set_text, self.get_time_str(duration),
-                      priority=GLib.PRIORITY_LOW)
-
-    def on_player_time_changed(self, t):
-        if not self._full_screen and self._player_rewind_box.get_visible():
-            GLib.idle_add(self._player_current_time_label.set_text, self.get_time_str(t),
-                          priority=GLib.PRIORITY_LOW)
-
-    @run_with_delay(2)
-    def on_player_error(self):
-        self.set_playback_elms_active()
-        self.show_error_message("Can't Playback!")
-
-    @run_idle
-    def set_playback_elms_active(self):
-        self._fav_view.set_sensitive(True)
-        self._fav_view.do_grab_focus(self._fav_view)
-
-    def get_time_str(self, duration):
-        """ Returns a string representation of time from duration in milliseconds """
-        m, s = divmod(duration // 1000, 60)
-        h, m = divmod(m, 60)
-        return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
-
-    def on_player_box_realize(self, widget):
-        if not self._player:
-            try:
-                self._player = Player.make(name=self._settings.stream_lib,
-                                           mode=self._settings.play_streams_mode,
-                                           widget=widget,
-                                           buf_cb=self.on_player_duration_changed,
-                                           position_cb=self.on_player_time_changed,
-                                           error_cb=self.on_player_error,
-                                           playing_cb=self.set_playback_elms_active)
-            except (ImportError, NameError) as e:
-                self.show_error_message(str(e))
-                return True
-            else:
-                self._main_window.connect("key-press-event", self.on_player_key_press)
-                self._player.play(self._current_mrl)
-            finally:
-                if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
-                    self.set_player_area_size(widget)
-
-    def on_player_box_visibility(self, box):
-        visible = box.get_visible()
-        self._fav_paned.set_orientation(Gtk.Orientation.VERTICAL if visible else Gtk.Orientation.HORIZONTAL)
-
-    @run_idle
-    def set_player_area_size(self, widget):
-        w, h = self._main_window.get_size()
-        widget.set_size_request(w * 0.6, -1)
-
-    def on_player_press(self, area, event):
-        if event.button == Gdk.BUTTON_PRIMARY:
-            if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-                self.on_full_screen()
-
-    def on_player_key_press(self, widget, event):
-        if self._player and self._player_event_box.get_visible():
-            key = event.keyval
-            if any((key == Gdk.KEY_F11, key == Gdk.KEY_f, self._full_screen and key == Gdk.KEY_Escape)):
-                self.on_full_screen()
-
-    def on_full_screen(self, item=None):
-        self._full_screen = not self._full_screen
-        if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
-            self.update_state_on_full_screen(not self._full_screen)
-            self._main_window.fullscreen() if self._full_screen else self._main_window.unfullscreen()
-        elif self._playback_window:
-            self._player_tool_bar.set_visible(not self._full_screen)
-            self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
-
-    def update_state_on_full_screen(self, visible):
-        self._player_tool_bar.set_visible(visible)
-        self._fav_paned.set_visible(visible)
-        self._status_bar_box.set_visible(visible and not self._app_info_box.get_visible())
+    def on_playback_full_screen(self, box, state):
+        self._data_paned.set_visible(state)
+        self._main_window.unfullscreen() if state else self._main_window.fullscreen()
         if not IS_GNOME_SESSION:
-            self._main_window.set_show_menubar(visible)
+            self._main_window.set_show_menubar(state)
 
-    def on_main_window_state(self, window, event):
-        if event.new_window_state & Gdk.WindowState.FULLSCREEN or event.new_window_state & Gdk.WindowState.MAXIMIZED:
-            # Saving the current size of the application window.
-            self._settings.add("window_size", self._main_window.get_size())
+    def on_playback_show(self, box):
+        if self._page is not Page.RECORDINGS and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+            self._stack.set_visible(False)
+            self._fav_paned.set_orientation(Gtk.Orientation.VERTICAL)
 
     @run_idle
-    def show_playback_window(self):
-        width, height = 480, 240
-        size = self._settings.get("playback_window_size")
-        if size:
-            width, height = size
-
-        self._playback_window = Gtk.Window(title=self.get_playback_title(),
-                                           window_position=Gtk.WindowPosition.CENTER,
-                                           gravity=Gdk.Gravity.CENTER,
-                                           icon_name="demon-editor")
-        self._playback_window.resize(width, height)
-        self._playback_window.connect("delete-event", self.on_player_close)
-        self._playback_window.connect("key-press-event", self.on_player_key_press)
-
-        box = Gtk.HBox(visible=True, orientation="vertical")
-        self._player_event_box.reparent(box)
-        self._playback_window.bind_property("visible", self._player_event_box, "visible")
-
-        if not self._settings.is_darwin:
-            self._player_prev_button.set_visible(False)
-            self._player_next_button.set_visible(False)
-            self._player_box.remove(self._player_tool_bar)
-            box.pack_end(self._player_tool_bar, False, False, 0)
-
-        self._playback_window.add(box)
-        self._playback_window.set_application(self)
-        self._playback_window.show()
-
-    def get_playback_title(self):
-        path, column = self._fav_view.get_cursor()
-        if path:
-            return "DemonEditor [{}]".format(self._fav_model[path][:][Column.FAV_SERVICE])
-        return "DemonEditor [Playback]"
-
-    # ************************* Record ***************************** #
+    def on_playback_close(self, box, state):
+        self._fav_view.set_sensitive(True)
+        self._stack.set_visible(True)
+        self._fav_paned.set_orientation(Gtk.Orientation.HORIZONTAL)
 
     def on_record(self, button):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
@@ -2845,7 +2638,7 @@ class Application(Gtk.Application):
         if is_record:
             self._recorder.stop()
         else:
-            self._http_api.send(HttpAPI.Request.STREAM_CURRENT, None, self.record)
+            self._http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.record)
 
     def record(self, data):
         url = self.get_url_from_m3u(data)
@@ -2898,39 +2691,10 @@ class Application(Gtk.Application):
         elif self._links_transmitter:
             self._links_transmitter.show(enable)
 
-    def on_stream(self, item=None):
-        path, column = self._fav_view.get_cursor()
-        if not path or not self._http_api:
-            return
-
-        ref = self.get_service_ref(path)
-        if not ref:
-            return
-
-        if self._player and self._player.is_playing():
-            self._player.stop()
-
-        self._http_api.send(HttpAPI.Request.STREAM, ref, self.watch)
-
-    def on_watch(self, item=None):
-        """ Switch to the channel and watch in the player """
-        if not self._app_info_box.get_visible() and self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
-            self.set_player_area_size(self._player_box)
-            GLib.idle_add(self._player_box.set_visible, True)
-            GLib.idle_add(self._app_info_box.set_visible, False)
-
-        self._http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
-
-    def watch(self, data):
-        url = self.get_url_from_m3u(data)
-        if url:
-            GLib.timeout_add_seconds(1, self.play, url)
-
     def get_url_from_m3u(self, data):
         error_code = data.get("error_code", 0)
         if error_code or self._http_status_image.get_visible():
             self.show_error_message("No connection to the receiver!")
-            self.set_playback_elms_active()
             return
 
         m3u = data.get("m3u", None)
@@ -2938,6 +2702,10 @@ class Application(Gtk.Application):
             return [s for s in m3u.split("\n") if not s.startswith("#")][0]
 
     def save_stream_to_m3u(self, url):
+        if self._page not in self._fav_pages:
+            self.show_error_message("Not allowed in this context!")
+            return
+
         path, column = self._fav_view.get_cursor()
         s_name = self._fav_model.get_value(self._fav_model.get_iter(path), Column.FAV_SERVICE) if path else "stream"
 
@@ -2960,20 +2728,18 @@ class Application(Gtk.Application):
         """ Switch(zap) the channel """
         path, column = self._fav_view.get_cursor()
         if not path or not self._http_api:
-            self.set_playback_elms_active()
             return
 
         ref = self.get_service_ref(path)
         if not ref:
             return
 
-        if self._player and self._player.is_playing():
-            self._player.stop()
+        self._player_box.on_stop()
 
         # IPTV type checking
         row = self._fav_model[path][:]
         if row[Column.FAV_TYPE] == BqServiceType.IPTV.name and callback:
-            callback = self.play(get_iptv_url(row, self._s_type))
+            callback = self._player_box.play(get_iptv_url(row, self._s_type))
 
         def zap(rq):
             if rq and rq.get("e2state", False):
@@ -2982,7 +2748,6 @@ class Application(Gtk.Application):
                     callback()
             else:
                 self.show_error_message("No connection to the receiver!")
-            self.set_playback_elms_active()
 
         self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
 
@@ -2992,7 +2757,6 @@ class Application(Gtk.Application):
 
         if srv_type in self._marker_types:
             self.show_error_message("Not allowed in this context!")
-            self.set_playback_elms_active()
             return
 
         srv = self._services.get(fav_id, None)
@@ -3665,6 +3429,10 @@ class Application(Gtk.Application):
     @property
     def app_settings(self):
         return self._settings
+
+    @property
+    def http_api(self):
+        return self._http_api
 
     @GObject.Property(type=bool, default=True)
     def is_enigma(self):

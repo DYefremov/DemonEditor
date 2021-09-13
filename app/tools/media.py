@@ -28,57 +28,95 @@
 
 import os
 import sys
-from abc import ABC, abstractmethod
 from datetime import datetime
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, Gtk, GObject
 
 from app.commons import run_task, log, _DATE_FORMAT, run_with_delay
 
 
-class Player(ABC):
+class Player(Gtk.DrawingArea):
     """ Base player class. Also used as a factory. """
 
-    @abstractmethod
+    def __init__(self, mode, widget, **kwargs):
+        super().__init__(**kwargs)
+
+        GObject.signal_new("error", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("message", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("position", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("played", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("audio-track", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("subtitle-track", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+
+        self.connect("draw", self.on_draw)
+        self.connect("motion-notify-event", self.on_mouse_motion)
+        self.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
+        widget.add(self)
+
+        parent = widget.get_parent()
+        parent.connect("play", self.on_play)
+        parent.connect("stop", self.on_stop)
+        self.show()
+
     def get_play_mode(self):
         pass
 
-    @abstractmethod
     def play(self, mrl=None):
         pass
 
-    @abstractmethod
     def stop(self):
         pass
 
-    @abstractmethod
     def pause(self):
         pass
 
-    @abstractmethod
     def set_time(self, time):
         pass
 
-    @abstractmethod
     def release(self):
         pass
 
-    @abstractmethod
     def is_playing(self):
         pass
 
-    @abstractmethod
-    def get_instance(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+    def set_audio_track(self, track):
         pass
 
-    def get_window_handle(self, widget):
+    def get_audio_track(self):
+        pass
+
+    def set_subtitle_track(self, track):
+        pass
+
+    def set_aspect_ratio(self, ratio):
+        pass
+
+    def get_instance(self, mode, widget):
+        pass
+
+    def on_play(self, widget, url):
+        self.play(url)
+
+    def on_stop(self, widget, state):
+        self.stop()
+
+    def on_release(self, widget, state):
+        self.release()
+
+    def get_window_handle(self):
         """ Returns the identifier [pointer] for the window.
 
             Based on gtkvlc.py[get_window_pointer] example from here:
             https://github.com/oaubert/python-vlc/tree/master/examples
         """
         if sys.platform == "linux":
-            return widget.get_window().get_xid()
+            return self.get_window().get_xid()
         else:
             is_darwin = sys.platform == "darwin"
             try:
@@ -91,23 +129,14 @@ class Player(ABC):
                 # https://gitlab.gnome.org/GNOME/pygobject/-/issues/112
                 ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
                 ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
+                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(self.get_window().__gpointer__, None)
                 get_pointer = libgdk.gdk_quartz_window_get_nsview if is_darwin else libgdk.gdk_win32_window_get_handle
                 get_pointer.restype = ctypes.c_void_p
                 get_pointer.argtypes = [ctypes.c_void_p]
 
                 return get_pointer(gpointer)
 
-    def get_video_widget(self, widget):
-        area = Gtk.DrawingArea(visible=True)
-        area.connect("draw", self.on_drawing_area_draw)
-        area.connect("motion-notify-event", self.on_mouse_motion)
-        area.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
-        widget.add(area)
-
-        return area
-
-    def on_drawing_area_draw(self, widget, cr):
+    def on_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area. """
         cr.set_source_rgb(0, 0, 0)
         cr.paint()
@@ -126,25 +155,21 @@ class Player(ABC):
         window.set_cursor(cursor)
 
     @staticmethod
-    def make(name, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
+    def make(name, mode, widget):
         """ Factory method. We will not use a separate factory to return a specific implementation.
 
             @param name: implementation name.
             @param mode: current player mode [Built-in or windowed].
             @param widget: parent of video widget.
-            @param buf_cb: buffering callback.
-            @param position_cb: time (position) callback.
-            @param error_cb: error callback.
-            @param playing_cb: playing state callback.
 
             Throws a NameError if there is no implementation for the given name.
         """
         if name == "mpv":
-            return MpvPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+            return MpvPlayer.get_instance(mode, widget)
         elif name == "gst":
-            return GstPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+            return GstPlayer.get_instance(mode, widget)
         elif name == "vlc":
-            return VlcPlayer.get_instance(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+            return VlcPlayer.get_instance(mode, widget)
         else:
             raise NameError("There is no such [{}] implementation.".format(name))
 
@@ -156,11 +181,12 @@ class MpvPlayer(Player):
     """
     __INSTANCE = None
 
-    def __init__(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+    def __init__(self, mode, widget):
+        super().__init__(mode, widget)
         try:
             from app.tools import mpv
 
-            self._player = mpv.MPV(wid=str(self.get_window_handle(self.get_video_widget(widget), )),
+            self._player = mpv.MPV(wid=str(self.get_window_handle()),
                                    input_default_bindings=False,
                                    input_cursor=False,
                                    cursor_autohide="no")
@@ -174,25 +200,24 @@ class MpvPlayer(Player):
             @self._player.event_callback(mpv.MpvEventID.FILE_LOADED)
             def on_open(event):
                 log("Starting playback...")
-                playing_cb()
+                self.emit("played", 0)
 
             @self._player.event_callback(mpv.MpvEventID.END_FILE)
             def on_end(event):
                 event = event.get("event", {})
                 if event.get("reason", mpv.MpvEventEndFile.ERROR) == mpv.MpvEventEndFile.ERROR:
                     log("Stream playback error: {}".format(event.get("error", mpv.ErrorCode.GENERIC)))
-                    error_cb()
+                    self.emit("error", "Can't Playback!")
 
     @classmethod
-    def get_instance(cls, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+    def get_instance(cls, mode, widget):
         if not cls.__INSTANCE:
-            cls.__INSTANCE = MpvPlayer(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+            cls.__INSTANCE = MpvPlayer(mode, widget)
         return cls.__INSTANCE
 
     def get_play_mode(self):
         return self._mode
 
-    @run_task
     def play(self, mrl=None):
         if not mrl:
             return
@@ -200,7 +225,6 @@ class MpvPlayer(Player):
         self._player.play(mrl)
         self._is_playing = True
 
-    @run_task
     def stop(self):
         self._player.stop()
         self._is_playing = True
@@ -225,7 +249,8 @@ class GstPlayer(Player):
 
     __INSTANCE = None
 
-    def __init__(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+    def __init__(self, mode, widget):
+        super().__init__(mode, widget)
         try:
             import gi
 
@@ -234,30 +259,17 @@ class GstPlayer(Player):
             from gi.repository import Gst, GstVideo
             # Initialization of GStreamer.
             Gst.init(sys.argv)
-            gtk_sink = Gst.ElementFactory.make("gtksink")
-            if not gtk_sink:
-                msg = "GStreamer error: gtksink plugin not installed!"
-                log(msg)
-                raise ImportError(msg)
         except (OSError, ValueError) as e:
             log("{}: Load library error: {}".format(__class__.__name__, e))
             raise ImportError("No GStreamer is found. Check that it is installed!")
         else:
-            self._error_cb = error_cb
-            self._playing_cb = playing_cb
-
             self.STATE = Gst.State
             self.STAT_RETURN = Gst.StateChangeReturn
 
             self._mode = mode
             self._is_playing = False
             self._player = Gst.ElementFactory.make("playbin", "player")
-            # Initialization of the playback widget.
-            self._player.set_property("video-sink", gtk_sink)
-            vid_widget = gtk_sink.get_property("widget")
-            vid_widget.connect("motion-notify-event", self.on_mouse_motion)
-            widget.add(vid_widget)
-            vid_widget.show()
+            self._player.set_window_handle(self.get_window_handle())
 
             bus = self._player.get_bus()
             bus.add_signal_watch()
@@ -266,9 +278,9 @@ class GstPlayer(Player):
             bus.connect("message::eos", self.on_eos)
 
     @classmethod
-    def get_instance(cls, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
+    def get_instance(cls, mode, widget):
         if not cls.__INSTANCE:
-            cls.__INSTANCE = GstPlayer(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+            cls.__INSTANCE = GstPlayer(mode, widget)
         return cls.__INSTANCE
 
     def get_play_mode(self):
@@ -285,8 +297,11 @@ class GstPlayer(Player):
         ret = self._player.set_state(self.STATE.PLAYING)
 
         if ret == self.STAT_RETURN.FAILURE:
-            log("ERROR: Unable to set the 'PLAYING' state for '{}'.".format(mrl))
+            msg = "ERROR: Unable to set the 'PLAYING' state for '{}'.".format(mrl)
+            log(msg)
+            self.emit("error", msg)
         else:
+            self.emit("played", 0)
             self._is_playing = True
 
     def stop(self):
@@ -315,7 +330,7 @@ class GstPlayer(Player):
     def on_error(self, bus, msg):
         err, dbg = msg.parse_error()
         log(err)
-        self._error_cb()
+        self.emit("error", "Can't Playback!")
 
     def on_state_changed(self, bus, msg):
         if not msg.src == self._player:
@@ -325,7 +340,7 @@ class GstPlayer(Player):
         old_state, new_state, pending = msg.parse_state_changed()
         if new_state is self.STATE.PLAYING:
             log("Starting playback...")
-            self._playing_cb()
+            self.emit("played", 0)
             self.get_stream_info()
 
     def on_eos(self, bus, msg):
@@ -360,8 +375,12 @@ class VlcPlayer(Player):
 
     __VLC_INSTANCE = None
 
-    def __init__(self, mode, widget, buf_cb, position_cb, error_cb, playing_cb):
+    def __init__(self, mode, widget):
+        super().__init__(mode, widget)
         try:
+            if sys.platform == "win32":
+                os.add_dll_directory(r"C:\Program Files\VideoLAN\VLC")
+
             from app.tools import vlc
             from app.tools.vlc import EventType
 
@@ -377,45 +396,28 @@ class VlcPlayer(Player):
             self._is_playing = False
 
             ev_mgr = self._player.event_manager()
-
-            if buf_cb:
-                # TODO look other EventType options
-                ev_mgr.event_attach(EventType.MediaPlayerBuffering,
-                                    lambda et, p: buf_cb(p.get_media().get_duration()),
-                                    self._player)
-            if position_cb:
-                ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
-                                    lambda et, p: position_cb(p.get_time()),
-                                    self._player)
-
-            if error_cb:
-                ev_mgr.event_attach(EventType.MediaPlayerEncounteredError,
-                                    lambda et, p: error_cb(),
-                                    self._player)
-            if playing_cb:
-                ev_mgr.event_attach(EventType.MediaPlayerPlaying,
-                                    lambda et, p: playing_cb(),
-                                    self._player)
+            ev_mgr.event_attach(EventType.MediaPlayerVout, self.on_playback_start)
+            ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
+                                lambda et: self.emit("position", self._player.get_time()))
+            ev_mgr.event_attach(EventType.MediaPlayerEncounteredError, lambda et: self.emit("error", "Can't Playback!"))
 
             self.init_video_widget(widget)
 
     @classmethod
-    def get_instance(cls, mode, widget, buf_cb=None, position_cb=None, error_cb=None, playing_cb=None):
+    def get_instance(cls, mode, widget):
         if not cls.__VLC_INSTANCE:
-            cls.__VLC_INSTANCE = VlcPlayer(mode, widget, buf_cb, position_cb, error_cb, playing_cb)
+            cls.__VLC_INSTANCE = VlcPlayer(mode, widget)
         return cls.__VLC_INSTANCE
 
     def get_play_mode(self):
         return self._mode
 
-    @run_task
     def play(self, mrl=None):
         if mrl:
             self._player.set_mrl(mrl)
         self._player.play()
         self._is_playing = True
 
-    @run_task
     def stop(self):
         if self._is_playing:
             self._player.stop()
@@ -441,14 +443,34 @@ class VlcPlayer(Player):
     def is_playing(self):
         return self._is_playing
 
+    def set_audio_track(self, track):
+        self._player.audio_set_track(track)
+
+    def get_audio_track(self):
+        return self._player.audio_get_track()
+
+    def set_subtitle_track(self, track):
+        self._player.video_set_spu(track)
+
+    def set_aspect_ratio(self, ratio):
+        self._player.video_set_aspect_ratio(ratio)
+
+    def on_playback_start(self, event):
+        self.emit("played", self._player.get_media().get_duration())
+        # Audio tracks
+        a_desc = self._player.audio_get_track_description()
+        self.emit("audio-track", [(t[0], t[1].decode(encoding="utf-8", errors="ignore")) for t in a_desc])
+        # Subtitle
+        s_desc = self._player.video_get_spu_description()
+        self.emit("subtitle-track", [(s[0], s[1].decode(encoding="utf-8", errors="ignore")) for s in s_desc])
+
     def init_video_widget(self, widget):
-        video_widget = self.get_video_widget(widget)
         if sys.platform == "linux":
-            self._player.set_xwindow(video_widget.get_window().get_xid())
+            self._player.set_xwindow(self.get_window_handle())
         elif sys.platform == "darwin":
-            self._player.set_nsobject(self.get_window_handle(video_widget))
+            self._player.set_nsobject(self.get_window_handle())
         else:
-            self._player.set_hwnd(self.get_window_handle(video_widget))
+            self._player.set_hwnd(self.get_window_handle())
 
 
 class Recorder:

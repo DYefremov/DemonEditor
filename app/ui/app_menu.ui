@@ -2,6 +2,17 @@
 <interface>
   <menu id="menu_bar">
     <submenu>
+      <attribute name="label" translatable="yes">Playback</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Close</attribute>
+          <attribute name="action">app.on_playback_close</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
       <attribute name="label" translatable="yes">File</attribute>
       <attribute name="action">app.hide_menu_bar</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
@@ -176,6 +187,17 @@
     </section>
   </menu>
   <menu id="mac_menu_bar">
+    <submenu>
+      <attribute name="label" translatable="yes">Playback</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Close</attribute>
+          <attribute name="action">app.on_playback_close</attribute>
+        </item>
+      </section>
+    </submenu>
     <submenu>
       <attribute name="label" translatable="yes">File</attribute>
       <attribute name="action">app.hide_menu_bar</attribute>

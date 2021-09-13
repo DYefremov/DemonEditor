@@ -125,7 +125,6 @@ class Page(Enum):
     SERVICES = "services"
     SATELLITE = "satellite"
     PICONS = "picons"
-    PLAYBACK = "playback"
     EPG = "epg"
     TIMERS = "timers"
     RECORDINGS = "recordings"
@@ -210,6 +209,13 @@ class Column(IntEnum):
     ALT_FAV_ID = 5
     ALT_ID = 6
     ALT_ITER = 7
+    # Recordings view
+    REC_SERVICE = 0
+    REC_TITLE = 1
+    REC_TIME = 2
+    REC_LEN = 3
+    REC_FILE = 4
+    REC_DESC = 5
 
     def __index__(self):
         """ Overridden to get the index in slices directly """

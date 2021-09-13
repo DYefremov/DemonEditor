@@ -218,6 +218,9 @@ class PiconManager(Gtk.Box):
             if index % factor == 0:
                 yield True
 
+        if not os.path.isdir(path):
+            return
+
         for file in os.listdir(path):
             if self._terminate:
                 return

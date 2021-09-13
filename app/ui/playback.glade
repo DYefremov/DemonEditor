@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkEventBox" id="event_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <signal name="button-press-event" handler="on_press" swapped="no"/>
+    <signal name="realize" handler="on_realize" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkToolbar" id="tool_bar">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkToolButton" id="prev_button">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Previous stream in the list</property>
+        <property name="use_underline">True</property>
+        <property name="stock_id">gtk-media-previous</property>
+        <signal name="clicked" handler="on_previous" swapped="no"/>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="play_button">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Play</property>
+        <property name="stock_id">gtk-media-play</property>
+        <signal name="clicked" handler="on_play" swapped="no"/>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="stop_button">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Stop playback</property>
+        <property name="use_underline">True</property>
+        <property name="stock_id">gtk-media-stop</property>
+        <signal name="clicked" handler="on_stop" swapped="no"/>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="next_button">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Next stream in the list</property>
+        <property name="use_underline">True</property>
+        <property name="stock_id">gtk-media-next</property>
+        <signal name="clicked" handler="on_next" swapped="no"/>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolItem" id="player_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkBox" id="rewind_box">
+            <property name="can_focus">False</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkLabel" id="current_time_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale" id="scale">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="restrict_to_fill_level">False</property>
+                <property name="fill_level">0</property>
+                <property name="draw_value">False</property>
+                <property name="has_origin">False</property>
+                <signal name="change-value" handler="on_rewind" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="full_time_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="full_button">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Toggle in fullscreen</property>
+        <property name="use_underline">True</property>
+        <property name="stock_id">gtk-fullscreen</property>
+        <signal name="clicked" handler="on_full_screen" swapped="no"/>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="close_button">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Close playback</property>
+        <property name="use_underline">True</property>
+        <property name="stock_id">gtk-close</property>
+        <signal name="clicked" handler="on_close" swapped="no"/>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+  </object>
+</interface>
