@@ -1711,10 +1711,25 @@ class Application(Gtk.Application):
         if len(self._bouquets_model):
             self.add_to_bouquets(bqs)
         else:
+            allow_markers = self.bq_has_markers(bqs)
+
             for bouquet in bqs:
                 parent = self._bouquets_model.append(None, [bouquet.name, None, None, bouquet.type])
                 for bq in bouquet.bouquets:
-                    self.append_bouquet(bq, parent)
+                    # Markers!
+                    if bq.type == BqType.MARKER.value and allow_markers:
+                        self.append_bouquet(bq, parent)
+                    else:
+                        self.append_bouquet(bq, parent)
+
+    def bq_has_markers(self, bqs):
+        """" Checks if there are markers in the list of bouquets. """
+        msg = "Detected markers in the bouquet list!\nThis feature is not fully supported.\n\n\t Add them to the list?"
+        for bq in bqs:
+            for b in bq.bouquets:
+                if b.type == BqType.MARKER.value:
+                    return show_dialog(DialogType.QUESTION, self._main_window, msg) == Gtk.ResponseType.OK
+        return True
 
     def add_to_bouquets(self, bqs):
         for bouquets in bqs:
@@ -1914,7 +1929,7 @@ class Application(Gtk.Application):
         yield True
 
         if profile is SettingsType.ENIGMA_2:
-            # blacklist
+            # Blacklist.
             write_blacklist(path, self._blacklist)
 
         self._save_tool_button.set_sensitive(True)
@@ -1929,7 +1944,7 @@ class Application(Gtk.Application):
         bq_name, locked, hidden, bq_type = model.get(itr, Column.BQ_NAME, Column.BQ_LOCKED, Column.BQ_HIDDEN,
                                                      Column.BQ_TYPE)
         bq_id = "{}:{}".format(bq_name, bq_type)
-        favs = self._bouquets[bq_id]
+        favs = self._bouquets.get(bq_id, [])
         ex_s = self._extra_bouquets.get(bq_id, None)
         bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
 

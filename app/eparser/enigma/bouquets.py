@@ -38,10 +38,11 @@ from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouque
 _TV_FILE = "bouquets.tv"
 _RADIO_FILE = "bouquets.radio"
 _DEFAULT_BOUQUET_NAME = "favourites"
+_MARKER_PREFIX = "[MARKER!] "
 
 
 class BouquetsWriter:
-    """ Class for creating and writing bouquet files..
+    """ Class for creating and writing bouquet files.
 
         If "force_bq_names" then naming the files using the name of the bouquet.
         Some images may have problems displaying the favorites list!
@@ -69,6 +70,7 @@ class BouquetsWriter:
             line.append("#NAME {}\n".format(bqs.name))
             bq_file_names = {b.file for b in bqs.bouquets}
             count = 1
+            m_count = 0
 
             for bq in bqs.bouquets:
                 bq_name = bq.file
@@ -82,8 +84,14 @@ class BouquetsWriter:
                             bq_name = "de{0:02d}".format(count)
                         bq_file_names.add(bq_name)
 
-                line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
-                self.write_bouquet(self._path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
+                if BqType(bq.type) is BqType.MARKER:
+                    b_name = bq.name.lstrip(_MARKER_PREFIX)
+                    m_line = "{}{}".format(self._MARKER.format(m_count, b_name), bq.file or b_name)
+                    m_count += 1
+                    line.append(m_line)
+                else:
+                    line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
+                    self.write_bouquet(self._path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
 
             with open(self._path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
                 file.writelines(line)
@@ -159,17 +167,19 @@ class BouquetsReader:
 
     def parse_bouquets(self, bq_name, bq_type):
         with open(self._path + bq_name, encoding="utf-8", errors="replace") as file:
-            lines = file.readlines()
-            bouquets = None
-            nm_sep = "#NAME"
+            line = file.readline()
+            _, _, bqs_name = line.partition("#NAME")
+            if not bqs_name:
+                log("No bouquets name found in '{}'".format(bq_name))
+                bqs_name = "Bouquets (TV)" if bq_type == BqType.TV.value else "Bouquets (Radio)"
+            bouquets = Bouquets(bqs_name.strip(), bq_type, [])
+
             b_names = set()
             real_b_names = Counter()
+            marker_found = False
 
-            for line in lines:
-                if nm_sep in line:
-                    _, _, name = line.partition(nm_sep)
-                    bouquets = Bouquets(name.strip(), bq_type, [])
-                if bouquets and "#SERVICE" in line:
+            for line in file.readlines():
+                if "#SERVICE" in line:
                     name = re.match(self._BQ_PAT, line)
                     if name:
                         b_name = name.group(1)
@@ -189,7 +199,19 @@ class BouquetsReader:
 
                         bouquets[2].append(Bouquet(rb_name, bq_type, services, None, None, b_name))
                     else:
-                        raise ValueError("No bouquet name found for: {}".format(line))
+                        s_data = line.split(":")
+                        if len(s_data) < 10 or s_data[1] != ServiceType.MARKER.value:
+                            log("Unsupported or invalid data format: [{}].".format(line))
+                        else:
+                            marker_found = True
+                elif marker_found:
+                    m_data, sep, desc = line.partition("#DESCRIPTION")
+                    if desc:
+                        b_name = "{}{}".format(_MARKER_PREFIX, desc.strip())
+                        bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line))
+                        marker_found = False
+                else:
+                    log("Unsupported or invalid line format: [{}].".format(line))
 
         return bouquets
 

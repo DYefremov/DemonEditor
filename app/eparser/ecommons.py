@@ -40,11 +40,16 @@ class TrType(Enum):
 
 
 class BqType(Enum):
-    """ Bouquet type"""
+    """ Bouquet type. """
     BOUQUET = "bouquet"
     TV = "tv"
     RADIO = "radio"
     WEBTV = "webtv"
+    MARKER = "marker"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.TV
 
 
 class Flag(Enum):
@@ -96,11 +101,19 @@ class Inversion(Enum):
     On = "1"
     Auto = "2"
 
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Auto
+
 
 class Pilot(Enum):
     Off = "0"
     On = "1"
     Auto = "2"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Auto
 
 
 class SystemCable(Enum):
