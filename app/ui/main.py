@@ -49,7 +49,7 @@ from app.settings import (SettingsType, Settings, SettingsException, SettingsRea
                           IS_DARWIN, PlayStreamsMode)
 from app.tools.media import Recorder
 from app.ui.control import ControlBox, EpgBox, TimersBox, RecordingsBox
-from app.ui.epg_dialog import EpgDialog
+from app.ui.epg import EpgDialog
 from app.ui.ftp import FtpClientBox
 from app.ui.playback import PlayerBox
 from app.ui.transmitter import LinksTransmitter

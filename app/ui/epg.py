@@ -96,7 +96,7 @@ class EpgDialog:
         self._show_tooltips = True
         self._download_xml_is_active = False
 
-        builder = get_builder(UI_RESOURCES_PATH + "epg_dialog.glade", handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "epg.glade", handlers)
 
         self._dialog = builder.get_object("epg_dialog_window")
         self._dialog.set_transient_for(transient)
@@ -111,6 +111,7 @@ class EpgDialog:
         self._xml_download_progress_bar = builder.get_object("xml_download_progress_bar")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
+        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._filter_entry = builder.get_object("filter_entry")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
