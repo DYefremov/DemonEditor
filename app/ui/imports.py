@@ -71,7 +71,6 @@ class ImportDialog:
     def __init__(self, transient, path, settings, service_ids, appender, bouquets=None):
         handlers = {"on_import": self.on_import,
                     "on_cursor_changed": self.on_cursor_changed,
-                    "on_info_button_toggled": self.on_info_button_toggled,
                     "on_selected_toggled": self.on_selected_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_select_all": self.on_select_all,
@@ -80,7 +79,7 @@ class ImportDialog:
                     "on_resize": self.on_resize,
                     "on_key_press": self.on_key_press}
 
-        builder = get_builder(UI_RESOURCES_PATH + "import_dialog.glade", handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "imports.glade", handlers)
 
         self._bq_services = {}
         self._services = {}
@@ -96,8 +95,8 @@ class ImportDialog:
         self._main_view = builder.get_object("main_view")
         self._services_view = builder.get_object("services_view")
         self._services_model = builder.get_object("services_list_store")
-        self._services_box = builder.get_object("services_box")
         self._info_check_button = builder.get_object("info_check_button")
+        self._info_check_button.bind_property("active", builder.get_object("services_box_frame"), "visible")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
         window_size = self._settings.get("import_dialog_window_size")
@@ -195,10 +194,6 @@ class ImportDialog:
                     self._services_model.append((srv.service, srv.service_type))
             else:
                 self._services_model.append((bq_srv.name, bq_srv.type.value))
-
-    def on_info_button_toggled(self, button):
-        active = button.get_active()
-        self._services_box.set_visible(active)
 
     def on_selected_toggled(self, toggle, path):
         self._main_model.set_value(self._main_model.get_iter(path), 2, not toggle.get_active())
