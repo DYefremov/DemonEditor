@@ -2027,16 +2027,17 @@ Author: Dmitriy Yefremov
                             <property name="focus_on_click">False</property>
                             <property name="active">0</property>
                             <items>
-                              <item id="en_US" translatable="yes">English</item>
-                              <item id="de_DE" translatable="yes">Deutsch</item>
-                              <item id="es_ES" translatable="yes">Español</item>
-                              <item id="nl_NL" translatable="yes">Nederlands</item>
-                              <item id="pl_PL" translatable="yes">Polski</item>
-                              <item id="pt_PT" translatable="yes">Português</item>
-                              <item id="tr_TR" translatable="yes">Türkçe</item>
-                              <item id="be_BY" translatable="yes">Беларуская</item>
-                              <item id="ru_RU" translatable="yes">Русский</item>
-                              <item id="zh_CN" translatable="yes">漢語</item>
+                              <item id="en_US">English</item>
+                              <item id="de_DE">Deutsch</item>
+                              <item id="es_ES" >Español</item>
+                              <item id="it_IT">Italiano</item>
+                              <item id="nl_NL">Nederlands</item>
+                              <item id="pl_PL">Polski</item>
+                              <item id="pt_PT">Português</item>
+                              <item id="tr_TR">Türkçe</item>
+                              <item id="be_BY">Беларуская</item>
+                              <item id="ru_RU">Русский</item>
+                              <item id="zh_CN">漢語</item>
                             </items>
                             <signal name="changed" handler="on_lang_changed" swapped="no"/>
                           </object>
