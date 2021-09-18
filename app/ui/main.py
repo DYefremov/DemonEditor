@@ -169,9 +169,6 @@ class Application(Gtk.Application):
                     "on_remove_picon": self.on_remove_picon,
                     "on_reference_picon": self.on_reference_picon,
                     "on_remove_unused_picons": self.on_remove_unused_picons,
-                    "on_search_down": self.on_search_down,
-                    "on_search_up": self.on_search_up,
-                    "on_search": self.on_search,
                     "on_iptv": self.on_iptv,
                     "on_epg_list_configuration": self.on_epg_list_configuration,
                     "on_iptv_list_configuration": self.on_iptv_list_configuration,
@@ -195,7 +192,8 @@ class Application(Gtk.Application):
                     "on_recordings_realize": self.on_recordings_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
-                    "on_visible_page": self.on_visible_page}
+                    "on_visible_page": self.on_visible_page,
+                    "on_data_paned_realize": self.init_main_paned_position}
 
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
@@ -331,29 +329,39 @@ class Application(Gtk.Application):
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         self._services_load_spinner.bind_property("active", self._filter_header_button, "sensitive", 4)
         self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
+        # Search.
+        services_search_provider = SearchProvider(self._services_view,
+                                                  builder.get_object("services_search_entry"),
+                                                  builder.get_object("srv_search_down_button"),
+                                                  builder.get_object("srv_search_up_button"),
+                                                  (Column.SRV_SERVICE, Column.SRV_PACKAGE))
+        self._srv_search_button = builder.get_object("srv_search_button")
+        self._srv_search_button.bind_property("active", builder.get_object("srv_search_box"), "visible")
+        self._srv_search_button.connect("toggled", services_search_provider.on_search_toggled)
+        fav_search_provider = SearchProvider(self._fav_view,
+                                             builder.get_object("fav_search_entry"),
+                                             builder.get_object("fav_search_down_button"),
+                                             builder.get_object("fav_search_up_button"),
+                                             (Column.FAV_SERVICE, Column.FAV_TYPE, Column.FAV_POS))
+        self._fav_search_button = builder.get_object("fav_search_button")
+        self._fav_search_button.bind_property("active", builder.get_object("fav_search_box"), "visible")
+        self._fav_search_button.connect("toggled", fav_search_provider.on_search_toggled)
         # Playback.
         self._player_box = PlayerBox(self)
         paned = builder.get_object("main_paned")
         data_paned = paned.get_child1()
         paned.remove(data_paned)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
-        paned.pack1(self._player_box, True, True)
+        paned.pack1(self._player_box, True, False)
         paned.pack2(data_paned, True, False)
         self._player_box.connect("show", self.on_playback_show)
         self._player_box.connect("playback-close", self.on_playback_close)
         self._player_box.connect("playback-full-screen", self.on_playback_full_screen)
         self._data_paned = builder.get_object("data_paned")
         self._data_paned.bind_property("visible", self._status_bar_box, "visible")
-        self._data_paned.bind_property("visible", builder.get_object("fs_box"), "visible")
-        # Record
+        # Record.
         self._record_image = builder.get_object("record_button_image")
-        # Search
-        self._search_box = builder.get_object("search_box")
-        self._search_entry = builder.get_object("search_entry")
-        self._search_provider = SearchProvider((self._services_view, self._fav_view, self._bouquets_view),
-                                               builder.get_object("search_down_button"),
-                                               builder.get_object("search_up_button"))
-        # Dynamically active elements depending on the selected view
+        # Dynamically active elements depending on the selected view.
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
                       self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
@@ -417,7 +425,6 @@ class Application(Gtk.Application):
             view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
             view_button.set_tooltip_text(get_message("View"))
             self._main_window.get_titlebar().pack_end(view_button)
-
         # IPTV menu.
         self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
         iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
@@ -451,13 +458,10 @@ class Application(Gtk.Application):
         self.set_action("on_backup_tool_show", self.on_backup_tool_show)
         self.set_action("on_about_app", self.on_about_app)
         self.set_action("on_close_app", self.on_close_app)
-        # Search, Filter.
-        search_action = Gio.SimpleAction.new_stateful("search", None, GLib.Variant.new_boolean(False))
-        search_action.connect("change-state", self.on_search_toggled)
-        self._main_window.add_action(search_action)  # For "win.*" actions!
+        # Filter.
         filter_action = Gio.SimpleAction.new_stateful("filter", None, GLib.Variant.new_boolean(False))
         filter_action.connect("change-state", self.on_filter_toggled)
-        self._main_window.add_action(filter_action)
+        self._main_window.add_action(filter_action)  # For "win.*" actions!
         # Lock, Hide.
         self.set_action("on_hide", self.on_hide)
         self.set_action("on_locked", self.on_locked)
@@ -532,7 +536,6 @@ class Application(Gtk.Application):
         self.set_accels_for_action("app.on_locked", ["<primary>l"])
         self.set_accels_for_action("app.on_close_app", ["<primary>q"])
         self.set_accels_for_action("app.on_edit", ["<primary>e"])
-        self.set_accels_for_action("win.search", ["<primary>f"])
         self.set_accels_for_action("win.filter", ["<shift><primary>f"])
 
     def do_activate(self):
@@ -656,6 +659,12 @@ class Application(Gtk.Application):
                 else:
                     self._NEW_COLOR = new_rgb
                     self._EXTRA_COLOR = extra_rgb
+
+    def init_main_paned_position(self, paned):
+        """ Initializes starting positions of main paned widgets. """
+        width = paned.get_allocated_width()
+        paned.set_position(width * 0.5)
+        self._fav_paned.set_position(width * 0.27)
 
     @run_idle
     def update_picons_size(self):
@@ -2205,7 +2214,10 @@ class Application(Gtk.Application):
             return
 
         key = KeyboardKey(key_code)
+        ctrl = event.state & MOD_MASK
         if key is KeyboardKey.F:
+            if ctrl:
+                self.activate_search_state(view)
             return True
 
         ctrl = event.state & MOD_MASK
@@ -2967,26 +2979,11 @@ class Application(Gtk.Application):
         values_set.update({r[0] for r in model if r[1]})
         self.on_filter_changed()
 
-    def on_search_toggled(self, action, value):
-        if self._app_info_box.get_visible():
-            return True
-
-        action.set_state(value)
-        self._search_box.set_visible(value)
-        if value:
-            self._search_entry.grab_focus()
-        else:
-            self._search_entry.set_text("")
-
-    def on_search_down(self, item):
-        self._search_provider.on_search_down()
-
-    def on_search_up(self, item):
-        self._search_provider.on_search_up()
-
-    @run_with_delay(1)
-    def on_search(self, entry):
-        self._search_provider.search(entry.get_text())
+    def activate_search_state(self, view):
+        if view is self._services_view:
+            self._srv_search_button.set_active(True)
+        elif view is self._fav_view:
+            self._fav_search_button.set_active(True)
 
     # ***************** Editing *********************#
 

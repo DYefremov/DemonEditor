@@ -1511,7 +1511,7 @@ Author: Dmitriy Yefremov
                         <property name="image">sat_update_search_image</property>
                         <property name="always_show_image">True</property>
                         <signal name="toggled" handler="on_find_toggled" swapped="no"/>
-                        <accelerator key="f" signal="clicked"/>
+                        <accelerator key="f" signal="clicked" modifiers="Primary"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1607,7 +1607,6 @@ Author: Dmitriy Yefremov
                     <property name="primary_icon_name">edit-find-symbolic</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">False</property>
-                    <signal name="search-changed" handler="on_search" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1621,7 +1620,6 @@ Author: Dmitriy Yefremov
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_search_down" swapped="no"/>
                     <child>
                       <object class="GtkArrow" id="arrow1">
                         <property name="visible">True</property>
@@ -1642,7 +1640,6 @@ Author: Dmitriy Yefremov
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_search_up" swapped="no"/>
                     <child>
                       <object class="GtkArrow" id="arrow2">
                         <property name="visible">True</property>

@@ -38,7 +38,7 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
-from .main_helper import move_items, scroll_to, append_text_to_tview, get_base_model, on_popup_menu
+from .main_helper import move_items, append_text_to_tview, get_base_model, on_popup_menu
 from .search import SearchProvider
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK
 
@@ -412,9 +412,6 @@ class UpdateDialog:
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
                     "on_filter": self.on_filter,
-                    "on_search": self.on_search,
-                    "on_search_down": self.on_search_down,
-                    "on_search_up": self.on_search_up,
                     "on_quit": self.on_quit}
 
         self._settings = settings
@@ -457,9 +454,11 @@ class UpdateDialog:
         self._filter_positions = (0, 0)
         # Search
         self._search_bar = builder.get_object("sat_update_search_bar")
-        self._search_provider = SearchProvider((self._sat_view,),
-                                               builder.get_object("sat_update_search_down_button"),
-                                               builder.get_object("sat_update_search_up_button"))
+        search_provider = SearchProvider(self._sat_view,
+                                         builder.get_object("sat_update_search_entry"),
+                                         builder.get_object("sat_update_search_down_button"),
+                                         builder.get_object("sat_update_search_up_button"))
+        builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
 
         window_size = self._settings.get(self._size_name)
         if window_size:
@@ -584,15 +583,6 @@ class UpdateDialog:
         from_pos = round(self._from_pos_button.get_value(), 1) * (-1 if self._filter_from_combo_box.get_active() else 1)
         to_pos = round(self._to_pos_button.get_value(), 1) * (-1 if self._filter_to_combo_box.get_active() else 1)
         return from_pos, to_pos
-
-    def on_search(self, entry):
-        self._search_provider.search(entry.get_text())
-
-    def on_search_down(self, item):
-        self._search_provider.on_search_down()
-
-    def on_search_up(self, item):
-        self._search_provider.on_search_up()
 
     def on_select_all(self, view):
         self.update_selection(view, True)
