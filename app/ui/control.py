@@ -284,18 +284,20 @@ class ControlBox(Gtk.Box):
         self._http_api = http_api
         self._settings = settings
         self._app = app
+        self._pix = None
 
-        handlers = {"on_volume_changed": self.on_volume_changed}
+        handlers = {"on_volume_changed": self.on_volume_changed,
+                    "on_screenshot_draw": self.on_screenshot_draw}
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
                               objects=("control_box", "volume_adjustment"))
 
         self.pack_start(builder.get_object("control_box"), True, True, 0)
         self._stack = builder.get_object("stack")
-        self._screenshot_image = builder.get_object("screenshot_image")
+        self._screenshot_area = builder.get_object("screenshot_area")
         self._screenshot_button_box = builder.get_object("screenshot_button_box")
         self._screenshot_check_button = builder.get_object("screenshot_check_button")
-        self._screenshot_check_button.bind_property("active", self._screenshot_image, "visible")
+        self._screenshot_check_button.bind_property("active", self._screenshot_area, "visible")
         self._snr_value_label = builder.get_object("snr_value_label")
         self._ber_value_label = builder.get_object("ber_value_label")
         self._agc_value_label = builder.get_object("agc_value_label")
@@ -368,7 +370,7 @@ class ControlBox(Gtk.Box):
         if data:
             from gi.repository import GdkPixbuf
 
-            allocation = self._screenshot_image.get_parent().get_allocation()
+            allocation = self._screenshot_area.get_parent().get_allocation()
             loader = GdkPixbuf.PixbufLoader.new_with_type("jpeg")
             loader.set_size(allocation.width, allocation.height)
             try:
@@ -377,9 +379,19 @@ class ControlBox(Gtk.Box):
             except GLib.Error:
                 pass  # NOP
             else:
-                GLib.idle_add(self._screenshot_image.set_from_pixbuf, pix)
+                self._pix = pix
+                self._screenshot_area.queue_draw()  # Redrawing the area!
             finally:
                 loader.close()
+
+    def on_screenshot_draw(self, area, cr):
+        """ Called to automatically resize the screenshot.  """
+        if self._pix:
+            cr.scale(area.get_allocated_width() / self._pix.get_width(),
+                     area.get_allocated_height() / self._pix.get_height())
+            img_surface = Gdk.cairo_surface_create_from_pixbuf(self._pix, 1, None)
+            cr.set_source_surface(img_surface, 0, 0)
+            cr.paint()
 
     def on_screenshot_all(self, action, value=None):
         self._http_api.send(HttpAPI.Request.GRUB, "mode=all" if self._http_api.is_owif else "d=",
