@@ -257,6 +257,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("play-current", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-load-done", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -439,13 +441,7 @@ class Application(Gtk.Application):
         self.init_appearance()
         self.filter_set_default()
 
-        if self._settings.load_last_config:
-            config = self._settings.get("last_config") or {}
-            self.init_profiles(config.get("last_profile", None))
-            last_bouquet = config.get("last_bouquet", None)
-            self.open_data(callback=lambda: self.open_bouquet(last_bouquet))
-        else:
-            self.init_profiles()
+        self.init_profiles()
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
@@ -582,11 +578,18 @@ class Application(Gtk.Application):
         self.activate()
         return 0
 
-    def init_profiles(self, profile=None):
+    def init_profiles(self):
         self.update_profiles()
-        self._profile_combo_box.set_active_id(profile if profile else self._settings.current_profile)
-        if profile:
-            self.set_profile(profile)
+        if self._settings.load_last_config:
+            config = self._settings.get("last_config") or {}
+            if config.get("last_bouquet", None):
+                self.connect("data-load-done", self.open_last_bouquet)
+            last_profile = config.get("last_profile", None)
+            self._profile_combo_box.set_active_id(last_profile)
+            if last_profile == self._settings.default_profile:
+                self.open_data()
+        else:
+            self._profile_combo_box.set_active_id(self._settings.current_profile)
 
     def init_drag_and_drop(self):
         """ Enable drag-and-drop. """
@@ -1648,7 +1651,7 @@ class Application(Gtk.Application):
                 return
 
             if current_profile != self._settings.current_profile:
-                self.init_profiles(self._settings.current_profile)
+                self.init_profiles()
 
             data_path = self._settings.profile_data_path if data_path is None else data_path
             local_path = self._settings.profile_data_path
@@ -1685,7 +1688,6 @@ class Application(Gtk.Application):
         else:
             self.append_blacklist(black_list)
             yield from self.append_data(bouquets, services)
-            self._profile_combo_box.set_sensitive(True)
             if callback:
                 callback()
             yield True
@@ -1697,7 +1699,9 @@ class Application(Gtk.Application):
                 self.on_filter_changed()
             yield True
         finally:
+            self._profile_combo_box.set_sensitive(True)
             self._wait_dialog.hide()
+            self.emit("data-load-done", self._settings.current_profile)
 
     def append_data(self, bouquets, services):
         if self._app_info_box.get_visible():
@@ -1794,11 +1798,15 @@ class Application(Gtk.Application):
             self._extra_bouquets[bq_id] = extra_services
 
     @run_idle
-    def open_bouquet(self, name):
-        """ Find and open bouquet by name """
+    def open_last_bouquet(self, app, profile):
+        """ Loads the last opened bouquet. """
+        self.disconnect_by_func(self.open_last_bouquet)  # -> We run it only once.
+        config = self._settings.get("last_config") or {}
+        last_bouquet = config.get("last_bouquet", None)
+
         for r in self._bouquets_model:
             for i in r.iterchildren():
-                if i[Column.BQ_NAME] == name:
+                if i[Column.BQ_NAME] == last_bouquet:
                     self._bouquets_view.expand_row(self._bouquets_model.get_path(r.iter), Column.BQ_NAME)
                     self._bouquets_view.set_cursor(i.path)
                     self._bouquets_view.row_activated(i.path, self._bouquets_view.get_column(Column.BQ_NAME))
