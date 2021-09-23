@@ -2782,6 +2782,7 @@ Author: Dmitriy Yefremov
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox" id="dark_mode_box">
+                            <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="dark_mode_label">
@@ -2817,7 +2818,7 @@ Author: Dmitriy Yefremov
                         </child>
                         <child>
                           <object class="GtkBox" id="layout_box">
-                            <property name="visible">True</property>
+                            <property name="visible">False</property>
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">Enables an alternate layout of the main window elements.</property>
                             <child>

@@ -31,7 +31,7 @@ import re
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP
+from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP, IS_WIN
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT
@@ -210,7 +210,7 @@ class SettingsDialog:
 
         if not IS_LINUX:
             # Themes.
-            builder.get_object("style_frame").set_visible(True)
+            builder.get_object("style_frame").set_visible(IS_WIN)
             builder.get_object("themes_support_frame").set_visible(True)
             self._layout_switch = builder.get_object("layout_switch")
             self._layout_switch.set_active(self._ext_settings.alternate_layout)
@@ -220,6 +220,7 @@ class SettingsDialog:
             self._theme_combo_box = builder.get_object("theme_combo_box")
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
             self._dark_mode_switch = builder.get_object("dark_mode_switch")
+            self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
             self._themes_support_switch = builder.get_object("themes_support_switch")
             self._themes_support_switch.bind_property("active", self._theme_frame, "sensitive")
             self.init_themes()
@@ -386,6 +387,7 @@ class SettingsDialog:
         self._ext_settings.list_font = self._list_font_button.get_font()
 
         if not IS_LINUX:
+            self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
             self._ext_settings.alternate_layout = self._layout_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()

@@ -655,6 +655,13 @@ class Settings:
 
     @property
     def dark_mode(self):
+        if IS_DARWIN:
+            import subprocess
+
+            cmd = ["defaults", "read", "-g", "AppleInterfaceStyle"]
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            return "Dark" in str(p[0])
+
         return self._settings.get("dark_mode", False)
 
     @dark_mode.setter
