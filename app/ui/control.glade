@@ -34,12 +34,6 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor. -->
   <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
-  <object class="GtkPopoverMenu">
-    <property name="can_focus">False</property>
-    <child>
-      <placeholder/>
-    </child>
-  </object>
   <object class="GtkAdjustment" id="begins_hour_adjustment">
     <property name="upper">23</property>
     <property name="step_increment">1</property>
@@ -61,6 +55,12 @@ Author: Dmitriy Yefremov
       <!-- column-name data -->
       <column type="PyObject"/>
     </columns>
+  </object>
+  <object class="GtkTreeModelFilter" id="epg_filter_model">
+    <property name="child_model">epg_model</property>
+  </object>
+  <object class="GtkTreeModelSort" id="epg_sort_model">
+    <property name="model">epg_filter_model</property>
   </object>
   <object class="GtkFrame" id="epg_frame">
     <property name="visible">True</property>
@@ -86,9 +86,32 @@ Author: Dmitriy Yefremov
             <property name="margin_bottom">5</property>
             <property name="spacing">5</property>
             <child>
+              <object class="GtkToggleButton" id="epg_filter_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Filter</property>
+                <signal name="toggled" handler="on_epg_filter_toggled" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="epg_filter_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">edit-find-replace-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="epg_add_timer_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Add timer</property>
                 <property name="always_show_image">True</property>
@@ -104,11 +127,8 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -124,13 +144,27 @@ Author: Dmitriy Yefremov
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
             <property name="margin_bottom">5</property>
-            <property name="spacing">5</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkSearchEntry" id="epg_filter_entry">
+                <property name="can_focus">True</property>
+                <property name="primary_icon_name">edit-find-replace-symbolic</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">False</property>
+                <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkBox" id="fav_search_box">
                 <property name="can_focus">False</property>
                 <property name="valign">center</property>
                 <child>
-                  <object class="GtkSearchEntry" id="fav_search_entry">
+                  <object class="GtkSearchEntry" id="epg_search_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="primary_icon_name">edit-find-symbolic</property>
@@ -144,13 +178,13 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fav_search_down_button">
+                  <object class="GtkButton" id="epg_search_down_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <child>
-                      <object class="GtkArrow" id="fav_down_arrow">
+                      <object class="GtkArrow" id="epg_down_arrow">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="arrow_type">down</property>
@@ -164,13 +198,13 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fav_search_up_button">
+                  <object class="GtkButton" id="epg_search_up_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <child>
-                      <object class="GtkArrow" id="fav_up_arrow">
+                      <object class="GtkArrow" id="epg_up_arrow">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="arrow_type">up</property>
@@ -190,7 +224,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -209,7 +243,7 @@ Author: Dmitriy Yefremov
               <object class="GtkTreeView" id="epg_view">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">epg_model</property>
+                <property name="model">epg_sort_model</property>
                 <property name="rules_hint">True</property>
                 <property name="rubber_banding">True</property>
                 <property name="enable_grid_lines">both</property>
@@ -681,7 +715,7 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
-                <property name="primary_icon_name">gtk-edit</property>
+                <property name="primary_icon_name">document-edit-symbolic</property>
               </object>
             </child>
             <style>
@@ -1606,11 +1640,24 @@ Author: Dmitriy Yefremov
             <property name="margin_bottom">5</property>
             <property name="spacing">10</property>
             <child>
+              <object class="GtkSearchEntry" id="timer_filter_entry">
+                <property name="can_focus">True</property>
+                <property name="primary_icon_name">edit-find-replace-symbolic</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkBox" id="timer_search_box">
                 <property name="can_focus">False</property>
                 <property name="valign">center</property>
                 <child>
-                  <object class="GtkSearchEntry" id="fav_search_entry2">
+                  <object class="GtkSearchEntry" id="timer_search_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="primary_icon_name">edit-find-symbolic</property>
@@ -1624,13 +1671,13 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fav_search_down_button2">
+                  <object class="GtkButton" id="timer_search_down_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <child>
-                      <object class="GtkArrow" id="fav_down_arrow2">
+                      <object class="GtkArrow" id="timer_down_arrow">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="arrow_type">down</property>
@@ -1644,13 +1691,13 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fav_search_up_button2">
+                  <object class="GtkButton" id="timer_search_up_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <child>
-                      <object class="GtkArrow" id="fav_up_arrow2">
+                      <object class="GtkArrow" id="timer_up_arrow">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="arrow_type">up</property>
@@ -1670,11 +1717,8 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>

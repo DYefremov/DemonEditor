@@ -52,10 +52,18 @@ class EpgTool(Gtk.Box):
         self._app.connect("fav-changed", self.on_service_changed)
 
         handlers = {"on_epg_press": self.on_epg_press,
-                    "on_timer_add": self.on_timer_add}
+                    "on_timer_add": self.on_timer_add,
+                    "on_epg_filter_changed": self.on_epg_filter_changed,
+                    "on_epg_filter_toggled": self.on_epg_filter_toggled}
 
-        builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers, objects=("epg_frame", "epg_model"))
+        builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
+                              objects=("epg_frame", "epg_model", "epg_filter_model", "epg_sort_model"))
         self._view = builder.get_object("epg_view")
+        self._model = builder.get_object("epg_model")
+        self._filter_model = builder.get_object("epg_filter_model")
+        self._filter_model.set_visible_func(self.epg_filter_function)
+        self._filter_entry = builder.get_object("epg_filter_entry")
+        builder.get_object("epg_filter_button").bind_property("active", self._filter_entry, "visible")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         self.show()
 
@@ -107,14 +115,13 @@ class EpgTool(Gtk.Box):
 
     @run_idle
     def update_epg_data(self, epg):
-        model = self._view.get_model()
-        model.clear()
-        list(map(model.append, (self.get_event_row(e) for e in epg.get("event_list", []))))
+        self._model.clear()
+        list(map(self._model.append, (self.get_event_row(e) for e in epg.get("event_list", []))))
         self._app.wait_dialog.hide()
 
     def get_event_row(self, event):
-        title = event.get("e2eventtitle", "")
-        desc = event.get("e2eventdescription", "")
+        title = event.get("e2eventtitle", "") or ""
+        desc = event.get("e2eventdescription", "") or ""
 
         start = int(event.get("e2eventstart", "0"))
         start_time = datetime.fromtimestamp(start)
@@ -122,6 +129,17 @@ class EpgTool(Gtk.Box):
         time = "{} - {}".format(start_time.strftime("%A, %H:%M"), end_time.strftime("%H:%M"))
 
         return title, time, desc, event
+
+    def on_epg_filter_changed(self, entry):
+        self._filter_model.refilter()
+
+    def on_epg_filter_toggled(self, button):
+        if not button.get_active():
+            self._filter_entry.set_text("")
+
+    def epg_filter_function(self, model, itr, data):
+        txt = self._filter_entry.get_text().upper()
+        return next((s for s in model.get(itr, 0, 1, 2) if txt in s.upper()), False)
 
 
 class TimerTool(Gtk.Box):
@@ -140,7 +158,7 @@ class TimerTool(Gtk.Box):
         CHANGE = 2
 
     class TimerDialog(Gtk.Dialog):
-        def __init__(self, action=None, timer_data=None, *args, **kwargs):
+        def __init__(self, parent, action=None, timer_data=None, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
             self._action = action or TimerTool.TimerAction.ADD
@@ -159,6 +177,8 @@ class TimerTool(Gtk.Box):
             self.set_modal(True)
             self.set_skip_pager_hint(True)
             self.set_skip_taskbar_hint(True)
+            self.set_transient_for(parent)
+            self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
             self.set_resizable(False)
 
             self._timer_name_entry = builder.get_object("timer_name_entry")
@@ -446,7 +466,7 @@ class TimerTool(Gtk.Box):
             self._app.show_error_message("No selected item!")
 
     def add_timer(self, timer_data):
-        dialog = self.TimerDialog(self.TimerAction.ADD, timer_data)
+        dialog = self.TimerDialog(self._app.app_window, self.TimerAction.ADD, timer_data)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self._http_api.send(HttpAPI.Request.TIMER, dialog.request, self.timer_add_edit_callback)
@@ -458,7 +478,7 @@ class TimerTool(Gtk.Box):
             self._app.show_error_message("Please, select only one item!")
             return
 
-        dialog = self.TimerDialog(self.TimerAction.CHANGE, model[paths][-1])
+        dialog = self.TimerDialog(self._app.app_window, self.TimerAction.CHANGE, model[paths][-1])
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self._http_api.send(HttpAPI.Request.TIMER, dialog.request, self.timer_add_edit_callback)
@@ -704,7 +724,7 @@ class RecordingsTool(Gtk.Box):
 
     def on_path_activated(self, view, path, column):
         row = view.get_model()[path][:]
-        path = "{}/{}".format(row[-1], row[1])
+        path = "{}/{}/".format(row[-1], row[1])
         self._app.http_api.send(HttpAPI.Request.RECORDINGS, quote(path), self.update_recordings_data)
 
     def on_path_press(self, view, event):
