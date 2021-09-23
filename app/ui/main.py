@@ -48,7 +48,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
                           IS_DARWIN, PlayStreamsMode)
 from app.tools.media import Recorder
-from app.ui.control import ControlBox, EpgBox, TimersBox, RecordingsBox
+from app.ui.control import ControlTool, EpgTool, TimerTool, RecordingsTool
 from app.ui.epg import EpgDialog
 from app.ui.ftp import FtpClientBox
 from app.ui.playback import PlayerBox
@@ -253,6 +253,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("page-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("change-page", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("play-recording", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("play-current", self, GObject.SIGNAL_RUN_LAST,
@@ -379,6 +381,7 @@ class Application(Gtk.Application):
         self._stack_recordings_box = builder.get_object("recordings_box")
         self._stack_ftp_box = builder.get_object("ftp_box")
         self._stack_control_box = builder.get_object("control_box")
+        self.connect("change-page", self.on_page_change)
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
@@ -707,13 +710,13 @@ class Application(Gtk.Application):
 
         if self._services_load_spinner.get_property("active"):
             msg = "{}\n\n\t{}".format(get_message("Data loading in progress!"), get_message("Are you sure?"))
-            if show_dialog(DialogType.QUESTION, self._main_window, msg) == Gtk.ResponseType.CANCEL:
+            if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                 return True
 
         if self._recorder:
             if self._recorder.is_record():
                 msg = "{}\n\n\t{}".format(get_message("Recording in progress!"), get_message("Are you sure?"))
-                if show_dialog(DialogType.QUESTION, self._main_window, msg) == Gtk.ResponseType.CANCEL:
+                if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                     return True
             self._recorder.release()
 
@@ -757,15 +760,15 @@ class Application(Gtk.Application):
         box.pack_start(self._picon_manager, True, True, 0)
 
     def on_epg_realize(self, box):
-        self._epg_box = EpgBox(self, self._http_api)
+        self._epg_box = EpgTool(self, self._http_api)
         box.pack_start(self._epg_box, True, True, 0)
 
     def on_timers_realize(self, box):
-        self._epg_box = TimersBox(self, self._http_api)
+        self._epg_box = TimerTool(self, self._http_api)
         box.pack_start(self._epg_box, True, True, 0)
 
     def on_recordings_realize(self, box):
-        self._recordings_box = RecordingsBox(self, self._http_api, self._settings)
+        self._recordings_box = RecordingsTool(self, self._http_api, self._settings)
         box.pack_start(self._recordings_box, True, True, 0)
         self._player_box.connect("play", self._recordings_box.on_playback)
         self._player_box.connect("playback-close", self._recordings_box.on_playback_close)
@@ -775,7 +778,7 @@ class Application(Gtk.Application):
         box.pack_start(self._ftp_client, True, True, 0)
 
     def on_control_realize(self, box: Gtk.HBox):
-        self._control_box = ControlBox(self, self._http_api, self._settings)
+        self._control_box = ControlTool(self, self._http_api, self._settings)
         box.pack_start(self._control_box, True, True, 0)
 
     def on_visible_page(self, stack, param):
@@ -787,6 +790,9 @@ class Application(Gtk.Application):
     def on_page_show(self, action, value):
         action.set_state(value)
         self._settings.add(action.get_name(), bool(value))
+
+    def on_page_change(self, app, page_name):
+        self._stack.set_visible_child_name(page_name)
 
     # ***************** Copy - Cut - Paste ********************* #
 
@@ -3449,6 +3455,10 @@ class Application(Gtk.Application):
     @property
     def app_settings(self):
         return self._settings
+
+    @property
+    def wait_dialog(self):
+        return self._wait_dialog
 
     @property
     def http_api(self):
