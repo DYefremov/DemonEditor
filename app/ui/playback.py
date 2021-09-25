@@ -29,7 +29,7 @@
 """ Additional module for playback. """
 from functools import lru_cache
 
-from gi.repository import GLib, GObject
+from gi.repository import GLib, GObject, Gio
 
 from app.commons import run_idle, run_with_delay
 from app.connections import HttpAPI
@@ -38,7 +38,7 @@ from app.settings import PlayStreamsMode, IS_DARWIN
 from app.tools.media import Player
 from app.ui.dialogs import get_builder
 from app.ui.main_helper import get_iptv_url
-from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column
+from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, IS_GNOME_SESSION
 
 
 class PlayerBox(Gtk.Box):
@@ -65,12 +65,12 @@ class PlayerBox(Gtk.Box):
         self._current_mrl = None
         self._full_screen = False
         self._playback_window = None
+        self._audio_track_menu = None
+        self._subtitle_track_menu = None
         self._play_mode = self._app.app_settings.play_streams_mode
 
         handlers = {"on_realize": self.on_realize,
                     "on_press": self.on_press,
-                    "on_play": self.on_play,
-                    "on_stop": self.on_stop,
                     "on_next": self.on_next,
                     "on_previous": self.on_previous,
                     "on_rewind": self.on_rewind,
@@ -82,18 +82,20 @@ class PlayerBox(Gtk.Box):
         self.set_orientation(Gtk.Orientation.VERTICAL)
         self._event_box = builder.get_object("event_box")
         self.pack_start(self._event_box, True, True, 0)
-        self.pack_end(builder.get_object("tool_bar"), False, True, 0)
-
-        self._scale = builder.get_object("scale")
-        self._full_time_label = builder.get_object("full_time_label")
-        self._current_time_label = builder.get_object("current_time_label")
-        self._rewind_box = builder.get_object("rewind_box")
-        self._tool_bar = builder.get_object("tool_bar")
-        self._prev_button = builder.get_object("prev_button")
-        self._next_button = builder.get_object("next_button")
-        self._play_button = builder.get_object("play_button")
-        self._fav_view.bind_property("sensitive", self._prev_button, "sensitive")
-        self._fav_view.bind_property("sensitive", self._next_button, "sensitive")
+        if not IS_DARWIN:
+            self.pack_end(builder.get_object("tool_bar"), False, True, 0)
+            self._scale = builder.get_object("scale")
+            self._full_time_label = builder.get_object("full_time_label")
+            self._current_time_label = builder.get_object("current_time_label")
+            self._rewind_box = builder.get_object("rewind_box")
+            self._tool_bar = builder.get_object("tool_bar")
+            self._prev_button = builder.get_object("prev_button")
+            self._next_button = builder.get_object("next_button")
+            self._audio_menu_button = builder.get_object("audio_menu_button")
+            self._video_menu_button = builder.get_object("video_menu_button")
+            self._subtitle_menu_button = builder.get_object("subtitle_menu_button")
+            self._fav_view.bind_property("sensitive", self._prev_button, "sensitive")
+            self._fav_view.bind_property("sensitive", self._next_button, "sensitive")
 
         self.connect("delete-event", self.on_delete)
         self.connect("show", self.set_player_area_size)
@@ -125,23 +127,61 @@ class PlayerBox(Gtk.Box):
             settings = self._app.app_settings
             try:
                 self._player = Player.make(settings.stream_lib, settings.play_streams_mode, self._event_box)
-                self._player.connect("error", self.on_error)
-                self._player.connect("played", self.on_played)
-                self._player.connect("position", self.on_time_changed)
             except (ImportError, NameError) as e:
                 self._app.show_error_message(str(e))
                 return True
             else:
-                self._app.app_window.connect("key-press-event", self.on_key_press)
+                self.init_playback_elements()
                 self.emit("play", self._current_mrl)
             finally:
                 if settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
                     self.set_player_area_size(box)
 
-    def on_play(self, button=None):
+    def init_playback_elements(self):
+        self._player.connect("error", self.on_error)
+        self._player.connect("played", self.on_played)
+        self._player.connect("audio-track", self.on_audio_track_changed)
+        self._player.connect("subtitle-track", self.on_subtitle_track_changed)
+        self._app.app_window.connect("key-press-event", self.on_key_press)
+
+        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
+        self._audio_track_menu = builder.get_object("audio_track_menu")
+        self._subtitle_track_menu = builder.get_object("subtitle_track_menu")
+        audio_menu = builder.get_object("audio_menu")
+        video_menu = builder.get_object("video_menu")
+        subtitle_menu = builder.get_object("subtitle_menu")
+
+        if not IS_GNOME_SESSION:
+            menu_bar = self._app.get_menubar()
+            menu_bar.insert_section(1, None, audio_menu)
+            menu_bar.insert_section(2, None, video_menu)
+            menu_bar.insert_section(3, None, subtitle_menu)
+
+        if not IS_DARWIN:
+            self._player.connect("position", self.on_time_changed)
+            self._audio_menu_button.set_menu_model(self._audio_track_menu)
+            self._video_menu_button.set_menu_model(builder.get_object("aspect_ratio_menu"))
+            self._subtitle_menu_button.set_menu_model(self._subtitle_track_menu)
+        # Actions.
+        self._app.set_action("on_play", self.on_play)
+        self._app.set_action("on_stop", self.on_stop)
+        audio_track_action = Gio.SimpleAction.new_stateful("on_set_audio_track", GLib.VariantType.new("i"),
+                                                           GLib.Variant("i", 0))
+        audio_track_action.connect("activate", self.on_set_audio_track)
+        self._app.add_action(audio_track_action)
+        aspect_action = Gio.SimpleAction.new_stateful("on_set_aspect_ratio", GLib.VariantType.new("s"),
+                                                      GLib.Variant("s", ""))
+        aspect_action.connect("activate", self.on_set_aspect_ratio)
+        self._app.add_action(aspect_action)
+        subtitle_track_action = Gio.SimpleAction.new_stateful("on_set_subtitle_track", GLib.VariantType.new("i"),
+                                                              GLib.Variant("i", -1))
+        subtitle_track_action.connect("activate", self.on_set_subtitle_track)
+        self._app.add_action(subtitle_track_action)
+
+    def on_play(self, action=None, value=None):
         self.emit("play", None)
 
-    def on_stop(self, button=None):
+    def on_stop(self, action=None, value=None):
         self.emit("stop", None)
 
     def on_next(self, button):
@@ -161,7 +201,8 @@ class PlayerBox(Gtk.Box):
             self._tool_bar.set_visible(not self._full_screen)
             self.emit("playback-full-screen", not self._full_screen)
         elif self._playback_window:
-            self._tool_bar.set_visible(not self._full_screen)
+            if not IS_DARWIN:
+                self._tool_bar.set_visible(not self._full_screen)
             self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
 
     def on_close(self, action=None, value=None):
@@ -174,6 +215,34 @@ class PlayerBox(Gtk.Box):
         self.emit("playback-close", None)
 
         return True
+
+    @run_with_delay(1)
+    def on_audio_track_changed(self, player, tracks):
+        self._audio_track_menu.remove_all()
+        for t in tracks:
+            item = Gio.MenuItem.new(t[1], None)
+            item.set_action_and_target_value("app.on_set_audio_track", GLib.Variant("i", t[0]))
+            self._audio_track_menu.append_item(item)
+
+    @run_with_delay(1)
+    def on_subtitle_track_changed(self, player, tracks):
+        self._subtitle_track_menu.remove_all()
+        for t in tracks:
+            item = Gio.MenuItem.new(t[1], None)
+            item.set_action_and_target_value("app.on_set_subtitle_track", GLib.Variant("i", t[0]))
+            self._subtitle_track_menu.append_item(item)
+
+    def on_set_audio_track(self, action, value):
+        action.set_state(value)
+        self._player.set_audio_track(value.get_int32())
+
+    def on_set_aspect_ratio(self, action, value):
+        action.set_state(value)
+        self._player.set_aspect_ratio(value.get_string())
+
+    def on_set_subtitle_track(self, action, value):
+        action.set_state(value)
+        self._player.set_subtitle_track(value.get_int32())
 
     def on_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
@@ -192,12 +261,13 @@ class PlayerBox(Gtk.Box):
 
     @run_with_delay(1)
     def set_player_action(self):
+        click_mode = self._app.app_settings.fav_click_mode
         self._fav_view.set_sensitive(False)
-        if self._fav_click_mode is FavClickMode.PLAY:
+        if click_mode is FavClickMode.PLAY:
             self.on_play_service()
-        elif self._fav_click_mode is FavClickMode.ZAP_PLAY:
+        elif click_mode is FavClickMode.ZAP_PLAY:
             self.on_zap(self.on_watch)
-        elif self._fav_click_mode is FavClickMode.STREAM:
+        elif click_mode is FavClickMode.STREAM:
             self.on_play_stream()
 
     def update_buttons(self):
@@ -320,7 +390,8 @@ class PlayerBox(Gtk.Box):
 
     def on_played(self, player, duration):
         GLib.idle_add(self._fav_view.set_sensitive, True)
-        self.on_duration_changed(duration)
+        if not IS_DARWIN:
+            self.on_duration_changed(duration)
 
     def on_error(self, player, msg):
         self._app.show_error_message(msg)

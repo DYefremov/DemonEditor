@@ -16,7 +16,6 @@
     <property name="can_focus">False</property>
     <child>
       <object class="GtkToolButton" id="prev_button">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Previous stream in the list</property>
         <property name="use_underline">True</property>
@@ -33,8 +32,8 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Play</property>
+        <property name="action_name">app.on_play</property>
         <property name="stock_id">gtk-media-play</property>
-        <signal name="clicked" handler="on_play" swapped="no"/>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -46,9 +45,9 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Stop playback</property>
+        <property name="action_name">app.on_stop</property>
         <property name="use_underline">True</property>
         <property name="stock_id">gtk-media-stop</property>
-        <signal name="clicked" handler="on_stop" swapped="no"/>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -57,7 +56,6 @@
     </child>
     <child>
       <object class="GtkToolButton" id="next_button">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Next stream in the list</property>
         <property name="use_underline">True</property>
@@ -76,6 +74,8 @@
         <child>
           <object class="GtkBox" id="rewind_box">
             <property name="can_focus">False</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkLabel" id="current_time_label">
@@ -123,6 +123,91 @@
       <packing>
         <property name="expand">True</property>
         <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolItem" id="extras_item">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkBox" id="extras_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkMenuButton" id="audio_menu_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="audio_menu_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Audio Track</property>
+                    <property name="icon_name">multimedia-volume-control</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkMenuButton" id="video_menu_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="video_menu_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Aspect ratio</property>
+                    <property name="icon_name">view-restore</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkMenuButton" id="subtitle_menu_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage" id="subtitle_menu_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Subtitle Track</property>
+                    <property name="icon_name">format-text-underline</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
       </packing>
     </child>
     <child>

@@ -52,7 +52,7 @@
           <attribute name="label" translatable="yes">Save</attribute>
           <attribute name="action">app.on_data_save</attribute>
         </item>
-         <item>
+        <item>
           <attribute name="label" translatable="yes">Save as</attribute>
           <attribute name="action">app.on_data_save_as</attribute>
         </item>
@@ -193,6 +193,16 @@
       <attribute name="hidden-when">action-disabled</attribute>
       <section>
         <item>
+          <attribute name="label" translatable="yes">Play</attribute>
+          <attribute name="action">app.on_play</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Stop</attribute>
+          <attribute name="action">app.on_stop</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
           <attribute name="label" translatable="yes">Close</attribute>
           <attribute name="action">app.on_playback_close</attribute>
         </item>
@@ -238,7 +248,7 @@
           <attribute name="label" translatable="yes">Save</attribute>
           <attribute name="action">app.on_data_save</attribute>
         </item>
-         <item>
+        <item>
           <attribute name="label" translatable="yes">Save as</attribute>
           <attribute name="action">app.on_data_save_as</attribute>
         </item>
@@ -255,15 +265,15 @@
       <attribute name="action">app.hide_menu_bar</attribute>
       <attribute name="hidden-when">action-disabled</attribute>
       <section>
-      <item>
-        <attribute name="label" translatable="yes">Lock</attribute>
-        <attribute name="action">app.on_locked</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Hide</attribute>
-        <attribute name="action">app.on_hide</attribute>
-      </item>
-    </section>
+        <item>
+          <attribute name="label" translatable="yes">Lock</attribute>
+          <attribute name="action">app.on_locked</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Hide</attribute>
+          <attribute name="action">app.on_hide</attribute>
+        </item>
+      </section>
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">View</attribute>
@@ -364,5 +374,76 @@
         <attribute name="action">app.on_remove_all_unavailable</attribute>
       </item>
     </section>
+  </menu>
+  <menu id="audio_menu">
+    <submenu>
+      <attribute name="label" translatable="yes">Audio</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu id="audio_track_menu">
+          <attribute name="label" translatable="yes">Audio Track</attribute>
+        </submenu>
+      </section>
+    </submenu>
+  </menu>
+  <menu id="video_menu">
+    <submenu>
+      <attribute name="label" translatable="yes">Video</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu id="aspect_ratio_menu">
+          <attribute name="label" translatable="yes">Aspect ratio</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Default</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target"/>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">16:9</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">16:9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">4:3</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">4:3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">1:1</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">1:1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">16:10</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">16:10</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">5:4</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">5:4</attribute>
+          </item>
+        </submenu>
+      </section>
+    </submenu>
+  </menu>
+  <menu id="subtitle_menu">
+    <submenu>
+      <attribute name="label" translatable="yes">Subtitle</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu id="subtitle_track_menu">
+          <attribute name="label" translatable="yes">Subtitle Track</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Default</attribute>
+            <attribute name="action">app.on_set_subtitle_track</attribute>
+            <attribute name="target"/>
+          </item>
+        </submenu>
+      </section>
+    </submenu>
   </menu>
 </interface>
