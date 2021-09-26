@@ -9,7 +9,7 @@ from ftplib import FTP, CRLF, Error, error_perm
 from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from urllib.request import (urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicAuthHandler, build_opener,
                             install_opener, Request)
 
@@ -363,14 +363,15 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 callback=log, done_callback=None, use_http=False, files_filter=None):
     s_type = settings.setting_type
     data_path = settings.profile_data_path
-    host = settings.host
-    base_url = "http{}://{}:{}".format("s" if settings.http_use_ssl else "", host, settings.http_port)
-    url = "{}/web/".format(base_url)
+    host, port, use_ssl = settings.host, settings.http_port, settings.http_use_ssl
+    base_url = f"http{'s' if use_ssl else ''}://{host}:{port}"
+    base = "web" if s_type is SettingsType.ENIGMA_2 else "control"
+    url = f"{base_url}/{base}/"
     tn, ht = None, None  # telnet, http
 
     try:
-        if s_type is SettingsType.ENIGMA_2 and use_http:
-            ht = http(settings.user, settings.password, base_url, callback, settings.http_use_ssl)
+        if use_http:
+            ht = http(settings.user, settings.password, base_url, callback, use_ssl, s_type)
             next(ht)
             message = ""
             if download_type is DownloadType.BOUQUETS:
@@ -382,22 +383,26 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             elif download_type is DownloadType.PICONS:
                 message = "Picons will be updated!"
 
-            params = urlencode({"text": message, "type": 2, "timeout": 5})
-            ht.send((url + "message?{}".format(params), "Sending info message... "))
+            if s_type is SettingsType.ENIGMA_2:
+                params = urlencode({"text": message, "type": 2, "timeout": 5})
+            else:
+                params = urlencode({"nmsg": message, "timeout": 5}, quote_via=quote)
 
-            if download_type is DownloadType.ALL:
+            ht.send((f"{url}message?{params}", "Sending info message... "))
+
+            if s_type is SettingsType.ENIGMA_2 and download_type is DownloadType.ALL:
                 time.sleep(5)
-                ht.send((url + "powerstate?newstate=0", "Toggle Standby "))
+                ht.send((f"{url}powerstate?newstate=0", "Toggle Standby "))
                 time.sleep(2)
         else:
             if download_type is not DownloadType.PICONS:
-                # telnet
+                # Telnet
                 tn = telnet(host=host,
                             user=settings.user,
                             password=settings.password,
                             timeout=settings.telnet_timeout)
                 next(tn)
-                # terminate enigma or neutrino
+                # Terminate Enigma2 or Neutrino.
                 callback("Telnet initialization ...\n")
                 tn.send("init 4")
                 callback("Stopping GUI...\n")
@@ -431,15 +436,18 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 ftp.upload_picons(settings.profile_picons_path, settings.picons_path, callback, files_filter)
 
             if tn and not use_http:
-                # resume enigma or restart neutrino
+                # Resume Enigma2 or restart Neutrino.
                 tn.send("init 3" if s_type is SettingsType.ENIGMA_2 else "init 6")
                 callback("Starting...\n" if s_type is SettingsType.ENIGMA_2 else "Rebooting...\n")
             elif ht and use_http:
-                if download_type is DownloadType.BOUQUETS:
-                    ht.send((url + "servicelistreload?mode=2", "Reloading Userbouquets."))
-                elif download_type is DownloadType.ALL:
-                    ht.send((url + "servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
-                    ht.send((url + "powerstate?newstate=4", "Wakeup from Standby."))
+                if s_type is SettingsType.ENIGMA_2:
+                    if download_type is DownloadType.BOUQUETS:
+                        ht.send((f"{url}servicelistreload?mode=2", "Reloading Userbouquets."))
+                    elif download_type is DownloadType.ALL:
+                        ht.send((f"{url}servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
+                        ht.send((f"{url}powerstate?newstate=4", "Wakeup from Standby."))
+                else:
+                    ht.send((f"{url}reloadchannels", "Reloading channels..."))
 
             if done_callback is not None:
                 done_callback()
@@ -465,14 +473,17 @@ def picons_filter_function(files_filter=None):
     return lambda f: f in files_filter if files_filter else f.endswith(PICONS_SUF)
 
 
-def http(user, password, url, callback, use_ssl=False):
-    init_auth(user, password, url, use_ssl)
-    data = get_post_data(url, password, url)
+def http(user, password, url, callback, use_ssl=False, s_type=SettingsType.ENIGMA_2):
+    HttpAPI.init_auth(user, password, url, use_ssl)
+    data = HttpAPI.get_post_data(url, password, url) if s_type is SettingsType.ENIGMA_2 else None
 
     while True:
         url, message = yield
-        resp = get_response(HttpAPI.Request.TEST, url, data).get("e2statetext", None)
-        callback("HTTP: {} {}\n".format(message, "Successful." if resp and message else ""))
+        resp = HttpAPI.get_response(HttpAPI.Request.TEST, url, data, s_type)
+        if s_type is SettingsType.ENIGMA_2:
+            resp = resp.get("e2statetext", None)
+
+        callback(f"HTTP: {message} {'Successful.' if resp and message else ''}\n")
 
 
 def telnet(host, port=23, user="", password="", timeout=5):
@@ -606,7 +617,7 @@ class HttpAPI:
         def done_callback(f):
             callback(f.result())
 
-        future = self._executor.submit(get_response, req_type, url, data)
+        future = self._executor.submit(self.get_response, req_type, url, data)
         future.add_done_callback(done_callback)
 
     @run_task
@@ -615,9 +626,9 @@ class HttpAPI:
         use_ssl = self._settings.http_use_ssl
         self._main_url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
         self._base_url = "{}/web/".format(self._main_url)
-        init_auth(user, password, self._main_url, use_ssl)
+        self.init_auth(user, password, self._main_url, use_ssl)
         url = "{}/web/{}".format(self._main_url, self.Request.TOKEN.value)
-        s_id = get_session_id(user, password, url)
+        s_id = self.get_session_id(user, password, url)
         if s_id != "0":
             self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
 
@@ -640,74 +651,87 @@ class HttpAPI:
         self._shutdown = True
         self._executor.shutdown()
 
+    @staticmethod
+    def get_response(req_type, url, data=None, s_type=SettingsType.ENIGMA_2):
+        try:
+            with urlopen(Request(url, data=data), timeout=10) as f:
+                if s_type is SettingsType.ENIGMA_2:
+                    return HttpAPI.get_e2_response_data(req_type, f)
+                elif s_type is SettingsType.NEUTRINO_MP:
+                    return HttpAPI.get_neutrino_response_data(req_type, f)
+                else:
+                    return f.read().decode("utf-8")
+        except HTTPError as e:
+            if req_type is HttpAPI.Request.TEST:
+                raise e
+            return {"error_code": e.code}
+        except (URLError, RemoteDisconnected, ConnectionResetError) as e:
+            if req_type is HttpAPI.Request.TEST:
+                raise e
+        except ETree.ParseError as e:
+            log("Parsing response error: {}".format(e))
 
-def get_response(req_type, url, data=None):
-    try:
-        with urlopen(Request(url, data=data), timeout=10) as f:
-            if req_type in HttpAPI.STREAM_REQUESTS:
-                return {"m3u": f.read().decode("utf-8")}
-            elif req_type is HttpAPI.Request.GRUB:
-                return {"img_data": f.read()}
-            elif req_type is HttpAPI.Request.CURRENT:
-                for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
-                    return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
-            elif req_type is HttpAPI.Request.PLAYER_LIST:
-                return [{el.tag: el.text for el in el.iter()} for el in
-                        ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
-            elif req_type is HttpAPI.Request.EPG:
-                return {"event_list": [{el.tag: el.text for el in el.iter()} for el in
-                                       ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
-            elif req_type is HttpAPI.Request.TIMER_LIST:
-                return {"timer_list": [{el.tag: el.text for el in el.iter()} for el in
-                                       ETree.fromstring(f.read().decode("utf-8")).iter("e2timer")]}
-            elif req_type is HttpAPI.Request.REC_DIRS:
-                return {"rec_dirs": [el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2location")]}
-            elif req_type is HttpAPI.Request.RECORDINGS:
-                return {"recordings": [{el.tag: el.text for el in el.iter()} for el in
-                                       ETree.fromstring(f.read().decode("utf-8")).iter("e2movie")]}
-            else:
-                return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
-    except HTTPError as e:
-        if req_type is HttpAPI.Request.TEST:
-            raise e
-        return {"error_code": e.code}
-    except (URLError, RemoteDisconnected, ConnectionResetError) as e:
-        if req_type is HttpAPI.Request.TEST:
-            raise e
-    except ETree.ParseError as e:
-        log("Parsing response error: {}".format(e))
+        return {"error_code": -1}
 
-    return {"error_code": -1}
+    @staticmethod
+    def get_e2_response_data(req_type, f):
+        if req_type in HttpAPI.STREAM_REQUESTS:
+            return {"m3u": f.read().decode("utf-8")}
+        elif req_type is HttpAPI.Request.GRUB:
+            return {"img_data": f.read()}
+        elif req_type is HttpAPI.Request.CURRENT:
+            for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2event"):
+                return {el.tag: el.text for el in el.iter()}  # return first[current] event from the list
+        elif req_type is HttpAPI.Request.PLAYER_LIST:
+            return [{el.tag: el.text for el in el.iter()} for el in
+                    ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
+        elif req_type is HttpAPI.Request.EPG:
+            return {"event_list": [{el.tag: el.text for el in el.iter()} for el in
+                                   ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
+        elif req_type is HttpAPI.Request.TIMER_LIST:
+            return {"timer_list": [{el.tag: el.text for el in el.iter()} for el in
+                                   ETree.fromstring(f.read().decode("utf-8")).iter("e2timer")]}
+        elif req_type is HttpAPI.Request.REC_DIRS:
+            return {"rec_dirs": [el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter("e2location")]}
+        elif req_type is HttpAPI.Request.RECORDINGS:
+            return {"recordings": [{el.tag: el.text for el in el.iter()} for el in
+                                   ETree.fromstring(f.read().decode("utf-8")).iter("e2movie")]}
+        else:
+            return {el.tag: el.text for el in ETree.fromstring(f.read().decode("utf-8")).iter()}
 
+    @staticmethod
+    def get_neutrino_response_data(req_type, f):
+        return f.read().decode("utf-8")
 
-def init_auth(user, password, url, use_ssl=False):
-    """ Init authentication """
-    pass_mgr = HTTPPasswordMgrWithDefaultRealm()
-    pass_mgr.add_password(None, url, user, password)
-    auth_handler = HTTPBasicAuthHandler(pass_mgr)
+    @staticmethod
+    def init_auth(user, password, url, use_ssl=False):
+        """ Init authentication """
+        pass_mgr = HTTPPasswordMgrWithDefaultRealm()
+        pass_mgr.add_password(None, url, user, password)
+        auth_handler = HTTPBasicAuthHandler(pass_mgr)
 
-    if use_ssl:
-        import ssl
-        from urllib.request import HTTPSHandler
+        if use_ssl:
+            import ssl
+            from urllib.request import HTTPSHandler
 
-        opener = build_opener(auth_handler, HTTPSHandler(context=ssl._create_unverified_context()))
-    else:
-        opener = build_opener(auth_handler)
+            opener = build_opener(auth_handler, HTTPSHandler(context=ssl._create_unverified_context()))
+        else:
+            opener = build_opener(auth_handler)
 
-    install_opener(opener)
+        install_opener(opener)
 
+    @staticmethod
+    def get_session_id(user, password, url):
+        data = urllib.parse.urlencode(dict(user=user, password=password)).encode("utf-8")
+        return HttpAPI.get_response(HttpAPI.Request.TOKEN, url, data=data).get("e2sessionid", "0")
 
-def get_session_id(user, password, url):
-    data = urllib.parse.urlencode(dict(user=user, password=password)).encode("utf-8")
-    return get_response(HttpAPI.Request.TOKEN, url, data=data).get("e2sessionid", "0")
-
-
-def get_post_data(base_url, password, user):
-    s_id = get_session_id(user, password, "{}/web/{}".format(base_url, HttpAPI.Request.TOKEN.value))
-    data = None
-    if s_id != "0":
-        data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
-    return data
+    @staticmethod
+    def get_post_data(base_url, password, user):
+        s_id = HttpAPI.get_session_id(user, password, "{}/web/{}".format(base_url, HttpAPI.Request.TOKEN.value))
+        data = None
+        if s_id != "0":
+            data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
+        return data
 
 
 # ***************** Connections testing *******************#
@@ -720,16 +744,29 @@ def test_ftp(host, port, user, password, timeout=5):
         raise TestException(e)
 
 
-def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message=False):
-    params = urlencode({"text": "Connection test", "type": 2, "timeout": timeout})
-    params = "statusinfo" if skip_message else "message?{}".format(params)
-    base_url = "http{}://{}:{}".format("s" if use_ssl else "", host, port)
-    # authentication
-    init_auth(user, password, base_url, use_ssl)
-    data = get_post_data(base_url, password, user)
+def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message=False, s_type=SettingsType.ENIGMA_2):
+    t_msg = "Connection test!"
+    if s_type is SettingsType.ENIGMA_2:
+        params = urlencode({"text": t_msg, "type": 2, "timeout": timeout})
+        params = "statusinfo" if skip_message else f"message?{params}"
+    elif s_type is SettingsType.NEUTRINO_MP:
+        params = urlencode({"nmsg": t_msg, "timeout": 5}, quote_via=quote)
+        params = "info" if skip_message else f"message?{params}"
+    else:
+        raise TestException("This type of settings is not supported!")
+
+    base_url = f"http{'s' if use_ssl else ''}://{host}:{port}"
+    base = "web" if s_type is SettingsType.ENIGMA_2 else "control"
+    url = f"{base_url}/{base}/{params}"
+    # Authentication
+    HttpAPI.init_auth(user, password, base_url, use_ssl)
+    data = HttpAPI.get_post_data(base_url, password, user) if s_type is SettingsType.ENIGMA_2 else None
 
     try:
-        return get_response(HttpAPI.Request.TEST, "{}/web/{}".format(base_url, params), data).get("e2statetext", "")
+        resp = HttpAPI.get_response(HttpAPI.Request.TEST, url, data, s_type)
+        if s_type is SettingsType.ENIGMA_2:
+            return resp.get("e2statetext", "")
+        return resp
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
 

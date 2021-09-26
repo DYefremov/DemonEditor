@@ -1552,7 +1552,10 @@ class Application(Gtk.Application):
             if profile is SettingsType.ENIGMA_2:
                 host, port, user, password = opts.host, opts.http_port, opts.user, opts.password
                 try:
-                    test_http(host, port, user, password, use_ssl=opts.http_use_ssl, skip_message=True)
+                    test_http(host, port, user, password,
+                              use_ssl=opts.http_use_ssl,
+                              skip_message=True,
+                              s_type=self._s_type)
                 except (TestException, HttpApiException):
                     use_http = False
 

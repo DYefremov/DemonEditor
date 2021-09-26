@@ -72,7 +72,6 @@ class DownloadDialog:
         self._webtv_radio_button = builder.get_object("webtv_radio_button")
         self._use_http_switch = builder.get_object("use_http_switch")
         self._http_radio_button = builder.get_object("http_radio_button")
-        self._use_http_box = builder.get_object("use_http_box")
         self._profile_combo_box = builder.get_object("profile_combo_box")
 
         self.init_settings()
@@ -89,8 +88,7 @@ class DownloadDialog:
         self._data_path_entry.set_text(self._settings.profile_data_path)
         is_enigma = self._s_type is SettingsType.ENIGMA_2
         self._webtv_radio_button.set_visible(not is_enigma)
-        self._use_http_box.set_visible(is_enigma)
-        self._use_http_switch.set_active(is_enigma and self._settings.use_http)
+        self._use_http_switch.set_active(self._settings.use_http)
         self._remove_unused_check_button.set_active(self._settings.remove_unused_bouquets)
 
     def update_profiles(self):

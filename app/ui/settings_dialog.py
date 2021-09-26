@@ -426,7 +426,8 @@ class SettingsDialog:
         host, port = self._host_field.get_text(), self._http_port_field.get_text()
         use_ssl = self._http_use_ssl_check_button.get_active()
         try:
-            self.show_info_message(test_http(host, port, user, password, use_ssl=use_ssl), Gtk.MessageType.INFO)
+            self.show_info_message(test_http(host, port, user, password, use_ssl=use_ssl, s_type=self._s_type),
+                                   Gtk.MessageType.INFO)
         except TestException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         except HttpApiException as e:
@@ -457,9 +458,10 @@ class SettingsDialog:
 
     @run_idle
     def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(True)
+        self._info_bar.set_visible(False)
         self._info_bar.set_message_type(message_type)
         self._message_label.set_text(get_message(text))
+        self._info_bar.set_visible(True)
 
     @run_idle
     def show_spinner(self, show):
