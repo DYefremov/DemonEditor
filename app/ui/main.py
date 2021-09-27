@@ -2682,7 +2682,13 @@ class Application(Gtk.Application):
         if is_record:
             self._recorder.stop()
         else:
-            self._http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.record)
+            if self._s_type is SettingsType.ENIGMA_2:
+                self._http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.record)
+            elif self._s_type is SettingsType.NEUTRINO_MP:
+                self._http_api.send(HttpAPI.Request.N_ZAP, "",
+                                    lambda rf: self._http_api.send(HttpAPI.Request.N_STREAM, rf, self.record))
+            else:
+                log("Error [on record]: Settings type is not supported!")
 
     def record(self, data):
         url = self.get_url_from_m3u(data)
@@ -2702,11 +2708,10 @@ class Application(Gtk.Application):
 
     def init_http_api(self):
         self._fav_click_mode = FavClickMode(self._settings.fav_click_mode)
-        http_api_enable = self._settings.http_api_support
-        st = all((http_api_enable, self._s_type is SettingsType.ENIGMA_2, not self._receiver_info_box.get_visible()))
-        GLib.idle_add(self._http_status_image.set_visible, st)
+        api_enable = self._settings.http_api_support
+        GLib.idle_add(self._http_status_image.set_visible, api_enable and not self._receiver_info_box.get_visible())
 
-        if self._s_type is SettingsType.NEUTRINO_MP or not http_api_enable:
+        if not api_enable:
             GLib.idle_add(self._receiver_info_box.set_visible, False)
             if self._http_api:
                 self._http_api.close()
@@ -2721,11 +2726,20 @@ class Application(Gtk.Application):
 
         if not self._http_api:
             self._http_api = HttpAPI(self._settings)
-            GLib.timeout_add_seconds(3, self.update_info, priority=GLib.PRIORITY_LOW)
+            if self._s_type is SettingsType.ENIGMA_2:
+                GLib.timeout_add_seconds(3, self.update_info,
+                                         HttpAPI.Request.INFO,
+                                         self.update_receiver_info,
+                                         priority=GLib.PRIORITY_LOW)
+            else:
+                GLib.timeout_add_seconds(3, self.update_info,
+                                         HttpAPI.Request.N_INFO,
+                                         self.update_neutrino_receiver_info,
+                                         priority=GLib.PRIORITY_LOW)
         else:
             self._http_api.init()
 
-        self.init_send_to(http_api_enable and self._settings.enable_send_to)
+        self.init_send_to(api_enable and self._settings.enable_send_to)
         yield True
 
     @run_idle
@@ -2779,21 +2793,33 @@ class Application(Gtk.Application):
             return
 
         self._player_box.on_stop()
-
         # IPTV type checking
         row = self._fav_model[path][:]
         if row[Column.FAV_TYPE] == BqServiceType.IPTV.name and callback:
             callback = self._player_box.play(get_iptv_url(row, self._s_type))
 
-        def zap(rq):
-            if rq and rq.get("e2state", False):
-                GLib.idle_add(scroll_to, path, self._fav_view)
-                if callback:
-                    callback()
-            else:
-                self.show_error_message("No connection to the receiver!")
+        if self._s_type is SettingsType.ENIGMA_2:
+            def zap(rq):
+                if rq and rq.get("e2state", False):
+                    GLib.idle_add(scroll_to, path, self._fav_view)
+                    if callback:
+                        callback()
+                else:
+                    self.show_error_message("No connection to the receiver!")
 
-        self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
+            self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            def zap(rq):
+                if rq and rq == "ok":
+                    GLib.idle_add(scroll_to, path, self._fav_view)
+                    if callback:
+                        callback()
+                else:
+                    self.show_error_message("No connection to the receiver!")
+
+            self._http_api.send(HttpAPI.Request.N_ZAP, f"?{ref}", zap)
+        else:
+            self.show_error_message("This type of settings is not supported!")
 
     def get_service_ref(self, path):
         row = self._fav_model[path][:]
@@ -2808,17 +2834,30 @@ class Application(Gtk.Application):
             if srv_type == BqServiceType.IPTV.name:
                 return srv.fav_id.strip()
             elif srv.picon_id:
-                return srv.picon_id.rstrip(".png").replace("_", ":")
+                ref = srv.picon_id.rstrip(".png").replace("_", ":")
+                if self._s_type is SettingsType.ENIGMA_2:
+                    return ref
+                elif self._s_type is SettingsType.NEUTRINO_MP:
+                    # It may require some correction for cable and terrestrial channels!
+                    try:
+                        pos, freq = int(self.get_pos_num(srv.pos)) * 10, int(srv.freq)
+                        tid, nid, sid = int(ref[: -8], 16), int(ref[-8: -4], 16), int(srv.ssid, 16)
+                    except ValueError:
+                        log(f"Error getting reference for: {srv}")
+                    else:
+                        return format((pos + freq * 4 << 48 | tid << 32 | nid << 16 | sid), "x")
 
-    def update_info(self):
-        """ Updating current info over HTTP API """
-        if not self._http_api or self._s_type is SettingsType.NEUTRINO_MP:
+    def update_info(self, req, cb):
+        """ Updating current info over HTTP API. """
+        if not self._http_api:
             GLib.idle_add(self._http_status_image.set_visible, False)
             GLib.idle_add(self._receiver_info_box.set_visible, False)
             return False
 
-        self._http_api.send(HttpAPI.Request.INFO, None, self.update_receiver_info)
+        self._http_api.send(req, None, cb)
         return True
+
+    # ************** Enigma2 HTTP API section ********************** #
 
     def update_receiver_info(self, info):
         error_code = info.get("error_code", 0) if info else 0
@@ -2834,7 +2873,7 @@ class Application(Gtk.Application):
             image = info.get("e2distroversion", "")
             image_ver = info.get("e2imageversion", "")
             model = info.get("e2model", "")
-            info_text = "{} Image: {} {}".format(model, image, image_ver)
+            info_text = f"{model} Image: {image} {image_ver}"
             GLib.idle_add(self._receiver_info_label.set_text, info_text, priority=GLib.PRIORITY_LOW)
             service_name = srv_name or ""
             GLib.idle_add(self._service_name_label.set_text, service_name, priority=GLib.PRIORITY_LOW)
@@ -2876,9 +2915,36 @@ class Application(Gtk.Application):
             s_time = datetime.fromtimestamp(s_duration)
             end_time = datetime.fromtimestamp(s_duration + int(evn.get("e2eventduration", "0") or "0"))
             title = evn.get("e2eventtitle", "")
-            dsc = "{} {}:{} - {}:{}".format(title, s_time.hour, s_time.minute, end_time.hour, end_time.minute)
+            dsc = f"{title} {s_time.hour}:{s_time.minute} - {end_time.hour}:{end_time.minute}"
             self._service_epg_label.set_text(dsc)
             self._service_epg_label.set_tooltip_text(evn.get("e2eventdescription", ""))
+
+    # ************** Neutrino HTTP API section ********************* #
+
+    def update_neutrino_receiver_info(self, info):
+        error_code = info.get("error_code", 0) if info else 0
+        GLib.idle_add(self._receiver_info_box.set_visible, error_code == 0, priority=GLib.PRIORITY_LOW)
+        if error_code < 0:
+            return
+        elif error_code == 412:
+            self._http_api.init()
+            return
+
+        if self._http_api:
+            self._http_api.send(HttpAPI.Request.SIGNAL, None, self.update_neutrino_signal)
+
+    @lru_cache(maxsize=2)
+    def update_neutrino_signal(self, sig):
+        s_data = sig.split()
+        has_data = len(s_data) == 6
+        if has_data:
+            try:
+                self._signal_level_bar.set_value(int(s_data[3]))
+            except ValueError:
+                pass  # NOP
+
+        GLib.idle_add(self._signal_level_bar.set_visible, has_data)
+        GLib.idle_add(self._signal_box.set_visible, has_data, priority=GLib.PRIORITY_LOW)
 
     # ***************** Filter and search ********************* #
 

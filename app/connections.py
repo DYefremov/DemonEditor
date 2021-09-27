@@ -549,6 +549,10 @@ class HttpAPI:
         REC_CURRENT = "getcurrlocation"
         # Screenshot
         GRUB = "grab?format=jpg&"
+        # Neutrino requests.
+        N_INFO = "info"
+        N_ZAP = "zapto"
+        N_STREAM = "build_playlist?id="
 
     class Remote(str, Enum):
         """ Args for HttpRequestType [REMOTE] class. """
@@ -578,11 +582,13 @@ class HttpAPI:
                       Request.VOL,
                       Request.EPG,
                       Request.TIMER,
-                      Request.RECORDINGS}
+                      Request.RECORDINGS,
+                      Request.N_ZAP}
 
     STREAM_REQUESTS = {Request.STREAM,
                        Request.STREAM_CURRENT,
-                       Request.STREAM_TS}
+                       Request.STREAM_TS,
+                       Request.N_STREAM}
 
     def __init__(self, settings):
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
@@ -595,6 +601,7 @@ class HttpAPI:
         self._base_url = None
         self._data = None
         self._is_owif = True
+        self._s_type = SettingsType.ENIGMA_2
         self.init()
 
     def send(self, req_type, ref, callback=print, ref_prefix=""):
@@ -605,32 +612,34 @@ class HttpAPI:
         data = self._data
 
         if req_type is self.Request.ZAP or req_type in self.STREAM_REQUESTS:
-            url += urllib.parse.quote(ref)
+            url += quote(ref)
         elif req_type is self.Request.PLAY or req_type is self.Request.PLAYER_REMOVE:
-            url += "{}{}".format(ref_prefix, urllib.parse.quote(ref).replace("%3A", "%253A"))
+            url = f"{url}{ref_prefix}{quote(ref).replace('%3A', '%253A')}"
         elif req_type is self.Request.GRUB:
             data = None  # Must be disabled for token-based security.
-            url = "{}/{}{}".format(self._main_url, req_type.value, ref)
+            url = f"{self._main_url}/{req_type.value}{ref}"
         elif req_type in self.PARAM_REQUESTS:
             url += ref
 
         def done_callback(f):
             callback(f.result())
 
-        future = self._executor.submit(self.get_response, req_type, url, data)
+        future = self._executor.submit(self.get_response, req_type, url, data, self._s_type)
         future.add_done_callback(done_callback)
 
     @run_task
     def init(self):
-        user, password = self._settings.user, self._settings.password
-        use_ssl = self._settings.http_use_ssl
-        self._main_url = "http{}://{}:{}".format("s" if use_ssl else "", self._settings.host, self._settings.http_port)
-        self._base_url = "{}/web/".format(self._main_url)
+        self._s_type = self._settings.setting_type
+        user, password, use_ssl = self._settings.user, self._settings.password, self._settings.http_use_ssl
+        self._main_url = f"http{'s' if use_ssl else ''}://{self._settings.host}:{self._settings.http_port}"
+        self._base_url = f"{self._main_url}/{'web' if self._s_type is SettingsType.ENIGMA_2 else 'control'}/"
         self.init_auth(user, password, self._main_url, use_ssl)
-        url = "{}/web/{}".format(self._main_url, self.Request.TOKEN.value)
-        s_id = self.get_session_id(user, password, url)
-        if s_id != "0":
-            self._data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
+
+        self._data = None
+        if self._s_type is SettingsType.ENIGMA_2:
+            s_id = self.get_session_id(user, password, f"{self._main_url}/web/{self.Request.TOKEN.value}")
+            if s_id != "0":
+                self._data = urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
 
         self.send(self.Request.INFO, None, self.init_callback)
 
@@ -701,6 +710,10 @@ class HttpAPI:
 
     @staticmethod
     def get_neutrino_response_data(req_type, f):
+        if req_type is HttpAPI.Request.N_INFO:
+            return {"info": f.read().decode("utf-8").strip()}
+        elif req_type is HttpAPI.Request.N_STREAM:
+            return {"m3u": f.read().decode("utf-8")}
         return f.read().decode("utf-8")
 
     @staticmethod

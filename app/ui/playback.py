@@ -34,7 +34,7 @@ from gi.repository import GLib, GObject, Gio
 from app.commons import run_idle, run_with_delay
 from app.connections import HttpAPI
 from app.eparser.ecommons import BqServiceType
-from app.settings import PlayStreamsMode, IS_DARWIN
+from app.settings import PlayStreamsMode, IS_DARWIN, SettingsType
 from app.tools.media import Player
 from app.ui.dialogs import get_builder
 from app.ui.main_helper import get_iptv_url
@@ -359,11 +359,18 @@ class PlayerBox(Gtk.Box):
         if self._player and self._player.is_playing():
             self.emit("stop", None)
 
-        self._app.http_api.send(HttpAPI.Request.STREAM, ref, self.watch)
+        s_type = self._app.app_settings.setting_type
+        req = HttpAPI.Request.STREAM if s_type is SettingsType.ENIGMA_2 else HttpAPI.Request.N_STREAM
+        self._app.http_api.send(req, ref, self.watch)
 
     def on_watch(self, item=None):
         """ Switch to the channel and watch in the player. """
-        self._app.http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
+        s_type = self._app.app_settings.setting_type
+        if s_type is SettingsType.ENIGMA_2:
+            self._app.http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
+        elif s_type is SettingsType.NEUTRINO_MP:
+            self._app.http_api.send(HttpAPI.Request.N_ZAP, "",
+                                    lambda rf: self._app.http_api.send(HttpAPI.Request.N_STREAM, rf, self.watch))
 
     def watch(self, data):
         url = self._app.get_url_from_m3u(data)
