@@ -85,24 +85,24 @@ class BouquetsWriter:
                         bq_file_names.add(bq_name)
 
                 if BqType(bq.type) is BqType.MARKER:
-                    b_name = bq.name.lstrip(_MARKER_PREFIX)
-                    m_line = "{}{}".format(self._MARKER.format(m_count, b_name), bq.file or b_name)
+                    m_data = bq.file.split(":") if bq.file else None
+                    b_name = m_data[-1].strip() if m_data else bq.name.lstrip(_MARKER_PREFIX)
+                    line.append(self._MARKER.format(m_count, b_name))
                     m_count += 1
-                    line.append(m_line)
                 else:
                     line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
-                    self.write_bouquet(self._path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services)
+                    self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bq.type}", bq.name, bq.services)
 
             with open(self._path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
                 file.writelines(line)
 
     def write_bouquet(self, path, name, services):
         """ Writes single bouquet file. """
-        bouquet = ["#NAME {}\n".format(name)]
+        bouquet = [f"#NAME {name}\n"]
         for srv in services:
             s_type = srv.service_type
             if s_type == BqServiceType.IPTV.name:
-                bouquet.append("#SERVICE {}\n".format(srv.fav_id.strip()))
+                bouquet.append(f"#SERVICE {srv.fav_id.strip()}\n")
             elif s_type == BqServiceType.MARKER.name:
                 m_data = srv.fav_id.strip().split(":")
                 m_data[2] = self._marker_index
@@ -116,21 +116,20 @@ class BouquetsWriter:
                 if services:
                     p = Path(path)
                     alt_name = srv.data_id
-                    f_name = "alternatives.{}{}".format(alt_name, p.suffix)
+                    f_name = f"alternatives.{alt_name}{p.suffix}"
 
                     if self._force_bq_names:
                         alt_name = re.sub(self._ALT_PAT, "_", srv.service).lower()
-                        f_name = "alternatives.{}{}".format(alt_name, p.suffix)
+                        f_name = f"alternatives.{alt_name}{p.suffix}"
 
-                    alt_path = "{}/{}".format(p.parent, f_name)
                     bouquet.append(self._ALT.format(f_name))
-                    self.write_bouquet(alt_path, srv.service, services)
+                    self.write_bouquet(f"{p.parent}/{f_name}", srv.service, services)
             else:
                 data = to_bouquet_id(srv)
                 if srv.service:
-                    bouquet.append("#SERVICE {}:{}\n#DESCRIPTION {}\n".format(data, srv.service, srv.service))
+                    bouquet.append(f"#SERVICE {data}:{srv.service}\n#DESCRIPTION {srv.service}\n")
                 else:
-                    bouquet.append("#SERVICE {}\n".format(data))
+                    bouquet.append(f"#SERVICE {data}\n")
 
         with open(path, "w", encoding="utf-8") as file:
             file.writelines(bouquet)
@@ -170,13 +169,12 @@ class BouquetsReader:
             line = file.readline()
             _, _, bqs_name = line.partition("#NAME")
             if not bqs_name:
-                log("No bouquets name found in '{}'".format(bq_name))
+                log(f"No bouquets name found in '{bq_name}'")
                 bqs_name = "Bouquets (TV)" if bq_type == BqType.TV.value else "Bouquets (Radio)"
             bouquets = Bouquets(bqs_name.strip(), bq_type, [])
 
             b_names = set()
             real_b_names = Counter()
-            marker_found = False
 
             for line in file.readlines():
                 if "#SERVICE" in line:
@@ -184,34 +182,28 @@ class BouquetsReader:
                     if name:
                         b_name = name.group(1)
                         if b_name in b_names:
-                            log("The list of bouquets contains duplicate [{}] names!".format(b_name))
+                            log(f"The list of bouquets contains duplicate [{b_name}] names!")
                         else:
                             b_names.add(b_name)
 
                         rb_name, services = self.get_bouquet(self._path, b_name, bq_type)
                         if rb_name in real_b_names:
-                            log("Bouquet file 'userbouquet.{}.{}' has duplicate name: {}".format(b_name, bq_type,
-                                                                                                 rb_name))
+                            log(f"Bouquet file 'userbouquet.{b_name}.{bq_type}' has duplicate name: {rb_name}")
                             real_b_names[rb_name] += 1
-                            rb_name = "{} {}".format(rb_name, real_b_names[rb_name])
+                            rb_name = f"{rb_name} {real_b_names[rb_name]}"
                         else:
                             real_b_names[rb_name] = 0
 
                         bouquets[2].append(Bouquet(rb_name, bq_type, services, None, None, b_name))
                     else:
                         s_data = line.split(":")
-                        if len(s_data) < 10 or s_data[1] != ServiceType.MARKER.value:
-                            log("Unsupported or invalid data format: [{}].".format(line))
+                        if len(s_data) == 12 and s_data[1] == ServiceType.MARKER.value:
+                            b_name = "{}{}".format(_MARKER_PREFIX, s_data[-1].strip())
+                            bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line.strip()))
                         else:
-                            marker_found = True
-                elif marker_found:
-                    m_data, sep, desc = line.partition("#DESCRIPTION")
-                    if desc:
-                        b_name = "{}{}".format(_MARKER_PREFIX, desc.strip())
-                        bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line))
-                        marker_found = False
+                            log(f"Unsupported or invalid data format: [{line}].")
                 else:
-                    log("Unsupported or invalid line format: [{}].".format(line))
+                    log(f"Unsupported or invalid line format: [{line}].")
 
         return bouquets
 
