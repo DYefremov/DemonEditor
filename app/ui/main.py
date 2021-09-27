@@ -1583,16 +1583,15 @@ class Application(Gtk.Application):
 
     def on_archive_open(self, action=None, value=None):
         """ Opening the data archive via "File/Open archive". """
-        file_filter = Gtk.FileFilter()
-        file_filter.set_name("*.zip, *.gz")
-        file_filter.add_mime_type("application/zip")
-        file_filter.add_mime_type("application/gzip")
+        file_filter = None
+        if IS_DARWIN:
+            file_filter = Gtk.FileFilter()
+            file_filter.set_name("*.zip, *.gz")
+            file_filter.add_mime_type("application/zip")
+            file_filter.add_mime_type("application/gzip")
 
-        response = show_dialog(DialogType.CHOOSER, self._main_window,
-                               action_type=Gtk.FileChooserAction.OPEN,
-                               file_filter=file_filter,
-                               settings=self._settings,
-                               title="Open archive")
+        response = get_chooser_dialog(self._main_window, self._settings,
+                                      "*.zip, *.gz files", ("*.zip", "*.gz"), "Open archive", file_filter)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self.open_data(response)
@@ -1625,8 +1624,10 @@ class Application(Gtk.Application):
             with zipfile.ZipFile(data_path) as zip_file:
                 for zip_info in zip_file.infolist():
                     if not zip_info.filename.endswith(os.sep):
-                        zip_info.filename = os.path.basename(zip_info.filename)
-                        zip_file.extract(zip_info, path=tmp_path_name)
+                        f_name = os.path.basename(zip_info.filename)
+                        if f_name:
+                            zip_info.filename = f_name
+                            zip_file.extract(zip_info, path=tmp_path_name)
         elif tarfile.is_tarfile(data_path):
             with tarfile.open(data_path) as tar:
                 for mb in tar.getmembers():

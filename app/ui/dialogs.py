@@ -118,11 +118,12 @@ def show_dialog(dialog_type, transient, text=None, settings=None, action_type=No
         return get_about_dialog(transient)
 
 
-def get_chooser_dialog(transient, settings, name, patterns, title=None):
-    file_filter = Gtk.FileFilter()
-    file_filter.set_name(name)
-    for p in patterns:
-        file_filter.add_pattern(p)
+def get_chooser_dialog(transient, settings, name, patterns, title=None, file_filter=None):
+    if not file_filter:
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name(name)
+        for p in patterns:
+            file_filter.add_pattern(p)
 
     return show_dialog(dialog_type=DialogType.CHOOSER,
                        transient=transient,
