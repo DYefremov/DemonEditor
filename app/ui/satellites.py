@@ -146,7 +146,7 @@ class SatellitesTool(Gtk.Box):
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
-            self._app.show_error_message("{}\n{}".format(e, msg))
+            self._app.show_error_message(f"{e}\n{msg}")
             return
         else:
             model = self._satellite_view.get_model()
@@ -194,7 +194,6 @@ class SatellitesTool(Gtk.Box):
                     index = paths[0].get_indices()[0] + 1
                     model.insert(index, sat)
                 else:
-                    print(sat)
                     model.append(sat)
 
     def on_transponder(self, transponder=None, edited_itr=None):
@@ -254,7 +253,7 @@ class SatellitesTool(Gtk.Box):
     def sat_pos_func(self, column, renderer, model, itr, data):
         """ Converts and sets the satellite position value to a readable format. """
         pos = int(model.get_value(itr, 2))
-        renderer.set_property("text", "{:0.1f}{}".format(abs(pos / 10), "W" if pos < 0 else "E"))
+        renderer.set_property("text", f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}")
 
     @run_idle
     def on_save(self):
@@ -372,7 +371,7 @@ class SatelliteDialog:
         if satellite:
             self._sat_name.set_text(satellite.name)
             pos = satellite.position
-            pos = float("{}.{}".format(pos[:-1], pos[-1:]))
+            pos = float(f"{pos[:-1]}.{pos[-1:]}")
             self._sat_position.set_value(fabs(pos))
             self._side.set_active(0 if pos >= 0 else 1)  # E or W
 
@@ -404,6 +403,7 @@ class UpdateDialog:
                     "on_receive_data": self.on_receive_data,
                     "on_cancel_receive": self.on_cancel_receive,
                     "on_satellite_toggled": self.on_satellite_toggled,
+                    "on_satellite_changed": self.on_satellite_changed,
                     "on_transponder_toggled": self.on_transponder_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_filter_toggled": self.on_filter_toggled,
@@ -417,7 +417,7 @@ class UpdateDialog:
         self._settings = settings
         self._download_task = False
         self._parser = None
-        self._size_name = "{}_window_size".format("_".join(re.findall("[A-Z][^A-Z]*", self.__class__.__name__))).lower()
+        self._size_name = f"{'_'.join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__))}_window_size".lower()
 
         builder = get_builder(UI_RESOURCES_PATH + "satellites.glade", handlers,
                               objects=("satellites_update_window", "update_source_store", "update_sat_list_store",
@@ -432,7 +432,7 @@ class UpdateDialog:
         if title:
             self._window.set_title(title)
 
-        self._transponder_paned = builder.get_object("sat_update_tr_paned")
+        self._transponder_frame = builder.get_object("sat_update_tr_frame")
         self._sat_view = builder.get_object("sat_update_tree_view")
         self._transponder_view = builder.get_object("sat_update_tr_view")
         self._service_view = builder.get_object("sat_update_srv_view")
@@ -443,6 +443,12 @@ class UpdateDialog:
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
         self._receive_button.bind_property("visible", builder.get_object("cancel_data_button"), "visible", 4)
+        update_button = builder.get_object("sat_update_button")
+        self._sat_view.bind_property("sensitive", update_button, "sensitive")
+        self._sat_view.bind_property("sensitive", self._source_box, "sensitive")
+        self._sat_view.bind_property("sensitive", self._source_box, "sensitive")
+        self._sat_view.bind_property("sensitive", self._receive_button, "sensitive")
+        self._receive_button.bind_property("visible", update_button, "visible")
         # Filter
         self._filter_bar = builder.get_object("sat_update_filter_bar")
         self._from_pos_button = builder.get_object("from_pos_button")
@@ -452,8 +458,10 @@ class UpdateDialog:
         self._filter_model = builder.get_object("update_sat_list_model_filter")
         self._filter_model.set_visible_func(self.filter_function)
         self._filter_positions = (0, 0)
+        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Search
         self._search_bar = builder.get_object("sat_update_search_bar")
+        self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
         search_provider = SearchProvider(self._sat_view,
                                          builder.get_object("sat_update_search_entry"),
                                          builder.get_object("sat_update_search_down_button"),
@@ -477,14 +485,17 @@ class UpdateDialog:
         self._receive_button.set_visible(not value)
 
     @run_idle
-    def on_update_satellites_list(self, item):
+    def on_update_satellites_list(self, item=None):
         if self.is_download:
             show_dialog(DialogType.ERROR, self._window, "The task is already running!")
             return
 
-        model = get_base_model(self._sat_view.get_model())
-        model.clear()
+        get_base_model(self._sat_view.get_model()).clear()
+        self._transponder_view.get_model().clear()
+        self._service_view.get_model().clear()
+
         self.is_download = True
+        self._sat_view.set_sensitive(False)
         src = self._source_box.get_active()
         if not self._parser:
             self._parser = SatellitesParser()
@@ -510,6 +521,8 @@ class UpdateDialog:
         for sat in sats:
             model.append(sat)
 
+        self._sat_view.set_sensitive(True)
+
     @run_idle
     def on_receive_data(self, item):
         if self.is_download:
@@ -532,6 +545,9 @@ class UpdateDialog:
 
     def on_cancel_receive(self, item=None):
         self._download_task = False
+
+    def on_satellite_changed(self, box):
+        self.on_update_satellites_list()
 
     def on_satellite_toggled(self, toggle, path):
         model = self._sat_view.get_model()
@@ -612,6 +628,7 @@ class SatellitesUpdateDialog(UpdateDialog):
         super().__init__(transient=transient, settings=settings)
 
         self._main_model = main_model
+        self._source_box.connect("changed", self.on_update_satellites_list)
 
     @run_idle
     def on_receive_data(self, item):
@@ -655,15 +672,15 @@ class SatellitesUpdateDialog(UpdateDialog):
                 pos = row[2]
                 if pos in sats:
                     sat = sats.pop(pos)
-                    appender.send("Updating satellite: {}\n".format(row[0]))
+                    appender.send(f"Updating satellite: {row[0]}\n")
                     GLib.idle_add(self._main_model.set, row.iter, {i: v for i, v in enumerate(sat)})
 
             for p, s in sats.items():
-                appender.send("Adding satellite: {}\n".format(s.name))
+                appender.send(f"Adding satellite: {s.name}\n")
                 self.append_satellite(s)
 
             appender.send("-" * 75 + "\n")
-            appender.send("Consumed: {:0.0f}s, {} satellites received.\n".format(time.time() - start, sat_count))
+            appender.send(f"Consumed: {time.time() - start:0.0f}s, {sat_count} satellites received.\n")
             appender.close()
             self.is_download = False
 
@@ -684,11 +701,6 @@ class ServicesUpdateDialog(UpdateDialog):
         self._services = {}
         self._selected_transponders = set()
         self._services_parser = ServicesParser(source=SatelliteSource.LYNGSAT)
-
-        self._transponder_paned.set_visible(True)
-        self._source_box.remove(0)
-        self._source_box.remove(1)
-        self._source_box.set_active(0)
         # Transponder view popup menu
         tr_popup_menu = Gtk.Menu()
         select_all_item = Gtk.ImageMenuItem.new_from_stock("gtk-select-all")
@@ -704,6 +716,11 @@ class ServicesUpdateDialog(UpdateDialog):
         self._transponder_view.connect("row-activated", self.on_activate_transponder)
         self._transponder_view.connect("button-press-event", lambda w, e: on_popup_menu(tr_popup_menu, e))
         self._transponder_view.connect("select_all", lambda w: self.update_transponder_selection(True))
+
+        self._transponder_frame.set_visible(True)
+        self._source_box.remove(0)
+        self._source_box.connect("changed", self.on_update_satellites_list)
+        self._source_box.set_active(0)
 
     @run_idle
     def on_receive_data(self, item):
@@ -752,13 +769,13 @@ class ServicesUpdateDialog(UpdateDialog):
                         self.is_download = False
                         return
 
-                    appender.send("Getting transponders for: {}.\n".format(sat_names.get(futures[future])))
+                    appender.send(f"Getting transponders for: {sat_names.get(futures[future])}.\n")
                     for t in future.result():
                         t_urls.append(t.url)
                         t_names[t.url] = t.text
 
                 appender.send("-" * 75 + "\n")
-                appender.send("{} transponders received.\n\n".format(len(t_urls)))
+                appender.send(f"{len(t_urls)} transponders received.\n\n")
 
         non_cached_ts = []
         for tr in t_urls:
@@ -774,11 +791,11 @@ class ServicesUpdateDialog(UpdateDialog):
                         self.is_download = False
                         return
 
-                    appender.send("Getting services for: {}.\n".format(t_names.get(futures[future], "")))
+                    appender.send(f"Getting services for: {t_names.get(futures[future], '')}.\n")
                     list(map(services.append, future.result()))
 
         appender.send("-" * 75 + "\n")
-        appender.send("Consumed: {:0.0f}s, {} services received.".format(time.time() - start, len(services)))
+        appender.send(f"Consumed: {time.time() - start:0.0f}s, {len(services)} services received.")
 
         try:
             from app.eparser.enigma.lamedb import LameDbReader
@@ -786,7 +803,7 @@ class ServicesUpdateDialog(UpdateDialog):
             reader = LameDbReader(path=None)
             srvs = reader.get_services_list("".join(reader.get_services_lines(services)))
         except ValueError as e:
-            log("ServicesUpdateDialog [on receive data] error: {}".format(e))
+            log(f"ServicesUpdateDialog [on receive data] error: {e}")
         else:
             self._callback(srvs)
 
@@ -794,7 +811,12 @@ class ServicesUpdateDialog(UpdateDialog):
 
     @run_task
     def get_sat_list(self, src, callback):
-        sats = self._parser.get_satellites_list(SatelliteSource.LYNGSAT)
+        sat_src = SatelliteSource.LYNGSAT
+        if src == 1:
+            sat_src = SatelliteSource.KINGOFSAT
+            self._services_parser.source = sat_src
+
+        sats = self._parser.get_satellites_list(sat_src)
         if sats:
             callback(sats)
         self.is_download = False
@@ -838,6 +860,9 @@ class ServicesUpdateDialog(UpdateDialog):
 
     @run_task
     def on_activate_satellite(self, view, path, column):
+        GLib.idle_add(self._transponder_view.get_model().clear)
+        GLib.idle_add(self._service_view.get_model().clear)
+
         model = view.get_model()
         itr = model.get_iter(path)
         url, selected = model.get_value(itr, 3), model.get_value(itr, 4)

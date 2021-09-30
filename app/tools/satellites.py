@@ -14,7 +14,7 @@ from app.eparser import Satellite, Transponder, is_transponder_valid
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
                                   Service, CAS)
 
-_HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0"}
 
 
 class SatelliteSource(Enum):
@@ -170,7 +170,7 @@ class SatellitesParser(HTMLParser):
                 return sats
             elif source is SatelliteSource.KINGOFSAT:
                 def get_sat(r):
-                    return r[3], self.parse_position(r[1]), None, r[0], False
+                    return r[3], self.parse_position(r[1]), None, r[2], False
 
                 return list(map(get_sat, filter(lambda x: len(x) == 17, self._rows)))
 
@@ -328,7 +328,7 @@ class ServicesParser(HTMLParser):
         self._S_TYPES = {"": "2", "MPEG-2 SD": "1", "MPEG-2/SD": "1", "SD": "1", "MPEG-4 SD": "22", "MPEG-4/SD": "22",
                          "MPEG-4": "22", "HEVC SD": "22", "MPEG-4/HD": "25", "MPEG-4 HD": "25", "MPEG-4 HD 1080": "25",
                          "MPEG-4 HD 720": "25", "HEVC HD": "25", "HEVC/HD": "25", "HEVC": "31", "HEVC/UHD": "31",
-                         "HEVC UHD": "31", "HEVC UHD 4K": "31"}
+                         "HEVC UHD": "31", "HEVC UHD 4K": "31", "3": "Data"}
         self._TR_PAT = re.compile(
             r".*?(\d+)\s+([RLHV]).*(DVB-S[2]?)/?(.*PSK)?\s(T2-MI)?\s?SR-FEC:\s(\d+)-(\d/\d)\s+.*ONID-TID:\s+(\d+)-(\d+).*")
         self._POS_PAT = re.compile(r".*?(\d+\.\d°[EW]).*")
@@ -344,6 +344,25 @@ class ServicesParser(HTMLParser):
         self._current_cell = Cell()
         self._rows = []
         self._source = source
+        self._t_url = ""
+        self._use_short_names = True
+
+    @property
+    def source(self):
+        return self._source
+
+    @source.setter
+    def source(self, value):
+        self._source = value
+        self.reset()
+
+    @property
+    def use_short_names(self):
+        return self._use_short_names
+
+    @use_short_names.setter
+    def use_short_names(self, value):
+        self._use_short_names = value
 
     def handle_starttag(self, tag, attrs):
         if tag == "td":
@@ -351,10 +370,24 @@ class ServicesParser(HTMLParser):
         elif tag == "tr":
             self._is_th = True
         elif tag == "a" and not self._current_cell.url:
-            self._current_cell.url = attrs[0][1]
+            if attrs:
+                for a in attrs:
+                    if a[0] == "href":
+                        self._current_cell.url = a[1]
+
+                    if self._source is SatelliteSource.KINGOFSAT and self._use_short_names:
+                        if a[0] != "title":
+                            continue
+                        txt = a[1]
+                        if txt and txt.startswith("Id: "):
+                            # Saving the 'short' name.
+                            self._current_cell.text = txt.lstrip("Id: ")
         elif tag == "img":
             img_link = attrs[0][1]
-            if img_link.startswith("/logo/"):
+            if self._source is SatelliteSource.LYNGSAT:
+                if img_link.startswith("/logo/"):
+                    self._current_cell.img = img_link
+            elif self._source is SatelliteSource.KINGOFSAT:
                 self._current_cell.img = img_link
 
     def handle_data(self, data):
@@ -369,8 +402,9 @@ class ServicesParser(HTMLParser):
             self._is_th = False
 
         if tag in ("td", "th"):
-            final_cell = self._separator.join(self._current_cell_text).strip()
-            self._current_cell.text = final_cell
+            if not self._current_cell.text:
+                txt = self._separator.join(self._current_cell_text).strip()
+                self._current_cell.text = txt
             self._current_row.append(self._current_cell)
             self._current_cell_text = []
             self._current_cell = Cell()
@@ -384,7 +418,7 @@ class ServicesParser(HTMLParser):
 
     def init_data(self, url):
         """ Initializes data for the given URL. """
-        if self._source is not SatelliteSource.LYNGSAT:
+        if self._source not in (SatelliteSource.LYNGSAT, SatelliteSource.KINGOFSAT):
             raise ValueError("Unsupported source: {}!".format(self._source.name))
 
         self._rows.clear()
@@ -399,13 +433,26 @@ class ServicesParser(HTMLParser):
     def get_transponders_links(self, sat_url):
         """ Returns transponder links. """
         try:
+            if self._source is SatelliteSource.KINGOFSAT:
+                sat_url = "https://en.kingofsat.net/" + sat_url
             self.init_data(sat_url)
         except ValueError as e:
             log(e)
         else:
-            url = "https://www.lyngsat.com/muxes/"
-            return [row[0] for row in
-                    filter(lambda x: x and len(x) > 8 and x[0].url and x[0].url.startswith(url), self._rows)]
+            if self._source is SatelliteSource.LYNGSAT:
+                url = "https://www.lyngsat.com/muxes/"
+                return [row[0] for row in
+                        filter(lambda x: x and len(x) > 8 and x[0].url and x[0].url.startswith(url), self._rows)]
+            elif self._source is SatelliteSource.KINGOFSAT:
+                trs = []
+                for r in self._rows:
+                    if len(r) == 13 and SatellitesParser.POS_PAT.match(r[0].text):
+                        t_cell = r[4]
+                        if t_cell.url and t_cell.url.startswith("tp.php?tp="):
+                            t_cell.url = f"https://en.kingofsat.net/{t_cell.url}"
+                            t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
+                            trs.append(t_cell)
+                return trs
         return []
 
     def get_transponder_services(self, tr_url, sat_position=None, use_pids=False):
@@ -415,89 +462,154 @@ class ServicesParser(HTMLParser):
             @param sat_position: custom satellite position. Sometimes required to adjust the namespace.
             @param use_pids: if possible use additional pids [video, audio].
         """
-        services = []
         try:
+            self._t_url = tr_url
             self.init_data(tr_url)
         except ValueError as e:
             log(e)
         else:
-            pos, freq, sr, fec, pol, namespace, tid, nid = sat_position or 0, 0, 0, 0, 0, 0, 0, 0
-            sys = "DVB-S"
-            pos_found = False
-            tr = None
-            # Transponder
-            for r in filter(lambda x: x and 6 < len(x) < 9, self._rows):
-                if not pos_found:
-                    pos_tr = re.match(self._POS_PAT, r[0].text)
-                    if not pos_tr:
-                        continue
-
-                    if not sat_position:
-                        pos = int(SatellitesParser.get_position(
-                            "".join(c for c in pos_tr.group(1) if c.isdigit() or c.isalpha())))
-
-                    pos_found = True
-
-                if pos_found:
-                    text = " ".join(c.text for c in r[1:])
-                    td = re.match(self._TR_PAT, text)
-                    if td:
-                        freq, pol = int(td.group(1)), get_key_by_value(POLARIZATION, td.group(2))
-                        if td.group(5):
-                            log("Detected T2-MI transponder!")
-                            continue
-
-                        sys, mod, sr, _fec, = td.group(3), td.group(4), td.group(6), td.group(7)
-                        nid, tid = td.group(8), td.group(9)
-
-                        neg_pos = False  # POS = W
-                        # For negative (West) positions: 3600 - numeric position value!!!
-                        namespace = "{:04x}0000".format(3600 - pos if neg_pos else pos)
-                        inv = 2  # Default
-                        fec = get_key_by_value(FEC, _fec)
-                        sys = get_key_by_value(SYSTEM, sys)
-                        tr_flag = 1
-                        mod = get_key_by_value(MODULATION, mod)
-                        roll_off = 0  # 35% DVB-S2/DVB-S (default)
-                        pilot = 2  # Auto
-                        s2_flags = "" if sys == "DVB-S" else self._S2_TR.format(tr_flag, mod or 0, roll_off, pilot)
-                        nid, tid = int(nid), int(tid)
-                        tr = self._TR.format(freq, sr, pol, fec, pos, inv, sys, s2_flags)
-
-            if not tr:
-                msg = "ServicesParser error [get transponder services]: {}"
-                er = "Transponder [{}] not found or its type [T2-MI, etc] not supported yet.".format(freq)
-                log(msg.format(er))
+            if self._source is SatelliteSource.LYNGSAT:
+                return self.get_lyngsat_services(sat_position, use_pids)
+            elif self._source is SatelliteSource.KINGOFSAT:
+                return self.get_kingofsat_services(sat_position, use_pids)
+            else:
                 return []
 
-            # Services
-            for r in filter(lambda x: x and len(x) == 12 and (x[0].text.isdigit()), self._rows):
-                sid, name, s_type, v_pid, a_pid, cas, pkg = r[0].text, r[2].text, r[4].text, r[
-                    5].text.strip(), r[6].text.split(), r[9].text, r[10].text.strip()
+    def get_lyngsat_services(self, sat_position=None, use_pids=False):
+        services = []
+        pos, freq, sr, fec, pol, nsp, tid, nid = sat_position or 0, 0, 0, 0, 0, 0, 0, 0
+        sys = "DVB-S"
+        pos_found = False
+        tr = None
+        # Transponder
+        for r in filter(lambda x: x and 6 < len(x) < 9, self._rows):
+            if not pos_found:
+                pos_tr = re.match(self._POS_PAT, r[0].text)
+                if not pos_tr:
+                    continue
 
-                try:
-                    s_type = self._S_TYPES.get(s_type, "3")  # 3 = Data
-                    _s_type = SERVICE_TYPE.get(s_type, SERVICE_TYPE.get("3"))  # str repr
-                    sid = int(sid)
-                    data_id = "{:04x}:{}:{:04x}:{:04x}:{}:0:0".format(sid, namespace, tid, nid, s_type)
-                    fav_id = "{}:{}:{}:{}".format(sid, tid, nid, namespace)
-                    picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(int(s_type), sid, tid, nid, namespace)
-                    # Flags.
-                    flags = "p:{}".format(pkg)
-                    cas = ",".join(get_key_by_value(CAS, c) or "C:0000" for c in cas.split()) if cas else None
-                    if use_pids:
-                        v_pid = "c:00{:04x}".format(int(v_pid)) if v_pid else None
-                        a_pid = ",".join(["c:01{:04x}".format(int(p)) for p in a_pid]) if a_pid else None
-                        flags = ",".join(filter(None, (flags, v_pid, a_pid, cas)))
-                    else:
-                        flags = ",".join(filter(None, (flags, cas)))
+                if not sat_position:
+                    pos = self.get_position(pos_tr.group(1))
 
-                    services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, r[1].img, picon_id,
-                                            sid, freq, sr, pol, fec, sys, pos, data_id, fav_id, tr))
-                except ValueError as e:
-                    log("ServicesParser error [get transponder services]: {}".format(e))
+                pos_found = True
+
+            if pos_found:
+                text = " ".join(c.text for c in r[1:])
+                td = re.match(self._TR_PAT, text)
+                if td:
+                    freq, pol = int(td.group(1)), get_key_by_value(POLARIZATION, td.group(2))
+                    if td.group(5):
+                        log("Detected T2-MI transponder!")
+                        continue
+
+                    sys, mod, sr, _fec, = td.group(3), td.group(4), td.group(6), td.group(7)
+                    nid, tid = td.group(8), td.group(9)
+                    sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, _fec, sys, mod)
+                    nid, tid = int(nid), int(tid)
+                    tr = self._TR.format(freq, sr, pol, fec, pos, inv, sys, s2_flags)
+
+        if not tr:
+            er = f"Transponder [{freq}] not found or its type [T2-MI, etc] not supported yet."
+            log(f"ServicesParser error [get transponder services]: {er}")
+            return services
+
+        # Services
+        for r in filter(lambda x: x and len(x) == 12 and (x[0].text.isdigit()), self._rows):
+            sid, name, s_type, v_pid, a_pid, cas, pkg = r[0].text, r[2].text, r[4].text, r[
+                5].text.strip(), r[6].text.split(), r[9].text, r[10].text.strip()
+            try:
+                s_type = self._S_TYPES.get(s_type, "3")  # 3 = Data
+                _s_type = SERVICE_TYPE.get(s_type, SERVICE_TYPE.get("3"))  # str repr
+                flags, sid, fav_id, picon_id, data_id = self.get_service_data(s_type, pkg, sid, tid, nid, nsp,
+                                                                              v_pid, a_pid, cas, use_pids)
+                services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, r[1].img, picon_id,
+                                        sid, freq, sr, pol, fec, sys, pos, data_id, fav_id, tr))
+            except ValueError as e:
+                log(f"ServicesParser error [get transponder services]: {e}")
 
         return services
+
+    def get_kingofsat_services(self, sat_position=None, use_pids=False):
+        services = []
+        # Transponder
+        tr = list(filter(lambda r: len(r) == 13 and r[4].url and r[4].url.startswith("tp.php?tp="), self._rows))
+        if not tr:
+            log(f"ServicesParser error [get transponder services]: Transponder [{self._t_url}] not found!")
+            return services
+
+        tr = tr[0]
+        s_pos, freq, pol, sys, mod, sr_fec = tr[0].text, tr[2].text, tr[3].text, tr[6].text, tr[7].text, tr[8].text
+        tid, nid = tr[10].text, tr[11].text
+
+        pos = sat_position
+        if not sat_position:
+            pos_tr = re.match(self._POS_PAT, s_pos)
+            if pos_tr:
+                pos = self.get_position(pos_tr.group(1))
+
+        sr, fec = sr_fec.split()
+        pol = get_key_by_value(POLARIZATION, pol)
+        sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, fec, sys, mod)
+        freq, nid, tid = int(float(freq)), int(nid), int(tid)
+        tr = self._TR.format(freq, sr, pol, fec, pos, inv, sys, s2_flags)
+
+        for r in filter(lambda x: len(x) == 14 and not x[1].text and x[7].text and x[7].text.isdigit(), self._rows):
+            if r[1].img == "/radio.gif":
+                s_type = ""
+            elif r[8].img == "/hd.gif":
+                s_type = "HEVC HD"
+            elif r[1].img == "/data.gif":
+                s_type = "Data"
+            else:
+                s_type = "SD"
+
+            s_type = self._S_TYPES.get(s_type, "3")
+            _s_type = SERVICE_TYPE.get(s_type, SERVICE_TYPE.get("3"))
+
+            name, pkg, cas, sid, v_pid, a_pid = r[2].text, r[5].text, r[6].text, r[7].text, None, None
+            flags, sid, fav_id, picon_id, data_id = self.get_service_data(s_type, pkg, sid, tid, nid, nsp,
+                                                                          v_pid, a_pid, cas, use_pids)
+            services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, None, picon_id,
+                                    sid, str(freq), sr, pol, fec, sys, pos, data_id, fav_id, tr))
+
+        return services
+
+    def get_transponder_data(self, pos, fec, sys, mod):
+        """ Returns converted transponder data. """
+        sys = get_key_by_value(SYSTEM, sys)
+        mod = get_key_by_value(MODULATION, mod)
+        fec = get_key_by_value(FEC, fec)
+        # For negative (West) positions: 3600 - numeric position value!!!
+        namespace = "{:04x}0000".format(3600 - pos if pos < 0 else pos)
+        tr_flag = 1
+        roll_off = 0  # 35% DVB-S2/DVB-S (default)
+        pilot = 2  # Auto
+        s2_flags = "" if sys == "DVB-S" else self._S2_TR.format(tr_flag, mod or 0, roll_off, pilot)
+        inv = 2  # Default
+
+        return sys, mod, fec, namespace, s2_flags, roll_off, pilot, inv
+
+    @staticmethod
+    def get_service_data(s_type, pkg, sid, tid, nid, namespace, v_pid, a_pid, cas, use_pids=False):
+        sid = int(sid)
+        data_id = "{:04x}:{}:{:04x}:{:04x}:{}:0:0".format(sid, namespace, tid, nid, s_type)
+        fav_id = "{}:{}:{}:{}".format(sid, tid, nid, namespace)
+        picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(int(s_type), sid, tid, nid, namespace)
+        # Flags.
+        flags = "p:{}".format(pkg)
+        cas = ",".join(get_key_by_value(CAS, c) or "C:0000" for c in cas.split()) if cas else None
+        if use_pids:
+            v_pid = "c:00{:04x}".format(int(v_pid)) if v_pid else None
+            a_pid = ",".join(["c:01{:04x}".format(int(p)) for p in a_pid]) if a_pid else None
+            flags = ",".join(filter(None, (flags, v_pid, a_pid, cas)))
+        else:
+            flags = ",".join(filter(None, (flags, cas)))
+
+        return flags, sid, fav_id, picon_id, data_id
+
+    @staticmethod
+    def get_position(pos):
+        return int(SatellitesParser.get_position("".join(c for c in pos if c.isdigit() or c.isalpha())))
 
 
 if __name__ == "__main__":

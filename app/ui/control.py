@@ -72,7 +72,7 @@ class EpgTool(Gtk.Box):
         p_count = len(paths)
 
         if p_count == 1:
-            dialog = TimerTool.TimerDialog(TimerTool.TimerAction.EVENT, model[paths][-1])
+            dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1])
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
                 pass
