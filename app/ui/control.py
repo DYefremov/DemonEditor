@@ -40,7 +40,7 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page, Column, KeyboardKey
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI, UtfFTP
 from ..eparser.ecommons import BqServiceType
-from ..settings import IS_DARWIN, PlayStreamsMode
+from ..settings import IS_DARWIN, PlayStreamsMode, IS_LINUX, IS_WIN
 
 
 class EpgTool(Gtk.Box):
@@ -927,18 +927,27 @@ class ControlTool(Gtk.Box):
 
         img = data.get("img_data", None)
         if img:
-            is_darwin = self._settings.is_darwin
-            GLib.idle_add(self._screenshot_button_box.set_sensitive, is_darwin)
-            path = os.path.expanduser("~/Desktop") if is_darwin else None
+            GLib.idle_add(self._screenshot_button_box.set_sensitive, not IS_LINUX)
+            path = os.path.expanduser("~/Desktop") if not IS_LINUX else None
 
             try:
                 import tempfile
                 import subprocess
 
-                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg", dir=path, delete=not is_darwin) as tf:
+                with tempfile.NamedTemporaryFile(mode="wb", suffix=".jpg", dir=path, delete=IS_LINUX) as tf:
                     tf.write(img)
-                    cmd = ["open" if is_darwin else "xdg-open", tf.name]
-                    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                    if IS_LINUX:
+                        cmd = ["xdg-open", tf.name]
+                    elif IS_DARWIN:
+                        cmd = ["open", tf.name]
+                    else:
+                        cmd = [tf.name]
+
+                    if not IS_WIN:
+                        subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                # File must be closed.
+                if IS_WIN:
+                    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=IS_WIN).communicate()
             finally:
                 GLib.idle_add(self._screenshot_button_box.set_sensitive, True)
 

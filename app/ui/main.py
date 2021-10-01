@@ -225,10 +225,10 @@ class Application(Gtk.Application):
         self._links_transmitter = None
         self._satellite_tool = None
         self._picon_manager = None
-        self._epg_box = None
-        self._timers_box = None
-        self._recordings_box = None
-        self._control_box = None
+        self._epg_tool = None
+        self._timers_tool = None
+        self._recordings_tool = None
+        self._control_tool = None
         self._ftp_client = None
         # Record
         self._recorder = None
@@ -761,26 +761,26 @@ class Application(Gtk.Application):
         box.pack_start(self._picon_manager, True, True, 0)
 
     def on_epg_realize(self, box):
-        self._epg_box = EpgTool(self, self._http_api)
-        box.pack_start(self._epg_box, True, True, 0)
+        self._epg_tool = EpgTool(self, self._http_api)
+        box.pack_start(self._epg_tool, True, True, 0)
 
     def on_timers_realize(self, box):
-        self._epg_box = TimerTool(self, self._http_api)
-        box.pack_start(self._epg_box, True, True, 0)
+        self._timers_tool = TimerTool(self, self._http_api)
+        box.pack_start(self._timers_tool, True, True, 0)
 
     def on_recordings_realize(self, box):
-        self._recordings_box = RecordingsTool(self, self._http_api, self._settings)
-        box.pack_start(self._recordings_box, True, True, 0)
-        self._player_box.connect("play", self._recordings_box.on_playback)
-        self._player_box.connect("playback-close", self._recordings_box.on_playback_close)
+        self._recordings_tool = RecordingsTool(self, self._http_api, self._settings)
+        box.pack_start(self._recordings_tool, True, True, 0)
+        self._player_box.connect("play", self._recordings_tool.on_playback)
+        self._player_box.connect("playback-close", self._recordings_tool.on_playback_close)
 
     def on_ftp_realize(self, box):
         self._ftp_client = FtpClientBox(self, self._settings)
         box.pack_start(self._ftp_client, True, True, 0)
 
     def on_control_realize(self, box: Gtk.HBox):
-        self._control_box = ControlTool(self, self._http_api, self._settings)
-        box.pack_start(self._control_box, True, True, 0)
+        self._control_tool = ControlTool(self, self._http_api, self._settings)
+        box.pack_start(self._control_tool, True, True, 0)
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
@@ -2891,8 +2891,8 @@ class Application(Gtk.Application):
             self._http_api.send(HttpAPI.Request.CURRENT, None, self.update_status)
 
     def update_signal(self, sig):
-        if self._control_box:
-            self._control_box.update_signal(sig)
+        if self._page is Page.CONTROL:
+            self._control_tool.update_signal(sig)
 
         self.set_signal(sig.get("e2snr", "0 %") if sig else "0 %")
 
@@ -3439,11 +3439,11 @@ class Application(Gtk.Application):
         return True
 
     def on_alt_selection(self, model, path, column):
-        if self._control_box and self._control_box.update_epg:
+        if self._control_tool and self._control_tool.update_epg:
             row = model[path][:]
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
-                self._control_box.on_service_changed(srv.picon_id.rstrip(".png").replace("_", ":"))
+                self._control_tool.on_service_changed(srv.picon_id.rstrip(".png").replace("_", ":"))
 
     # ***************** Profile label ********************* #
 
