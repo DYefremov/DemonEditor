@@ -370,7 +370,8 @@ class PlayerBox(Gtk.Box):
             self._app.http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
         elif s_type is SettingsType.NEUTRINO_MP:
             self._app.http_api.send(HttpAPI.Request.N_ZAP, "",
-                                    lambda rf: self._app.http_api.send(HttpAPI.Request.N_STREAM, rf, self.watch))
+                                    lambda rf: self._app.http_api.send(HttpAPI.Request.N_STREAM, rf.get("data", ""),
+                                                                       self.watch))
 
     def watch(self, data):
         url = self._app.get_url_from_m3u(data)

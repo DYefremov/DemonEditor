@@ -700,7 +700,8 @@ class Application(Gtk.Application):
 
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
-        event.state |= MOD_MASK
+        if event.state is not Gdk.ModifierType.SHIFT_MASK:
+            event.state |= MOD_MASK
 
     def on_close_app(self, *args):
         """ Performing operations before closing the application. """
@@ -2687,7 +2688,8 @@ class Application(Gtk.Application):
                 self._http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.record)
             elif self._s_type is SettingsType.NEUTRINO_MP:
                 self._http_api.send(HttpAPI.Request.N_ZAP, "",
-                                    lambda rf: self._http_api.send(HttpAPI.Request.N_STREAM, rf, self.record))
+                                    lambda rf: self._http_api.send(HttpAPI.Request.N_STREAM,
+                                                                   rf.get("data", ""), self.record))
             else:
                 log("Error [on record]: Settings type is not supported!")
 
@@ -2811,7 +2813,7 @@ class Application(Gtk.Application):
             self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
         elif self._s_type is SettingsType.NEUTRINO_MP:
             def zap(rq):
-                if rq and rq == "ok":
+                if rq and rq.get("data", None) == "ok":
                     GLib.idle_add(scroll_to, path, self._fav_view)
                     if callback:
                         callback()
@@ -2931,11 +2933,18 @@ class Application(Gtk.Application):
             self._http_api.init()
             return
 
+        GLib.idle_add(self._receiver_info_label.set_text, info.get("info", ""), priority=GLib.PRIORITY_LOW)
+
         if self._http_api:
             self._http_api.send(HttpAPI.Request.SIGNAL, None, self.update_neutrino_signal)
 
-    @lru_cache(maxsize=2)
     def update_neutrino_signal(self, sig):
+        data = sig.get("data", None)
+        if data:
+            self.set_neutrino_signal(data)
+
+    @lru_cache(maxsize=2)
+    def set_neutrino_signal(self, sig):
         s_data = sig.split()
         has_data = len(s_data) == 6
         if has_data:

@@ -714,7 +714,7 @@ class HttpAPI:
             return {"info": f.read().decode("utf-8").strip()}
         elif req_type is HttpAPI.Request.N_STREAM:
             return {"m3u": f.read().decode("utf-8")}
-        return f.read().decode("utf-8")
+        return {"data": f.read().decode("utf-8")}
 
     @staticmethod
     def init_auth(user, password, url, use_ssl=False):
