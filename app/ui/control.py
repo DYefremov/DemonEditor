@@ -816,16 +816,21 @@ class ControlTool(Gtk.Box):
         self._snr_value_label = builder.get_object("snr_value_label")
         self._ber_value_label = builder.get_object("ber_value_label")
         self._agc_value_label = builder.get_object("agc_value_label")
+        self._snr_level_bar = builder.get_object("snr_level_bar")
+        self._ber_level_bar = builder.get_object("ber_level_bar")
+        self._agc_level_bar = builder.get_object("agc_level_bar")
         self._volume_button = builder.get_object("volume_button")
         self.init_actions(app)
         self.show()
 
     def init_actions(self, app):
-        # Remote controller actions
+        # Remote controller actions.
         app.set_action("on_up", lambda a, v: self.on_remote_action(HttpAPI.Remote.UP))
         app.set_action("on_down", lambda a, v: self.on_remote_action(HttpAPI.Remote.DOWN))
         app.set_action("on_left", lambda a, v: self.on_remote_action(HttpAPI.Remote.LEFT))
         app.set_action("on_right", lambda a, v: self.on_remote_action(HttpAPI.Remote.RIGHT))
+        app.set_action("on_back", lambda a, v: self.on_remote_action(HttpAPI.Remote.BACK))
+        app.set_action("on_info", lambda a, v: self.on_remote_action(HttpAPI.Remote.INFO))
         app.set_action("on_ok", lambda a, v: self.on_remote_action(HttpAPI.Remote.OK))
         app.set_action("on_menu", lambda a, v: self.on_remote_action(HttpAPI.Remote.MENU))
         app.set_action("on_exit", lambda a, v: self.on_remote_action(HttpAPI.Remote.EXIT))
@@ -833,13 +838,18 @@ class ControlTool(Gtk.Box):
         app.set_action("on_green", lambda a, v: self.on_remote_action(HttpAPI.Remote.GREEN))
         app.set_action("on_yellow", lambda a, v: self.on_remote_action(HttpAPI.Remote.YELLOW))
         app.set_action("on_blue", lambda a, v: self.on_remote_action(HttpAPI.Remote.BLUE))
-        # Power
+        # Playback.
+        app.set_action("on_prev_media", lambda a, v: self.on_player_action(HttpAPI.Request.PLAYER_PREV))
+        app.set_action("on_play_media", lambda a, v: self.on_player_action(HttpAPI.Request.PLAYER_PLAY))
+        app.set_action("on_stop_media", lambda a, v: self.on_player_action(HttpAPI.Request.PLAYER_STOP))
+        app.set_action("on_next_media", lambda a, v: self.on_player_action(HttpAPI.Request.PLAYER_NEXT))
+        # Power.
         app.set_action("on_standby", lambda a, v: self.on_power_action(HttpAPI.Power.STANDBY))
         app.set_action("on_wake_up", lambda a, v: self.on_power_action(HttpAPI.Power.WAKEUP))
         app.set_action("on_reboot", lambda a, v: self.on_power_action(HttpAPI.Power.REBOOT))
         app.set_action("on_restart_gui", lambda a, v: self.on_power_action(HttpAPI.Power.RESTART_GUI))
         app.set_action("on_shutdown", lambda a, v: self.on_power_action(HttpAPI.Power.DEEP_STANDBY))
-        # Screenshots
+        # Screenshots.
         app.set_action("on_screenshot_all", self.on_screenshot_all)
         app.set_action("on_screenshot_video", self.on_screenshot_video)
         app.set_action("on_screenshot_osd", self.on_screenshot_osd)
@@ -857,6 +867,9 @@ class ControlTool(Gtk.Box):
 
     def on_remote_action(self, action):
         self._http_api.send(HttpAPI.Request.REMOTE, action, self.on_response)
+
+    def on_player_action(self, action):
+        self._http_api.send(action, "", self.on_response)
 
     @run_with_delay(0.5)
     def on_volume_changed(self, button, value):
@@ -955,6 +968,14 @@ class ControlTool(Gtk.Box):
         self._http_api.send(HttpAPI.Request.POWER, action, lambda resp: log("Power status changed..."))
 
     def update_signal(self, sig):
-        self._snr_value_label.set_text(sig.get("e2snrdb", "0 dB").strip())
-        self._ber_value_label.set_text(str(sig.get("e2ber", None) or "0").strip())
-        self._agc_value_label.set_text(sig.get("e2acg", "0 %").strip())
+        snr = sig.get("e2snr", "0 %").strip() if sig else "0 %"
+        acg = sig.get("e2acg", "0 %").strip() if sig else "0 %"
+        ber = (sig.get("e2ber", None) or "").strip() if sig else ""
+        # Labels.
+        self._snr_value_label.set_text(snr)
+        self._agc_value_label.set_text(acg)
+        self._ber_value_label.set_text(ber)
+        # Level bars.
+        self._snr_level_bar.set_value(int(snr.strip("%N/A") or 0))
+        self._agc_level_bar.set_value(int(acg.rstrip("%N/A") or 0))
+        self._ber_level_bar.set_value(int(ber.rstrip("N/A") or 0))

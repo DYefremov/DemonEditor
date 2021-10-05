@@ -516,7 +516,7 @@ def telnet(host, port=23, user="", password="", timeout=5):
 class HttpAPI:
     __MAX_WORKERS = 4
 
-    class Request(Enum):
+    class Request(str, Enum):
         ZAP = "zap?sRef="
         INFO = "about"
         SIGNAL = "signal"
@@ -563,10 +563,12 @@ class HttpAPI:
         MENU = "139"
         EXIT = "174"
         OK = "352"
+        INFO = "358"
         RED = "398"
         GREEN = "399"
         YELLOW = "400"
         BLUE = "401"
+        BACK = "412"
 
     class Power(str, Enum):
         """ Args for HttpRequestType [POWER] class. """
@@ -608,7 +610,7 @@ class HttpAPI:
         if self._shutdown:
             return
 
-        url = self._base_url + req_type.value
+        url = self._base_url + req_type
         data = self._data
 
         if req_type is self.Request.ZAP or req_type in self.STREAM_REQUESTS:
@@ -617,7 +619,7 @@ class HttpAPI:
             url = f"{url}{ref_prefix}{quote(ref).replace('%3A', '%253A')}"
         elif req_type is self.Request.GRUB:
             data = None  # Must be disabled for token-based security.
-            url = f"{self._main_url}/{req_type.value}{ref}"
+            url = f"{self._main_url}/{req_type}{ref}"
         elif req_type in self.PARAM_REQUESTS:
             url += ref
 
@@ -637,7 +639,7 @@ class HttpAPI:
 
         self._data = None
         if self._s_type is SettingsType.ENIGMA_2:
-            s_id = self.get_session_id(user, password, f"{self._main_url}/web/{self.Request.TOKEN.value}")
+            s_id = self.get_session_id(user, password, f"{self._main_url}/web/{self.Request.TOKEN}")
             if s_id != "0":
                 self._data = urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
 
@@ -740,7 +742,7 @@ class HttpAPI:
 
     @staticmethod
     def get_post_data(base_url, password, user):
-        s_id = HttpAPI.get_session_id(user, password, "{}/web/{}".format(base_url, HttpAPI.Request.TOKEN.value))
+        s_id = HttpAPI.get_session_id(user, password, "{}/web/{}".format(base_url, HttpAPI.Request.TOKEN))
         data = None
         if s_id != "0":
             data = urllib.parse.urlencode({"user": user, "password": password, "sessionid": s_id}).encode("utf-8")
