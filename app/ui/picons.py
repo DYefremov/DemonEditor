@@ -57,6 +57,7 @@ class PiconManager(Gtk.Box):
 
         self._app = app
         self._app.connect("page-changed", self.update_picons_dest)
+        self._app.connect("filter-toggled", self.on_app_filter_toggled)
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
         self._BASE_URL = "www.lyngsat.com/packages/"
@@ -161,7 +162,9 @@ class PiconManager(Gtk.Box):
         self._satellite_label.bind_property("visible", self._satellites_view, "sensitive")
         self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
+        self._convert_button.bind_property("visible", builder.get_object("converter_label"), "visible")
         self._download_source_button.bind_property("visible", self._receive_button, "visible")
+        self._download_source_button.bind_property("visible", builder.get_object("downloader_label"), "visible")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
         self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
@@ -169,6 +172,11 @@ class PiconManager(Gtk.Box):
         self._filter_button.bind_property("visible", self._send_button, "visible")
         self._filter_button.bind_property("visible", self._download_button, "visible")
         self._filter_button.bind_property("visible", self._remove_button, "visible")
+        self._filter_button.bind_property("visible", builder.get_object("manager_label"), "visible")
+        self._src_button = builder.get_object("src_button")
+        self._src_button.bind_property("active", builder.get_object("explorer_dst_label"), "visible")
+        self._src_button.bind_property("active", builder.get_object("src_picon_box_frame"), "visible")
+        self._filter_button.bind_property("visible", self._src_button, "visible")
         explorer_info_bar = builder.get_object("explorer_info_bar")
         explorer_info_bar.bind_property("visible", builder.get_object("explorer_info_bar_frame"), "visible")
         self._info_check_button.bind_property("active", explorer_info_bar, "visible")
@@ -194,6 +202,7 @@ class PiconManager(Gtk.Box):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
+        self._src_button.set_active(True)
         self.update_picons_data(self._picons_src_view, response)
 
     def update_picons_dest(self, app, page):
@@ -246,7 +255,7 @@ class PiconManager(Gtk.Box):
             if p:
                 model.append((p, path.name, f_path))
         elif path.is_dir():
-            self._explorer_src_path_button.select_filename(f_path)
+            self.update_picons_data(view, f_path)
 
     def get_pixbuf_at_scale(self, path, width, height, p_ratio):
         try:
@@ -647,6 +656,7 @@ class PiconManager(Gtk.Box):
             if not self._resize_no_radio_button.get_active():
                 self.resize(picons_path)
         finally:
+            self._app.update_picons()
             GLib.idle_add(self._cancel_button.hide)
             self._is_downloading = False
 
@@ -793,8 +803,12 @@ class PiconManager(Gtk.Box):
 
     # *********************** Filter **************************** #
 
+    def on_app_filter_toggled(self, app, value):
+        if app.page is Page.PICONS:
+            self._filter_button.set_active(not self._filter_button.get_active())
+
     def on_filter_toggled(self, button):
-        active = button.get_active()
+        active = self._filter_button.get_active()
         self._filter_bar.set_search_mode(active)
         if not active:
             self._picons_filter_entry.set_text("")

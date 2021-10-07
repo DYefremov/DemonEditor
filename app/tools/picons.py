@@ -37,7 +37,7 @@ from html.parser import HTMLParser
 import requests
 
 from app.commons import run_task, log
-from app.settings import SettingsType
+from app.settings import SettingsType, IS_LINUX, IS_WIN
 from .satellites import _HEADERS
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
@@ -57,7 +57,7 @@ class PiconsCzDownloader:
     _PERM_URL = "https://picon.cz/download/7337"
     _BASE_URL = "https://picon.cz/download/"
     _BASE_LOGO_URL = "https://picon.cz/picon/0/"
-    _HEADER = {"User-Agent": "DemonEditor/1.0.10", "Referer": ""}
+    _HEADER = {"User-Agent": "DemonEditor/2.0.0", "Referer": ""}
     _LINK_PATTERN = re.compile(r"((.*)-\d+x\d+)-(.*)_by_chocholousek.7z$")
     _FILE_PATTERN = re.compile(b"\\s+(1_.*\\.png).*")
 
@@ -81,7 +81,11 @@ class PiconsCzDownloader:
                 name_map = self.get_name_map()
 
                 for line in request.iter_lines():
-                    l_id, perm_link = line.decode(encoding="utf-8", errors="ignore").split(maxsplit=1)
+                    data = line.decode(encoding="utf-8", errors="ignore").split(maxsplit=1)
+                    if len(data) != 2:
+                        continue
+
+                    l_id, perm_link = data
                     self._perm_links[str(l_id)] = str(perm_link)
                     data = re.match(self._LINK_PATTERN, perm_link)
                     if data:
@@ -89,7 +93,7 @@ class PiconsCzDownloader:
                         # Logo url.
                         logo = logo_map.get(data.group(2), None)
                         l_name = name_map.get(sat_pos, None) or sat_pos.replace(".", "")
-                        logo_url = "{}{}/{}.png".format(self._BASE_LOGO_URL, logo, l_name) if logo else None
+                        logo_url = f"{self._BASE_LOGO_URL}{logo}/{l_name}.png" if logo else None
 
                         prv = Provider(None, data.group(1), sat_pos, self._BASE_URL + l_id, l_id, logo_url, None, False)
                         if sat_pos in self._providers:
@@ -97,7 +101,7 @@ class PiconsCzDownloader:
                         else:
                             self._providers[sat_pos] = [prv]
             else:
-                log("{} [get permalinks] error: {}".format(self.__class__.__name__, request.reason))
+                log(f"{self.__class__.__name__} [get permalinks] error: {request.reason}")
                 raise PiconsError(request.reason)
 
     @property
@@ -111,31 +115,36 @@ class PiconsCzDownloader:
         self._HEADER["Referer"] = provider.url
         with requests.get(url=provider.url, headers=self._HEADER, stream=True) as request:
             if request.reason == "OK":
-                dest = "{}{}.7z".format(picons_path, provider.on_id)
-                self._appender("Downloading: {}\n".format(provider.url))
+                dest = f"{picons_path}{provider.on_id}.7z"
+                self._appender(f"Downloading: {provider.url}\n")
                 with open(dest, mode="bw") as f:
                     for data in request.iter_content(chunk_size=1024):
                         f.write(data)
-                self._appender("Extracting: {}\n".format(provider.on_id))
+                self._appender(f"Extracting: {provider.on_id}\n")
                 self.extract(dest, picons_path, picon_ids)
             else:
-                log("{} [download] error: {}".format(self.__class__.__name__, request.reason))
+                log(f"{self.__class__.__name__} [download] error: {request.reason}")
 
     def extract(self, src, dest, picon_ids=None):
         """ Extracts 7z archives. """
         # TODO: think about https://github.com/miurahr/py7zr
         exe = "7zr"
-        if not os.path.isfile("/usr/bin/7zr"):
+        if IS_LINUX and not os.path.isfile("/usr/bin/7zr"):
             raise PiconsError("7-zip [7zr] archiver not found!")
+
+        if IS_WIN:
+            exe = "C:\\Program Files\\7-Zip\\7z.exe"
+            if not os.path.isfile(exe):
+                raise PiconsError("7-Zip executable not found!")
 
         cmd = [exe, "l", src]
         try:
             out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             if err:
-                log("{} [extract] error: {}".format(self.__class__.__name__, err))
+                log(f"{self.__class__.__name__} [extract] error: {err}")
                 raise PiconsError(err)
         except OSError as e:
-            log("{} [extract] error: {}".format(self.__class__.__name__, e))
+            log(f"{self.__class__.__name__} [extract] error: {e}")
             raise PiconsError(e)
 
         is_filter = bool(picon_ids)
@@ -157,7 +166,7 @@ class PiconsCzDownloader:
         try:
             out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
             if err:
-                log("{} [extract] error: {}".format(self.__class__.__name__, err))
+                log(f"{self.__class__.__name__} [extract] error: {err}")
                 raise PiconsError(err)
             else:
                 if os.path.isfile(src):
@@ -184,9 +193,9 @@ class PiconsCzDownloader:
                     self._provider_logos[url] = data
                     return data
                 else:
-                    log("Downloading package logo error: {}".format(logo_request.reason))
+                    log(f"Downloading package logo error: {logo_request.reason}")
         except requests.exceptions.ConnectionError as e:
-            log("{} error [get provider logo]: {}".format(self.__class__.__name__, e))
+            log(f"{self.__class__.__name__} error [get provider logo]: {e}")
 
     def get_logos_map(self):
         return {"piconblack": "b50",

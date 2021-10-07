@@ -164,6 +164,7 @@ class Application(Gtk.Application):
                     "on_mark_duplicates": self.on_mark_duplicates,
                     "on_filter_changed": self.on_filter_changed,
                     "on_filter_type_toggled": self.on_filter_type_toggled,
+                    "on_services_filter_toggled": self.on_services_filter_toggled,
                     "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
@@ -261,6 +262,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("data-load-done", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("filter-toggled", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -325,13 +328,13 @@ class Application(Gtk.Application):
         # Filter
         self._services_model_filter = builder.get_object("services_model_filter")
         self._services_model_filter.set_visible_func(self.services_filter_function)
-        self._filter_header_button = builder.get_object("filter_header_button")
+        self._filter_services_button = builder.get_object("filter_services_button")
         self._filter_entry = builder.get_object("filter_entry")
         self._filter_box = builder.get_object("filter_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
-        self._services_load_spinner.bind_property("active", self._filter_header_button, "sensitive", 4)
+        self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
         self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
         # Search.
         services_search_provider = SearchProvider(self._services_view,
@@ -458,9 +461,10 @@ class Application(Gtk.Application):
         self.set_action("on_about_app", self.on_about_app)
         self.set_action("on_close_app", self.on_close_app)
         # Filter.
-        filter_action = Gio.SimpleAction.new_stateful("filter", None, GLib.Variant.new_boolean(False))
-        filter_action.connect("change-state", self.on_filter_toggled)
+        filter_action = Gio.SimpleAction.new("filter", None)
+        filter_action.connect("activate", lambda a, v: self.emit("filter-toggled", None))
         self._main_window.add_action(filter_action)  # For "win.*" actions!
+        self.connect("filter-toggled", self.on_services_filter_toggled)
         # Lock, Hide.
         self.set_action("on_hide", self.on_hide)
         self.set_action("on_locked", self.on_locked)
@@ -1646,7 +1650,7 @@ class Application(Gtk.Application):
     def update_data(self, data_path, callback=None):
         self._profile_combo_box.set_sensitive(False)
         self._alt_revealer.set_visible(False)
-        self._filter_header_button.set_active(False)
+        self._filter_services_button.set_active(False)
         self._wait_dialog.show()
 
         yield from self.clear_current_data()
@@ -2958,15 +2962,15 @@ class Application(Gtk.Application):
 
     # ***************** Filter and search ********************* #
 
-    def on_filter_toggled(self, action, value):
-        if self._app_info_box.get_visible() or self._services_load_spinner.get_property("active"):
+    def on_services_filter_toggled(self, app=None, value=None):
+        if self._page is not Page.SERVICES and self._services_load_spinner.get_property("active"):
             return True
 
-        action.set_state(value)
-
-        self._filter_entry.grab_focus() if value else self.on_filter_changed()
+        active = not self._filter_box.get_visible()
+        self._filter_services_button.set_active(active)
+        self._filter_entry.grab_focus() if active else self.on_filter_changed()
         self.filter_set_default()
-        self._filter_box.set_visible(value)
+        self._filter_box.set_visible(active)
 
     @run_idle
     def filter_set_default(self):
@@ -3550,6 +3554,10 @@ class Application(Gtk.Application):
     @is_enigma.setter
     def is_enigma(self, value):
         self._is_enigma = value
+
+    @property
+    def page(self):
+        return self._page
 
 
 def start_app():

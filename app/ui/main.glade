@@ -1321,14 +1321,14 @@ Author: Dmitriy Yefremov
                                 <property name="margin_bottom">5</property>
                                 <property name="spacing">5</property>
                                 <child>
-                                  <object class="GtkToggleButton" id="filter_header_button">
+                                  <object class="GtkToggleButton" id="filter_services_button">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="receives_default">True</property>
                                     <property name="tooltip_text" translatable="yes">Filter</property>
-                                    <property name="action_name">win.filter</property>
+                                    <signal name="toggled" handler="on_services_filter_toggled" swapped="no"/>
                                     <child>
                                       <object class="GtkImage" id="filter_header_button_image">
                                         <property name="visible">True</property>
@@ -3288,6 +3288,7 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Info</property>
+                    <property name="ellipsize">end</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
