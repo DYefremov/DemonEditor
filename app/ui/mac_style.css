@@ -3,12 +3,16 @@
 }
 
 entry {
-  min-height: 2em;
+  min-height: 2.0em;
 }
 
 button {
   min-height: 1.5em;
-  padding: 0.2em;
+  min-width: 1em;
+  padding-left: 0.4em;
+  padding-right: 0.4em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
 }
 
 spinbutton {
@@ -16,7 +20,7 @@ spinbutton {
 }
 
 toolbutton {
-  padding: 0.2em;
+  padding: 0.1em;
 }
 
 spinner {
@@ -31,23 +35,4 @@ infobar {
 switch slider {
   min-height: 1.5em;
   min-width: 1.5em;
-}
-
-paned > separator {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 1px 24px;
-}
-
-combobox {
-  min-height: 1em;
-  padding: 0.2em;
-}
-
-buttonbox {
-  padding: 0.2em;
-}
-
-stackswitcher {
-  padding: 0.2em;
 }
