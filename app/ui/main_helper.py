@@ -37,7 +37,7 @@ from gi.repository import GdkPixbuf, GLib
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.settings import SettingsType, SEP
+from app.settings import SettingsType, SEP, IS_WIN
 from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
@@ -411,6 +411,10 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
         src_path = get_chooser_dialog(transient, settings, "*.png files", ("*.png",))
         if src_path == Gtk.ResponseType.CANCEL:
             return picons_files
+
+    if IS_WIN:
+        src_path = src_path.lstrip("/")
+        dst_path = dst_path.lstrip("/") if dst_path else dst_path
 
     if not str(src_path).endswith(".png") or not os.path.isfile(src_path):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")

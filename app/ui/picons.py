@@ -76,7 +76,8 @@ class PiconManager(Gtk.Box):
         self._download_src = self.DownloadSource.PICON_CZ
         self._picon_cz_downloader = None
 
-        handlers = {"on_receive": self.on_receive,
+        handlers = {"on_tool_switched": self.on_tool_switched,
+                    "on_receive": self.on_receive,
                     "on_cancel": self.on_cancel,
                     "on_send": self.on_send,
                     "on_download": self.on_download,
@@ -86,7 +87,6 @@ class PiconManager(Gtk.Box):
                     "on_url_changed": self.on_url_changed,
                     "on_picons_filter_changed": self.on_picons_filter_changed,
                     "on_position_edited": self.on_position_edited,
-                    "on_visible_page": self.on_visible_page,
                     "on_convert": self.on_convert,
                     "on_picons_view_drag_data_get": self.on_picons_view_drag_data_get,
                     "on_picons_src_view_drag_drop": self.on_picons_src_view_drag_drop,
@@ -117,6 +117,7 @@ class PiconManager(Gtk.Box):
         builder = get_builder(UI_RESOURCES_PATH + "picons.glade", handlers)
 
         self._app_window = app.get_active_window()
+        self._stack = builder.get_object("stack")
         self._picons_src_view = builder.get_object("picons_src_view")
         self._picons_dest_view = builder.get_object("picons_dest_view")
         self._providers_view = builder.get_object("providers_view")
@@ -127,8 +128,6 @@ class PiconManager(Gtk.Box):
         self._picons_dst_filter_model.set_visible_func(self.picons_dst_filter_function)
         self._expander = builder.get_object("expander")
         self._text_view = builder.get_object("text_view")
-        self._filter_bar = builder.get_object("filter_bar")
-        self._filter_button = builder.get_object("filter_button")
         self._src_filter_button = builder.get_object("src_filter_button")
         self._dst_filter_button = builder.get_object("dst_filter_button")
         self._picons_filter_entry = builder.get_object("picons_filter_entry")
@@ -151,10 +150,10 @@ class PiconManager(Gtk.Box):
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
         self._satellite_label = builder.get_object("satellite_label")
-        self._provider_header_label = builder.get_object("provider_header_label")
+        self._src_link_button = builder.get_object("src_link_button")
         self._satellite_filter_switch = builder.get_object("satellite_filter_switch")
         self._bouquet_filter_switch = builder.get_object("bouquet_filter_switch")
-        self._bouquet_filter_grid = builder.get_object("bouquet_filter_grid")
+        self._providers_header_box = builder.get_object("providers_header_box")
         self._header_download_box = builder.get_object("header_download_box")
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_label"), "visible", 4)
         self._satellite_label.bind_property("visible", builder.get_object("loading_data_spinner"), "visible", 4)
@@ -162,9 +161,10 @@ class PiconManager(Gtk.Box):
         self._satellite_label.bind_property("visible", self._satellites_view, "sensitive")
         self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
-        self._convert_button.bind_property("visible", builder.get_object("converter_label"), "visible")
         self._download_source_button.bind_property("visible", self._receive_button, "visible")
-        self._download_source_button.bind_property("visible", builder.get_object("downloader_label"), "visible")
+        # Filter.
+        self._filter_bar = builder.get_object("filter_bar")
+        self._filter_button = builder.get_object("filter_button")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
         self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
@@ -172,7 +172,6 @@ class PiconManager(Gtk.Box):
         self._filter_button.bind_property("visible", self._send_button, "visible")
         self._filter_button.bind_property("visible", self._download_button, "visible")
         self._filter_button.bind_property("visible", self._remove_button, "visible")
-        self._filter_button.bind_property("visible", builder.get_object("manager_label"), "visible")
         self._src_button = builder.get_object("src_button")
         self._src_button.bind_property("active", builder.get_object("explorer_dst_label"), "visible")
         self._src_button.bind_property("active", builder.get_object("src_picon_box_frame"), "visible")
@@ -180,6 +179,13 @@ class PiconManager(Gtk.Box):
         explorer_info_bar = builder.get_object("explorer_info_bar")
         explorer_info_bar.bind_property("visible", builder.get_object("explorer_info_bar_frame"), "visible")
         self._info_check_button.bind_property("active", explorer_info_bar, "visible")
+        # Header buttons. -> Used instead stack switcher.
+        self._manager_button = builder.get_object("manager_button")
+        self._manager_button.bind_property("active", builder.get_object("manager_label"), "visible")
+        self._downloader_button = builder.get_object("downloader_button")
+        self._downloader_button.bind_property("active", builder.get_object("downloader_label"), "visible")
+        self._converter_button = builder.get_object("converter_button")
+        self._converter_button.bind_property("active", builder.get_object("converter_label"), "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Settings
@@ -195,6 +201,28 @@ class PiconManager(Gtk.Box):
                                   "first load the required services list into the main application window.")
             self.show_info_message(message, Gtk.MessageType.WARNING)
             self._satellite_label.show()
+
+    def on_tool_switched(self, button):
+        if not button.get_active():
+            return True
+
+        is_explorer = button is self._manager_button
+        is_downloader = button is self._downloader_button
+        is_converter = button is self._converter_button
+
+        name = "explorer"
+        if is_downloader:
+            name = "downloader"
+        elif is_converter:
+            name = "converter"
+
+        self._stack.set_visible_child_name(name)
+
+        self._convert_button.set_visible(is_converter)
+        self._download_source_button.set_visible(is_downloader)
+        self._filter_button.set_visible(is_explorer)
+        if is_explorer:
+            self.update_picons_data(self._picons_dest_view)
 
     def on_open(self):
         """ Opens picons from local path [in src view]. """
@@ -476,7 +504,7 @@ class PiconManager(Gtk.Box):
     def on_download_source_changed(self, button):
         self._download_src = self.DownloadSource(button.get_active_id())
         self.set_providers_header()
-        self._bouquet_filter_grid.set_sensitive(self._download_src is self.DownloadSource.PICON_CZ)
+        self._providers_header_box.set_sensitive(self._download_src is self.DownloadSource.PICON_CZ)
         GLib.idle_add(self._providers_view.get_model().clear)
         self.init_satellites(self._satellites_view)
 
@@ -521,19 +549,19 @@ class PiconManager(Gtk.Box):
 
     @run_idle
     def set_providers_header(self):
-        msg = "{} [{}]"
-        tooltip = ""
         if self._download_src is self.DownloadSource.PICON_CZ:
-            tooltip = "https://picon.cz (by Chocholoušek)"
-            msg = msg.format(get_message("Package"), tooltip)
+            link = "https://picon.cz"
+            tooltip = f"{link} (by Chocholoušek)"
         elif self._download_src is self.DownloadSource.LYNG_SAT:
-            tooltip = "https://www.lyngsat.com"
-            msg = msg.format(get_message("Providers"), tooltip)
+            link = "https://www.lyngsat.com"
+            tooltip = f"{get_message('Providers')} [{link}]"
         else:
-            msg = ""
+            link = ""
+            tooltip = ""
 
-        self._provider_header_label.set_text(msg)
-        self._provider_header_label.set_tooltip_text(tooltip)
+        self._src_link_button.set_uri(link)
+        self._src_link_button.set_label(link)
+        self._src_link_button.set_tooltip_text(tooltip)
 
     @run_task
     def get_satellites(self, view):
@@ -905,16 +933,6 @@ class PiconManager(Gtk.Box):
     def on_position_edited(self, render, path, value):
         model = self._providers_view.get_model()
         model.set_value(model.get_iter(path), 2, value)
-
-    @run_idle
-    def on_visible_page(self, stack, param):
-        name = stack.get_visible_child_name()
-        self._convert_button.set_visible(name == "converter")
-        self._download_source_button.set_visible(name == "downloader")
-        is_explorer = name == "explorer"
-        self._filter_button.set_visible(is_explorer)
-        if is_explorer:
-            self.update_picons_data(self._picons_dest_view)
 
     @run_idle
     def on_convert(self, item):
