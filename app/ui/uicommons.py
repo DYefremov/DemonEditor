@@ -13,10 +13,10 @@ from app.settings import Settings, SettingsException, IS_DARWIN, GTK_PATH, IS_LI
 
 # Setting mod mask for keyboard depending on platform
 MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
+# *.deb
 DEB_PATH = "/usr/share/demoneditor/app/ui/"
 # Path to *.glade files
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
-# *.deb
 UI_RESOURCES_PATH = DEB_PATH if os.path.exists(DEB_PATH) else UI_RESOURCES_PATH
 LANG_PATH = UI_RESOURCES_PATH + "lang"
 NOTIFY_IS_INIT = False
@@ -39,9 +39,13 @@ else:
         st.set_property("gtk-theme-name", settings.theme)
         st.set_property("gtk-icon-theme-name", settings.icon_theme)
     else:
-        if IS_DARWIN:
+        if not IS_LINUX:
+            if IS_DARWIN:
+                s_path = f"{GTK_PATH + '/' + UI_RESOURCES_PATH if GTK_PATH else UI_RESOURCES_PATH}mac_style.css"
+            else:
+                s_path = f"{UI_RESOURCES_PATH}win_style.css"
+
             style_provider = Gtk.CssProvider()
-            s_path = "{}mac_style.css".format(GTK_PATH + "/" + UI_RESOURCES_PATH if GTK_PATH else UI_RESOURCES_PATH)
             style_provider.load_from_path(s_path)
             Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                      Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)

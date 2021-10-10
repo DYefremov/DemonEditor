@@ -1011,7 +1011,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkImage" id="update_header_button_img">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="stock">gtk-refresh</property>
+                            <property name="icon_name">emblem-synchronizing-symbolic</property>
                           </object>
                         </child>
                       </object>
