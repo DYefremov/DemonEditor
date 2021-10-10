@@ -369,8 +369,16 @@ class Settings:
     @property
     def picons_paths(self):
         if self.setting_type is SettingsType.NEUTRINO_MP:
-            return Defaults.NEUTRINO_BOX_PICON_PATHS.value
-        return Defaults.BOX_PICON_PATHS.value
+            return self._settings.get("neutrino_picon_paths", Defaults.NEUTRINO_BOX_PICON_PATHS.value)
+        else:
+            return self._settings.get("picon_paths", Defaults.BOX_PICON_PATHS.value)
+
+    @picons_paths.setter
+    def picons_paths(self, value):
+        if self.setting_type is SettingsType.NEUTRINO_MP:
+            self._settings["neutrino_picon_paths"] = value
+        else:
+            self._settings["picon_paths"] = value
 
     # ***** Local paths ***** #
 

@@ -67,6 +67,8 @@ class SettingsDialog:
                     "on_profile_edited": self.on_profile_edited,
                     "on_profile_selected": self.on_profile_selected,
                     "on_profile_set_default": self.on_profile_set_default,
+                    "on_add_picon_path": self.on_add_picon_path,
+                    "on_remove_picon_path": self.on_remove_picon_path,
                     "on_lang_changed": self.on_lang_changed,
                     "on_main_settings_visible": self.on_main_settings_visible,
                     "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
@@ -115,6 +117,7 @@ class SettingsDialog:
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
         self._picons_paths_box = builder.get_object("picons_paths_box")
+        self._remove_picon_path_button = builder.get_object("remove_picon_path_button")
         # Paths.
         self._picons_path_field = builder.get_object("picons_path_field")
         self._data_path_field = builder.get_object("data_path_field")
@@ -258,7 +261,10 @@ class SettingsDialog:
         model = self._picons_paths_box.get_model()
         model.clear()
         list(map(lambda p: model.append((p, p)), self._settings.picons_paths))
-        self._picons_paths_box.set_active_id(self._settings.picons_path)
+        if self._settings.picons_path in self._settings.picons_paths:
+            self._picons_paths_box.set_active_id(self._settings.picons_path)
+        else:
+            self._picons_paths_box.set_active(0)
 
     def show(self):
         self._dialog.run()
@@ -450,7 +456,7 @@ class SettingsDialog:
         host, port = self._host_field.get_text(), self._port_field.get_text()
         user, password = self._login_field.get_text(), self._password_field.get_text()
         try:
-            self.show_info_message("OK.  {}".format(test_ftp(host, port, user, password)), Gtk.MessageType.INFO)
+            self.show_info_message(f"OK.  {test_ftp(host, port, user, password)}", Gtk.MessageType.INFO)
         except TestException as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         finally:
@@ -571,6 +577,35 @@ class SettingsDialog:
 
     def on_profile_inserted(self, model, path, itr):
         self._profile_remove_button.set_sensitive(len(model) > 1)
+
+    def on_add_picon_path(self, button):
+        response = show_dialog(DialogType.INPUT, self._dialog, self._settings.picons_path)
+        if response is Gtk.ResponseType.CANCEL:
+            return
+
+        if response in self._settings.picons_paths:
+            self.show_info_message("This path already exists!", Gtk.MessageType.ERROR)
+            return
+
+        path = response if response.endswith(SEP) else response + SEP
+        model = self._picons_paths_box.get_model()
+        model.append((path, path))
+        self._picons_paths_box.set_active_id(path)
+        self._ext_settings.picons_paths = tuple(r[0] for r in model)
+
+    def on_remove_picon_path(self, button):
+        msg = f"{get_message('This may change the settings of other profiles!')}\n\n\t\t{'Are you sure?'}"
+        if show_dialog(DialogType.QUESTION, self._dialog, msg) != Gtk.ResponseType.OK:
+            return
+
+        model = self._picons_paths_box.get_model()
+        active = self._picons_paths_box.get_active_iter()
+        if active:
+            model.remove(active)
+
+        self._picons_paths_box.set_active(0)
+        self._remove_picon_path_button.set_sensitive(len(model) > 1)
+        self._ext_settings.picons_paths = tuple(r[0] for r in model)
 
     def on_lang_changed(self, box):
         if box.get_active_id() != self._settings.language:

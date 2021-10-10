@@ -871,16 +871,82 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBoxText" id="picons_paths_box">
+                                  <object class="GtkBox" id="picon_paths_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="active">0</property>
-                                    <property name="has_entry">True</property>
-                                    <child internal-child="entry">
-                                      <object class="GtkEntry">
+                                    <property name="spacing">2</property>
+                                    <child>
+                                      <object class="GtkComboBoxText" id="picons_paths_box">
+                                        <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
+                                        <property name="active">0</property>
+                                        <property name="has_entry">True</property>
+                                        <child internal-child="entry">
+                                          <object class="GtkEntry">
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                        </child>
                                       </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButtonBox" id="action_picon_paths_box">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="layout_style">expand</property>
+                                        <child>
+                                          <object class="GtkButton" id="remove_picon_path_button">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Remove</property>
+                                            <signal name="clicked" handler="on_remove_picon_path" swapped="no"/>
+                                            <child>
+                                              <object class="GtkImage" id="remove_picon_path_image">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="icon_name">list-remove-symbolic</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="add_picon_path_button">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Add</property>
+                                            <signal name="clicked" handler="on_add_picon_path" swapped="no"/>
+                                            <child>
+                                              <object class="GtkImage" id="add_picon_path_image">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="icon_name">list-add-symbolic</property>
+                                              </object>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">3</property>
+                                      </packing>
                                     </child>
                                   </object>
                                   <packing>
@@ -2029,7 +2095,7 @@ Author: Dmitriy Yefremov
                             <items>
                               <item id="en_US">English</item>
                               <item id="de_DE">Deutsch</item>
-                              <item id="es_ES" >Español</item>
+                              <item id="es_ES">Español</item>
                               <item id="it_IT">Italiano</item>
                               <item id="nl_NL">Nederlands</item>
                               <item id="pl_PL">Polski</item>

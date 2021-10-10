@@ -13,17 +13,18 @@ from app.settings import Settings, SettingsException, IS_DARWIN, GTK_PATH, IS_LI
 
 # Setting mod mask for keyboard depending on platform
 MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
-# *.deb
-DEB_PATH = "/usr/share/demoneditor/app/ui/"
-# Path to *.glade files
-UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "ui/"
-UI_RESOURCES_PATH = DEB_PATH if os.path.exists(DEB_PATH) else UI_RESOURCES_PATH
-LANG_PATH = UI_RESOURCES_PATH + "lang"
-NOTIFY_IS_INIT = False
-IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
+# Paths.
+BASE_PATH = "app/ui/"
+EX_PATH = "/usr/share/demoneditor/app/ui/" if IS_LINUX else "ui/"
+# Path to *.glade files.
+UI_RESOURCES_PATH = BASE_PATH if os.path.exists(BASE_PATH) else EX_PATH
 # Translation.
+LANG_PATH = UI_RESOURCES_PATH + "lang"
 TEXT_DOMAIN = "demon-editor"
+
+NOTIFY_IS_INIT = False
 APP_FONT = None
+IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 
 try:
     settings = Settings.get_instance()
