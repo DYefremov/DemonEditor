@@ -44,10 +44,9 @@ from ..settings import IS_DARWIN, PlayStreamsMode, IS_LINUX, IS_WIN
 
 
 class EpgTool(Gtk.Box):
-    def __init__(self, app, http_api, *args, **kwargs):
+    def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._http_api = http_api
         self._app = app
         self._app.connect("fav-changed", self.on_service_changed)
 
@@ -75,7 +74,8 @@ class EpgTool(Gtk.Box):
             dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1])
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
-                pass
+                gen = self.write_timers_list([dialog.get_request()])
+                GLib.idle_add(lambda: next(gen, False))
             dialog.destroy()
         elif p_count > 1:
             if show_dialog(DialogType.QUESTION, self._app.app_window,
@@ -97,7 +97,7 @@ class EpgTool(Gtk.Box):
         self._app.wait_dialog.show()
         tasks = list(refs)
         for ref in refs:
-            self._http_api.send(HttpAPI.Request.TIMER, ref, lambda x: tasks.pop())
+            self._app.send_http_request(HttpAPI.Request.TIMER, ref, lambda x: tasks.pop())
             yield True
 
         while tasks:
@@ -111,7 +111,7 @@ class EpgTool(Gtk.Box):
 
     def on_service_changed(self, app, ref):
         self._app.wait_dialog.show()
-        self._http_api.send(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
+        self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
 
     @run_idle
     def update_epg_data(self, epg):
@@ -376,10 +376,9 @@ class TimerTool(Gtk.Box):
                     "afterevent": self._timer_after_combo_box.get_active_id(),
                     "repeated": TimerTool.get_repetition_flags(self._days_buttons)}
 
-    def __init__(self, app, http_api, *args, **kwargs):
+    def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._http_api = http_api
         self._app = app
         self._app.connect("page-changed", self.update_timer_list)
         # Icon.
@@ -430,7 +429,7 @@ class TimerTool(Gtk.Box):
     def update_timer_list(self, app, page):
         if page is Page.TIMERS:
             self._app.wait_dialog.show()
-            self._http_api.send(HttpAPI.Request.TIMER_LIST, "", self.update_timers_data)
+            self._app.send_http_request(HttpAPI.Request.TIMER_LIST, "", self.update_timers_data)
 
     @run_idle
     def update_timers_data(self, timers):
@@ -469,7 +468,7 @@ class TimerTool(Gtk.Box):
         dialog = self.TimerDialog(self._app.app_window, self.TimerAction.ADD, timer_data)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
-            self._http_api.send(HttpAPI.Request.TIMER, dialog.request, self.timer_add_edit_callback)
+            self._app.send_http_request(HttpAPI.Request.TIMER, dialog.request, self.timer_add_edit_callback)
         dialog.destroy()
 
     def on_timer_edit(self, action=None, value=None):
@@ -481,7 +480,7 @@ class TimerTool(Gtk.Box):
         dialog = self.TimerDialog(self._app.app_window, self.TimerAction.CHANGE, model[paths][-1])
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
-            self._http_api.send(HttpAPI.Request.TIMER, dialog.request, self.timer_add_edit_callback)
+            self._app.send_http_request(HttpAPI.Request.TIMER, dialog.request, self.timer_add_edit_callback)
         dialog.destroy()
 
     @run_idle
@@ -547,7 +546,7 @@ class TimerTool(Gtk.Box):
             if tasks:
                 tasks.pop()
 
-        self._http_api.send(HttpAPI.Request.TIMER, ref, callback)
+        self._app.send_http_request(HttpAPI.Request.TIMER, ref, callback)
         yield True
 
     def on_timers_press(self, view, event):
@@ -644,7 +643,7 @@ class RecordingsTool(Gtk.Box):
     ROOT = ".."
     DEFAULT_PATH = "/hdd"
 
-    def __init__(self, app, http_api, settings, *args, **kwargs):
+    def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._app = app
@@ -724,8 +723,8 @@ class RecordingsTool(Gtk.Box):
 
     def on_path_activated(self, view, path, column):
         row = view.get_model()[path][:]
-        path = "{}/{}/".format(row[-1], row[1])
-        self._app.http_api.send(HttpAPI.Request.RECORDINGS, quote(path), self.update_recordings_data)
+        path = f"{row[-1]}/{row[1]}/"
+        self._app.send_http_request(HttpAPI.Request.RECORDINGS, quote(path), self.update_recordings_data)
 
     def on_path_press(self, view, event):
         target = view.get_path_at_pos(event.x, event.y)
@@ -753,7 +752,7 @@ class RecordingsTool(Gtk.Box):
 
     def on_recordings_activated(self, view, path, column):
         rec = view.get_model()[path][-1]
-        self._app.http_api.send(HttpAPI.Request.STREAM_TS, rec.get("e2filename", ""), self.on_play_recording)
+        self._app.send_http_request(HttpAPI.Request.STREAM_TS, rec.get("e2filename", ""), self.on_play_recording)
 
     def on_play_recording(self, m3u):
         url = self._app.get_url_from_m3u(m3u)
@@ -793,10 +792,9 @@ class RecordingsTool(Gtk.Box):
 
 class ControlTool(Gtk.Box):
 
-    def __init__(self, app, http_api, settings, *args, **kwargs):
+    def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._http_api = http_api
         self._settings = settings
         self._app = app
         self._pix = None
@@ -863,17 +861,17 @@ class ControlTool(Gtk.Box):
         self._remote_revealer.set_reveal_child(state)
 
         if state:
-            self._http_api.send(HttpAPI.Request.VOL, "state", self.update_volume)
+            self._app.send_http_request(HttpAPI.Request.VOL, "state", self.update_volume)
 
     def on_remote_action(self, action):
-        self._http_api.send(HttpAPI.Request.REMOTE, action, self.on_response)
+        self._app.send_http_request(HttpAPI.Request.REMOTE, action, self.on_response)
 
     def on_player_action(self, action):
-        self._http_api.send(action, "", self.on_response)
+        self._app.send_http_request(action, "", self.on_response)
 
     @run_with_delay(0.5)
     def on_volume_changed(self, button, value):
-        self._http_api.send(HttpAPI.Request.VOL, "{:.0f}".format(value), self.on_response)
+        self._app.send_http_request(HttpAPI.Request.VOL, "{:.0f}".format(value), self.on_response)
 
     def update_volume(self, vol):
         if "error_code" in vol:
@@ -885,9 +883,9 @@ class ControlTool(Gtk.Box):
         if "error_code" in resp:
             return
 
-        if self._screenshot_check_button.get_active():
-            ref = "mode=all" if self._http_api.is_owif else "d="
-            self._http_api.send(HttpAPI.Request.GRUB, ref, self.update_screenshot)
+        if self._screenshot_check_button.get_active() and self._app.http_api:
+            ref = "mode=all" if self._app.http_api.is_owif else "d="
+            self._app.send_http_request(HttpAPI.Request.GRUB, ref, self.update_screenshot)
 
     @run_task
     def update_screenshot(self, data):
@@ -922,16 +920,19 @@ class ControlTool(Gtk.Box):
             cr.paint()
 
     def on_screenshot_all(self, action, value=None):
-        self._http_api.send(HttpAPI.Request.GRUB, "mode=all" if self._http_api.is_owif else "d=",
-                            self.on_screenshot)
+        if self._app.http_api:
+            self._app.send_http_request(HttpAPI.Request.GRUB, "mode=all" if self._app.http_api.is_owif else "d=",
+                                        self.on_screenshot)
 
     def on_screenshot_video(self, action, value=None):
-        self._http_api.send(HttpAPI.Request.GRUB, "mode=video" if self._http_api.is_owif else "v=",
-                            self.on_screenshot)
+        if self._app.http_api:
+            self._app.send_http_request(HttpAPI.Request.GRUB, "mode=video" if self._app.http_api.is_owif else "v=",
+                                        self.on_screenshot)
 
     def on_screenshot_osd(self, action, value=None):
-        self._http_api.send(HttpAPI.Request.GRUB, "mode=osd" if self._http_api.is_owif else "o=",
-                            self.on_screenshot)
+        if self._app.http_api:
+            self._app.send_http_request(HttpAPI.Request.GRUB, "mode=osd" if self._app.http_api.is_owif else "o=",
+                                        self.on_screenshot)
 
     @run_task
     def on_screenshot(self, data):
@@ -965,7 +966,7 @@ class ControlTool(Gtk.Box):
                 GLib.idle_add(self._screenshot_button_box.set_sensitive, True)
 
     def on_power_action(self, action):
-        self._http_api.send(HttpAPI.Request.POWER, action, lambda resp: log("Power status changed..."))
+        self._app.send_http_request(HttpAPI.Request.POWER, action, lambda resp: log("Power status changed..."))
 
     def update_signal(self, sig):
         snr = sig.get("e2snr", "0 %").strip() if sig else "0 %"

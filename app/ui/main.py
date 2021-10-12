@@ -765,7 +765,7 @@ class Application(Gtk.Application):
         box.pack_start(self._picon_manager, True, True, 0)
 
     def on_epg_realize(self, box):
-        self._epg_tool = EpgTool(self, self._http_api)
+        self._epg_tool = EpgTool(self)
         box.pack_start(self._epg_tool, True, True, 0)
 
     def on_timers_realize(self, box):
@@ -773,7 +773,7 @@ class Application(Gtk.Application):
         box.pack_start(self._timers_tool, True, True, 0)
 
     def on_recordings_realize(self, box):
-        self._recordings_tool = RecordingsTool(self, self._http_api, self._settings)
+        self._recordings_tool = RecordingsTool(self, self._settings)
         box.pack_start(self._recordings_tool, True, True, 0)
         self._player_box.connect("play", self._recordings_tool.on_playback)
         self._player_box.connect("playback-close", self._recordings_tool.on_playback_close)
@@ -2863,6 +2863,17 @@ class Application(Gtk.Application):
 
         self._http_api.send(req, None, cb)
         return True
+
+    def send_http_request(self, req_type, ref, callback=log, ref_prefix=""):
+        """ Sends requests via HTTP API. """
+        if not self._http_api:
+            self.show_error_message("HTTP API is not activated. Check your settings!")
+            self._wait_dialog.hide()
+        elif self._http_status_image.get_visible():
+            self.show_error_message("No connection to the receiver!")
+            self._wait_dialog.hide()
+        else:
+            self._http_api.send(req_type, ref, callback)
 
     # ************** Enigma2 HTTP API section ********************** #
 
