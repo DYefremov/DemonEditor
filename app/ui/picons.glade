@@ -553,6 +553,8 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Automatically set the name selected in the favorites list. </property>
+                        <property name="valign">center</property>
+                        <property name="margin_right">5</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -634,15 +636,16 @@ Author: Dmitriy Yefremov
                                   <object class="GtkTreeView" id="picons_src_view">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services. </property>
                                     <property name="model">picons_src_sort_model</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>
                                     <property name="activate_on_single_click">True</property>
                                     <signal name="button-press-event" handler="on_popup_menu" object="picons_src_view_popup_menu" swapped="no"/>
                                     <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
-                                    <signal name="drag-data-received" handler="on_picons_src_view_drag_data_received" swapped="no"/>
-                                    <signal name="drag-drop" handler="on_picons_src_view_drag_drop" swapped="no"/>
-                                    <signal name="drag-end" handler="on_picons_src_view_drag_end" swapped="no"/>
+                                    <signal name="drag-data-received" handler="on_picons_view_drag_data_received" swapped="no"/>
+                                    <signal name="drag-drop" handler="on_picons_view_drag_drop" swapped="no"/>
+                                    <signal name="drag-end" handler="on_picons_view_drag_end" swapped="no"/>
                                     <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                     <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
                                     <child internal-child="selection">
@@ -761,6 +764,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkTreeView" id="picons_dest_view">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services. </property>
                                     <property name="model">picons_dst_sort_model</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>
@@ -768,6 +772,9 @@ Author: Dmitriy Yefremov
                                     <signal name="button-press-event" handler="on_popup_menu" object="picons_dest_view_popup_menu" swapped="no"/>
                                     <signal name="cursor-changed" handler="on_picon_activated" swapped="no"/>
                                     <signal name="drag-data-get" handler="on_picons_view_drag_data_get" swapped="no"/>
+                                    <signal name="drag-data-received" handler="on_picons_view_drag_data_received" swapped="no"/>
+                                    <signal name="drag-drop" handler="on_picons_view_drag_drop" swapped="no"/>
+                                    <signal name="drag-end" handler="on_picons_view_drag_end" swapped="no"/>
                                     <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                     <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
                                     <child internal-child="selection">

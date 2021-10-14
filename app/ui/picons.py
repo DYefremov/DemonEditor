@@ -90,9 +90,9 @@ class PiconManager(Gtk.Box):
                     "on_position_edited": self.on_position_edited,
                     "on_convert": self.on_convert,
                     "on_picons_view_drag_data_get": self.on_picons_view_drag_data_get,
-                    "on_picons_src_view_drag_drop": self.on_picons_src_view_drag_drop,
-                    "on_picons_src_view_drag_data_received": self.on_picons_src_view_drag_data_received,
-                    "on_picons_src_view_drag_end": self.on_picons_src_view_drag_end,
+                    "on_picons_view_drag_drop": self.on_picons_view_drag_drop,
+                    "on_picons_view_drag_data_received": self.on_picons_view_drag_data_received,
+                    "on_picons_view_drag_end": self.on_picons_view_drag_end,
                     "on_picon_info_image_drag_data_received": self.on_picon_info_image_drag_data_received,
                     "on_send_button_drag_data_received": self.on_send_button_drag_data_received,
                     "on_download_button_drag_data_received": self.on_download_button_drag_data_received,
@@ -305,6 +305,9 @@ class PiconManager(Gtk.Box):
         self._picons_src_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._picons_src_view.drag_dest_add_text_targets()
 
+        self._picons_dest_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
+        self._picons_dest_view.drag_dest_add_text_targets()
+
         self._picon_info_image.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._picon_info_image.drag_dest_add_uri_targets()
 
@@ -323,12 +326,12 @@ class PiconManager(Gtk.Box):
             data.set_uris([Path(model[path][-1]).as_uri(),
                            Path(self._settings.profile_picons_path).as_uri()])
 
-    def on_picons_src_view_drag_drop(self, view, drag_context, x, y, time):
+    def on_picons_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
         targets = drag_context.list_targets()
         view.drag_get_data(drag_context, targets[-1] if targets else Gdk.atom_intern("text/plain", False), time)
 
-    def on_picons_src_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
+    def on_picons_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         view.stop_emission_by_name("drag_data_received")
         txt = data.get_text()
         if not txt:
@@ -387,7 +390,7 @@ class PiconManager(Gtk.Box):
                 info = self._app.get_hint_for_srv_list(srv)
                 self.append_output("Picon assignment for the service:\n{}\n{}\n".format(info, " * " * 30))
 
-    def on_picons_src_view_drag_end(self, view, drag_context):
+    def on_picons_view_drag_end(self, view, drag_context):
         self.update_picons_dest_view(self._app.picons_buffer)
 
     def on_picon_info_image_drag_data_received(self, img, drag_context, x, y, data, info, time):
