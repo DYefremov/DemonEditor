@@ -58,6 +58,7 @@ class PiconManager(Gtk.Box):
         self._app = app
         self._app.connect("page-changed", self.update_picons_dest)
         self._app.connect("filter-toggled", self.on_app_filter_toggled)
+        self._app.fav_view.connect("row-activated", self.on_fav_changed)
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
         self._BASE_URL = "www.lyngsat.com/packages/"
@@ -164,10 +165,11 @@ class PiconManager(Gtk.Box):
         self._download_source_button.bind_property("visible", self._receive_button, "visible")
         # Filter.
         self._filter_bar = builder.get_object("filter_bar")
+        self._auto_filer_switch = builder.get_object("auto_filer_switch")
         self._filter_button = builder.get_object("filter_button")
-        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
-        self._filter_button.bind_property("active", builder.get_object("src_title_grid"), "visible")
-        self._filter_button.bind_property("active", builder.get_object("dst_title_grid"), "visible")
+        self._filter_button.bind_property("active", self._filter_bar, "visible")
+        self._filter_button.bind_property("active", self._src_filter_button, "visible")
+        self._filter_button.bind_property("active", self._dst_filter_button, "visible")
         self._filter_button.bind_property("visible", self._info_check_button, "visible")
         self._filter_button.bind_property("visible", self._send_button, "visible")
         self._filter_button.bind_property("visible", self._download_button, "visible")
@@ -835,9 +837,13 @@ class PiconManager(Gtk.Box):
         if app.page is Page.PICONS:
             self._filter_button.set_active(not self._filter_button.get_active())
 
+    def on_fav_changed(self, view, path, column):
+        if self._app.page is Page.PICONS and self._auto_filer_switch.get_active():
+            model = view.get_model()
+            self._picons_filter_entry.set_text(model.get_value(model.get_iter(path), Column.FAV_SERVICE))
+
     def on_filter_toggled(self, button):
         active = self._filter_button.get_active()
-        self._filter_bar.set_search_mode(active)
         if not active:
             self._picons_filter_entry.set_text("")
 
