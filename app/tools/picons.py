@@ -37,7 +37,7 @@ from html.parser import HTMLParser
 import requests
 
 from app.commons import run_task, log
-from app.settings import SettingsType, IS_LINUX, IS_WIN
+from app.settings import SettingsType, IS_LINUX, IS_WIN, IS_DARWIN, GTK_PATH
 from .satellites import _HEADERS
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
@@ -128,12 +128,15 @@ class PiconsCzDownloader:
     def extract(self, src, dest, picon_ids=None):
         """ Extracts 7z archives. """
         # TODO: think about https://github.com/miurahr/py7zr
-        exe = "7zr"
-        if IS_LINUX and not os.path.isfile("/usr/bin/7zr"):
-            raise PiconsError("7-zip [7zr] archiver not found!")
+        exe = "7z"
+        if IS_DARWIN and GTK_PATH:
+            exe = "./7z"
+
+        if IS_LINUX and not os.path.isfile(f"/usr/bin/{exe}"):
+            raise PiconsError("7-zip [7z] archiver not found!")
 
         if IS_WIN:
-            exe = "C:\\Program Files\\7-Zip\\7z.exe"
+            exe = f"C:{os.sep}Program Files{os.sep}7-Zip{os.sep}{exe}.exe"
             if not os.path.isfile(exe):
                 raise PiconsError("7-Zip executable not found!")
 
