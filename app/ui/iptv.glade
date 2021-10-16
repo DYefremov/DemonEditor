@@ -751,6 +751,7 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Done!</property>
+                    <property name="ellipsize">end</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1298,6 +1299,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">label</property>
+                        <property name="ellipsize">end</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1342,13 +1344,13 @@ Author: Dmitriy Yefremov
     <property name="width_request">480</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">YouTube</property>
-    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="default_width">480</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
+    <signal name="delete-event" handler="on_close" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -1358,97 +1360,111 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="yt_actions_box">
+          <object class="GtkBox" id="yt_import_header_box">
+            <property name="name">yt_import_header_box</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">15</property>
-            <property name="margin_right">15</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
             <child>
-              <object class="GtkButton" id="yt_receive_button">
-                <property name="label" translatable="yes">Receive</property>
+              <object class="GtkBox" id="yt_actions_box">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Receive</property>
-                <property name="valign">center</property>
-                <property name="image">yt_receive_image</property>
-                <property name="always_show_image">True</property>
-                <signal name="clicked" handler="on_receive" swapped="no"/>
-                <accelerator key="d" signal="clicked"/>
+                <property name="can_focus">False</property>
+                <property name="margin_left">15</property>
+                <property name="margin_right">15</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkButton" id="yt_receive_button">
+                    <property name="label" translatable="yes">Receive</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Receive</property>
+                    <property name="valign">center</property>
+                    <property name="image">yt_receive_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_receive" swapped="no"/>
+                    <accelerator key="d" signal="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child type="center">
+                  <object class="GtkLabel" id="playlist_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Playlist import</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButtonBox" id="yt_impotr_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="layout_style">expand</property>
+                    <child>
+                      <object class="GtkButton" id="yt_import_button">
+                        <property name="label" translatable="yes">Import</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Import</property>
+                        <property name="image">yt_import_image</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="clicked" handler="on_import" swapped="no"/>
+                        <accelerator key="i" signal="clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="yt_quality_combobox">
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Desired video quality</property>
+                        <property name="model">yt_quality_liststore</property>
+                        <property name="active">0</property>
+                        <property name="id_column">0</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="yt_quality_renderer1"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
-            <child type="center">
-              <object class="GtkLabel" id="playlist_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Playlist import</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButtonBox" id="yt_impotr_box">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="layout_style">expand</property>
-                <child>
-                  <object class="GtkComboBox" id="yt_quality_combobox">
-                    <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Desired video quality</property>
-                    <property name="valign">center</property>
-                    <property name="model">yt_quality_liststore</property>
-                    <property name="active">0</property>
-                    <property name="id_column">0</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="yt_quality_renderer1"/>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="yt_import_button">
-                    <property name="label" translatable="yes">Import</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Import</property>
-                    <property name="valign">center</property>
-                    <property name="image">yt_import_image</property>
-                    <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="on_import" swapped="no"/>
-                    <accelerator key="i" signal="clicked"/>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
+            <style>
+              <class name="primary-toolbar"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1464,7 +1480,7 @@ Author: Dmitriy Yefremov
             <property name="margin_right">5</property>
             <property name="margin_top">5</property>
             <property name="margin_bottom">5</property>
-            <property name="primary_icon_stock">gtk-edit</property>
+            <property name="primary_icon_name">document-edit-symbolic</property>
             <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
             <property name="placeholder_text" translatable="yes">YouTube playlist URL:</property>
             <signal name="changed" handler="on_yt_url_entry_changed" swapped="no"/>
@@ -1477,7 +1493,10 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkScrolledWindow" id="yt_list_view_scrolled_window">
+            <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="shadow_type">in</property>
             <property name="min_content_height">150</property>
             <child>
@@ -1497,7 +1516,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkTreeViewColumn" id="yt_title_column">
                     <property name="resizable">True</property>
-                    <property name="min_width">50</property>
+                    <property name="min_width">100</property>
                     <property name="title" translatable="yes">Title</property>
                     <property name="expand">True</property>
                     <property name="clickable">True</property>
@@ -1528,8 +1547,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="yt_selected_column">
-                    <property name="min_width">50</property>
-                    <property name="max_width">100</property>
+                    <property name="min_width">100</property>
                     <property name="title" translatable="yes">Selected</property>
                     <property name="clickable">True</property>
                     <property name="alignment">0.5</property>
@@ -1570,9 +1588,12 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkBox" id="yt_info_bar_box">
             <property name="height_request">26</property>
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>
-            <property name="margin_right">10</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkBox" id="yt_cout_box">
@@ -1661,6 +1682,7 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">info</property>
+                    <property name="ellipsize">end</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>

@@ -861,10 +861,14 @@ class YtListImportDialog:
         self._import_button.bind_property("visible", self._quality_box, "visible")
         self._import_button.bind_property("sensitive", self._quality_box, "sensitive")
         self._receive_button.bind_property("sensitive", self._import_button, "sensitive")
-        # style
-        self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
+
+        window_size = self._settings.get("yt_import_dialog_size")
+        if window_size:
+            self._dialog.resize(*window_size)
+        # Style
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def show(self):
@@ -909,7 +913,6 @@ class YtListImportDialog:
             self.update_active_elements(True)
 
     def on_receive(self, item):
-        self.show_invisible_elements()
         self.update_active_elements(False)
         self._model.clear()
         self._yt_count_label.set_text("0")
@@ -968,11 +971,6 @@ class YtListImportDialog:
         self._url_entry.set_sensitive(sensitive)
         self._receive_button.set_sensitive(sensitive)
 
-    def show_invisible_elements(self):
-        self._list_view_scrolled_window.set_visible(True)
-        self._info_bar_box.set_visible(True)
-        self._dialog.set_resizable(True)
-
     def on_url_entry_changed(self, entry):
         url_str = entry.get_text()
         yt_id = YouTube.get_yt_list_id(url_str)
@@ -1028,7 +1026,9 @@ class YtListImportDialog:
     def on_close(self, window, event):
         if self._download_task and show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
             return True
+
         self._download_task = False
+        self._settings.add("yt_import_dialog_size", self._dialog.get_size())
 
 
 if __name__ == "__main__":
