@@ -52,6 +52,7 @@ from app.ui.control import ControlTool, EpgTool, TimerTool, RecordingsTool
 from app.ui.epg import EpgDialog
 from app.ui.ftp import FtpClientBox
 from app.ui.playback import PlayerBox
+from app.ui.telnet import TelnetClient
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
@@ -193,6 +194,7 @@ class Application(Gtk.Application):
                     "on_recordings_realize": self.on_recordings_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
+                    "on_telnet_relize": self.on_telnet_relize,
                     "on_visible_page": self.on_visible_page,
                     "on_data_paned_realize": self.init_main_paned_position}
 
@@ -384,6 +386,7 @@ class Application(Gtk.Application):
         self._stack_recordings_box = builder.get_object("recordings_box")
         self._stack_ftp_box = builder.get_object("ftp_box")
         self._stack_control_box = builder.get_object("control_box")
+        self._telnet_box = builder.get_object("telnet_box")
         self.connect("change-page", self.on_page_change)
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
@@ -460,6 +463,7 @@ class Application(Gtk.Application):
         self.set_action("on_backup_tool_show", self.on_backup_tool_show)
         self.set_action("on_about_app", self.on_about_app)
         self.set_action("on_close_app", self.on_close_app)
+        self.set_state_action("on_telnet_show", self.on_telnet_show, False)
         # Filter.
         filter_action = Gio.SimpleAction.new("filter", None)
         filter_action.connect("activate", lambda a, v: self.emit("filter-toggled", None))
@@ -539,6 +543,7 @@ class Application(Gtk.Application):
         self.set_accels_for_action("app.on_locked", ["<primary>l"])
         self.set_accels_for_action("app.on_close_app", ["<primary>q"])
         self.set_accels_for_action("app.on_edit", ["<primary>e"])
+        self.set_accels_for_action("app.on_telnet_show", ["<primary>t"])
         self.set_accels_for_action("win.filter", ["<shift><primary>f"])
 
     def do_activate(self):
@@ -782,9 +787,13 @@ class Application(Gtk.Application):
         self._ftp_client = FtpClientBox(self, self._settings)
         box.pack_start(self._ftp_client, True, True, 0)
 
-    def on_control_realize(self, box: Gtk.HBox):
+    def on_control_realize(self, box):
         self._control_tool = ControlTool(self, self._http_api, self._settings)
         box.pack_start(self._control_tool, True, True, 0)
+
+    def on_telnet_relize(self, box):
+        telnet_tool = TelnetClient(self, self._settings)
+        box.pack_start(telnet_tool, True, True, 0)
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
@@ -2645,6 +2654,12 @@ class Application(Gtk.Application):
     def on_backup_tool_show(self, action, value=None):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window, self._settings, self.open_data).show()
+
+    # ***************** Telnet  ******************** #
+
+    def on_telnet_show(self, action, value=False):
+        action.set_state(value)
+        GLib.idle_add(self._telnet_box.set_visible, value)
 
     # ************************* Streams ***************************** #
 

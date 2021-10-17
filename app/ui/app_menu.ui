@@ -143,8 +143,10 @@
           <attribute name="label" translatable="yes">Backups</attribute>
           <attribute name="action">app.on_backup_tool_show</attribute>
         </item>
-      </section>
-      <section id="telnet_section">
+        <item>
+          <attribute name="label" translatable="yes">Telnet</attribute>
+          <attribute name="action">app.on_telnet_show</attribute>
+        </item>
       </section>
     </submenu>
     <submenu>
@@ -327,8 +329,10 @@
           <attribute name="label" translatable="yes">Backups</attribute>
           <attribute name="action">app.on_backup_tool_show</attribute>
         </item>
-      </section>
-      <section id="telnet_section">
+        <item>
+          <attribute name="label" translatable="yes">Telnet</attribute>
+          <attribute name="action">app.on_telnet_show</attribute>
+        </item>
       </section>
     </submenu>
     <submenu>
