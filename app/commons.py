@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from functools import wraps
 from threading import Thread, Timer
 
@@ -75,6 +76,19 @@ def run_with_delay(timeout=5):
         return wrapper
 
     return run_with
+
+
+class DefaultDict(defaultdict):
+    """ Extended to support functions with params as default factory. """
+
+    def __missing__(self, key):
+        if self.default_factory:
+            value = self[key] = self.default_factory(key)
+            return value
+        return super().__missing__(key)
+
+    def get(self, key, default=None):
+        return self[key]
 
 
 if __name__ == "__main__":

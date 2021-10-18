@@ -36,7 +36,7 @@ from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib, Gio, GObject
 
-from app.commons import run_idle, log, run_task, run_with_delay, init_logger
+from app.commons import run_idle, log, run_task, run_with_delay, init_logger, DefaultDict
 from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
                              HttpApiException, STC_XML_FILE)
 from app.eparser import get_blacklist, write_blacklist, write_bouquet
@@ -215,7 +215,7 @@ class Application(Gtk.Application):
         self._filter_cache = {}
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
-        self._picons = {}
+        self._picons = DefaultDict(self.get_picon)
         self._blacklist = set()
         self._current_bq_name = None
         self._bq_selected = ""  # Current selected bouquet
@@ -681,10 +681,14 @@ class Application(Gtk.Application):
         paned.set_position(width * 0.5)
         self._fav_paned.set_position(width * 0.27)
 
-    @run_idle
+    @run_task
     def update_picons_size(self):
         self._picons_size = self._settings.list_picon_size
         update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
+        self.update_picons_pixbufs()
+
+    @run_idle
+    def update_picons_pixbufs(self):
         self._fav_model.foreach(lambda m, p, itr: m.set_value(itr, Column.FAV_PICON, self._picons.get(
             self._services.get(m.get_value(itr, Column.FAV_ID)).picon_id, None)))
         self._services_model.foreach(lambda m, p, itr: m.set_value(itr, Column.SRV_PICON, self._picons.get(
@@ -1694,8 +1698,6 @@ class Application(Gtk.Application):
             bouquets = get_bouquets(data_path, prf)
             yield True
             services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
-            yield True
-            update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
@@ -3267,6 +3269,9 @@ class Application(Gtk.Application):
     def update_picons(self):
         update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
         append_picons(self._picons, self._services_model)
+
+    def get_picon(self, p_id):
+        return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._settings.list_picon_size)
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):
         return assign_picons(self.get_target_view(view), self._services_view, self._fav_view, self._main_window,
