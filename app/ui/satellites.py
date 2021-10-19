@@ -30,6 +30,7 @@ import concurrent.futures
 import re
 import time
 from math import fabs
+from pyexpat import ExpatError
 
 from gi.repository import GLib
 
@@ -59,7 +60,7 @@ class SatellitesTool(Gtk.Box):
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
-                    "on_popup_menu": on_popup_menu,
+                    "on_button_press": self.on_button_press,
                     "on_satellite_add": self.on_satellite_add,
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
@@ -116,6 +117,12 @@ class SatellitesTool(Gtk.Box):
     def on_down(self, item):
         move_items(KeyboardKey.DOWN, self._satellite_view)
 
+    def on_button_press(self, menu, event):
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            self.on_edit(self._satellite_view if self._satellite_view.is_focus() else self._transponder_view)
+        else:
+            on_popup_menu(menu, event)
+
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """
         key_code = event.hardware_keycode
@@ -141,16 +148,20 @@ class SatellitesTool(Gtk.Box):
 
     def on_satellites_list_load(self, path=None):
         """ Load satellites data into model """
+        model = self._satellite_view.get_model()
+        model.clear()
+
         try:
-            satellites = get_satellites(path or self._settings.profile_data_path + "satellites.xml")
+            path = path or self._settings.profile_data_path + "satellites.xml"
+            satellites = get_satellites(path)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
             self._app.show_error_message(f"{e}\n{msg}")
-            return
+        except ExpatError as e:
+            msg = f"The file [{path}] is not formatted correctly or contains invalid characters! Cause: {e}"
+            self._app.show_error_message(msg)
         else:
-            model = self._satellite_view.get_model()
-            model.clear()
             for sat in satellites:
                 yield model.append(sat)
 
