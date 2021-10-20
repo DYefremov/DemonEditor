@@ -82,6 +82,21 @@ class Flag(Enum):
     def is_new(value: int):
         return value & 1 << 5
 
+    @staticmethod
+    def parse(value: str) -> int:
+        """ Returns an int representation of the flag value.
+
+            The flag value is usually represented by the number [int],
+            but can also be appear in hex format.
+         """
+        if len(value) < 3:
+            return 0
+
+        value = value[2:]
+        if value.isdigit():
+            return int(value)
+        return int(value, 16)
+
 
 class Pids(Enum):
     VIDEO = "c:00"

@@ -259,7 +259,7 @@ class ServiceDetailsDialog:
     def init_enigma2_flags(self, flags):
         f_flags = list(filter(lambda x: x.startswith("f:"), flags))
         if f_flags:
-            value = int(f_flags[0][2:])
+            value = Flag.parse(f_flags[0])
             self._keep_check_button.set_active(Flag.is_keep(value))
             self._hide_check_button.set_active(Flag.is_hide(value))
             self._use_pids_check_button.set_active(Flag.is_pids(value))
@@ -468,7 +468,7 @@ class ServiceDetailsDialog:
         extra_data = {Column.SRV_TOOLTIP: None, Column.SRV_BACKGROUND: None}
         if self._s_type is SettingsType.ENIGMA_2 and flags:
             f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
-            if f_flags and Flag.is_new(int(f_flags[0][2:])):
+            if f_flags and Flag.is_new(Flag.parse(f_flags[0])):
                 extra_data[Column.SRV_BACKGROUND] = self._new_color
 
         self._current_model.set(self._current_itr, extra_data)

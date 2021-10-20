@@ -177,7 +177,7 @@ class LameDbReader:
             all_flags = srv[2].split(",")
             coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
             flags = list(filter(lambda x: x.startswith("f:"), all_flags))
-            hide = HIDE_ICON if flags and Flag.is_hide(int(flags[0][2:])) else None
+            hide = HIDE_ICON if flags and Flag.is_hide(Flag.parse(flags[0])) else None
             locked = LOCKED_ICON if s_id in blacklist else None
 
             package = list(filter(lambda x: x.startswith("p:"), all_flags))

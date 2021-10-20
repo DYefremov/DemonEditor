@@ -1853,7 +1853,7 @@ class Application(Gtk.Application):
                 flags = srv.flags_cas
                 if flags:
                     f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
-                    if f_flags and Flag.is_new(int(f_flags[0][2:])):
+                    if f_flags and Flag.is_new(Flag.parse(f_flags[0])):
                         background = self._NEW_COLOR
 
             s = srv._replace(picon=self._picons.get(srv.picon_id, None)) + (tooltip, background)
