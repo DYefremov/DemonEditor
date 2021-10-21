@@ -51,6 +51,7 @@ from app.tools.media import Recorder
 from app.ui.control import ControlTool, EpgTool, TimerTool, RecordingsTool
 from app.ui.epg import EpgDialog
 from app.ui.ftp import FtpClientBox
+from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
 from app.ui.telnet import TelnetClient
 from app.ui.transmitter import LinksTransmitter
@@ -194,7 +195,8 @@ class Application(Gtk.Application):
                     "on_recordings_realize": self.on_recordings_realize,
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
-                    "on_telnet_relize": self.on_telnet_relize,
+                    "on_telnet_realize": self.on_telnet_realize,
+                    "on_logs_realize": self.on_logs_realize,
                     "on_visible_page": self.on_visible_page,
                     "on_data_paned_realize": self.init_main_paned_position}
 
@@ -386,8 +388,11 @@ class Application(Gtk.Application):
         self._stack_recordings_box = builder.get_object("recordings_box")
         self._stack_ftp_box = builder.get_object("ftp_box")
         self._stack_control_box = builder.get_object("control_box")
-        self._telnet_box = builder.get_object("telnet_box")
         self.connect("change-page", self.on_page_change)
+        # Extra tools.
+        self._telnet_box = builder.get_object("telnet_box")
+        self._logs_box = builder.get_object("logs_box")
+        self._bottom_paned = builder.get_object("bottom_paned")
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
@@ -464,6 +469,7 @@ class Application(Gtk.Application):
         self.set_action("on_about_app", self.on_about_app)
         self.set_action("on_close_app", self.on_close_app)
         self.set_state_action("on_telnet_show", self.on_telnet_show, False)
+        self.set_state_action("on_logs_show", self.on_logs_show, False)
         # Filter.
         filter_action = Gio.SimpleAction.new("filter", None)
         filter_action.connect("activate", lambda a, v: self.emit("filter-toggled", None))
@@ -544,6 +550,7 @@ class Application(Gtk.Application):
         self.set_accels_for_action("app.on_close_app", ["<primary>q"])
         self.set_accels_for_action("app.on_edit", ["<primary>e"])
         self.set_accels_for_action("app.on_telnet_show", ["<primary>t"])
+        self.set_accels_for_action("app.on_logs_show", ["<shift><primary>l"])
         self.set_accels_for_action("win.filter", ["<shift><primary>f"])
 
     def do_activate(self):
@@ -795,9 +802,11 @@ class Application(Gtk.Application):
         self._control_tool = ControlTool(self, self._http_api, self._settings)
         box.pack_start(self._control_tool, True, True, 0)
 
-    def on_telnet_relize(self, box):
-        telnet_tool = TelnetClient(self, self._settings)
-        box.pack_start(telnet_tool, True, True, 0)
+    def on_telnet_realize(self, box):
+        box.pack_start(TelnetClient(self), True, True, 0)
+
+    def on_logs_realize(self, box):
+        box.pack_start(LogsClient(self), True, True, 0)
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
@@ -1209,6 +1218,9 @@ class Application(Gtk.Application):
 
     def on_fav_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         """  Sets detailed info about service in the tooltip [fav view]. """
+        if not self._main_window.is_active():
+            return False
+
         result = view.get_dest_row_at_pos(x, y)
         if not result or not self._settings.show_bq_hints:
             return False
@@ -1217,6 +1229,9 @@ class Application(Gtk.Application):
 
     def on_services_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         """  Sets short info about service in the tooltip [main services view]. """
+        if not self._main_window.is_active():
+            return False
+
         result = view.get_dest_row_at_pos(x, y)
         if not result or not self._settings.show_srv_hints:
             return False
@@ -2657,11 +2672,21 @@ class Application(Gtk.Application):
         """ Shows backup tool dialog """
         BackupDialog(self._main_window, self._settings, self.open_data).show()
 
-    # ***************** Telnet  ******************** #
+    # ***************** Extra tools  ******************** #
 
     def on_telnet_show(self, action, value=False):
         action.set_state(value)
-        GLib.idle_add(self._telnet_box.set_visible, value)
+        self._telnet_box.set_visible(value)
+        self.update_tools_visibility()
+
+    def on_logs_show(self, action, value=False):
+        action.set_state(value)
+        self._logs_box.set_visible(value)
+        self.update_tools_visibility()
+
+    @run_idle
+    def update_tools_visibility(self):
+        self._bottom_paned.set_visible(self._telnet_box.get_visible() or self._logs_box.get_visible())
 
     # ************************* Streams ***************************** #
 

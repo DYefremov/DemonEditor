@@ -7,13 +7,12 @@ from gi.repository import GLib
 
 _LOG_FILE = "demon-editor.log"
 _DATE_FORMAT = "%d-%m-%y %H:%M:%S"
-_LOGGER_NAME = None
+
+LOGGER_NAME = "main_logger"
 
 
 def init_logger():
-    global _LOGGER_NAME
-    _LOGGER_NAME = "main_logger"
-    logging.Logger(_LOGGER_NAME)
+    logging.Logger(LOGGER_NAME)
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s %(message)s",
                         datefmt=_DATE_FORMAT,
@@ -23,7 +22,7 @@ def init_logger():
 
 def log(message, level=logging.ERROR, debug=False, fmt_message="{}"):
     """ The main logging function. """
-    logger = logging.getLogger(_LOGGER_NAME)
+    logger = logging.getLogger(LOGGER_NAME)
     if debug:
         from traceback import format_exc
         logger.log(level, fmt_message.format(format_exc()))
