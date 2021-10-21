@@ -203,7 +203,7 @@ class LameDbReader:
                     system = "DVB-S2" if len(tr) > 7 else "DVB-S"
                     pos = tr[4]
                 if tr_type is TrType.Terrestrial:
-                    system = T_SYSTEM.get(tr[9], None)
+                    system = T_SYSTEM.get(tr[10], None)
                     pos = "T"
                     fec = T_FEC.get(tr[3], None)
                 elif tr_type is TrType.Cable:
