@@ -48,7 +48,7 @@ from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu, get_
 from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
-_ENIGMA2_REFERENCE = "{}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
+_ENIGMA2_REFERENCE = "{}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
 
@@ -104,6 +104,7 @@ class IptvDialog:
         self._url_entry = builder.get_object("url_entry")
         self._reference_entry = builder.get_object("reference_entry")
         self._srv_type_entry = builder.get_object("srv_type_entry")
+        self._srv_id_entry = builder.get_object("srv_id_entry")
         self._sid_entry = builder.get_object("sid_entry")
         self._tr_id_entry = builder.get_object("tr_id_entry")
         self._net_id_entry = builder.get_object("net_id_entry")
@@ -119,8 +120,8 @@ class IptvDialog:
         # style
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        self._digit_elems = (self._srv_type_entry, self._sid_entry, self._tr_id_entry, self._net_id_entry,
-                             self._namespace_entry)
+        self._digit_elems = (self._srv_id_entry, self._srv_type_entry, self._sid_entry, self._tr_id_entry,
+                             self._net_id_entry, self._namespace_entry)
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
@@ -195,6 +196,7 @@ class IptvDialog:
         except ValueError:
             self.show_info_message("Unknown stream type {}".format(s_type), Gtk.MessageType.ERROR)
 
+        self._srv_id_entry.set_text(data[1])
         self._srv_type_entry.set_text(data[2])
         self._sid_entry.set_text(str(int(data[3], 16)))
         self._tr_id_entry.set_text(str(int(data[4], 16)))
@@ -212,6 +214,7 @@ class IptvDialog:
         if self._s_type is SettingsType.ENIGMA_2 and is_data_correct(self._digit_elems):
             self.on_url_changed(self._url_entry)
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
+                                                                     self._srv_id_entry.get_text(),
                                                                      self._srv_type_entry.get_text(),
                                                                      int(self._sid_entry.get_text()),
                                                                      int(self._tr_id_entry.get_text()),
@@ -296,6 +299,7 @@ class IptvDialog:
     def save_enigma2_data(self):
         name = self._name_entry.get_text().strip()
         fav_id = ENIGMA2_FAV_ID_FORMAT.format(self.get_type(),
+                                              self._srv_id_entry.get_text(),
                                               self._srv_type_entry.get_text(),
                                               int(self._sid_entry.get_text()),
                                               int(self._tr_id_entry.get_text()),
@@ -432,6 +436,7 @@ class IptvListDialog:
                     "on_response": self.on_response,
                     "on_stream_type_default_togged": self.on_stream_type_default_togged,
                     "on_stream_type_changed": self.on_stream_type_changed,
+                    "on_default_id_toggled": self.on_default_id_toggled,
                     "on_default_type_toggled": self.on_default_type_toggled,
                     "on_auto_sid_toggled": self.on_auto_sid_toggled,
                     "on_default_tid_toggled": self.on_default_tid_toggled,
@@ -453,12 +458,14 @@ class IptvListDialog:
         self._info_bar = builder.get_object("list_configuration_info_bar")
         self._reference_label = builder.get_object("reference_label")
         self._stream_type_check_button = builder.get_object("stream_type_default_check_button")
+        self._id_default_check_button = builder.get_object("id_default_check_button")
         self._type_check_button = builder.get_object("type_default_check_button")
         self._sid_auto_check_button = builder.get_object("sid_auto_check_button")
         self._tid_check_button = builder.get_object("tid_default_check_button")
         self._nid_check_button = builder.get_object("nid_default_check_button")
         self._namespace_check_button = builder.get_object("namespace_default_check_button")
         self._stream_type_combobox = builder.get_object("stream_type_list_combobox")
+        self._list_srv_id_entry = builder.get_object("list_srv_id_entry")
         self._list_srv_type_entry = builder.get_object("list_srv_type_entry")
         self._list_sid_entry = builder.get_object("list_sid_entry")
         self._list_tid_entry = builder.get_object("list_tid_entry")
@@ -470,10 +477,11 @@ class IptvListDialog:
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        self._default_elems = (self._stream_type_check_button, self._type_check_button, self._sid_auto_check_button,
-                               self._tid_check_button, self._nid_check_button, self._namespace_check_button)
-        self._digit_elems = (self._list_srv_type_entry, self._list_sid_entry, self._list_tid_entry,
-                             self._list_nid_entry, self._list_namespace_entry)
+        self._default_elems = (self._stream_type_check_button, self._id_default_check_button, self._type_check_button,
+                               self._sid_auto_check_button, self._tid_check_button, self._nid_check_button,
+                               self._namespace_check_button)
+        self._digit_elems = (self._list_srv_id_entry, self._list_srv_type_entry, self._list_sid_entry,
+                             self._list_tid_entry, self._list_nid_entry, self._list_namespace_entry)
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
@@ -495,30 +503,28 @@ class IptvListDialog:
             self._stream_type_combobox.set_active(1)
         self._stream_type_combobox.set_sensitive(not button.get_active())
 
+    def on_default_id_toggled(self, button):
+        self.set_default(button, self._list_srv_id_entry, "0")
+
     def on_default_type_toggled(self, button):
-        if button.get_active():
-            self._list_srv_type_entry.set_text("1")
-        self._list_srv_type_entry.set_sensitive(not button.get_active())
+        self.set_default(button, self._list_srv_type_entry, "1")
 
     def on_auto_sid_toggled(self, button):
-        if button.get_active():
-            self._list_sid_entry.set_text("0")
-        self._list_sid_entry.set_sensitive(not button.get_active())
+        self.set_default(button, self._list_sid_entry, "0")
 
     def on_default_tid_toggled(self, button):
-        if button.get_active():
-            self._list_tid_entry.set_text("0")
-        self._list_tid_entry.set_sensitive(not button.get_active())
+        self.set_default(button, self._list_tid_entry, "0")
 
     def on_default_nid_toggled(self, button):
-        if button.get_active():
-            self._list_nid_entry.set_text("0")
-        self._list_nid_entry.set_sensitive(not button.get_active())
+        self.set_default(button, self._list_nid_entry, "0")
 
     def on_default_namespace_toggled(self, button):
+        self.set_default(button, self._list_namespace_entry, "0")
+
+    def set_default(self, button, entry, value):
         if button.get_active():
-            self._list_namespace_entry.set_text("0")
-        self._list_namespace_entry.set_sensitive(not button.get_active())
+            entry.set_text(value)
+        entry.set_sensitive(not button.get_active())
 
     @run_idle
     def on_reset_to_default(self, item):
@@ -550,7 +556,7 @@ class IptvListDialog:
             self.update_reference()
 
     def is_default_values(self):
-        return any(el.get_text() == "0" for el in self._digit_elems[2:])
+        return any(el.get_text() == "0" for el in self._digit_elems[3:])
 
     def is_all_data_default(self):
         return all(el.get_active() for el in self._default_elems)
@@ -573,13 +579,15 @@ class IptvListConfigurationDialog(IptvListDialog):
             return
 
         if self._s_type is SettingsType.ENIGMA_2:
+            id_default = self._id_default_check_button.get_active()
             type_default = self._type_check_button.get_active()
             tid_default = self._tid_check_button.get_active()
             sid_auto = self._sid_auto_check_button.get_active()
             nid_default = self._nid_check_button.get_active()
             namespace_default = self._namespace_check_button.get_active()
 
-            stream_type = get_stream_type(self._stream_type_combobox)
+            st_type = get_stream_type(self._stream_type_combobox)
+            s_id = 0 if id_default else int(self._list_srv_id_entry.get_text())
             srv_type = "1" if type_default else self._list_srv_type_entry.get_text()
             tid = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
             nid = "0" if nid_default else "{:X}".format(int(self._list_nid_entry.get_text()))
@@ -591,9 +599,9 @@ class IptvListConfigurationDialog(IptvListDialog):
                 data = data.split(":")
 
                 if self.is_all_data_default():
-                    data[2], data[3], data[4], data[5], data[6] = "10000"
+                    data[1], data[2], data[3], data[4], data[5], data[6] = "010000"
                 else:
-                    data[0], data[2], data[4], data[5], data[6] = stream_type, srv_type, tid, nid, namespace
+                    data[0], data[1], data[2], data[4], data[5], data[6] = st_type, s_id, srv_type, tid, nid, namespace
                     data[3] = "{:X}".format(index) if sid_auto else "0"
 
                 data = ":".join(data)
@@ -685,9 +693,10 @@ class M3uImportDialog(IptvListDialog):
         if not self.is_all_data_default():
             services = []
             params = [int(el.get_text()) for el in self._digit_elems]
-            s_type = params[0]
-            params = params[1:]
-            stream_type = get_stream_type(self._stream_type_combobox)
+            s_id = params[0]
+            s_type = params[1]
+            params = params[2:]
+            st_type = get_stream_type(self._stream_type_combobox)
 
             for i, s in enumerate(self._services, start=params[0]):
                 # Skipping markers.
@@ -696,8 +705,8 @@ class M3uImportDialog(IptvListDialog):
                     continue
 
                 params[0] = i
-                picon_id = "{}_0_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(stream_type, s_type, *params)
-                fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, stream_type, s_type)
+                picon_id = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(st_type, s_id, s_type, *params)
+                fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, st_type, s_id, s_type)
                 if s.picon:
                     picons[s.picon] = picon_id
 

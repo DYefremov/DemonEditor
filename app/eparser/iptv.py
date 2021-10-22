@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Module for IPTV and streams support """
 import re
 from enum import Enum
@@ -10,7 +38,7 @@ from app.ui.uicommons import IPTV_ICON
 
 # url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group
 NEUTRINO_FAV_ID_FORMAT = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}"
-ENIGMA2_FAV_ID_FORMAT = " {}:0:{}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION: {}\n"
+ENIGMA2_FAV_ID_FORMAT = " {}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION: {}\n"
 MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
 
 
@@ -51,9 +79,6 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
 
         for line in str(data, encoding=encoding, errors="ignore").splitlines():
             if line.startswith("#EXTINF"):
-                inf, sep, line = line.partition(" ")
-                if not line:
-                    line = inf
                 line, sep, name = line.rpartition(",")
 
                 data = re.split('"', line)
@@ -115,12 +140,12 @@ def export_to_m3u(path, bouquet, s_type):
         file.writelines(lines)
 
 
-def get_fav_id(url, service_name, settings_type, params=None, stream_type=None, s_type=1):
+def get_fav_id(url, name, settings_type, params=None, st_type=None, s_id=0, srv_type=1):
     """ Returns fav id depending on the profile. """
     if settings_type is SettingsType.ENIGMA_2:
-        stream_type = stream_type or StreamType.NONE_TS.value
+        st_type = st_type or StreamType.NONE_TS.value
         params = params or (0, 0, 0, 0)
-        return ENIGMA2_FAV_ID_FORMAT.format(stream_type, s_type, *params, quote(url), service_name, service_name, None)
+        return ENIGMA2_FAV_ID_FORMAT.format(st_type, s_id, srv_type, *params, quote(url), name, name, None)
     elif settings_type is SettingsType.NEUTRINO_MP:
         return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
 

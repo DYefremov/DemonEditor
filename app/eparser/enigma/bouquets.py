@@ -141,6 +141,7 @@ class ServiceType(Enum):
     MARKER = "64"
     SPACE = "832"  # Hidden marker.
     ALT = "134"  # Alternatives.
+    UDP = "256"
 
     @classmethod
     def _missing_(cls, value):
