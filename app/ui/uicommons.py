@@ -52,7 +52,8 @@ else:
                                                      Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
 if IS_LINUX:
-    locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
+    if UI_RESOURCES_PATH == BASE_PATH:
+        locale.bindtextdomain(TEXT_DOMAIN, LANG_PATH)
     # Init notify
     try:
         gi.require_version("Notify", "0.7")
