@@ -58,6 +58,7 @@ class PiconManager(Gtk.Box):
         self._app = app
         self._app.connect("page-changed", self.update_picons_dest)
         self._app.connect("filter-toggled", self.on_app_filter_toggled)
+        self._app.connect("profile-changed", self.on_profile_changed)
         self._app.fav_view.connect("row-activated", self.on_fav_changed)
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
@@ -127,15 +128,10 @@ class PiconManager(Gtk.Box):
         self._picons_src_filter_model.set_visible_func(self.picons_src_filter_function)
         self._picons_dst_filter_model = builder.get_object("picons_dst_filter_model")
         self._picons_dst_filter_model.set_visible_func(self.picons_dst_filter_function)
-        self._expander = builder.get_object("expander")
-        self._text_view = builder.get_object("text_view")
         self._src_filter_button = builder.get_object("src_filter_button")
         self._dst_filter_button = builder.get_object("dst_filter_button")
         self._picons_filter_entry = builder.get_object("picons_filter_entry")
-        self._picons_dir_entry = builder.get_object("picons_dir_entry")
-        self._info_check_button = builder.get_object("info_check_button")
-        self._picon_info_image = builder.get_object("picon_info_image")
-        self._picon_info_label = builder.get_object("picon_info_label")
+        self._current_path_label = builder.get_object("current_path_label")
         self._download_source_button = builder.get_object("download_source_button")
         self._receive_button = builder.get_object("receive_button")
         self._convert_button = builder.get_object("convert_button")
@@ -163,6 +159,15 @@ class PiconManager(Gtk.Box):
         self._cancel_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._convert_button.bind_property("visible", self._header_download_box, "visible", 4)
         self._download_source_button.bind_property("visible", self._receive_button, "visible")
+        # Info.
+        self._dst_count_label = builder.get_object("dst_count_label")
+        self._info_check_button = builder.get_object("info_check_button")
+        self._picon_info_image = builder.get_object("picon_info_image")
+        self._picon_info_label = builder.get_object("picon_info_label")
+        self._info_view = builder.get_object("info_view")
+        self._info_bar = builder.get_object("info_bar")
+        self._info_bar.bind_property("visible", builder.get_object("info_bar_frame"), "visible")
+        self._info_bar.connect("response", lambda b, r: b.set_visible(False))
         # Filter.
         self._filter_bar = builder.get_object("filter_bar")
         self._auto_filer_switch = builder.get_object("auto_filer_switch")
@@ -178,9 +183,7 @@ class PiconManager(Gtk.Box):
         self._src_button.bind_property("active", builder.get_object("explorer_dst_label"), "visible")
         self._src_button.bind_property("active", builder.get_object("src_picon_box_frame"), "visible")
         self._filter_button.bind_property("visible", self._src_button, "visible")
-        explorer_info_bar = builder.get_object("explorer_info_bar")
-        explorer_info_bar.bind_property("visible", builder.get_object("explorer_info_bar_frame"), "visible")
-        self._info_check_button.bind_property("active", explorer_info_bar, "visible")
+        self._info_check_button.bind_property("active", builder.get_object("explorer_info_box_frame"), "visible")
         # Header buttons. -> Used instead stack switcher.
         self._manager_button = builder.get_object("manager_button")
         self._manager_button.bind_property("active", builder.get_object("manager_label"), "visible")
@@ -193,9 +196,9 @@ class PiconManager(Gtk.Box):
         # Settings
         self._settings = settings
         self._s_type = settings.setting_type
-        self._picons_dir_entry.set_text(self._settings.profile_picons_path)
+        self._current_path_label.set_text(self._settings.profile_picons_path)
 
-        self.pack_start(builder.get_object("picon_manager_frame"), True, True, 0)
+        self.pack_start(builder.get_object("main_frame"), True, True, 0)
         self.show()
 
         if not len(self._picon_ids) and self._s_type is SettingsType.ENIGMA_2:
@@ -240,6 +243,10 @@ class PiconManager(Gtk.Box):
             self._services = {s.picon_id: s for s in self._app.current_services.values() if s.picon_id}
             self.update_picons_data(self._picons_dest_view)
 
+    def on_profile_changed(self, app, data):
+        self._current_path_label.set_text(self._settings.profile_picons_path)
+        self.update_picons_dest(app, self._app.page)
+
     def update_picons_data(self, view, path=None):
         if view is self._picons_dest_view:
             self.update_picon_info()
@@ -257,18 +264,24 @@ class PiconManager(Gtk.Box):
             if index % factor == 0:
                 yield True
 
+        self._dst_count_label.set_text("0")
         if not os.path.isdir(path):
             return
 
-        for file in os.listdir(path):
+        for index, file in enumerate(os.listdir(path)):
             if self._terminate:
                 return
 
             p_path = "{}{}{}".format(path, SEP, file)
             p = self.get_pixbuf_at_scale(p_path, 72, 48, True)
             if p:
-                yield model.append((p, file, p_path))
+                model.append((p, file, p_path))
 
+            if index % factor == 0:
+                self._dst_count_label.set_text(str(len(model)))
+                yield True
+
+        self._dst_count_label.set_text(str(len(model)))
         yield True
 
     def update_picons_from_file(self, view, uri):
@@ -382,8 +395,8 @@ class PiconManager(Gtk.Box):
 
     @run_idle
     def show_assign_info(self, fav_ids):
-        self._expander.set_expanded(True)
-        self._text_view.get_buffer().set_text("")
+        self._info_bar.show()
+        self._info_view.get_buffer().set_text("")
         for i in fav_ids:
             srv = self._app.current_services.get(i, None)
             if srv:
@@ -663,7 +676,7 @@ class PiconManager(Gtk.Box):
     @run_task
     def start_download(self, providers):
         self._is_downloading = True
-        GLib.idle_add(self._expander.set_expanded, True)
+        GLib.idle_add(self._info_bar.set_visible, True)
 
         for prv in providers:
             if self._download_src is self.DownloadSource.LYNG_SAT and not self._POS_PATTERN.match(prv[2]):
@@ -673,7 +686,7 @@ class PiconManager(Gtk.Box):
                 return
 
         try:
-            picons_path = self._picons_dir_entry.get_text()
+            picons_path = self._current_path_label.get_text()
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
             providers = (Provider(*p) for p in providers)
@@ -757,7 +770,7 @@ class PiconManager(Gtk.Box):
 
     @run_idle
     def append_output(self, char):
-        append_text_to_tview(char, self._text_view)
+        append_text_to_tview(char, self._info_view)
 
     @run_task
     def resize(self, path):
@@ -802,7 +815,7 @@ class PiconManager(Gtk.Box):
     @run_task
     def run_func(self, func, update=False):
         try:
-            GLib.idle_add(self._expander.set_expanded, True)
+            GLib.idle_add(self._info_bar.set_visible, True)
             GLib.idle_add(self._header_download_box.set_sensitive, False)
             func()
         except OSError as e:
@@ -954,7 +967,7 @@ class PiconManager(Gtk.Box):
             self._app.show_error_message("Select paths!")
             return
 
-        self._expander.set_expanded(True)
+        self._info_bar.set_visible(True)
         convert_to(src_path=picons_path,
                    dest_path=save_path,
                    s_type=SettingsType.ENIGMA_2,
