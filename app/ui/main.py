@@ -437,10 +437,19 @@ class Application(Gtk.Application):
             else:
                 self.set_menubar(builder.get_object("menu_bar"))
         else:
+            tools_menu = builder.get_object("tools_menu")
+            tools_button = Gtk.MenuButton(visible=True, menu_model=tools_menu, direction=Gtk.ArrowType.NONE)
+            tools_button.set_tooltip_text(get_message("Tools"))
+            tools_button.set_image(Gtk.Image.new_from_icon_name("applications-utilities-symbolic", Gtk.IconSize.BUTTON))
+
             view_menu = builder.get_object("view_menu")
             view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
             view_button.set_tooltip_text(get_message("View"))
-            self._main_window.get_titlebar().pack_end(view_button)
+
+            box = Gtk.ButtonBox(visible=True, layout_style="expand")
+            box.add(tools_button)
+            box.add(view_button)
+            self._main_window.get_titlebar().pack_end(box)
         # IPTV menu.
         self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
         iptv_elem = self._tool_elements.get("fav_iptv_popup_item")

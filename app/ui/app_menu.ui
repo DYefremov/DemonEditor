@@ -134,7 +134,7 @@
         </item>
       </section>
     </submenu>
-    <submenu>
+    <submenu id="tools_menu">
       <attribute name="label" translatable="yes">Tools</attribute>
       <attribute name="action">app.hide_menu_bar</attribute>
       <attribute name="hidden-when">action-disabled</attribute>

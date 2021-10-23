@@ -61,12 +61,13 @@ paned > separator {
 }
 
 .stack-switcher > button > label {
-  padding-left: 2px;
-  padding-right: 2px;
-  min-width: 75px;
+  padding-left: 5px;
+  padding-right: 5px;
+  min-width: 50px;
 }
 
 .stack-switcher > button.text-button {
-  padding-left: 2px;
-  padding-right: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  min-width: 50px;
 }
