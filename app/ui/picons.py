@@ -35,9 +35,9 @@ from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib, GdkPixbuf, Gio
 
-from app.commons import run_idle, run_task, run_with_delay
+from app.commons import run_idle, run_task, run_with_delay, log
 from app.connections import upload_data, DownloadType, download_data, remove_picons
-from app.settings import SettingsType, Settings, SEP
+from app.settings import SettingsType, Settings, SEP, IS_LINUX, IS_DARWIN
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
                               PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
@@ -79,6 +79,8 @@ class PiconManager(Gtk.Box):
         self._picon_cz_downloader = None
 
         handlers = {"on_tool_switched": self.on_tool_switched,
+                    "on_add": self.on_add,
+                    "on_extract": self.on_extract,
                     "on_receive": self.on_receive,
                     "on_cancel": self.on_cancel,
                     "on_send": self.on_send,
@@ -191,6 +193,7 @@ class PiconManager(Gtk.Box):
         self._downloader_button.bind_property("active", builder.get_object("downloader_label"), "visible")
         self._converter_button = builder.get_object("converter_button")
         self._converter_button.bind_property("active", builder.get_object("converter_label"), "visible")
+        self._manager_button.bind_property("active", builder.get_object("add_menu_button"), "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
         # Settings
@@ -272,7 +275,7 @@ class PiconManager(Gtk.Box):
             if self._terminate:
                 return
 
-            p_path = "{}{}{}".format(path, SEP, file)
+            p_path = f"{path}{SEP}{file}"
             p = self.get_pixbuf_at_scale(p_path, 72, 48, True)
             if p:
                 model.append((p, file, p_path))
@@ -393,6 +396,8 @@ class PiconManager(Gtk.Box):
                         itr = dest_model.append((p, p_name, p_path))
                     scroll_to(dest_model.get_path(itr), self._picons_dest_view)
 
+            self._dst_count_label.set_text(str(len(dest_model)))
+
     @run_idle
     def show_assign_info(self, fav_ids):
         self._info_bar.show()
@@ -401,7 +406,7 @@ class PiconManager(Gtk.Box):
             srv = self._app.current_services.get(i, None)
             if srv:
                 info = self._app.get_hint_for_srv_list(srv)
-                self.append_output("Picon assignment for the service:\n{}\n{}\n".format(info, " * " * 30))
+                self.append_output(f"Picon assignment for the service:\n{info}\n{' * ' * 30}\n")
 
     def on_picons_view_drag_end(self, view, drag_context):
         self.update_picons_dest_view(self._app.picons_buffer)
@@ -415,7 +420,7 @@ class PiconManager(Gtk.Box):
         if len(uris) == 2:
             name, fav_id = self._current_picon_info
             src = urlparse(unquote(uris[0])).path
-            dst = "{}{}{}".format(urlparse(unquote(uris[1])).path, SEP, name)
+            dst = f"{urlparse(unquote(uris[1])).path}{SEP}{name}"
             if src != dst:
                 shutil.copy(src, dst)
                 for row in get_base_model(self._picons_dest_view.get_model()):
@@ -452,6 +457,59 @@ class PiconManager(Gtk.Box):
         yield set_picon(fav_id, get_base_model(self._app.services_view.get_model()), picon, Column.SRV_FAV_ID, p_pos)
         yield set_picon(fav_id, get_base_model(self._app.fav_view.get_model()), picon, Column.FAV_ID, p_pos)
 
+    # ************************ Add/Extract ******************************** #
+
+    def on_add(self, item):
+        """ Adds (copies) picons from an external folder to the profile picons folder. """
+        dialog = self.get_copy_dialog()
+        if dialog.run() in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        picon_path = self._settings.profile_picons_path
+        os.makedirs(os.path.dirname(picon_path), exist_ok=True)
+
+        try:
+            picons = [shutil.copy(p, f"{picon_path}{Path(p).name}") for p in dialog.get_filenames()]
+        except shutil.SameFileError as e:
+            log(e)
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self.update_picons_dest_view(picons)
+            self._app.update_picons()
+
+    def get_copy_dialog(self):
+        """ Returns a copy dialog with a preview of images [picons -> *.png]. """
+        dialog = Gtk.FileChooserNative.new(get_message("Add picons"), self._app_window,
+                                           Gtk.FileChooserAction.OPEN, get_message("Add"))
+        dialog.set_select_multiple(True)
+        dialog.set_modal(True)
+        # Filter.
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name("*.png")
+        file_filter.add_pattern("*.png")
+        file_filter.add_mime_type("image/png") if IS_DARWIN else None
+        dialog.add_filter(file_filter)
+
+        if IS_LINUX:
+            preview_image = Gtk.Image(margin_right=10)
+            dialog.set_preview_widget(preview_image)
+
+            def update_preview_widget(dlg):
+                path = dialog.get_preview_filename()
+                if not path:
+                    return
+
+                pix = get_picon_pixbuf(path, 220)
+                preview_image.set_from_pixbuf(pix)
+                dlg.set_preview_widget_active(bool(pix))
+
+            dialog.connect("update-preview", update_preview_widget)
+
+        return dialog
+
+    def on_extract(self, item):
+        """ Extracts picons from an archives to the profile picons folder. """
+
     # ******************** Download/Upload/Remove ************************* #
 
     def on_selective_send(self, view):
@@ -481,10 +539,13 @@ class PiconManager(Gtk.Box):
                 itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
                 base_model.remove(itr)
 
+        if view is self._picons_dest_view:
+            self._dst_count_label.set_text(str(len(model)))
+
     def on_send(self, item=None, files_filter=None, path=None):
         dest_path = path or self._settings.profile_picons_path
         settings = Settings(self._settings.settings)
-        settings.profile_picons_path = "{}{}".format(dest_path, SEP)
+        settings.profile_picons_path = f"{dest_path}{SEP}"
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
@@ -615,7 +676,7 @@ class PiconManager(Gtk.Box):
         try:
             for sat in sorted(sats):
                 pos = sat[1]
-                name = "{} ({})".format(sat[0], pos)
+                name = f"{sat[0]} ({pos})"
                 if is_filter and pos not in self._sat_positions:
                     continue
                 if not model:
@@ -744,7 +805,7 @@ class PiconManager(Gtk.Box):
             for p in providers:
                 self._picon_cz_downloader.download(p, path, p_ids)
         except PiconsError as e:
-            self.append_output("Error: {}\n".format(str(e)))
+            self.append_output(f"Error: {str(e)}\n")
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
@@ -765,7 +826,7 @@ class PiconManager(Gtk.Box):
         return {services.get(fav_id).picon_id for fav_id in fav_bouquet}
 
     def process_provider(self, prv, picons_path):
-        self.append_output("Getting links to picons for: {}.\n".format(prv.name))
+        self.append_output(f"Getting links to picons for: {prv.name}.\n")
         return PiconsParser.parse(prv, picons_path, self._picon_ids, self.get_picons_format())
 
     @run_idle
@@ -780,7 +841,7 @@ class PiconManager(Gtk.Box):
             from pathlib import Path
             from PIL import Image
         except ImportError as e:
-            self.show_info_message("{} {}".format(get_message("Conversion error."), e), Gtk.MessageType.ERROR)
+            self.show_info_message(f"{get_message('Conversion error.')} {e}", Gtk.MessageType.ERROR)
         else:
             res = (220, 132) if self._resize_220_132_radio_button.get_active() else (100, 60)
 

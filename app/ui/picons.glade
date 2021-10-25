@@ -41,13 +41,15 @@ Author: Dmitriy Yefremov
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Open folder</property>
+        <signal name="activate" handler="on_add" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="extract_menu_item">
-        <property name="visible">True</property>
+        <property name="visible">False</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Extract...</property>
+        <signal name="activate" handler="on_extract" swapped="no"/>
       </object>
     </child>
   </object>
@@ -303,6 +305,7 @@ Author: Dmitriy Yefremov
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkMenuButton" id="add_menu_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
