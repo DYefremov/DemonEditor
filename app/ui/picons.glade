@@ -46,7 +46,7 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkMenuItem" id="extract_menu_item">
-        <property name="visible">False</property>
+        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Extract...</property>
         <signal name="activate" handler="on_extract" swapped="no"/>

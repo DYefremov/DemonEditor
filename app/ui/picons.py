@@ -41,7 +41,7 @@ from app.settings import SettingsType, Settings, SEP, IS_LINUX, IS_DARWIN
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
                               PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .dialogs import show_dialog, DialogType, get_message, get_builder
+from .dialogs import show_dialog, DialogType, get_message, get_builder, get_chooser_dialog
 from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
                           get_picon_pixbuf)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page
@@ -465,17 +465,7 @@ class PiconManager(Gtk.Box):
         if dialog.run() in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
-        picon_path = self._settings.profile_picons_path
-        os.makedirs(os.path.dirname(picon_path), exist_ok=True)
-
-        try:
-            picons = [shutil.copy(p, f"{picon_path}{Path(p).name}") for p in dialog.get_filenames()]
-        except shutil.SameFileError as e:
-            log(e)
-            self.show_info_message(str(e), Gtk.MessageType.ERROR)
-        else:
-            self.update_picons_dest_view(picons)
-            self._app.update_picons()
+        self.copy_picons_file(dialog.get_filenames())
 
     def get_copy_dialog(self):
         """ Returns a copy dialog with a preview of images [picons -> *.png]. """
@@ -509,6 +499,38 @@ class PiconManager(Gtk.Box):
 
     def on_extract(self, item):
         """ Extracts picons from an archives to the profile picons folder. """
+        file_filter = None
+        if IS_DARWIN:
+            file_filter = Gtk.FileFilter()
+            file_filter.set_name("*.zip, *.gz")
+            file_filter.add_mime_type("application/zip")
+            file_filter.add_mime_type("application/gzip")
+
+        response = get_chooser_dialog(self._app_window, self._settings, "*.zip, *.gz files",
+                                      ("*.zip", "*.gz"), "Extract picons", file_filter)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        arch_path = self._app.get_archive_path(response)
+        if arch_path:
+            self.copy_picons_file(Path(arch_path.name).glob("*.png"), arch_path.cleanup)
+
+    def copy_picons_file(self, files, callback=None):
+        """ Copies files to the profile picons folder. """
+        picon_path = self._settings.profile_picons_path
+        os.makedirs(os.path.dirname(picon_path), exist_ok=True)
+
+        try:
+            picons = [shutil.copy(p, picon_path) for p in files]
+        except shutil.SameFileError as e:
+            log(e)
+            self.show_info_message(str(e), Gtk.MessageType.ERROR)
+        else:
+            self.update_picons_dest_view(picons)
+            self._app.update_picons()
+        finally:
+            if callback:
+                callback()
 
     # ******************** Download/Upload/Remove ************************* #
 
