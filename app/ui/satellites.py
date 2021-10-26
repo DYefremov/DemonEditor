@@ -435,8 +435,7 @@ class UpdateDialog:
                                        "update_sat_list_model_filter", "update_sat_list_model_sort", "side_store",
                                        "pos_adjustment", "pos_adjustment2", "satellites_update_popup_menu",
                                        "remove_selection_image", "sat_update_cancel_image", "sat_receive_image",
-                                       "sat_update_filter_image", "sat_update_search_image", "sat_update_image",
-                                       "update_transponder_store", "update_service_store"))
+                                       "sat_update_image", "update_transponder_store", "update_service_store"))
 
         self._window = builder.get_object("satellites_update_window")
         self._window.set_transient_for(transient)
@@ -448,7 +447,6 @@ class UpdateDialog:
         self._transponder_view = builder.get_object("sat_update_tr_view")
         self._service_view = builder.get_object("sat_update_srv_view")
         self._source_box = builder.get_object("source_combo_box")
-        self._sat_update_expander = builder.get_object("sat_update_expander")
         self._text_view = builder.get_object("text_view")
         self._receive_button = builder.get_object("receive_data_button")
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
@@ -470,7 +468,10 @@ class UpdateDialog:
         self._filter_model.set_visible_func(self.filter_function)
         self._filter_positions = (0, 0)
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
-        # Search
+        # Log.
+        self._log_frame = builder.get_object("log_frame")
+        builder.get_object("log_info_bar").connect("response", lambda b, r: self._log_frame.set_visible(False))
+        # Search.
         self._search_bar = builder.get_object("sat_update_search_bar")
         self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
         search_provider = SearchProvider(self._sat_view,
@@ -541,8 +542,8 @@ class UpdateDialog:
             return
 
     @run_idle
-    def update_expander(self):
-        self._sat_update_expander.set_expanded(True)
+    def update_log_visibility(self):
+        self._log_frame.set_visible(True)
         self._text_view.get_buffer().set_text("", 0)
 
     def append_output(self):
@@ -652,7 +653,7 @@ class SatellitesUpdateDialog(UpdateDialog):
     @run_task
     def receive_satellites(self):
         self.is_download = True
-        self.update_expander()
+        self.update_log_visibility()
         model = self._sat_view.get_model()
         start = time.time()
 
@@ -744,7 +745,7 @@ class ServicesUpdateDialog(UpdateDialog):
     @run_task
     def receive_services(self):
         self.is_download = True
-        self.update_expander()
+        self.update_log_visibility()
         model = self._sat_view.get_model()
         appender = self.append_output()
         next(appender)
