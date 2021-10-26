@@ -205,8 +205,8 @@ msgstr "Aktueller Datenpfad:"
 msgid "Data:"
 msgstr "Daten:"
 
-msgid "Enigma2 channel and satellite list editor for GNU/Linux."
-msgstr "Enigma2 Kanal- und Satellitenlisteneditor für GNU/Linux."
+msgid "Enigma2 channel and satellite list editor."
+msgstr "Enigma2 Kanal- und Satellitenlisteneditor."
 
 msgid "Host:"
 msgstr "Host:"
@@ -298,8 +298,8 @@ msgstr "Picon Namens-Format:"
 msgid "Resize:"
 msgstr "Größe ändern:"
 
-msgid "Current picons path:"
-msgstr "Aktueller Piconspfad:"
+msgid "Current picons path"
+msgstr "Aktueller Piconspfad"
 
 msgid "Receiver picons path:"
 msgstr "Receiver Piconspfad:"
@@ -1263,3 +1263,12 @@ msgstr "Aufnahmen"
 
 msgid "Help"
 msgstr "Hilfe"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP API ist nicht aktiviert. Überprüfe deine Einstellungen!"
+
+msgid "Add picons"
+msgstr "Picons hinzufügen"
+
+msgid "Logs"
+msgstr "Logs"

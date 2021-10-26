@@ -203,8 +203,8 @@ msgstr "Текущий путь к данным:"
 msgid "Data:"
 msgstr "Данные:"
 
-msgid "Enigma2 channel and satellite list editor for GNU/Linux."
-msgstr "Редактор списка каналов и спутников Enigma2\n для GNU/Linux."
+msgid "Enigma2 channel and satellite list editor."
+msgstr "Редактор списка каналов и спутников Enigma2."
 
 msgid "Host:"
 msgstr "Адрес ресивера:"
@@ -296,8 +296,8 @@ msgstr "Формат имени пиконов:"
 msgid "Resize:"
 msgstr "Обрезать:"
 
-msgid "Current picons path:"
-msgstr "Текущий путь к пиконам:"
+msgid "Current picons path"
+msgstr "Текущий путь к пиконам"
 
 msgid "Receiver picons path:"
 msgstr "Путь к пиконам ресивера:"
@@ -1246,3 +1246,12 @@ msgstr "Записи"
 
 msgid "Help"
 msgstr "Справка"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP API не активировано. Проверьте настройки!"
+
+msgid "Add picons"
+msgstr "Добавить пиконы"
+
+msgid "Logs"
+msgstr "Журнал"
