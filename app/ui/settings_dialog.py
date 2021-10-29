@@ -34,7 +34,7 @@ from app.connections import test_telnet, test_ftp, TestException, test_http, Htt
 from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP, IS_WIN
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT, IS_GNOME_SESSION
 
 
 def show_settings_dialog(transient, options):
@@ -208,6 +208,16 @@ class SettingsDialog:
         for el in self._digit_elems:
             el.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                            Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+        if IS_GNOME_SESSION:
+            switcher = builder.get_object("main_stack_switcher")
+            switcher.set_margin_top(0)
+            switcher.set_margin_bottom(0)
+            builder.get_object("main_box").remove(switcher)
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            header_bar.set_custom_title(switcher)
+            self._dialog.set_titlebar(header_bar)
+
         self.init_ui_elements()
         self.init_profiles()
 
