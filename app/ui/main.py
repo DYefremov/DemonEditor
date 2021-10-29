@@ -3629,12 +3629,16 @@ def start_app():
     try:
         Settings.get_instance()
     except SettingsReadException as e:
-        msg = "{}\n {}".format(get_message("Error reading or writing program settings!"), e)
+        msg = f"{get_message('Error reading or writing program settings!')}\n {e}"
         show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
     except SettingsException as e:
-        msg = "{} \n{}".format(e, get_message("All setting were reset. Restart the program!"))
-        show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
+        msg = f"{e}\n\n{get_message('It is recommended to load the default settings!')}"
+        dlg = Gtk.Dialog()
+        if show_dialog(DialogType.QUESTION, dlg, msg) != Gtk.ResponseType.OK:
+            return True
+
         Settings.reset_to_default()
+        show_dialog(DialogType.INFO, transient=dlg, text=get_message("All setting were reset. Restart the program!"))
     else:
         app = Application()
         app.run(sys.argv)
