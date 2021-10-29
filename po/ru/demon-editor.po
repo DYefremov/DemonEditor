@@ -1255,3 +1255,18 @@ msgstr "Добавить пиконы"
 
 msgid "Logs"
 msgstr "Журнал"
+
+msgid "Title"
+msgstr "Название"
+
+msgid "Time"
+msgstr "Время"
+
+msgid "Length"
+msgstr "Длительность"
+
+msgid "Additional source"
+msgstr "Дополнительный источник"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Автоматическая установка имени из списка избранного."

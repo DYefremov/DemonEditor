@@ -172,7 +172,7 @@ class PiconManager(Gtk.Box):
         self._info_bar.connect("response", lambda b, r: b.set_visible(False))
         # Filter.
         self._filter_bar = builder.get_object("filter_bar")
-        self._auto_filer_switch = builder.get_object("auto_filer_switch")
+        self._auto_filter_switch = builder.get_object("auto_filter_switch")
         self._filter_button = builder.get_object("filter_button")
         self._filter_button.bind_property("active", self._filter_bar, "visible")
         self._filter_button.bind_property("active", self._src_filter_button, "visible")
@@ -937,7 +937,7 @@ class PiconManager(Gtk.Box):
             self._filter_button.set_active(not self._filter_button.get_active())
 
     def on_fav_changed(self, view, path, column):
-        if self._app.page is Page.PICONS and self._auto_filer_switch.get_active():
+        if self._app.page is Page.PICONS and self._auto_filter_switch.get_active():
             model = view.get_model()
             self._picons_filter_entry.set_text(model.get_value(model.get_iter(path), Column.FAV_SERVICE))
 

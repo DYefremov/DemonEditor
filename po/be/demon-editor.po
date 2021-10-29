@@ -1258,3 +1258,18 @@ msgstr "Дадаць піконы"
 
 msgid "Logs"
 msgstr "Логі"
+
+msgid "Title"
+msgstr "Назва"
+
+msgid "Time"
+msgstr "Час"
+
+msgid "Length"
+msgstr "Працягласць"
+
+msgid "Additional source"
+msgstr "Дадатковая крыніца"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Аўтаматычная ўсталёўка імя са спіса абранага."

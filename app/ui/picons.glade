@@ -618,10 +618,10 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSwitch" id="auto_filer_switch">
+                      <object class="GtkSwitch" id="auto_filter_switch">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Automatically set the name selected in the favorites list. </property>
+                        <property name="tooltip_text" translatable="yes">Automatically set the name selected in the favorites list.</property>
                         <property name="valign">center</property>
                         <property name="margin_right">5</property>
                       </object>
@@ -633,7 +633,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="auto_filer_label">
+                      <object class="GtkLabel" id="auto_filter_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Auto</property>
@@ -675,7 +675,7 @@ Author: Dmitriy Yefremov
                                 <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkCheckButton" id="src_filter_button">
-                                    <property name="label" translatable="yes">Filer</property>
+                                    <property name="label" translatable="yes">Filter</property>
                                     <property name="can_focus">False</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="receives_default">False</property>

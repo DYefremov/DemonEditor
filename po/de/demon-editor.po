@@ -1272,3 +1272,18 @@ msgstr "Picons hinzufügen"
 
 msgid "Logs"
 msgstr "Logs"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Time"
+msgstr "Zeit"
+
+msgid "Length"
+msgstr "Dauer"
+
+msgid "Additional source"
+msgstr "Zusätzliche Quelle"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Automatisch den in der Favoritenliste ausgewählten Namen einstellen."
