@@ -429,7 +429,7 @@ class Application(Gtk.Application):
     def do_startup(self):
         Gtk.Application.do_startup(self)
         # App menu.
-        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
+        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
         if not IS_GNOME_SESSION:
             if IS_DARWIN:
                 self.set_app_menu(builder.get_object("mac_app_menu"))
