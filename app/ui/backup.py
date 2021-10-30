@@ -38,7 +38,7 @@ from app.commons import run_idle
 from app.settings import SettingsType, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
 
 
 class RestoreType(Enum):
@@ -74,6 +74,24 @@ class BackupDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+
+        if IS_GNOME_SESSION:
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            self._dialog_window.set_titlebar(header_bar)
+
+            button_box = builder.get_object("main_button_box")
+            button_box.set_margin_top(0)
+            button_box.set_margin_bottom(0)
+            button_box.set_margin_left(0)
+            button_box.reparent(header_bar)
+
+            ch_button = builder.get_object("info_check_button")
+            ch_button.set_margin_right(0)
+            h_bar = builder.get_object("header_bar")
+            h_bar.remove(ch_button)
+            h_bar.set_visible(False)
+            header_bar.pack_end(ch_button)
+
         # Setting the last size of the dialog window if it was saved
         window_size = self._settings.get("backup_tool_window_size")
         if window_size:
