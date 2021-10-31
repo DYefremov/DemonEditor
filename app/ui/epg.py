@@ -80,7 +80,7 @@ class EpgDialog:
                     "on_enable_filtering_switch": self.on_enable_filtering_switch,
                     "on_update_on_start_switch": self.on_update_on_start_switch,
                     "on_field_icon_press": self.on_field_icon_press,
-                    "on_key_release": self.on_key_release}
+                    "on_key_press": self.on_key_press}
 
         self._services = {}
         self._ex_services = services
@@ -93,7 +93,6 @@ class EpgDialog:
         self._use_web_source = False
         self._update_epg_data_on_start = False
         self._refs_source = RefsSource.SERVICES
-        self._show_tooltips = True
         self._download_xml_is_active = False
 
         builder = get_builder(UI_RESOURCES_PATH + "epg.glade", handlers)
@@ -188,14 +187,14 @@ class EpgDialog:
                 try:
                     self.download_epg_from_stb()
                 except OSError as e:
-                    self.show_info_message("Download epg.dat file error: {}".format(e), Gtk.MessageType.ERROR)
+                    self.show_info_message(f"Download epg.dat file error: {e}", Gtk.MessageType.ERROR)
                     return
             yield True
 
             try:
                 refs = EPG.get_epg_refs(self._epg_dat_path_entry.get_text() + "epg.dat")
             except FileNotFoundError as e:
-                self.show_info_message("Read data error: {}".format(e), Gtk.MessageType.ERROR)
+                self.show_info_message(f"Read data error: {e}", Gtk.MessageType.ERROR)
                 return
             yield True
 
@@ -225,7 +224,7 @@ class EpgDialog:
         s_types = (BqServiceType.MARKER.value, BqServiceType.IPTV.value)
         filtered = filter(None, [srvs.get(ref) for ref in refs]) if refs else filter(
             lambda s: s.service_type not in s_types, self._ex_services.values())
-        list(map(self._services_model.append, map(lambda s: (s.service, s.fav_id), filtered)))
+        list(map(self._services_model.append, map(lambda s: (s.service, s.pos, s.fav_id), filtered)))
         self.update_source_count_info()
 
     def init_xml_source(self, refs):
@@ -274,7 +273,7 @@ class EpgDialog:
 
                         path = tfp.name.rstrip(".gz")
             except (HTTPError, URLError) as e:
-                raise ValueError("{} {}".format(get_message("Download XML file error."), e))
+                raise ValueError(f"{get_message('Download XML file error.')} {e}")
             else:
                 try:
                     with open(path, "wb") as f_out:
@@ -282,7 +281,7 @@ class EpgDialog:
                             shutil.copyfileobj(f, f_out)
                     os.remove(tfp.name)
                 except Exception as e:
-                    raise ValueError("{} {}".format(get_message("Unpacking data error."), e))
+                    raise ValueError(f"{get_message('Unpacking data error.')} {e}")
             finally:
                 self._download_xml_is_active = False
                 self.update_active_header_elements(True)
@@ -291,7 +290,7 @@ class EpgDialog:
             s_refs, info = ChannelsParser.get_refs_from_xml(path)
             yield True
         except Exception as e:
-            raise ValueError("{} {}".format(get_message("XML parsing error:"), e))
+            raise ValueError(f"{get_message('XML parsing error:')} {e}")
         else:
             if refs:
                 s_refs = filter(lambda x: x.num in refs, s_refs)
@@ -300,7 +299,7 @@ class EpgDialog:
             self.update_source_count_info()
             yield True
 
-    def on_key_release(self, view, event):
+    def on_key_press(self, view, event):
         """  Handling  keystrokes  """
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
@@ -348,7 +347,7 @@ class EpgDialog:
         for row in self._services_model:
             name = re.sub("\\W+", "", str(row[0])).upper()
             name = name.translate(tr) if use_cyrillic else name
-            source[name] = row[1]
+            source[name] = row
 
         success_count = 0
         not_founded = {}
@@ -378,7 +377,7 @@ class EpgDialog:
                                                  get_message("Count of successfully configured services:"),
                                                  success_count), Gtk.MessageType.INFO)
 
-    def assign_data(self, row, ref, show_error=False):
+    def assign_data(self, row, data, show_error=False):
         if row[Column.FAV_TYPE] != BqServiceType.IPTV.value:
             if not show_error:
                 self.show_info_message(get_message("Not allowed in this context!"), Gtk.MessageType.ERROR)
@@ -386,14 +385,15 @@ class EpgDialog:
 
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
-        fav_id_data[3:7] = ref.split(":")
+        fav_id_data[3:7] = data[-1].split(":")
         new_fav_id = ":".join(fav_id_data)
         service = self._services.pop(fav_id, None)
         if service:
             self._services[new_fav_id] = service
             row[Column.FAV_ID] = new_fav_id
             row[Column.FAV_LOCKED] = EPG_ICON
-            row[Column.FAV_TOOLTIP] = ":".join(fav_id_data[:10]) if self._show_tooltips else None
+            src = f"{get_message('EPG source')}: {data[0]} ({data[1]})"
+            row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
 
     def on_filter_toggled(self, button: Gtk.ToggleButton):
         self._filter_bar.set_search_mode(button.get_active())
@@ -412,7 +412,7 @@ class EpgDialog:
         model, paths = self._source_view.get_selection().get_selected_rows()
         self._current_ref.clear()
         if paths:
-            self._current_ref.append(model[paths][1])
+            self._current_ref.append(model[paths][:])
 
     def on_assign_ref(self, item=None):
         if self._current_ref:
@@ -481,7 +481,7 @@ class EpgDialog:
     # ***************** Drag-and-drop *********************#
 
     def init_drag_and_drop(self):
-        """ Enable drag-and-drop """
+        """ Enable drag-and-drop. """
         target = []
         self._source_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
         self._source_view.drag_source_add_text_targets()
@@ -494,17 +494,22 @@ class EpgDialog:
         if selection.count_selected_rows() > 1:
             view.do_toggle_cursor_row(view)
 
-    def on_drag_data_get(self, view: Gtk.TreeView, drag_context, data, info, time):
+    def on_drag_data_get(self, view, drag_context, data, info, time):
         model, paths = view.get_selection().get_selected_rows()
         if paths:
-            val = model.get_value(model.get_iter(paths), 1)
-            data.set_text(val, -1)
+            s_data = model[paths][:]
+            if all(s_data):
+                data.set_text("::::".join(s_data), -1)
+            else:
+                self.show_info_message(get_message("Source error!"), Gtk.MessageType.ERROR)
 
-    def on_drag_data_received(self, view: Gtk.TreeView, drag_context, x, y, data, info, time):
+    def on_drag_data_received(self, view, drag_context, x, y, data, info, time):
         path, pos = view.get_dest_row_at_pos(x, y)
         model = view.get_model()
-        self.assign_data(model[path], data.get_text())
-        self.update_epg_count()
+        data = data.get_text()
+        if data:
+            self.assign_data(model[path], data.split("::::"))
+            self.update_epg_count()
         return False
 
     # ***************** Options *********************#

@@ -158,6 +158,8 @@ Author: Dmitriy Yefremov
     <columns>
       <!-- column-name service -->
       <column type="gchararray"/>
+      <!-- column-name pos -->
+      <column type="gchararray"/>
       <!-- column-name service_id -->
       <column type="gchararray"/>
     </columns>
@@ -868,22 +870,22 @@ Author: Dmitriy Yefremov
                             <signal name="button-press-event" handler="on_popup_menu" object="source_popup_menu" swapped="no"/>
                             <signal name="drag-begin" handler="on_drag_begin" swapped="no"/>
                             <signal name="drag-data-get" handler="on_drag_data_get" swapped="no"/>
-                            <signal name="key-release-event" handler="on_key_release" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection"/>
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="service_column">
                                 <property name="resizable">True</property>
-                                <property name="sizing">autosize</property>
                                 <property name="min_width">50</property>
                                 <property name="title" translatable="yes">Service</property>
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <property name="sort_column_id">0</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="source_service_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="source_service_renderertext">
                                     <property name="xpad">5</property>
+                                    <property name="ellipsize">end</property>
                                   </object>
                                   <attributes>
                                     <attribute name="text">0</attribute>
@@ -892,19 +894,35 @@ Author: Dmitriy Yefremov
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="ref_column">
-                                <property name="resizable">True</property>
-                                <property name="sizing">autosize</property>
-                                <property name="min_width">50</property>
-                                <property name="title" translatable="yes">Reference</property>
-                                <property name="expand">True</property>
+                              <object class="GtkTreeViewColumn" id="pos_column">
+                                <property name="min_width">70</property>
+                                <property name="title" translatable="yes">Pos</property>
                                 <property name="alignment">0.5</property>
+                                <property name="sort_column_id">1</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="source_reference_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="source_pos_renderertext">
+                                    <property name="xpad">5</property>
                                     <property name="xalign">0.50999999046325684</property>
                                   </object>
                                   <attributes>
                                     <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="ref_column">
+                                <property name="resizable">True</property>
+                                <property name="min_width">50</property>
+                                <property name="title" translatable="yes">Reference</property>
+                                <property name="alignment">0.5</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="source_reference_renderertext">
+                                    <property name="xpad">10</property>
+                                    <property name="xalign">0.50999999046325684</property>
+                                  </object>
+                                  <attributes>
+                                    <attribute name="text">2</attribute>
                                   </attributes>
                                 </child>
                               </object>
@@ -1056,7 +1074,7 @@ Author: Dmitriy Yefremov
                             <property name="tooltip_column">9</property>
                             <signal name="button-press-event" handler="on_bouquet_popup_menu" object="bouquet_popup_menu" swapped="no"/>
                             <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
-                            <signal name="key-release-event" handler="on_key_release" swapped="no"/>
+                            <signal name="key-release-event" handler="on_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection">
                                 <property name="mode">multiple</property>
