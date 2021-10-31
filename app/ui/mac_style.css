@@ -1,5 +1,6 @@
 * {
-  -GtkDialog-action-area-border: 5em;
+  -GtkDialog-action-area-border: 6em;
+  -GtkDialog-button-spacing: 12;
 }
 
 entry {
@@ -35,4 +36,8 @@ infobar {
 switch slider {
   min-height: 1.5em;
   min-width: 1.5em;
+}
+
+.dialog-action-area button {
+  margin-bottom: 0.6em;
 }
