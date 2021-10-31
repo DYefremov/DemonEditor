@@ -44,7 +44,7 @@ from app.settings import SEP
 from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from .main_helper import on_popup_menu, update_entry_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION
 
 
 class RefsSource(Enum):
@@ -131,6 +131,17 @@ class EpgDialog:
         self._epg_dat_stb_path_entry = builder.get_object("epg_dat_stb_path_entry")
         self._update_on_start_switch = builder.get_object("update_on_start_switch")
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
+
+        if IS_GNOME_SESSION:
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True, title="EPG",
+                                       subtitle=get_message("List configuration"))
+            self._dialog.set_titlebar(header_bar)
+            builder.get_object("left_action_box").reparent(header_bar)
+            right_box = builder.get_object("right_action_box")
+            builder.get_object("main_actions_box").remove(right_box)
+            header_bar.pack_end(right_box)
+            builder.get_object("toolbar_box").set_visible(False)
+
         # Setting the last size of the dialog window
         window_size = self._settings.get("epg_tool_window_size")
         if window_size:
