@@ -36,7 +36,7 @@ from urllib.parse import quote
 from gi.repository import GLib
 
 from .dialogs import get_builder, show_dialog, DialogType, get_message
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page, Column, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page, Column, KeyboardKey, IS_GNOME_SESSION
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI, UtfFTP
 from ..eparser.ecommons import BqServiceType
@@ -159,7 +159,7 @@ class TimerTool(Gtk.Box):
 
     class TimerDialog(Gtk.Dialog):
         def __init__(self, parent, action=None, timer_data=None, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+            super().__init__(use_header_bar=IS_GNOME_SESSION, *args, **kwargs)
 
             self._action = action or TimerTool.TimerAction.ADD
             self._timer_data = timer_data or {}
@@ -213,7 +213,7 @@ class TimerTool(Gtk.Box):
             self._timer_desc_entry.drag_dest_unset()
             self._timer_service_entry.drag_dest_unset()
 
-            self.add_buttons(get_message("Cancel"), Gtk.ResponseType.CLOSE, get_message("Save"), Gtk.ResponseType.OK)
+            self.add_buttons(get_message("Cancel"), Gtk.ResponseType.CANCEL, get_message("Save"), Gtk.ResponseType.OK)
             self.get_content_area().pack_start(builder.get_object("timer_dialog_frame"), True, True, 5)
 
             if self._action is TimerTool.TimerAction.ADD:

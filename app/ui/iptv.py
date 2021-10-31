@@ -662,7 +662,7 @@ class M3uImportDialog(IptvListDialog):
         extra_box.pack_start(self._info_label, False, False, 5)
         extra_box.pack_end(self._picon_box, True, True, 5)
 
-        frame = Gtk.Frame(visible=True)
+        frame = Gtk.Frame(visible=True, margin_bottom=5)
         frame.add(extra_box)
         self._data_box.add(frame)
 

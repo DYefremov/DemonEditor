@@ -185,7 +185,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkImage" id="cancel_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="stock">gtk-cancel</property>
+                        <property name="stock">gtk-close</property>
                       </object>
                     </child>
                   </object>
@@ -268,6 +268,33 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="response" handler="on_response" swapped="no"/>
+    <child type="action">
+      <object class="GtkButton" id="cancel_config_list_button">
+        <property name="label" translatable="yes">Cancel</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="list_configuration_apply_button">
+        <property name="label" translatable="yes">Apply</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_apply" swapped="no"/>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="list_configuration_ok_button">
+        <property name="label" translatable="yes">OK</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="iptv_list_configuration_dialog_box">
         <property name="can_focus">False</property>
@@ -278,48 +305,6 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="valign">center</property>
             <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="cancel_config_list_button">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="list_configuration_apply_button">
-                <property name="label" translatable="yes">Apply</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_apply" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="list_configuration_ok_button">
-                <property name="label" translatable="yes">OK</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -873,6 +858,34 @@ Author: Dmitriy Yefremov
     <child type="titlebar">
       <placeholder/>
     </child>
+    <child type="action">
+      <object class="GtkButton" id="iptv_dialog_cancel_button">
+        <property name="label" translatable="yes">Cancel</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="iptv_dialog_add_button">
+        <property name="label" translatable="yes">Add</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_save" swapped="no"/>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="iptv_dialog_save_button">
+        <property name="label" translatable="yes">Save</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_save" swapped="no"/>
+      </object>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="iptv_dialog_box">
         <property name="can_focus">False</property>
@@ -882,49 +895,6 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="valign">center</property>
             <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="iptv_dialog_cancel_button">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="iptv_dialog_add_button">
-                <property name="label" translatable="yes">Add</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_save" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="iptv_dialog_save_button">
-                <property name="label" translatable="yes">Save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_save" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -938,7 +908,6 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
-            <property name="margin_top">2</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkFrame" id="iptv_dialog_service_data_frame">
@@ -1340,60 +1309,60 @@ Author: Dmitriy Yefremov
                 <property name="position">2</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkInfoBar" id="info_bar">
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkInfoBar" id="info_bar">
+            <property name="can_focus">False</property>
+            <property name="show_close_button">True</property>
+            <signal name="response" handler="on_info_bar_close" swapped="no"/>
+            <child internal-child="action_area">
+              <object class="GtkButtonBox">
                 <property name="can_focus">False</property>
-                <property name="show_close_button">True</property>
-                <signal name="response" handler="on_info_bar_close" swapped="no"/>
-                <child internal-child="action_area">
-                  <object class="GtkButtonBox">
+                <property name="spacing">6</property>
+                <property name="layout_style">end</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child internal-child="content_area">
+              <object class="GtkBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">16</property>
+                <child>
+                  <object class="GtkLabel" id="info_bar_message_label">
+                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">6</property>
-                    <property name="layout_style">end</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">label</property>
+                    <property name="ellipsize">end</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child internal-child="content_area">
-                  <object class="GtkBox">
-                    <property name="can_focus">False</property>
-                    <property name="spacing">16</property>
-                    <child>
-                      <object class="GtkLabel" id="info_bar_message_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">label</property>
-                        <property name="ellipsize">end</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

@@ -275,6 +275,38 @@ Author: Dmitriy Yefremov
     <child type="titlebar">
       <placeholder/>
     </child>
+    <child type="action">
+      <object class="GtkButton" id="cancel_button">
+        <property name="label" translatable="yes">Cancel</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_cancel" swapped="no"/>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="apply_button">
+        <property name="label" translatable="yes">Apply</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Save current service</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_save" swapped="no"/>
+        <accelerator key="Return" signal="activate"/>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="create_button">
+        <property name="label" translatable="yes">Create</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Create and save as new service</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_create_new" swapped="no"/>
+      </object>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_vbox">
         <property name="can_focus">False</property>
@@ -287,53 +319,6 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="valign">center</property>
             <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="cancel_button">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_cancel" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="apply_button">
-                <property name="label" translatable="yes">Apply</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Save current service</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_save" swapped="no"/>
-                <accelerator key="Return" signal="activate"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="create_button">
-                <property name="label" translatable="yes">Create</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Create and save as new service</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_create_new" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1644,6 +1629,9 @@ Author: Dmitriy Yefremov
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-6">cancel_button</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkListStore" id="transponder_services_liststore">
     <columns>
@@ -1676,6 +1664,24 @@ Author: Dmitriy Yefremov
     <child>
       <placeholder/>
     </child>
+    <child type="action">
+      <object class="GtkButton" id="tr_services_no_button">
+        <property name="label" translatable="yes">Cancel</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="tr_services_ok_button">
+        <property name="label" translatable="yes">OK</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="tr_services_dialog_vbox">
         <property name="can_focus">False</property>
@@ -1685,34 +1691,6 @@ Author: Dmitriy Yefremov
           <object class="GtkButtonBox">
             <property name="can_focus">False</property>
             <property name="valign">center</property>
-            <child>
-              <object class="GtkButton" id="tr_services_no_button">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="tr_services_ok_button">
-                <property name="label" translatable="yes">OK</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
