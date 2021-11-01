@@ -166,7 +166,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="satellite_view" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
@@ -220,7 +220,7 @@ Author: Dmitriy Yefremov
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
         <signal name="activate" handler="on_edit" object="transponder_view" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
@@ -1482,7 +1482,7 @@ Author: Dmitriy Yefremov
                         <property name="image">sat_update_cancel_image</property>
                         <property name="always_show_image">True</property>
                         <signal name="clicked" handler="on_cancel_receive" swapped="no"/>
-                        <accelerator key="z" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="z" signal="clicked" modifiers="Primary"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1518,7 +1518,7 @@ Author: Dmitriy Yefremov
                             <property name="icon_size">1</property>
                           </object>
                         </child>
-                        <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+                        <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | Primary"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1542,7 +1542,7 @@ Author: Dmitriy Yefremov
                             <property name="icon_size">1</property>
                           </object>
                         </child>
-                        <accelerator key="f" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                        <accelerator key="f" signal="clicked" modifiers="Primary"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>

@@ -159,6 +159,7 @@ class Application(Gtk.Application):
                     "on_import_m3u": self.on_import_m3u,
                     "on_bouquet_export": self.on_bouquet_export,
                     "on_export_to_m3u": self.on_export_to_m3u,
+                    "on_import_bouquet": self.on_import_bouquet,
                     "on_insert_marker": self.on_insert_marker,
                     "on_insert_space": self.on_insert_space,
                     "on_fav_press": self.on_fav_press,

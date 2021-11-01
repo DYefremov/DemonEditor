@@ -673,7 +673,7 @@ Author: Dmitriy Yefremov
                         <property name="image">filter_image</property>
                         <property name="always_show_image">True</property>
                         <signal name="toggled" handler="on_filter_toggled" swapped="no"/>
-                        <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+                        <accelerator key="f" signal="clicked" modifiers="GDK_SHIFT_MASK | Primary"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
