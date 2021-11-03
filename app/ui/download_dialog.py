@@ -35,7 +35,7 @@ from app.connections import download_data, DownloadType, upload_data
 from app.settings import SettingsType
 from app.ui.backup import backup_data, restore_data
 from app.ui.main_helper import append_text_to_tview
-from app.ui.settings_dialog import show_settings_dialog
+from app.ui.settings_dialog import SettingsDialog
 from .dialogs import show_dialog, DialogType, get_message, get_builder
 from .uicommons import Gtk, UI_RESOURCES_PATH
 
@@ -120,8 +120,9 @@ class DownloadDialog:
         self._dialog_window.destroy()
 
     def on_settings(self, item):
-        response = show_settings_dialog(self._dialog_window, self._settings)
-        if response != Gtk.ResponseType.CANCEL:
+        dialog = SettingsDialog(self._dialog_window, self._settings)
+        dialog.show()
+        if dialog.is_updated():
             self._s_type = self._settings.setting_type
             self.update_profiles()
             gen = self._update_settings_callback()

@@ -60,16 +60,12 @@ from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, ge
 from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
-from .main_helper import (insert_marker, move_items, rename, ViewTarget, set_flags, locate_in_services,
-                          scroll_to, get_base_model, update_picons_data, copy_picon_reference, assign_picons,
-                          remove_picon, is_only_one_item_selected, gen_bouquets, BqGenType, append_picons,
-                          get_selection, get_model_data, remove_all_unused_picons, get_picon_pixbuf, get_base_itrs,
-                          get_iptv_url)
+from .main_helper import *
 from .picons import PiconManager
 from .satellites import SatellitesTool, ServicesUpdateDialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
-from .settings_dialog import show_settings_dialog
+from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
                         FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION)
 
@@ -2197,13 +2193,14 @@ class Application(Gtk.Application):
                         self._bouquets["{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE])] = bq
 
     def delete_selection(self, view, *args):
-        """ Used for clear selection on given view(s) """
+        """ Used for clear selection on given view(s). """
         for v in [view, *args]:
             v.get_selection().unselect_all()
 
     def on_settings(self, action, value=None):
-        response = show_settings_dialog(self._main_window, self._settings)
-        if response != Gtk.ResponseType.CANCEL:
+        dialog = SettingsDialog(self._main_window, self._settings)
+        dialog.show()
+        if dialog.is_updated():
             gen = self.update_settings()
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 

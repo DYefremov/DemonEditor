@@ -50,7 +50,6 @@ class SettingsDialog:
                     "on_settings_type_changed": self.on_settings_type_changed,
                     "on_reset": self.on_reset,
                     "on_response": self.on_response,
-                    "apply_settings": self.apply_settings,
                     "on_connection_test": self.on_connection_test,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_set_color_switch": self.on_set_color_switch,
@@ -86,11 +85,12 @@ class SettingsDialog:
                     "on_icon_theme_add": self.on_icon_theme_add,
                     "on_icon_theme_remove": self.on_icon_theme_remove}
 
-        # Settings
+        # Settings.
         self._ext_settings = settings
         self._settings = Settings(settings.settings)
         self._profiles = self._settings.profiles
         self._s_type = self._settings.setting_type
+        self._updated = False
 
         builder = get_builder(UI_RESOURCES_PATH + "settings_dialog.glade", handlers)
 
@@ -135,7 +135,7 @@ class SettingsDialog:
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
         self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
-        # Streaming
+        # Streaming.
         self._apply_presets_button = builder.get_object("apply_presets_button")
         self._transcoding_switch = builder.get_object("transcoding_switch")
         self._edit_preset_switch = builder.get_object("edit_preset_switch")
@@ -277,14 +277,15 @@ class SettingsDialog:
             self._picons_paths_box.set_active(0)
 
     def show(self):
-        self._dialog.run()
+        return self._dialog.run()
+
+    def is_updated(self):
+        return self._updated
 
     def on_response(self, dialog, resp):
-        if resp == Gtk.ResponseType.OK and not self.apply_settings():
-            return
-
-        self._dialog.destroy()
-        return resp
+        if resp == Gtk.ResponseType.ACCEPT:
+            self._updated = self.on_save_settings()
+        dialog.destroy()
 
     def on_field_icon_press(self, entry, icon, event_button):
         update_entry_data(entry, self._dialog, self._settings)
@@ -376,9 +377,9 @@ class SettingsDialog:
         self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
         self._settings.picons_path = self._picons_paths_box.get_active_id()
 
-    def apply_settings(self, item=None):
+    def on_save_settings(self, item=None):
         if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
-            return
+            return False
 
         self.on_apply_profile_settings()
         self._ext_settings.profiles = self._settings.profiles
@@ -423,6 +424,7 @@ class SettingsDialog:
 
         self._ext_settings.default_profile = list(filter(lambda r: r[1], self._profile_view.get_model()))[0][0]
         self._ext_settings.save()
+
         return True
 
     @run_task
