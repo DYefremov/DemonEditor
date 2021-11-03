@@ -1273,3 +1273,21 @@ msgstr "Дадатковая крыніца"
 
 msgid "Automatically set the name selected in the favorites list."
 msgstr "Аўтаматычная ўсталёўка імя са спіса абранага."
+
+msgid "Playback"
+msgstr "Прайграванне"
+
+msgid "Audio"
+msgstr "Аўдыё"
+
+msgid "Audio Track"
+msgstr "Аўдыёдарожка"
+
+msgid "Subtitle"
+msgstr "Субтытры"
+
+msgid "Subtitle Track"
+msgstr "Дарожка субтытраў"
+
+msgid "Aspect ratio"
+msgstr "Стасунак бакоў"

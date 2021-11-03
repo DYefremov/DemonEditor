@@ -1287,3 +1287,21 @@ msgstr "Zusätzliche Quelle"
 
 msgid "Automatically set the name selected in the favorites list."
 msgstr "Automatisch den in der Favoritenliste ausgewählten Namen einstellen."
+
+msgid "Playback"
+msgstr "Wiedergabe"
+
+msgid "Audio"
+msgstr ""
+
+msgid "Audio Track"
+msgstr "Audio"
+
+msgid "Subtitle"
+msgstr "Untertitel"
+
+msgid "Subtitle Track"
+msgstr "Untertitelspur"
+
+msgid "Aspect ratio"
+msgstr "Seitenverhältnis"
