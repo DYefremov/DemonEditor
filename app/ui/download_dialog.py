@@ -59,10 +59,6 @@ class DownloadDialog:
 
         self._dialog_window = builder.get_object("download_dialog_window")
         self._dialog_window.set_transient_for(transient)
-        self._info_bar = builder.get_object("info_bar")
-        self._message_label = builder.get_object("info_bar_message_label")
-        self._text_view = builder.get_object("text_view")
-        self._expander = builder.get_object("expander")
         self._host_entry = builder.get_object("host_entry")
         self._data_path_entry = builder.get_object("data_path_entry")
         self._remove_unused_check_button = builder.get_object("remove_unused_check_button")
@@ -73,6 +69,13 @@ class DownloadDialog:
         self._use_http_switch = builder.get_object("use_http_switch")
         self._http_radio_button = builder.get_object("http_radio_button")
         self._profile_combo_box = builder.get_object("profile_combo_box")
+        # Info.
+        self._info_bar = builder.get_object("info_bar")
+        self._message_label = builder.get_object("info_bar_message_label")
+        self._text_view = builder.get_object("text_view")
+        self._log_bar = builder.get_object("log_bar")
+        self._log_bar.bind_property("visible", builder.get_object("log_bar_frame"), "visible")
+        self._log_bar.connect("response", lambda b, r: b.set_visible(False))
 
         self.init_settings()
 
@@ -148,7 +151,7 @@ class DownloadDialog:
     @run_task
     def download(self, download, d_type):
         """ Download/upload data from/to receiver """
-        GLib.idle_add(self._expander.set_expanded, True)
+        GLib.idle_add(self._log_bar.set_visible, True)
         self.clear_output()
         backup, backup_src, data_path = self._settings.backup_before_downloading, None, None
 
