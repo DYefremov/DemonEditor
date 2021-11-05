@@ -200,6 +200,9 @@ class SettingsDialog:
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
+        # Network.
+        # Separated due to a bug with response (presumably in the builder) in ubuntu 18.04 and derivatives.
+        builder.get_object("network_settings_frame").add(builder.get_object("network_box"))
         # Style.
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
