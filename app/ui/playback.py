@@ -295,7 +295,7 @@ class PlayerBox(Gtk.Box):
         """ Returns a string representation of time from duration in milliseconds """
         m, s = divmod(duration // 1000, 60)
         h, m = divmod(m, 60)
-        return "{}{:02d}:{:02d}".format(str(h) + ":" if h else "", m, s)
+        return f"{str(h) + ':' if h else ''}{m:02d}:{s:02d}"
 
     def set_player_area_size(self, widget):
         w, h = self._app.app_window.get_size()
@@ -310,6 +310,7 @@ class PlayerBox(Gtk.Box):
 
         if self._playback_window:
             self._playback_window.show()
+            self._playback_window.set_title(self.get_playback_title())
         else:
             self._playback_window = Gtk.Window(title=self.get_playback_title(),
                                                window_position=Gtk.WindowPosition.CENTER,
@@ -333,7 +334,7 @@ class PlayerBox(Gtk.Box):
     def get_playback_title(self):
         path, column = self._fav_view.get_cursor()
         if path:
-            return "DemonEditor [{}]".format(self._app.fav_view.get_model()[path][:][Column.FAV_SERVICE])
+            return f"DemonEditor [{self._app.fav_view.get_model()[path][:][Column.FAV_SERVICE]}]"
         return "DemonEditor [Playback]"
 
     def on_play_stream(self):
@@ -396,11 +397,13 @@ class PlayerBox(Gtk.Box):
         else:
             self._current_mrl = url
 
+    @run_idle
     def on_played(self, player, duration):
-        GLib.idle_add(self._fav_view.set_sensitive, True)
+        self._fav_view.set_sensitive(True)
         if not IS_DARWIN:
             self.on_duration_changed(duration)
 
+    @run_idle
     def on_error(self, player, msg):
         self._app.show_error_message(msg)
         self._fav_view.set_sensitive(True)
