@@ -1291,3 +1291,12 @@ msgstr "Дарожка субтытраў"
 
 msgid "Aspect ratio"
 msgstr "Стасунак бакоў"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Гэта можа змяніць налады іншых профіляў!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Перацягніце сэрвісы на патрэбны пікон ці пікон на спіс абраных сэрвісаў."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Усталёўвае тэчку профілю па змаўчанні для захоўвання  піконаў, рэзервовых копій і т. п."

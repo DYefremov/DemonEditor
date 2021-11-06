@@ -609,7 +609,7 @@ class SettingsDialog:
         self._ext_settings.picons_paths = tuple(r[0] for r in model)
 
     def on_remove_picon_path(self, button):
-        msg = f"{get_message('This may change the settings of other profiles!')}\n\n\t\t{'Are you sure?'}"
+        msg = f"{get_message('This may change the settings of other profiles!')}\n\n\t\t{get_message('Are you sure?')}"
         if show_dialog(DialogType.QUESTION, self._dialog, msg) != Gtk.ResponseType.OK:
             return
 

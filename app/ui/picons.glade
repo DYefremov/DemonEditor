@@ -705,7 +705,7 @@ Author: Dmitriy Yefremov
                                   <object class="GtkTreeView" id="picons_src_view">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services. </property>
+                                    <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services.</property>
                                     <property name="model">picons_src_sort_model</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>

@@ -1305,3 +1305,12 @@ msgstr "Untertitelspur"
 
 msgid "Aspect ratio"
 msgstr "Seitenverhältnis"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Dadurch können sich die Einstellungen anderer Profile ändern!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Ziehe die Dienste auf das gewünschte Picon oder Picon in die Liste der ausgewählten Dienste."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Legt den Profilordner als Standardordner zum Speichern von Piconen, Backups usw. fest."
