@@ -1401,15 +1401,25 @@ class Application(Gtk.Application):
     def on_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         txt = data.get_text()
         uris = data.get_uris()
+        name, model = get_model_data(view)
+
         if txt:
-            name, model = get_model_data(view)
             if txt.startswith("file://") and name == self.SERVICE_MODEL_NAME:
                 self.on_import_data(urlparse(unquote(txt)).path.strip())
             elif name == self.FAV_MODEL_NAME:
                 self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
-        elif len(uris) == 2:
-            self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
-                                                      urlparse(unquote(uris[1])).path + os.sep)
+
+        if uris:
+            if len(uris) == 2:
+                self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
+                                                          urlparse(unquote(uris[1])).path + os.sep)
+            elif IS_DARWIN and len(uris) == 1:
+                src, sep, dest = uris[0].partition(self.DRAG_SEP)
+                src_path = urlparse(unquote(src)).path
+                if dest:
+                    dest_path = urlparse(unquote(dest)).path + os.sep
+                    self.picons_buffer = self.on_assign_picon(view, src_path, dest_path)
+
             drag_context.finish(True, False, time)
 
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
@@ -2538,6 +2548,10 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def on_import_data(self, path):
+        if self._services_load_spinner.get_property("active"):
+            self.show_error_message("Data loading in progress!")
+            return
+
         msg = "Combine with the current data?"
         if len(self._services_model) > 0 and show_dialog(DialogType.QUESTION, self._main_window,
                                                          msg) == Gtk.ResponseType.OK:

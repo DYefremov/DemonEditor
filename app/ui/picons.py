@@ -339,8 +339,11 @@ class PiconManager(Gtk.Box):
     def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
         model, path = view.get_selection().get_selected_rows()
         if path:
-            data.set_uris([Path(model[path][-1]).as_uri(),
-                           Path(self._settings.profile_picons_path).as_uri()])
+            dest_uri = Path(self._settings.profile_picons_path).as_uri()
+            if IS_DARWIN:
+                data.set_uris([f"{Path(model[path][-1]).as_uri()}{self._app.DRAG_SEP}{dest_uri}"])
+            else:
+                data.set_uris([Path(model[path][-1]).as_uri(), dest_uri])
 
     def on_picons_view_drag_drop(self, view, drag_context, x, y, time):
         view.stop_emission_by_name("drag_drop")
@@ -357,7 +360,7 @@ class PiconManager(Gtk.Box):
             self.update_picons_from_file(view, txt)
             return
 
-        itr_str, sep, src = txt.partition("::::")
+        itr_str, sep, src = txt.partition(self._app.DRAG_SEP)
         if src == self._app.BQ_MODEL_NAME:
             return
 
