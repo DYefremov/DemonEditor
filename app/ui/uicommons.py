@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import locale
 import os
 from enum import Enum, IntEnum
@@ -263,10 +291,12 @@ if IS_LINUX:
         LEFT = 113
         RIGHT = 114
         F2 = 68
+        F5 = 71
         F7 = 73
         SPACE = 65
         DELETE = 119
         BACK_SPACE = 22
+        RETURN = 36
         CTRL_L = 37
         CTRL_R = 105
         # Laptop codes
@@ -301,10 +331,12 @@ elif IS_DARWIN:
         LEFT = 123
         RIGHT = 123
         F2 = 120
+        F5 = 96
         F7 = 98
         SPACE = 49
         DELETE = 51
         BACK_SPACE = 76
+        RETURN = 36
         CTRL_L = 55
         CTRL_R = 55
         # Laptop codes.
@@ -337,10 +369,12 @@ else:
         LEFT = 37
         RIGHT = 39
         F2 = 113
+        F5 = 116
         F7 = 118
         SPACE = 32
         DELETE = 46
         BACK_SPACE = 8
+        RETURN = 13
         CTRL_L = 17
         CTRL_R = 163
         # Laptop codes.

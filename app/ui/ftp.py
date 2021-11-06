@@ -469,7 +469,7 @@ class FtpClientBox(Gtk.HBox):
 
         resp = "2"
         try:
-            GLib.idle_add(self._app._wait_dialog.show)
+            GLib.idle_add(self._app.wait_dialog.show)
 
             uris = data.get_uris()
             if self._settings.is_darwin and len(uris) == 1:
@@ -488,7 +488,7 @@ class FtpClientBox(Gtk.HBox):
                 else:
                     resp = self._ftp.send_file(path.name, str(path.parent) + "/", callback=self.update_ftp_info)
         finally:
-            GLib.idle_add(self._app._wait_dialog.hide)
+            GLib.idle_add(self._app.wait_dialog.hide)
             if resp and resp[0] == "2":
                 itr = self._ftp_model.get_iter_first()
                 if itr:
@@ -507,7 +507,7 @@ class FtpClientBox(Gtk.HBox):
     def on_file_drag_data_received(self, view, context, x, y, data, info, time):
         cur_path = self._file_model.get_value(self._file_model.get_iter_first(), self.Column.ATTR) + "/"
         try:
-            GLib.idle_add(self._app._wait_dialog.show)
+            GLib.idle_add(self._app.wait_dialog.show)
 
             uris = data.get_uris()
             if self._settings.is_darwin and len(uris) == 1:
@@ -525,7 +525,7 @@ class FtpClientBox(Gtk.HBox):
         except OSError as e:
             log(e)
         finally:
-            GLib.idle_add(self._app._wait_dialog.hide)
+            GLib.idle_add(self._app.wait_dialog.hide)
             self.init_file_data(cur_path)
 
         Gtk.drag_finish(context, True, False, time)
@@ -564,6 +564,10 @@ class FtpClientBox(Gtk.HBox):
                 self.on_ftp_file_remove()
             elif self._file_view.is_focus():
                 self.on_file_remove()
+        elif key is KeyboardKey.RETURN:
+            path, column = view.get_cursor()
+            if path:
+                view.emit("row-activated", path, column)
 
     def on_view_press(self, view, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
