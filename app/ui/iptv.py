@@ -474,6 +474,8 @@ class IptvListDialog:
         self._apply_button = builder.get_object("list_configuration_apply_button")
         self._cancel_button = builder.get_object("cancel_config_list_button")
         self._ok_button = builder.get_object("list_configuration_ok_button")
+        self._ok_button.bind_property("visible", self._apply_button, "visible", 4)
+        self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
         # Style
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -585,27 +587,29 @@ class IptvListConfigurationDialog(IptvListDialog):
             sid_auto = self._sid_auto_check_button.get_active()
             nid_default = self._nid_check_button.get_active()
             namespace_default = self._namespace_check_button.get_active()
+            all_default = self.is_all_data_default()
 
             st_type = get_stream_type(self._stream_type_combobox)
-            s_id = 0 if id_default else int(self._list_srv_id_entry.get_text())
+            s_id = "0" if id_default else self._list_srv_id_entry.get_text()
             srv_type = "1" if type_default else self._list_srv_type_entry.get_text()
-            tid = "0" if tid_default else "{:X}".format(int(self._list_tid_entry.get_text()))
-            nid = "0" if nid_default else "{:X}".format(int(self._list_nid_entry.get_text()))
-            namespace = "0" if namespace_default else "{:X}".format(int(self._list_namespace_entry.get_text()))
+            sid = "0" if sid_auto else self._list_sid_entry.get_text()
+            tid = "0" if tid_default else f"{int(self._list_tid_entry.get_text()):X}"
+            nid = "0" if nid_default else f"{int(self._list_nid_entry.get_text()):X}"
+            namespace = "0" if namespace_default else f"{int(self._list_namespace_entry.get_text()):X}"
 
             for index, row in enumerate(self._rows):
                 fav_id = row[Column.FAV_ID]
                 data, sep, desc = fav_id.partition("http")
                 data = data.split(":")
 
-                if self.is_all_data_default():
+                if all_default:
                     data[1], data[2], data[3], data[4], data[5], data[6] = "010000"
                 else:
                     data[0], data[1], data[2], data[4], data[5], data[6] = st_type, s_id, srv_type, tid, nid, namespace
-                    data[3] = "{:X}".format(index) if sid_auto else "0"
 
+                data[3] = f"{index:X}" if sid_auto else sid
                 data = ":".join(data)
-                new_fav_id = "{}{}{}".format(data, sep, desc)
+                new_fav_id = f"{data}{sep}{desc}"
                 row[Column.FAV_ID] = new_fav_id
                 srv = self._services.pop(fav_id, None)
 
@@ -616,6 +620,7 @@ class IptvListConfigurationDialog(IptvListDialog):
             list(map(lambda r: self._bouquet.append(r[Column.FAV_ID]), self._fav_model))
 
             self._info_bar.set_visible(True)
+            self._ok_button.set_visible(True)
 
 
 class M3uImportDialog(IptvListDialog):
@@ -636,8 +641,6 @@ class M3uImportDialog(IptvListDialog):
         self._dialog.set_title(get_message("Playlist import"))
         self._dialog.connect("delete-event", self.on_close)
         self._apply_button.set_label(get_message("Import"))
-        self._ok_button.bind_property("visible", self._apply_button, "visible", 4)
-        self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
         # Progress
         self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
         self._spinner = Gtk.Spinner(active=False)
@@ -678,7 +681,7 @@ class M3uImportDialog(IptvListDialog):
                     GLib.idle_add(self._picon_box.set_sensitive, True)
                     break
         finally:
-            msg = "{} {}.".format(get_message("Streams detected:"), len(self._services) if self._services else 0)
+            msg = f"{get_message('Streams detected:')} {len(self._services) if self._services else 0}."
             GLib.idle_add(self._info_label.set_text, msg)
             GLib.idle_add(self._spinner.set_property, "active", False)
 
@@ -697,6 +700,8 @@ class M3uImportDialog(IptvListDialog):
             s_type = params[1]
             params = params[2:]
             st_type = get_stream_type(self._stream_type_combobox)
+            sid_auto = self._sid_auto_check_button.get_active()
+            sid = 0 if sid_auto else int(self._list_sid_entry.get_text())
 
             for i, s in enumerate(self._services, start=params[0]):
                 # Skipping markers.
@@ -704,7 +709,7 @@ class M3uImportDialog(IptvListDialog):
                     services.append(s)
                     continue
 
-                params[0] = i
+                params[0] = i if sid_auto else sid
                 picon_id = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(st_type, s_id, s_type, *params)
                 fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, st_type, s_id, s_type)
                 if s.picon:
@@ -764,16 +769,16 @@ class M3uImportDialog(IptvListDialog):
     @run_idle
     def on_picon_load_done(self, data, user_data):
         try:
-            self._info_label.set_text("Processing: {}".format(user_data))
+            self._info_label.set_text(f"Processing: {user_data}")
             f = Gio.MemoryInputStream.new_from_data(data)
             pixbuf = GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, 220, 132, False, self._cancellable)
-            path = "{}{}".format(self._pic_path, user_data)
+            path = f"{self._pic_path}{user_data}"
             pixbuf.savev(path, "png", [], [])
             self._picons[user_data] = get_picon_pixbuf(path)
         except GLib.GError as e:
             self.update_progress(1)
             if e.code != Gio.IOErrorEnum.CANCELLED:
-                log("Loading picon [{}] data error: {}".format(user_data, e))
+                log(f"Loading picon [{user_data}] data error: {e}")
         else:
             self.update_progress()
 
@@ -789,14 +794,14 @@ class M3uImportDialog(IptvListDialog):
         self._progress_bar.set_visible(False)
         self._progress_bar.set_fraction(0.0)
         self._apply_button.set_sensitive(True)
-        self._info_label.set_text("Errors: {}.".format(self._errors_count))
+        self._info_label.set_text(f"Errors: {self._errors_count}.")
         self._is_download = False
 
         gen = self.update_fav_model()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_fav_model(self):
-        services = self._app._services
+        services = self._app.current_services
         picons = self._app._picons
         model = self._app.fav_view.get_model()
         for r in model:
