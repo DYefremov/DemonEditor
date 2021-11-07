@@ -151,18 +151,18 @@ class LameDbReader:
             is_v3 = False
             if len(tid) < 4:
                 is_v3 = True
-                tid = "{:0>4}".format(tid)
+                tid = f"{tid:0>4}"
                 data[2] = tid
             if len(nid) < 4:
                 is_v3 = True
-                nid = "{:0>4}".format(nid)
+                nid = f"{nid:0>4}"
                 data[3] = nid
             if is_v3:
-                data[0] = "{:0>4}".format(data[0])
+                data[0] = f"{data[0]:0>4}"
                 data_id = _SEP.join(data)
 
             srv_type = int(data[4])
-            transponder_id = "{}:{}:{}".format(data[1], tid, nid)
+            transponder_id = f"{data[1]}:{tid}:{nid}"
             transponder = transponders.get(transponder_id, None)
 
             tid = tid.lstrip(sp).upper()
@@ -170,9 +170,9 @@ class LameDbReader:
             ssid = str(data[0]).lstrip(sp).upper()
             onid = str(data[1]).lstrip(sp).upper()
             # For comparison in bouquets. Needed in upper case!!!
-            fav_id = "{}:{}:{}:{}".format(ssid, tid, nid, onid)
-            picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(srv_type, ssid, tid, nid, onid)
-            s_id = "1:0:{:X}:{}:{}:{}:{}:0:0:0:".format(srv_type, ssid, tid, nid, onid)
+            fav_id = f"{ssid}:{tid}:{nid}:{onid}"
+            picon_id = f"1_0_{srv_type:X}_{ssid}_{tid}_{nid}_{onid}_0_0_0.png"
+            s_id = f"1:0:{srv_type:X}:{ssid}:{tid}:{nid}:{onid}:0:0:0:"
 
             all_flags = srv[2].split(",")
             coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
@@ -203,7 +203,7 @@ class LameDbReader:
                     system = "DVB-S2" if len(tr) > 7 else "DVB-S"
                     pos = tr[4]
                 if tr_type is TrType.Terrestrial:
-                    system = T_SYSTEM.get(tr[10], None)
+                    system = T_SYSTEM.get(tr[10] if len(tr) > 10 else "0", None)
                     pos = "T"
                     fec = T_FEC.get(tr[3], None)
                 elif tr_type is TrType.Cable:
@@ -217,13 +217,13 @@ class LameDbReader:
 
                 # Formatting displayed values.
                 try:
-                    freq = "{}".format(int(freq) // 1000)
-                    rate = "{}".format(int(rate) // 1000)
+                    freq = f"{int(freq) // 1000}"
+                    rate = f"{int(rate) // 1000}"
                     if tr_type is TrType.Satellite:
                         pos = int(pos)
-                        pos = "{:0.1f}{}".format(abs(pos / 10), "W" if pos < 0 else "E")
+                        pos = f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}"
                 except ValueError as e:
-                    log("Parse error [parse_services]: {}".format(e))
+                    log(f"Parse error [parse_services]: {e}")
 
                 s = Service(srv[2], tr_type.value, coded, srv_name, locked, hide, package, service_type, None,
                             picon_id, data[0], freq, rate, pol, fec, system, pos, data_id, fav_id, transponder)
