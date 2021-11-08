@@ -36,9 +36,9 @@ from app.connections import HttpAPI
 from app.eparser.ecommons import BqServiceType
 from app.settings import PlayStreamsMode, IS_DARWIN, SettingsType
 from app.tools.media import Player
-from app.ui.dialogs import get_builder
+from app.ui.dialogs import get_builder, get_message
 from app.ui.main_helper import get_iptv_url
-from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, IS_GNOME_SESSION
+from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, IS_GNOME_SESSION, Page
 
 
 class PlayerBox(Gtk.Box):
@@ -332,10 +332,13 @@ class PlayerBox(Gtk.Box):
         self._playback_window.show()
 
     def get_playback_title(self):
-        path, column = self._fav_view.get_cursor()
-        if path:
-            return f"DemonEditor [{self._app.fav_view.get_model()[path][:][Column.FAV_SERVICE]}]"
-        return "DemonEditor [Playback]"
+        if self._app.page is not Page.RECORDINGS:
+            path, column = self._fav_view.get_cursor()
+            if path:
+                return f"DemonEditor [{self._app.fav_view.get_model()[path][:][Column.FAV_SERVICE]}]"
+        else:
+            return f"DemonEditor [{get_message('Recordings')}]"
+        return f"DemonEditor [{get_message('Playback')}]"
 
     def on_play_stream(self):
         path, column = self._fav_view.get_cursor()
