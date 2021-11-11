@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 
+
+The MIT License (MIT)
+
+Copyright (c) 2018-2020 Dmitriy Yefremov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Dmitriy Yefremov
+
+-->
+<interface domain="demon-editor">
+  <requires lib="gtk+" version="3.16"/>
+  <!-- interface-css-provider-path style.css -->
+  <!-- interface-license-type mit -->
+  <!-- interface-name DemonEditor -->
+  <!-- interface-description Enigma2 channel and satellite list editor for GNU/Linux. -->
+  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkListStore" id="bookmarks_list_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name url -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkImage" id="file_create_folder_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">folder-new</property>
+  </object>
+  <object class="GtkListStore" id="file_list_store">
+    <columns>
+      <!-- column-name icon -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name size -->
+      <column type="gchararray"/>
+      <!-- column-name date -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+      <!-- column-name extra -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkImage" id="ftp_create_folder_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">folder-new</property>
+  </object>
+  <object class="GtkListStore" id="ftp_list_store">
+    <columns>
+      <!-- column-name icon -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name size -->
+      <column type="gchararray"/>
+      <!-- column-name date -->
+      <column type="gchararray"/>
+      <!-- column-name attr -->
+      <column type="gchararray"/>
+      <!-- column-name extra -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkFrame" id="main_frame">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="label_xalign">0.49000000953674316</property>
+    <property name="shadow_type">in</property>
+    <child>
+      <object class="GtkBox" id="main_ftp_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkBox" id="ftp_button_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkButton" id="connect_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Connect</property>
+                <signal name="clicked" handler="on_connect" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="connect_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-connect</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="disconnect_button">
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Disconnect</property>
+                <signal name="clicked" handler="on_disconnect" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="disconnect_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-disconnect</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="bookmark_button">
+                <property name="can_focus">False</property>
+                <property name="model">bookmarks_list_store</property>
+                <property name="id_column">0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkPaned" id="paned">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="wide_handle">True</property>
+            <child>
+              <object class="GtkBox" id="ftp_bpx">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">2</property>
+                <child>
+                  <object class="GtkBox" id="ftp_info_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="ftp_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label">FTP:</property>
+                        <attributes>
+                          <attribute name="weight" value="semibold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="ftp_info_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="ellipsize">end</property>
+                        <property name="max_width_chars">75</property>
+                        <property name="yalign">1</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="ftp_view_scrolled_window">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <property name="min_content_height">100</property>
+                    <child>
+                      <object class="GtkTreeView" id="ftp_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">ftp_list_store</property>
+                        <property name="search_column">1</property>
+                        <property name="rubber_banding">True</property>
+                        <signal name="button-press-event" handler="on_view_popup_menu" object="ftp_popup_menu" swapped="no"/>
+                        <signal name="button-press-event" handler="on_view_press" swapped="no"/>
+                        <signal name="button-release-event" handler="on_view_release" swapped="no"/>
+                        <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
+                        <signal name="drag-data-get" handler="on_ftp_drag_data_get" swapped="no"/>
+                        <signal name="drag-data-received" handler="on_ftp_drag_data_received" swapped="no"/>
+                        <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
+                        <signal name="key-press-event" handler="on_view_key_press" swapped="no"/>
+                        <signal name="row-activated" handler="on_ftp_row_activated" swapped="no"/>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="ftp_selection">
+                            <property name="mode">multiple</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ftp_name_column">
+                            <property name="resizable">True</property>
+                            <property name="min_width">100</property>
+                            <property name="title" translatable="yes">Name</property>
+                            <property name="expand">True</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">1</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="ftp_icon_column_renderer">
+                                <property name="xalign">0.019999999552965164</property>
+                              </object>
+                              <attributes>
+                                <attribute name="pixbuf">0</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererText" id="ftp_name_column_renderer">
+                                <property name="xalign">0.019999999552965164</property>
+                                <property name="ellipsize">end</property>
+                                <signal name="edited" handler="on_ftp_edited" swapped="no"/>
+                              </object>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ftp_size_column">
+                            <property name="sizing">fixed</property>
+                            <property name="min_width">75</property>
+                            <property name="title" translatable="yes">Size</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">2</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ftp_size_column_renderer">
+                                <property name="xalign">0.94999998807907104</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ftp_date_column">
+                            <property name="min_width">75</property>
+                            <property name="title" translatable="yes">Date</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">3</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ftp_date_column_renderer"/>
+                              <attributes>
+                                <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ftp_attr_column">
+                            <property name="sizing">fixed</property>
+                            <property name="min_width">85</property>
+                            <property name="title" translatable="yes">Attr.</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">4</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ftp_attr_column_renderer">
+                                <property name="xalign">0.50999999046325684</property>
+                                <property name="ellipsize">end</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">4</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ftp_extra_column">
+                            <property name="visible">False</property>
+                            <property name="title" translatable="yes">Extra</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ftp_extra_column_renderer"/>
+                              <attributes>
+                                <attribute name="text">5</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="file_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">2</property>
+                <child>
+                  <object class="GtkBox" id="pc_info_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="pc_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="margin_left">10</property>
+                        <property name="label" translatable="yes">PC:</property>
+                        <attributes>
+                          <attribute name="weight" value="semibold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="pc_info_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="ellipsize">end</property>
+                        <property name="max_width_chars">75</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="file_view_scrolled_window">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <property name="min_content_height">100</property>
+                    <child>
+                      <object class="GtkTreeView" id="file_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">file_list_store</property>
+                        <property name="search_column">1</property>
+                        <property name="rubber_banding">True</property>
+                        <signal name="button-press-event" handler="on_view_popup_menu" object="file_popup_menu" swapped="no"/>
+                        <signal name="button-press-event" handler="on_view_press" swapped="no"/>
+                        <signal name="button-release-event" handler="on_view_release" swapped="no"/>
+                        <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
+                        <signal name="drag-data-get" handler="on_file_drag_data_get" swapped="no"/>
+                        <signal name="drag-data-received" handler="on_file_drag_data_received" swapped="no"/>
+                        <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
+                        <signal name="key-press-event" handler="on_view_key_press" swapped="no"/>
+                        <signal name="row-activated" handler="on_file_row_activated" swapped="no"/>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="file_selection">
+                            <property name="mode">multiple</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="file_name_column">
+                            <property name="resizable">True</property>
+                            <property name="min_width">100</property>
+                            <property name="title" translatable="yes">Name</property>
+                            <property name="expand">True</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">1</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="file_icon_column_renderer">
+                                <property name="xalign">0.20000000298023224</property>
+                              </object>
+                              <attributes>
+                                <attribute name="pixbuf">0</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererText" id="file_name_column_renderer">
+                                <property name="ellipsize">end</property>
+                                <signal name="edited" handler="on_file_edited" swapped="no"/>
+                              </object>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="file_size_column">
+                            <property name="sizing">fixed</property>
+                            <property name="min_width">75</property>
+                            <property name="title" translatable="yes">Size</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">2</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="file_size_column_renderer">
+                                <property name="xalign">0.94999998807907104</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="file_date_column">
+                            <property name="min_width">75</property>
+                            <property name="title" translatable="yes">Date</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">3</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="file_date_column_renderer"/>
+                              <attributes>
+                                <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="file_type_column">
+                            <property name="visible">False</property>
+                            <property name="sizing">fixed</property>
+                            <property name="min_width">50</property>
+                            <property name="title" translatable="yes">Path</property>
+                            <property name="alignment">0.5</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="file_path_column_renderer"/>
+                              <attributes>
+                                <attribute name="text">4</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="file_extra_column">
+                            <property name="visible">False</property>
+                            <property name="title" translatable="yes">Extra</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="file_extra_column_renderer"/>
+                              <attributes>
+                                <attribute name="text">5</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child type="label">
+      <object class="GtkLabel" id="main_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">FTP client</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="remove_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">list-remove</property>
+  </object>
+  <object class="GtkImage" id="remove_image_2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">list-remove</property>
+  </object>
+  <object class="GtkImage" id="rename_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">gtk-edit</property>
+  </object>
+  <object class="GtkMenu" id="ftp_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="ftp_create_folder_menu_item">
+        <property name="label" translatable="yes">Create folder</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">ftp_create_folder_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_ftp_create_folder" object="ftp_name_column_renderer" swapped="no"/>
+        <accelerator key="F7" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="ftp_edit_menu_item">
+        <property name="label" translatable="yes">Edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">rename_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_ftp_edit" object="ftp_name_column_renderer" swapped="no"/>
+        <accelerator key="r" signal="activate" modifiers="Primary"/>
+        <accelerator key="F2" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="ftp_remove_menu_item">
+        <property name="label" translatable="yes">Remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">remove_image_2</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_ftp_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="rename_image_2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">gtk-edit</property>
+  </object>
+  <object class="GtkMenu" id="file_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="file_create_folder_menu_item">
+        <property name="label" translatable="yes">Create folder</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">file_create_folder_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_file_create_folder" object="file_name_column_renderer" swapped="no"/>
+        <accelerator key="F7" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="file_edit_menu_item">
+        <property name="label" translatable="yes">Edit</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">rename_image_2</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_file_edit" object="file_name_column_renderer" swapped="no"/>
+        <accelerator key="r" signal="activate" modifiers="Primary"/>
+        <accelerator key="F2" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="file_remove_menu_item">
+        <property name="label" translatable="yes">Remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">remove_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_file_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
+</interface>

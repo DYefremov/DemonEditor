@@ -1,16 +1,51 @@
-""" Helper module for the ui. """
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
+""" Helper module for the GUI. """
+
+__all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "locate_in_services",
+           "scroll_to", "get_base_model", "update_picons_data", "copy_picon_reference", "assign_picons",
+           "remove_picon", "is_only_one_item_selected", "gen_bouquets", "BqGenType", "append_picons",
+           "get_selection", "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs",
+           "get_iptv_url", "update_entry_data", "append_text_to_tview", "on_popup_menu")
+
 import os
 import shutil
+from collections import defaultdict
 from urllib.parse import unquote
 
 from gi.repository import GdkPixbuf, GLib
 
-from app.commons import run_task
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.settings import SettingsType
-from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog
+from app.settings import SettingsType, SEP, IS_WIN
+from .dialogs import show_dialog, DialogType, get_chooser_dialog
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
 
@@ -46,54 +81,57 @@ def move_items(key, view: Gtk.TreeView):
     """ Move items in the tree view """
     selection = view.get_selection()
     model, paths = selection.get_selected_rows()
+    if not paths:
+        return
 
-    if paths:
-        mod_length = len(model)
-        if mod_length == len(paths):
-            return
-        cursor_path = view.get_cursor()[0]
-        max_path = Gtk.TreePath.new_from_indices((mod_length,))
-        min_path = Gtk.TreePath.new_from_indices((0,))
+    is_tree_store = type(model) is Gtk.TreeStore
+    mod_length = len(model)
+    if not is_tree_store and mod_length == len(paths):
+        return
+
+    cursor_path = view.get_cursor()[0]
+    max_path = Gtk.TreePath.new_from_indices((mod_length,))
+    min_path = Gtk.TreePath.new_from_indices((0,))
+
+    if is_tree_store:
         is_tree_store = False
+        parent_paths = list(filter(lambda p: p.get_depth() == 1, paths))
+        if parent_paths:
+            paths = parent_paths
+            min_path = model.get_path(model.get_iter_first())
+            view.collapse_all()
+            if mod_length == len(paths):
+                return
+        else:
+            if not is_some_level(paths):
+                return
+            parent_itr = model.iter_parent(model.get_iter(paths[0]))
+            parent_index = model.get_path(parent_itr)
+            children_num = model.iter_n_children(parent_itr)
+            if key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
+                children_num -= 1
+            min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
+            max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
+            is_tree_store = True
 
-        if type(model) is Gtk.TreeStore:
-            parent_paths = list(filter(lambda p: p.get_depth() == 1, paths))
-            if parent_paths:
-                paths = parent_paths
-                min_path = model.get_path(model.get_iter_first())
-                view.collapse_all()
-                if mod_length == len(paths):
-                    return
-            else:
-                if not is_some_level(paths):
-                    return
-                parent_itr = model.iter_parent(model.get_iter(paths[0]))
-                parent_index = model.get_path(parent_itr)
-                children_num = model.iter_n_children(parent_itr)
-                if key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
-                    children_num -= 1
-                min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
-                max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
-                is_tree_store = True
-
-        if key is KeyboardKey.UP:
-            top_path = Gtk.TreePath(paths[0])
-            set_cursor(top_path, paths, selection, view)
-            top_path.prev()
-            move_up(top_path, model, paths)
-        elif key is KeyboardKey.DOWN:
-            down_path = Gtk.TreePath(paths[-1])
-            set_cursor(down_path, paths, selection, view)
-            down_path.next()
-            if down_path < max_path:
-                move_down(down_path, model, paths)
-            else:
-                max_path.prev()
-                move_down(max_path, model, paths)
-        elif key in (KeyboardKey.PAGE_UP, KeyboardKey.HOME, KeyboardKey.PAGE_UP_KP, KeyboardKey.HOME_KP):
-            move_up(min_path if is_tree_store else cursor_path, model, paths)
-        elif key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
-            move_down(max_path if is_tree_store else cursor_path, model, paths)
+    if key is KeyboardKey.UP:
+        top_path = Gtk.TreePath(paths[0])
+        set_cursor(top_path, paths, selection, view)
+        top_path.prev()
+        move_up(top_path, model, paths)
+    elif key is KeyboardKey.DOWN:
+        down_path = Gtk.TreePath(paths[-1])
+        set_cursor(down_path, paths, selection, view)
+        down_path.next()
+        if down_path < max_path:
+            move_down(down_path, model, paths)
+        else:
+            max_path.prev()
+            move_down(max_path, model, paths)
+    elif key in (KeyboardKey.PAGE_UP, KeyboardKey.HOME, KeyboardKey.PAGE_UP_KP, KeyboardKey.HOME_KP):
+        move_up(min_path if is_tree_store else cursor_path, model, paths)
+    elif key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
+        move_down(max_path if is_tree_store else cursor_path, model, paths)
 
 
 def move_up(top_path, model, paths):
@@ -161,7 +199,8 @@ def rename(view, parent_window, target, fav_view=None, service_view=None, servic
             return
 
         srv_name = response
-        model.set_value(itr, Column.FAV_SERVICE, response)
+        if not model.get_value(itr, Column.FAV_BACKGROUND):
+            model.set_value(itr, Column.FAV_SERVICE, response)
 
         if service_view is not None:
             for row in get_base_model(service_view.get_model()):
@@ -349,12 +388,12 @@ def scroll_to(index, view, paths=None):
 
 # ***************** Picons *********************#
 
-def update_picons_data(path, picons):
+def update_picons_data(path, picons, size=32):
     if not os.path.exists(path):
         return
 
     for file in os.listdir(path):
-        pf = get_picon_pixbuf(path + file)
+        pf = get_picon_pixbuf(path + file, size)
         if pf:
             picons[file] = pf
 
@@ -380,6 +419,10 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
         if src_path == Gtk.ResponseType.CANCEL:
             return picons_files
 
+    if IS_WIN:
+        src_path = src_path.lstrip("/")
+        dst_path = dst_path.lstrip("/") if dst_path else dst_path
+
     if not str(src_path).endswith(".png") or not os.path.isfile(src_path):
         show_dialog(DialogType.ERROR, transient, text="No png file is selected!")
         return picons_files
@@ -398,7 +441,7 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
         picon_id = services.get(fav_id)[Column.SRV_PICON_ID]
 
         if picon_id:
-            picons_path = dst_path or settings.picons_local_path
+            picons_path = dst_path or settings.profile_picons_path
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
             picon_file = picons_path + picon_id
             try:
@@ -495,8 +538,8 @@ def remove_all_unused_picons(settings, picons, services):
 
 
 def remove_picons(settings, picon_ids, picons):
-    pions_path = settings.picons_local_path
-    backup_path = settings.backup_local_path + "picons/"
+    pions_path = settings.profile_picons_path
+    backup_path = "{}{}{}".format(settings.profile_backup_path, "picons", SEP)
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     for p_id in picon_ids:
         picons[p_id] = None
@@ -524,10 +567,16 @@ def get_picon_pixbuf(path, size=32):
         pass
 
 
-# ***************** Bouquets *********************#
+# ***************** Bouquets ********************* #
 
-def gen_bouquets(view, bq_view, transient, gen_type, tv_types, s_type, callback):
-    """ Auto-generate and append list of bouquets """
+def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
+    """ Auto-generate and append list of bouquets. """
+    model, paths = view.get_selection().get_selected_rows()
+    single_types = (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE)
+    if gen_type in single_types:
+        if not is_only_one_item_selected(paths, transient):
+            return
+
     fav_id_index = Column.SRV_FAV_ID
     index = Column.SRV_TYPE
     if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE):
@@ -535,60 +584,49 @@ def gen_bouquets(view, bq_view, transient, gen_type, tv_types, s_type, callback)
     elif gen_type in (BqGenType.SAT, BqGenType.EACH_SAT):
         index = Column.SRV_POS
 
-    model, paths = view.get_selection().get_selected_rows()
+    # Splitting services [caching] by column value.
+    s_data = defaultdict(list)
+    for row in model:
+        s_data[row[index]].append(BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0))
+
     bq_type = BqType.BOUQUET.value if s_type is SettingsType.NEUTRINO_MP else BqType.TV.value
-    if gen_type in (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE):
-        if not is_only_one_item_selected(paths, transient):
-            return
-        service = Service(*model[paths][:Column.SRV_TOOLTIP])
-        if service.service_type not in tv_types:
-            bq_type = BqType.RADIO.value
-        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
-                        [service.package if gen_type is BqGenType.PACKAGE else
-                         service.pos if gen_type is BqGenType.SAT else service.service_type], s_type)
-    else:
-        wait_dialog = WaitDialog(transient)
-        wait_dialog.show()
-        append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model,
-                        {row[index] for row in model}, s_type, wait_dialog)
-
-
-@run_task
-def append_bouquets(bq_type, bq_view, callback, fav_id_index, index, model, names, s_type, wait_dialog=None):
     bq_index = 0 if s_type is SettingsType.ENIGMA_2 else 1
+    bq_root_iter = bq_view.get_model().get_iter(bq_index)
+    srv = Service(*model[paths][:Column.SRV_TOOLTIP])
+    cond = srv.package if gen_type is BqGenType.PACKAGE else srv.pos if gen_type is BqGenType.SAT else srv.service_type
     bq_view.expand_row(Gtk.TreePath(bq_index), 0)
-    bqs_model = bq_view.get_model()
-    bouquets_names = get_bouquets_names(bqs_model)
 
-    for pos, name in enumerate(sorted(names)):
-        if name not in bouquets_names:
-            services = [BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0)
-                        for row in model if row[index] == name]
-            callback(Bouquet(name=name, type=bq_type, services=services, locked=None, hidden=None),
-                     bqs_model.get_iter(bq_index))
+    bq_names = get_bouquets_names(bq_view.get_model())
 
-    if wait_dialog is not None:
-        wait_dialog.destroy()
+    if gen_type in single_types:
+        if cond in bq_names:
+            show_dialog(DialogType.ERROR, transient, "A bouquet with that name exists!")
+        else:
+            callback(Bouquet(cond, bq_type, s_data.get(cond)), bq_root_iter)
+    else:
+        # We add a bouquet only if the given name is missing [keys - names]!
+        for name in sorted(s_data.keys() - bq_names):
+            callback(Bouquet(name, BqType.TV.value, s_data.get(name)), bq_root_iter)
 
 
 def get_bouquets_names(model):
     """ Returns all current bouquets names """
-    bouquets_names = []
+    bouquets_names = set()
     for row in model:
         itr = row.iter
         if model.iter_has_child(itr):
             num_of_children = model.iter_n_children(itr)
             for num in range(num_of_children):
                 child_itr = model.iter_nth_child(itr, num)
-                bouquets_names.append(model[child_itr][0])
+                bouquets_names.add(model[child_itr][0])
     return bouquets_names
 
 
 # ***************** Others *********************#
 
 def update_entry_data(entry, dialog, settings):
-    """ Updates value in text entry from chooser dialog """
-    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, settings=settings)
+    """ Updates value in text entry from chooser dialog. """
+    response = show_dialog(dialog_type=DialogType.CHOOSER, transient=dialog, settings=settings, create_dir=True)
     if response not in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
         entry.set_text(response)
         return response
@@ -621,7 +659,7 @@ def get_base_paths(paths, model):
 def get_model_data(view):
     """ Returns model name and base model from the given view """
     model = get_base_model(view.get_model())
-    model_name = model.get_name()
+    model_name = model.get_name() if model else ""
     return model_name, model
 
 

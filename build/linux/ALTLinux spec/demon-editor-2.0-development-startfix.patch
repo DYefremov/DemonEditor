@@ -1,0 +1,49 @@
+diff -Nru demon-editor-2.0-development-orig/DemonEditor.desktop demon-editor-2.0-development/DemonEditor.desktop
+--- demon-editor-2.0-development-orig/DemonEditor.desktop	2021-10-14 21:32:56.000000000 +0300
++++ demon-editor-2.0-development/DemonEditor.desktop	2021-09-29 13:19:24.000000000 +0300
+@@ -6,8 +6,8 @@
+ Comment[be]=Рэдактар спіса каналаў і спадарожнікаў для Enigma2
+ Comment[de]=Programm- und Satellitenlisten-Editor für Enigma2
+ Icon=demon-editor
+-Exec=bash -c 'cd $(dirname %k) && ./start.py'
++Exec=demon-editor
+ Terminal=false
+ Type=Application
+-Categories=Utility;Application;
++Categories=Utility;
+ StartupNotify=false
+diff -Nru demon-editor-2.0-development-orig/start.py demon-editor-2.0-development/start.py
+--- demon-editor-2.0-development-orig/start.py	2021-10-14 21:32:56.000000000 +0300
++++ demon-editor-2.0-development/start.py	2021-09-29 13:19:24.000000000 +0300
+@@ -1,29 +1,4 @@
+ #!/usr/bin/env python3
+-import os
++from app.ui.main import start_app
+ 
+-
+-def update_icon():
+-    need_update = False
+-    icon_name = "DemonEditor.desktop"
+-
+-    with open(icon_name, "r") as f:
+-        lines = f.readlines()
+-        for i, line in enumerate(lines):
+-            if line.startswith("Icon="):
+-                icon_path = line.lstrip("Icon=")
+-                current_path = "{}/app/ui/icons/hicolor/96x96/apps/demon-editor.png".format(os.getcwd())
+-                if icon_path != current_path:
+-                    need_update = True
+-                    lines[i] = "Icon={}\n".format(current_path)
+-                break
+-
+-    if need_update:
+-        with open(icon_name, "w") as f:
+-            f.writelines(lines)
+-
+-
+-if __name__ == "__main__":
+-    from app.ui.main import start_app
+-
+-    update_icon()
+-    start_app()
++start_app()

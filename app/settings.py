@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import copy
 import json
 import locale
@@ -9,85 +37,65 @@ from pathlib import Path
 from pprint import pformat
 from textwrap import dedent
 
+SEP = os.sep
 HOME_PATH = str(Path.home())
-CONFIG_PATH = HOME_PATH + "/.config/demon-editor/"
+CONFIG_PATH = HOME_PATH + "{}.config{}demon-editor{}".format(SEP, SEP, SEP)
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = HOME_PATH + "/DemonEditor/data/"
+DATA_PATH = HOME_PATH + "{}DemonEditor{}".format(SEP, SEP)
+GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_DARWIN = sys.platform == "darwin"
+IS_WIN = sys.platform == "win32"
+IS_LINUX = sys.platform == "linux"
 
 
 class Defaults(Enum):
     """ Default program settings """
+    USER = "root"
+    PASSWORD = ""
+    HOST = "127.0.0.1"
+    FTP_PORT = "21"
+    HTTP_PORT = "80"
+    TELNET_PORT = "23"
+    HTTP_USE_SSL = False
+    # Enigma2.
+    BOX_SERVICES_PATH = "/etc/enigma2/"
+    BOX_SATELLITE_PATH = "/etc/tuxbox/"
+    BOX_PICON_PATH = "/usr/share/enigma2/picon/"
+    BOX_PICON_PATHS = ("/usr/share/enigma2/picon/",
+                       "/media/hdd/picon/",
+                       "/media/usb/picon/",
+                       "/media/mmc/picon/",
+                       "/media/cf/picon/")
+    # Neutrino.
+    NEUTRINO_BOX_SERVICES_PATH = "/var/tuxbox/config/zapit/"
+    NEUTRINO_BOX_SATELLITE_PATH = "/var/tuxbox/config/"
+    NEUTRINO_BOX_PICON_PATH = "/usr/share/tuxbox/neutrino/icons/logo/"
+    NEUTRINO_BOX_PICON_PATHS = ("/usr/share/tuxbox/neutrino/icons/logo/",)
+    # Paths.
+    BACKUP_PATH = "{}backup{}".format(DATA_PATH, SEP)
+    PICON_PATH = "{}picons{}".format(DATA_PATH, SEP)
+
     DEFAULT_PROFILE = "default"
     BACKUP_BEFORE_DOWNLOADING = True
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
     FORCE_BQ_NAMES = False
-    HTTP_API_SUPPORT = False
+    HTTP_API_SUPPORT = True
     ENABLE_YT_DL = False
     ENABLE_SEND_TO = False
     USE_COLORS = True
     NEW_COLOR = "rgb(255,230,204)"
     EXTRA_COLOR = "rgb(179,230,204)"
+    TOOLTIP_LOGO_SIZE = 96
+    LIST_PICON_SIZE = 32
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
+    STREAM_LIB = "mpv" if IS_WIN else "vlc"
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = DATA_PATH + "records/"
+    RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
-    ACTIVE_TRANSCODING_PRESET = "720p TV/device"
-
-
-def get_settings():
-    if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
-        write_settings(get_default_settings())
-
-    with open(CONFIG_FILE, "r") as config_file:
-        return json.load(config_file)
-
-
-def get_default_settings(profile_name="default"):
-    def_settings = SettingsType.ENIGMA_2.get_default_settings()
-    set_local_paths(def_settings, profile_name)
-
-    return {
-        "version": 1,
-        "default_profile": Defaults.DEFAULT_PROFILE.value,
-        "profiles": {profile_name: def_settings},
-        "v5_support": Defaults.V5_SUPPORT.value,
-        "http_api_support": Defaults.HTTP_API_SUPPORT.value,
-        "enable_yt_dl": Defaults.ENABLE_YT_DL.value,
-        "enable_send_to": Defaults.ENABLE_SEND_TO.value,
-        "use_colors": Defaults.USE_COLORS.value,
-        "new_color": Defaults.NEW_COLOR.value,
-        "extra_color": Defaults.EXTRA_COLOR.value,
-        "fav_click_mode": Defaults.FAV_CLICK_MODE.value,
-        "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
-        "records_path": Defaults.RECORDS_PATH.value
-    }
-
-
-def get_default_transcoding_presets():
-    return {"720p TV/device": {"vcodec": "h264", "vb": "1500", "width": "1280", "height": "720", "acodec": "mp3",
-                               "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"},
-            "1080p TV/device": {"vcodec": "h264", "vb": "3500", "width": "1920", "height": "1080", "acodec": "mp3",
-                                "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"}}
-
-
-def write_settings(config):
-    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-    with open(CONFIG_FILE, "w") as config_file:
-        json.dump(config, config_file, indent="    ")
-
-
-def set_local_paths(settings, profile_name, data_path=DATA_PATH, use_profile_folder=False):
-    settings["data_local_path"] = "{}{}/".format(data_path, profile_name)
-    if use_profile_folder:
-        settings["picons_local_path"] = "{}{}/{}/".format(data_path, profile_name, "picons")
-        settings["backup_local_path"] = "{}{}/{}/".format(data_path, profile_name, "backup")
-    else:
-        settings["picons_local_path"] = "{}{}/{}/".format(data_path, "picons", profile_name)
-        settings["backup_local_path"] = "{}{}/{}/".format(data_path, "backup", profile_name)
+    ACTIVE_TRANSCODING_PRESET = "720p TV{}device".format(SEP)
 
 
 class SettingsType(IntEnum):
@@ -96,28 +104,35 @@ class SettingsType(IntEnum):
     NEUTRINO_MP = 1
 
     def get_default_settings(self):
-        """ Returns default settings for current type """
+        """ Returns default settings for current type. """
         if self is self.ENIGMA_2:
-            return {"setting_type": self.value,
-                    "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
-                    "http_user": "root", "http_password": "", "http_port": "80",
-                    "http_timeout": 5, "http_use_ssl": False,
-                    "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 5,
-                    "services_path": "/etc/enigma2/", "user_bouquet_path": "/etc/enigma2/",
-                    "satellites_xml_path": "/etc/tuxbox/", "data_local_path": DATA_PATH + "enigma2/",
-                    "picons_path": "/usr/share/enigma2/picon/",
-                    "picons_local_path": DATA_PATH + "enigma2/picons/",
-                    "backup_local_path": DATA_PATH + "enigma2/backup/"}
-        elif self is self.NEUTRINO_MP:
-            return {"setting_type": self,
-                    "host": "127.0.0.1", "port": "21", "user": "root", "password": "root", "timeout": 5,
-                    "http_user": "", "http_password": "", "http_port": "80", "http_timeout": 2, "http_use_ssl": False,
-                    "telnet_user": "root", "telnet_password": "", "telnet_port": "23", "telnet_timeout": 1,
-                    "services_path": "/var/tuxbox/config/zapit/", "user_bouquet_path": "/var/tuxbox/config/zapit/",
-                    "satellites_xml_path": "/var/tuxbox/config/", "data_local_path": DATA_PATH + "neutrino/",
-                    "picons_path": "/usr/share/tuxbox/neutrino/icons/logo/",
-                    "picons_local_path": DATA_PATH + "neutrino/picons/",
-                    "backup_local_path": DATA_PATH + "neutrino/backup/"}
+            srv_path = Defaults.BOX_SERVICES_PATH.value
+            sat_path = Defaults.BOX_SATELLITE_PATH.value
+            picons_path = Defaults.BOX_PICON_PATH.value
+            http_timeout = 5
+            telnet_timeout = 5
+        else:
+            srv_path = Defaults.NEUTRINO_BOX_SERVICES_PATH.value
+            sat_path = Defaults.NEUTRINO_BOX_SATELLITE_PATH.value
+            picons_path = Defaults.NEUTRINO_BOX_PICON_PATH.value
+            http_timeout = 2
+            telnet_timeout = 1
+
+        return {"setting_type": self.value,
+                "host": Defaults.HOST.value,
+                "port": Defaults.FTP_PORT.value,
+                "timeout": 5,
+                "user": Defaults.USER.value,
+                "password": Defaults.PASSWORD.value,
+                "http_port": Defaults.HTTP_PORT.value,
+                "http_timeout": http_timeout,
+                "http_use_ssl": Defaults.HTTP_USE_SSL.value,
+                "telnet_port": Defaults.TELNET_PORT.value,
+                "telnet_timeout": telnet_timeout,
+                "services_path": srv_path,
+                "user_bouquet_path": srv_path,
+                "satellites_xml_path": sat_path,
+                "picons_path": picons_path}
 
 
 class SettingsException(Exception):
@@ -131,17 +146,17 @@ class SettingsReadException(SettingsException):
 class PlayStreamsMode(IntEnum):
     """ Behavior mode when opening streams. """
     BUILT_IN = 0
-    VLC = 1
+    WINDOW = 1
     M3U = 2
 
 
 class Settings:
     __INSTANCE = None
-    __VERSION = 1
+    __VERSION = 2
 
     def __init__(self, ext_settings=None):
         try:
-            settings = ext_settings or get_settings()
+            settings = ext_settings or self.get_settings()
         except PermissionError as e:
             raise SettingsReadException(e)
 
@@ -172,22 +187,18 @@ class Settings:
         return cls.__INSTANCE
 
     def save(self):
-        write_settings(self._settings)
+        self.write_settings(self._settings)
 
     def reset(self, force_write=False):
         for k, v in self.setting_type.get_default_settings().items():
             self._cp_settings[k] = v
-
-        def_path = self.default_data_path
-        def_path += "enigma2/" if self.setting_type is SettingsType.ENIGMA_2 else "neutrino/"
-        set_local_paths(self._cp_settings, self._current_profile, def_path, self.profile_folder_is_default)
 
         if force_write:
             self.save()
 
     @staticmethod
     def reset_to_default():
-        write_settings(get_default_settings())
+        Settings.write_settings(Settings.get_default_settings())
 
     def get_default(self, p_name):
         """ Returns default value for current settings type """
@@ -197,9 +208,9 @@ class Settings:
         """ Adds extra options """
         self._settings[name] = value
 
-    def get(self, name):
+    def get(self, name, default=None):
         """ Returns extra options or None """
-        return self._settings.get(name, None)
+        return self._settings.get(name, default)
 
     @property
     def settings(self):
@@ -227,6 +238,10 @@ class Settings:
     @default_profile.setter
     def default_profile(self, value):
         self._settings["default_profile"] = value
+
+    @property
+    def current_profile_settings(self):
+        return self._cp_settings
 
     @property
     def profiles(self):
@@ -280,22 +295,6 @@ class Settings:
         self._cp_settings["password"] = value
 
     @property
-    def http_user(self):
-        return self._cp_settings.get("http_user", self.get_default("http_user"))
-
-    @http_user.setter
-    def http_user(self, value):
-        self._cp_settings["http_user"] = value
-
-    @property
-    def http_password(self):
-        return self._cp_settings.get("http_password", self.get_default("http_password"))
-
-    @http_password.setter
-    def http_password(self, value):
-        self._cp_settings["http_password"] = value
-
-    @property
     def http_port(self):
         return self._cp_settings.get("http_port", self.get_default("http_port"))
 
@@ -318,22 +317,6 @@ class Settings:
     @http_use_ssl.setter
     def http_use_ssl(self, value):
         self._cp_settings["http_use_ssl"] = value
-
-    @property
-    def telnet_user(self):
-        return self._cp_settings.get("telnet_user", self.get_default("telnet_user"))
-
-    @telnet_user.setter
-    def telnet_user(self, value):
-        self._cp_settings["telnet_user"] = value
-
-    @property
-    def telnet_password(self):
-        return self._cp_settings.get("telnet_password", self.get_default("telnet_password"))
-
-    @telnet_password.setter
-    def telnet_password(self, value):
-        self._cp_settings["telnet_password"] = value
 
     @property
     def telnet_port(self):
@@ -383,6 +366,20 @@ class Settings:
     def picons_path(self, value):
         self._cp_settings["picons_path"] = value
 
+    @property
+    def picons_paths(self):
+        if self.setting_type is SettingsType.NEUTRINO_MP:
+            return self._settings.get("neutrino_picon_paths", Defaults.NEUTRINO_BOX_PICON_PATHS.value)
+        else:
+            return self._settings.get("picon_paths", Defaults.BOX_PICON_PATHS.value)
+
+    @picons_paths.setter
+    def picons_paths(self, value):
+        if self.setting_type is SettingsType.NEUTRINO_MP:
+            self._settings["neutrino_picon_paths"] = value
+        else:
+            self._settings["picon_paths"] = value
+
     # ***** Local paths ***** #
 
     @property
@@ -402,28 +399,48 @@ class Settings:
         self._settings["default_data_path"] = value
 
     @property
-    def data_local_path(self):
-        return self._cp_settings.get("data_local_path", self.get_default("data_local_path"))
+    def default_backup_path(self):
+        return self._settings.get("default_backup_path", Defaults.BACKUP_PATH.value)
 
-    @data_local_path.setter
-    def data_local_path(self, value):
-        self._cp_settings["data_local_path"] = value
-
-    @property
-    def picons_local_path(self):
-        return self._cp_settings.get("picons_local_path", self.get_default("picons_local_path"))
-
-    @picons_local_path.setter
-    def picons_local_path(self, value):
-        self._cp_settings["picons_local_path"] = value
+    @default_backup_path.setter
+    def default_backup_path(self, value):
+        self._settings["default_backup_path"] = value
 
     @property
-    def backup_local_path(self):
-        return self._cp_settings.get("backup_local_path", self.get_default("backup_local_path"))
+    def default_picon_path(self):
+        return self._settings.get("default_picon_path", Defaults.PICON_PATH.value)
 
-    @backup_local_path.setter
-    def backup_local_path(self, value):
-        self._cp_settings["backup_local_path"] = value
+    @default_picon_path.setter
+    def default_picon_path(self, value):
+        self._settings["default_picon_path"] = value
+
+    @property
+    def profile_data_path(self):
+        return "{}data{}{}{}".format(self.default_data_path, SEP, self._current_profile, SEP)
+
+    @profile_data_path.setter
+    def profile_data_path(self, value):
+        self._cp_settings["profile_data_path"] = value
+
+    @property
+    def profile_picons_path(self):
+        if self.profile_folder_is_default:
+            return "{}picons{}".format(self.profile_data_path, SEP)
+        return "{}{}{}".format(self.default_picon_path, self._current_profile, SEP)
+
+    @profile_picons_path.setter
+    def profile_picons_path(self, value):
+        self._cp_settings["profile_picons_path"] = value
+
+    @property
+    def profile_backup_path(self):
+        if self.profile_folder_is_default:
+            return "{}backup{}".format(self.profile_data_path, SEP)
+        return "{}{}{}".format(self.default_backup_path, self._current_profile, SEP)
+
+    @profile_backup_path.setter
+    def profile_backup_path(self, value):
+        self._cp_settings["profile_backup_path"] = value
 
     @property
     def records_path(self):
@@ -453,7 +470,7 @@ class Settings:
 
     @property
     def transcoding_presets(self):
-        return self._settings.get("transcoding_presets", get_default_transcoding_presets())
+        return self._settings.get("transcoding_presets", self.get_default_transcoding_presets())
 
     @transcoding_presets.setter
     def transcoding_presets(self, value):
@@ -466,6 +483,14 @@ class Settings:
     @play_streams_mode.setter
     def play_streams_mode(self, value):
         self._settings["play_streams_mode"] = value
+
+    @property
+    def stream_lib(self):
+        return self._settings.get("stream_lib", Defaults.STREAM_LIB.value)
+
+    @stream_lib.setter
+    def stream_lib(self, value):
+        self._settings["stream_lib"] = value
 
     # *********** EPG ************ #
 
@@ -545,30 +570,6 @@ class Settings:
         self._settings["enable_send_to"] = value
 
     @property
-    def use_colors(self):
-        return self._settings.get("use_colors", Defaults.USE_COLORS.value)
-
-    @use_colors.setter
-    def use_colors(self, value):
-        self._settings["use_colors"] = value
-
-    @property
-    def new_color(self):
-        return self._settings.get("new_color", Defaults.NEW_COLOR.value)
-
-    @new_color.setter
-    def new_color(self, value):
-        self._settings["new_color"] = value
-
-    @property
-    def extra_color(self):
-        return self._settings.get("extra_color", Defaults.EXTRA_COLOR.value)
-
-    @extra_color.setter
-    def extra_color(self, value):
-        self._settings["extra_color"] = value
-
-    @property
     def fav_click_mode(self):
         return self._settings.get("fav_click_mode", Defaults.FAV_CLICK_MODE.value)
 
@@ -613,12 +614,83 @@ class Settings:
     # *********** Appearance *********** #
 
     @property
+    def list_font(self):
+        return self._settings.get("list_font", "")
+
+    @list_font.setter
+    def list_font(self, value):
+        self._settings["list_font"] = value
+
+    @property
+    def list_picon_size(self):
+        return self._settings.get("list_picon_size", Defaults.LIST_PICON_SIZE.value)
+
+    @list_picon_size.setter
+    def list_picon_size(self, value):
+        self._settings["list_picon_size"] = value
+
+    @property
+    def tooltip_logo_size(self):
+        return self._settings.get("tooltip_logo_size", Defaults.TOOLTIP_LOGO_SIZE.value)
+
+    @tooltip_logo_size.setter
+    def tooltip_logo_size(self, value):
+        self._settings["tooltip_logo_size"] = value
+
+    @property
+    def use_colors(self):
+        return self._settings.get("use_colors", Defaults.USE_COLORS.value)
+
+    @use_colors.setter
+    def use_colors(self, value):
+        self._settings["use_colors"] = value
+
+    @property
+    def new_color(self):
+        return self._settings.get("new_color", Defaults.NEW_COLOR.value)
+
+    @new_color.setter
+    def new_color(self, value):
+        self._settings["new_color"] = value
+
+    @property
+    def extra_color(self):
+        return self._settings.get("extra_color", Defaults.EXTRA_COLOR.value)
+
+    @extra_color.setter
+    def extra_color(self, value):
+        self._settings["extra_color"] = value
+
+    @property
     def dark_mode(self):
+        if IS_DARWIN:
+            import subprocess
+
+            cmd = ["defaults", "read", "-g", "AppleInterfaceStyle"]
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            return "Dark" in str(p[0])
+
         return self._settings.get("dark_mode", False)
 
     @dark_mode.setter
     def dark_mode(self, value):
         self._settings["dark_mode"] = value
+
+    @property
+    def alternate_layout(self):
+        return self._settings.get("alternate_layout", IS_DARWIN)
+
+    @alternate_layout.setter
+    def alternate_layout(self, value):
+        self._settings["alternate_layout"] = value
+
+    @property
+    def bq_details_first(self):
+        return self._settings.get("bq_details_first", False)
+
+    @bq_details_first.setter
+    def bq_details_first(self, value):
+        self._settings["bq_details_first"] = value
 
     @property
     def is_themes_support(self):
@@ -639,7 +711,7 @@ class Settings:
     @property
     @lru_cache(1)
     def themes_path(self):
-        return "{}/.themes/".format(HOME_PATH)
+        return "{}{}.themes{}".format(HOME_PATH, SEP, SEP)
 
     @property
     def icon_theme(self):
@@ -652,7 +724,7 @@ class Settings:
     @property
     @lru_cache(1)
     def icon_themes_path(self):
-        return "{}/.icons/".format(HOME_PATH)
+        return "{}{}.icons{}".format(HOME_PATH, SEP, SEP)
 
     @property
     def is_darwin(self):
@@ -696,6 +768,49 @@ class Settings:
     @is_enable_experimental.setter
     def is_enable_experimental(self, value):
         self._settings["enable_experimental"] = value
+
+    # **************** Get-Set settings **************** #
+
+    @staticmethod
+    def get_settings():
+        if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
+            Settings.write_settings(Settings.get_default_settings())
+
+        with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
+            return json.load(config_file)
+
+    @staticmethod
+    def get_default_settings(profile_name="default"):
+        def_settings = SettingsType.ENIGMA_2.get_default_settings()
+
+        return {
+            "version": Settings.__VERSION,
+            "default_profile": Defaults.DEFAULT_PROFILE.value,
+            "profiles": {profile_name: def_settings},
+            "v5_support": Defaults.V5_SUPPORT.value,
+            "http_api_support": Defaults.HTTP_API_SUPPORT.value,
+            "enable_yt_dl": Defaults.ENABLE_YT_DL.value,
+            "enable_send_to": Defaults.ENABLE_SEND_TO.value,
+            "use_colors": Defaults.USE_COLORS.value,
+            "new_color": Defaults.NEW_COLOR.value,
+            "extra_color": Defaults.EXTRA_COLOR.value,
+            "fav_click_mode": Defaults.FAV_CLICK_MODE.value,
+            "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
+            "records_path": Defaults.RECORDS_PATH.value
+        }
+
+    @staticmethod
+    def get_default_transcoding_presets():
+        return {"720p TV/device": {"vcodec": "h264", "vb": "1500", "width": "1280", "height": "720", "acodec": "mp3",
+                                   "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"},
+                "1080p TV/device": {"vcodec": "h264", "vb": "3500", "width": "1920", "height": "1080", "acodec": "mp3",
+                                    "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"}}
+
+    @staticmethod
+    def write_settings(config):
+        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            json.dump(config, config_file, indent="    ")
 
 
 if __name__ == "__main__":

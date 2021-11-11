@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu_bar">
+    <submenu>
+      <attribute name="label" translatable="yes">Playback</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Close</attribute>
+          <attribute name="action">app.on_playback_close</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">File</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu>
+          <attribute name="label" translatable="yes">Import</attribute>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Bouquet</attribute>
+              <attribute name="action">app.on_import_bouquet</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Bouquets and services</attribute>
+              <attribute name="action">app.on_import_bouquets</attribute>
+            </item>
+          </section>
+        </submenu>
+        <item>
+          <attribute name="label" translatable="yes">Import from Web</attribute>
+          <attribute name="action">app.on_import_from_web</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">New empty configuration</attribute>
+          <attribute name="action">app.on_new_configuration</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Open</attribute>
+          <attribute name="action">app.on_data_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Extract...</attribute>
+          <attribute name="action">app.on_archive_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Save</attribute>
+          <attribute name="action">app.on_data_save</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Save as</attribute>
+          <attribute name="action">app.on_data_save_as</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">FTP-transfer</attribute>
+          <attribute name="action">app.on_download</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Settings</attribute>
+          <attribute name="action">app.on_settings</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Exit</attribute>
+          <attribute name="action">app.on_close_app</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Edit</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Lock</attribute>
+          <attribute name="action">app.on_locked</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Hide</attribute>
+          <attribute name="action">app.on_hide</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu id="view_menu">
+      <attribute name="label" translatable="yes">View</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Bouquets</attribute>
+          <attribute name="action">app.show_bouquets</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Satellites</attribute>
+          <attribute name="action">app.show_satellites</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Picons</attribute>
+          <attribute name="action">app.show_picons</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">EPG</attribute>
+          <attribute name="action">app.show_epg</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Timers</attribute>
+          <attribute name="action">app.show_timers</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Recordings</attribute>
+          <attribute name="action">app.show_recordings</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">FTP</attribute>
+          <attribute name="action">app.show_ftp</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Control</attribute>
+          <attribute name="action">app.show_control</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu id="tools_menu">
+      <attribute name="label" translatable="yes">Tools</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Backups</attribute>
+          <attribute name="action">app.on_backup_tool_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Telnet</attribute>
+          <attribute name="action">app.on_telnet_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Logs</attribute>
+          <attribute name="action">app.on_logs_show</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">FTP client</attribute>
+      <attribute name="action">app.show_ftp_menu</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Close</attribute>
+        <attribute name="action">app.on_ftp_client_close</attribute>
+      </item>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Help</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">About</attribute>
+          <attribute name="action">app.on_about_app</attribute>
+        </item>
+      </section>
+    </submenu>
+  </menu>
+  <menu id="mac_app_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">About</attribute>
+        <attribute name="action">app.on_about_app</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Settings</attribute>
+        <attribute name="action">app.on_settings</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Exit</attribute>
+        <attribute name="action">app.on_close_app</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="mac_menu_bar">
+    <submenu>
+      <attribute name="label" translatable="yes">Playback</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Play</attribute>
+          <attribute name="action">app.on_play</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Stop</attribute>
+          <attribute name="action">app.on_stop</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Close</attribute>
+          <attribute name="action">app.on_playback_close</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">File</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu>
+          <attribute name="label" translatable="yes">Import</attribute>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Bouquet</attribute>
+              <attribute name="action">app.on_import_bouquet</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Bouquets and services</attribute>
+              <attribute name="action">app.on_import_bouquets</attribute>
+            </item>
+          </section>
+        </submenu>
+        <item>
+          <attribute name="label" translatable="yes">Import from Web</attribute>
+          <attribute name="action">app.on_import_from_web</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">New empty configuration</attribute>
+          <attribute name="action">app.on_new_configuration</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Open</attribute>
+          <attribute name="action">app.on_data_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Extract...</attribute>
+          <attribute name="action">app.on_archive_open</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Save</attribute>
+          <attribute name="action">app.on_data_save</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Save as</attribute>
+          <attribute name="action">app.on_data_save_as</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">FTP-transfer</attribute>
+          <attribute name="action">app.on_download</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Edit</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Lock</attribute>
+          <attribute name="action">app.on_locked</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Hide</attribute>
+          <attribute name="action">app.on_hide</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">View</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Bouquets</attribute>
+          <attribute name="action">app.show_bouquets</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Satellites</attribute>
+          <attribute name="action">app.show_satellites</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Picons</attribute>
+          <attribute name="action">app.show_picons</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">EPG</attribute>
+          <attribute name="action">app.show_epg</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Timers</attribute>
+          <attribute name="action">app.show_timers</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Recordings</attribute>
+          <attribute name="action">app.show_recordings</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">FTP</attribute>
+          <attribute name="action">app.show_ftp</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Control</attribute>
+          <attribute name="action">app.show_control</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Tools</attribute>
+      <attribute name="action">app.hide_menu_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Backups</attribute>
+          <attribute name="action">app.on_backup_tool_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Telnet</attribute>
+          <attribute name="action">app.on_telnet_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Logs</attribute>
+          <attribute name="action">app.on_logs_show</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">FTP client</attribute>
+      <attribute name="action">app.show_ftp_menu</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Close</attribute>
+        <attribute name="action">app.on_ftp_client_close</attribute>
+      </item>
+    </submenu>
+  </menu>
+  <menu id="iptv_menu">
+    <item>
+      <attribute name="label" translatable="yes">Add IPTV or stream service</attribute>
+      <attribute name="action">app.on_iptv</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Import YouTube playlist</attribute>
+      <attribute name="action">app.on_import_yt_list</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Import m3u</attribute>
+      <attribute name="action">app.on_import_m3u</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Export to m3u</attribute>
+      <attribute name="action">app.on_export_to_m3u</attribute>
+    </item>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">EPG configuration</attribute>
+        <attribute name="action">app.on_epg_list_configuration</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">List configuration</attribute>
+        <attribute name="action">app.on_iptv_list_configuration</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Remove all unavailable</attribute>
+        <attribute name="action">app.on_remove_all_unavailable</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="audio_menu">
+    <submenu>
+      <attribute name="label" translatable="yes">Audio</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu id="audio_track_menu">
+          <attribute name="label" translatable="yes">Audio Track</attribute>
+        </submenu>
+      </section>
+    </submenu>
+  </menu>
+  <menu id="video_menu">
+    <submenu>
+      <attribute name="label" translatable="yes">Video</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu id="aspect_ratio_menu">
+          <attribute name="label" translatable="yes">Aspect ratio</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Default</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target"/>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">16:9</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">16:9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">4:3</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">4:3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">1:1</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">1:1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">16:10</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">16:10</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">5:4</attribute>
+            <attribute name="action">app.on_set_aspect_ratio</attribute>
+            <attribute name="target">5:4</attribute>
+          </item>
+        </submenu>
+      </section>
+    </submenu>
+  </menu>
+  <menu id="subtitle_menu">
+    <submenu>
+      <attribute name="label" translatable="yes">Subtitle</attribute>
+      <attribute name="action">app.hide_media_bar</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
+      <section>
+        <submenu id="subtitle_track_menu">
+          <attribute name="label" translatable="yes">Subtitle Track</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Default</attribute>
+            <attribute name="action">app.on_set_subtitle_track</attribute>
+            <attribute name="target"/>
+          </item>
+        </submenu>
+      </section>
+    </submenu>
+  </menu>
+</interface>

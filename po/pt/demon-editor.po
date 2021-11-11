@@ -201,8 +201,8 @@ msgstr "Rota de dados atual:"
 msgid "Data:"
 msgstr "Dados:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Editor de Canais e Satélites Enigma2 para GNU/Linux"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "Editor de Canais e Satélites Enigma2 para GNU/Linux."
 
 msgid "Host:"
 msgstr "Anfitrião:"

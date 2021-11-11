@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
 import shutil
 import tempfile
@@ -7,10 +35,10 @@ from datetime import datetime
 from enum import Enum
 
 from app.commons import run_idle
-from app.settings import SettingsType
-from app.ui.dialogs import show_dialog, DialogType
+from app.settings import SettingsType, SEP
+from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
 
 
 class RestoreType(Enum):
@@ -30,15 +58,12 @@ class BackupDialog:
                     "on_resize": self.on_resize,
                     "on_key_release": self.on_key_release}
 
-        builder = Gtk.Builder()
-        builder.set_translation_domain("demon-editor")
-        builder.add_from_file(UI_RESOURCES_PATH + "backup_dialog.glade")
-        builder.connect_signals(handlers)
+        builder = get_builder(UI_RESOURCES_PATH + "backup_dialog.glade", handlers)
 
         self._settings = settings
         self._s_type = settings.setting_type
-        self._data_path = self._settings.data_local_path
-        self._backup_path = self._settings.backup_local_path or self._data_path + "backup/"
+        self._data_path = self._settings.profile_data_path
+        self._backup_path = self._settings.profile_backup_path or "{}backup{}".format(self._data_path, os.sep)
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -49,6 +74,24 @@ class BackupDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+
+        if IS_GNOME_SESSION:
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            self._dialog_window.set_titlebar(header_bar)
+
+            button_box = builder.get_object("main_button_box")
+            button_box.set_margin_top(0)
+            button_box.set_margin_bottom(0)
+            button_box.set_margin_left(0)
+            button_box.reparent(header_bar)
+
+            ch_button = builder.get_object("info_check_button")
+            ch_button.set_margin_right(0)
+            h_bar = builder.get_object("header_bar")
+            h_bar.remove(ch_button)
+            h_bar.set_visible(False)
+            header_bar.pack_end(ch_button)
+
         # Setting the last size of the dialog window if it was saved
         window_size = self._settings.get("backup_tool_window_size")
         if window_size:
@@ -152,7 +195,7 @@ class BackupDialog:
                 clear_data_path(self._data_path)
                 shutil.unpack_archive(full_file_name, self._data_path)
             elif restore_type is RestoreType.BOUQUETS:
-                tmp_dir = tempfile.gettempdir() + "/" + file_name
+                tmp_dir = tempfile.gettempdir() + SEP + file_name
                 cond = (".tv", ".radio") if self._s_type is SettingsType.ENIGMA_2 else "bouquets.xml"
                 shutil.unpack_archive(full_file_name, tmp_dir)
                 for file in filter(lambda f: f.endswith(cond), os.listdir(self._data_path)):
@@ -176,7 +219,7 @@ class BackupDialog:
         if not KeyboardKey.value_exist(key_code):
             return
         key = KeyboardKey(key_code)
-        ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
+        ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:
             self.on_remove(view)
@@ -191,7 +234,7 @@ def backup_data(path, backup_path, move=True):
 
         Returns full path to the compressed file.
     """
-    backup_path = "{}{}/".format(backup_path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    backup_path = "{}{}{}".format(backup_path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), SEP)
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     # backup files in data dir(skipping dirs and satellites.xml)

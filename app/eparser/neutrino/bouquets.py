@@ -1,7 +1,36 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 import os
-from xml.dom.minidom import parse, Document
 
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
+from app.eparser.neutrino import KSP, SP, get_xml_attributes, get_attributes, API_VER
+from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
 from app.ui.uicommons import LOCKED_ICON, HIDE_ICON
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER, BqType
 
@@ -23,29 +52,29 @@ def parse_bouquets(file, name, bq_type):
     if not os.path.exists(file):
         return bouquets
 
-    dom = parse(file)
+    dom = XmlHandler.parse(file)
 
     for elem in dom.getElementsByTagName("Bouquet"):
         if elem.hasAttributes():
-            bq_name = elem.attributes["name"].value
-            hidden = elem.attributes.get("hidden")
-            hidden = hidden.value if hidden else hidden
-            locked = elem.attributes.get("locked")
-            locked = locked.value if locked else locked
-            # epg = elem.attributes["epg"].value
+            bq_attrs = get_xml_attributes(elem)
+            bq_name = bq_attrs.get("name", "")
+            hidden = bq_attrs.get("hidden", "0")
+            locked = bq_attrs.get("locked", "0")
             services = []
             for srv_elem in elem.getElementsByTagName("S"):
                 if srv_elem.hasAttributes():
-                    ssid = srv_elem.attributes["i"].value
-                    on = srv_elem.attributes["on"].value
-                    tr_id = srv_elem.attributes["t"].value
+                    s_attrs = get_xml_attributes(srv_elem)
+                    ssid = s_attrs.get("i", "0")
+                    on = s_attrs.get("on", "0")
+                    tr_id = s_attrs.get("t", "0")
                     fav_id = "{}:{}:{}".format(tr_id, on, ssid)
                     services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
             bouquets[2].append(Bouquet(name=bq_name,
                                        type=bq_type,
                                        services=services,
                                        locked=LOCKED_ICON if locked == "1" else None,
-                                       hidden=HIDE_ICON if hidden == "1" else None))
+                                       hidden=HIDE_ICON if hidden == "1" else None,
+                                       file=SP.join("{}{}{}".format(k, KSP, v) for k, v in bq_attrs.items())))
 
     if BqType(bq_type) is BqType.BOUQUET:
         for bq in bouquets.bouquets:
@@ -63,38 +92,27 @@ def parse_webtv(path, name, bq_type):
     if not os.path.exists(path):
         return bouquets
 
-    dom = parse(path)
+    dom = XmlHandler.parse(path)
     services = []
     for elem in dom.getElementsByTagName("webtv"):
         if elem.hasAttributes():
-            title = elem.attributes["title"].value
-            url = elem.attributes["url"].value
-            description = elem.attributes.get("description")
-            description = description.value if description else description
-            urlkey = elem.attributes.get("urlkey", None)
-            urlkey = urlkey.value if urlkey else urlkey
-            account = elem.attributes.get("account", None)
-            account = account.value if account else account
-            usrname = elem.attributes.get("usrname", None)
-            usrname = usrname.value if usrname else usrname
-            psw = elem.attributes.get("psw", None)
-            psw = psw.value if psw else psw
-            s_type = elem.attributes.get("type", None)
-            s_type = s_type.value if s_type else s_type
-            iconsrc = elem.attributes.get("iconsrc", None)
-            iconsrc = iconsrc.value if iconsrc else iconsrc
-            iconsrc_b = elem.attributes.get("iconsrc_b", None)
-            iconsrc_b = iconsrc_b.value if iconsrc_b else iconsrc_b
-            group = elem.attributes.get("group", None)
-            group = group.value if group else group
+            web_attrs = get_xml_attributes(elem)
+            title = web_attrs.get("title", "")
+            url = web_attrs.get("url", "")
+            description = web_attrs.get("description", "")
+            urlkey = web_attrs.get("urlkey", None)
+            account = web_attrs.get("account", None)
+            usrname = web_attrs.get("usrname", None)
+            psw = web_attrs.get("psw", None)
+            s_type = web_attrs.get("type", None)
+            iconsrc = web_attrs.get("iconsrc", None)
+            iconsrc_b = web_attrs.get("iconsrc_b", None)
+            group = web_attrs.get("group", None)
             fav_id = NEUTRINO_FAV_ID_FORMAT.format(url, description, urlkey, account, usrname, psw, s_type, iconsrc,
                                                    iconsrc_b, group)
-            srv = BouquetService(name=title,
-                                 type=BqServiceType.IPTV,
-                                 data=fav_id,
-                                 num=0)
-            services.append(srv)
-    bouquet = Bouquet(name="default", type=bq_type, services=services, locked=None, hidden=None)
+            services.append(BouquetService(name=title, type=BqServiceType.IPTV, data=fav_id, num=0))
+
+    bouquet = Bouquet(name="default", type=bq_type, services=services, locked=None, hidden=None, file=None)
     bouquets[2].append(bouquet)
 
     return bouquets
@@ -110,18 +128,29 @@ def write_bouquets(path, bouquets):
 
 
 def write_bouquet(file, bouquet):
-    doc = Document()
+    doc = NeutrinoDocument()
     root = doc.createElement("zapit")
+    root.setAttribute("api", API_VER)
     doc.appendChild(root)
     comment = doc.createComment(_COMMENT)
     doc.appendChild(comment)
 
     for bq in bouquet.bouquets:
+        attrs = get_attributes(bq.file) if bq.file else {}
+        attrs["name"] = bq.name
+        if bq.hidden:
+            attrs["hidden"] = "1"
+        else:
+            attrs.pop("hidden", None)
+        if bq.locked:
+            attrs["locked"] = "1"
+        else:
+            attrs.pop("locked", None)
+
         bq_elem = doc.createElement("Bouquet")
-        bq_elem.setAttribute("name", bq.name)
-        bq_elem.setAttribute("hidden", "1" if bq.hidden else "0")
-        bq_elem.setAttribute("locked", "1" if bq.locked else "0")
-        bq_elem.setAttribute("epg", "0")
+        for k, v in attrs.items():
+            bq_elem.setAttribute(k, v)
+
         root.appendChild(bq_elem)
 
         for srv in bq.services:
@@ -131,16 +160,15 @@ def write_bouquet(file, bouquet):
             srv_elem.setAttribute("n", srv.service)
             srv_elem.setAttribute("t", tr_id)
             srv_elem.setAttribute("on", on)
-            srv_elem.setAttribute("s", srv.pos.replace(".", ""))
-            srv_elem.setAttribute("frq", srv.freq[:-3])
-            srv_elem.setAttribute("l", "0")  # temporary !!!
+            srv_elem.setAttribute("frq", srv.freq)
+            srv_elem.setAttribute("s", get_attributes(srv.flags_cas).get("position", "0"))
             bq_elem.appendChild(srv_elem)
 
-    doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+    doc.write_xml(file)
 
 
 def write_webtv(file, bouquet):
-    doc = Document()
+    doc = NeutrinoDocument()
     root = doc.createElement("webtvs")
     doc.appendChild(root)
     comment = doc.createComment(_COMMENT)
@@ -174,7 +202,7 @@ def write_webtv(file, bouquet):
 
             root.appendChild(srv_elem)
 
-    doc.writexml(open(file, "w"), addindent="    ", newl="\n", encoding="UTF-8")
+    doc.write_xml(file)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Dmitriy Yefremov
+# Copyright (C) 2018-2021 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -203,8 +203,8 @@ msgstr "Текущий путь к данным:"
 msgid "Data:"
 msgstr "Данные:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Редактор списка каналов и спутников Enigma2\n для GNU/Linux"
+msgid "Enigma2 channel and satellite list editor."
+msgstr "Редактор списка каналов и спутников Enigma2."
 
 msgid "Host:"
 msgstr "Адрес ресивера:"
@@ -296,8 +296,8 @@ msgstr "Формат имени пиконов:"
 msgid "Resize:"
 msgstr "Обрезать:"
 
-msgid "Current picons path:"
-msgstr "Текущий путь к пиконам:"
+msgid "Current picons path"
+msgstr "Текущий путь к пиконам"
 
 msgid "Receiver picons path:"
 msgstr "Путь к пиконам ресивера:"
@@ -914,8 +914,8 @@ msgstr "Режим воспроизведения потоков:"
 msgid "Built-in player"
 msgstr "Встроенный плеер"
 
-msgid "VLC media player"
-msgstr "VLC медиаплеер"
+msgid "In a separate window"
+msgstr "В отдельном окне"
 
 msgid "Only get m3u file"
 msgstr "Получить файл *.m3u"
@@ -1028,3 +1028,272 @@ msgstr "Не удается воспроизвести!"
 msgid "Enable Dark Mode"
 msgstr "Включить темный режим"
 
+msgid "Extract..."
+msgstr "Извлечь..."
+
+msgid "Unsupported format!"
+msgstr "Неподдерживаемый формат!"
+
+msgid "Combine with the current data?"
+msgstr "Объединить с текущими данными?"
+
+msgid "Importing data done!"
+msgstr "Импорт данных завершен!"
+
+msgid "Current service"
+msgstr "Текущий сервис"
+
+msgid "Open folder"
+msgstr "Открыть папку"
+
+msgid "Open archive"
+msgstr "Открыть архив"
+
+msgid "Import from Web"
+msgstr "Импорт из сети"
+
+msgid "Control"
+msgstr "Управление"
+
+msgid "Timers"
+msgstr "Таймеры"
+
+msgid "Timer"
+msgstr "Таймер"
+
+msgid "Add timer"
+msgstr "Добавить таймер"
+
+msgid "Hr."
+msgstr "ч."
+
+msgid "Min."
+msgstr "мин."
+
+msgid "Power"
+msgstr "Питание"
+
+msgid "Standby"
+msgstr "Режим ожидания"
+
+msgid "Wake Up"
+msgstr "Пробуждение"
+
+msgid "Reboot"
+msgstr "Перезагрузка"
+
+msgid "Restart GUI"
+msgstr "Перезагрузить графический интерфейс"
+
+msgid "Shutdown"
+msgstr "Выключение"
+
+msgid "Shut down"
+msgstr "Выключить"
+
+msgid "Do Nothing"
+msgstr "Ничего не делать"
+
+msgid "Auto"
+msgstr "Авто"
+
+msgid "Grab screenshot"
+msgstr "Сделать скриншот"
+
+msgid "Enabled:"
+msgstr "Включен:"
+
+msgid "Name:"
+msgstr "Имя:"
+
+msgid "Description:"
+msgstr "Описание:"
+
+msgid "Service:"
+msgstr "Сервис:"
+
+msgid "Service reference:"
+msgstr "Сервисная ссылка:"
+
+msgid "Event ID:"
+msgstr "ID события:"
+
+msgid "Begins:"
+msgstr "Начало:"
+
+msgid "Ends:"
+msgstr "Окончание:"
+
+msgid "Repeated:"
+msgstr "Повтор:"
+
+msgid "Action:"
+msgstr "Действие:"
+
+msgid "After event:"
+msgstr "После события:"
+
+msgid "Location:"
+msgstr "Расположение:"
+
+msgid "Mo"
+msgstr "Пн"
+
+msgid "Tu"
+msgstr "Вт"
+
+msgid "We"
+msgstr "Ср"
+
+msgid "Th"
+msgstr "Чт"
+
+msgid "Fr"
+msgstr "Пт"
+
+msgid "Sa"
+msgstr "Сб"
+
+msgid "Su"
+msgstr "Вс"
+
+msgid "Set"
+msgstr "Установить"
+
+msgid "Services update"
+msgstr "Обновление сервисов"
+
+msgid "Create folder"
+msgstr "Создать папку"
+
+msgid "FTP client"
+msgstr "FTP-клиент"
+
+msgid "The file size is too large!"
+msgstr "Размер файла слишком велик!"
+
+msgid "Connect"
+msgstr "Соединение"
+
+msgid "Disconnect"
+msgstr "Разъединить"
+
+msgid "Size"
+msgstr "Размер"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Toggle display position"
+msgstr "Переключить позицию отображения"
+
+msgid "Alternatives"
+msgstr "Альтернативы"
+
+msgid "Add alternatives"
+msgstr "Добавить альтернативы"
+
+msgid "DreamOS only!"
+msgstr "Только DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Подобный сервис уже есть в этом списке!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "Изменен режим воспроизведения!\nПерезапустите программу для применения настроек."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Установите значения TID, NID и пр. имен для правильного именования пиконов!"
+
+msgid "Streams detected:"
+msgstr "Обнаружено потоков:"
+
+msgid "Download picons"
+msgstr "Загрузить пиконы"
+
+msgid "Errors:"
+msgstr "Ошибок:"
+
+msgid "Use to play streams:"
+msgstr "Использовать для воспроизведения потоков:"
+
+msgid "Font in the lists:"
+msgstr "Шрифт в списках:"
+
+msgid "Picons size in the lists:"
+msgstr "Размер пиконов в списках:"
+
+msgid "Logo size in tooltips:"
+msgstr "Размер логотипа во всплывающих подсказках:"
+
+msgid "Save as"
+msgstr "Сохранить как"
+
+msgid "Mark duplicates"
+msgstr "Отметить дубликаты"
+
+msgid "Load only for selected bouquet"
+msgstr "Загрузить только для выбранного букета"
+
+msgid "The task is canceled!"
+msgstr "Задание отменено!"
+
+msgid "Data loading in progress!"
+msgstr "Выполняется загрузка данных!"
+
+msgid "Recordings"
+msgstr "Записи"
+
+msgid "Help"
+msgstr "Справка"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP API не активировано. Проверьте настройки!"
+
+msgid "Add picons"
+msgstr "Добавить пиконы"
+
+msgid "Logs"
+msgstr "Журнал"
+
+msgid "Title"
+msgstr "Название"
+
+msgid "Time"
+msgstr "Время"
+
+msgid "Length"
+msgstr "Длительность"
+
+msgid "Additional source"
+msgstr "Дополнительный источник"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Автоматическая установка имени из списка избранного."
+
+msgid "Playback"
+msgstr "Воспроизведение"
+
+msgid "Audio"
+msgstr "Аудио"
+
+msgid "Audio Track"
+msgstr "Аудиодорожка"
+
+msgid "Subtitle"
+msgstr "Субтитры"
+
+msgid "Subtitle Track"
+msgstr "Дорожка субтитров"
+
+msgid "Aspect ratio"
+msgstr "Соотношение сторон"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Это может изменить настройки других профилей!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Перетащите сервисы на нужный пикон или пикон на список выбранных сервисов."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Устанавливает папку профиля по умолчанию для хранения пиконов, резервных копий и т. п."

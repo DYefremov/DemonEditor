@@ -14,9 +14,12 @@ class BqServiceType(Enum):
     IPTV = "IPTV"
     MARKER = "MARKER"  # 64
     SPACE = "SPACE"  # 832 [hidden marker]
+    ALT = "ALT"  # Service with alternatives
+    BOUQUET = "BOUQUET"  # Sub bouquet.
 
 
-Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden"])
+Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden", "file"])
+Bouquet.__new__.__defaults__ = (None, BqServiceType.DEFAULT, [], None, None, None)  # For Python3 < 3.7
 Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
 BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 
@@ -33,14 +36,20 @@ class TrType(Enum):
     Satellite = "s"
     Terrestrial = "t"
     Cable = "c"
+    ATSC = "a"
 
 
 class BqType(Enum):
-    """ Bouquet type"""
+    """ Bouquet type. """
     BOUQUET = "bouquet"
     TV = "tv"
     RADIO = "radio"
     WEBTV = "webtv"
+    MARKER = "marker"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.TV
 
 
 class Flag(Enum):
@@ -73,6 +82,21 @@ class Flag(Enum):
     def is_new(value: int):
         return value & 1 << 5
 
+    @staticmethod
+    def parse(value: str) -> int:
+        """ Returns an int representation of the flag value.
+
+            The flag value is usually represented by the number [int],
+            but can also be appear in hex format.
+         """
+        if len(value) < 3:
+            return 0
+
+        value = value[2:]
+        if value.isdigit():
+            return int(value)
+        return int(value, 16)
+
 
 class Pids(Enum):
     VIDEO = "c:00"
@@ -92,11 +116,19 @@ class Inversion(Enum):
     On = "1"
     Auto = "2"
 
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Auto
+
 
 class Pilot(Enum):
     Off = "0"
     On = "1"
     Auto = "2"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Auto
 
 
 class SystemCable(Enum):
@@ -144,6 +176,10 @@ T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "-1": "DVB-T/T2"}
 
 # Cable
 C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
+
+# ATSC
+A_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256", "6": "8VSB",
+                "7": "16VSB"}
 
 # CAS
 CAS = {"C:26": "BISS", "C:0B": "Conax", "C:06": "Irdeto", "C:18": "Nagravision", "C:05": "Viaccess", "C:01": "SECA",

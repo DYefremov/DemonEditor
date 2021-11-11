@@ -1,9 +1,40 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Common module for showing dialogs """
-import locale
+import gettext
 from enum import Enum
 from functools import lru_cache
+from pathlib import Path
+import xml.etree.ElementTree as ET
 
 from app.commons import run_idle
+from app.settings import SEP, IS_WIN
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
 
 
@@ -16,12 +47,11 @@ class Dialog(Enum):
         <property name="use-header-bar">{use_header}</property>
         <property name="can_focus">False</property>
         <property name="modal">True</property>
-        <property name="default_width">320</property>
+        <property name="width_request">250</property>
         <property name="destroy_with_parent">True</property>
         <property name="type_hint">dialog</property>
         <property name="skip_taskbar_hint">True</property>
         <property name="skip_pager_hint">True</property>
-        <property name="gravity">center</property>
         <property name="message_type">{message_type}</property>
         <property name="buttons">{buttons_type}</property>
       </object>
@@ -72,12 +102,13 @@ class WaitDialog:
         self._dialog.destroy()
 
 
-def show_dialog(dialog_type: DialogType, transient, text=None, settings=None, action_type=None, file_filter=None):
-    """ Shows dialogs by name """
+def show_dialog(dialog_type, transient, text=None, settings=None, action_type=None, file_filter=None, buttons=None,
+                title=None, create_dir=False):
+    """ Shows dialogs by name. """
     if dialog_type in (DialogType.INFO, DialogType.ERROR):
         return get_message_dialog(transient, dialog_type, Gtk.ButtonsType.OK, text)
     elif dialog_type is DialogType.CHOOSER and settings:
-        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter)
+        return get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons, title, create_dir)
     elif dialog_type is DialogType.INPUT:
         return get_input_dialog(transient, text)
     elif dialog_type is DialogType.QUESTION:
@@ -87,36 +118,39 @@ def show_dialog(dialog_type: DialogType, transient, text=None, settings=None, ac
         return get_about_dialog(transient)
 
 
-def get_chooser_dialog(transient, settings, name, patterns):
-    file_filter = Gtk.FileFilter()
-    file_filter.set_name(name)
-    for p in patterns:
-        file_filter.add_pattern(p)
+def get_chooser_dialog(transient, settings, name, patterns, title=None, file_filter=None):
+    if not file_filter:
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name(name)
+        for p in patterns:
+            file_filter.add_pattern(p)
 
     return show_dialog(dialog_type=DialogType.CHOOSER,
                        transient=transient,
                        settings=settings,
                        action_type=Gtk.FileChooserAction.OPEN,
-                       file_filter=file_filter)
+                       file_filter=file_filter,
+                       title=title)
 
 
-def get_file_chooser_dialog(transient, text, settings, action_type, file_filter):
-    dialog = Gtk.FileChooserDialog(get_message(text) if text else "", transient,
-                                   action_type if action_type is not None else Gtk.FileChooserAction.SELECT_FOLDER,
-                                   (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK),
-                                   use_header_bar=IS_GNOME_SESSION)
+def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None, dirs=False):
+    action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
+    dialog = Gtk.FileChooserNative.new(get_message(title) if title else "", transient, action_type)
+    dialog.set_create_folders(dirs)
+    dialog.set_modal(True)
+
     if file_filter is not None:
         dialog.add_filter(file_filter)
 
-    path = settings.data_local_path
-    dialog.set_current_folder(path)
+    dialog.set_current_folder(settings.profile_data_path)
     response = dialog.run()
-    if response == Gtk.ResponseType.OK:
-        if dialog.get_filename():
-            path = dialog.get_filename()
-            if action_type is not Gtk.FileChooserAction.OPEN:
-                path = path + "/"
-            response = path
+
+    if response == Gtk.ResponseType.ACCEPT:
+        path = Path(dialog.get_filename() or dialog.get_current_folder())
+        if path.is_dir():
+            response = "{}{}".format(path.resolve(), SEP)
+        elif path.is_file():
+            response = str(path.resolve())
     dialog.destroy()
 
     return response
@@ -170,13 +204,52 @@ def get_dialog_from_xml(dialog_type, transient, use_header=0, title=""):
 
 def get_message(message):
     """ returns translated message """
-    return locale.dgettext(TEXT_DOMAIN, message)
+    return gettext.dgettext(TEXT_DOMAIN, message)
 
 
 @lru_cache(maxsize=5)
-def get_dialogs_string(path):
-    with open(path, "r") as f:
-        return "".join(f)
+def get_dialogs_string(path, tag="property"):
+    if IS_WIN:
+        return translate_xml(path, tag)
+    else:
+        with open(path, "r", encoding="utf-8") as f:
+            return "".join(f)
+
+
+def get_builder(path, handlers=None, use_str=False, objects=None, tag="property"):
+    """ Creates and returns a Gtk.Builder instance. """
+    builder = Gtk.Builder()
+    builder.set_translation_domain(TEXT_DOMAIN)
+
+    if use_str:
+        if objects:
+            builder.add_objects_from_string(get_dialogs_string(path, tag).format(use_header=IS_GNOME_SESSION), objects)
+        else:
+            builder.add_from_string(get_dialogs_string(path, tag).format(use_header=IS_GNOME_SESSION))
+    else:
+        if objects:
+            builder.add_objects_from_string(get_dialogs_string(path, tag), objects)
+        else:
+            builder.add_from_string(get_dialogs_string(path, tag))
+
+    builder.connect_signals(handlers or {})
+
+    return builder
+
+
+def translate_xml(path, tag="property"):
+    """
+        Used to translate GUI from * .glade files in MS Windows.
+
+        More info: https://gitlab.gnome.org/GNOME/gtk/-/issues/569
+    """
+    et = ET.parse(path)
+    root = et.getroot()
+    for e in root.iter(tag):
+        if e.attrib.get("translatable", None) == "yes":
+            e.text = get_message(e.text)
+
+    return ET.tostring(root, encoding="unicode", method="xml")
 
 
 if __name__ == "__main__":

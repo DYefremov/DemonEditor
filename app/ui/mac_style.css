@@ -1,0 +1,43 @@
+* {
+  -GtkDialog-action-area-border: 6em;
+  -GtkDialog-button-spacing: 12;
+}
+
+entry {
+  min-height: 2.0em;
+}
+
+button {
+  min-height: 1.5em;
+  min-width: 1em;
+  padding-left: 0.4em;
+  padding-right: 0.4em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+}
+
+spinbutton {
+  min-height: 1.5em;
+}
+
+toolbutton {
+  padding: 0.1em;
+}
+
+spinner {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+infobar {
+  min-height: 2em;
+}
+
+switch slider {
+  min-height: 1.5em;
+  min-width: 1.5em;
+}
+
+.dialog-action-area button {
+  margin-bottom: 0.6em;
+}

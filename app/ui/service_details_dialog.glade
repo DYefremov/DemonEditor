@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2
+
+The MIT License (MIT)
+
+Copyright (c) 2018-2021 Dmitriy Yefremov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Dmitriy Yefremov
+
+-->
 <interface>
   <requires lib="gtk+" version="3.16"/>
+  <!-- interface-license-type mit -->
+  <!-- interface-name DemonEditor -->
+  <!-- interface-description Enigma2 channel and satellite list editor for GNU/Linux. -->
+  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
+  <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkListStore" id="fec_list_store">
     <columns>
       <!-- column-name fec -->
@@ -9,39 +40,52 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
       <row>
-        <col id="0" translatable="yes">1/2</col>
+        <col id="0">1/2</col>
       </row>
       <row>
         <col id="0" translatable="yes">2/3</col>
       </row>
       <row>
-        <col id="0" translatable="yes">3/4</col>
+        <col id="0">3/4</col>
       </row>
       <row>
-        <col id="0" translatable="yes">5/6</col>
+        <col id="0">5/6</col>
       </row>
       <row>
-        <col id="0" translatable="yes">7/8</col>
+        <col id="0">7/8</col>
       </row>
       <row>
-        <col id="0" translatable="yes">8/9</col>
+        <col id="0">8/9</col>
       </row>
       <row>
-        <col id="0" translatable="yes">3/5</col>
+        <col id="0">3/5</col>
       </row>
       <row>
-        <col id="0" translatable="yes">4/5</col>
+        <col id="0">4/5</col>
       </row>
       <row>
-        <col id="0" translatable="yes">6/7</col>
+        <col id="0">6/7</col>
       </row>
       <row>
-        <col id="0" translatable="yes">9/10</col>
+        <col id="0">9/10</col>
       </row>
     </data>
+  </object>
+  <object class="GtkComboBox" id="rate_lp_combo_box">
+    <property name="visible">True</property>
+    <property name="sensitive">False</property>
+    <property name="can_focus">False</property>
+    <property name="model">fec_list_store</property>
+    <property name="id_column">0</property>
+    <child>
+      <object class="GtkCellRendererText" id="rate_lp_cellrenderertext"/>
+      <attributes>
+        <attribute name="text">0</attribute>
+      </attributes>
+    </child>
   </object>
   <object class="GtkListStore" id="invertion_list_store">
     <columns>
@@ -50,13 +94,13 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Off</col>
+        <col id="0">Off</col>
       </row>
       <row>
-        <col id="0" translatable="yes">On</col>
+        <col id="0">On</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
     </data>
   </object>
@@ -67,19 +111,19 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
       <row>
-        <col id="0" translatable="yes">QPSK</col>
+        <col id="0">QPSK</col>
       </row>
       <row>
-        <col id="0" translatable="yes">8PSK</col>
+        <col id="0">8PSK</col>
       </row>
       <row>
-        <col id="0" translatable="yes">16APSK</col>
+        <col id="0">16APSK</col>
       </row>
       <row>
-        <col id="0" translatable="yes">32APSK</col>
+        <col id="0">32APSK</col>
       </row>
     </data>
   </object>
@@ -90,13 +134,13 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Off</col>
+        <col id="0">Off</col>
       </row>
       <row>
-        <col id="0" translatable="yes">On</col>
+        <col id="0">On</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
     </data>
   </object>
@@ -107,13 +151,13 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Root</col>
+        <col id="0">Root</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Gold</col>
+        <col id="0">Gold</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Combo</col>
+        <col id="0">Combo</col>
       </row>
     </data>
   </object>
@@ -124,16 +168,16 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">H</col>
+        <col id="0">H</col>
       </row>
       <row>
-        <col id="0" translatable="yes">V</col>
+        <col id="0">V</col>
       </row>
       <row>
-        <col id="0" translatable="yes">R</col>
+        <col id="0">R</col>
       </row>
       <row>
-        <col id="0" translatable="yes">L</col>
+        <col id="0">L</col>
       </row>
     </data>
   </object>
@@ -144,21 +188,20 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">35%</col>
+        <col id="0">35%</col>
       </row>
       <row>
-        <col id="0" translatable="yes">25%</col>
+        <col id="0">25%</col>
       </row>
       <row>
-        <col id="0" translatable="yes">20%</col>
+        <col id="0">20%</col>
       </row>
       <row>
-        <col id="0" translatable="yes">Auto</col>
+        <col id="0">Auto</col>
       </row>
     </data>
   </object>
   <object class="GtkAdjustment" id="sat_pos_adjustment">
-    <property name="lower">-180</property>
     <property name="upper">180</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">10</property>
@@ -210,25 +253,12 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">DVB-S</col>
+        <col id="0">DVB-S</col>
       </row>
       <row>
-        <col id="0" translatable="yes">DVB-S2</col>
+        <col id="0">DVB-S2</col>
       </row>
     </data>
-  </object>
-  <object class="GtkComboBox" id="rate_lp_combo_box">
-    <property name="visible">True</property>
-    <property name="sensitive">False</property>
-    <property name="can_focus">False</property>
-    <property name="model">fec_list_store</property>
-    <property name="id_column">0</property>
-    <child>
-      <object class="GtkCellRendererText" id="rate_lp_cellrenderertext"/>
-      <attributes>
-        <attribute name="text">0</attribute>
-      </attributes>
-    </child>
   </object>
   <object class="GtkDialog" id="service_details_dialog">
     <property name="use-header-bar">{use_header}</property>
@@ -242,41 +272,38 @@
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child type="titlebar">
       <placeholder/>
     </child>
     <child type="action">
       <object class="GtkButton" id="cancel_button">
-        <property name="label">gtk-cancel</property>
+        <property name="label" translatable="yes">Cancel</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Cancel</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_cancel" swapped="no"/>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="apply_button">
-        <property name="label">gtk-save</property>
+        <property name="label" translatable="yes">Apply</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Save current service</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
+        <accelerator key="Return" signal="activate"/>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="create_button">
-        <property name="label">gtk-new</property>
+        <property name="label" translatable="yes">Create</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Create and save as new service</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
         <signal name="clicked" handler="on_create_new" swapped="no"/>
       </object>
     </child>
@@ -290,6 +317,8 @@
         <child internal-child="action_area">
           <object class="GtkButtonBox">
             <property name="can_focus">False</property>
+            <property name="valign">center</property>
+            <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -314,7 +343,7 @@
                 <property name="margin_right">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">2</property>
+                <property name="spacing">5</property>
                 <child>
                   <object class="GtkGrid" id="srv_grid">
                     <property name="visible">True</property>
@@ -335,7 +364,7 @@
                       <object class="GtkEntry" id="name_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -357,7 +386,7 @@
                       <object class="GtkEntry" id="package_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -381,7 +410,7 @@
                         <property name="can_focus">True</property>
                         <property name="width_chars">10</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -426,7 +455,7 @@
                             <property name="can_focus">True</property>
                             <property name="width_chars">7</property>
                             <property name="max_width_chars">7</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                             <signal name="changed" handler="update_reference" swapped="no"/>
                           </object>
@@ -776,10 +805,14 @@
                   <object class="GtkBox" id="flags_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="spacing">10</property>
                     <child>
                       <object class="GtkGrid" id="flags_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="valign">center</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">10</property>
                         <property name="column_spacing">2</property>
                         <child>
                           <object class="GtkLabel" id="flags_label">
@@ -853,6 +886,47 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkBox" id="extra_flags_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">2</property>
+                        <child>
+                          <object class="GtkLabel" id="extra_pids_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Extra:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="extra_pids_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">20</property>
+                            <property name="max_width_chars">20</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <property name="placeholder_text">c:000000,etc.</property>
+                            <signal name="changed" handler="on_extra_pids_entry_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkGrid" id="caids_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -862,9 +936,9 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text">C:0000,C:a1b2,etc.</property>
-                            <property name="width_chars">15</property>
-                            <property name="max_width_chars">26</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="width_chars">20</property>
+                            <property name="max_width_chars">20</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <property name="placeholder_text" translatable="yes">C:0000,C:a1b2,etc.</property>
                             <signal name="changed" handler="on_cas_entry_changed" swapped="no"/>
                           </object>
@@ -889,7 +963,7 @@
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="pack_type">end</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -967,7 +1041,7 @@
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">12</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -993,7 +1067,7 @@
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">12</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -1072,7 +1146,7 @@
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
                         <property name="max_width_chars">12</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -1093,21 +1167,6 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="sat_pos_button">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="input_purpose">number</property>
-                        <property name="adjustment">sat_pos_adjustment</property>
-                        <property name="digits">1</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkLabel" id="tid_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -1125,7 +1184,7 @@
                         <property name="can_focus">True</property>
                         <property name="width_chars">8</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
@@ -1152,12 +1211,56 @@
                         <property name="can_focus">True</property>
                         <property name="width_chars">8</property>
                         <property name="max_width_chars">10</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                         <signal name="changed" handler="on_non_empty_entry_changed" swapped="no"/>
                         <signal name="key-release-event" handler="update_reference" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">6</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="sat_pos_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">1</property>
+                        <child>
+                          <object class="GtkSpinButton" id="sat_pos_button">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="input_purpose">number</property>
+                            <property name="adjustment">sat_pos_adjustment</property>
+                            <property name="digits">1</property>
+                            <property name="numeric">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="pos_side_box">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <property name="active">0</property>
+                            <items>
+                              <item id="E">E</item>
+                              <item id="W">W</item>
+                            </items>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
@@ -1317,7 +1420,7 @@
                             <property name="can_focus">True</property>
                             <property name="width_chars">8</property>
                             <property name="max_width_chars">10</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -1343,7 +1446,7 @@
                             <property name="can_focus">True</property>
                             <property name="width_chars">8</property>
                             <property name="max_width_chars">10</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -1369,7 +1472,7 @@
                             <property name="can_focus">True</property>
                             <property name="width_chars">8</property>
                             <property name="max_width_chars">10</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                           </object>
                           <packing>
@@ -1498,7 +1601,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">10</property>
-                        <property name="stock">gtk-edit</property>
+                        <property name="icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1558,28 +1661,25 @@
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child>
       <placeholder/>
     </child>
     <child type="action">
       <object class="GtkButton" id="tr_services_no_button">
-        <property name="label">gtk-cancel</property>
+        <property name="label" translatable="yes">Cancel</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="tr_services_ok_button">
-        <property name="label">gtk-ok</property>
+        <property name="label" translatable="yes">OK</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
       </object>
     </child>
     <child internal-child="vbox">
@@ -1590,6 +1690,7 @@
         <child internal-child="action_area">
           <object class="GtkButtonBox">
             <property name="can_focus">False</property>
+            <property name="valign">center</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1616,7 +1717,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">5</property>
                     <property name="margin_bottom">5</property>
-                     <property name="label" translatable="yes">Changes will be applied to all services of this transponder!
+                    <property name="label" translatable="yes">Changes will be applied to all services of this transponder!
 Continue?</property>
                     <property name="justify">center</property>
                     <property name="lines">2</property>

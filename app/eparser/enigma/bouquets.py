@@ -1,76 +1,266 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Module for working with Enigma2 bouquets. """
 import re
 from collections import Counter
+from enum import Enum
+from pathlib import Path
 
 from app.commons import log
 from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet, BqType
 
-_TV_ROOT_FILE_NAME = "bouquets.tv"
-_RADIO_ROOT_FILE_NAME = "bouquets.radio"
+_TV_FILE = "bouquets.tv"
+_RADIO_FILE = "bouquets.radio"
 _DEFAULT_BOUQUET_NAME = "favourites"
+_MARKER_PREFIX = "[MARKER!] "
 
 
-def get_bouquets(path):
-    return parse_bouquets(path, "bouquets.tv", BqType.TV.value), parse_bouquets(path, "bouquets.radio",
-                                                                                BqType.RADIO.value)
-
-
-def write_bouquets(path, bouquets, force_bq_names=False):
-    """ Creating and writing bouquets files.
+class BouquetsWriter:
+    """ Class for creating and writing bouquet files.
 
         If "force_bq_names" then naming the files using the name of the bouquet.
         Some images may have problems displaying the favorites list!
      """
-    srv_line = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
-    line = []
-    pattern = re.compile("[^\\w_()]+")
-    m_index = [0]
-    s_index = [0]
+    _SERVICE = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
+    _MARKER = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
+    _SPACE = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
+    _ALT = '#SERVICE 1:134:1:0:0:0:0:0:0:0:FROM BOUQUET "{}" ORDER BY bouquet\n'
+    _ALT_PAT = r"[<>:\"/\\|?*\-\s]"
 
-    for bqs in bouquets:
-        line.clear()
-        line.append("#NAME {}\n".format(bqs.name))
+    def __init__(self, path, bouquets, force_bq_names=False):
+        self._path = path
+        self._bouquets = bouquets
+        self._force_bq_names = force_bq_names
+        self._marker_index = 1
+        self._space_index = 0
+        self._alt_names = set()
 
-        for index, bq in enumerate(bqs.bouquets):
-            bq_name = bq.name
-            if bq_name == "Favourites (TV)" or bq_name == "Favourites (Radio)":
-                bq_name = _DEFAULT_BOUQUET_NAME
+    def write(self):
+        line = []
+        pattern = re.compile("[^\\w_()]+")
+
+        for bqs in self._bouquets:
+            line.clear()
+            line.append("#NAME {}\n".format(bqs.name))
+            bq_file_names = {b.file for b in bqs.bouquets}
+            count = 1
+            m_count = 0
+
+            for bq in bqs.bouquets:
+                bq_name = bq.file
+                if not bq_name:
+                    if self._force_bq_names:
+                        bq_name = re.sub(pattern, "_", bq.name)
+                    else:
+                        bq_name = "de{0:02d}".format(count)
+                        while bq_name in bq_file_names:
+                            count += 1
+                            bq_name = "de{0:02d}".format(count)
+                        bq_file_names.add(bq_name)
+
+                if BqType(bq.type) is BqType.MARKER:
+                    m_data = bq.file.split(":") if bq.file else None
+                    b_name = m_data[-1].strip() if m_data else bq.name.lstrip(_MARKER_PREFIX)
+                    line.append(self._MARKER.format(m_count, b_name))
+                    m_count += 1
+                else:
+                    line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
+                    self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bq.type}", bq.name, bq.services)
+
+            with open(self._path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
+                file.writelines(line)
+
+    def write_bouquet(self, path, name, services):
+        """ Writes single bouquet file. """
+        bouquet = [f"#NAME {name}\n"]
+        for srv in services:
+            s_type = srv.service_type
+            if s_type == BqServiceType.IPTV.name:
+                bouquet.append(f"#SERVICE {srv.fav_id.strip()}\n")
+            elif s_type == BqServiceType.MARKER.name:
+                m_data = srv.fav_id.strip().split(":")
+                m_data[2] = self._marker_index
+                self._marker_index += 1
+                bouquet.append(self._MARKER.format(m_data[2], m_data[-1]))
+            elif s_type == BqServiceType.SPACE.name:
+                bouquet.append(self._SPACE.format(self._space_index))
+                self._space_index += 1
+            elif s_type == BqServiceType.ALT.name:
+                services = srv.transponder
+                if services:
+                    p = Path(path)
+                    alt_name = srv.data_id
+                    f_name = f"alternatives.{alt_name}{p.suffix}"
+
+                    if self._force_bq_names:
+                        alt_name = re.sub(self._ALT_PAT, "_", srv.service).lower()
+                        f_name = f"alternatives.{alt_name}{p.suffix}"
+
+                    bouquet.append(self._ALT.format(f_name))
+                    self.write_bouquet(f"{p.parent}/{f_name}", srv.service, services)
             else:
-                bq_name = re.sub(pattern, "_", bq.name) if force_bq_names else "de{0:02d}".format(index)
-            line.append(srv_line.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
-            write_bouquet(path + "userbouquet.{}.{}".format(bq_name, bq.type), bq.name, bq.services, m_index, s_index)
+                data = to_bouquet_id(srv)
+                if srv.service:
+                    bouquet.append(f"#SERVICE {data}:{srv.service}\n#DESCRIPTION {srv.service}\n")
+                else:
+                    bouquet.append(f"#SERVICE {data}\n")
 
-        with open(path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
-            file.writelines(line)
+        with open(path, "w", encoding="utf-8") as file:
+            file.writelines(bouquet)
 
 
-def write_bouquet(path, name, services, current_marker, current_space):
-    bouquet = ["#NAME {}\n".format(name)]
-    marker = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
-    space = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
+class ServiceType(Enum):
+    SERVICE = "0"
+    BOUQUET = "7"  # Sub bouquet.
+    MARKER = "64"
+    SPACE = "832"  # Hidden marker.
+    ALT = "134"  # Alternatives.
+    UDP = "256"
 
-    for srv in services:
-        s_type = srv.service_type
+    @classmethod
+    def _missing_(cls, value):
+        log("Error. No matching service type [{} {}] was found.".format(cls.__name__, value))
+        return cls.SERVICE
 
-        if s_type == BqServiceType.IPTV.name:
-            bouquet.append("#SERVICE {}\n".format(srv.fav_id.strip()))
-        elif s_type == BqServiceType.MARKER.name:
-            m_data = srv.fav_id.strip().split(":")
-            m_data[2] = current_marker[0]
-            current_marker[0] += 1
-            bouquet.append(marker.format(m_data[2], m_data[-1]))
-        elif s_type == BqServiceType.SPACE.name:
-            bouquet.append(space.format(current_space[0]))
-            current_space[0] += 1
-        else:
-            data = to_bouquet_id(srv)
-            if srv.service:
-                bouquet.append("#SERVICE {}:{}\n#DESCRIPTION {}\n".format(data, srv.service, srv.service))
-            else:
-                bouquet.append("#SERVICE {}\n".format(data))
 
-    with open(path, "w", encoding="utf-8") as file:
-        file.writelines(bouquet)
+class BouquetsReader:
+    """ Class for reading and parsing bouquets. """
+    _ALT_PAT = re.compile(".*alternatives\\.+(.*)\\.([tv|radio]+).*")
+    _BQ_PAT = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
+    _SUB_BQ_PAT = re.compile(".*subbouquet\\.+(.*)\\.([tv|radio]+).*")
+    _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
+
+    __slots__ = ["_path"]
+
+    def __init__(self, path):
+        self._path = path
+
+    def get(self):
+        """ Returns a tuple of TV and Radio bouquets. """
+        return self.parse_bouquets(_TV_FILE, BqType.TV.value), self.parse_bouquets(_RADIO_FILE, BqType.RADIO.value)
+
+    def parse_bouquets(self, bq_name, bq_type):
+        with open(self._path + bq_name, encoding="utf-8", errors="replace") as file:
+            line = file.readline()
+            _, _, bqs_name = line.partition("#NAME")
+            if not bqs_name:
+                log(f"No bouquets name found in '{bq_name}'")
+                bqs_name = "Bouquets (TV)" if bq_type == BqType.TV.value else "Bouquets (Radio)"
+            bouquets = Bouquets(bqs_name.strip(), bq_type, [])
+
+            b_names = set()
+            real_b_names = Counter()
+
+            for line in file.readlines():
+                if "#SERVICE" in line:
+                    name = re.match(self._BQ_PAT, line)
+                    if name:
+                        b_name = name.group(1)
+                        if b_name in b_names:
+                            log(f"The list of bouquets contains duplicate [{b_name}] names!")
+                        else:
+                            b_names.add(b_name)
+
+                        rb_name, services = self.get_bouquet(self._path, b_name, bq_type)
+                        if rb_name in real_b_names:
+                            log(f"Bouquet file 'userbouquet.{b_name}.{bq_type}' has duplicate name: {rb_name}")
+                            real_b_names[rb_name] += 1
+                            rb_name = f"{rb_name} {real_b_names[rb_name]}"
+                        else:
+                            real_b_names[rb_name] = 0
+
+                        bouquets[2].append(Bouquet(rb_name, bq_type, services, None, None, b_name))
+                    else:
+                        s_data = line.split(":")
+                        if len(s_data) == 12 and s_data[1] == ServiceType.MARKER.value:
+                            b_name = "{}{}".format(_MARKER_PREFIX, s_data[-1].strip())
+                            bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line.strip()))
+                        else:
+                            log(f"Unsupported or invalid data format: [{line}].")
+                else:
+                    log(f"Unsupported or invalid line format: [{line}].")
+
+        return bouquets
+
+    @staticmethod
+    def get_bouquet(path, bq_name, bq_type, prefix="userbouquet"):
+        """ Parsing services ids from bouquet file. """
+        with open(path + "{}.{}.{}".format(prefix, bq_name, bq_type), encoding="utf-8", errors="replace") as file:
+            chs_list = file.read()
+            services = []
+            srvs = list(filter(None, chs_list.split("\n#SERVICE")))  # filtering ['']
+            # May come across empty[wrong] files!
+            if not srvs:
+                log("Bouquet file 'userbouquet.{}.{}' is empty or wrong!".format(bq_name, bq_type))
+                return "{} [empty]".format(bq_name), services
+
+            bq_name = srvs.pop(0)
+
+            for num, srv in enumerate(srvs, start=1):
+                srv_data = srv.strip().split(":")
+                data_len = len(srv_data)
+                if data_len < 10:
+                    log("The bouquet [{}] service [{}] has the wrong data format: [{}]".format(bq_name, num, srv))
+                    continue
+
+                s_type = ServiceType(srv_data[1])
+                if s_type is ServiceType.MARKER:
+                    m_data, sep, desc = srv.partition("#DESCRIPTION")
+                    services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, num))
+                elif s_type is ServiceType.SPACE:
+                    m_data, sep, desc = srv.partition("#DESCRIPTION")
+                    services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
+                elif s_type is ServiceType.ALT:
+                    alt = re.match(BouquetsReader._ALT_PAT, srv)
+                    if alt:
+                        alt_name, alt_type = alt.group(1), alt.group(2)
+                        alt_bq_name, alt_srvs = BouquetsReader.get_bouquet(path, alt_name, alt_type, "alternatives")
+                        services.append(BouquetService(alt_bq_name, BqServiceType.ALT, alt_name, tuple(alt_srvs)))
+                elif s_type is ServiceType.BOUQUET:
+                    sub = re.match(BouquetsReader._SUB_BQ_PAT, srv)
+                    if sub:
+                        sub_name, sub_type = sub.group(1), sub.group(2)
+                        sub_bq_name, sub_srvs = BouquetsReader.get_bouquet(path, sub_name, sub_type, "subbouquet")
+                        bq = Bouquet(sub_bq_name, sub_type, tuple(sub_srvs), None, None, sub_name)
+                        services.append(BouquetService(sub_bq_name, BqServiceType.BOUQUET, bq, num))
+                elif srv_data[0].strip() in BouquetsReader._STREAM_TYPES or srv_data[10].startswith(("http", "rtsp")):
+                    stream_data, sep, desc = srv.partition("#DESCRIPTION")
+                    desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
+                    services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))
+                else:
+                    fav_id = "{}:{}:{}:{}".format(srv_data[3], srv_data[4], srv_data[5], srv_data[6])
+                    name = None
+                    if data_len == 12:
+                        name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
+                    services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), num))
+
+        return bq_name.lstrip("#NAME").strip(), services
 
 
 def to_bouquet_id(srv):
@@ -80,82 +270,6 @@ def to_bouquet_id(srv):
         data_type = int(srv.data_id.split(":")[4])
 
         return "{}:0:{:X}:{}:0:0:0:".format(1, data_type, srv.fav_id)
-
-
-def get_bouquet(path, bq_name, bq_type):
-    """ Parsing services ids from bouquet file. """
-    with open(path + "userbouquet.{}.{}".format(bq_name, bq_type), encoding="utf-8", errors="replace") as file:
-        chs_list = file.read()
-        services = []
-        srvs = list(filter(None, chs_list.split("\n#SERVICE")))  # filtering ['']
-        # May come across empty[wrong] files!
-        if not srvs:
-            log("Bouquet file 'userbouquet.{}.{}' is empty or wrong!".format(bq_name, bq_type))
-            return "{} [empty]".format(bq_name), services
-
-        bq_name = srvs.pop(0)
-
-        for num, srv in enumerate(srvs, start=1):
-            srv_data = srv.strip().split(":")
-            if srv_data[1] == "64":
-                m_data, sep, desc = srv.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, num))
-            elif srv_data[1] == "832":
-                m_data, sep, desc = srv.partition("#DESCRIPTION")
-                services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
-            elif "http" in srv or srv_data[0] == "8193":
-                stream_data, sep, desc = srv.partition("#DESCRIPTION")
-                desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
-                services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))
-            else:
-                fav_id = "{}:{}:{}:{}".format(srv_data[3], srv_data[4], srv_data[5], srv_data[6])
-                name = None
-                if len(srv_data) == 12:
-                    name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
-                services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), num))
-
-    return bq_name.lstrip("#NAME").strip(), services
-
-
-def parse_bouquets(path, bq_name, bq_type):
-    with open(path + bq_name, encoding="utf-8", errors="replace") as file:
-        lines = file.readlines()
-        bouquets = None
-        nm_sep = "#NAME"
-        bq_pattern = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
-        b_names = set()
-        real_b_names = Counter()
-
-        for line in lines:
-            if nm_sep in line:
-                _, _, name = line.partition(nm_sep)
-                bouquets = Bouquets(name.strip(), bq_type, [])
-            if bouquets and "#SERVICE" in line:
-                name = re.match(bq_pattern, line)
-                if name:
-                    b_name = name.group(1)
-                    if b_name in b_names:
-                        log("The list of bouquets contains duplicate [{}] names!".format(b_name))
-                    else:
-                        b_names.add(b_name)
-
-                    rb_name, services = get_bouquet(path, b_name, bq_type)
-                    if rb_name in real_b_names:
-                        log("Bouquet file 'userbouquet.{}.{}' has duplicate name: {}".format(b_name, bq_type, rb_name))
-                        real_b_names[rb_name] += 1
-                        rb_name = "{} {}".format(rb_name, real_b_names[rb_name])
-                    else:
-                        real_b_names[rb_name] = 0
-
-                    bouquets[2].append(Bouquet(name=rb_name,
-                                               type=bq_type,
-                                               services=services,
-                                               locked=None,
-                                               hidden=None))
-                else:
-                    raise ValueError("No bouquet name found for: {}".format(line))
-
-    return bouquets
 
 
 if __name__ == "__main__":

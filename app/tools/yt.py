@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 """ Module for working with YouTube service """
 import gzip
 import json
@@ -12,6 +40,7 @@ from urllib.parse import unquote
 from urllib.request import Request, urlopen, urlretrieve
 
 from app.commons import log
+from app.settings import SEP
 from app.ui.uicommons import show_notification
 
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
@@ -129,6 +158,21 @@ class YouTube:
 
             return None, rsn
 
+    def get_yt_playlist(self, list_id, url=None):
+        """ Returns tuple from the playlist header and list of tuples (title, video id). """
+        if self._settings.enable_yt_dl and url:
+            try:
+                self._yt_dl.update_options({"noplaylist": False, "extract_flat": True})
+                info = self._yt_dl.get_info(url, skip_errors=False)
+                if "url" in info:
+                    info = self._yt_dl.get_info(info.get("url"), skip_errors=False)
+                return info.get("title", ""), [(e.get("title", ""), e.get("id", "")) for e in info.get("entries", [])]
+            finally:
+                # Restoring default options
+                self._yt_dl.update_options({"noplaylist": True, "extract_flat": False})
+
+        return PlayListParser.get_yt_playlist(list_id)
+
 
 class PlayListParser(HTMLParser):
     """ Very simple parser to handle YouTube playlist pages. """
@@ -139,6 +183,7 @@ class PlayListParser(HTMLParser):
         self._header = ""
         self._playlist = []
         self._is_script = False
+        self._scr_start = ('var ytInitialData = ', 'window["ytInitialData"] = ')
 
     def handle_starttag(self, tag, attrs):
         if tag == "script":
@@ -147,8 +192,11 @@ class PlayListParser(HTMLParser):
     def handle_data(self, data):
         if self._is_script:
             data = data.lstrip()
-            if data.startswith('window["ytInitialData"] = '):
-                data = data.split(";")[0].lstrip('window["ytInitialData"] = ')
+            if data.startswith(self._scr_start):
+                data = data.split(";")[0]
+                for s in self._scr_start:
+                    data = data.lstrip(s)
+
                 try:
                     resp = json.loads(data)
                 except JSONDecodeError as e:
@@ -164,7 +212,7 @@ class PlayListParser(HTMLParser):
 
                     ct = resp.get("contents", None)
                     if ct:
-                        for d in [(d.get("title", {}).get("simpleText", ""),
+                        for d in [(d.get("title", {}).get("runs", [{}])[0].get("text", ""),
                                    d.get("videoId", "")) for d in flat("playlistVideoRenderer", ct)]:
                             self._playlist.append(d)
             self._is_script = False
@@ -205,12 +253,13 @@ class YouTubeDL:
     _DownloadError = None
     _LATEST_RELEASE_URL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
     _OPTIONS = {"noplaylist": True,  # Single video instead of a playlist [ignoring playlist in URL].
+                "extract_flat": False,  # Do not resolve URLs, return the immediate result.
                 "quiet": True,  # Do not print messages to stdout.
                 "simulate": True,  # Do not download the video files.
                 "cookiefile": "cookies.txt"}  # File name where cookies should be read from and dumped to.
 
     def __init__(self, settings, callback):
-        self._path = settings.default_data_path + "tools/"
+        self._path = "{}tools{}".format(settings.default_data_path, SEP)
         self._update = settings.enable_yt_dl_update
         self._supported = {"22", "18"}
         self._dl = None
@@ -227,7 +276,7 @@ class YouTubeDL:
         return cls._DL_INSTANCE
 
     def init(self):
-        if not os.path.isfile(self._path + "youtube_dl/version.py"):
+        if not os.path.isfile("{}youtube_dl{}version.py".format(self._path, SEP)):
             self.get_latest_release()
 
         if self._path not in sys.path:
@@ -316,8 +365,17 @@ class YouTubeDL:
             self._callback("Update process. Please wait.", False)
             return {}, ""
 
+        info = self.get_info(url, skip_errors)
+        fmts = info.get("formats", None)
+        if fmts:
+            return {Quality.get(int(fm["format_id"])): fm.get("url", "") for fm in fmts if
+                    fm.get("format_id", "") in self._supported}, info.get("title", "")
+
+        return {}, info.get("title", "")
+
+    def get_info(self, url, skip_errors=False):
         try:
-            info = self._dl.extract_info(url, download=False)
+            return self._dl.extract_info(url, download=False)
         except URLError as e:
             log(str(e))
             raise YouTubeException(e)
@@ -325,13 +383,13 @@ class YouTubeDL:
             log(str(e))
             if not skip_errors:
                 raise YouTubeException(e)
-        else:
-            fmts = info.get("formats", None)
-            if fmts:
-                return {Quality.get(int(fm["format_id"])): fm.get("url", "") for fm in fmts if
-                        fm.get("format_id", "") in self._supported}, info.get("title", "")
 
-            return {}, info.get("title", "")
+    def update_options(self, options):
+        self._dl.params.update(options)
+
+    @property
+    def options(self):
+        return self._dl.params
 
 
 def flat(key, d):

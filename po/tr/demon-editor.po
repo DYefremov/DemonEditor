@@ -3,13 +3,13 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2020-06-08 21:53+0300\n"
+"PO-Revision-Date: 2021-06-13 14:54+0300\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.4.1\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: tr\n"
 
@@ -107,6 +107,9 @@ msgstr "Varsayılan adı ayarla"
 msgid "Insert marker"
 msgstr "İşaretçi ekle"
 
+msgid "Insert space"
+msgstr "Boşluk ekle"
+
 msgid "Locate in services"
 msgstr "Hizmetlerde bulun"
 
@@ -203,8 +206,8 @@ msgstr "Mevcut veri yolu:"
 msgid "Data:"
 msgstr "Veri:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "GNU/Linux için Enigma2 kanalı ve uydu listesi editörü"
+msgid "Enigma2 channel and satellite list editor for GNU/Linux."
+msgstr "GNU/Linux için Enigma2 kanalı ve uydu listesi editörü."
 
 msgid "Host:"
 msgstr "Ana bilgisayar:"
@@ -517,6 +520,9 @@ msgstr "Lütfen sadece bir ürün seçiniz!"
 
 msgid "No png file is selected!"
 msgstr "Hiçbir png dosyası seçilmedi!"
+
+msgid "No profile selected!"
+msgstr "Profil seçilmedi!"
 
 msgid "No reference is present!"
 msgstr "Referans yok!"
@@ -923,8 +929,8 @@ msgstr "Akışları oynatma modu:"
 msgid "Built-in player"
 msgstr "Dahili oynatıcı"
 
-msgid "VLC media player"
-msgstr "VLC media player"
+msgid "In a separate window"
+msgstr "Ayrı bir pencerede"
 
 msgid "Only get m3u file"
 msgstr "Sadece m3u dosyası al"
@@ -988,3 +994,278 @@ msgstr "Alıcıdaki tüm piconları kaldırın"
 
 msgid "Service reference"
 msgstr "Servis referansı"
+
+msgid "Enable support for"
+msgstr "Temalar için desteği etkinleştir"
+
+msgid "Auto-check for updates"
+msgstr "Güncellemeleri otomatik kontrol et"
+
+msgid "Filter services"
+msgstr "Services filtrele"
+
+msgid "Filter services in the main list."
+msgstr "Ana listedeki services filtreleyin."
+
+msgid "Destination:"
+msgstr "Hedef:"
+
+msgid "EXPERIMENTAL!"
+msgstr "EXPERIMENTAL!"
+
+msgid "Sorting data..."
+msgstr "Verilerin sıralanması..."
+
+msgid ""
+"There are unsaved changes.\n"
+"\n"
+"\t Save them now?"
+msgstr ""
+"Kaydedilmemiş değişiklikler var.\n"
+"\n"
+"\t Şimdi kaydedilsin mi?"
+
+msgid ""
+"Are you sure you want to change the order\n"
+"\t of services in this bouquet?"
+msgstr ""
+"Sırayı değiştirmek istediğinizden emin misiniz\n"
+"\t Bu buketdeki hizmetlerin sayısı?"
+
+msgid "Remove from the receiver"
+msgstr "Alıcıdaki tüm piconları kaldırın"
+
+msgid "Screenshot"
+msgstr "Ekran görüntüsü"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino'nun yalnızca experimental desteği var. Tüm özellikler desteklenmiyor!"
+
+msgid "Enable experimental features"
+msgstr "Experimental özellikleri etkinleştirin"
+
+msgid "Can't Playback!"
+msgstr "Oynatılamıyor!"
+
+msgid "Enable Dark Mode"
+msgstr "Koyu Modu Etkinleştir"
+
+msgid "Extract..."
+msgstr "Çıkart..."
+
+msgid "Unsupported format!"
+msgstr "Desteklenmeyen format!"
+
+msgid "Combine with the current data?"
+msgstr "Mevcut verilerle birleştirilsin mi?"
+
+msgid "Importing data done!"
+msgstr "Verilerin içe aktarılması tamamlandı!"
+
+msgid "Current service"
+msgstr "Mevcut service"
+
+msgid "Open folder"
+msgstr "Dosya aç"
+
+msgid "Open archive"
+msgstr "Arşiv aç"
+
+msgid "Import from Web"
+msgstr "Web'den içe aktar"
+
+msgid "Control"
+msgstr "Control"
+
+msgid "Timers"
+msgstr "Zamanlayıcılar"
+
+msgid "Timer"
+msgstr "Zamanlayıcı"
+
+msgid "Add timer"
+msgstr "Zamanlayıcı ekle"
+
+msgid "Hr."
+msgstr "Hr."
+
+msgid "Min."
+msgstr "Min."
+
+msgid "Power"
+msgstr "Power"
+
+msgid "Standby"
+msgstr "Standby"
+
+msgid "Wake Up"
+msgstr "Wake Up"
+
+msgid "Reboot"
+msgstr "Reboot"
+
+msgid "Restart GUI"
+msgstr "Restart GUI"
+
+msgid "Shutdown"
+msgstr "Shutdown"
+
+msgid "Shut down"
+msgstr "Kapat"
+
+msgid "Do Nothing"
+msgstr "Hiçbir şey yapma"
+
+msgid "Auto"
+msgstr "Auto"
+
+msgid "Grab screenshot"
+msgstr "Ekran görüntüsü al"
+
+msgid "Enabled:"
+msgstr "Etkin:"
+
+msgid "Name:"
+msgstr "Ad:"
+
+msgid "Description:"
+msgstr "Açıklama:"
+
+msgid "Service:"
+msgstr "Service:"
+
+msgid "Service reference:"
+msgstr "Servis referansı:"
+
+msgid "Event ID:"
+msgstr "Olay Kimliği:"
+
+msgid "Begins:"
+msgstr "Başlıyor:"
+
+msgid "Ends:"
+msgstr "Bitiş:"
+
+msgid "Repeated:"
+msgstr "Tekrar:"
+
+msgid "Action:"
+msgstr "Aksiyon:"
+
+msgid "After event:"
+msgstr "Olaydan sonra:"
+
+msgid "Location:"
+msgstr "Konum:"
+
+msgid "Mo"
+msgstr "Pzt"
+
+msgid "Tu"
+msgstr "Sal"
+
+msgid "We"
+msgstr "Çar"
+
+msgid "Th"
+msgstr "Per"
+
+msgid "Fr"
+msgstr "Cum"
+
+msgid "Sa"
+msgstr "Cmt"
+
+msgid "Su"
+msgstr "Paz"
+
+msgid "Set"
+msgstr "Yüklemek"
+
+msgid "Services update"
+msgstr "Servisleri güncelle"
+
+msgid "Create folder"
+msgstr "Klasör oluştur"
+
+msgid "FTP client"
+msgstr "FTP istemcisi"
+
+msgid "The file size is too large!"
+msgstr "Dosya boyutu çok büyük!"
+
+msgid "Connect"
+msgstr "Bağlan"
+
+msgid "Disconnect"
+msgstr "Bağlantıyı kes"
+
+msgid "Size"
+msgstr "Boyut"
+
+msgid "Date"
+msgstr "Saat"
+
+msgid "Attr."
+msgstr "Özellik."
+
+msgid "Toggle display position"
+msgstr "Görüntü konumunu değiştir"
+
+msgid "Alternatives"
+msgstr "Alternatifler"
+
+msgid "Add alternatives"
+msgstr "Alternatif ekleyin"
+
+msgid "DreamOS only!"
+msgstr "Sadece DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Bu listede zaten benzer bir hizmet var!"
+
+msgid ""
+"Play mode has been changed!\n"
+"Restart the program to apply the settings."
+msgstr ""
+"Oynatma modu değiştirildi!\n"
+"Ayarları uygulamak için programı yeniden başlatın."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Piconların doğru isimlendirilmesi için TID, NID ve Namespace değerlerini ayarlayın!"
+
+msgid "Streams detected:"
+msgstr "Akışlar algılandı:"
+
+msgid "Download picons"
+msgstr "Picon'lar indirin"
+
+msgid "Errors:"
+msgstr "Hatalar:"
+
+msgid "Use to play streams:"
+msgstr "Akışları oynatmak için kullanın:"
+
+msgid "Font in the lists:"
+msgstr "Listelerdeki yazı tipi:"
+
+msgid "Picons size in the lists:"
+msgstr "Listelerdeki Piconların boyutu:"
+
+msgid "Logo size in tooltips:"
+msgstr "Araç ipuçlarındaki logo boyutu:"
+
+msgid "Save as"
+msgstr "Farklı kaydet"
+
+msgid "Mark duplicates"
+msgstr "Yinelenenleri işaretle"
+
+msgid "Load only for selected bouquet"
+msgstr "Yalnızca seçilen buket için yükle"
+
+msgid "The task is canceled!"
+msgstr "Görev iptal edildi!"

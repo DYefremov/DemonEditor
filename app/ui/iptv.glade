@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,37 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage" id="remove_selection_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-undo</property>
+  </object>
+  <object class="GtkMenu" id="yt_popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="select_all_popup_item">
+        <property name="label">gtk-select-all</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_select_all" object="yt_list_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="unselect_all_popup_item">
+        <property name="label" translatable="yes">Remove selection</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">remove_selection_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_unselect_all" object="yt_list_view" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkDialog" id="search_unavailable_streams_dialog">
     <property name="use-header-bar">1</property>
     <property name="width_request">320</property>
@@ -46,7 +75,6 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
-    <property name="gravity">center</property>
     <signal name="response" handler="on_response" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="search_unavailable_dialog_box">
@@ -157,7 +185,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkImage" id="cancel_image">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="stock">gtk-cancel</property>
+                        <property name="stock">gtk-close</property>
                       </object>
                     </child>
                   </object>
@@ -222,6 +250,597 @@ Author: Dmitriy Yefremov
       <row>
         <col id="0">eServiceUri</col>
       </row>
+      <row>
+        <col id="0">eServiceHLS</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkDialog" id="iptv_list_configuration_dialog">
+    <property name="use-header-bar">{use_header}</property>
+    <property name="width_request">400</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">IPTV streams list configuration</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <signal name="response" handler="on_response" swapped="no"/>
+    <child type="action">
+      <object class="GtkButton" id="cancel_config_list_button">
+        <property name="label" translatable="yes">Cancel</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="list_configuration_apply_button">
+        <property name="label" translatable="yes">Apply</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+        <signal name="clicked" handler="on_apply" swapped="no"/>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="list_configuration_ok_button">
+        <property name="label" translatable="yes">OK</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="valign">center</property>
+      </object>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="iptv_list_configuration_dialog_box">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="valign">center</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="iptv_list_data_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">2</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkFrame" id="list_configuration_reference_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">5</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_top">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="spacing">1</property>
+                    <child>
+                      <object class="GtkLabel" id="ref_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="label" translatable="yes">Reference</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="colon_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_right">5</property>
+                        <property name="label" translatable="yes">:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="reference_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">4097:0:1:0:0:0:0:0:0:0</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="reset_list_to_default_button">
+                        <property name="label" translatable="yes">Reset to default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_reset_to_default" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="start_values_frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="label_xalign">0.019999999552965164</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkGrid" id="start_values_grid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <property name="margin_bottom">5</property>
+                    <property name="row_spacing">2</property>
+                    <property name="column_spacing">5</property>
+                    <property name="column_homogeneous">True</property>
+                    <child>
+                      <object class="GtkComboBox" id="stream_type_list_combobox">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">stream_type_liststore</property>
+                        <property name="active">1</property>
+                        <property name="id_column">0</property>
+                        <signal name="changed" handler="on_stream_type_changed" swapped="no"/>
+                        <child>
+                          <object class="GtkCellRendererText" id="iptv_sream_type_cellrenderertext1"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Type</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="stream_type_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_stream_type_default_togged" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="namespace_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_namespace_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">6</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="list_namespace_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Namespace</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">6</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="list_namespace_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text">0</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">6</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="nid_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_nid_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">5</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="list_nid_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">NID</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">5</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="list_nid_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text">0</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">5</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="tid_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_tid_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">TID</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="list_tid_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text">0</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="sid_auto_check_button">
+                        <property name="label" translatable="yes">Auto</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_auto_sid_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="list_sid_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">SID</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="list_sid_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text">0</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="id_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_id_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="list_id_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">ID</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="list_srv_id_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text">0</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="type_default_check_button">
+                        <property name="label" translatable="yes">Default</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">center</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_default_type_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="list_type_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Type</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="list_srv_type_entry">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="width_chars">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text">1</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
+                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Starting values</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkInfoBar" id="list_configuration_info_bar">
+            <property name="can_focus">False</property>
+            <property name="margin_left">1</property>
+            <property name="margin_right">1</property>
+            <property name="margin_bottom">1</property>
+            <property name="show_close_button">True</property>
+            <signal name="response" handler="on_info_bar_close" swapped="no"/>
+            <child internal-child="action_area">
+              <object class="GtkButtonBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">6</property>
+                <property name="layout_style">end</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child internal-child="content_area">
+              <object class="GtkBox">
+                <property name="can_focus">False</property>
+                <property name="spacing">16</property>
+                <child>
+                  <object class="GtkLabel" id="list_configuration_message_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Done!</property>
+                    <property name="ellipsize">end</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">cancel_config_list_button</action-widget>
+      <action-widget response="-10">list_configuration_apply_button</action-widget>
+      <action-widget response="-5">list_configuration_ok_button</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkImage" id="yt_import_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-revert-symbolic-rtl</property>
+  </object>
+  <object class="GtkListStore" id="yt_liststore">
+    <columns>
+      <!-- column-name title -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gchararray"/>
+      <!-- column-name selected -->
+      <column type="gboolean"/>
+      <!-- column-name tooltip -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="yt_quality_liststore">
+    <columns>
+      <!-- column-name quality -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Auto</col>
+      </row>
+      <row>
+        <col id="0">720p</col>
+      </row>
+      <row>
+        <col id="0">360p</col>
+      </row>
     </data>
   </object>
   <object class="GtkDialog" id="iptv_dialog">
@@ -236,34 +855,34 @@ Author: Dmitriy Yefremov
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="response" handler="on_response" swapped="no"/>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
     <child type="action">
       <object class="GtkButton" id="iptv_dialog_cancel_button">
-        <property name="label">gtk-cancel</property>
+        <property name="label" translatable="yes">Cancel</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="iptv_dialog_add_button">
-        <property name="label">gtk-add</property>
+        <property name="label" translatable="yes">Add</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="iptv_dialog_save_button">
-        <property name="label">gtk-save</property>
+        <property name="label" translatable="yes">Save</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
       </object>
     </child>
@@ -271,13 +890,24 @@ Author: Dmitriy Yefremov
       <object class="GtkBox" id="iptv_dialog_box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="valign">center</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkBox" id="iptv_dialog_main_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
-            <property name="margin_top">2</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkFrame" id="iptv_dialog_service_data_frame">
@@ -314,7 +944,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -337,7 +967,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
+                        <property name="primary_icon_name">document-edit-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -437,7 +1067,7 @@ Author: Dmitriy Yefremov
                             <property name="margin_left">5</property>
                             <property name="margin_right">5</property>
                             <property name="margin_bottom">5</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
                             <signal name="changed" handler="on_url_changed" swapped="no"/>
                           </object>
@@ -451,12 +1081,12 @@ Author: Dmitriy Yefremov
                           <object class="GtkComboBox" id="yt_iptv_quality_combobox">
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">Desired video quality</property>
-                            <property name="model">yt_quality_liststore</property>
                             <property name="margin_right">5</property>
                             <property name="margin_bottom">5</property>
-                            <signal name="changed" handler="on_yt_quality_changed" swapped="no"/>
+                            <property name="model">yt_quality_liststore</property>
                             <property name="active">0</property>
                             <property name="id_column">0</property>
+                            <signal name="changed" handler="on_yt_quality_changed" swapped="no"/>
                             <child>
                               <object class="GtkCellRendererText" id="yt_quality_renderer"/>
                               <attributes>
@@ -500,39 +1130,32 @@ Author: Dmitriy Yefremov
                         <property name="margin_right">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="row_spacing">2</property>
-                        <property name="column_spacing">2</property>
+                        <property name="column_spacing">5</property>
                         <property name="column_homogeneous">True</property>
                         <child>
-                          <object class="GtkLabel" id="label28">
+                          <object class="GtkLabel" id="label32">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Type</property>
+                            <property name="label" translatable="yes">Namespace</property>
                           </object>
                           <packing>
-                            <property name="left_attach">0</property>
+                            <property name="left_attach">5</property>
                             <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label29">
+                          <object class="GtkEntry" id="namespace_entry">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">SID</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">10</property>
+                            <property name="max_width_chars">5</property>
+                            <property name="text">0</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label30">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">TID</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
+                            <property name="left_attach">5</property>
+                            <property name="top_attach">1</property>
                           </packing>
                         </child>
                         <child>
@@ -542,18 +1165,110 @@ Author: Dmitriy Yefremov
                             <property name="label" translatable="yes">NID</property>
                           </object>
                           <packing>
+                            <property name="left_attach">4</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="net_id_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">5</property>
+                            <property name="max_width_chars">5</property>
+                            <property name="text">0</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">4</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label30">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">TID</property>
+                          </object>
+                          <packing>
                             <property name="left_attach">3</property>
                             <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label32">
+                          <object class="GtkEntry" id="tr_id_entry">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Namespace</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">5</property>
+                            <property name="max_width_chars">5</property>
+                            <property name="text">0</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
                           </object>
                           <packing>
-                            <property name="left_attach">4</property>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="sid_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">SID</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="sid_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">5</property>
+                            <property name="max_width_chars">5</property>
+                            <property name="text">0</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="id_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">ID</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="srv_id_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">5</property>
+                            <property name="max_width_chars">4</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="type_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Type</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
                             <property name="top_attach">0</property>
                           </packing>
                         </child>
@@ -564,71 +1279,11 @@ Author: Dmitriy Yefremov
                             <property name="width_chars">5</property>
                             <property name="max_width_chars">5</property>
                             <property name="text">1</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
-                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="sid_entry">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="width_chars">5</property>
-                            <property name="max_width_chars">5</property>
-                            <property name="text">0</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
                             <signal name="changed" handler="on_entry_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="tr_id_entry">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="width_chars">5</property>
-                            <property name="max_width_chars">5</property>
-                            <property name="text">0</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
-                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="net_id_entry">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="width_chars">5</property>
-                            <property name="max_width_chars">5</property>
-                            <property name="text">0</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
-                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left_attach">3</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="namespace_entry">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="width_chars">5</property>
-                            <property name="max_width_chars">5</property>
-                            <property name="text">0</property>
-                            <property name="primary_icon_stock">gtk-edit</property>
-                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left_attach">4</property>
                             <property name="top_attach">1</property>
                           </packing>
                         </child>
@@ -654,504 +1309,6 @@ Author: Dmitriy Yefremov
                 <property name="position">2</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkInfoBar" id="info_bar">
-                <property name="can_focus">False</property>
-                <property name="show_close_button">True</property>
-                <signal name="response" handler="on_info_bar_close" swapped="no"/>
-                <child internal-child="action_area">
-                  <object class="GtkButtonBox">
-                    <property name="can_focus">False</property>
-                    <property name="spacing">6</property>
-                    <property name="layout_style">end</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child internal-child="content_area">
-                  <object class="GtkBox">
-                    <property name="can_focus">False</property>
-                    <property name="spacing">16</property>
-                    <child>
-                      <object class="GtkLabel" id="info_bar_message_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">label</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">iptv_dialog_cancel_button</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkDialog" id="iptv_list_configuration_dialog">
-    <property name="use-header-bar">{use_header}</property>
-    <property name="width_request">400</property>
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">IPTV streams list configuration</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window_position">center</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
-    <signal name="response" handler="on_response" swapped="no"/>
-    <child type="action">
-      <object class="GtkButton" id="close_config_list_button">
-        <property name="label">gtk-close</property>
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
-      </object>
-    </child>
-    <child type="action">
-       <object class="GtkButton" id="list_configuration_apply_button">
-         <property name="label">gtk-apply</property>
-         <property name="visible">True</property>
-         <property name="can_focus">True</property>
-         <property name="receives_default">True</property>
-         <property name="use_stock">True</property>
-         <property name="always_show_image">True</property>
-         <signal name="clicked" handler="on_apply" swapped="no"/>
-       </object>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="iptv_list_configuration_dialog_box">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkBox" id="iptv_list_data_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">2</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkFrame" id="list_configuration_reference_frame">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_top">5</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="spacing">1</property>
-                    <child>
-                      <object class="GtkLabel" id="ref_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">5</property>
-                        <property name="label" translatable="yes">Reference</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="colon_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_right">5</property>
-                        <property name="label" translatable="yes">:</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="reference_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">4097:0:1:0:0:0:0:0:0:0</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSwitch" id="reset_to_default_lists_switch">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <signal name="state-set" handler="on_reset_to_default" object="start_values_frame" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="reset_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_right">2</property>
-                        <property name="label" translatable="yes">Reset to default</property>
-                        <property name="xalign">1</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFrame" id="start_values_frame">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
-                <property name="label_xalign">0.019999999552965164</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <object class="GtkGrid" id="start_values_grid">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_left">5</property>
-                    <property name="margin_right">5</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="row_spacing">2</property>
-                    <property name="column_spacing">2</property>
-                    <property name="column_homogeneous">True</property>
-                    <child>
-                      <object class="GtkCheckButton" id="namespace_default_check_button">
-                        <property name="label" translatable="yes">Default</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_default_namespace_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">5</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="list_namespace_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Namespace</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">5</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="list_namespace_entry">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">5</property>
-                        <property name="text">0</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">5</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="nid_default_check_button">
-                        <property name="label" translatable="yes">Default</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_default_nid_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="list_nid_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">NID</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="list_nid_entry">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">5</property>
-                        <property name="text">0</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="tid_default_check_button">
-                        <property name="label" translatable="yes">Default</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_default_tid_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">TID</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="list_tid_entry">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">5</property>
-                        <property name="text">0</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="sid_auto_check_button">
-                        <property name="label" translatable="yes">Auto</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_auto_sid_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="list_sid_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">SID</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="list_sid_entry">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">5</property>
-                        <property name="text">0</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="type_default_check_button">
-                        <property name="label" translatable="yes">Default</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_default_type_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="list_type_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Type</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="list_srv_type_entry">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="width_chars">5</property>
-                        <property name="max_width_chars">5</property>
-                        <property name="text">1</property>
-                        <property name="primary_icon_stock">gtk-edit</property>
-                        <signal name="changed" handler="on_entry_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="stream_type_list_combobox">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">False</property>
-                        <property name="model">stream_type_liststore</property>
-                        <property name="active">1</property>
-                        <property name="id_column">0</property>
-                        <signal name="changed" handler="on_stream_type_changed" swapped="no"/>
-                        <child>
-                          <object class="GtkCellRendererText" id="iptv_sream_type_cellrenderertext1"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Type</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="stream_type_default_check_button">
-                        <property name="label" translatable="yes">Default</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_stream_type_default_togged" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Starting values</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1160,11 +1317,8 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkInfoBar" id="list_configuration_info_bar">
+          <object class="GtkInfoBar" id="info_bar">
             <property name="can_focus">False</property>
-            <property name="margin_left">1</property>
-            <property name="margin_right">1</property>
-            <property name="margin_bottom">1</property>
             <property name="show_close_button">True</property>
             <signal name="response" handler="on_info_bar_close" swapped="no"/>
             <child internal-child="action_area">
@@ -1172,9 +1326,6 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <property name="layout_style">end</property>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1187,13 +1338,15 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="spacing">16</property>
                 <child>
-                  <object class="GtkLabel" id="list_configuration_message_label">
+                  <object class="GtkLabel" id="info_bar_message_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Done!</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">label</property>
+                    <property name="ellipsize">end</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
@@ -1215,154 +1368,147 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">close_config_list_button</action-widget>
+      <action-widget response="-6">iptv_dialog_cancel_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkImage" id="remove_selection_image">
+  <object class="GtkImage" id="yt_receive_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">edit-undo</property>
-  </object>
-  <object class="GtkMenu" id="yt_popup_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="select_all_popup_item">
-        <property name="label">gtk-select-all</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_select_all" object="yt_list_view" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="unselect_all_popup_item">
-        <property name="label" translatable="yes">Remove selection</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="image">remove_selection_image</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_unselect_all" object="yt_list_view" swapped="no"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkListStore" id="yt_liststore">
-    <columns>
-      <!-- column-name title -->
-      <column type="gchararray"/>
-      <!-- column-name id -->
-      <column type="gchararray"/>
-      <!-- column-name selected -->
-      <column type="gboolean"/>
-      <!-- column-name tooltip -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="yt_quality_liststore">
-    <columns>
-      <!-- column-name quality -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Auto</col>
-      </row>
-      <row>
-        <col id="0">720p</col>
-      </row>
-      <row>
-        <col id="0">360p</col>
-      </row>
-    </data>
+    <property name="icon_name">network-receive-symbolic</property>
+    <property name="icon_size">1</property>
   </object>
   <object class="GtkWindow" id="yt_import_dialog_window">
     <property name="width_request">480</property>
     <property name="can_focus">False</property>
-    <property name="resizable">False</property>
+    <property name="title" translatable="yes">YouTube</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="default_width">480</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
+    <signal name="delete-event" handler="on_close" swapped="no"/>
     <child type="titlebar">
-      <object class="GtkHeaderBar" id="yt_header_bar">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="title" translatable="yes">YouTube</property>
-        <property name="subtitle" translatable="yes">Playlist import</property>
-        <property name="spacing">2</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButton" id="yt_receive_button">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Receive</property>
-            <signal name="clicked" handler="on_receive" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="yt_receive_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="stock">gtk-goto-bottom</property>
-              </object>
-            </child>
-            <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="yt_import_button">
-            <property name="visible">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Import</property>
-            <signal name="clicked" handler="on_import" swapped="no"/>
-            <child>
-              <object class="GtkImage" id="yt_import_button_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">insert-link</property>
-              </object>
-            </child>
-            <accelerator key="i" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkComboBox" id="yt_quality_combobox">
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Desired video quality</property>
-            <property name="model">yt_quality_liststore</property>
-            <property name="active">0</property>
-            <property name="id_column">0</property>
-            <child>
-              <object class="GtkCellRendererText" id="yt_quality_renderer"/>
-              <attributes>
-                <attribute name="text">0</attribute>
-              </attributes>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
+      <placeholder/>
     </child>
     <child>
       <object class="GtkBox" id="yt_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="yt_import_header_box">
+            <property name="name">yt_import_header_box</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkBox" id="yt_actions_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">15</property>
+                <property name="margin_right">15</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkButton" id="yt_receive_button">
+                    <property name="label" translatable="yes">Receive</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Receive</property>
+                    <property name="valign">center</property>
+                    <property name="image">yt_receive_image</property>
+                    <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_receive" swapped="no"/>
+                    <accelerator key="d" signal="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child type="center">
+                  <object class="GtkLabel" id="playlist_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Playlist import</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButtonBox" id="yt_impotr_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="layout_style">expand</property>
+                    <child>
+                      <object class="GtkButton" id="yt_import_button">
+                        <property name="label" translatable="yes">Import</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Import</property>
+                        <property name="image">yt_import_image</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="clicked" handler="on_import" swapped="no"/>
+                        <accelerator key="i" signal="clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="yt_quality_combobox">
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Desired video quality</property>
+                        <property name="model">yt_quality_liststore</property>
+                        <property name="active">0</property>
+                        <property name="id_column">0</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="yt_quality_renderer1"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <style>
+              <class name="primary-toolbar"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkEntry" id="yt_url_entry">
             <property name="visible">True</property>
@@ -1371,19 +1517,23 @@ Author: Dmitriy Yefremov
             <property name="margin_right">5</property>
             <property name="margin_top">5</property>
             <property name="margin_bottom">5</property>
-            <property name="primary_icon_stock">gtk-edit</property>
+            <property name="primary_icon_name">document-edit-symbolic</property>
             <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
             <property name="placeholder_text" translatable="yes">YouTube playlist URL:</property>
             <signal name="changed" handler="on_yt_url_entry_changed" swapped="no"/>
           </object>
           <packing>
+            <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="yt_list_view_scrolled_window">
+            <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
             <property name="shadow_type">in</property>
             <property name="min_content_height">150</property>
             <child>
@@ -1403,7 +1553,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkTreeViewColumn" id="yt_title_column">
                     <property name="resizable">True</property>
-                    <property name="min_width">50</property>
+                    <property name="min_width">100</property>
                     <property name="title" translatable="yes">Title</property>
                     <property name="expand">True</property>
                     <property name="clickable">True</property>
@@ -1434,8 +1584,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="yt_selected_column">
-                    <property name="min_width">50</property>
-                    <property name="max_width">100</property>
+                    <property name="min_width">100</property>
                     <property name="title" translatable="yes">Selected</property>
                     <property name="clickable">True</property>
                     <property name="alignment">0.5</property>
@@ -1475,10 +1624,13 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="yt_info_bar_box">
-            <property name="height_request">24</property>
+            <property name="height_request">26</property>
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">5</property>
-            <property name="margin_right">10</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
             <property name="spacing">2</property>
             <child>
               <object class="GtkBox" id="yt_cout_box">
@@ -1489,7 +1641,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkImage" id="yt_count_image">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-properties</property>
+                    <property name="margin_left">5</property>
+                    <property name="icon_name">document-properties-symbolic</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1566,6 +1719,7 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">info</property>
+                    <property name="ellipsize">end</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>

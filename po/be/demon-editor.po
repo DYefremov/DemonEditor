@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Dmitriy Yefremov
+# Copyright (C) 2018-2021 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -203,8 +203,8 @@ msgstr "Цякучы шлях да дадзеных:"
 msgid "Data:"
 msgstr "Дадзеныя:"
 
-msgid "Enigma2 channel and satellites list editor for GNU/Linux"
-msgstr "Рэдактар спіса каналаў і спадарожнікаў Enigma2\n для GNU/Linux"
+msgid "Enigma2 channel and satellite list editor."
+msgstr "Рэдактар спіса каналаў і спадарожнікаў Enigma2."
 
 msgid "Host:"
 msgstr "Адрас рэсівера:"
@@ -296,8 +296,8 @@ msgstr "Фармат імя піконаў:"
 msgid "Resize:"
 msgstr "Змяніць памер:"
 
-msgid "Current picons path:"
-msgstr "Цякучы шлях да піконаў:"
+msgid "Current picons path"
+msgstr "Цякучы шлях да піконаў"
 
 msgid "Receiver picons path:"
 msgstr "Шлях да піконаў рэсівера:"
@@ -909,13 +909,13 @@ msgid "Sample rate (Hz):"
 msgstr "Частата дыскр. (Гц):"
 
 msgid "Play streams mode:"
-msgstr "Рэжым прайгравання струменяў:"
+msgstr "Рэжым прайгравання патокаў:"
 
 msgid "Built-in player"
 msgstr "Убудаваны плэер"
 
-msgid "VLC media player"
-msgstr "VLC медыяплэер"
+msgid "In a separate window"
+msgstr "У асобным акне"
 
 msgid "Only get m3u file"
 msgstr "Атрымаць файл *.m3u"
@@ -1027,3 +1027,276 @@ msgstr "Не атрымоўваецца прайграць!"
 
 msgid "Enable Dark Mode"
 msgstr "Уключыць цёмны рэжым"
+
+msgid "Extract..."
+msgstr "Выняць..."
+
+msgid "Unsupported format!"
+msgstr "Непадтрымоўваны фармат!"
+
+msgid "Combine with the current data?"
+msgstr "Аб'яднаць з цякучымі дадзенымі?"
+
+msgid "Importing data done!"
+msgstr "Імпарт дадзеных завершаны!"
+
+msgid "Current service"
+msgstr "Цякучы сэрвіс"
+
+msgid "Open folder"
+msgstr "Адкрыць тэчку"
+
+msgid "Open archive"
+msgstr "Адкрыць архіў"
+
+msgid "Import from Web"
+msgstr "Імпарт з сеткі"
+
+msgid "Control"
+msgstr "Кіраванне"
+
+msgid "Timers"
+msgstr "Таймеры"
+
+msgid "Timer"
+msgstr "Таймер"
+
+msgid "Add timer"
+msgstr "Дадаць таймер"
+
+msgid "Hr."
+msgstr "г."
+
+msgid "Min."
+msgstr "хв."
+
+msgid "Power"
+msgstr "Сілкаванне"
+
+msgid "Standby"
+msgstr "Рэжым чакання"
+
+msgid "Wake Up"
+msgstr "Абуджэнне"
+
+msgid "Reboot"
+msgstr "Перазагрузка"
+
+msgid "Restart GUI"
+msgstr "Перазагрузіць графічны інтэрфейс"
+
+msgid "Shutdown"
+msgstr "Выключэнне"
+
+msgid "Shut down"
+msgstr "Выключыць"
+
+msgid "Do Nothing"
+msgstr "Нічога не рабіць"
+
+msgid "Auto"
+msgstr "Аўта"
+
+msgid "Grab screenshot"
+msgstr "Зрабіць скрыншот"
+
+msgid "Enabled:"
+msgstr "Улучаны:"
+
+msgid "Name:"
+msgstr "Імя:"
+
+msgid "Description:"
+msgstr "Апісанне:"
+
+msgid "Service:"
+msgstr "Сэрвіс:"
+
+msgid "Service reference:"
+msgstr "Сэрвісная спасылка:"
+
+msgid "Event ID:"
+msgstr "ID падзеі:"
+
+msgid "Begins:"
+msgstr "Пачатак:"
+
+msgid "Ends:"
+msgstr "Сканчэнне:"
+
+msgid "Repeated:"
+msgstr "Паўтор:"
+
+msgid "Action:"
+msgstr "Дзеянне:"
+
+msgid "After event:"
+msgstr "Пасля падзеі:"
+
+msgid "Location:"
+msgstr "Месцаванне:"
+
+msgid "Mo"
+msgstr "Пн"
+
+msgid "Tu"
+msgstr "Аў"
+
+msgid "We"
+msgstr "Ср"
+
+msgid "Th"
+msgstr "Чц"
+
+msgid "Fr"
+msgstr "Пт"
+
+msgid "Sa"
+msgstr "Сб"
+
+msgid "Su"
+msgstr "Нд"
+
+msgid "Set"
+msgstr "Усталяваць"
+
+msgid "Services update"
+msgstr "Абнаўленне сэрвісаў"
+
+msgid "Create folder"
+msgstr "Стварыць тэчку"
+
+msgid "FTP client"
+msgstr "FTP-кліент"
+
+msgid "The file size is too large!"
+msgstr "Памер файла занадта вялікі!"
+
+msgid "Connect"
+msgstr "Злучэнне"
+
+msgid "Disconnect"
+msgstr "Раз'яднаць"
+
+msgid "Size"
+msgstr "Памер"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Attr."
+msgstr "Атрыб."
+
+msgid "Toggle display position"
+msgstr "Перамкнуць пазіцыю адлюстравання"
+
+msgid "Alternatives"
+msgstr "Альтэрнатывы"
+
+msgid "Add alternatives"
+msgstr "Дадаць альтэрнатывы"
+
+msgid "DreamOS only!"
+msgstr "Толькі DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Падобны сэрвіс ужо ёсць у гэтым спісе!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "Зменены рэжым прайгравання!\nПеразапусціце праграму для ўжывання налад."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Усталюйце значэнні TID, NID і пр. імёнаў для слушнага наймення пiконаў!"
+
+msgid "Streams detected:"
+msgstr "Выяўлена патокаў:"
+
+msgid "Download picons"
+msgstr "Загрузіць пiконы"
+
+msgid "Errors:"
+msgstr "Памылак:"
+
+msgid "Use to play streams:"
+msgstr "Скарыстаць для прайгравання патокаў:"
+
+msgid "Font in the lists:"
+msgstr "Шрыфт у спісах:"
+
+msgid "Picons size in the lists:"
+msgstr "Памер пiконаў у спісах:"
+
+msgid "Logo size in tooltips:"
+msgstr "Памер лагатыпа ва ўсплыўных падказках:"
+
+msgid "Save as"
+msgstr "Захаваць як"
+
+msgid "Mark duplicates"
+msgstr "Адзначыць дублікаты"
+
+msgid "Load only for selected bouquet"
+msgstr "Загрузіць толькі для абранага букета"
+
+msgid "The task is canceled!"
+msgstr "Заданне скасавана!"
+
+msgid "Data loading in progress!"
+msgstr "Выконваецца загрузка дадзеных!"
+
+msgid "Recordings"
+msgstr "Запісы"
+
+msgid "Help"
+msgstr "Даведка"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP API не актывавана. Праверце налады!"
+
+msgid "Add picons"
+msgstr "Дадаць піконы"
+
+msgid "Logs"
+msgstr "Логі"
+
+msgid "Title"
+msgstr "Назва"
+
+msgid "Time"
+msgstr "Час"
+
+msgid "Length"
+msgstr "Працягласць"
+
+msgid "Additional source"
+msgstr "Дадатковая крыніца"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Аўтаматычная ўсталёўка імя са спіса абранага."
+
+msgid "Playback"
+msgstr "Прайграванне"
+
+msgid "Audio"
+msgstr "Аўдыё"
+
+msgid "Audio Track"
+msgstr "Аўдыёдарожка"
+
+msgid "Subtitle"
+msgstr "Субтытры"
+
+msgid "Subtitle Track"
+msgstr "Дарожка субтытраў"
+
+msgid "Aspect ratio"
+msgstr "Стасунак бакоў"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Гэта можа змяніць налады іншых профіляў!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Перацягніце сэрвісы на патрэбны пікон ці пікон на спіс абраных сэрвісаў."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Усталёўвае тэчку профілю па змаўчанні для захоўвання  піконаў, рэзервовых копій і т. п."

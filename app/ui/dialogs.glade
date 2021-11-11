@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2021 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,8 +30,8 @@ Author: Dmitriy Yefremov
   <requires lib="gtk+" version="3.16"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-description Enigma2 channel and satellites list editor. -->
+  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
@@ -40,17 +40,17 @@ Author: Dmitriy Yefremov
     <property name="icon_name">system-help</property>
     <property name="type_hint">normal</property>
     <property name="program_name">DemonEditor</property>
-    <property name="version">1.0.0 Beta</property>
-    <property name="copyright">2018-2020 Dmitriy Yefremov
+    <property name="version">2.0.0 Beta</property>
+    <property name="copyright">2018-2021 Dmitriy Yefremov
 </property>
-    <property name="comments" translatable="yes">Enigma2 channel and satellites list editor for GNU/Linux</property>
+    <property name="comments" translatable="yes">Enigma2 channel and satellite list editor.</property>
     <property name="website">https://dyefremov.github.io/DemonEditor/</property>
     <property name="license" translatable="yes">Это приложение распространяется без каких-либо гарантий.
 Подробнее в &lt;a href="http://opensource.org/licenses/mit-license.php"&gt;The MIT License (MIT)&lt;/a&gt;.</property>
     <property name="authors">Dmitriy Yefremov
 </property>
     <property name="translator_credits" translatable="yes">translator-credits</property>
-    <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt; mfgeg&lt;/a&gt;</property>
+    <property name="artists">Program logo: &lt;a href="http://ihad.tv"&gt;mfgeg&lt;/a&gt;</property>
     <property name="logo_icon_name">demon-editor</property>
     <property name="wrap_license">True</property>
     <property name="license_type">mit-x11</property>
@@ -65,7 +65,9 @@ Author: Dmitriy Yefremov
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="aboutdialog_action_area">
             <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="margin_left">50</property>
+            <property name="margin_right">50</property>
+            <property name="layout_style">expand</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -86,45 +88,55 @@ Author: Dmitriy Yefremov
     <property name="window_position">center</property>
     <property name="default_width">320</property>
     <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">utility</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <property name="gravity">center</property>
     <child type="action">
       <object class="GtkButton" id="input_dialog_cancel_button">
-        <property name="label">gtk-cancel</property>
+        <property name="label" translatable="yes">Cancel</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
       </object>
     </child>
     <child type="action">
       <object class="GtkButton" id="input_dialog_ok_button">
-        <property name="label">gtk-ok</property>
+        <property name="label" translatable="yes">OK</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="use_stock">True</property>
-        <property name="always_show_image">True</property>
+        <property name="valign">center</property>
         <accelerator key="Return" signal="activate"/>
       </object>
     </child>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="valign">center</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkEntry" id="input_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="margin_left">2</property>
-            <property name="margin_right">2</property>
-            <property name="margin_top">2</property>
-            <property name="margin_bottom">2</property>
-            <property name="primary_icon_stock">gtk-edit</property>
+            <property name="margin_left">5</property>
+            <property name="margin_right">5</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="primary_icon_name">document-edit-symbolic</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="secondary_icon_sensitive">False</property>
@@ -132,7 +144,7 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </object>
@@ -142,7 +154,7 @@ Author: Dmitriy Yefremov
       <action-widget response="ok">input_dialog_ok_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkDialog" id="wait_dialog">
+  <object class="GtkWindow" id="wait_dialog">
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
@@ -153,69 +165,45 @@ Author: Dmitriy Yefremov
     <property name="skip_pager_hint">True</property>
     <property name="decorated">False</property>
     <child>
-      <placeholder/>
-    </child>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="wait_dialog_vbox">
-        <property name="width_request">120</property>
+      <object class="GtkBox" id="wait_dialog_box">
+        <property name="width_request">100</property>
+        <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin_top">5</property>
+        <property name="margin_bottom">5</property>
         <property name="orientation">vertical</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area4">
+        <child>
+          <object class="GtkSpinner" id="spinner">
+            <property name="width_request">150</property>
+            <property name="height_request">45</property>
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="opacity">0</property>
-            <property name="layout_style">end</property>
+            <property name="active">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box4">
+          <object class="GtkLabel" id="wait_dialog_label">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkSpinner" id="spinner">
-                <property name="width_request">150</property>
-                <property name="height_request">45</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="active">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="wait_dialog_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="label" translatable="yes">Loading data...</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="label" translatable="yes">Loading data...</property>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
-        <style>
-          <class name="app-notification"/>
-        </style>
       </object>
-    </child>
+    </child>                          <!-- NOP -->
+    <style>
+      <class name="app-notification"/>
+    </style>
   </object>
 </interface>
