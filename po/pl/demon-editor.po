@@ -1059,7 +1059,7 @@ msgid "Enable Dark Mode"
 msgstr "Włącz tryb ciemny"
 
 msgid "Extract..."
-msgstr "Wypakuj…"
+msgstr "Rozpakuj…"
 
 msgid "Unsupported format!"
 msgstr "Format nieobsługiwany!"
