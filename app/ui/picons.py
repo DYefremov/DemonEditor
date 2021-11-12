@@ -571,6 +571,7 @@ class PiconManager(Gtk.Box):
         dest_path = path or self._settings.profile_picons_path
         settings = Settings(self._settings.settings)
         settings.profile_picons_path = f"{dest_path}{SEP}"
+        settings.current_profile = self._settings.current_profile
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
@@ -583,6 +584,7 @@ class PiconManager(Gtk.Box):
         path = path or self._settings.profile_picons_path
         settings = Settings(self._settings.settings)
         settings.profile_picons_path = path + SEP
+        settings.current_profile = self._settings.current_profile
         self.run_func(lambda: download_data(settings=settings,
                                             download_type=DownloadType.PICONS,
                                             callback=self.append_output,
