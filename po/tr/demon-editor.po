@@ -3,13 +3,13 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2021-06-13 14:54+0300\n"
+"PO-Revision-Date: 2021-11-11 23:49+0300\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
+"Last-Translator: audi06_19 <audi06_19@hotmail.com>\n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 3.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: tr\n"
 
@@ -206,8 +206,8 @@ msgstr "Mevcut veri yolu:"
 msgid "Data:"
 msgstr "Veri:"
 
-msgid "Enigma2 channel and satellite list editor for GNU/Linux."
-msgstr "GNU/Linux için Enigma2 kanalı ve uydu listesi editörü."
+msgid "Enigma2 channel and satellite list editor."
+msgstr "Enigma2 kanal ve uydu listesi düzenleyicisi."
 
 msgid "Host:"
 msgstr "Ana bilgisayar:"
@@ -299,8 +299,8 @@ msgstr "Piconların adı biçimi:"
 msgid "Resize:"
 msgstr "Yeniden boyutlandır:"
 
-msgid "Current picons path:"
-msgstr "Geçerli picon yolları:"
+msgid "Current picons path"
+msgstr "Mevcut piconların yolu"
 
 msgid "Receiver picons path:"
 msgstr "Alıcı picon yolu:"
@@ -1269,3 +1269,63 @@ msgstr "Yalnızca seçilen buket için yükle"
 
 msgid "The task is canceled!"
 msgstr "Görev iptal edildi!"
+
+msgid "Data loading in progress!"
+msgstr "Veri yükleme devam ediyor!"
+
+msgid "Recordings"
+msgstr "Kayıtlar"
+
+msgid "Help"
+msgstr "Yardım"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP API etkinleştirilmedi. Ayarlarınızı kontrol edin!"
+
+msgid "Add picons"
+msgstr "Piconlar ekle"
+
+msgid "Logs"
+msgstr "Loglar"
+
+msgid "Title"
+msgstr "Başlık"
+
+msgid "Time"
+msgstr "Zaman"
+
+msgid "Length"
+msgstr "Uzunluk"
+
+msgid "Additional source"
+msgstr "Ek kaynak"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Favoriler listesinde seçilen adı otomatik olarak ayarlayın."
+
+msgid "Playback"
+msgstr "Oynatım"
+
+msgid "Audio"
+msgstr "Ses"
+
+msgid "Audio Track"
+msgstr "Ses parçası"
+
+msgid "Subtitle"
+msgstr "Altyazı"
+
+msgid "Subtitle Track"
+msgstr "Altyazı Parçası"
+
+msgid "Aspect ratio"
+msgstr "En boy oranı"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Bu, diğer profillerin ayarlarını değiştirebilir!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Hizmetleri istediğiniz simgeye veya simgeyi seçili hizmetler listesine sürükleyin."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Picon'ları, yedekleri vb. depolamak için profil klasörünü varsayılan olarak ayarlar."
