@@ -1,6 +1,36 @@
-""" Common elements module """
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
+""" Common elements module. """
 from collections import namedtuple
 from enum import Enum
+
+from app.commons import log
 
 Service = namedtuple("Service", ["flags_cas", "transponder_type", "coded", "service", "locked", "hide", "package",
                                  "service_type", "picon", "picon_id", "ssid", "freq", "rate", "pol", "fec",
@@ -206,14 +236,15 @@ def get_value_by_name(en, name):
 
 
 def is_transponder_valid(tr: Transponder):
-    """ Checks  transponder validity """
+    """ Checks transponder validity. """
     try:
         int(tr.frequency)
         int(tr.symbol_rate)
         tr.pls_mode is None or int(tr.pls_mode)
         tr.pls_code is None or int(tr.pls_code)
         tr.is_id is None or int(tr.is_id)
-    except TypeError:
+    except (TypeError, ValueError) as e:
+        log(f"Transponder validation error: {e}\n{tr}")
         return False
 
     if tr.polarization not in POLARIZATION.values():
