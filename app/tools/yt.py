@@ -46,7 +46,7 @@ from app.ui.uicommons import show_notification
 _YT_PATTERN = re.compile(r"https://www.youtube.com/.+(?:v=)([\w-]{11}).*")
 _YT_LIST_PATTERN = re.compile(r"https://www.youtube.com/.+?(?:list=)([\w-]{18,})?.*")
 _YT_VIDEO_PATTERN = re.compile(r"https://r\d+---sn-[\w]{10}-[\w]{3,5}.googlevideo.com/videoplayback?.*")
-_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/69.0",
+_HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0",
             "DNT": "1",
             "Accept-Encoding": "gzip, deflate"}
 
@@ -109,6 +109,8 @@ class YouTube:
         if self._settings.enable_yt_dl and url:
             if not self._yt_dl:
                 self._yt_dl = YouTubeDL.get_instance(self._settings, self._callback)
+                if not self._yt_dl:
+                    raise YouTubeException("youtube-dl initialization error.")
             return self._yt_dl.get_yt_link(url, skip_errors)
 
         return self.get_yt_link_by_id(video_id)
@@ -130,7 +132,7 @@ class YouTube:
                 try:
                     resp = json.loads(player_resp)
                 except JSONDecodeError as e:
-                    log("{}: Parsing player response error: {}".format(__class__.__name__, e))
+                    log(f"{__class__.__name__}: Parsing player response error: {e}")
                 else:
                     det = resp.get("videoDetails", None)
                     title = det.get("title", None) if det else None
@@ -162,14 +164,19 @@ class YouTube:
         """ Returns tuple from the playlist header and list of tuples (title, video id). """
         if self._settings.enable_yt_dl and url:
             try:
+                if not self._yt_dl:
+                    raise YouTubeException("youtube-dl is not initialized!")
+
                 self._yt_dl.update_options({"noplaylist": False, "extract_flat": True})
                 info = self._yt_dl.get_info(url, skip_errors=False)
                 if "url" in info:
                     info = self._yt_dl.get_info(info.get("url"), skip_errors=False)
+
                 return info.get("title", ""), [(e.get("title", ""), e.get("id", "")) for e in info.get("entries", [])]
             finally:
                 # Restoring default options
-                self._yt_dl.update_options({"noplaylist": True, "extract_flat": False})
+                if self._yt_dl:
+                    self._yt_dl.update_options({"noplaylist": True, "extract_flat": False})
 
         return PlayListParser.get_yt_playlist(list_id)
 
@@ -218,7 +225,7 @@ class PlayListParser(HTMLParser):
             self._is_script = False
 
     def error(self, message):
-        log("{} Parsing error: {}".format(__class__.__name__, message))
+        log(f"{__class__.__name__} Parsing error: {message}")
 
     @property
     def header(self):
@@ -259,7 +266,7 @@ class YouTubeDL:
                 "cookiefile": "cookies.txt"}  # File name where cookies should be read from and dumped to.
 
     def __init__(self, settings, callback):
-        self._path = "{}tools{}".format(settings.default_data_path, SEP)
+        self._path = f"{settings.default_data_path}tools{SEP}"
         self._update = settings.enable_yt_dl_update
         self._supported = {"22", "18"}
         self._dl = None
@@ -276,7 +283,7 @@ class YouTubeDL:
         return cls._DL_INSTANCE
 
     def init(self):
-        if not os.path.isfile("{}youtube_dl{}version.py".format(self._path, SEP)):
+        if not os.path.isfile(f"{self._path}youtube_dl{SEP}version.py"):
             self.get_latest_release()
 
         if self._path not in sys.path:
@@ -293,12 +300,17 @@ class YouTubeDL:
         except ImportError as e:
             log("YouTubeDLHelper error: {}".format(str(e)))
         else:
+            if self._path not in youtube_dl.__file__:
+                msg = "Another version of youtube-dl was found on your system!"
+                log(msg)
+                raise YouTubeException(msg)
+
             if self._update:
                 if hasattr(youtube_dl.version, "__version__"):
                     l_ver = self.get_last_release_id()
                     cur_ver = youtube_dl.version.__version__
                     if l_ver and youtube_dl.version.__version__ < l_ver:
-                        msg = "youtube-dl has new release!\nCurrent: {}. Last: {}.".format(cur_ver, l_ver)
+                        msg = f"youtube-dl has new release!\nCurrent: {cur_ver}. Last: {l_ver}."
                         show_notification(msg)
                         log(msg)
                         self._callback(msg, False)
@@ -318,7 +330,7 @@ class YouTubeDL:
             with urlopen(url, timeout=10) as resp:
                 return json.loads(resp.read().decode("utf-8")).get("tag_name", "0")
         except URLError as e:
-            log("YouTubeDLHelper error [get last release id]: {}".format(e))
+            log(f"YouTubeDLHelper error [get last release id]: {e}")
 
     def get_latest_release(self):
         try:
@@ -329,6 +341,9 @@ class YouTubeDL:
                 r = json.loads(resp.read().decode("utf-8"))
                 zip_url = r.get("zipball_url", None)
                 if zip_url:
+                    if os.path.isdir(self._path):
+                        shutil.rmtree(self._path)
+
                     zip_file = self._path + "yt.zip"
                     os.makedirs(os.path.dirname(self._path), exist_ok=True)
                     f_name, headers = urlretrieve(zip_url, filename=zip_file)
@@ -336,25 +351,22 @@ class YouTubeDL:
                     import zipfile
 
                     with zipfile.ZipFile(f_name) as arch:
-
-                        if os.path.isdir(self._path):
-                            shutil.rmtree(self._path)
-                        else:
-                            os.makedirs(os.path.dirname(self._path), exist_ok=True)
-
                         for info in arch.infolist():
                             pref, sep, f = info.filename.partition("/youtube_dl/")
                             if sep:
                                 arch.extract(info.filename)
-                                shutil.move(info.filename, "{}{}{}".format(self._path, sep, f))
+                                shutil.move(info.filename, f"{self._path}{sep}{f}")
                         shutil.rmtree(pref)
                         msg = "Getting the last youtube-dl release is done!"
                         show_notification(msg)
                         log(msg)
                         self._callback(msg, False)
-                        return True
+
+                    if os.path.isfile(zip_file):
+                        os.remove(zip_file)
+                    return True
         except URLError as e:
-            log("YouTubeDLHelper error: {}".format(e))
+            log(f"YouTubeDLHelper error: {e}")
             raise YouTubeException(e)
         finally:
             self._is_update_process = False
@@ -377,10 +389,10 @@ class YouTubeDL:
         try:
             return self._dl.extract_info(url, download=False)
         except URLError as e:
-            log(str(e))
+            log(f"YouTubeDLHelper error [get info]: {e}")
             raise YouTubeException(e)
         except self._DownloadError as e:
-            log(str(e))
+            log(f"YouTubeDLHelper error [get info]: {e}")
             if not skip_errors:
                 raise YouTubeException(e)
 
