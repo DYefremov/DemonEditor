@@ -192,7 +192,6 @@ class SettingsDialog:
         self._enable_exp_switch.bind_property("active", builder.get_object("enable_direct_playback_box"), "sensitive")
         # Enigma2 only.
         self._enigma_radio_button.bind_property("active", builder.get_object("bq_naming_grid"), "sensitive")
-        self._enigma_radio_button.bind_property("active", builder.get_object("enable_http_box"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("enable_experimental_box"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("program_frame"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("experimental_box"), "sensitive")
@@ -246,8 +245,7 @@ class SettingsDialog:
         self._neutrino_radio_button.set_active(self._s_type is SettingsType.NEUTRINO_MP)
         self.update_picon_paths()
         self.update_title()
-        http_active = self._support_http_api_switch.get_active()
-        self._click_mode_zap_button.set_sensitive(is_enigma_profile and http_active)
+        self._click_mode_zap_button.set_sensitive(self._support_http_api_switch.get_active())
         self._lang_combo_box.set_active_id(self._ext_settings.language)
         self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
             "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
@@ -338,12 +336,12 @@ class SettingsDialog:
         self._picons_size_button.set_active_id(str(self._settings.list_picon_size))
         self._tooltip_logo_size_button.set_active_id(str(self._settings.tooltip_logo_size))
         self._list_font_button.set_font(self._settings.list_font)
+        self._support_http_api_switch.set_active(self._settings.http_api_support)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._enable_exp_switch.set_active(self._settings.is_enable_experimental)
             self._support_ver5_switch.set_active(self._settings.v5_support)
             self._force_bq_name_switch.set_active(self._settings.force_bq_names)
-            self._support_http_api_switch.set_active(self._settings.http_api_support)
             self._enable_yt_dl_switch.set_active(self._settings.enable_yt_dl)
             self._enable_update_yt_dl_switch.set_active(self._settings.enable_yt_dl_update)
             self._enable_send_to_switch.set_active(self._settings.enable_send_to)
@@ -405,6 +403,7 @@ class SettingsDialog:
         self._ext_settings.list_picon_size = int(self._picons_size_button.get_active_id())
         self._ext_settings.tooltip_logo_size = int(self._tooltip_logo_size_button.get_active_id())
         self._ext_settings.list_font = self._list_font_button.get_font()
+        self._ext_settings.http_api_support = self._support_http_api_switch.get_active()
 
         if not IS_LINUX:
             self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
@@ -420,7 +419,6 @@ class SettingsDialog:
             self._ext_settings.extra_color = self._extra_color_button.get_rgba().to_string()
             self._ext_settings.v5_support = self._support_ver5_switch.get_active()
             self._ext_settings.force_bq_names = self._force_bq_name_switch.get_active()
-            self._ext_settings.http_api_support = self._support_http_api_switch.get_active()
             self._ext_settings.enable_yt_dl = self._enable_yt_dl_switch.get_active()
             self._ext_settings.enable_yt_dl_update = self._enable_update_yt_dl_switch.get_active()
             self._ext_settings.enable_send_to = self._enable_send_to_switch.get_active()
