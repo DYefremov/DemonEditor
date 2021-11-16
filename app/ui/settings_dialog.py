@@ -803,15 +803,16 @@ class SettingsDialog:
     @run_task
     def unpack_theme(self, src, dst, button):
         try:
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            from shutil import unpack_archive
 
-            import subprocess
-            log("Unpacking '{}' started...".format(src))
-            p = subprocess.Popen(["tar", "-xvf", src, "-C", dst],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
-            p.communicate()
+            log(f"Unpacking '{src}' started...")
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            unpack_archive(src, dst)
             log("Unpacking end.")
+        except (ValueError, OSError) as e:
+            msg = f"Unpacking error: {e}"
+            log(msg)
+            self.show_info_message(msg, Gtk.MessageType.ERROR)
         finally:
             self.update_theme_button(button, dst)
 
