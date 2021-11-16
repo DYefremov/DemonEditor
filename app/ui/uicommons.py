@@ -35,7 +35,7 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 
 from app.settings import Settings, SettingsException, IS_DARWIN, GTK_PATH, IS_LINUX
 
@@ -106,16 +106,22 @@ else:
 theme = Gtk.IconTheme.get_default()
 theme.append_search_path(UI_RESOURCES_PATH + "icons")
 
-_IMAGE_MISSING = theme.load_icon("image-missing", 16, 0) if theme.lookup_icon("image-missing", 16, 0) else None
-CODED_ICON = theme.load_icon("emblem-readonly", 16, 0) if theme.lookup_icon(
-    "emblem-readonly", 16, 0) else _IMAGE_MISSING
-LOCKED_ICON = theme.load_icon("changes-prevent-symbolic", 16, 0) if theme.lookup_icon(
-    "system-lock-screen", 16, 0) else _IMAGE_MISSING
-HIDE_ICON = theme.load_icon("go-jump", 16, 0) if theme.lookup_icon("go-jump", 16, 0) else _IMAGE_MISSING
-TV_ICON = theme.load_icon("tv-symbolic", 16, 0) if theme.lookup_icon("tv-symbolic", 16, 0) else _IMAGE_MISSING
-IPTV_ICON = theme.load_icon("emblem-shared", 16, 0) if theme.lookup_icon("emblem-shared", 16, 0) else None
-EPG_ICON = theme.load_icon("gtk-index", 16, 0) if theme.lookup_icon("gtk-index", 16, 0) else None
-DEFAULT_ICON = theme.load_icon("emblem-default", 16, 0) if theme.lookup_icon("emblem-default", 16, 0) else None
+
+def get_icon(name, size, default=None):
+    try:
+        return theme.load_icon(name, size, 0) if theme.lookup_icon(name, size, 0) else default
+    except GLib.Error:
+        return default
+
+
+_IMAGE_MISSING = get_icon("image-missing", 16)
+CODED_ICON = get_icon("emblem-readonly", 16, _IMAGE_MISSING)
+LOCKED_ICON = get_icon("changes-prevent-symbolic", 16, _IMAGE_MISSING)
+HIDE_ICON = get_icon("go-jump", 16, _IMAGE_MISSING)
+TV_ICON = get_icon("tv-symbolic", 16, _IMAGE_MISSING)
+IPTV_ICON = get_icon("emblem-shared", 16, _IMAGE_MISSING)
+EPG_ICON = get_icon("gtk-index", 16, _IMAGE_MISSING)
+DEFAULT_ICON = get_icon("emblem-default", 16, _IMAGE_MISSING)
 
 
 @lru_cache(maxsize=1)
