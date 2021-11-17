@@ -3364,6 +3364,10 @@ class Application(Gtk.Application):
             self.show_error_message("Data loading in progress!")
             return
 
+        if not len(self._bouquets_model):
+            self.show_error_message("No bouquets config is loaded. Load or create a new config!")
+            return
+
         gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._s_type,
                      self.append_bouquet)
 
