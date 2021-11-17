@@ -130,7 +130,7 @@ class PiconsCzDownloader:
         # TODO: think about https://github.com/miurahr/py7zr
         exe = "7z"
         if IS_DARWIN and GTK_PATH:
-            exe = "./7z"
+            exe = "./7zr"
 
         if IS_LINUX and not os.path.isfile(f"/usr/bin/{exe}"):
             raise PiconsError("7-zip [7z] archiver not found!")
@@ -219,7 +219,8 @@ class PiconsCzDownloader:
                 "picontransparentdark": "td220",
                 "piconoled": "o96",
                 "piconblack80": "b50",
-                "piconblack3d": "b50"
+                "piconblack3d": "b50",
+                "piconwin11": "win11220"
                 }
 
     def get_name_map(self):
