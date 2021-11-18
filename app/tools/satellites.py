@@ -539,7 +539,7 @@ class ServicesParser(HTMLParser):
 
         tr = tr[0]
         s_pos, freq, pol, sys, mod, sr_fec = tr[0].text, tr[2].text, tr[3].text, tr[6].text, tr[7].text, tr[8].text
-        tid, nid = tr[10].text, tr[11].text
+        nid, tid = tr[10].text, tr[11].text
 
         pos = sat_position
         if not sat_position:
