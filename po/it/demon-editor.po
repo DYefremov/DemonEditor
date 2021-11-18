@@ -1233,7 +1233,7 @@ msgid "Mark duplicates"
 msgstr "Seleziona duplicati"
 
 msgid "Load only for selected bouquet"
-msgstr "Larica solo per i bouquet selezionati"
+msgstr "Scarica solo per i bouquet selezionati"
 
 msgid "The task is canceled!"
 msgstr "Operazione cancellata!"
