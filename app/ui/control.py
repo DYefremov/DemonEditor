@@ -716,10 +716,14 @@ class RecordingsTool(Gtk.Box):
 
         for f in files:
             f_data = f.split()
+            if len(f_data) < 9:
+                log(f"{__class__.__name__}. Folder data parsing error. [{f}]")
+                continue
+
             f_type = f_data[0][0]
 
             if f_type == "d":
-                model.append((self._icon, f_data[-1], self._ftp.pwd()))
+                model.append((self._icon, " ".join(f_data[8:]), self._ftp.pwd()))
 
     def on_path_activated(self, view, path, column):
         row = view.get_model()[path][:]
