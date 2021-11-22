@@ -2944,6 +2944,8 @@ class Application(Gtk.Application):
         error_code = info.get("error_code", 0) if info else 0
         GLib.idle_add(self._receiver_info_box.set_visible, error_code == 0, priority=GLib.PRIORITY_LOW)
         if error_code < 0:
+            if self._page is Page.CONTROL:
+                GLib.idle_add(self._control_tool.update_signal, None)
             return
         elif error_code == 412:
             self._http_api.init()
