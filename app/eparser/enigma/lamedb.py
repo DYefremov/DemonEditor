@@ -164,9 +164,9 @@ class LameDbReader:
             srv_type = int(data[4])
             transponder_id = f"{data[1]}:{tid}:{nid}"
             transponder = transponders.get(transponder_id, None)
-
-            tid = tid.lstrip(sp).upper()
-            nid = nid.lstrip(sp).upper()
+            # The tid and nid values can be 0.
+            tid = tid.lstrip(sp).upper() or "0"
+            nid = nid.lstrip(sp).upper() or "0"
             ssid = str(data[0]).lstrip(sp).upper()
             onid = str(data[1]).lstrip(sp).upper()
             # For comparison in bouquets. Needed in upper case!!!
