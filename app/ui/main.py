@@ -268,11 +268,6 @@ class Application(Gtk.Application):
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
-        main_window_size = self._settings.get("window_size")
-        # Setting the last size of the window if it was saved
-        if main_window_size:
-            self._main_window.resize(*main_window_size)
-
         self._stack = builder.get_object("stack")
         self._fav_paned = builder.get_object("fav_paned")
         self._services_view = builder.get_object("services_tree_view")
@@ -417,7 +412,11 @@ class Application(Gtk.Application):
             self._data_paned.bind_property("visible", main_header_box, "visible")
         self._player_box.bind_property("visible", profile_box, "visible", 4)
         self._player_box.bind_property("visible", toolbar_box, "visible", 4)
-        # Style
+        # Setting the last size of the window if it was saved.
+        main_window_size = self._settings.get("window_size")
+        if main_window_size:
+            self._main_window.resize(*main_window_size)
+        # Style.
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._status_bar_box.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
@@ -691,8 +690,10 @@ class Application(Gtk.Application):
     def init_main_paned_position(self, paned):
         """ Initializes starting positions of main paned widgets. """
         width = paned.get_allocated_width()
-        paned.set_position(width * 0.5)
-        self._fav_paned.set_position(width * 0.27)
+        main_position = self._settings.get("data_paned_position", width * 0.5)
+        fav_position = self._settings.get("fav_paned_position", width * 0.27)
+        paned.set_position(main_position)
+        self._fav_paned.set_position(fav_position)
 
     @run_task
     def update_picons_size(self):
@@ -734,6 +735,9 @@ class Application(Gtk.Application):
         # Saving the current size of the application window.
         if not self._main_window.is_maximized():
             self._settings.add("window_size", self._main_window.get_size())
+        # Saving the state of the main paned widgets.
+        self._settings.add("data_paned_position", self._data_paned.get_position())
+        self._settings.add("fav_paned_position", self._fav_paned.get_position())
 
         if self._services_load_spinner.get_property("active"):
             msg = "{}\n\n\t{}".format(get_message("Data loading in progress!"), get_message("Are you sure?"))
