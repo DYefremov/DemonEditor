@@ -165,6 +165,7 @@ class Application(Gtk.Application):
                     "on_filter_type_toggled": self.on_filter_type_toggled,
                     "on_services_filter_toggled": self.on_services_filter_toggled,
                     "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
+                    "on_filter_in_bq_toggled": self.on_filter_in_bq_toggled,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
                     "on_reference_picon": self.on_reference_picon,
@@ -212,6 +213,7 @@ class Application(Gtk.Application):
         self._alt_counter = 1
         self._data_hash = 0
         self._filter_cache = {}
+        self._in_bouquets = set()
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
         self._picons = DefaultDict(self.get_picon)
@@ -330,6 +332,7 @@ class Application(Gtk.Application):
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
+        self._filter_not_in_bq_button = builder.get_object("filter_not_in_bq_button")
         self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
         self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
         # Search.
@@ -596,7 +599,7 @@ class Application(Gtk.Application):
             else:
                 log("No valid [on, off] arguments for -d found!")
                 return 1
-            log("Debug mode is {}.".format(d_op))
+            log(f"Debug mode is {d_op}.")
             self._settings.save()
 
         self.activate()
@@ -740,13 +743,13 @@ class Application(Gtk.Application):
         self._settings.add("fav_paned_position", self._fav_paned.get_position())
 
         if self._services_load_spinner.get_property("active"):
-            msg = "{}\n\n\t{}".format(get_message("Data loading in progress!"), get_message("Are you sure?"))
+            msg = f"{get_message('Data loading in progress!')}\n\n\t{get_message('Are you sure?')}"
             if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                 return True
 
         if self._recorder:
             if self._recorder.is_record():
-                msg = "{}\n\n\t{}".format(get_message("Recording in progress!"), get_message("Are you sure?"))
+                msg = f"{get_message('Recording in progress!')}\n\n\t{get_message('Are you sure?')}"
                 if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                     return True
             self._recorder.release()
@@ -785,7 +788,7 @@ class Application(Gtk.Application):
         if self._s_type is SettingsType.ENIGMA_2:
             for r in self._services_model:
                 data = r[Column.SRV_PICON_ID].split("_")
-                ids["{}:{}:{}".format(data[3], data[5], data[6])] = r[Column.SRV_PICON_ID]
+                ids[f"{data[3]}:{data[5]}:{data[6]}"] = r[Column.SRV_PICON_ID]
 
         self._picon_manager = PiconManager(self, self._settings, ids, self._sat_positions)
         box.pack_start(self._picon_manager, True, True, 0)
@@ -1025,7 +1028,7 @@ class Application(Gtk.Application):
             self._fav_model.clear()
             yield True
             b_row = self._bouquets_model[itr][:]
-            self._bouquets.pop("{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE]), None)
+            self._bouquets.pop(f"{b_row[Column.BQ_NAME]}:{b_row[Column.BQ_TYPE]}", None)
             self._bouquets_model.remove(itr)
 
         self._bq_selected = ""
@@ -1050,19 +1053,19 @@ class Application(Gtk.Application):
             bq_type = model.get_value(itr, 3)
             bq_name = "bouquet"
             count = 0
-            key = "{}:{}".format(bq_name, bq_type)
+            key = f"{bq_name}:{bq_type}"
             #  Generating name of new bouquet
             while key in self._bouquets:
                 count += 1
-                bq_name = "bouquet{}".format(count)
-                key = "{}:{}".format(bq_name, bq_type)
+                bq_name = f"bouquet{count}"
+                key = f"{bq_name}:{bq_type}"
 
             response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
             if response == Gtk.ResponseType.CANCEL:
                 return
 
             bq = response, None, None, bq_type
-            key = "{}:{}".format(response, bq_type)
+            key = f"{response}:{bq_type}"
 
             while key in self._bouquets:
                 self.show_error_message(get_message("A bouquet with that name exists!"))
@@ -1070,7 +1073,7 @@ class Application(Gtk.Application):
                 if response == Gtk.ResponseType.CANCEL:
                     return
 
-                key = "{}:{}".format(response, bq_type)
+                key = f"{response}:{bq_type}"
                 bq = response, None, None, bq_type
 
             self._current_bq_name = response
@@ -1268,7 +1271,7 @@ class Application(Gtk.Application):
         header, ref = self.get_hint_header_info(srv)
 
         if srv.service_type == "IPTV":
-            return "{}{}".format(header, ref)
+            return f"{header}{ref}"
 
         pol = ", {}: {},".format(get_message("Pol"), srv.pol) if srv.pol else ","
         fec = "{}: {}".format("FEC", srv.fec) if srv.fec else ","
@@ -1277,17 +1280,18 @@ class Application(Gtk.Application):
                          get_message("Package"), srv.package,
                          get_message("System"), srv.system,
                          get_message("Freq"), srv.freq,
-                         get_message("Rate"), srv.rate, pol, fec, self.get_ssid_info(srv),
+                         get_message("Rate"), srv.rate, pol, fec,
+                         self.get_ssid_info(srv),
                          ref)
 
     def get_hint_for_srv_list(self, srv):
         """ Returns short info about service as formatted string for using as hint. """
         header, ref = self.get_hint_header_info(srv)
-        return "{}{}\n{}".format(header, self.get_ssid_info(srv), ref)
+        return f"{header}{self.get_ssid_info(srv)}\n{ref}"
 
     def get_hint_header_info(self, srv):
-        header = "{}: {}\n{}: {}\n".format(get_message("Name"), srv.service, get_message("Type"), srv.service_type)
-        ref = "{}: {}".format(get_message("Service reference"), srv.picon_id.rstrip(".png"))
+        header = f"{get_message('Name')}: {srv.service}\n{get_message('Type')}: {srv.service_type}\n"
+        ref = f"{get_message('Service reference')}: {srv.picon_id.rstrip('.png')}"
         return header, ref
 
     def get_ssid_info(self, srv):
@@ -1296,11 +1300,11 @@ class Application(Gtk.Application):
         try:
             dec = "{0:04d}".format(int(sid, 16))
         except ValueError as e:
-            log("SID value conversion error: {}".format(e))
+            log(f"SID value conversion error: {e}")
         else:
-            return "SID: 0x{} ({})".format(sid.upper(), dec)
+            return f"SID: 0x{sid.upper()} ({dec})"
 
-        return "SID: 0x{}".format(sid.upper())
+        return f"SID: 0x{sid.upper()}"
 
     # ***************** Drag-and-drop *********************#
 
@@ -1475,7 +1479,7 @@ class Application(Gtk.Application):
 
         if len(paths) > 0:
             itrs = [model.get_iter(path) for path in paths]
-            return "{}::::{}".format(",".join([model.get_string_from_iter(itr) for itr in itrs]), model.get_name())
+            return f"{','.join([model.get_string_from_iter(itr) for itr in itrs])}::::{model.get_name()}"
 
     def receive_selection(self, *, view, drop_info, data):
         """  Update fav view  after data received  """
@@ -1661,7 +1665,7 @@ class Application(Gtk.Application):
         """ Opening archived data.  """
         arch_path = self.get_archive_path(data_path)
         if arch_path:
-            gen = self.update_data("{}{}".format(arch_path.name, os.sep), callback=arch_path.cleanup)
+            gen = self.update_data(f"{arch_path.name}{os.sep}", callback=arch_path.cleanup)
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def get_archive_path(self, data_path):
@@ -1689,7 +1693,7 @@ class Application(Gtk.Application):
                         tar.extract(mb, path=tmp_path_name)
         else:
             tmp_path.cleanup()
-            log("Error getting the path for the archive. Unsupported file format: {}".format(data_path))
+            log(f"Error getting the path for the archive. Unsupported file format: {data_path}")
             self.show_error_message("Unsupported format!")
             return
 
@@ -1815,7 +1819,7 @@ class Application(Gtk.Application):
     def append_bouquet(self, bq, parent):
         name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
         bouquet = self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
-        bq_id = "{}:{}".format(name, bq_type)
+        bq_id = f"{name}:{bq_type}"
         services = []
         extra_services = {}  # for services with different names in bouquet and main list
         agr = [None] * 7
@@ -1840,7 +1844,7 @@ class Application(Gtk.Application):
                               self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.ALT:
-                self._alt_file.add("{}:{}".format(srv.data, bq_type))
+                self._alt_file.add(f"{srv.data}:{bq_type}")
                 srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
                               None, None, *agr, srv.data, fav_id, srv.num)
                 self._services[fav_id] = srv
@@ -2116,7 +2120,7 @@ class Application(Gtk.Application):
 
         if self._current_bq_name:
             ch_row = model[model.get_iter(path)][:]
-            self._bq_selected = "{}:{}".format(ch_row[Column.BQ_NAME], ch_row[Column.BQ_TYPE])
+            self._bq_selected = f"{ch_row[Column.BQ_NAME]}:{ch_row[Column.BQ_TYPE]}"
         else:
             self._bq_selected = ""
 
@@ -2200,11 +2204,11 @@ class Application(Gtk.Application):
             if bqs_rows:
                 bq_type = row[-1]
                 for b_row in bqs_rows:
-                    bq_id = "{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE])
+                    bq_id = f"{b_row[Column.BQ_NAME]}:{b_row[Column.BQ_TYPE]}"
                     bq = self._bouquets.get(bq_id, None)
                     if bq:
                         b_row[Column.BQ_TYPE] = bq_type
-                        self._bouquets["{}:{}".format(b_row[Column.BQ_NAME], b_row[Column.BQ_TYPE])] = bq
+                        self._bouquets[f"{b_row[Column.BQ_NAME]}:{b_row[Column.BQ_TYPE]}"] = bq
 
     def delete_selection(self, view, *args):
         """ Used for clear selection on given view(s). """
@@ -2846,8 +2850,8 @@ class Application(Gtk.Application):
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
 
-            with open("{}{}.m3u".format(response, s_name), "w", encoding="utf-8") as file:
-                file.writelines("#EXTM3U\n#EXTVLCOPT--http-reconnect=true\n#EXTINF:-1,{}\n{}\n".format(s_name, url))
+            with open(f"{response}{s_name}.m3u", "w", encoding="utf-8") as file:
+                file.writelines(f"#EXTM3U\n#EXTVLCOPT--http-reconnect=true\n#EXTINF:-1,{s_name}\n{url}\n")
         except IOError as e:
             self.show_error_message(str(e))
         else:
@@ -3057,6 +3061,7 @@ class Application(Gtk.Application):
         """ Setting defaults for filter elements. """
         self._filter_entry.set_text("")
         self._filter_only_free_button.set_active(False)
+        self._filter_not_in_bq_button.set_active(False)
         self._filter_types_model.foreach(lambda m, p, i: m.set_value(i, 1, True))
         self._service_types.update({r[0] for r in self._filter_types_model})
         self.update_sat_positions()
@@ -3123,14 +3128,16 @@ class Application(Gtk.Application):
 
         txt = self._filter_entry.get_text().upper()
         for r in self._services_model:
+            fav_id = r[Column.SRV_FAV_ID]
             free = not r[Column.SRV_CODED] if self._filter_only_free_button.get_active() else True
-            self._filter_cache[r[Column.SRV_FAV_ID]] = all((r[Column.SRV_TYPE] in self._service_types,
-                                                            r[Column.SRV_POS] in self._sat_positions, free,
-                                                            txt in "".join((r[Column.SRV_SERVICE],
-                                                                            r[Column.SRV_PACKAGE],
-                                                                            r[Column.SRV_TYPE],
-                                                                            r[Column.SRV_SSID],
-                                                                            r[Column.SRV_POS])).upper()))
+            self._filter_cache[fav_id] = all((free, fav_id not in self._in_bouquets,
+                                              r[Column.SRV_TYPE] in self._service_types,
+                                              r[Column.SRV_POS] in self._sat_positions,
+                                              txt in "".join((r[Column.SRV_SERVICE],
+                                                              r[Column.SRV_PACKAGE],
+                                                              r[Column.SRV_TYPE],
+                                                              r[Column.SRV_SSID],
+                                                              r[Column.SRV_POS])).upper()))
 
     def services_filter_function(self, model, itr, data):
         return self._filter_cache.get(model.get_value(itr, Column.SRV_FAV_ID), True)
@@ -3140,6 +3147,16 @@ class Application(Gtk.Application):
 
     def on_filter_satellite_toggled(self, toggle, path):
         self.update_filter_toogle_model(self._filter_sat_pos_model, toggle, path, self._sat_positions)
+
+    @run_idle
+    def on_filter_in_bq_toggled(self, button):
+        if button.get_active():
+            self._in_bouquets.update(chain.from_iterable(self._bouquets.values()))
+        else:
+            self._in_bouquets.clear()
+
+        if self._filter_services_button.get_active():
+            self.on_filter_changed()
 
     def update_filter_toogle_model(self, model, toggle, path, values_set):
         active = not toggle.get_active()
@@ -3218,13 +3235,13 @@ class Application(Gtk.Application):
             if response == Gtk.ResponseType.CANCEL:
                 return
 
-            bq = "{}:{}".format(response, bq_type)
+            bq = f"{response}:{bq_type}"
             if bq in self._bouquets:
                 self.show_error_message(get_message("A bouquet with that name exists!"))
                 return
 
             model.set_value(itr, 0, response)
-            old_bq_name = "{}:{}".format(bq_name, bq_type)
+            old_bq_name = f"{bq_name}:{bq_type}"
             self._bouquets[bq] = self._bouquets.pop(old_bq_name)
             self._bq_file[bq] = self._bq_file.pop(old_bq_name, None)
             self._current_bq_name = response
@@ -3403,14 +3420,14 @@ class Application(Gtk.Application):
         bq_name, sep, bq_type = self._bq_selected.partition(":")
         fav_id = srv.fav_id
 
-        key = "de{:02d}:{}".format(self._alt_counter, bq_type)
+        key = f"de{self._alt_counter:02d}:{bq_type}"
         #  Generating file name for alternative
         while key in self._alt_file:
             self._alt_counter += 1
-            key = "de{:02d}:{}".format(self._alt_counter, bq_type)
+            key = f"de{self._alt_counter:02d}:{bq_type}"
 
-        alt_name = "de{:02d}".format(self._alt_counter)
-        alt_id = "alternatives_{}_{}".format(self._bq_selected, fav_id)
+        alt_name = f"de{self._alt_counter:02d}"
+        alt_id = f"alternatives_{self._bq_selected}_{fav_id}"
         if alt_id in bq:
             self.show_error_message("A similar service is already in this list!")
             return
@@ -3422,7 +3439,7 @@ class Application(Gtk.Application):
         try:
             index = bq.index(fav_id)
         except ValueError as e:
-            log("[on_add_alternatives] error: {}".format(e))
+            log(f"[on_add_alternatives] error: {e}")
         else:
             bq[index] = alt_id
             self._services[alt_id] = a_srv
@@ -3541,16 +3558,16 @@ class Application(Gtk.Application):
     @run_idle
     def update_profile_label(self):
         label, sep, ip = self._current_ip_label.get_text().partition(":")
-        self._current_ip_label.set_text("{}: {}".format(label, self._settings.host))
+        self._current_ip_label.set_text(f"{label}: {self._settings.host}")
 
         profile_name = self._profile_combo_box.get_active_text()
         msg = get_message("Profile:")
 
         if self._s_type is SettingsType.ENIGMA_2:
-            title = "DemonEditor [{} {} - Enigma2 v.{}]".format(msg, profile_name, self.get_format_version())
+            title = f"DemonEditor [{msg} {profile_name} - Enigma2 v.{self.get_format_version()}]"
             self._main_window.set_title(title)
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._main_window.set_title("DemonEditor [{} {} - Neutrino-MP]".format(msg, profile_name))
+            self._main_window.set_title(f"DemonEditor [{msg} {profile_name} - Neutrino-MP]")
 
     def get_format_version(self):
         return 5 if self._settings.v5_support else 4

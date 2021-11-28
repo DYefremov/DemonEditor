@@ -1533,6 +1533,21 @@ Author: Dmitriy Yefremov
                                             <property name="position">3</property>
                                           </packing>
                                         </child>
+                                        <child>
+                                          <object class="GtkToggleButton" id="filter_not_in_bq_button">
+                                            <property name="label" translatable="yes">Not in Bouquets</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="tooltip_text" translatable="yes">Do not show services present in Bouquets</property>
+                                            <signal name="toggled" handler="on_filter_in_bq_toggled" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">4</property>
+                                          </packing>
+                                        </child>
                                         <style>
                                           <class name="group"/>
                                         </style>
