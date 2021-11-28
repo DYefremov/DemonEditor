@@ -161,6 +161,8 @@ class Application(Gtk.Application):
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_mark_duplicates": self.on_mark_duplicates,
+                    "on_services_mark_not_in_bouquets": self.on_services_mark_not_in_bouquets,
+                    "on_services_clear_marked": self.on_services_clear_marked,
                     "on_filter_changed": self.on_filter_changed,
                     "on_filter_type_toggled": self.on_filter_type_toggled,
                     "on_services_filter_toggled": self.on_services_filter_toggled,
@@ -1887,21 +1889,20 @@ class Application(Gtk.Application):
         factor = self.DEL_FACTOR
 
         for index, srv in enumerate(services):
-            tooltip, background = None, None
-            if self._use_colors:
-                flags = srv.flags_cas
-                if flags:
-                    f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
-                    if f_flags and Flag.is_new(Flag.parse(f_flags[0])):
-                        background = self._NEW_COLOR
-
-            s = srv._replace(picon=self._picons.get(srv.picon_id, None)) + (tooltip, background)
+            background = self.get_new_background(srv.flags_cas)
+            s = srv._replace(picon=self._picons.get(srv.picon_id, None)) + (None, background)
             self._services_model.append(s)
             if index % factor == 0:
                 yield True
 
         self._services_load_spinner.stop()
         yield True
+
+    def get_new_background(self, flags):
+        if self._use_colors and flags:
+            f_flags = list(filter(lambda x: x.startswith("f:"), flags.split(",")))
+            if f_flags and Flag.is_new(Flag.parse(f_flags[0])):
+                return self._NEW_COLOR
 
     def clear_current_data(self):
         """ Clearing current data from lists """
@@ -3331,6 +3332,47 @@ class Application(Gtk.Application):
         for r in self._fav_model:
             if r[Column.FAV_SERVICE] in dup:
                 r[Column.FAV_BACKGROUND] = self._NEW_COLOR
+
+    def on_services_mark_not_in_bouquets(self, item):
+        if self._services_load_spinner.get_property("active"):
+            self.show_error_message("Data loading in progress!")
+            return
+
+        gen = self.mark_not_in_bouquets()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def mark_not_in_bouquets(self):
+        self._services_load_spinner.start()
+        ids = set(chain.from_iterable(self._bouquets.values()))
+
+        for index, row in enumerate(self._services_model):
+            fav_id = row[Column.SRV_FAV_ID]
+            if fav_id not in ids:
+                row[Column.SRV_BACKGROUND] = self._EXTRA_COLOR
+
+            if index % self.FAV_FACTOR == 0:
+                yield True
+
+        self._services_load_spinner.stop()
+        yield True
+
+    def on_services_clear_marked(self, item):
+        if self._services_load_spinner.get_property("active"):
+            self.show_error_message("Data loading in progress!")
+            return
+
+        gen = self.clear_marked()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def clear_marked(self):
+        self._services_load_spinner.start()
+        for index, row in enumerate(self._services_model):
+            row[Column.SRV_BACKGROUND] = self.get_new_background(row[Column.SRV_CAS_FLAGS])
+            if index % self.FAV_FACTOR == 0:
+                yield True
+
+        self._services_load_spinner.stop()
+        yield True
 
     # ***************** Picons *********************#
 

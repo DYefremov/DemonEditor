@@ -103,6 +103,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-clear</property>
   </object>
+  <object class="GtkImage" id="clear_mark_not_in_bq_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-clear</property>
+  </object>
   <object class="GtkImage" id="copy_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -822,6 +827,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-find-and-replace</property>
   </object>
+  <object class="GtkImage" id="mark_not_in_bq_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-find-and-replace</property>
+  </object>
   <object class="GtkImage" id="network_transmit_receive_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1059,6 +1069,32 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_mark_not_in_bq_popup_item">
+        <property name="label" translatable="yes">Mark not presented in Bouquets</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">mark_not_in_bq_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_services_mark_not_in_bouquets" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="services_clear_not_in_bq_popup_item">
+        <property name="label" translatable="yes">Clear marked</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">clear_mark_not_in_bq_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_services_clear_marked" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -3752,7 +3788,7 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkImageMenuItem" id="fav_edit_sub_menu_popup_item">
-        <property name="label" translatable="yes">Extra:</property>
+        <property name="label" translatable="yes">Extra</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="image">extra_edit_image</property>
