@@ -1852,7 +1852,7 @@ class Application(Gtk.Application):
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.BOUQUET:
                 # Sub bouquets!
-                msg = "Detected sub-bouquets! This feature is not fully supported. Saving may cause bouquet data loss!"
+                msg = "Detected sub-bouquets. This feature is not fully supported yet!"
                 self.show_info_message(msg, Gtk.MessageType.WARNING)
                 self.append_bouquet(srv.data, bouquet)
             elif srv.name:
@@ -1994,10 +1994,7 @@ class Application(Gtk.Application):
         def parse_bouquets(model, b_path, itr):
             bqs = None
             if model.iter_has_child(itr):
-                bqs = []
-                num_of_children = model.iter_n_children(itr)
-                for num in range(num_of_children):
-                    bqs.append(self.get_bouquet(model.iter_nth_child(itr, num), model))
+                bqs = [self.get_bouquet(model.iter_nth_child(itr, n), model) for n in range(model.iter_n_children(itr))]
             if len(b_path) == 1:
                 bouquets.append(Bouquets(*model.get(itr, Column.BQ_NAME, Column.BQ_TYPE), bqs if bqs else []))
 
@@ -2024,12 +2021,15 @@ class Application(Gtk.Application):
 
     def get_bouquet(self, itr, model):
         """ Constructs and returns Bouquet class instance. """
-        bq_name, locked, hidden, bq_type = model.get(itr, Column.BQ_NAME, Column.BQ_LOCKED, Column.BQ_HIDDEN,
-                                                     Column.BQ_TYPE)
-        bq_id = "{}:{}".format(bq_name, bq_type)
+        bq_name, locked, hidden, bq_type = model[itr][:]
+        bq_id = f"{bq_name}:{bq_type}"
         favs = self._bouquets.get(bq_id, [])
         ex_s = self._extra_bouquets.get(bq_id, None)
         bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
+        # Sub bouquets.
+        if model.iter_has_child(itr):
+            s_bs = [self.get_bouquet(model.iter_nth_child(itr, n), model) for n in range(model.iter_n_children(itr))]
+            return Bouquet(bq_name, BqType.BOUQUET.value, s_bs, locked, hidden, bq_name)
 
         if self._s_type is SettingsType.ENIGMA_2:
             bq_s = self.get_enigma_bq_services(bq_s, ex_s)

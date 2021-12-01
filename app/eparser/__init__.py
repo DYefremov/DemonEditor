@@ -62,7 +62,7 @@ def get_bouquets(path, s_type):
 def write_bouquet(path, bq, s_type):
     if s_type is SettingsType.ENIGMA_2:
         writer = BouquetsWriter(path, None)
-        writer.write_bouquet(path + "userbouquet.{}.{}".format(bq.name, bq.type), bq.name, bq.services)
+        writer.write_bouquet(f"{path}userbouquet.{bq.name}.{bq.type}", bq.name, bq.services)
     elif s_type is SettingsType.NEUTRINO_MP:
         from .neutrino.bouquets import write_bouquet
         write_bouquet(path, bq)

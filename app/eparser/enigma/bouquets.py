@@ -67,7 +67,7 @@ class BouquetsWriter:
 
         for bqs in self._bouquets:
             line.clear()
-            line.append("#NAME {}\n".format(bqs.name))
+            line.append(f"#NAME {bqs.name}\n")
             bq_file_names = {b.file for b in bqs.bouquets}
             count = 1
             m_count = 0
@@ -78,22 +78,26 @@ class BouquetsWriter:
                     if self._force_bq_names:
                         bq_name = re.sub(pattern, "_", bq.name)
                     else:
-                        bq_name = "de{0:02d}".format(count)
+                        bq_name = f"de{count:02d}"
                         while bq_name in bq_file_names:
                             count += 1
-                            bq_name = "de{0:02d}".format(count)
+                            bq_name = f"de{count:02d}"
                         bq_file_names.add(bq_name)
 
-                if BqType(bq.type) is BqType.MARKER:
+                bq_type = BqType(bq.type)
+                if bq_type is BqType.MARKER:
                     m_data = bq.file.split(":") if bq.file else None
                     b_name = m_data[-1].strip() if m_data else bq.name.lstrip(_MARKER_PREFIX)
                     line.append(self._MARKER.format(m_count, b_name))
                     m_count += 1
                 else:
-                    line.append(self._SERVICE.format(2 if bq.type == BqType.RADIO.value else 1, bq_name, bq.type))
-                    self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bq.type}", bq.name, bq.services)
+                    line.append(self._SERVICE.format(2 if bqs.type == BqType.RADIO.value else 1, bq_name, bqs.type))
+                    if bq_type is BqType.BOUQUET:
+                        self.write_sub_bouquet(self._path, bq_name, bq, bqs.type)
+                    else:
+                        self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bqs.type}", bq.name, bq.services)
 
-            with open(self._path + "bouquets.{}".format(bqs.type), "w", encoding="utf-8") as file:
+            with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8") as file:
                 file.writelines(line)
 
     def write_bouquet(self, path, name, services):
@@ -132,6 +136,20 @@ class BouquetsWriter:
                     bouquet.append(f"#SERVICE {data}\n")
 
         with open(path, "w", encoding="utf-8") as file:
+            file.writelines(bouquet)
+
+    def write_sub_bouquet(self, path, file_name, bq, bq_type):
+        bq_name = f"#NAME {bq.name}\n"
+        bouquet = []
+        sb_type = 2 if bq_type == BqType.RADIO.value else 1
+
+        for sb in bq.services:
+            sb_path = f"{path}subbouquet.{sb.name}.{sb.type}"
+            self.write_bouquet(sb_path, sb.name, sb.services)
+            bouquet.append(bq_name)
+            bouquet.append(f"#SERVICE 1:7:{sb_type}:0:0:0:0:0:0:0:FROM BOUQUET \"{sb_path}\" ORDER BY bouquet\n")
+
+        with open(f"{self._path}userbouquet.{file_name}.{bq_type}", "w", encoding="utf-8") as file:
             file.writelines(bouquet)
 
 
@@ -199,7 +217,7 @@ class BouquetsReader:
                     else:
                         s_data = line.split(":")
                         if len(s_data) == 12 and s_data[1] == ServiceType.MARKER.value:
-                            b_name = "{}{}".format(_MARKER_PREFIX, s_data[-1].strip())
+                            b_name = f"{_MARKER_PREFIX}{s_data[-1].strip()}"
                             bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line.strip()))
                         else:
                             log(f"Unsupported or invalid data format: [{line}].")
@@ -211,14 +229,14 @@ class BouquetsReader:
     @staticmethod
     def get_bouquet(path, bq_name, bq_type, prefix="userbouquet"):
         """ Parsing services ids from bouquet file. """
-        with open(path + "{}.{}.{}".format(prefix, bq_name, bq_type), encoding="utf-8", errors="replace") as file:
+        with open(f"{path}{prefix}.{bq_name}.{bq_type}", encoding="utf-8", errors="replace") as file:
             chs_list = file.read()
             services = []
             srvs = list(filter(None, chs_list.split("\n#SERVICE")))  # filtering ['']
             # May come across empty[wrong] files!
             if not srvs:
-                log("Bouquet file 'userbouquet.{}.{}' is empty or wrong!".format(bq_name, bq_type))
-                return "{} [empty]".format(bq_name), services
+                log(f"Bouquet file 'userbouquet.{bq_name}.{bq_type}' is empty or wrong!")
+                return f"{bq_name} [empty]", services
 
             bq_name = srvs.pop(0)
 
@@ -226,7 +244,7 @@ class BouquetsReader:
                 srv_data = srv.strip().split(":")
                 data_len = len(srv_data)
                 if data_len < 10:
-                    log("The bouquet [{}] service [{}] has the wrong data format: [{}]".format(bq_name, num, srv))
+                    log(f"The bouquet [{bq_name}] service [{num}] has the wrong data format: [{srv}]")
                     continue
 
                 s_type = ServiceType(srv_data[1])
@@ -254,7 +272,7 @@ class BouquetsReader:
                     desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
                     services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))
                 else:
-                    fav_id = "{}:{}:{}:{}".format(srv_data[3], srv_data[4], srv_data[5], srv_data[6])
+                    fav_id = f"{srv_data[3]}:{srv_data[4]}:{srv_data[5]}:{srv_data[6]}"
                     name = None
                     if data_len == 12:
                         name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
