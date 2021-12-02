@@ -181,6 +181,7 @@ class Application(Gtk.Application):
                     "on_record": self.on_record,
                     "on_remove_all_unavailable": self.on_remove_all_unavailable,
                     "on_new_bouquet": self.on_new_bouquet,
+                    "on_new_sub_bouquet": self.on_new_sub_bouquet,
                     "on_create_bouquet_for_current_satellite": self.on_create_bouquet_for_current_satellite,
                     "on_create_bouquet_for_each_satellite": self.on_create_bouquet_for_each_satellite,
                     "on_create_bouquet_for_current_package": self.on_create_bouquet_for_current_package,
@@ -376,6 +377,8 @@ class Application(Gtk.Application):
         # Lock, Hide.
         self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[0]), "visible")
         self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[1]), "visible", 4)
+        # Sub-bouquets menu item.
+        self.bind_property("is_enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
         # Stack page widgets.
         self._stack_services_frame = builder.get_object("services_frame")
         self._stack_satellite_box = builder.get_object("satellite_box")
@@ -1046,17 +1049,21 @@ class Application(Gtk.Application):
                                                          *bouquet.split(":"))
         return bouquet_file_name
 
-    def on_new_bouquet(self, view):
+    def on_new_bouquet(self, view, sub=False):
         """ Creates a new item in the bouquets tree """
         model, paths = view.get_selection().get_selected_rows()
 
         if paths:
             itr = model.get_iter(paths[0])
-            bq_type = model.get_value(itr, 3)
+            if not model.iter_parent(itr) and sub:
+                self.show_error_message("Not allowed in this context!")
+                return
+
+            bq_type = model.get_value(itr, Column.BQ_TYPE)
             bq_name = "bouquet"
             count = 0
             key = f"{bq_name}:{bq_type}"
-            #  Generating name of new bouquet
+            #  Generating name of new bouquet.
             while key in self._bouquets:
                 count += 1
                 bq_name = f"bouquet{count}"
@@ -1080,14 +1087,28 @@ class Application(Gtk.Application):
 
             self._current_bq_name = response
 
-            if model.iter_n_children(itr):  # parent
-                ch_itr = model.insert(itr, 0, bq)
-                scroll_to(model.get_path(ch_itr), view, paths)
+            if not model.iter_parent(itr):  # root parent
+                scroll_to(model.get_path(model.insert(itr, Column.BQ_NAME, bq)), view, paths)
             else:
                 p_itr = model.iter_parent(itr)
-                it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
-                scroll_to(model.get_path(it), view, paths)
+                if sub:
+                    if model.iter_parent(p_itr):
+                        self.show_error_message("Not allowed in this context!")
+                        return
+                    else:
+                        if len(self._fav_model):
+                            msg = "This bouquet already contains data.\n\nThey may be lost when saved!"
+                            if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
+                                return
+
+                        scroll_to(model.get_path(model.append(itr, bq)), view, paths)
+                else:
+                    it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
+                    scroll_to(model.get_path(it), view, paths)
             self._bouquets[key] = []
+
+    def on_new_sub_bouquet(self, item=None):
+        self.on_new_bouquet(self._bouquets_view, True)
 
     def on_edit(self, *args):
         """ Edit header bar button """
@@ -1852,7 +1873,7 @@ class Application(Gtk.Application):
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.BOUQUET:
                 # Sub bouquets!
-                msg = "Detected sub-bouquets. This feature is not fully supported yet!"
+                msg = "Detected sub-bouquets. This feature is still experimental!"
                 self.show_info_message(msg, Gtk.MessageType.WARNING)
                 self.append_bouquet(srv.data, bouquet)
             elif srv.name:
