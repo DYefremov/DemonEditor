@@ -168,6 +168,7 @@ class Application(Gtk.Application):
                     "on_services_filter_toggled": self.on_services_filter_toggled,
                     "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
                     "on_filter_in_bq_toggled": self.on_filter_in_bq_toggled,
+                    "on_assign_picon_file": self.on_assign_picon_file,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
                     "on_reference_picon": self.on_reference_picon,
@@ -270,6 +271,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("filter-toggled", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("picon-assign", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -314,6 +317,7 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
+        self._save_tool_button.bind_property("visible", builder.get_object("fav_assign_picon_popup_item"), "sensitive")
         # Alternatives
         self._alt_view = builder.get_object("alt_tree_view")
         self._alt_model = builder.get_object("alt_list_store")
@@ -1442,14 +1446,14 @@ class Application(Gtk.Application):
 
         if uris:
             if len(uris) == 2:
-                self.picons_buffer = self.on_assign_picon(view, urlparse(unquote(uris[0])).path,
-                                                          urlparse(unquote(uris[1])).path + os.sep)
+                self.picons_buffer = self.on_assign_picon_file(view, urlparse(unquote(uris[0])).path,
+                                                               urlparse(unquote(uris[1])).path + os.sep)
             elif IS_DARWIN and len(uris) == 1:
                 src, sep, dest = uris[0].partition(self.DRAG_SEP)
                 src_path = urlparse(unquote(src)).path
                 if dest:
                     dest_path = urlparse(unquote(dest)).path + os.sep
-                    self.picons_buffer = self.on_assign_picon(view, src_path, dest_path)
+                    self.picons_buffer = self.on_assign_picon_file(view, src_path, dest_path)
 
             drag_context.finish(True, False, time)
 
@@ -3406,6 +3410,10 @@ class Application(Gtk.Application):
         return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._settings.list_picon_size)
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):
+        self._stack.set_visible_child_name(Page.PICONS.value)
+        self.emit("picon-assign", self.get_target_view(view))
+
+    def on_assign_picon_file(self, view, src_path=None, dst_path=None):
         return assign_picons(self.get_target_view(view), self._services_view, self._fav_view, self._main_window,
                              self._picons, self._settings, self._services, src_path, dst_path)
 

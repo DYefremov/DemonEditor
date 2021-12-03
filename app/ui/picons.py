@@ -44,7 +44,7 @@ from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message, get_builder, get_chooser_dialog
 from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
                           get_picon_pixbuf)
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
 
 
 class PiconManager(Gtk.Box):
@@ -59,6 +59,7 @@ class PiconManager(Gtk.Box):
         self._app.connect("page-changed", self.update_picons_dest)
         self._app.connect("filter-toggled", self.on_app_filter_toggled)
         self._app.connect("profile-changed", self.on_profile_changed)
+        self._app.connect("picon-assign", self.on_picon_assign)
         self._app.fav_view.connect("row-activated", self.on_fav_changed)
         self._picon_ids = picon_ids
         self._sat_positions = sat_positions
@@ -250,6 +251,19 @@ class PiconManager(Gtk.Box):
         self._current_path_label.set_text(self._settings.profile_picons_path)
         self.update_picons_dest(app, self._app.page)
 
+    def on_picon_assign(self, app, target):
+        if target is ViewTarget.SERVICES:
+            model, paths = app.services_view.get_selection().get_selected_rows()
+            ids = {model[p][Column.SRV_FAV_ID] for p in paths}
+        else:
+            model, paths = app.fav_view.get_selection().get_selected_rows()
+            ids = {model[p][Column.FAV_ID] for p in paths}
+
+        self._filter_button.set_active(True)
+        self._dst_filter_button.set_active(True)
+        self._picons_filter_entry.set_text(
+            "|".join(s.service for f, s in self._app.current_services.items() if f in ids))
+
     def update_picons_data(self, view, path=None):
         if view is self._picons_dest_view:
             self.update_picon_info()
@@ -378,7 +392,7 @@ class PiconManager(Gtk.Box):
 
         t_mod = target_view.get_model()
         dest_path = self._settings.profile_picons_path
-        self.update_picons_dest_view(self._app.on_assign_picon(target_view, model[path][-1], dest_path))
+        self.update_picons_dest_view(self._app.on_assign_picon_file(target_view, model[path][-1], dest_path))
         self.show_assign_info([t_mod.get_value(t_mod.get_iter_from_string(itr), c_id) for itr in itr_str.split(",")])
 
     @run_idle
@@ -957,10 +971,10 @@ class PiconManager(Gtk.Box):
 
     @run_with_delay(0.5)
     def on_picons_filter_changed(self, entry):
-        txt = entry.get_text().upper()
         self._filter_cache.clear()
+        txt = entry.get_text().upper().split("|")
         for s in self._app.current_services.values():
-            self._filter_cache[s.picon_id] = txt in s.service.upper()
+            self._filter_cache[s.picon_id] = any(t in s.service.upper() or t in str(s.picon_id) for t in txt)
 
         GLib.idle_add(self._picons_src_filter_model.refilter, priority=GLib.PRIORITY_LOW)
         GLib.idle_add(self._picons_dst_filter_model.refilter, priority=GLib.PRIORITY_LOW)

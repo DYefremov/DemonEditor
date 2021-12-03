@@ -148,6 +148,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-edit</property>
   </object>
+  <object class="GtkImage" id="fav_assign_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">insert-link</property>
+  </object>
   <object class="GtkImage" id="fav_iptv_list_config_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -350,12 +355,12 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="insert_link_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">insert-link</property>
+    <property name="icon_name">insert-image</property>
   </object>
   <object class="GtkImage" id="insert_link_image_2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">insert-link</property>
+    <property name="icon_name">insert-image</property>
   </object>
   <object class="GtkImage" id="insert_space_image">
     <property name="visible">True</property>
@@ -932,6 +937,11 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="stock">gtk-select-all</property>
   </object>
+  <object class="GtkImage" id="services_assign_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">insert-link</property>
+  </object>
   <object class="GtkMenu" id="services_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1099,7 +1109,7 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkImageMenuItem" id="services_clear_not_in_bq_popup_item">
-        <property name="label" translatable="yes">Clear marked</property>
+        <property name="label" translatable="yes">Clear</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="image">clear_mark_not_in_bq_image</property>
@@ -1125,11 +1135,21 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
+              <object class="GtkImageMenuItem" id="services_assign_picon_file_popup_item">
+                <property name="label" translatable="yes">Assign file</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">insert_link_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_assign_picon_file" object="services_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
               <object class="GtkImageMenuItem" id="services_assign_picon_popup_item">
                 <property name="label" translatable="yes">Assign</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="image">insert_link_image</property>
+                <property name="image">services_assign_image</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_assign_picon" object="services_tree_view" swapped="no"/>
               </object>
@@ -4056,11 +4076,21 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
+              <object class="GtkImageMenuItem" id="fav_assign_picon_file_popup_item">
+                <property name="label" translatable="yes">Assign file</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="image">insert_link_image_2</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_assign_picon_file" object="fav_tree_view" swapped="no"/>
+              </object>
+            </child>
+            <child>
               <object class="GtkImageMenuItem" id="fav_assign_picon_popup_item">
                 <property name="label" translatable="yes">Assign</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="image">insert_link_image_2</property>
+                <property name="image">fav_assign_image</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_assign_picon" object="fav_tree_view" swapped="no"/>
               </object>
