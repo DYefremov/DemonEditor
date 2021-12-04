@@ -52,6 +52,9 @@ msgstr "Akt.IP:"
 msgid "Assign"
 msgstr "Zuweisen"
 
+msgid "Assign file"
+msgstr "Datei zuweisen"
+
 msgid "Bouquet details"
 msgstr "Bouquet-Details"
 
@@ -1314,3 +1317,15 @@ msgstr "Ziehe die Dienste auf das gewünschte Picon oder Picon in die Liste der 
 
 msgid "Sets the profile folder as default to store picons, backups, etc."
 msgstr "Legt den Profilordner als Standardordner zum Speichern von Piconen, Backups usw. fest."
+
+msgid "New sub-bouquet"
+msgstr "Neues Sub-Bouquet"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Markieren die nicht in Bouquets vorhanden"
+
+msgid "Not in Bouquets"
+msgstr "Nicht in Bouquets"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Vorhandene in Bouquets Dienste nicht anzeigen."

@@ -50,6 +50,9 @@ msgstr "Текущий IP:"
 msgid "Assign"
 msgstr "Привязать"
 
+msgid "Assign file"
+msgstr "Привязать файл"
+
 msgid "Bouquet details"
 msgstr "Сервисы букета"
 
@@ -1297,3 +1300,15 @@ msgstr "Перетащите сервисы на нужный пикон или 
 
 msgid "Sets the profile folder as default to store picons, backups, etc."
 msgstr "Устанавливает папку профиля по умолчанию для хранения пиконов, резервных копий и т. п."
+
+msgid "New sub-bouquet"
+msgstr "Создать суббукет"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Отметить отсутствующие в букетах"
+
+msgid "Not in Bouquets"
+msgstr "Не в букетах"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Не показывать сервисы присутствующие в букетах."

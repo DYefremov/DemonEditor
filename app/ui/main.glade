@@ -1109,7 +1109,7 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkImageMenuItem" id="services_clear_not_in_bq_popup_item">
-        <property name="label" translatable="yes">Clear</property>
+        <property name="label" translatable="yes">Remove selection</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="image">clear_mark_not_in_bq_image</property>
@@ -1609,7 +1609,7 @@ Author: Dmitriy Yefremov
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="receives_default">True</property>
-                                            <property name="tooltip_text" translatable="yes">Do not show services present in Bouquets</property>
+                                            <property name="tooltip_text" translatable="yes">Do not show services present in Bouquets.</property>
                                             <signal name="toggled" handler="on_filter_in_bq_toggled" swapped="no"/>
                                           </object>
                                           <packing>
