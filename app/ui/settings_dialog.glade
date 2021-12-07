@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 
+<!-- Generated with glade 3.22.2
 
 The MIT License (MIT)
 
@@ -3662,6 +3662,7 @@ Author: Dmitriy Yefremov
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
+        <property name="pack_type">end</property>
         <property name="position">2</property>
       </packing>
     </child>
