@@ -6,3 +6,11 @@ button {
   min-height: 24px;
   min-width: 24px;
 }
+
+entry {
+  min-height: 24px;
+}
+
+switch {
+ margin-right: 2px;
+}
