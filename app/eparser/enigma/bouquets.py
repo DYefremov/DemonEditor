@@ -60,10 +60,10 @@ class BouquetsWriter:
         self._marker_index = 1
         self._space_index = 0
         self._alt_names = set()
+        self._NAME_PATTERN = re.compile("[^\\w_()]+")
 
     def write(self):
         line = []
-        pattern = re.compile("[^\\w_()]+")
 
         for bqs in self._bouquets:
             line.clear()
@@ -76,7 +76,7 @@ class BouquetsWriter:
                 bq_name = bq.file
                 if not bq_name:
                     if self._force_bq_names:
-                        bq_name = re.sub(pattern, "_", bq.name)
+                        bq_name = re.sub(self._NAME_PATTERN, "_", bq.name)
                     else:
                         bq_name = f"de{count:02d}"
                         while bq_name in bq_file_names:
@@ -91,11 +91,12 @@ class BouquetsWriter:
                     line.append(self._MARKER.format(m_count, b_name))
                     m_count += 1
                 else:
-                    line.append(self._SERVICE.format(2 if bqs.type == BqType.RADIO.value else 1, bq_name, bqs.type))
                     if bq_type is BqType.BOUQUET:
+                        bq_name = re.sub(self._NAME_PATTERN, "_", bq.name)
                         self.write_sub_bouquet(self._path, bq_name, bq, bqs.type)
                     else:
                         self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bqs.type}", bq.name, bq.services)
+                    line.append(self._SERVICE.format(2 if bqs.type == BqType.RADIO.value else 1, bq_name, bqs.type))
 
             with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8") as file:
                 file.writelines(line)
@@ -139,15 +140,13 @@ class BouquetsWriter:
             file.writelines(bouquet)
 
     def write_sub_bouquet(self, path, file_name, bq, bq_type):
-        bq_name = f"#NAME {bq.name}\n"
-        bouquet = []
+        bouquet = [f"#NAME {bq.name}\n"]
         sb_type = 2 if bq_type == BqType.RADIO.value else 1
 
         for sb in bq.services:
-            sb_path = f"{path}subbouquet.{sb.name}.{sb.type}"
-            self.write_bouquet(sb_path, sb.name, sb.services)
-            bouquet.append(bq_name)
-            bouquet.append(f"#SERVICE 1:7:{sb_type}:0:0:0:0:0:0:0:FROM BOUQUET \"{sb_path}\" ORDER BY bouquet\n")
+            bq_name = f"subbouquet.{re.sub(self._NAME_PATTERN, '_', sb.name)}.{sb.type}"
+            self.write_bouquet(f"{path}{bq_name}", sb.name, sb.services)
+            bouquet.append(f"#SERVICE 1:7:{sb_type}:0:0:0:0:0:0:0:FROM BOUQUET \"{bq_name}\" ORDER BY bouquet\n")
 
         with open(f"{self._path}userbouquet.{file_name}.{bq_type}", "w", encoding="utf-8") as file:
             file.writelines(bouquet)
