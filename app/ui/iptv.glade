@@ -1253,6 +1253,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
                             <property name="max_width_chars">4</property>
+                            <property name="text">0</property>
                             <property name="primary_icon_name">document-edit-symbolic</property>
                             <signal name="changed" handler="on_entry_changed" swapped="no"/>
                           </object>
