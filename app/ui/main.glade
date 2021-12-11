@@ -2453,7 +2453,11 @@ Author: Dmitriy Yefremov
                                         <property name="tooltip_text" translatable="yes">IPTV</property>
                                         <property name="direction">none</property>
                                         <child>
-                                          <placeholder/>
+                                          <object class="GtkImage" id="iptv_menu_button_image">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="icon_name">emblem-shared-symbolic</property>
+                                          </object>
                                         </child>
                                       </object>
                                       <packing>
@@ -3204,6 +3208,7 @@ Author: Dmitriy Yefremov
                                         <property name="search_column">0</property>
                                         <property name="rubber_banding">True</property>
                                         <property name="enable_tree_lines">True</property>
+                                        <property name="tooltip_column">1</property>
                                         <property name="activate_on_single_click">True</property>
                                         <signal name="button-press-event" handler="on_view_popup_menu" object="bouquets_popup_menu" swapped="no"/>
                                         <signal name="button-press-event" handler="on_view_press" swapped="yes"/>
@@ -3215,6 +3220,7 @@ Author: Dmitriy Yefremov
                                         <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <signal name="key-release-event" handler="on_tree_view_key_release" swapped="no"/>
+                                        <signal name="query-tooltip" handler="on_bq_view_query_tooltip" swapped="no"/>
                                         <signal name="row-activated" handler="on_bouquets_selection" object="bouquets_tree_store" swapped="no"/>
                                         <child internal-child="selection">
                                           <object class="GtkTreeSelection" id="bouquets_selection">

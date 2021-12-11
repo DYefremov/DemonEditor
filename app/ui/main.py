@@ -28,6 +28,7 @@
 
 import os
 import sys
+from collections import Counter
 from contextlib import suppress
 from datetime import datetime
 from functools import lru_cache
@@ -136,6 +137,7 @@ class Application(Gtk.Application):
                     "on_to_fav_copy": self.on_to_fav_copy,
                     "on_to_fav_end_copy": self.on_to_fav_end_copy,
                     "on_fav_sort": self.on_fav_sort,
+                    "on_bq_view_query_tooltip": self.on_bq_view_query_tooltip,
                     "on_fav_view_query_tooltip": self.on_fav_view_query_tooltip,
                     "on_services_view_query_tooltip": self.on_services_view_query_tooltip,
                     "on_view_drag_begin": self.on_view_drag_begin,
@@ -1254,7 +1256,34 @@ class Application(Gtk.Application):
 
         return -181.0 if pos == "T" else -182.0
 
-    # ********************* Hints *************************#
+    # ********************* Hints ************************* #
+
+    def on_bq_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        if not self._main_window.is_active():
+            return False
+
+        result = view.get_dest_row_at_pos(x, y)
+        if not result:
+            return False
+
+        path, pos = result
+        model = view.get_model()
+
+        row = model[path][:]
+        name, b_type = row[Column.BQ_NAME], row[Column.BQ_TYPE]
+        b_id = f"{name}:{b_type}"
+        bq = self._bouquets.get(b_id, None)
+        if bq is None:
+            return False
+
+        counter = Counter(s.service_type for s in filter(None, (self._services.get(f_id, None) for f_id in bq)))
+        services_txt = "\n".join(f"{k}: {v}" for k, v in counter.items())
+        n_msg, s_msg, f_msg = get_message("Name"), get_message("Services"), get_message("File")
+        f = f"\n\n{f_msg}: *.{self._bq_file.get(b_id, None)}.{b_type}" if self._s_type is SettingsType.ENIGMA_2 else ""
+        tooltip.set_text(f"{n_msg}: {name}\n{s_msg}:\n{services_txt}{f}")
+        view.set_tooltip_row(tooltip, path)
+
+        return True
 
     def on_fav_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         """  Sets detailed info about service in the tooltip [fav view]. """
@@ -1287,13 +1316,13 @@ class Application(Gtk.Application):
         if srv and srv.picon_id:
             tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
                                               size=self._settings.tooltip_logo_size))
-            tooltip.set_text(
-                self.get_hint_for_bq_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv))
+            txt = self.get_hint_for_fav_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv)
+            tooltip.set_text(txt)
             view.set_tooltip_row(tooltip, path)
             return True
         return False
 
-    def get_hint_for_bq_list(self, srv):
+    def get_hint_for_fav_list(self, srv):
         """ Returns detailed info about service as formatted string for using as hint. """
         header, ref = self.get_hint_header_info(srv)
 
