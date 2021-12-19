@@ -77,9 +77,9 @@ class FtpClientBox(Gtk.HBox):
                     "on_disconnect": self.on_disconnect,
                     "on_ftp_row_activated": self.on_ftp_row_activated,
                     "on_file_row_activated": self.on_file_row_activated,
-                    "on_ftp_edit": self.on_ftp_edit,
+                    "on_ftp_rename": self.on_ftp_rename,
                     "on_ftp_edited": self.on_ftp_edited,
-                    "on_file_edit": self.on_file_edit,
+                    "on_file_rename": self.on_file_rename,
                     "on_file_edited": self.on_file_edited,
                     "on_file_remove": self.on_file_remove,
                     "on_ftp_remove": self.on_ftp_file_remove,
@@ -94,11 +94,12 @@ class FtpClientBox(Gtk.HBox):
                     "on_view_popup_menu": on_popup_menu,
                     "on_view_key_press": self.on_view_key_press,
                     "on_view_press": self.on_view_press,
-                    "on_view_release": self.on_view_release}
+                    "on_view_release": self.on_view_release,
+                    "on_paned_size_allocate": self.on_paned_size_allocate}
 
         builder = get_builder(UI_RESOURCES_PATH + "ftp.glade", handlers)
 
-        self.add(builder.get_object("main_frame"))
+        self.add(builder.get_object("main_ftp_box"))
         self._ftp_info_label = builder.get_object("ftp_info_label")
         self._ftp_view = builder.get_object("ftp_view")
         self._ftp_model = builder.get_object("ftp_list_store")
@@ -109,8 +110,10 @@ class FtpClientBox(Gtk.HBox):
         # Buttons
         self._connect_button = builder.get_object("connect_button")
         disconnect_button = builder.get_object("disconnect_button")
+        disconnect_button.bind_property("visible", builder.get_object("ftp_actions_box"), "sensitive")
         disconnect_button.bind_property("visible", builder.get_object("ftp_create_folder_menu_item"), "sensitive")
         disconnect_button.bind_property("visible", builder.get_object("ftp_edit_menu_item"), "sensitive")
+        disconnect_button.bind_property("visible", builder.get_object("ftp_rename_menu_item"), "sensitive")
         disconnect_button.bind_property("visible", builder.get_object("ftp_remove_menu_item"), "sensitive")
         self._connect_button.bind_property("visible", builder.get_object("disconnect_button"), "visible", 4)
         # Force Ctrl
@@ -219,7 +222,7 @@ class FtpClientBox(Gtk.HBox):
             else:
                 r_size = self.get_size_from_bytes(size)
 
-            date = "{}, {}  {}".format(f_data[5], f_data[6], f_data[7])
+            date = f"{f_data[5]}, {f_data[6]}  { f_data[7]}"
             self._ftp_model.append(File(icon, " ".join(f_data[8:]), r_size, date, f_data[0], size))
 
     def on_connect(self, item=None):
@@ -288,7 +291,7 @@ class FtpClientBox(Gtk.HBox):
         finally:
             GLib.idle_add(self._ftp_view.set_sensitive, True)
 
-    def on_ftp_edit(self, renderer):
+    def on_ftp_rename(self, renderer):
         model, paths = self._ftp_view.get_selection().get_selected_rows()
         if not paths:
             return
@@ -308,11 +311,11 @@ class FtpClientBox(Gtk.HBox):
             return
 
         resp = self._ftp.rename_file(old_name, new_value)
-        self.update_ftp_info("{}   Status: {}".format(old_name, resp))
+        self.update_ftp_info(f"{old_name}   Status: {resp}")
         if resp[0] == "2":
             row[self.Column.NAME] = new_value
 
-    def on_file_edit(self, renderer):
+    def on_file_rename(self, renderer):
         model, paths = self._file_view.get_selection().get_selected_rows()
         if len(paths) > 1:
             self._app.show_error_message("Please, select only one item!")
@@ -331,7 +334,7 @@ class FtpClientBox(Gtk.HBox):
         path = Path(row[self.Column.ATTR])
         if path.exists():
             try:
-                new_path = path.rename("{}/{}".format(path.parent, new_value))
+                new_path = path.rename(f"{path.parent}/{new_value}")
             except ValueError as e:
                 log(e)
                 self._app.show_error_message(str(e))
@@ -385,7 +388,7 @@ class FtpClientBox(Gtk.HBox):
 
         name = self.get_new_folder_name(self._file_model)
         cur_path = self._file_model.get_value(itr, self.Column.ATTR)
-        path = Path("{}/{}".format(cur_path, name))
+        path = Path(f"{cur_path}/{name}")
 
         try:
             path.mkdir()
@@ -406,13 +409,13 @@ class FtpClientBox(Gtk.HBox):
         name = self.get_new_folder_name(self._ftp_model)
 
         try:
-            folder = "{}/{}".format(cur_path, name)
+            folder = f"{cur_path}/{name}"
             resp = self._ftp.mkd(folder)
         except all_errors as e:
             self.update_ftp_info(str(e))
             log(e)
         else:
-            if resp == "{}/{}".format(cur_path, name):
+            if resp == f"{cur_path}/{name}":
                 itr = self._ftp_model.append(File(self._folder_icon, name, self.FOLDER, "", "drwxr-xr-x", "0"))
                 renderer.set_property("editable", True)
                 self._ftp_view.set_cursor(self._ftp_model.get_path(itr), self._ftp_view.get_column(0), True)
@@ -424,7 +427,7 @@ class FtpClientBox(Gtk.HBox):
         count = 0
         while name in names:
             count += 1
-            name = "{}{}".format(name, count)
+            name = f"{name}{count}"
         return name
 
     # ***************** Drag-and-drop ********************* #
@@ -459,7 +462,7 @@ class FtpClientBox(Gtk.HBox):
             uris = []
             for r in [model[p][:] for p in paths]:
                 if r[self.Column.SIZE] != self.LINK and r[self.Column.NAME] != self.ROOT:
-                    uris.append(Path("/{}:{}".format(r[self.Column.NAME], r[self.Column.ATTR])).as_uri())
+                    uris.append(Path(f"/{r[self.Column.NAME]}:{r[self.Column.ATTR]}").as_uri())
             data.set_uris([sep.join(uris)])
 
     @run_task
@@ -556,9 +559,9 @@ class FtpClientBox(Gtk.HBox):
                 self.on_file_create_folder(self._file_name_renderer)
         elif key is KeyboardKey.F2 or ctrl and KeyboardKey.R:
             if self._ftp_view.is_focus():
-                self.on_ftp_edit(self._ftp_name_renderer)
+                self.on_ftp_rename(self._ftp_name_renderer)
             elif self._file_view.is_focus():
-                self.on_file_edit(self._file_name_renderer)
+                self.on_file_rename(self._file_name_renderer)
         elif key is KeyboardKey.DELETE:
             if self._ftp_view.is_focus():
                 self.on_ftp_file_remove()
@@ -581,6 +584,10 @@ class FtpClientBox(Gtk.HBox):
         # Enable selection.
         self._select_enabled = True
 
+    def on_paned_size_allocate(self, paned, allocation):
+        """ Sets default homogeneous sizes. """
+        paned.set_position(0.5 * allocation.width)
+
     def get_size_from_bytes(self, size):
         """ Simple convert function from bytes to other units like K, M or G. """
         try:
@@ -593,11 +600,11 @@ class FtpClientBox(Gtk.HBox):
             if b < kb:
                 return str(b)
             elif kb <= b < mb:
-                return "{0:.1f} K".format(b / kb)
+                return f"{b / kb:.1f} K"
             elif mb <= b < gb:
-                return "{0:.1f} M".format(b / mb)
+                return f"{b / mb:.1f} M"
             elif gb <= b:
-                return "{0:.1f} G".format(b / gb)
+                return f"{b / gb:.1f} G"
 
 
 if __name__ == '__main__':
