@@ -1311,6 +1311,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkPaned" id="data_paned">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
                     <property name="position_set">True</property>
                     <property name="wide_handle">True</property>
                     <signal name="realize" handler="on_data_paned_realize" swapped="no"/>
@@ -1382,7 +1384,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkFrame" id="services_frame">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
                             <property name="label_xalign">0.49000000953674316</property>
                             <property name="shadow_type">in</property>
                             <child>
@@ -2262,8 +2263,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="satellite_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
                             <property name="margin_top">2</property>
                             <property name="orientation">vertical</property>
                             <signal name="realize" handler="on_satellites_realize" swapped="no"/>
@@ -2281,7 +2280,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="picon_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
                             <property name="margin_top">2</property>
                             <property name="orientation">vertical</property>
                             <signal name="realize" handler="on_picons_realize" swapped="no"/>
@@ -2299,7 +2297,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="epg_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
                             <property name="margin_top">2</property>
                             <property name="orientation">vertical</property>
                             <signal name="realize" handler="on_epg_realize" swapped="no"/>
@@ -2317,7 +2314,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="timers_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
                             <property name="margin_top">2</property>
                             <property name="orientation">vertical</property>
                             <signal name="realize" handler="on_timers_realize" swapped="no"/>
@@ -2335,8 +2331,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="recordings_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
                             <property name="margin_top">2</property>
                             <property name="orientation">vertical</property>
                             <signal name="realize" handler="on_recordings_realize" swapped="no"/>
@@ -2354,8 +2348,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="ftp_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
                             <property name="margin_top">2</property>
                             <property name="orientation">vertical</property>
                             <signal name="realize" handler="on_ftp_realize" swapped="no"/>
@@ -2373,9 +2365,6 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="control_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">2</property>
                             <signal name="realize" handler="on_control_realize" swapped="no"/>
                             <child>
                               <placeholder/>
@@ -2397,7 +2386,6 @@ Author: Dmitriy Yefremov
                       <object class="GtkPaned" id="fav_paned">
                         <property name="width_request">350</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_right">5</property>
                         <property name="position_set">True</property>
                         <property name="wide_handle">True</property>
                         <child>

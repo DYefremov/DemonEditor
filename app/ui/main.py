@@ -265,6 +265,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("change-page", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("layout-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("play-recording", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("play-current", self, GObject.SIGNAL_RUN_LAST,
@@ -280,6 +282,8 @@ class Application(Gtk.Application):
         self._main_window = builder.get_object("main_window")
         self._stack = builder.get_object("stack")
         self._fav_paned = builder.get_object("fav_paned")
+        self._bq_frame = builder.get_object("bq_frame")
+        self._fav_frame = builder.get_object("fav_frame")
         self._services_view = builder.get_object("services_tree_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")
@@ -363,17 +367,13 @@ class Application(Gtk.Application):
         self._fav_search_button.connect("toggled", fav_search_provider.on_search_toggled)
         # Playback.
         self._player_box = PlayerBox(self)
-        paned = builder.get_object("main_paned")
-        data_paned = paned.get_child1()
-        paned.remove(data_paned)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
-        paned.pack1(self._player_box, True, False)
-        paned.pack2(data_paned, True, False)
         self._player_box.connect("show", self.on_playback_show)
         self._player_box.connect("playback-close", self.on_playback_close)
         self._player_box.connect("playback-full-screen", self.on_playback_full_screen)
         self._data_paned = builder.get_object("data_paned")
         self._data_paned.bind_property("visible", self._status_bar_box, "visible")
+        self._main_paned = builder.get_object("main_paned")
         # Record.
         self._record_image = builder.get_object("record_button_image")
         # Dynamically active elements depending on the selected view.
@@ -469,6 +469,7 @@ class Application(Gtk.Application):
 
         self.init_actions()
         self.set_accels()
+        self.init_layout()
 
         self.init_drag_and_drop()
         self.init_appearance()
@@ -530,6 +531,9 @@ class Application(Gtk.Application):
         sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
         sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
         self.bind_property("is-enigma", sa, "enabled")
+        # Alternate layout.
+        sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
+        sa.connect("change-state", self.on_layout_change)
         # Menu bar and playback.
         self.set_action("on_playback_close", self._player_box.on_close)
         if not IS_GNOME_SESSION:
@@ -701,6 +705,27 @@ class Application(Gtk.Application):
                     self._NEW_COLOR = new_rgb
                     self._EXTRA_COLOR = extra_rgb
 
+    def init_layout(self):
+        """ Initializes an alternate layout, if enabled. """
+        if self._settings.alternate_layout:
+            self._main_paned.pack2(self._player_box, True, False)
+            self.reverse_main_elements(True)
+        else:
+            self._main_paned.remove(self._data_paned)
+            self._main_paned.pack1(self._player_box, True, False)
+            self._main_paned.pack2(self._data_paned, True, False)
+
+    def init_bq_position(self):
+        self._fav_paned.remove(self._fav_frame)
+        self._fav_paned.remove(self._bq_frame)
+
+        if self._settings.alternate_layout:
+            self._fav_paned.pack1(self._bq_frame, True, False)
+            self._fav_paned.pack2(self._fav_frame, True, False)
+        else:
+            self._fav_paned.pack1(self._fav_frame, True, False)
+            self._fav_paned.pack2(self._bq_frame, True, False)
+
     def init_main_paned_position(self, paned):
         """ Initializes starting positions of main paned widgets. """
         width = paned.get_allocated_width()
@@ -791,40 +816,47 @@ class Application(Gtk.Application):
     # ************** Pages initialization *************** #
 
     def on_satellites_realize(self, box):
-        self._satellite_tool = SatellitesTool(self, self._settings)
-        box.pack_start(self._satellite_tool, True, True, 0)
+        if not self._satellite_tool:
+            self._satellite_tool = SatellitesTool(self, self._settings)
+            box.pack_start(self._satellite_tool, True, True, 0)
 
     def on_picons_realize(self, box):
-        ids = {}
-        if self._s_type is SettingsType.ENIGMA_2:
-            for r in self._services_model:
-                data = r[Column.SRV_PICON_ID].split("_")
-                ids[f"{data[3]}:{data[5]}:{data[6]}"] = r[Column.SRV_PICON_ID]
+        if not self._picon_manager:
+            ids = {}
+            if self._s_type is SettingsType.ENIGMA_2:
+                for r in self._services_model:
+                    data = r[Column.SRV_PICON_ID].split("_")
+                    ids[f"{data[3]}:{data[5]}:{data[6]}"] = r[Column.SRV_PICON_ID]
 
-        self._picon_manager = PiconManager(self, self._settings, ids, self._sat_positions)
-        box.pack_start(self._picon_manager, True, True, 0)
+            self._picon_manager = PiconManager(self, self._settings, ids, self._sat_positions)
+            box.pack_start(self._picon_manager, True, True, 0)
 
     def on_epg_realize(self, box):
-        self._epg_tool = EpgTool(self)
-        box.pack_start(self._epg_tool, True, True, 0)
+        if not self._epg_tool:
+            self._epg_tool = EpgTool(self)
+            box.pack_start(self._epg_tool, True, True, 0)
 
     def on_timers_realize(self, box):
-        self._timers_tool = TimerTool(self, self._http_api)
-        box.pack_start(self._timers_tool, True, True, 0)
+        if not self._timers_tool:
+            self._timers_tool = TimerTool(self, self._http_api)
+            box.pack_start(self._timers_tool, True, True, 0)
 
     def on_recordings_realize(self, box):
-        self._recordings_tool = RecordingsTool(self, self._settings)
-        box.pack_start(self._recordings_tool, True, True, 0)
-        self._player_box.connect("play", self._recordings_tool.on_playback)
-        self._player_box.connect("playback-close", self._recordings_tool.on_playback_close)
+        if not self._recordings_tool:
+            self._recordings_tool = RecordingsTool(self, self._settings)
+            box.pack_start(self._recordings_tool, True, True, 0)
+            self._player_box.connect("play", self._recordings_tool.on_playback)
+            self._player_box.connect("playback-close", self._recordings_tool.on_playback_close)
 
     def on_ftp_realize(self, box):
-        self._ftp_client = FtpClientBox(self, self._settings)
-        box.pack_start(self._ftp_client, True, True, 0)
+        if not self._ftp_client:
+            self._ftp_client = FtpClientBox(self, self._settings)
+            box.pack_start(self._ftp_client, True, True, 0)
 
     def on_control_realize(self, box):
-        self._control_tool = ControlTool(self, self._http_api, self._settings)
-        box.pack_start(self._control_tool, True, True, 0)
+        if not self._control_tool:
+            self._control_tool = ControlTool(self, self._settings)
+            box.pack_start(self._control_tool, True, True, 0)
 
     def on_telnet_realize(self, box):
         box.pack_start(TelnetClient(self), True, True, 0)
@@ -844,6 +876,29 @@ class Application(Gtk.Application):
 
     def on_page_change(self, app, page_name):
         self._stack.set_visible_child_name(page_name)
+
+    def set_use_alt_layout(self, action, value):
+        action.set_state(value)
+        self._settings.alternate_layout = bool(value)
+
+    @run_idle
+    def on_layout_change(self, action, value):
+        is_alt = bool(value)
+        self.reverse_main_elements(is_alt)
+        if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
+            msg = get_message("Layout of elements has been changed!")
+            msg = f"{msg} {get_message('Restart the program to apply all changes.')}"
+            self.show_info_message(msg, Gtk.MessageType.WARNING)
+
+        self.emit("layout-changed", is_alt)
+
+    def reverse_main_elements(self, alt_layout):
+        self._data_paned.remove(self._stack)
+        self._data_paned.remove(self._fav_paned)
+        self._data_paned.pack1(self._fav_paned if alt_layout else self._stack, True, False)
+        self._data_paned.pack2(self._stack if alt_layout else self._fav_paned, True, False)
+
+        self.init_bq_position()
 
     # ***************** Copy - Cut - Paste ********************* #
 

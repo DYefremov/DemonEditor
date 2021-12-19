@@ -126,7 +126,7 @@ class EpgTool(Gtk.Box):
         start = int(event.get("e2eventstart", "0"))
         start_time = datetime.fromtimestamp(start)
         end_time = datetime.fromtimestamp(start + int(event.get("e2eventduration", "0")))
-        time = "{} - {}".format(start_time.strftime("%A, %H:%M"), end_time.strftime("%H:%M"))
+        time = f"{start_time.strftime('%A, %H:%M')} - {end_time.strftime('%H:%M')}"
 
         return title, time, desc, event
 
@@ -223,7 +223,7 @@ class TimerTool(Gtk.Box):
             elif self._action is TimerTool.TimerAction.EVENT:
                 self.set_timer_from_event_data()
             else:
-                log("{} error: No action set for timer!".format(__class__.__name__))
+                log(f"{__class__.__name__} error: No action set for timer!")
 
         @property
         def request(self):
@@ -242,34 +242,34 @@ class TimerTool(Gtk.Box):
             s_ref = quote(t_data.get("sRef", ""))
 
             if self._action is TimerTool.TimerAction.EVENT:
-                args.append("timeraddbyeventid?sRef={}".format(s_ref))
-                args.append("eventid={}".format(t_data.get("eit", "0")))
-                args.append("justplay={}".format(t_data.get("justplay", "")))
-                args.append("tags={}".format(""))
+                args.append(f"timeraddbyeventid?sRef={s_ref}")
+                args.append(f"eventid={t_data.get('eit', '0')}")
+                args.append(f"justplay={t_data.get('justplay', '')}")
+                args.append(f"tags={''}")
             else:
                 if self._action is TimerTool.TimerAction.ADD:
-                    args.append("timeradd?sRef={}".format(s_ref))
-                    args.append("deleteOldOnSave={}".format(0))
+                    args.append(f"timeradd?sRef={s_ref}")
+                    args.append(f"deleteOldOnSave={0}")
                 elif self._action is TimerTool.TimerAction.CHANGE:
-                    args.append("timerchange?sRef={}".format(s_ref))
-                    args.append("channelOld={}".format(s_ref))
-                    args.append("beginOld={}".format(self._timer_data.get("e2timebegin", "0")))
-                    args.append("endOld={}".format(self._timer_data.get("e2timeend", "0")))
-                    args.append("deleteOldOnSave={}".format(1))
+                    args.append(f"timerchange?sRef={s_ref}")
+                    args.append(f"channelOld={s_ref}")
+                    args.append(f"beginOld={self._timer_data.get('e2timebegin', '0')}")
+                    args.append(f"endOld={self._timer_data.get('e2timeend', '0')}")
+                    args.append(f"deleteOldOnSave={1}")
 
-                args.append("begin={}".format(t_data.get("begin", "")))
-                args.append("end={}".format(t_data.get("end", "")))
-                args.append("name={}".format(quote(t_data.get("name", ""))))
-                args.append("description={}".format(quote(t_data.get("description", ""))))
-                args.append("tags={}".format(""))
-                args.append("eit={}".format("0"))
-                args.append("disabled={}".format(t_data.get("disabled", "1")))
-                args.append("justplay={}".format(t_data.get("justplay", "1")))
-                args.append("afterevent={}".format(t_data.get("afterevent", "0")))
-                args.append("repeated={}".format(TimerTool.get_repetition_flags(self._days_buttons)))
+                args.append(f"begin={t_data.get('begin', '')}")
+                args.append(f"end={t_data.get('end', '')}")
+                args.append(f"name={quote(t_data.get('name', ''))}")
+                args.append(f"description={quote(t_data.get('description', ''))}")
+                args.append(f"tags={''}")
+                args.append(f"eit={'0'}")
+                args.append(f"disabled={t_data.get('disabled', '1')}")
+                args.append(f"justplay={t_data.get('justplay', '1')}")
+                args.append(f"afterevent={t_data.get('afterevent', '0')}")
+                args.append(f"repeated={TimerTool.get_repetition_flags(self._days_buttons)}")
 
                 if self._timer_location_switch.get_active():
-                    args.append("dirname={}".format(self._timer_location_entry.get_text()))
+                    args.append(f"dirname={self._timer_location_entry.get_text()}")
 
             return "&".join(args)
 
@@ -292,8 +292,7 @@ class TimerTool(Gtk.Box):
             self._timer_begins_min_button.set_value(minute)
             self._timer_begins_calendar.select_day(date.day)
             self._timer_begins_calendar.select_month(date.month - 1, date.year)
-            self._timer_begins_entry.set_text(
-                "{}-{}-{} {}:{:02d}".format(date.year, date.month, date.day, hour, minute))
+            self._timer_begins_entry.set_text(f"{date.year}-{date.month}-{date.day} {hour}:{minute:02d}")
 
         def get_ends_date(self):
             date = self._timer_ends_calendar.get_date()
@@ -308,7 +307,7 @@ class TimerTool(Gtk.Box):
             self._timer_ends_min_button.set_value(minute)
             self._timer_ends_calendar.select_day(date.day)
             self._timer_ends_calendar.select_month(date.month - 1, date.year)
-            self._timer_ends_entry.set_text("{}-{}-{} {}:{:02d}".format(date.year, date.month, date.day, hour, minute))
+            self._timer_ends_entry.set_text(f"{date.year}-{date.month}-{date.day} {hour}:{minute:02d}")
 
         def set_timer_for_add(self):
             self._timer_service_entry.set_text(self._timer_data.get("e2servicename", ""))
@@ -446,7 +445,7 @@ class TimerTool(Gtk.Box):
         service = timer.get("e2servicename", "") or ""
         start_time = datetime.fromtimestamp(int(timer.get("e2timebegin", "0")))
         end_time = datetime.fromtimestamp(int(timer.get("e2timeend", "0")))
-        time = "{} - {}".format(start_time.strftime("%A, %H:%M"), end_time.strftime("%H:%M"))
+        time = f"{start_time.strftime('%A, %H:%M')} - {end_time.strftime('%H:%M')}"
 
         return disabled, name, service, time, description, timer
 
@@ -486,7 +485,7 @@ class TimerTool(Gtk.Box):
     @run_idle
     def timer_add_edit_callback(self, resp):
         if "error_code" in resp:
-            msg = "Error getting timer status.\n{}".format(resp.get("error_code"))
+            msg = f"Error getting timer status.\n{resp.get('error_code')}"
             self._app.show_error_message(msg)
             log(msg)
             return
@@ -628,7 +627,7 @@ class TimerTool(Gtk.Box):
             service = self._app.current_services.get(fav_id, None)
             if service:
                 if service.service_type == BqServiceType.ALT.name:
-                    msg = "Alternative service.\n\n {}".format(get_message("Not implemented yet!"))
+                    msg = "Alternative service.\n\n {get_message('Not implemented yet!')}"
                     show_dialog(DialogType.ERROR, transient=self._app._main_window, text=msg)
                     context.finish(False, False, time)
                     return
@@ -647,6 +646,7 @@ class RecordingsTool(Gtk.Box):
         super().__init__(*args, **kwargs)
 
         self._app = app
+        self._app.connect("layout-changed", self.on_layout_changed)
         self._app.connect("profile-changed", self.init)
         self._settings = settings
         self._ftp = None
@@ -666,6 +666,8 @@ class RecordingsTool(Gtk.Box):
         self._paths_view = builder.get_object("recordings_paths_view")
         self._paned = builder.get_object("recordings_paned")
         self.pack_start(builder.get_object("recordings_frame"), True, True, 0)
+        if settings.alternate_layout:
+            self.on_layout_changed(app, True)
 
         self.init()
         self.show()
@@ -673,6 +675,14 @@ class RecordingsTool(Gtk.Box):
     def clear_data(self):
         self._rec_view.get_model().clear()
         self._paths_view.get_model().clear()
+
+    def on_layout_changed(self, app, alt_layout):
+        ch1 = self._paned.get_child1()
+        ch2 = self._paned.get_child2()
+        self._paned.remove(ch1)
+        self._paned.remove(ch2)
+        self._paned.add1(ch2)
+        self._paned.add(ch1)
 
     @run_task
     def init(self, app=None, arg=None):
@@ -801,6 +811,7 @@ class ControlTool(Gtk.Box):
 
         self._settings = settings
         self._app = app
+        self._app.connect("layout-changed", self.on_layout_changed)
         self._pix = None
 
         handlers = {"on_volume_changed": self.on_volume_changed,
@@ -810,7 +821,7 @@ class ControlTool(Gtk.Box):
                               objects=("control_box", "volume_adjustment"))
 
         self.pack_start(builder.get_object("control_box"), True, True, 0)
-        self._stack = builder.get_object("stack")
+        self._remote_box = builder.get_object("remote_box")
         self._screenshot_area = builder.get_object("screenshot_area")
         self._screenshot_button_box = builder.get_object("screenshot_button_box")
         self._screenshot_check_button = builder.get_object("screenshot_check_button")
@@ -823,6 +834,9 @@ class ControlTool(Gtk.Box):
         self._agc_level_bar = builder.get_object("agc_level_bar")
         self._volume_button = builder.get_object("volume_button")
         self.init_actions(app)
+        if settings.alternate_layout:
+            self.on_layout_changed(app, True)
+
         self.show()
 
     def init_actions(self, app):
@@ -856,6 +870,9 @@ class ControlTool(Gtk.Box):
         app.set_action("on_screenshot_video", self.on_screenshot_video)
         app.set_action("on_screenshot_osd", self.on_screenshot_osd)
 
+    def on_layout_changed(self, app, alt_layout):
+        self._remote_box.reorder_child(self._remote_box.get_children()[0], 1)
+
     # ***************** Remote controller ********************* #
 
     def on_remote(self, action, state=False):
@@ -875,7 +892,7 @@ class ControlTool(Gtk.Box):
 
     @run_with_delay(0.5)
     def on_volume_changed(self, button, value):
-        self._app.send_http_request(HttpAPI.Request.VOL, "{:.0f}".format(value), self.on_response)
+        self._app.send_http_request(HttpAPI.Request.VOL, f"{value:.0f}", self.on_response)
 
     def update_volume(self, vol):
         if "error_code" in vol:
