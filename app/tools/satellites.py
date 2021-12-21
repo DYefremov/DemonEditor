@@ -1,6 +1,34 @@
-""" Module for downloading satellites, transponders ans services from the web.
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
 
-    Sources: www.flysat.com, www.lyngsat.com.
+
+""" Module for downloading satellites, transponders ans services from the Web.
+
+    Sources: www.flysat.com, www.lyngsat.com, www.kingofsat.net.
     Replaces or updates the current satellites.xml file.
 """
 import re
@@ -18,7 +46,7 @@ _HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Fi
 
 
 class SatelliteSource(Enum):
-    FLYSAT = ("https://www.flysat.com/satlist.php",)
+    FLYSAT = ("https://www.flysat.com/en/satellitelist",)
     LYNGSAT = ("https://www.lyngsat.com/asia.html", "https://www.lyngsat.com/europe.html",
                "https://www.lyngsat.com/atlantic.html", "https://www.lyngsat.com/america.html")
     KINGOFSAT = ("https://en.kingofsat.net/satellites.php",)
@@ -38,10 +66,10 @@ class Cell:
         self._img = img
 
     def __repr__(self):
-        return "Cell({}, {}, {})".format(self._text, self._url, self._img)
+        return f"Cell({self._text}, {self._url}, {self._img})"
 
     def __str__(self):
-        return "<Cell(text={}, link={}, img={})>".format(self._text, self._url, self._img)
+        return f"<Cell(text={self._text}, link={self._url}, img={self._img})>"
 
     def __iter__(self):
         return (x for x in (self._text, self._url, self._img))
@@ -147,39 +175,78 @@ class SatellitesParser(HTMLParser):
 
         if self._rows:
             if self._source is SatelliteSource.FLYSAT:
-                def get_sat(r):
-                    return r[1], self.parse_position(r[2]), r[3], r[0], False
-
-                return list(map(get_sat, filter(lambda x: all(x) and len(x) == 5, self._rows)))
+                return self.get_satellites_for_fly_sat()
             elif self._source is SatelliteSource.LYNGSAT:
-                base_url = "https://www.lyngsat.com/"
-                sats = []
-                cur_pos = "0"
-                for row in filter(lambda x: 3 < len(x) < 8, self._rows):
-                    if not row[0]:
-                        row = row[1:]
-
-                    pos = self.parse_position(row[1])
-                    if not self.POS_PAT.match(pos):
-                        if len(row) == 4 and row[0].endswith(".html"):
-                            sats.append((row[1], cur_pos, row[-2], base_url + row[0], False))
-                        continue
-
-                    sats.append((row[-3], pos, row[-2], base_url + row[0], False))
-                    cur_pos = pos
-                return sats
+                return self.get_satellites_for_lyng_sat()
             elif source is SatelliteSource.KINGOFSAT:
-                def get_sat(r):
-                    return r[3], self.parse_position(r[1]), None, r[2], False
-
-                return list(map(get_sat, filter(lambda x: len(x) == 17, self._rows)))
+                return self.get_satellites_for_king_of_sat()
 
     def get_satellite(self, sat):
         pos = sat[1]
-        return Satellite(name="{} {}".format(pos, sat[0]),
-                         flags="0",
+        return Satellite(name=f"{pos} {sat[0]}", flags="0",
                          position=self.get_position(pos.replace(".", "")),
                          transponders=self.get_transponders(sat[3]))
+
+    def get_satellites_for_fly_sat(self):
+        sat_pat = re.compile(r"https://.*/satellite/.+")
+        pos_pat = re.compile(r"https://.*/satellite/position/.+")
+        names = []
+        pos = ""
+        pos_url = ""
+
+        def normalize_pos(p):
+            return f"{float(p[:-1])}{p[-1]}" if "." not in p else p
+
+        def get_sat(r):
+            nonlocal pos
+            nonlocal pos_url
+            # Uniting satellites in position.
+            if re.match(pos_pat, r[2]):
+                pos_url = r[2]
+                name = r[1]
+                pos = normalize_pos(self.parse_position(r[3]))
+
+                names.append(name)
+                return name, pos, r[5], r[0], False
+
+            r_size = len(r)
+            if r_size == 5:
+                name = r[1]
+                names.append(name)
+                return name, pos, r[3], r[0], False
+            if r_size == 6:
+                if names:
+                    name = "/".join(names)
+                    names.clear()
+                    return name, pos, None, pos_url, False
+
+                return r[1], normalize_pos(self.parse_position(r[2])), r[4], r[0], False
+
+        return list(filter(None, map(get_sat, filter(lambda row: row and re.match(sat_pat, row[0]), self._rows))))
+
+    def get_satellites_for_lyng_sat(self):
+        base_url = "https://www.lyngsat.com/"
+        sats = []
+        cur_pos = "0"
+        for row in filter(lambda x: 3 < len(x) < 8, self._rows):
+            if not row[0]:
+                row = row[1:]
+
+            pos = self.parse_position(row[1])
+            if not self.POS_PAT.match(pos):
+                if len(row) == 4 and row[0].endswith(".html"):
+                    sats.append((row[1], cur_pos, row[-2], base_url + row[0], False))
+                continue
+
+            sats.append((row[-3], pos, row[-2], base_url + row[0], False))
+            cur_pos = pos
+        return sats
+
+    def get_satellites_for_king_of_sat(self):
+        def get_sat(r):
+            return r[3], self.parse_position(r[1]), None, r[2], False
+
+        return list(map(get_sat, filter(lambda x: len(x) == 17, self._rows)))
 
     @staticmethod
     def parse_position(pos_str):
@@ -187,23 +254,20 @@ class SatellitesParser(HTMLParser):
 
     @staticmethod
     def get_position(pos):
-        return "{}{}".format("-" if pos[-1] == "W" else "", pos[:-1])
+        return f"{'-' if pos[-1] == 'W' else ''}{pos[:-1]}"
 
     def get_transponders(self, sat_url):
         """ Getting transponders(sorted by frequency). """
         self._rows.clear()
         trs = []
 
-        url = sat_url
-        if self._source is SatelliteSource.FLYSAT:
-            url = "https://www.flysat.com/" + sat_url
-        elif self._source is SatelliteSource.KINGOFSAT:
-            url = "https://en.kingofsat.net/" + sat_url
+        if self._source is SatelliteSource.KINGOFSAT:
+            sat_url = "https://en.kingofsat.net/" + sat_url
 
         try:
-            request = requests.get(url=url, headers=_HEADERS)
+            request = requests.get(url=sat_url, headers=_HEADERS)
         except requests.exceptions.ConnectionError as e:
-            log("Getting transponders error: {}".format(e))
+            log(f"Getting transponders error: {e}")
         else:
             if request.status_code == 200:
                 self.feed(request.text)
@@ -214,14 +278,16 @@ class SatellitesParser(HTMLParser):
                 elif self._source is SatelliteSource.KINGOFSAT:
                     self.get_transponders_for_king_of_sat(trs)
             else:
-                log("SatellitesParser [get transponders] error: {}  {}".format(url, request.reason))
+                log(f"SatellitesParser [get transponders] error: {sat_url}  {request.reason}")
 
         return sorted(trs, key=lambda x: int(x.frequency))
 
     def get_transponders_for_fly_sat(self, trs):
-        """ Parsing transponders for FlySat """
-        pls_pattern = re.compile("(PLS:)+ (Root|Gold|Combo)+ (\\d+)?")
-        is_id_pattern = re.compile("(Stream) (\\d+)")
+        """ Parsing transponders for FlySat. """
+        frq_pol_pattern = re.compile(r"(\d{4,5})+\s+([RLHV]).*(DVB-S[2]?)/(.+PSK)?.*")
+        pls_pattern = re.compile(r".*PLS\s+(Root|Gold|Combo)+\s(\d+)?")
+        is_id_pattern = re.compile(r"Stream\s(\d+)")
+        sr_fec_pattern = re.compile(r"(\d{4,5})+\s+(\d+/\d+).*")
         pls_modes = {v: k for k, v in PLS_MODE.items()}
         n_trs = []
 
@@ -229,43 +295,43 @@ class SatellitesParser(HTMLParser):
             zeros = "000"
             is_ids = []
             for r in self._rows:
-                if len(r) == 1:
+                row_len = len(r)
+                if row_len == 1:
                     is_ids.extend(re.findall(is_id_pattern, r[0]))
                     continue
-                if len(r) < 3:
+                if row_len < 12:
                     continue
-                data = r[2].split(" ")
-                if len(data) != 2:
-                    continue
-                sr, fec = data
-                data = r[1].split(" ")
-                if len(data) < 3:
-                    continue
-                freq, pol, sys = data[0], data[1], data[2]
-                sys = sys.split("/")
-                if len(sys) != 2:
-                    continue
-                sys, mod = sys
-                mod = "QPSK" if sys == "DVB-S" else mod
 
-                pls = re.findall(pls_pattern, r[1])
+                freq = re.findall(frq_pol_pattern, r[2])
+                if not freq:
+                    continue
+
+                freq, pol, sys, mod = freq[0]
+
+                sr_fec = re.match(sr_fec_pattern, r[3])
+                if not sr_fec:
+                    continue
+
+                sr, fec = sr_fec.group(1), sr_fec.group(2)
+
+                pls = re.match(pls_pattern, r[2])
                 pls_code = None
                 pls_mode = None
-
                 if pls:
-                    pls_code = pls[0][2]
-                    pls_mode = pls_modes.get(pls[0][1], None)
+                    pls_mode = pls_modes.get(pls.group(1), None)
+                    pls_code = pls.group(2)
 
                 if is_ids:
                     tr = trs.pop()
                     for index, is_id in enumerate(is_ids):
-                        tr = tr._replace(is_id=is_id[1])
+                        tr = tr._replace(is_id=is_id)
                         if is_transponder_valid(tr):
                             n_trs.append(tr)
                 else:
                     tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, None)
                     if is_transponder_valid(tr):
                         trs.append(tr)
+
                 is_ids.clear()
             trs.extend(n_trs)
 
@@ -414,12 +480,12 @@ class ServicesParser(HTMLParser):
             self._current_row = []
 
     def error(self, message):
-        log("ServicesParser error: {}".format(message))
+        log(f"ServicesParser error: {message}")
 
     def init_data(self, url):
         """ Initializes data for the given URL. """
         if self._source not in (SatelliteSource.LYNGSAT, SatelliteSource.KINGOFSAT):
-            raise ValueError("Unsupported source: {}!".format(self._source.name))
+            raise ValueError(f"Unsupported source: {self._source.name}!")
 
         self._rows.clear()
         request = requests.get(url=url, headers=_HEADERS)
@@ -580,7 +646,7 @@ class ServicesParser(HTMLParser):
         mod = get_key_by_value(MODULATION, mod)
         fec = get_key_by_value(FEC, fec)
         # For negative (West) positions: 3600 - numeric position value!!!
-        namespace = "{:04x}0000".format(3600 - pos if pos < 0 else pos)
+        namespace = f"{3600 - pos if pos < 0 else pos:04x}0000"
         tr_flag = 1
         roll_off = 0  # 35% DVB-S2/DVB-S (default)
         pilot = 2  # Auto
@@ -592,15 +658,15 @@ class ServicesParser(HTMLParser):
     @staticmethod
     def get_service_data(s_type, pkg, sid, tid, nid, namespace, v_pid, a_pid, cas, use_pids=False):
         sid = int(sid)
-        data_id = "{:04x}:{}:{:04x}:{:04x}:{}:0:0".format(sid, namespace, tid, nid, s_type)
-        fav_id = "{}:{}:{}:{}".format(sid, tid, nid, namespace)
-        picon_id = "1_0_{:X}_{}_{}_{}_{}_0_0_0.png".format(int(s_type), sid, tid, nid, namespace)
+        data_id = f"{sid:04x}:{namespace}:{tid:04x}:{nid:04x}:{s_type}:0:0"
+        fav_id = f"{sid}:{tid}:{nid}:{namespace}"
+        picon_id = f"1_0_{int(s_type):X}_{sid}_{tid}_{nid}_{namespace}_0_0_0.png"
         # Flags.
-        flags = "p:{}".format(pkg)
+        flags = f"p:{pkg}"
         cas = ",".join(get_key_by_value(CAS, c) or "C:0000" for c in cas.split()) if cas else None
         if use_pids:
-            v_pid = "c:00{:04x}".format(int(v_pid)) if v_pid else None
-            a_pid = ",".join(["c:01{:04x}".format(int(p)) for p in a_pid]) if a_pid else None
+            v_pid = f"c:00{int(v_pid):04x}" if v_pid else None
+            a_pid = ",".join([f"c:01{int(p):04x}" for p in a_pid]) if a_pid else None
             flags = ",".join(filter(None, (flags, v_pid, a_pid, cas)))
         else:
             flags = ",".join(filter(None, (flags, cas)))
