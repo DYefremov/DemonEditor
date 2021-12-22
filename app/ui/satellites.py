@@ -442,7 +442,7 @@ class UpdateDialog:
         if title:
             self._window.set_title(title)
 
-        self._transponder_frame = builder.get_object("sat_update_tr_frame")
+        self._transponder_paned = builder.get_object("sat_update_tr_paned")
         self._sat_view = builder.get_object("sat_update_tree_view")
         self._transponder_view = builder.get_object("sat_update_tr_view")
         self._service_view = builder.get_object("sat_update_srv_view")
@@ -451,6 +451,9 @@ class UpdateDialog:
         self._receive_button = builder.get_object("receive_data_button")
         self._sat_update_info_bar = builder.get_object("sat_update_info_bar")
         self._info_bar_message_label = builder.get_object("info_bar_message_label")
+        self._satellites_count_label = builder.get_object("satellites_count_label")
+        self._transponders_count_label = builder.get_object("transponders_count_label")
+        self._services_count_label = builder.get_object("services_count_label")
         self._receive_button.bind_property("visible", builder.get_object("cancel_data_button"), "visible", 4)
         update_button = builder.get_object("sat_update_button")
         self._sat_view.bind_property("sensitive", update_button, "sensitive")
@@ -502,9 +505,7 @@ class UpdateDialog:
             show_dialog(DialogType.ERROR, self._window, "The task is already running!")
             return
 
-        get_base_model(self._sat_view.get_model()).clear()
-        self._transponder_view.get_model().clear()
-        self._service_view.get_model().clear()
+        self.clear_data()
 
         self.is_download = True
         self._sat_view.set_sensitive(False)
@@ -513,6 +514,14 @@ class UpdateDialog:
             self._parser = SatellitesParser()
 
         self.get_sat_list(src, self.append_satellites)
+
+    def clear_data(self):
+        get_base_model(self._sat_view.get_model()).clear()
+        self._transponder_view.get_model().clear()
+        self._service_view.get_model().clear()
+        self._satellites_count_label.set_text("0")
+        self._transponders_count_label.set_text("0")
+        self._services_count_label.set_text("0")
 
     @run_task
     def get_sat_list(self, src, callback):
@@ -534,6 +543,7 @@ class UpdateDialog:
             model.append(sat)
 
         self._sat_view.set_sensitive(True)
+        self._satellites_count_label.set_text(str(len(model)))
 
     @run_idle
     def on_receive_data(self, item):
@@ -729,7 +739,7 @@ class ServicesUpdateDialog(UpdateDialog):
         self._transponder_view.connect("button-press-event", lambda w, e: on_popup_menu(tr_popup_menu, e))
         self._transponder_view.connect("select_all", lambda w: self.update_transponder_selection(True))
 
-        self._transponder_frame.set_visible(True)
+        self._transponder_paned.set_visible(True)
         self._source_box.remove(0)
         self._source_box.connect("changed", self.on_update_satellites_list)
         self._source_box.set_active(0)
@@ -896,6 +906,7 @@ class ServicesUpdateDialog(UpdateDialog):
         model.clear()
         list(map(model.append, [(t.text, t.url, t.url in self._selected_transponders) for t in trs_list]))
         self._sat_view.set_sensitive(True)
+        self._transponders_count_label.set_text(str(len(model)))
 
     @run_task
     def on_activate_transponder(self, view, path, column):
@@ -915,6 +926,7 @@ class ServicesUpdateDialog(UpdateDialog):
             model.append((None, s.service, s.package, s.service_type, str(s.ssid), None))
 
         self._transponder_view.set_sensitive(True)
+        self._services_count_label.set_text(str(len(model)))
 
     def update_transponder_selection(self, select):
         m = self._transponder_view.get_model()
