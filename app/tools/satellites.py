@@ -162,9 +162,9 @@ class SatellitesParser(HTMLParser):
 
         for src in SatelliteSource.get_sources(self._source):
             try:
-                request = requests.get(url=src, headers=_HEADERS)
-            except requests.exceptions.ConnectionError as e:
-                log(repr(e))
+                request = requests.get(url=src, headers=_HEADERS, timeout=10)
+            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
+                log(f"Getting satellite list error: {repr(e)}")
                 return []
             else:
                 reason = request.reason

@@ -532,8 +532,7 @@ class UpdateDialog:
             sat_src = SatelliteSource.KINGOFSAT
 
         sats = self._parser.get_satellites_list(sat_src)
-        if sats:
-            callback(sats)
+        callback(sats)
         self.is_download = False
 
     @run_idle
@@ -814,7 +813,10 @@ class ServicesUpdateDialog(UpdateDialog):
                         return
 
                     appender.send(f"Getting services for: {t_names.get(futures[future], '')}.\n")
-                    list(map(services.append, future.result()))
+                    try:
+                        list(map(services.append, future.result()))
+                    except ValueError as e:
+                        log(f"Getting services error: {e} [{t_names.get(futures[future])}]")
 
         appender.send("-" * 75 + "\n")
         appender.send(f"Consumed: {time.time() - start:0.0f}s, {len(services)} services received.")
@@ -839,8 +841,7 @@ class ServicesUpdateDialog(UpdateDialog):
             self._services_parser.source = sat_src
 
         sats = self._parser.get_satellites_list(sat_src)
-        if sats:
-            callback(sats)
+        callback(sats)
         self.is_download = False
 
     def on_satellite_toggled(self, toggle, path):
