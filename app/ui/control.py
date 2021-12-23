@@ -658,14 +658,16 @@ class RecordingsTool(Gtk.Box):
         handlers = {"on_path_press": self.on_path_press,
                     "on_path_activated": self.on_path_activated,
                     "on_recordings_activated": self.on_recordings_activated,
-                    "on_recording_remove": self.on_recording_remove}
+                    "on_recording_remove": self.on_recording_remove,
+                    "on_recordings_model_changed": self.on_recordings_model_changed}
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
-                              objects=("recordings_frame", "recordings_model", "rec_paths_model"))
+                              objects=("recordings_box", "recordings_model", "rec_paths_model"))
         self._rec_view = builder.get_object("recordings_view")
         self._paths_view = builder.get_object("recordings_paths_view")
         self._paned = builder.get_object("recordings_paned")
-        self.pack_start(builder.get_object("recordings_frame"), True, True, 0)
+        self._recordings_count_label = builder.get_object("recordings_count_label")
+        self.pack_start(builder.get_object("recordings_box"), True, True, 0)
         if settings.alternate_layout:
             self.on_layout_changed(app, True)
 
@@ -787,6 +789,9 @@ class RecordingsTool(Gtk.Box):
                 else:
                     self._app.show_error_message(resp)
                     break
+
+    def on_recordings_model_changed(self, model, path, itr=None):
+        self._recordings_count_label.set_text(str(len(model)))
 
     def on_playback(self, box, state):
         """ Updates state of the UI elements for playback mode. """
