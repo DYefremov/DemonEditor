@@ -297,6 +297,7 @@ if IS_LINUX:
         LEFT = 113
         RIGHT = 114
         F2 = 68
+        F4 = 70
         F5 = 71
         F7 = 73
         SPACE = 65
@@ -337,6 +338,7 @@ elif IS_DARWIN:
         LEFT = 123
         RIGHT = 123
         F2 = 120
+        F4 = 118
         F5 = 96
         F7 = 98
         SPACE = 49
@@ -375,6 +377,7 @@ else:
         LEFT = 37
         RIGHT = 39
         F2 = 113
+        F4 = 115
         F5 = 116
         F7 = 118
         SPACE = 32

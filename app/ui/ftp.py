@@ -32,6 +32,7 @@ from collections import namedtuple
 from datetime import datetime
 from enum import IntEnum
 from ftplib import all_errors
+from io import TextIOWrapper, BytesIO
 from pathlib import Path
 from shutil import rmtree
 from urllib.parse import urlparse, unquote
@@ -42,7 +43,7 @@ from app.commons import log, run_task, run_idle
 from app.connections import UtfFTP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
 
 File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
 
@@ -63,6 +64,86 @@ class FtpClientBox(Gtk.HBox):
         ATTR = 4
         EXTRA = 5
 
+    class TextEditDialog(Gtk.Dialog):
+        """ Simple text edit dialog. """
+
+        def __init__(self, path, use_header_bar=0, *args, **kwargs):
+            super().__init__(title=f"DemonEditor [{path}]", use_header_bar=use_header_bar, *args, **kwargs)
+
+            self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK, )
+
+            content_box = self.get_content_area()
+            self._search_entry = Gtk.SearchEntry(visible=True, primary_icon_name="system-search-symbolic")
+            self._search_entry.connect("search-changed", self.on_search_changed)
+
+            if use_header_bar:
+                bar = self.get_header_bar()
+                bar.pack_start(self._search_entry)
+                bar.set_title("DemonEditor")
+                bar.set_subtitle(path)
+            else:
+                search_bar = Gtk.SearchBar(visible=True)
+                search_bar.add(self._search_entry)
+                search_bar.set_search_mode(True)
+                content_box.pack_start(search_bar, False, False, 0)
+
+            scrolled_window = Gtk.ScrolledWindow(hexpand=True, vexpand=True,
+                                                 min_content_width=720,
+                                                 min_content_height=320)
+            content_box.pack_start(scrolled_window, True, True, 0)
+
+            try:
+                import gi
+
+                gi.require_version("GtkSource", "3.0")
+                from gi.repository import GtkSource
+            except ImportError as e:
+                self._text_view = Gtk.TextView()
+                self._buf = self._text_view.get_buffer()
+                log(e)
+            else:
+                self._text_view = GtkSource.View(show_line_numbers=True, show_line_marks=True)
+                self._buf = self._text_view.get_buffer()
+                self._buf.set_highlight_syntax(True)
+                self._buf.set_highlight_matching_brackets(True)
+                lang_manager = GtkSource.LanguageManager.new()
+                self._buf.set_language(lang_manager.guess_language(path))
+                # Style
+                self._buf.set_style_scheme(GtkSource.StyleSchemeManager().get_default().get_scheme("tango"))
+
+            self._tag_found = self._buf.create_tag("found", background="yellow")
+            scrolled_window.add(self._text_view)
+
+            self.show_all()
+
+        @property
+        def text(self):
+            return self._buf.get_text(self._buf.get_start_iter(), self._buf.get_end_iter(), include_hidden_chars=True)
+
+        @text.setter
+        def text(self, value):
+            self._buf.set_text(value)
+
+        def on_search_changed(self, entry):
+            self._buf.remove_tag(self._tag_found, self._buf.get_start_iter(), self._buf.get_end_iter())
+            cursor_mark = self._buf.get_insert()
+            start = self._buf.get_iter_at_mark(cursor_mark)
+            if start.get_offset() == self._buf.get_char_count():
+                start = self._buf.get_start_iter()
+
+            self.search_and_mark(entry.get_text(), start)
+
+        def search_and_mark(self, text, start, first=True):
+            end = self._buf.get_end_iter()
+            match = start.forward_search(text, 0, end)
+
+            if match is not None:
+                match_start, match_end = match
+                self._buf.apply_tag(self._tag_found, match_start, match_end)
+                if first:
+                    self._text_view.scroll_to_iter(match_start, 0.0, False, 0.0, 0.0)
+                GLib.idle_add(self.search_and_mark, text, match_end, False)
+
     def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_spacing(2)
@@ -77,10 +158,11 @@ class FtpClientBox(Gtk.HBox):
                     "on_disconnect": self.on_disconnect,
                     "on_ftp_row_activated": self.on_ftp_row_activated,
                     "on_file_row_activated": self.on_file_row_activated,
+                    "on_ftp_edit": self.on_ftp_edit,
                     "on_ftp_rename": self.on_ftp_rename,
-                    "on_ftp_edited": self.on_ftp_edited,
+                    "on_ftp_renamed": self.on_ftp_renamed,
                     "on_file_rename": self.on_file_rename,
-                    "on_file_edited": self.on_file_edited,
+                    "on_file_renamed": self.on_file_renamed,
                     "on_file_remove": self.on_file_remove,
                     "on_ftp_remove": self.on_ftp_file_remove,
                     "on_file_create_folder": self.on_file_create_folder,
@@ -222,7 +304,7 @@ class FtpClientBox(Gtk.HBox):
             else:
                 r_size = self.get_size_from_bytes(size)
 
-            date = f"{f_data[5]}, {f_data[6]}  { f_data[7]}"
+            date = f"{f_data[5]}, {f_data[6]}  {f_data[7]}"
             self._ftp_model.append(File(icon, " ".join(f_data[8:]), r_size, date, f_data[0], size))
 
     def on_connect(self, item=None):
@@ -278,7 +360,7 @@ class FtpClientBox(Gtk.HBox):
             path = os.path.expanduser("~/Desktop") if is_darwin else None
 
             with tempfile.NamedTemporaryFile(mode="wb", dir=path, delete=not is_darwin) as tf:
-                msg = "Downloading file: {}.   Status: {}"
+                msg = "Downloading file: {}.  Status: {}"
                 try:
                     status = self._ftp.retrbinary("RETR " + f_path, tf.write)
                     self.update_ftp_info(msg.format(f_path, status))
@@ -291,7 +373,60 @@ class FtpClientBox(Gtk.HBox):
         finally:
             GLib.idle_add(self._ftp_view.set_sensitive, True)
 
+    @run_task
+    def on_ftp_edit(self, item=None):
+        path = self.get_ftp_edit_path()
+        if path:
+            row = self._ftp_model[path]
+            f_path = row[self.Column.NAME]
+            size = row[self.Column.SIZE]
+
+            if size == self.FOLDER or f_path == self.ROOT:
+                self._app.show_error_message("Not allowed in this context!")
+            else:
+                b_size = row[self.Column.EXTRA]
+                if b_size.isdigit() and int(b_size) > self.MAX_SIZE / 5:
+                    self._app.show_error_message("The file size is too large!")
+                else:
+                    msg = "Retrieving file: {}.  Status: {}"
+                    io = BytesIO()
+                    try:
+                        status = self._ftp.retrbinary("RETR " + f_path, io.write)
+                        self.update_ftp_info(msg.format(f_path, status))
+                    except all_errors as e:
+                        self.update_ftp_info(msg.format(f_path, e))
+                    else:
+                        io.seek(0)
+                        self.show_edit_dialog(f_path, TextIOWrapper(io, errors="ignore").read())
+
+    def on_ftp_edited(self, f_path, txt_data):
+        buf = BytesIO()
+        buf.write(txt_data.encode())
+        buf.seek(0)
+
+        msg = "Uploading file: {}.  Status: {}"
+        try:
+            status = self._ftp.storbinary(f"STOR {f_path}", buf)
+            self.update_ftp_info(msg.format(f_path, status))
+        except all_errors as e:
+            self.update_ftp_info(msg.format(f_path, e))
+
+    @run_idle
+    def show_edit_dialog(self, f_path, data):
+        dialog = self.TextEditDialog(f_path, IS_GNOME_SESSION)
+        dialog.text = data
+        ok = Gtk.ResponseType.OK
+        if dialog.run() == ok and show_dialog(DialogType.QUESTION, self._app.app_window) == ok:
+            self.on_ftp_edited(f_path, dialog.text)
+        dialog.destroy()
+
     def on_ftp_rename(self, renderer):
+        path = self.get_ftp_edit_path()
+        if path:
+            renderer.set_property("editable", True)
+            self._ftp_view.set_cursor(path, self._ftp_view.get_column(0), True)
+
+    def get_ftp_edit_path(self):
         model, paths = self._ftp_view.get_selection().get_selected_rows()
         if not paths:
             return
@@ -299,11 +434,9 @@ class FtpClientBox(Gtk.HBox):
         if len(paths) > 1:
             self._app.show_error_message("Please, select only one item!")
             return
+        return paths
 
-        renderer.set_property("editable", True)
-        self._ftp_view.set_cursor(paths, self._ftp_view.get_column(0), True)
-
-    def on_ftp_edited(self, renderer, path, new_value):
+    def on_ftp_renamed(self, renderer, path, new_value):
         renderer.set_property("editable", False)
         row = self._ftp_model[path]
         old_name = row[self.Column.NAME]
@@ -324,7 +457,7 @@ class FtpClientBox(Gtk.HBox):
         renderer.set_property("editable", True)
         self._file_view.set_cursor(paths, self._file_view.get_column(0), True)
 
-    def on_file_edited(self, renderer, path, new_value):
+    def on_file_renamed(self, renderer, path, new_value):
         renderer.set_property("editable", False)
         row = self._file_model[path]
         old_name = row[self.Column.NAME]
@@ -344,7 +477,7 @@ class FtpClientBox(Gtk.HBox):
                     row[self.Column.ATTR] = str(new_path.resolve())
 
     def on_file_remove(self, item=None):
-        if show_dialog(DialogType.QUESTION, self._app._main_window) != Gtk.ResponseType.OK:
+        if show_dialog(DialogType.QUESTION, self._app.app_window) != Gtk.ResponseType.OK:
             return
 
         model, paths = self._file_view.get_selection().get_selected_rows()
@@ -362,7 +495,7 @@ class FtpClientBox(Gtk.HBox):
         list(map(model.remove, to_delete))
 
     def on_ftp_file_remove(self, item=None):
-        if show_dialog(DialogType.QUESTION, self._app._main_window) != Gtk.ResponseType.OK:
+        if show_dialog(DialogType.QUESTION, self._app.app_window) != Gtk.ResponseType.OK:
             return
 
         model, paths = self._ftp_view.get_selection().get_selected_rows()
@@ -562,6 +695,9 @@ class FtpClientBox(Gtk.HBox):
                 self.on_ftp_rename(self._ftp_name_renderer)
             elif self._file_view.is_focus():
                 self.on_file_rename(self._file_name_renderer)
+        elif key is KeyboardKey.F4:
+            if self._ftp_view.is_focus():
+                self.on_ftp_edit()
         elif key is KeyboardKey.DELETE:
             if self._ftp_view.is_focus():
                 self.on_ftp_file_remove()

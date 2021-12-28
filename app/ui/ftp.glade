@@ -192,10 +192,12 @@ Author: Dmitriy Yefremov
                         </child>
                         <child>
                           <object class="GtkButton" id="ftp_edit_button">
+                            <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="receives_default">True</property>
                             <property name="tooltip_text" translatable="yes">Edit</property>
                             <property name="always_show_image">True</property>
+                            <signal name="clicked" handler="on_ftp_edit" swapped="no"/>
                             <child>
                               <object class="GtkImage" id="ftp_edit_button_image">
                                 <property name="visible">True</property>
@@ -304,7 +306,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkCellRendererText" id="ftp_name_column_renderer">
                                 <property name="xalign">0.019999999552965164</property>
                                 <property name="ellipsize">end</property>
-                                <signal name="edited" handler="on_ftp_edited" swapped="no"/>
+                                <signal name="edited" handler="on_ftp_renamed" swapped="no"/>
                               </object>
                               <attributes>
                                 <attribute name="text">1</attribute>
@@ -561,7 +563,7 @@ Author: Dmitriy Yefremov
                             <child>
                               <object class="GtkCellRendererText" id="file_name_column_renderer">
                                 <property name="ellipsize">end</property>
-                                <signal name="edited" handler="on_file_edited" swapped="no"/>
+                                <signal name="edited" handler="on_file_renamed" swapped="no"/>
                               </object>
                               <attributes>
                                 <attribute name="text">1</attribute>
@@ -728,9 +730,11 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkImageMenuItem" id="ftp_edit_menu_item">
         <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="on_ftp_edit" swapped="no"/>
         <accelerator key="F4" signal="activate"/>
       </object>
     </child>
