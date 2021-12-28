@@ -101,7 +101,7 @@ class Application(Gtk.Application):
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item")
 
-    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_header_button",
+    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_menu_button",
                           "iptv_menu_button")
 
     _LOCK_HIDE_ELEMENTS = ("enigma_lock_hide_box", "bouquet_lock_hide_box")
@@ -156,7 +156,8 @@ class Application(Gtk.Application):
                     "on_import_yt_list": self.on_import_yt_list,
                     "on_import_m3u": self.on_import_m3u,
                     "on_bouquet_export": self.on_bouquet_export,
-                    "on_export_to_m3u": self.on_export_to_m3u,
+                    "on_bouquet_export_to_m3u": self.on_bouquet_export_to_m3u,
+                    "on_export_iptv_to_m3u": self.on_export_iptv_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
                     "on_insert_marker": self.on_insert_marker,
                     "on_insert_space": self.on_insert_space,
@@ -384,7 +385,14 @@ class Application(Gtk.Application):
         self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[0]), "visible")
         self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[1]), "visible", 4)
         # Sub-bouquets menu item.
-        self.bind_property("is_enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
+        self.bind_property("is-enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
+        # Export bouquet to m3u menu items.
+        export_to_m3u_item = builder.get_object("bouquet_export_to_m3u_item")
+        self.bind_property("is-enigma", export_to_m3u_item, "visible")
+        self._signal_box.bind_property("visible", export_to_m3u_item, "sensitive")
+        export_to_m3u_model_button = builder.get_object("export_all_to_m3u_model_button")
+        self.bind_property("is-enigma", export_to_m3u_model_button, "visible")
+        self._signal_box.bind_property("visible", export_to_m3u_model_button, "sensitive")
         # Stack page widgets.
         self._stack_services_frame = builder.get_object("services_frame")
         self._stack_satellite_box = builder.get_object("satellite_box")
@@ -463,7 +471,7 @@ class Application(Gtk.Application):
         # IPTV menu.
         self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
         iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
-        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_to_m3u,
+        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_iptv_to_m3u,
                   self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
             iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
 
@@ -2780,18 +2788,43 @@ class Application(Gtk.Application):
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
+    def on_bouquet_export_to_m3u(self, item):
+        """ Exports bouquet services to * .m3u file.
+
+            Since the streaming port can be changed by the user,
+            we're getting base link to the stream -> http(s)://IP:PORT/
+        """
+        self._http_api.send(HttpAPI.Request.STREAM, "", lambda d: self.export_bouquet_to_m3u(self.get_url_from_m3u(d)))
+
     @run_idle
-    def on_export_to_m3u(self, action, value=None):
+    def export_bouquet_to_m3u(self, url):
+        if not url:
+            return
+
+        def get_service(name, s_type, fav_id, num):
+            if s_type is BqServiceType.DEFAULT:
+                srv = self._services.get(fav_id, None)
+                s_data = srv.picon_id.rstrip(".png").replace("_", ":") if srv.picon_id else None
+                return BouquetService(name, s_type, s_data, num)
+            return BouquetService(name, s_type, fav_id, num)
+
+        self.save_bouquet_to_m3u((get_service(r[Column.FAV_SERVICE], BqServiceType(r[Column.FAV_TYPE]),
+                                              r[Column.FAV_ID], r[Column.FAV_NUM]) for r in self._fav_model), url)
+
+    @run_idle
+    def on_export_iptv_to_m3u(self, action, value=None):
         i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
-        bq_services = [BouquetService(r[Column.FAV_SERVICE],
-                                      BqServiceType(r[Column.FAV_TYPE]),
-                                      r[Column.FAV_ID],
+        bq_services = [BouquetService(r[Column.FAV_SERVICE], BqServiceType(r[Column.FAV_TYPE]), r[Column.FAV_ID],
                                       r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
 
         if not any(s.type is BqServiceType.IPTV for s in bq_services):
             self.show_error_message("This list does not contains IPTV streams!")
             return
 
+        self.save_bouquet_to_m3u(bq_services)
+
+    def save_bouquet_to_m3u(self, bq_services, url=None):
+        """ Saves bouquet services to *.m3u file. """
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
                                buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
@@ -2799,7 +2832,7 @@ class Application(Gtk.Application):
 
         try:
             bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
-            export_to_m3u(response, bq, self._s_type)
+            export_to_m3u(response, bq, self._s_type, url)
         except Exception as e:
             self.show_error_message(str(e))
         else:

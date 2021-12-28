@@ -380,7 +380,7 @@
     </item>
     <item>
       <attribute name="label" translatable="yes">Export to m3u</attribute>
-      <attribute name="action">app.on_export_to_m3u</attribute>
+      <attribute name="action">app.on_export_iptv_to_m3u</attribute>
     </item>
     <section>
       <item>

@@ -47,6 +47,10 @@ class BqServiceType(Enum):
     ALT = "ALT"  # Service with alternatives
     BOUQUET = "BOUQUET"  # Sub bouquet.
 
+    @classmethod
+    def _missing_(cls, value):
+        return cls.DEFAULT
+
 
 Bouquet = namedtuple("Bouquet", ["name", "type", "services", "locked", "hidden", "file"])
 Bouquet.__new__.__defaults__ = (None, BqServiceType.DEFAULT, [], None, None, None)  # For Python3 < 3.7

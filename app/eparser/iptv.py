@@ -112,12 +112,12 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                     srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], st, picon, p_id, *s_aggr, url, fav_id, None)
                     services.append(srv)
                 else:
-                    log("*.m3u* parse error ['{}']: name[{}], url[{}], fav id[{}]".format(path, name, url, fav_id))
+                    log(f"*.m3u* parse error ['{path}']: name[{name}], url[{url}], fav id[{fav_id}]")
 
     return services
 
 
-def export_to_m3u(path, bouquet, s_type):
+def export_to_m3u(path, bouquet, s_type, url=None):
     pattern = re.compile(".*:(http.*):.*") if s_type is SettingsType.ENIGMA_2 else re.compile("(http.*?)::::.*")
     lines = ["#EXTM3U\n"]
     current_grp = None
@@ -128,15 +128,17 @@ def export_to_m3u(path, bouquet, s_type):
             res = re.match(pattern, s.data)
             if not res:
                 continue
-            data = res.group(1)
-            lines.append("#EXTINF:-1,{}\n".format(s.name))
-            if current_grp:
-                lines.append(current_grp)
-            lines.append("{}\n".format(unquote(data.strip())))
+            lines.append(f"#EXTINF:-1,{s.name}\n")
+            lines.append(current_grp) if current_grp else None
+            lines.append(f"{unquote(res.group(1).strip())}\n")
         elif s_type is BqServiceType.MARKER:
-            current_grp = "#EXTGRP:{}\n".format(s.name)
+            current_grp = f"#EXTGRP:{s.name}\n"
+        elif s_type is BqServiceType.DEFAULT and url:
+            lines.append(f"#EXTINF:-1,{s.name}\n")
+            lines.append(current_grp) if current_grp else None
+            lines.append(f"{url}{s.data}\n")
 
-    with open(path + "{}.m3u".format(bouquet.name), "w", encoding="utf-8") as file:
+    with open(f"{path}{bouquet.name}.m3u", "w", encoding="utf-8") as file:
         file.writelines(lines)
 
 
