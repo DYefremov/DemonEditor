@@ -687,10 +687,10 @@ class SatellitesUpdateDialog(UpdateDialog):
             appender.send("-" * 75 + "\n")
             sat_count = len(sats)
 
-            sats = {s[2]: s for s in sats}  # key = position, v = satellite
+            sats = {s[0]: s for s in sats}  # key = name, v = satellite
 
             for row in self._main_model:
-                pos = row[2]
+                pos = row[0]
                 if pos in sats:
                     sat = sats.pop(pos)
                     appender.send(f"Updating satellite: {row[0]}\n")

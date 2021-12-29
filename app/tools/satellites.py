@@ -26,7 +26,7 @@
 #
 
 
-""" Module for downloading satellites, transponders ans services from the Web.
+""" Module for downloading satellites, transponders and services from the Web.
 
     Sources: www.flysat.com, www.lyngsat.com, www.kingofsat.net.
     Replaces or updates the current satellites.xml file.
@@ -43,6 +43,7 @@ from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLAR
                                   Service, CAS)
 
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0"}
+_TIMEOUT = 10
 
 
 class SatelliteSource(Enum):
@@ -162,8 +163,8 @@ class SatellitesParser(HTMLParser):
 
         for src in SatelliteSource.get_sources(self._source):
             try:
-                request = requests.get(url=src, headers=_HEADERS, timeout=10)
-            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
+                request = requests.get(url=src, headers=_HEADERS, timeout=_TIMEOUT)
+            except requests.exceptions.RequestException as e:
                 log(f"Getting satellite list error: {repr(e)}")
                 return []
             else:
@@ -265,8 +266,8 @@ class SatellitesParser(HTMLParser):
             sat_url = "https://en.kingofsat.net/" + sat_url
 
         try:
-            request = requests.get(url=sat_url, headers=_HEADERS)
-        except requests.exceptions.ConnectionError as e:
+            request = requests.get(url=sat_url, headers=_HEADERS, timeout=_TIMEOUT)
+        except requests.exceptions.RequestException as e:
             log(f"Getting transponders error: {e}")
         else:
             if request.status_code == 200:
@@ -369,19 +370,37 @@ class SatellitesParser(HTMLParser):
 
             Since the *.ini file contains incomplete information, it is not used.
         """
-        zeros = "000"
-        pat = re.compile(
-            r"(\d+).00\s+([RLHV])\s+(DVB-S[2]?)\s+(?:T2-MI, PLP (\d+)\s+)?(.*PSK).*?(?:Stream\s+(\d+))?\s+(\d+)\s+(\d+/\d+)$")
+        sys_pat = re.compile(r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*?(?:PLS:\s+(Root|Gold|Combo)\+(\d+))?")
+        mod_pat = re.compile(r"(.*PSK).*?(?:.*Stream\s+(\d+))?.*")
+        sr_fec_pattern = re.compile(r"(\d{4,5})+\s+(\d+/\d+).*")
+        pls_modes = {v: k for k, v in PLS_MODE.items()}
 
         for row in filter(lambda r: len(r) == 16 and self.POS_PAT.match(r[0]), self._rows):
-            res = pat.search(" ".join((row[0], row[2], row[3], row[8], row[9], row[10])))
-            if res:
-                freq, sr, pol, fec, sys = res.group(1), res.group(7), res.group(2), res.group(8), res.group(3)
-                mod, pls_id, pls_code = res.group(5), res.group(4), res.group(6)
+            freq, pol = row[2].replace(".", "0"), row[3]
+            if not freq.isdigit() or pol not in "VHLR":
+                continue
 
-                tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, None, pls_code, pls_id)
-                if is_transponder_valid(tr):
-                    trs.append(tr)
+            res = re.match(sys_pat, row[8])
+            if not res:
+                continue
+            sys, t2_mi, pls_id, pls_code = res.group(1), res.group(2), pls_modes.get(res.group(3), None), res.group(4)
+
+            res = re.match(mod_pat, row[9])
+            if not res:
+                continue
+            mod, is_id = res.group(1), res.group(2)
+
+            res = re.match(sr_fec_pattern, row[10])
+            if not res:
+                continue
+            sr, fec = res.group(1), res.group(2)
+
+            if t2_mi:
+                log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
+
+            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id)
+            if is_transponder_valid(tr):
+                trs.append(tr)
 
 
 class ServicesParser(HTMLParser):
@@ -488,13 +507,16 @@ class ServicesParser(HTMLParser):
             raise ValueError(f"Unsupported source: {self._source.name}!")
 
         self._rows.clear()
-        request = requests.get(url=url, headers=_HEADERS)
-        reason = request.reason
-
-        if reason == "OK":
-            self.feed(request.text)
+        try:
+            request = requests.get(url=url, headers=_HEADERS, timeout=_TIMEOUT)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(e)
         else:
-            raise ValueError(reason)
+            reason = request.reason
+            if reason == "OK":
+                self.feed(request.text)
+            else:
+                raise ValueError(reason)
 
     def get_transponders_links(self, sat_url):
         """ Returns transponder links. """
