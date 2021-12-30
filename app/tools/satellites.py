@@ -121,6 +121,7 @@ class SatellitesParser(HTMLParser):
         self._current_cell = []
         self._rows = []
         self._source = source
+        self.pls_modes = {v: k for k, v in PLS_MODE.items()}
 
     def handle_starttag(self, tag, attrs):
         if tag == "td":
@@ -289,11 +290,9 @@ class SatellitesParser(HTMLParser):
         pls_pattern = re.compile(r".*PLS\s+(Root|Gold|Combo)+\s(\d+)?")
         is_id_pattern = re.compile(r"Stream\s(\d+)")
         sr_fec_pattern = re.compile(r"(\d{4,5})+\s+(\d+/\d+).*")
-        pls_modes = {v: k for k, v in PLS_MODE.items()}
         n_trs = []
 
         if self._rows:
-            zeros = "000"
             is_ids = []
             for r in self._rows:
                 row_len = len(r)
@@ -306,20 +305,18 @@ class SatellitesParser(HTMLParser):
                 freq = re.findall(frq_pol_pattern, r[2])
                 if not freq:
                     continue
-
                 freq, pol, sys, mod = freq[0]
 
                 sr_fec = re.match(sr_fec_pattern, r[3])
                 if not sr_fec:
                     continue
-
                 sr, fec = sr_fec.group(1), sr_fec.group(2)
 
                 pls = re.match(pls_pattern, r[2])
                 pls_code = None
                 pls_mode = None
                 if pls:
-                    pls_mode = pls_modes.get(pls.group(1), None)
+                    pls_mode = self.pls_modes.get(pls.group(1), None)
                     pls_code = pls.group(2)
 
                 if is_ids:
@@ -328,40 +325,44 @@ class SatellitesParser(HTMLParser):
                         tr = tr._replace(is_id=is_id)
                         if is_transponder_valid(tr):
                             n_trs.append(tr)
-                else:
-                    tr = Transponder(freq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, None)
-                    if is_transponder_valid(tr):
-                        trs.append(tr)
+
+                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None)
+                if is_transponder_valid(tr):
+                    trs.append(tr)
 
                 is_ids.clear()
             trs.extend(n_trs)
 
     def get_transponders_for_lyng_sat(self, trs):
         """ Parsing transponders for LyngSat. """
-        frq_pol_pattern = re.compile("(\\d{4,5})\\s+([RLHV]).*")
-        sr_fec_pattern = re.compile(r"(DVB-S[2]?)\s+(.+PSK)?.*?(\d+)\s+(\d/\d)\s*(?:T2-MI\s+PLP\s+(\d+))?.*")
-        zeros = "000"
-        pls_mode, pls_code, pls_id = None, None, None
+        frq_pol_pattern = re.compile(r"(\d{4,5})\s+([RLHV]).*")
+        sr_fec_pattern = re.compile((r"(DVB-S[2]?)\s+(.+PSK)?.*?(\d+)\s+(\d/\d)\s?"
+                                     r"(?:T2-MI\s+PLP\s+(\d+))?.*"
+                                     r"?(?:PLS\s+(Root|Gold|Combo)\s+(\d+))?"
+                                     r"(?:.*Stream\s+(\d+))?.*"))
 
         for row in filter(lambda x: len(x) > 8, self._rows):
-            for frq in row[1], row[2], row[3]:
-                freq = re.match(frq_pol_pattern, frq)
-                if freq:
+            for freq in row[1], row[2], row[3]:
+                res = re.match(frq_pol_pattern, freq)
+                if res:
                     break
-            if not freq:
+            if not res:
                 continue
 
-            frq, pol = freq.group(1), freq.group(2)
-            srf = " ".join(row[3:5])
-            sr_fec = re.search(sr_fec_pattern, srf)
-            if not sr_fec:
+            freq, pol = res.group(1), res.group(2)
+            res = re.search(sr_fec_pattern, row[3])
+            if not res:
                 continue
 
-            sys, mod, sr, fec = sr_fec.group(1), sr_fec.group(2), sr_fec.group(3), sr_fec.group(4)
+            sys, mod, sr, fec = res.group(1), res.group(2), res.group(3), res.group(4)
             mod = mod.strip() if mod else "Auto"
-            pls_id = sr_fec.group(5)
+            plp, pls_mode, pls_code, is_id = res.group(5), res.group(6), res.group(7), res.group(8)
+            pls_mode = self.pls_modes.get(pls_mode, None)
 
-            tr = Transponder(frq + zeros, sr + zeros, pol, fec, sys, mod, pls_mode, pls_code, pls_id)
+            if plp is not None:
+                log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
+
+            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -373,7 +374,6 @@ class SatellitesParser(HTMLParser):
         sys_pat = re.compile(r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*?(?:PLS:\s+(Root|Gold|Combo)\+(\d+))?")
         mod_pat = re.compile(r"(.*PSK).*?(?:.*Stream\s+(\d+))?.*")
         sr_fec_pattern = re.compile(r"(\d{4,5})+\s+(\d+/\d+).*")
-        pls_modes = {v: k for k, v in PLS_MODE.items()}
 
         for row in filter(lambda r: len(r) == 16 and self.POS_PAT.match(r[0]), self._rows):
             freq, pol = row[2].replace(".", "0"), row[3]
@@ -383,7 +383,8 @@ class SatellitesParser(HTMLParser):
             res = re.match(sys_pat, row[8])
             if not res:
                 continue
-            sys, t2_mi, pls_id, pls_code = res.group(1), res.group(2), pls_modes.get(res.group(3), None), res.group(4)
+            sys, t2_mi, pls_id, pls_code = res.group(1), res.group(2), res.group(3), res.group(4)
+            pls_id = self.pls_modes.get(pls_id, None)
 
             res = re.match(mod_pat, row[9])
             if not res:
