@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -170,10 +170,10 @@ class SatellitesTool(Gtk.Box):
         self.on_edit(view, force=True)
 
     def on_satellite_add(self, item):
-        self.on_satellite(None)
+        self.on_satellite()
 
     def on_transponder_add(self, item):
-        self.on_transponder(None)
+        self.on_transponder()
 
     def on_edit(self, view, force=False):
         """ Common edit """
@@ -763,7 +763,7 @@ class ServicesUpdateDialog(UpdateDialog):
         non_cached_sats = []
         sat_names = {}
         t_names = {}
-        t_urls = []
+        t_urls = set()
         services = []
 
         for r in (r for r in model if r[-1]):
@@ -775,7 +775,7 @@ class ServicesUpdateDialog(UpdateDialog):
             trs = self._transponders.get(url, None)
             if trs:
                 for t in filter(lambda tp: tp.url in self._selected_transponders, trs):
-                    t_urls.append(t.url)
+                    t_urls.add(t.url)
                     t_names[t.url] = t.text
             else:
                 non_cached_sats.append(url)
@@ -792,7 +792,7 @@ class ServicesUpdateDialog(UpdateDialog):
 
                     appender.send(f"Getting transponders for: {sat_names.get(futures[future])}.\n")
                     for t in future.result():
-                        t_urls.append(t.url)
+                        t_urls.add(t.url)
                         t_names[t.url] = t.text
 
                 appender.send("-" * 75 + "\n")
@@ -823,7 +823,7 @@ class ServicesUpdateDialog(UpdateDialog):
 
         try:
             from app.eparser.enigma.lamedb import LameDbReader
-            # Used for double checking!
+            # Used for double check!
             reader = LameDbReader(path=None)
             srvs = reader.get_services_list("".join(reader.get_services_lines(services)))
         except ValueError as e:
