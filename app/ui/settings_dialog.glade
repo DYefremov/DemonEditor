@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c)  2018-2021 Dmitriy Yefremov
+Copyright (c)  2018-2022 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1885,6 +1885,7 @@ Author: Dmitriy Yefremov
                                   <item id="72">72</item>
                                   <item id="96">96</item>
                                 </items>
+                                <signal name="changed" handler="on_picons_size_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>

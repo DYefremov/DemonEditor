@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -243,7 +243,7 @@ class Application(Gtk.Application):
         self._ftp_client = None
         # Record
         self._recorder = None
-        # http api
+        # HTTP API
         self._http_api = None
         self._fav_click_mode = None
         # Appearance
@@ -434,6 +434,11 @@ class Application(Gtk.Application):
             self._data_paned.bind_property("visible", main_header_box, "visible")
         self._player_box.bind_property("visible", profile_box, "visible", 4)
         self._player_box.bind_property("visible", toolbar_box, "visible", 4)
+        # Picons.
+        column = builder.get_object("picon_column")
+        column.set_cell_data_func(builder.get_object("picon_renderer"), self.picon_data_func)
+        column = builder.get_object("fav_service_column")
+        column.set_cell_data_func(builder.get_object("fav_picon_renderer"), self.fav_picon_data_func)
         # Setting the last size of the window if it was saved.
         main_window_size = self._settings.get("window_size")
         if main_window_size:
@@ -696,7 +701,7 @@ class Application(Gtk.Application):
             self._current_font = self._settings.list_font
 
         if self._picons_size != self._settings.list_picon_size:
-            self.update_picons_size()
+            self._picons.clear()
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._use_colors = self._settings.use_colors
@@ -741,19 +746,6 @@ class Application(Gtk.Application):
         fav_position = self._settings.get("fav_paned_position", width * 0.27)
         paned.set_position(main_position)
         self._fav_paned.set_position(fav_position)
-
-    @run_task
-    def update_picons_size(self):
-        self._picons_size = self._settings.list_picon_size
-        update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
-        self.update_picons_pixbufs()
-
-    @run_idle
-    def update_picons_pixbufs(self):
-        self._fav_model.foreach(lambda m, p, itr: m.set_value(itr, Column.FAV_PICON, self._picons.get(
-            self._services.get(m.get_value(itr, Column.FAV_ID)).picon_id, None)))
-        self._services_model.foreach(lambda m, p, itr: m.set_value(itr, Column.SRV_PICON, self._picons.get(
-            m.get_value(itr, Column.SRV_PICON_ID), None)))
 
     def update_background_colors(self, new_color, extra_color):
         if extra_color != self._EXTRA_COLOR:
@@ -2003,11 +1995,11 @@ class Application(Gtk.Application):
         self.update_services_counts(len(self._services.values()))
         self._wait_dialog.hide()
         self._services_load_spinner.start()
-        factor = self.DEL_FACTOR
+        factor = self.DEL_FACTOR / 4
 
         for index, srv in enumerate(services):
             background = self.get_new_background(srv.flags_cas)
-            s = srv._replace(picon=self._picons.get(srv.picon_id, None)) + (None, background)
+            s = srv + (None, background)
             self._services_model.append(s)
             if index % factor == 0:
                 yield True
@@ -2282,18 +2274,9 @@ class Application(Gtk.Application):
                 if not is_marker:
                     num += 1
 
-                picon = self._picons.get(srv.picon_id, None)
-                # Alternatives
-                if srv.service_type == BqServiceType.ALT.name:
-                    alt_servs = srv.transponder
-                    if alt_servs:
-                        alt_srv = self._services.get(alt_servs[0].data, None)
-                        if alt_srv:
-                            picon = self._picons.get(alt_srv.picon_id, None) if srv else None
-
                 self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
                                         srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
-                                        picon, None, background))
+                                        None, None, background))
 
         yield True
         self._fav_view.set_model(self._fav_model)
@@ -3253,15 +3236,12 @@ class Application(Gtk.Application):
     @run_with_delay(2)
     def on_filter_changed(self, item=None):
         self._services_load_spinner.start()
-        model = self._services_view.get_model()
-        self._services_view.set_model(None)
         self.update_filter_cache()
-        self.update_filter_state(model)
+        self.update_filter_state()
 
     @run_idle
-    def update_filter_state(self, model):
+    def update_filter_state(self):
         self._services_model_filter.refilter()
-        self._services_view.set_model(model)
         GLib.idle_add(self._services_load_spinner.stop)
 
     def update_filter_cache(self):
@@ -3516,7 +3496,25 @@ class Application(Gtk.Application):
         self._services_load_spinner.stop()
         yield True
 
-    # ***************** Picons *********************#
+    # ***************** Picons ********************* #
+
+    def picon_data_func(self, column, renderer, model, itr, data):
+        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.SRV_PICON_ID)))
+
+    def fav_picon_data_func(self, column, renderer, model, itr, data):
+        srv = self._services.get(model.get_value(itr, Column.FAV_ID), None)
+        if not srv:
+            return True
+
+        picon = self._picons.get(srv.picon_id, None)
+        # Alternatives.
+        if srv.service_type == BqServiceType.ALT.name:
+            alt_servs = srv.transponder
+            if alt_servs:
+                alt_srv = self._services.get(alt_servs[0].data, None)
+                if alt_srv:
+                    picon = self._picons.get(alt_srv.picon_id, None) if srv else None
+        renderer.set_property("pixbuf", picon)
 
     @run_task
     def update_picons(self):
@@ -3524,7 +3522,7 @@ class Application(Gtk.Application):
         append_picons(self._picons, self._services_model)
 
     def get_picon(self, p_id):
-        return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._settings.list_picon_size)
+        return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._picons_size)
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):
         self._stack.set_visible_child_name(Page.PICONS.value)

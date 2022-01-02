@@ -281,7 +281,7 @@ def set_lock(blacklist, services, model, paths, target, services_model):
     locked = has_locked_hide(model, paths, col_num)
 
     ids = []
-    skip_type = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
+    skip_type = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
 
     for path in paths:
         itr = model.get_iter(path)

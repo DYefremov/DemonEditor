@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,7 @@ class SettingsDialog:
                     "on_add_picon_path": self.on_add_picon_path,
                     "on_remove_picon_path": self.on_remove_picon_path,
                     "on_lang_changed": self.on_lang_changed,
+                    "on_picons_size_changed": self.on_picons_size_changed,
                     "on_main_settings_visible": self.on_main_settings_visible,
                     "on_http_use_ssl_toggled": self.on_http_use_ssl_toggled,
                     "on_click_mode_togged": self.on_click_mode_togged,
@@ -91,6 +92,7 @@ class SettingsDialog:
         self._profiles = self._settings.profiles
         self._s_type = self._settings.setting_type
         self._updated = False
+        self._current_page = None
 
         builder = get_builder(UI_RESOURCES_PATH + "settings_dialog.glade", handlers)
 
@@ -624,10 +626,14 @@ class SettingsDialog:
         if box.get_active_id() != self._settings.language:
             self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
 
+    def on_picons_size_changed(self, box):
+        if self._current_page == "appearance" and box.get_active_id() != self._settings.list_picon_size:
+            self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
+
     def on_main_settings_visible(self, stack, param):
-        name = stack.get_visible_child_name()
-        self._apply_presets_button.set_visible(name == "streaming")
-        self._reset_button.set_visible(name == "profiles")
+        self._current_page = stack.get_visible_child_name()
+        self._apply_presets_button.set_visible(self._current_page == "streaming")
+        self._reset_button.set_visible(self._current_page == "profiles")
 
     def on_http_use_ssl_toggled(self, button):
         active = button.get_active()

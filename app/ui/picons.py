@@ -197,6 +197,11 @@ class PiconManager(Gtk.Box):
         self._manager_button.bind_property("active", builder.get_object("add_menu_button"), "visible")
         # Init drag-and-drop
         self.init_drag_and_drop()
+        # Rendering.
+        column = builder.get_object("dest_picon_column")
+        column.set_cell_data_func(builder.get_object("picons_dest_renderer"), self.picon_data_func)
+        column = builder.get_object("src_picon_column")
+        column.set_cell_data_func(builder.get_object("picons_src_renderer"), self.picon_data_func)
         # Settings
         self._settings = settings
         self._s_type = settings.setting_type
@@ -274,7 +279,7 @@ class PiconManager(Gtk.Box):
     def update_picons(self, path, view):
         p_model = view.get_model()
         model = get_base_model(p_model)
-        factor = self._app.DEL_FACTOR
+        factor = self._app.DEL_FACTOR * 2
 
         for index, itr in enumerate([row.iter for row in model]):
             model.remove(itr)
@@ -282,24 +287,20 @@ class PiconManager(Gtk.Box):
                 yield True
 
         self._dst_count_label.set_text("0")
-        if not os.path.isdir(path):
-            return
-
         for index, file in enumerate(os.listdir(path)):
             if self._terminate:
                 return
 
-            p_path = f"{path}{SEP}{file}"
-            p = self.get_pixbuf_at_scale(p_path, 72, 48, True)
-            if p:
-                model.append((p, file, p_path))
-
+            model.append((None, file, f"{path}{SEP}{file}"))
             if index % factor == 0:
                 self._dst_count_label.set_text(str(len(model)))
                 yield True
 
         self._dst_count_label.set_text(str(len(model)))
         yield True
+
+    def picon_data_func(self, column, renderer, model, itr, data):
+        renderer.set_property("pixbuf", self.get_pixbuf_at_scale(model.get_value(itr, 2), 72, 48, True))
 
     def update_picons_from_file(self, view, uri):
         """ Adds picons in the view on dragging from file system. """

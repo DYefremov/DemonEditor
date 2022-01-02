@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2021 Dmitriy Yefremov
+Copyright (c) 2018-2022 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -708,6 +708,7 @@ Author: Dmitriy Yefremov
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services.</property>
                                     <property name="model">picons_src_sort_model</property>
+                                    <property name="fixed_height_mode">True</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>
                                     <property name="activate_on_single_click">True</property>
@@ -723,11 +724,14 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="src_picon_column">
+                                        <property name="sizing">fixed</property>
                                         <property name="min_width">150</property>
                                         <property name="title" translatable="yes">Picon</property>
                                         <property name="alignment">0.49000000953674316</property>
                                         <child>
-                                          <object class="GtkCellRendererPixbuf" id="picons_src_renderer"/>
+                                          <object class="GtkCellRendererPixbuf" id="picons_src_renderer">
+                                            <property name="ypad">5</property>
+                                          </object>
                                           <attributes>
                                             <attribute name="pixbuf">0</attribute>
                                           </attributes>
@@ -736,6 +740,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="src_title_column">
+                                        <property name="sizing">fixed</property>
                                         <property name="title" translatable="yes">Name</property>
                                         <property name="alignment">0.49000000953674316</property>
                                         <child>
@@ -751,6 +756,7 @@ Author: Dmitriy Yefremov
                                     <child>
                                       <object class="GtkTreeViewColumn" id="src_path_column">
                                         <property name="visible">False</property>
+                                        <property name="sizing">fixed</property>
                                         <property name="title" translatable="yes">column</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="path_src_renderer"/>
@@ -836,6 +842,7 @@ Author: Dmitriy Yefremov
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services. </property>
                                     <property name="model">picons_dst_sort_model</property>
+                                    <property name="fixed_height_mode">True</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>
                                     <property name="activate_on_single_click">True</property>
@@ -852,11 +859,14 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="dest_picon_column">
+                                        <property name="sizing">fixed</property>
                                         <property name="min_width">150</property>
                                         <property name="title" translatable="yes">Picon</property>
                                         <property name="alignment">0.49000000953674316</property>
                                         <child>
-                                          <object class="GtkCellRendererPixbuf" id="picons_dest_renderer"/>
+                                          <object class="GtkCellRendererPixbuf" id="picons_dest_renderer">
+                                            <property name="ypad">5</property>
+                                          </object>
                                           <attributes>
                                             <attribute name="pixbuf">0</attribute>
                                           </attributes>
@@ -865,6 +875,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn" id="dest_title_column">
+                                        <property name="sizing">fixed</property>
                                         <property name="title" translatable="yes">Name</property>
                                         <property name="expand">True</property>
                                         <property name="alignment">0.49000000953674316</property>
@@ -881,6 +892,7 @@ Author: Dmitriy Yefremov
                                     <child>
                                       <object class="GtkTreeViewColumn" id="dest_path_column">
                                         <property name="visible">False</property>
+                                        <property name="sizing">fixed</property>
                                         <property name="title" translatable="yes">column</property>
                                         <child>
                                           <object class="GtkCellRendererText" id="path_dest_renderer"/>
