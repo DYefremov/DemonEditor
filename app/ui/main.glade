@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2021 Dmitriy Yefremov
+Copyright (c) 2018-2022 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1929,11 +1929,14 @@ Author: Dmitriy Yefremov
                                             <property name="sizing">fixed</property>
                                             <property name="min_width">25</property>
                                             <property name="title" translatable="yes">Picon</property>
+                                            <property name="expand">True</property>
                                             <property name="clickable">True</property>
                                             <property name="alignment">0.5</property>
                                             <property name="sort_column_id">9</property>
                                             <child>
-                                              <object class="GtkCellRendererPixbuf" id="picon_renderer"/>
+                                              <object class="GtkCellRendererPixbuf" id="picon_renderer">
+                                                <property name="ypad">2</property>
+                                              </object>
                                               <attributes>
                                                 <attribute name="cell-background-rgba">21</attribute>
                                                 <attribute name="pixbuf">8</attribute>
@@ -2745,6 +2748,25 @@ Author: Dmitriy Yefremov
                                               </object>
                                             </child>
                                             <child>
+                                              <object class="GtkTreeViewColumn" id="fav_picon_column">
+                                                <property name="sizing">fixed</property>
+                                                <property name="min_width">25</property>
+                                                <property name="title" translatable="yes">Picon</property>
+                                                <property name="expand">True</property>
+                                                <property name="clickable">True</property>
+                                                <property name="alignment">0.5</property>
+                                                <child>
+                                                  <object class="GtkCellRendererPixbuf" id="fav_picon_renderer">
+                                                    <property name="ypad">2</property>
+                                                  </object>
+                                                  <attributes>
+                                                    <attribute name="cell-background-rgba">10</attribute>
+                                                    <attribute name="pixbuf">8</attribute>
+                                                  </attributes>
+                                                </child>
+                                              </object>
+                                            </child>
+                                            <child>
                                               <object class="GtkTreeViewColumn" id="fav_service_column">
                                                 <property name="resizable">True</property>
                                                 <property name="sizing">fixed</property>
@@ -2754,15 +2776,6 @@ Author: Dmitriy Yefremov
                                                 <property name="clickable">True</property>
                                                 <property name="alignment">0.5</property>
                                                 <signal name="clicked" handler="on_fav_sort" swapped="no"/>
-                                                <child>
-                                                  <object class="GtkCellRendererPixbuf" id="fav_picon_renderer">
-                                                    <property name="xpad">5</property>
-                                                  </object>
-                                                  <attributes>
-                                                    <attribute name="cell-background-rgba">10</attribute>
-                                                    <attribute name="pixbuf">8</attribute>
-                                                  </attributes>
-                                                </child>
                                                 <child>
                                                   <object class="GtkCellRendererPixbuf" id="fav_coded_renderer">
                                                     <property name="width">24</property>

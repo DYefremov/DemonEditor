@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,10 +29,10 @@
 """ Helper module for the GUI. """
 
 __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "locate_in_services",
-           "scroll_to", "get_base_model", "update_picons_data", "copy_picon_reference", "assign_picons",
-           "remove_picon", "is_only_one_item_selected", "gen_bouquets", "BqGenType", "append_picons",
-           "get_selection", "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs",
-           "get_iptv_url", "update_entry_data", "append_text_to_tview", "on_popup_menu")
+           "scroll_to", "get_base_model", "copy_picon_reference", "assign_picons", "remove_picon",
+           "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection",
+           "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
+           "update_entry_data", "append_text_to_tview", "on_popup_menu")
 
 import os
 import shutil
@@ -44,8 +44,8 @@ from gi.repository import GdkPixbuf, GLib
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
-from app.settings import SettingsType, SEP, IS_WIN
-from .dialogs import show_dialog, DialogType, get_chooser_dialog
+from app.settings import SettingsType, SEP, IS_WIN, IS_DARWIN, IS_LINUX
+from .dialogs import show_dialog, DialogType, get_message
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
 
@@ -64,7 +64,7 @@ def insert_marker(view, bouquets, selected_bouquet, services, parent_window, m_t
             show_dialog(DialogType.ERROR, parent_window, "The text of marker is empty, please try again!")
             return
 
-        fav_id = "1:64:0:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n".format(response, response)
+        fav_id = f"1:64:0:0:0:0:0:0:0:0::{response}\n#DESCRIPTION {response}\n"
         text = response
 
     s_type = m_type.name
@@ -110,8 +110,8 @@ def move_items(key, view: Gtk.TreeView):
             children_num = model.iter_n_children(parent_itr)
             if key in (KeyboardKey.PAGE_DOWN, KeyboardKey.END, KeyboardKey.END_KP, KeyboardKey.PAGE_DOWN_KP):
                 children_num -= 1
-            min_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, 0))
-            max_path = Gtk.TreePath.new_from_string("{}:{}".format(parent_index, children_num))
+            min_path = Gtk.TreePath.new_from_string(f"{parent_index}:{0}")
+            max_path = Gtk.TreePath.new_from_string(f"{parent_index}:{children_num}")
             is_tree_store = True
 
     if key is KeyboardKey.UP:
@@ -386,26 +386,36 @@ def scroll_to(index, view, paths=None):
     selection.select_path(index)
 
 
-# ***************** Picons *********************#
+# ***************** Picons ********************* #
 
-def update_picons_data(path, picons, size=32):
-    if not os.path.exists(path):
-        return
+def get_picon_dialog(transient, title, button_text, multiple=True):
+    """ Returns a copy dialog with a preview of images [picons -> *.png]. """
+    dialog = Gtk.FileChooserNative.new(title, transient, Gtk.FileChooserAction.OPEN, button_text)
+    dialog.set_select_multiple(multiple)
+    dialog.set_modal(True)
+    # Filter.
+    file_filter = Gtk.FileFilter()
+    file_filter.set_name("*.png")
+    file_filter.add_pattern("*.png")
+    file_filter.add_mime_type("image/png") if IS_DARWIN else None
+    dialog.add_filter(file_filter)
 
-    for file in os.listdir(path):
-        pf = get_picon_pixbuf(path + file, size)
-        if pf:
-            picons[file] = pf
+    if IS_LINUX:
+        preview_image = Gtk.Image(margin_right=10)
+        dialog.set_preview_widget(preview_image)
 
+        def update_preview_widget(dlg):
+            path = dialog.get_preview_filename()
+            if not path:
+                return
 
-def append_picons(picons, model):
-    def append_picons_data(pcs, mod):
-        for r in mod:
-            mod.set_value(mod.get_iter(r.path), Column.SRV_PICON, pcs.get(r[Column.SRV_PICON_ID], None))
-            yield True
+            pix = get_picon_pixbuf(path, 220)
+            preview_image.set_from_pixbuf(pix)
+            dlg.set_preview_widget_active(bool(pix))
 
-    app = append_picons_data(picons, model)
-    GLib.idle_add(lambda: next(app, False), priority=GLib.PRIORITY_LOW)
+        dialog.connect("update-preview", update_preview_widget)
+
+    return dialog
 
 
 def assign_picons(target, srv_view, fav_view, transient, picons, settings, services, src_path=None, dst_path=None):
@@ -415,9 +425,11 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
     picons_files = []
 
     if not src_path:
-        src_path = get_chooser_dialog(transient, settings, "*.png files", ("*.png",))
-        if src_path == Gtk.ResponseType.CANCEL:
+        dialog = get_picon_dialog(transient, get_message("Picon selection"), get_message("Open"), False)
+        if dialog.run() in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT) or not dialog.get_filenames():
             return picons_files
+
+        src_path = dialog.get_filenames()[0]
 
     if IS_WIN:
         src_path = src_path.lstrip("/")
@@ -450,7 +462,7 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
                 pass  # NOP
             else:
                 picons_files.append(picon_file)
-                picon = get_picon_pixbuf(picon_file)
+                picon = get_picon_pixbuf(picon_file, settings.list_picon_size)
                 picons[picon_id] = picon
                 model.set_value(itr, p_pos, picon)
                 if target is ViewTarget.SERVICES:

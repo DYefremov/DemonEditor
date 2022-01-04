@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,13 +37,13 @@ from gi.repository import GLib, GdkPixbuf, Gio
 
 from app.commons import run_idle, run_task, run_with_delay, log
 from app.connections import upload_data, DownloadType, download_data, remove_picons
-from app.settings import SettingsType, Settings, SEP, IS_LINUX, IS_DARWIN
+from app.settings import SettingsType, Settings, SEP, IS_DARWIN
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
                               PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message, get_builder, get_chooser_dialog
 from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
-                          get_picon_pixbuf)
+                          get_picon_pixbuf, get_picon_dialog)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
 
 
@@ -287,6 +287,7 @@ class PiconManager(Gtk.Box):
                 yield True
 
         self._dst_count_label.set_text("0")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         for index, file in enumerate(os.listdir(path)):
             if self._terminate:
                 return
@@ -479,41 +480,11 @@ class PiconManager(Gtk.Box):
 
     def on_add(self, item):
         """ Adds (copies) picons from an external folder to the profile picons folder. """
-        dialog = self.get_copy_dialog()
+        dialog = get_picon_dialog(self._app_window, get_message("Add picons"), get_message("Add"))
         if dialog.run() in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
         self.copy_picons_file(dialog.get_filenames())
-
-    def get_copy_dialog(self):
-        """ Returns a copy dialog with a preview of images [picons -> *.png]. """
-        dialog = Gtk.FileChooserNative.new(get_message("Add picons"), self._app_window,
-                                           Gtk.FileChooserAction.OPEN, get_message("Add"))
-        dialog.set_select_multiple(True)
-        dialog.set_modal(True)
-        # Filter.
-        file_filter = Gtk.FileFilter()
-        file_filter.set_name("*.png")
-        file_filter.add_pattern("*.png")
-        file_filter.add_mime_type("image/png") if IS_DARWIN else None
-        dialog.add_filter(file_filter)
-
-        if IS_LINUX:
-            preview_image = Gtk.Image(margin_right=10)
-            dialog.set_preview_widget(preview_image)
-
-            def update_preview_widget(dlg):
-                path = dialog.get_preview_filename()
-                if not path:
-                    return
-
-                pix = get_picon_pixbuf(path, 220)
-                preview_image.set_from_pixbuf(pix)
-                dlg.set_preview_widget_active(bool(pix))
-
-            dialog.connect("update-preview", update_preview_widget)
-
-        return dialog
 
     def on_extract(self, item):
         """ Extracts picons from an archives to the profile picons folder. """
@@ -905,15 +876,6 @@ class PiconManager(Gtk.Box):
         self._terminate = True
         self._is_downloading = False
         self.show_info_message(get_message("The task is canceled!"), Gtk.MessageType.WARNING)
-
-    def on_close(self, window, event):
-        if self.on_cancel():
-            return True
-
-        self._terminate = True
-        self._is_downloading = False
-        self._app.update_picons()
-        GLib.idle_add(self._app_window.destroy)
 
     @run_task
     def run_func(self, func, update=False):

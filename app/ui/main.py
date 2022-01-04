@@ -435,10 +435,10 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", profile_box, "visible", 4)
         self._player_box.bind_property("visible", toolbar_box, "visible", 4)
         # Picons.
-        column = builder.get_object("picon_column")
-        column.set_cell_data_func(builder.get_object("picon_renderer"), self.picon_data_func)
-        column = builder.get_object("fav_service_column")
-        column.set_cell_data_func(builder.get_object("fav_picon_renderer"), self.fav_picon_data_func)
+        self._picon_renderer = builder.get_object("picon_renderer")
+        builder.get_object("picon_column").set_cell_data_func(self._picon_renderer, self.picon_data_func)
+        self._fav_picon_renderer = builder.get_object("fav_picon_renderer")
+        builder.get_object("fav_picon_column").set_cell_data_func(self._fav_picon_renderer, self.fav_picon_data_func)
         # Setting the last size of the window if it was saved.
         main_window_size = self._settings.get("window_size")
         if main_window_size:
@@ -701,7 +701,10 @@ class Application(Gtk.Application):
             self._current_font = self._settings.list_font
 
         if self._picons_size != self._settings.list_picon_size:
+            self._picons_size = self._settings.list_picon_size
             self._picons.clear()
+        self._picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
+        self._fav_picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._use_colors = self._settings.use_colors
@@ -1103,7 +1106,7 @@ class Application(Gtk.Application):
         self._wait_dialog.hide()
         yield True
 
-    # ***************** ####### *********************#
+    # ***************** Bouquets ********************* #
 
     def get_bouquet_file_name(self, bouquet):
         bouquet_file_name = "{}userbouquet.{}.{}".format(self._settings.get(self._s_type).get("data_dir_path"),
@@ -2703,7 +2706,6 @@ class Application(Gtk.Application):
 
         dialog = ImportDialog(self._main_window, path, self._settings, self._services.keys(), append)
         dialog.import_data() if force else dialog.show()
-        self.update_picons()
 
     def append_imported_data(self, bouquets, services, callback=None):
         try:
@@ -3514,12 +3516,13 @@ class Application(Gtk.Application):
                 alt_srv = self._services.get(alt_servs[0].data, None)
                 if alt_srv:
                     picon = self._picons.get(alt_srv.picon_id, None) if srv else None
+
         renderer.set_property("pixbuf", picon)
 
-    @run_task
+    @run_idle
     def update_picons(self):
-        update_picons_data(self._settings.profile_picons_path, self._picons, self._picons_size)
-        append_picons(self._picons, self._services_model)
+        self._picons.clear()
+        self._fav_model.foreach(lambda m, p, i: m.set_value(i, Column.FAV_PICON, None))
 
     def get_picon(self, p_id):
         return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._picons_size)
