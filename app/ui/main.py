@@ -436,9 +436,13 @@ class Application(Gtk.Application):
         self._player_box.bind_property("visible", toolbar_box, "visible", 4)
         # Picons.
         self._picon_renderer = builder.get_object("picon_renderer")
-        builder.get_object("picon_column").set_cell_data_func(self._picon_renderer, self.picon_data_func)
+        self._picon_column = builder.get_object("picon_column")
+        self._picon_column.set_cell_data_func(self._picon_renderer, self.picon_data_func)
         self._fav_picon_renderer = builder.get_object("fav_picon_renderer")
-        builder.get_object("fav_picon_column").set_cell_data_func(self._fav_picon_renderer, self.fav_picon_data_func)
+        self._fav_picon_column = builder.get_object("fav_picon_column")
+        self._fav_picon_column.set_cell_data_func(self._fav_picon_renderer, self.fav_picon_data_func)
+        self._picon_column.set_visible(self._settings.display_picons)
+        self._fav_picon_column.set_visible(self._settings.display_picons)
         # Setting the last size of the window if it was saved.
         main_window_size = self._settings.get("window_size")
         if main_window_size:
@@ -544,6 +548,8 @@ class Application(Gtk.Application):
         sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
         sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
         self.bind_property("is-enigma", sa, "enabled")
+        # Display picons.
+        self.set_state_action("display_picons", self.set_display_picons, self._settings.display_picons)
         # Alternate layout.
         sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
         sa.connect("change-state", self.on_layout_change)
@@ -703,6 +709,8 @@ class Application(Gtk.Application):
         if self._picons_size != self._settings.list_picon_size:
             self._picons_size = self._settings.list_picon_size
             self._picons.clear()
+            self.refresh_models()
+
         self._picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
         self._fav_picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
 
@@ -3499,6 +3507,23 @@ class Application(Gtk.Application):
         yield True
 
     # ***************** Picons ********************* #
+
+    @run_idle
+    def set_display_picons(self, action, value):
+        action.set_state(value)
+        set_display = bool(value)
+        self._settings.display_picons = set_display
+        self._picon_column.set_visible(set_display)
+        self._fav_picon_column.set_visible(set_display)
+        self.refresh_models()
+
+    @run_idle
+    def refresh_models(self):
+        model = self._services_view.get_model()
+        self._services_view.set_model(None)
+        self._services_view.set_model(model)
+        self._fav_view.set_model(None)
+        self._fav_view.set_model(self._fav_model)
 
     def picon_data_func(self, column, renderer, model, itr, data):
         renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.SRV_PICON_ID)))

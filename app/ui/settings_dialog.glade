@@ -1885,7 +1885,6 @@ Author: Dmitriy Yefremov
                                   <item id="72">72</item>
                                   <item id="96">96</item>
                                 </items>
-                                <signal name="changed" handler="on_picons_size_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>

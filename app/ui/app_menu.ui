@@ -135,6 +135,10 @@
       </section>
       <section>
         <item>
+          <attribute name="label" translatable="yes">Display picons</attribute>
+          <attribute name="action">app.display_picons</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">Alternate layout</attribute>
           <attribute name="action">app.set_alternate_layout</attribute>
         </item>
@@ -330,6 +334,10 @@
         </item>
       </section>
       <section>
+        <item>
+          <attribute name="label" translatable="yes">Display picons</attribute>
+          <attribute name="action">app.display_picons</attribute>
+        </item>
         <item>
           <attribute name="label" translatable="yes">Alternate layout</attribute>
           <attribute name="action">app.set_alternate_layout</attribute>

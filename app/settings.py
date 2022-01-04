@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -677,6 +677,14 @@ class Settings:
         self._settings["dark_mode"] = value
 
     @property
+    def display_picons(self):
+        return self._settings.get("display_picons", True)
+
+    @display_picons.setter
+    def display_picons(self, value):
+        self._settings["display_picons"] = value
+
+    @property
     def alternate_layout(self):
         return self._settings.get("alternate_layout", IS_DARWIN)
 
@@ -711,7 +719,7 @@ class Settings:
     @property
     @lru_cache(1)
     def themes_path(self):
-        return "{}{}.themes{}".format(HOME_PATH, SEP, SEP)
+        return f"{HOME_PATH}{SEP}.themes{SEP}"
 
     @property
     def icon_theme(self):
@@ -724,7 +732,7 @@ class Settings:
     @property
     @lru_cache(1)
     def icon_themes_path(self):
-        return "{}{}.icons{}".format(HOME_PATH, SEP, SEP)
+        return f"{HOME_PATH}{SEP}.icons{SEP}"
 
     @property
     def is_darwin(self):
