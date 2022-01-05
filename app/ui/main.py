@@ -758,6 +758,15 @@ class Application(Gtk.Application):
         paned.set_position(main_position)
         self._fav_paned.set_position(fav_position)
 
+    def init_new_services_models(self):
+        """ Initializes new models for main services view. """
+        column_types = (self._services_model.get_column_type(i) for i in range(self._services_model.get_n_columns()))
+        self._services_model = Gtk.ListStore(*column_types)
+        self._services_model.set_name(self.SERVICE_MODEL_NAME)
+        self._services_model_filter = self._services_model.filter_new()
+        self._services_model_filter.set_visible_func(self.services_filter_function)
+        self._services_view.set_model(Gtk.TreeModelSort(model=self._services_model_filter))
+
     def update_background_colors(self, new_color, extra_color):
         if extra_color != self._EXTRA_COLOR:
             for row in self._fav_model:
@@ -2026,18 +2035,22 @@ class Application(Gtk.Application):
 
     def clear_current_data(self):
         """ Clearing current data from lists """
-        if len(self._services_model) > self.DEL_FACTOR * 50:
-            self._wait_dialog.set_text("Deleting data...")
-
         self._bouquets_model.clear()
         yield True
         self._fav_model.clear()
         yield True
-        for index, itr in enumerate([row.iter for row in self._services_model]):
-            self._services_model.remove(itr)
-            if index % self.DEL_FACTOR == 0:
-                yield True
-        yield True
+
+        if len(self._services_model) < self.DEL_FACTOR * 30:
+            for index, itr in enumerate([row.iter for row in self._services_model]):
+                self._services_model.remove(itr)
+                if index % self.DEL_FACTOR == 0:
+                    yield True
+        else:
+            # With a large amount of data,
+            # it is more optimal to recreate the models.
+            self.init_new_services_models()
+            yield True
+
         self._blacklist.clear()
         self._services.clear()
         self._rows_buffer.clear()
