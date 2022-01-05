@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@ from gi.repository import GLib
 
 from app.commons import log, run_task, run_idle
 from app.connections import UtfFTP
+from app.settings import IS_LINUX, IS_DARWIN, IS_WIN
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
@@ -97,7 +98,7 @@ class FtpClientBox(Gtk.HBox):
 
                 gi.require_version("GtkSource", "3.0")
                 from gi.repository import GtkSource
-            except ImportError as e:
+            except (ImportError, ValueError) as e:
                 self._text_view = Gtk.TextView()
                 self._buf = self._text_view.get_buffer()
                 log(e)
@@ -344,22 +345,21 @@ class FtpClientBox(Gtk.HBox):
     def open_file(self, path):
         GLib.idle_add(self._file_view.set_sensitive, False)
         try:
-            cmd = ["open" if self._settings.is_darwin else "xdg-open", path]
-            subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            cmd = [self.get_open_file_cmd(), path]
+            subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=IS_WIN).communicate()
         finally:
             GLib.idle_add(self._file_view.set_sensitive, True)
 
     @run_task
     def open_ftp_file(self, f_path):
-        is_darwin = self._settings.is_darwin
         GLib.idle_add(self._ftp_view.set_sensitive, False)
 
         try:
             import tempfile
             import os
-            path = os.path.expanduser("~/Desktop") if is_darwin else None
+            path = os.path.expanduser("~/Desktop") if not IS_LINUX else None
 
-            with tempfile.NamedTemporaryFile(mode="wb", dir=path, delete=not is_darwin) as tf:
+            with tempfile.NamedTemporaryFile(mode="wb", dir=path, delete=IS_LINUX) as tf:
                 msg = "Downloading file: {}.  Status: {}"
                 try:
                     status = self._ftp.retrbinary("RETR " + f_path, tf.write)
@@ -368,10 +368,19 @@ class FtpClientBox(Gtk.HBox):
                     self.update_ftp_info(msg.format(f_path, e))
 
                 tf.flush()
-                cmd = ["open" if is_darwin else "xdg-open", tf.name]
-                subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+
+                cmd = [self.get_open_file_cmd(), tf.name]
+                subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=IS_WIN).communicate()
         finally:
             GLib.idle_add(self._ftp_view.set_sensitive, True)
+
+    @staticmethod
+    def get_open_file_cmd():
+        if IS_DARWIN:
+            return "open"
+        elif IS_WIN:
+            return "start"
+        return "xdg-open"
 
     @run_task
     def on_ftp_edit(self, item=None):
