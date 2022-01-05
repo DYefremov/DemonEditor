@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ class PiconsCzDownloader:
     _PERM_URL = "https://picon.cz/download/7337"
     _BASE_URL = "https://picon.cz/download/"
     _BASE_LOGO_URL = "https://picon.cz/picon/0/"
-    _HEADER = {"User-Agent": "DemonEditor/2.0.4", "Referer": ""}
+    _HEADER = {"User-Agent": "DemonEditor/2.1.0", "Referer": ""}
     _LINK_PATTERN = re.compile(r"((.*)-\d+x\d+)-(.*)_by_chocholousek.7z$")
     _FILE_PATTERN = re.compile(b"\\s+(1_.*\\.png).*")
 
