@@ -235,6 +235,9 @@ msgstr "Profil zurücksetzen"
 msgid "Satellites"
 msgstr "Satelliten"
 
+msgid "Transponders"
+msgstr "Transpondern"
+
 msgid "Satellites.xml file:"
 msgstr "Satellites.xml Datei:"
 
@@ -1329,3 +1332,18 @@ msgstr "Nicht in Bouquets"
 
 msgid "Do not show services present in Bouquets."
 msgstr "Vorhandene in Bouquets Dienste nicht anzeigen."
+
+msgid "IPTV services only"
+msgstr "Nur IPTV-Dienste"
+
+msgid "Display picons"
+msgstr "Picons anzeigen"
+
+msgid "Alternate layout"
+msgstr "Alternatives Layout"
+
+msgid "Layout of elements has been changed!"
+msgstr "Das Layout der Elemente wurde geändert!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Starte das Programm neu, um alle Änderungen zu übernehmen."

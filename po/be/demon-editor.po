@@ -233,6 +233,9 @@ msgstr "Скід профілю"
 msgid "Satellites"
 msgstr "Спадарожнікі"
 
+msgid "Transponders"
+msgstr "Транспондары"
+
 msgid "Satellites.xml file:"
 msgstr "Файл satellites.xml:"
 
@@ -1315,3 +1318,18 @@ msgstr "Адсутныя у букетах"
 
 msgid "Do not show services present in Bouquets."
 msgstr "Не паказваць сэрвісы якія прысутнічаюць у букетах."
+
+msgid "IPTV services only"
+msgstr "Толькі IPTV сэрвісы"
+
+msgid "Display picons"
+msgstr "Адлюстроўваць пiконы"
+
+msgid "Alternate layout"
+msgstr "Альтэрнатыўная кампаноўка"
+
+msgid "Layout of elements has been changed!"
+msgstr "Зменена месцаванне элементаў!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Перазапусціце праграму, каб ужыць усе змены."
