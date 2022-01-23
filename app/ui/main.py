@@ -2227,6 +2227,7 @@ class Application(Gtk.Application):
                 self._alt_revealer.set_visible(True)
         else:
             self._alt_revealer.set_visible(False)
+            self.on_info_bar_close()
 
             if self._page is Page.EPG:
                 ref = self.get_service_ref(path)
@@ -2890,6 +2891,7 @@ class Application(Gtk.Application):
     def on_playback_close(self, box, state):
         self._fav_view.set_sensitive(True)
         self._stack.set_visible(True)
+        self.on_info_bar_close()
         self._fav_paned.set_orientation(Gtk.Orientation.HORIZONTAL)
 
     def on_record(self, button):
