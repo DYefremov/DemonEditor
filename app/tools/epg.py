@@ -90,14 +90,14 @@ class ChannelsParser:
             srv_type = srv.type
             if srv_type is BqServiceType.IPTV:
                 channel_child = doc.createElement("channel")
-                channel_child.setAttribute("id", str(srv.num))
+                channel_child.setAttribute("id", srv.name)
                 data = srv.data.strip().split(":")
                 channel_child.appendChild(doc.createTextNode(":".join(data[:10])))
                 comment = doc.createComment(srv.name)
-                lines.append("{} {}\n".format(str(channel_child.toxml()), str(comment.toxml())))
+                lines.append(f"{channel_child.toxml()} {comment.toxml()}\n")
             elif srv_type is BqServiceType.MARKER:
                 comment = doc.createComment(srv.name)
-                lines.append("{}\n".format(str(comment.toxml())))
+                lines.append(f"{comment.toxml()}\n")
 
         lines.append("</channels>")
         doc.unlink()

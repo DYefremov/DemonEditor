@@ -305,7 +305,7 @@ class EpgDialog:
         else:
             if refs:
                 s_refs = filter(lambda x: x.num in refs, s_refs)
-            list(map(lambda s: self._services_model.append((s.name, s.data)), s_refs))
+            list(map(lambda s: self._services_model.append((s.name, " ", s.data)), s_refs))
             self.update_source_info(info)
             self.update_source_count_info()
             yield True
@@ -403,7 +403,8 @@ class EpgDialog:
             self._services[new_fav_id] = service
             row[Column.FAV_ID] = new_fav_id
             row[Column.FAV_LOCKED] = EPG_ICON
-            src = f"{get_message('EPG source')}: {data[0]} ({data[1]})"
+            pos = f"({data[1] if self._refs_source is RefsSource.SERVICES else 'XML'})"
+            src = f"{get_message('EPG source')}: {data[0]} {pos}"
             row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
 
     def on_filter_toggled(self, button: Gtk.ToggleButton):
