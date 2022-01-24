@@ -37,7 +37,7 @@ from urllib.error import HTTPError, URLError
 
 from gi.repository import GLib
 
-from app.commons import run_idle, run_task
+from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP
@@ -112,9 +112,8 @@ class EpgDialog:
         self._xml_download_progress_bar = builder.get_object("xml_download_progress_bar")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
-        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._filter_entry = builder.get_object("filter_entry")
-        self._filter_auto_button = builder.get_object("filter_auto_button")
+        self._filter_auto_switch = builder.get_object("filter_auto_switch")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
         # Info
@@ -337,7 +336,7 @@ class EpgDialog:
             self.on_assign_ref()
 
     def on_bq_cursor_changed(self, view):
-        if self._filter_bar.get_visible() and self._filter_auto_button.get_active():
+        if self._filter_bar.get_visible() and self._filter_auto_switch.get_active():
             path, column = view.get_cursor()
             model = view.get_model()
             if path:
@@ -428,10 +427,11 @@ class EpgDialog:
             row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
 
     def on_filter_toggled(self, button):
-        self._filter_bar.set_search_mode(button.get_active())
+        self._filter_bar.set_visible(button.get_active())
         if not button.get_active():
             self._filter_entry.set_text("")
 
+    @run_with_delay(1)
     def on_filter_changed(self, entry):
         self._services_filter_model.refilter()
 
