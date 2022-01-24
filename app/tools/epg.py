@@ -1,4 +1,32 @@
-"""  Module for working with epg.dat file """
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2022 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
+"""  Module for working with epg.dat file. """
 import struct
 from datetime import datetime
 from xml.dom.minidom import parse, Node, Document
@@ -11,7 +39,7 @@ class EPG:
     @staticmethod
     def get_epg_refs(path):
         """ The read algorithm was taken from the eEPGCache::load() function from this source:
-            https://github.com/OpenPLi/enigma2/blob/44d9b92f5260c7de1b3b3a1b9a9cbe0f70ca4bf0/lib/dvb/epgcache.cpp#L1300
+            https://github.com/OpenPLi/enigma2/blob/develop/lib/dvb/epgcache.cpp#L955
         """
         refs = set()
 
@@ -21,17 +49,23 @@ class EPG:
                 raise ValueError("Epg file has incorrect byte order!")
 
             header = f.read(13).decode()
-            if header != "ENIGMA_EPG_V7":
+            if header == "ENIGMA_EPG_V7":
+                epg_ver = 7
+            elif header == "ENIGMA_EPG_V8":
+                epg_ver = 8
+            else:
                 raise ValueError("Unsupported format of epd.dat file!")
 
             channels_count = struct.unpack("<I", f.read(4))[0]
+            _len_read_size = 3 if epg_ver == 8 else 2
+            _type_read_str = f"<{'H' if epg_ver == 8 else 'B'}B"
 
             for i in range(channels_count):
                 sid, nid, tsid, events_size = struct.unpack("<IIII", f.read(16))
-                service_id = "{:X}:{:X}:{:X}".format(sid, tsid, nid)
+                service_id = f"{sid:X}:{tsid:X}:{nid:X}"
 
                 for j in range(events_size):
-                    _type, _len = struct.unpack("<BB", f.read(2))
+                    _type, _len = struct.unpack(_type_read_str, f.read(_len_read_size))
                     f.read(10)
                     n_crc = (_len - 10) // 4
                     if n_crc > 0:

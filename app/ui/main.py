@@ -278,6 +278,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("picon-assign", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("epg-dat-downloaded", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -2647,7 +2649,7 @@ class Application(Gtk.Application):
             return
 
         bq = self._bouquets.get(self._bq_selected)
-        EpgDialog(self._main_window, self._settings, self._services, bq, self._fav_model, self._current_bq_name).show()
+        EpgDialog(self, bq, self._current_bq_name).show()
 
     # ***************** Import ******************** #
 

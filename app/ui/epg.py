@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ class RefsSource(Enum):
 
 class EpgDialog:
 
-    def __init__(self, transient, settings, services, bouquet, fav_model, bouquet_name):
+    def __init__(self, app, bouquet, bouquet_name):
 
         handlers = {"on_close_dialog": self.on_close_dialog,
                     "on_apply": self.on_apply,
@@ -80,12 +80,14 @@ class EpgDialog:
                     "on_enable_filtering_switch": self.on_enable_filtering_switch,
                     "on_update_on_start_switch": self.on_update_on_start_switch,
                     "on_field_icon_press": self.on_field_icon_press,
-                    "on_key_press": self.on_key_press}
+                    "on_key_press": self.on_key_press,
+                    "on_bq_cursor_changed": self.on_bq_cursor_changed}
 
+        self._app = app
         self._services = {}
-        self._ex_services = services
-        self._ex_fav_model = fav_model
-        self._settings = settings
+        self._ex_services = self._app.current_services
+        self._ex_fav_model = self._app.fav_view.get_model()
+        self._settings = self._app.app_settings
         self._bouquet = bouquet
         self._bouquet_name = bouquet_name
         self._current_ref = []
@@ -98,7 +100,7 @@ class EpgDialog:
         builder = get_builder(UI_RESOURCES_PATH + "epg.glade", handlers)
 
         self._dialog = builder.get_object("epg_dialog_window")
-        self._dialog.set_transient_for(transient)
+        self._dialog.set_transient_for(self._app.app_window)
         self._source_view = builder.get_object("source_view")
         self._bouquet_view = builder.get_object("bouquet_view")
         self._bouquet_model = builder.get_object("bouquet_list_store")
@@ -112,6 +114,7 @@ class EpgDialog:
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         self._filter_entry = builder.get_object("filter_entry")
+        self._filter_auto_button = builder.get_object("filter_auto_button")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
         # Info
@@ -141,6 +144,8 @@ class EpgDialog:
             builder.get_object("main_actions_box").remove(right_box)
             header_bar.pack_end(right_box)
             builder.get_object("toolbar_box").set_visible(False)
+
+        self._app.connect("epg-dat-downloaded", self.on_epg_dat_downloaded)
 
         # Setting the last size of the dialog window
         window_size = self._settings.get("epg_tool_window_size")
@@ -177,8 +182,11 @@ class EpgDialog:
     def on_update(self, item=None):
         self.clear_data()
         self.init_options()
-        gen = self.init_data()
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        if self._update_epg_data_on_start:
+            self.download_epg_from_stb()
+        else:
+            gen = self.init_data()
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def clear_data(self):
         self._services_model.clear()
@@ -194,23 +202,15 @@ class EpgDialog:
 
         refs = None
         if self._enable_dat_filter:
-            if self._update_epg_data_on_start:
-                try:
-                    self.download_epg_from_stb()
-                except OSError as e:
-                    self.show_info_message(f"Download epg.dat file error: {e}", Gtk.MessageType.ERROR)
-                    return
-            yield True
-
             try:
                 refs = EPG.get_epg_refs(self._epg_dat_path_entry.get_text() + "epg.dat")
-            except FileNotFoundError as e:
+            except (OSError, ValueError) as e:
                 self.show_info_message(f"Read data error: {e}", Gtk.MessageType.ERROR)
                 return
             yield True
 
         if self._refs_source is RefsSource.SERVICES:
-            self.init_lamedb_source(refs)
+            yield from self.init_lamedb_source(refs)
         elif self._refs_source is RefsSource.XML:
             xml_gen = self.init_xml_source(refs)
             try:
@@ -235,8 +235,15 @@ class EpgDialog:
         s_types = (BqServiceType.MARKER.value, BqServiceType.IPTV.value)
         filtered = filter(None, [srvs.get(ref) for ref in refs]) if refs else filter(
             lambda s: s.service_type not in s_types, self._ex_services.values())
-        list(map(self._services_model.append, map(lambda s: (s.service, s.pos, s.fav_id), filtered)))
+
+        factor = self._app.DEL_FACTOR / 4
+        for index, srv in enumerate(filtered):
+            self._services_model.append((srv.service, srv.pos, srv.fav_id))
+            if index % factor == 0:
+                yield True
+
         self.update_source_count_info()
+        yield True
 
     def init_xml_source(self, refs):
         path = self._epg_dat_path_entry.get_text() if self._use_web_source else self._xml_chooser_button.get_filename()
@@ -305,7 +312,13 @@ class EpgDialog:
         else:
             if refs:
                 s_refs = filter(lambda x: x.num in refs, s_refs)
-            list(map(lambda s: self._services_model.append((s.name, " ", s.data)), s_refs))
+
+            factor = self._app.DEL_FACTOR / 4
+            for index, srv in enumerate(s_refs):
+                self._services_model.append((srv.name, " ", srv.data))
+                if index % factor == 0:
+                    yield True
+
             self.update_source_info(info)
             self.update_source_count_info()
             yield True
@@ -322,6 +335,13 @@ class EpgDialog:
             self.on_copy_ref()
         elif ctrl and key is KeyboardKey.V:
             self.on_assign_ref()
+
+    def on_bq_cursor_changed(self, view):
+        if self._filter_bar.get_visible() and self._filter_auto_button.get_active():
+            path, column = view.get_cursor()
+            model = view.get_model()
+            if path:
+                self._filter_entry.set_text(model[path][Column.FAV_SERVICE] or "")
 
     @run_idle
     def on_save_to_xml(self, item):
@@ -404,11 +424,13 @@ class EpgDialog:
             row[Column.FAV_ID] = new_fav_id
             row[Column.FAV_LOCKED] = EPG_ICON
             pos = f"({data[1] if self._refs_source is RefsSource.SERVICES else 'XML'})"
-            src = f"{get_message('EPG source')}: {data[0]} {pos}"
+            src = f"{get_message('EPG source')}: {(GLib.markup_escape_text(data[0] or ''))} {pos}"
             row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
 
-    def on_filter_toggled(self, button: Gtk.ToggleButton):
+    def on_filter_toggled(self, button):
         self._filter_bar.set_search_mode(button.get_active())
+        if not button.get_active():
+            self._filter_entry.set_text("")
 
     def on_filter_changed(self, entry):
         self._services_filter_model.refilter()
@@ -583,10 +605,19 @@ class EpgDialog:
 
     # ***************** Downloads *********************#
 
+    def on_epg_dat_downloaded(self, app, value):
+        gen = self.init_data()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
     @run_task
     def download_epg_from_stb(self):
         """ Download the epg.dat file via ftp from the receiver. """
-        download_data(settings=self._settings, download_type=DownloadType.EPG, callback=print)
+        try:
+            download_data(settings=self._settings, download_type=DownloadType.EPG, callback=print)
+        except Exception as e:
+            GLib.idle_add(self.show_info_message, f"Download epg.dat file error: {e}", Gtk.MessageType.ERROR)
+        else:
+            GLib.idle_add(self._app.emit, "epg-dat-downloaded", None)
 
 
 if __name__ == "__main__":
