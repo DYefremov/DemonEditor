@@ -630,7 +630,7 @@ class M3uImportDialog(IptvListDialog):
         super().__init__(transient, s_type)
 
         self._app = app
-        self._picons = app._picons
+        self._picons = app.picons
         self._pic_path = app._settings.profile_picons_path
         self._services = None
         self._url_count = 0
@@ -802,7 +802,7 @@ class M3uImportDialog(IptvListDialog):
 
     def update_fav_model(self):
         services = self._app.current_services
-        picons = self._app._picons
+        picons = self._app.picons
         model = self._app.fav_view.get_model()
         for r in model:
             s = services.get(r[Column.FAV_ID], None)

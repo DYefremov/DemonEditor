@@ -549,6 +549,7 @@ class PiconManager(Gtk.Box):
                 filter_model = model.get_model()
                 itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
                 base_model.remove(itr)
+                self._app.update_picons()
 
         if view is self._picons_dest_view:
             self._dst_count_label.set_text(str(len(model)))
