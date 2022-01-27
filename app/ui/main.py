@@ -788,7 +788,7 @@ class Application(Gtk.Application):
 
     def force_ctrl(self, view, event):
         """ Function for force ctrl press event for view """
-        if event.state is not Gdk.ModifierType.SHIFT_MASK:
+        if not event.state & Gdk.ModifierType.SHIFT_MASK:
             event.state |= MOD_MASK
 
     def on_close_app(self, *args):
