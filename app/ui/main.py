@@ -3588,7 +3588,7 @@ class Application(Gtk.Application):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
             return
 
-        remove_all_unused_picons(self._settings, self._picons, self._services.values())
+        remove_all_unused_picons(self._settings, self._services.values())
 
     def get_target_view(self, view):
         return ViewTarget.SERVICES if Gtk.Buildable.get_name(view) == "services_tree_view" else ViewTarget.FAV

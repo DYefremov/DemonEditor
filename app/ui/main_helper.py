@@ -37,6 +37,7 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
 import os
 import shutil
 from collections import defaultdict
+from pathlib import Path
 from urllib.parse import unquote
 
 from gi.repository import GdkPixbuf, GLib
@@ -543,15 +544,17 @@ def copy_picon_reference(target, view, services, clipboard, transient):
             show_dialog(DialogType.ERROR, transient, "No reference is present!")
 
 
-def remove_all_unused_picons(settings, picons, services):
+def remove_all_unused_picons(settings, services):
+    """ Removes picons from profile picons folder if there are no services for these picons. """
     ids = {s.picon_id for s in services}
-    pcs = list(filter(lambda x: x not in ids, picons))
-    remove_picons(settings, pcs, picons)
+    for p in Path(settings.profile_picons_path).glob("*.png"):
+        if p.name not in ids and p.is_file():
+            p.unlink()
 
 
 def remove_picons(settings, picon_ids, picons):
     pions_path = settings.profile_picons_path
-    backup_path = "{}{}{}".format(settings.profile_backup_path, "picons", SEP)
+    backup_path = f"{settings.profile_backup_path}picons{SEP}"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     for p_id in picon_ids:
         picons[p_id] = None
