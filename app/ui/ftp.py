@@ -41,7 +41,7 @@ from gi.repository import GLib
 
 from app.commons import log, run_task, run_idle
 from app.connections import UtfFTP
-from app.settings import IS_LINUX, IS_DARWIN, IS_WIN
+from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
@@ -162,8 +162,10 @@ class FtpClientBox(Gtk.HBox):
                     "on_ftp_edit": self.on_ftp_edit,
                     "on_ftp_rename": self.on_ftp_rename,
                     "on_ftp_renamed": self.on_ftp_renamed,
+                    "on_ftp_copy": self.on_ftp_copy,
                     "on_file_rename": self.on_file_rename,
                     "on_file_renamed": self.on_file_renamed,
+                    "on_file_copy": self.on_file_copy,
                     "on_file_remove": self.on_file_remove,
                     "on_ftp_remove": self.on_ftp_file_remove,
                     "on_file_create_folder": self.on_file_create_folder,
@@ -485,6 +487,14 @@ class FtpClientBox(Gtk.HBox):
                     row[self.Column.NAME] = new_value
                     row[self.Column.ATTR] = str(new_path.resolve())
 
+    def on_file_copy(self, item=None):
+        uris = self.get_file_uris()
+        self.copy_to_ftp(uris) if uris else None
+
+    def on_ftp_copy(self, item=None):
+        uris = self.get_ftp_uris()
+        self.copy_to_pc(uris) if uris else None
+
     def on_file_remove(self, item=None):
         if show_dialog(DialogType.QUESTION, self._app.app_window) != Gtk.ResponseType.OK:
             return
@@ -598,30 +608,43 @@ class FtpClientBox(Gtk.HBox):
         return True
 
     def on_ftp_drag_data_get(self, view, context, data, info, time):
-        model, paths = view.get_selection().get_selected_rows()
+        uris = self.get_ftp_uris()
+        data.set_uris(uris) if uris else None
+
+    def get_ftp_uris(self):
+        """ Returns the selected paths in FTP view as a list containing uris string or None. """
+        model, paths = self._ftp_view.get_selection().get_selected_rows()
         if len(paths) > 0:
             sep = self.URI_SEP if self._settings.is_darwin else "\n"
             uris = []
             for r in [model[p][:] for p in paths]:
                 if r[self.Column.SIZE] != self.LINK and r[self.Column.NAME] != self.ROOT:
-                    uris.append(Path(f"/{r[self.Column.NAME]}:{r[self.Column.ATTR]}").as_uri())
-            data.set_uris([sep.join(uris)])
+                    path = Path(f"/{r[self.Column.NAME]}:{r[self.Column.ATTR]}")
+                    uris.append(str(path.resolve()) if IS_WIN else path.as_uri())
+            return [sep.join(uris)]
 
-    @run_task
     def on_ftp_drag_data_received(self, view, context, x, y, data: Gtk.SelectionData, info, time):
         if not self._ftp:
             return
 
+        self.copy_to_ftp(data.get_uris())
+        Gtk.drag_finish(context, True, False, time)
+        return True
+
+    @run_task
+    def copy_to_ftp(self, uris):
         resp = "2"
         try:
             GLib.idle_add(self._app.wait_dialog.show)
 
-            uris = data.get_uris()
-            if self._settings.is_darwin and len(uris) == 1:
-                uris = uris[0].split(self.URI_SEP)
+            if len(uris) == 1:
+                uris = uris[0].split(self.URI_SEP if self._settings.is_darwin else "\n")
 
             for uri in uris:
                 uri = urlparse(unquote(uri)).path
+                if IS_WIN:
+                    uri = uri.lstrip("/")
+
                 path = Path(uri)
                 if path.is_dir():
                     try:
@@ -629,34 +652,40 @@ class FtpClientBox(Gtk.HBox):
                     except all_errors as e:
                         pass  # NOP
                     self._ftp.cwd(path.name)
-                    resp = self._ftp.upload_dir(str(path.resolve()) + "/", self.update_ftp_info)
+                    resp = self._ftp.upload_dir(str(path.resolve()) + SEP, self.update_ftp_info)
                 else:
-                    resp = self._ftp.send_file(path.name, str(path.parent) + "/", callback=self.update_ftp_info)
+                    resp = self._ftp.send_file(path.name, str(path.parent) + SEP, callback=self.update_ftp_info)
         finally:
             GLib.idle_add(self._app.wait_dialog.hide)
             if resp and resp[0] == "2":
                 itr = self._ftp_model.get_iter_first()
                 if itr:
                     self.init_ftp_data(self._ftp_model.get_value(itr, self.Column.ATTR))
+
+    def on_file_drag_data_get(self, view, context, data, info, time):
+        uris = self.get_file_uris()
+        data.set_uris(uris) if uris else None
+
+    def get_file_uris(self):
+        """ Returns the selected paths in the file view as a list containing uris string or None. """
+        model, paths = self._file_view.get_selection().get_selected_rows()
+        if len(paths) > 0:
+            sep = self.URI_SEP if self._settings.is_darwin else "\n"
+            return [sep.join([Path(model[p][self.Column.ATTR]).as_uri() for p in paths])]
+
+    def on_file_drag_data_received(self, view, context, x, y, data, info, time):
+        self.copy_to_pc(data.get_uris())
         Gtk.drag_finish(context, True, False, time)
         return True
 
-    def on_file_drag_data_get(self, view, context, data: Gtk.SelectionData, info, time):
-        model, paths = view.get_selection().get_selected_rows()
-        if len(paths) > 0:
-            sep = self.URI_SEP if self._settings.is_darwin else "\n"
-            uris = [sep.join([Path(model[p][self.Column.ATTR]).as_uri() for p in paths])]
-            data.set_uris(uris)
-
     @run_task
-    def on_file_drag_data_received(self, view, context, x, y, data, info, time):
+    def copy_to_pc(self, uris):
         cur_path = self._file_model.get_value(self._file_model.get_iter_first(), self.Column.ATTR) + "/"
         try:
             GLib.idle_add(self._app.wait_dialog.show)
 
-            uris = data.get_uris()
-            if self._settings.is_darwin and len(uris) == 1:
-                uris = uris[0].split(self.URI_SEP)
+            if len(uris) == 1:
+                uris = uris[0].split(self.URI_SEP if self._settings.is_darwin else "\n")
 
             for uri in uris:
                 name, sep, attr = unquote(Path(uri).name).partition(":")
@@ -672,9 +701,6 @@ class FtpClientBox(Gtk.HBox):
         finally:
             GLib.idle_add(self._app.wait_dialog.hide)
             self.init_file_data(cur_path)
-
-        Gtk.drag_finish(context, True, False, time)
-        return True
 
     def on_view_drag_end(self, view, context):
         self._select_enabled = True
@@ -707,6 +733,11 @@ class FtpClientBox(Gtk.HBox):
         elif key is KeyboardKey.F4:
             if self._ftp_view.is_focus():
                 self.on_ftp_edit()
+        elif key is KeyboardKey.F5:
+            if self._ftp_view.is_focus():
+                self.on_ftp_copy()
+            elif self._file_view.is_focus():
+                self.on_file_copy()
         elif key is KeyboardKey.DELETE:
             if self._ftp_view.is_focus():
                 self.on_ftp_file_remove()
