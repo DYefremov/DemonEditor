@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
 from contextlib import suppress
 from pathlib import Path
 
@@ -5,7 +33,7 @@ from app.commons import run_idle, log
 from app.eparser import get_bouquets, get_services, BouquetsReader
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
-from app.settings import SettingsType
+from app.settings import SettingsType, IS_DARWIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
@@ -19,8 +47,8 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
     profile = settings.setting_type
 
     if profile is SettingsType.ENIGMA_2:
-        pattern = ".{}".format(bq_type.value)
-        f_pattern = "userbouquet.*{}".format(pattern)
+        pattern = f".{bq_type.value}"
+        f_pattern = f"{'' if IS_DARWIN else 'userbouquet.'}*{pattern}"
     elif profile is SettingsType.NEUTRINO_MP:
         pattern = "webtv.xml" if bq_type is BqType.WEBTV else "bouquets.xml"
         f_pattern = "bouquets.xml"
@@ -38,6 +66,10 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
         return
 
     if profile is SettingsType.ENIGMA_2:
+        if IS_DARWIN and file_path.rfind("userbouquet.") < 0:
+            show_dialog(DialogType.ERROR, transient, text="Not allowed in this context!")
+            return
+
         bq = get_enigma2_bouquet(file_path)
         imported = list(filter(lambda x: x.data in services or x.type is BqServiceType.IPTV, bq.services))
 
@@ -55,7 +87,7 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
             bqs = parse_webtv(file_path, "WEBTV", bq_type.value)
         else:
             bqs = get_neutrino_bouquets(file_path, "", bq_type.value)
-        file_path = "{}/".format(Path(file_path).parent)
+        file_path = f"{Path(file_path).parent}{SEP}"
         ImportDialog(transient, file_path, settings, services.keys(), lambda b, s: appender(b), (bqs,)).show()
 
 
