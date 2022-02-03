@@ -47,7 +47,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
-                          IS_DARWIN, PlayStreamsMode)
+                          IS_DARWIN, PlayStreamsMode, IS_LINUX)
 from app.tools.media import Recorder
 from app.ui.control import ControlTool, EpgTool, TimerTool, RecordingsTool
 from app.ui.epg import EpgDialog
@@ -1590,13 +1590,14 @@ class Application(Gtk.Application):
                     p_itr = model.iter_parent(itr)
                     if not p_itr:
                         break
-                    if p_itr and model.get_path(p_itr)[0] == p_path:
+
+                    if all((IS_LINUX, p_itr, model.get_path(p_itr)[0] == p_path)):
                         model.move_after(itr, top_iter)
                         top_iter = itr
                     else:
                         model.insert(parent_itr, model.get_path(top_iter)[1], model[itr][:])
                         to_del.append(itr)
-            elif not model.iter_has_child(top_iter):
+            elif not model.iter_has_child(top_iter) or not IS_LINUX:
                 for itr in itrs:
                     model.append(top_iter, model[itr][:])
                     to_del.append(itr)
@@ -1604,6 +1605,7 @@ class Application(Gtk.Application):
 
             list(map(model.remove, to_del))
             self.update_bouquets_type()
+            drag_context.finish(True, False, time)
 
     def get_selection(self, view):
         """ Creates a string from the iterators of the selected rows """
