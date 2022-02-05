@@ -501,6 +501,9 @@ class Recorder:
 
     def __init__(self, settings):
         try:
+            if IS_WIN:
+                os.add_dll_directory(r"C:\Program Files\VideoLAN\VLC")
+
             from app.tools import vlc
             from app.tools.vlc import EventType
         except OSError as e:
@@ -526,7 +529,8 @@ class Recorder:
         path = self._settings.records_path
         os.makedirs(os.path.dirname(path), exist_ok=True)
         d_now = datetime.now().strftime(_DATE_FORMAT)
-        path = "{}{}_{}".format(path, name.replace(" ", "_"), d_now.replace(" ", "_"))
+        d_now = d_now.replace(" ", "_").replace(":", "-") if IS_WIN else d_now.replace(" ", "_")
+        path = f"{path}{name.replace(' ', '_')}_{d_now}"
         cmd = self.get_transcoding_cmd(path) if self._settings.activate_transcoding else self._CMD.format(path)
         media = self._recorder.get_instance().media_new(url, cmd)
         media.get_mrl()
