@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ from datetime import datetime
 from gi.repository import Gdk, Gtk, GObject
 
 from app.commons import run_task, log, _DATE_FORMAT, run_with_delay
+from app.settings import IS_DARWIN, IS_LINUX, IS_WIN
 
 
 class Player(Gtk.DrawingArea):
@@ -115,22 +116,21 @@ class Player(Gtk.DrawingArea):
             Based on gtkvlc.py[get_window_pointer] example from here:
             https://github.com/oaubert/python-vlc/tree/master/examples
         """
-        if sys.platform == "linux":
+        if IS_LINUX:
             return self.get_window().get_xid()
         else:
-            is_darwin = sys.platform == "darwin"
             try:
                 import ctypes
 
-                libgdk = ctypes.CDLL("libgdk-3.0.dylib" if is_darwin else "libgdk-3-0.dll")
+                libgdk = ctypes.CDLL("libgdk-3.0.dylib" if IS_DARWIN else "libgdk-3-0.dll")
             except OSError as e:
-                log("{}: Load library error: {}".format(__class__.__name__, e))
+                log(f"{__class__.__name__}: Load library error: {e}")
             else:
                 # https://gitlab.gnome.org/GNOME/pygobject/-/issues/112
                 ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
                 ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
                 gpointer = ctypes.pythonapi.PyCapsule_GetPointer(self.get_window().__gpointer__, None)
-                get_pointer = libgdk.gdk_quartz_window_get_nsview if is_darwin else libgdk.gdk_win32_window_get_handle
+                get_pointer = libgdk.gdk_quartz_window_get_nsview if IS_DARWIN else libgdk.gdk_win32_window_get_handle
                 get_pointer.restype = ctypes.c_void_p
                 get_pointer.argtypes = [ctypes.c_void_p]
 
@@ -171,7 +171,7 @@ class Player(Gtk.DrawingArea):
         elif name == "vlc":
             return VlcPlayer.get_instance(mode, widget)
         else:
-            raise NameError("There is no such [{}] implementation.".format(name))
+            raise NameError(f"There is no such [{name}] implementation.")
 
 
 class MpvPlayer(Player):
@@ -191,7 +191,7 @@ class MpvPlayer(Player):
                                    input_cursor=False,
                                    cursor_autohide="no")
         except OSError as e:
-            log("{}: Load library error: {}".format(__class__.__name__, e))
+            log(f"{__class__.__name__}: Load library error: {e}")
             raise ImportError("No libmpv is found. Check that it is installed!")
         else:
             self._mode = mode
@@ -202,11 +202,22 @@ class MpvPlayer(Player):
                 log("Starting playback...")
                 self.emit("played", 0)
 
+                t_list = self._player._get_property("track-list")
+                if t_list:
+                    # Audio tracks.
+                    a_tracks = filter(lambda t: t.get("type", "") == "audio", t_list)
+                    self.emit("audio-track", ((t.get("id", 1), t.get("lang", "Unknown")) for t in a_tracks))
+                    # Subtitle.
+                    sub_tracks = [(0, "no")]
+                    tracks = filter(lambda t: t.get("type", "") == "sub", t_list)
+                    [sub_tracks.append((t.get("id", 1), t.get("lang", "Unknown"))) for t in tracks]
+                    self.emit("subtitle-track", sub_tracks)
+
             @self._player.event_callback(mpv.MpvEventID.END_FILE)
             def on_end(event):
                 event = event.get("event", {})
                 if event.get("reason", mpv.MpvEventEndFile.ERROR) == mpv.MpvEventEndFile.ERROR:
-                    log("Stream playback error: {}".format(event.get("error", mpv.ErrorCode.GENERIC)))
+                    log(f"Stream playback error: {event.get('error', mpv.ErrorCode.GENERIC)}")
                     self.emit("error", "Can't Playback!")
 
     @classmethod
@@ -243,6 +254,15 @@ class MpvPlayer(Player):
     def is_playing(self):
         return self._is_playing
 
+    def set_audio_track(self, track):
+        self._player._set_property("aid", track)
+
+    def set_subtitle_track(self, track):
+        self._player._set_property("sub", track)
+
+    def set_aspect_ratio(self, ratio):
+        self._player._set_property("aspect", ratio or "-1.0")
+
 
 class GstPlayer(Player):
     """ Simple wrapper for GStreamer playbin. """
@@ -260,7 +280,7 @@ class GstPlayer(Player):
             # Initialization of GStreamer.
             Gst.init(sys.argv)
         except (OSError, ValueError) as e:
-            log("{}: Load library error: {}".format(__class__.__name__, e))
+            log(f"{__class__.__name__}: Load library error: {e}")
             raise ImportError("No GStreamer is found. Check that it is installed!")
         else:
             self.STATE = Gst.State
@@ -293,11 +313,11 @@ class GstPlayer(Player):
 
         self._player.set_property("uri", mrl)
 
-        log("Setting the URL for playback: {}".format(mrl))
+        log(f"Setting the URL for playback: {mrl}")
         ret = self._player.set_state(self.STATE.PLAYING)
 
         if ret == self.STAT_RETURN.FAILURE:
-            msg = "ERROR: Unable to set the 'PLAYING' state for '{}'.".format(mrl)
+            msg = f"ERROR: Unable to set the 'PLAYING' state for '{mrl}'."
             log(msg)
             self.emit("error", msg)
         else:
@@ -356,7 +376,7 @@ class GstPlayer(Player):
             tags = self._player.emit("get-video-tags", i)
             if tags:
                 _, cod = tags.get_string("video-codec")
-                log("Video codec: {}".format(cod or "unknown"))
+                log(f"Video codec: {cod or 'unknown'}")
 
         nr_audio = self._player.get_property("n-audio")
         for i in range(nr_audio):
@@ -364,7 +384,7 @@ class GstPlayer(Player):
             tags = self._player.emit("get-audio-tags", i)
             if tags:
                 _, cod = tags.get_string("audio-codec")
-                log("Audio codec: {}".format(cod or "unknown"))
+                log(f"Audio codec: {cod or 'unknown'}")
 
 
 class VlcPlayer(Player):
@@ -378,18 +398,18 @@ class VlcPlayer(Player):
     def __init__(self, mode, widget):
         super().__init__(mode, widget)
         try:
-            if sys.platform == "win32":
+            if IS_WIN:
                 os.add_dll_directory(r"C:\Program Files\VideoLAN\VLC")
 
             from app.tools import vlc
             from app.tools.vlc import EventType
 
-            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+            args = f"--quiet {'' if IS_DARWIN else '--no-xlib'}"
             self._player = vlc.Instance(args).media_player_new()
             vlc.libvlc_video_set_key_input(self._player, False)
             vlc.libvlc_video_set_mouse_input(self._player, False)
         except (OSError, AttributeError, NameError) as e:
-            log("{}: Load library error: {}".format(__class__.__name__, e))
+            log(f"{__class__.__name__}: Load library error: {e}")
             raise ImportError("No VLC is found. Check that it is installed!")
         else:
             self._mode = mode
@@ -457,17 +477,17 @@ class VlcPlayer(Player):
 
     def on_playback_start(self, event):
         self.emit("played", self._player.get_media().get_duration())
-        # Audio tracks
+        # Audio tracks.
         a_desc = self._player.audio_get_track_description()
         self.emit("audio-track", [(t[0], t[1].decode(encoding="utf-8", errors="ignore")) for t in a_desc])
-        # Subtitle
+        # Subtitle.
         s_desc = self._player.video_get_spu_description()
         self.emit("subtitle-track", [(s[0], s[1].decode(encoding="utf-8", errors="ignore")) for s in s_desc])
 
     def init_video_widget(self, widget):
-        if sys.platform == "linux":
+        if IS_LINUX:
             self._player.set_xwindow(self.get_window_handle())
-        elif sys.platform == "darwin":
+        elif IS_DARWIN:
             self._player.set_nsobject(self.get_window_handle())
         else:
             self._player.set_hwnd(self.get_window_handle())
@@ -484,12 +504,12 @@ class Recorder:
             from app.tools import vlc
             from app.tools.vlc import EventType
         except OSError as e:
-            log("{}: Load library error: {}".format(__class__.__name__, e))
+            log(f"{__class__.__name__}: Load library error: {e}")
             raise ImportError
         else:
             self._settings = settings
             self._is_record = False
-            args = "--quiet {}".format("" if sys.platform == "darwin" else "--no-xlib")
+            args = f"--quiet {'' if IS_DARWIN else '--no-xlib'}"
             self._recorder = vlc.Instance(args).media_player_new()
 
     @classmethod
@@ -514,7 +534,7 @@ class Recorder:
         self._recorder.set_media(media)
         self._is_record = True
         self._recorder.play()
-        log("Record started {}".format(d_now))
+        log(f"Record started {d_now}")
 
     @run_task
     def stop(self):
@@ -536,7 +556,7 @@ class Recorder:
     def get_transcoding_cmd(self, path):
         presets = self._settings.transcoding_presets
         prs = presets.get(self._settings.active_preset)
-        return self._TR_CMD.format(",".join("{}={}".format(k, v) for k, v in prs.items()), path)
+        return self._TR_CMD.format(",".join(f"{k}={v}" for k, v in prs.items()), path)
 
 
 if __name__ == "__main__":
