@@ -291,7 +291,7 @@ class FtpClientBox(Gtk.HBox):
         self._ftp_model.append(File(None, self.ROOT, None, None, self._ftp.pwd(), "0"))
 
         for f in files:
-            f_data = f.split()
+            f_data = self._ftp.get_file_data(f)
             f_type = f_data[0][0]
             is_dir = f_type == "d"
             is_link = f_type == "l"
@@ -308,7 +308,7 @@ class FtpClientBox(Gtk.HBox):
                 r_size = self.get_size_from_bytes(size)
 
             date = f"{f_data[5]}, {f_data[6]}  {f_data[7]}"
-            self._ftp_model.append(File(icon, " ".join(f_data[8:]), r_size, date, f_data[0], size))
+            self._ftp_model.append(File(icon, f_data[8], r_size, date, f_data[0], size))
 
     def on_connect(self, item=None):
         self.init_ftp()
