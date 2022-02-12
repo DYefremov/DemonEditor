@@ -159,6 +159,7 @@ class FtpClientBox(Gtk.HBox):
                     "on_disconnect": self.on_disconnect,
                     "on_ftp_row_activated": self.on_ftp_row_activated,
                     "on_file_row_activated": self.on_file_row_activated,
+                    "on_bookmark_activated": self.on_bookmark_activated,
                     "on_ftp_edit": self.on_ftp_edit,
                     "on_ftp_rename": self.on_ftp_rename,
                     "on_ftp_renamed": self.on_ftp_renamed,
@@ -168,6 +169,7 @@ class FtpClientBox(Gtk.HBox):
                     "on_file_copy": self.on_file_copy,
                     "on_file_remove": self.on_file_remove,
                     "on_ftp_remove": self.on_ftp_file_remove,
+                    "on_bookmark_remove": self.on_bookmark_remove,
                     "on_file_create_folder": self.on_file_create_folder,
                     "on_ftp_create_folder": self.on_ftp_create_folder,
                     "on_view_drag_begin": self.on_view_drag_begin,
@@ -176,6 +178,7 @@ class FtpClientBox(Gtk.HBox):
                     "on_file_drag_data_get": self.on_file_drag_data_get,
                     "on_file_drag_data_received": self.on_file_drag_data_received,
                     "on_view_drag_end": self.on_view_drag_end,
+                    "on_bookmark_add": self.on_bookmark_add,
                     "on_view_popup_menu": on_popup_menu,
                     "on_view_key_press": self.on_view_key_press,
                     "on_view_press": self.on_view_press,
@@ -192,6 +195,8 @@ class FtpClientBox(Gtk.HBox):
         self._file_view = builder.get_object("file_view")
         self._file_model = builder.get_object("file_list_store")
         self._file_name_renderer = builder.get_object("file_name_column_renderer")
+        self._bookmark_view = builder.get_object("bookmarks_view")
+        self._bookmark_model = builder.get_object("bookmarks_list_store")
         # Buttons
         self._connect_button = builder.get_object("connect_button")
         disconnect_button = builder.get_object("disconnect_button")
@@ -200,7 +205,10 @@ class FtpClientBox(Gtk.HBox):
         disconnect_button.bind_property("visible", builder.get_object("ftp_edit_menu_item"), "sensitive")
         disconnect_button.bind_property("visible", builder.get_object("ftp_rename_menu_item"), "sensitive")
         disconnect_button.bind_property("visible", builder.get_object("ftp_remove_menu_item"), "sensitive")
+        disconnect_button.bind_property("visible", builder.get_object("add_ftp_bookmark_button"), "sensitive")
         self._connect_button.bind_property("visible", builder.get_object("disconnect_button"), "visible", 4)
+        self._bookmarks_button = builder.get_object("bookmarks_button")
+        self._bookmarks_button.bind_property("active", builder.get_object("bookmarks_box"), "visible")
         # Force Ctrl
         self._ftp_view.connect("key-press-event", self._app.force_ctrl)
         self._file_view.connect("key-press-event", self._app.force_ctrl)
@@ -218,6 +226,7 @@ class FtpClientBox(Gtk.HBox):
 
     @run_task
     def init_ftp(self):
+        self.init_bookmarks()
         GLib.idle_add(self._ftp_model.clear)
         try:
             if self._ftp:
@@ -712,6 +721,27 @@ class FtpClientBox(Gtk.HBox):
         self._ftp_info_label.set_text(message)
         self._ftp_info_label.set_tooltip_text(message)
 
+    # **************** Bookmarks ***************** #
+
+    @run_idle
+    def init_bookmarks(self):
+        self._bookmark_model.clear()
+        list(map(lambda b: self._bookmark_model.append((b,)), self._settings.ftp_bookmarks))
+
+    def on_bookmark_activated(self, view, path, column):
+        self.init_ftp_data(self._bookmark_model[path][0])
+
+    def on_bookmark_add(self, item=None):
+        self._bookmarks_button.set_active(True)
+        self._bookmark_model.append((self._ftp_model.get_value(self._ftp_model.get_iter_first(), 4),))
+        self._settings.ftp_bookmarks = [r[0] for r in self._bookmark_model]
+
+    def on_bookmark_remove(self, item=None):
+        model, paths = self._bookmark_view.get_selection().get_selected_rows()
+        if paths and show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.OK:
+            list(map(lambda p: model.remove(model.get_iter(p)), paths))
+            self._settings.ftp_bookmarks = [r[0] for r in self._bookmark_model]
+
     def on_view_key_press(self, view, event):
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
@@ -743,6 +773,8 @@ class FtpClientBox(Gtk.HBox):
                 self.on_ftp_file_remove()
             elif self._file_view.is_focus():
                 self.on_file_remove()
+            elif self._bookmark_view.is_focus():
+                self.on_bookmark_remove()
         elif key is KeyboardKey.RETURN:
             path, column = view.get_cursor()
             if path:
@@ -760,11 +792,13 @@ class FtpClientBox(Gtk.HBox):
         # Enable selection.
         self._select_enabled = True
 
-    def on_paned_size_allocate(self, paned, allocation):
+    @staticmethod
+    def on_paned_size_allocate(paned, allocation):
         """ Sets default homogeneous sizes. """
         paned.set_position(0.5 * allocation.width)
 
-    def get_size_from_bytes(self, size):
+    @staticmethod
+    def get_size_from_bytes(size):
         """ Simple convert function from bytes to other units like K, M or G. """
         try:
             b = float(size)

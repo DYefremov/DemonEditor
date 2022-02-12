@@ -503,6 +503,16 @@ class Settings:
     def epg_options(self, value):
         self._cp_settings["epg_options"] = value
 
+    # *********** FTP ************ #
+
+    @property
+    def ftp_bookmarks(self):
+        return self._cp_settings.get("ftp_bookmarks", [])
+
+    @ftp_bookmarks.setter
+    def ftp_bookmarks(self, value):
+        self._cp_settings["ftp_bookmarks"] = value
+
     # ***** Program settings ***** #
 
     @property
