@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ class ServiceDetailsDialog:
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
-    def __init__(self, transient, settings, srv_view, fav_view, services, bouquets, new_color, action=Action.EDIT):
+    def __init__(self, app, new_color, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_create_new": self.on_create_new,
@@ -76,19 +76,19 @@ class ServiceDetailsDialog:
 
         builder = get_builder(_UI_PATH, handlers, use_str=True)
         self._builder = builder
+        settings = app.app_settings
 
         self._dialog = builder.get_object("service_details_dialog")
-        self._dialog.set_transient_for(transient)
+        self._dialog.set_transient_for(app.app_window)
         self._s_type = settings.setting_type
         self._tr_type = TrType.Satellite
-        self._satellites_xml_path = settings.profile_data_path + "satellites.xml"
         self._picons_path = settings.profile_picons_path
-        self._services_view = srv_view
-        self._fav_view = fav_view
+        self._services_view = app.services_view
+        self._fav_view = app.fav_view
         self._action = action
         self._old_service = None
-        self._services = services
-        self._bouquets = bouquets
+        self._services = app.current_services
+        self._bouquets = app.current_bouquets
         self._new_color = new_color
         self._transponder_services_iters = None
         self._current_model = None

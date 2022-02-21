@@ -44,7 +44,7 @@ from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
-from app.eparser.iptv import export_to_m3u
+from app.eparser.iptv import export_to_m3u, StreamType
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
                           IS_DARWIN, PlayStreamsMode, IS_LINUX)
@@ -72,10 +72,12 @@ from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPT
 
 
 class Application(Gtk.Application):
-    SERVICE_MODEL_NAME = "services_list_store"
-    FAV_MODEL_NAME = "fav_list_store"
-    BQ_MODEL_NAME = "bouquets_tree_store"
-    ALT_MODEL_NAME = "alt_list_store"
+    """ Main application class. """
+    SERVICE_MODEL = "services_list_store"
+    FAV_MODEL = "fav_list_store"
+    BQ_MODEL = "bouquets_tree_store"
+    ALT_MODEL = "alt_list_store"
+    IPTV_MODEL = "iptv_list_store"
     DRAG_SEP = "::::"
 
     DEL_FACTOR = 100  # Batch size to delete in one pass.
@@ -125,6 +127,7 @@ class Application(Gtk.Application):
                     "on_fav_cut": self.on_fav_cut,
                     "on_bouquets_cut": self.on_bouquets_cut,
                     "on_services_copy": self.on_services_copy,
+                    "on_iptv_services_copy": self.on_iptv_services_copy,
                     "on_fav_copy": self.on_fav_copy,
                     "on_bouquets_copy": self.on_bouquets_copy,
                     "on_fav_paste": self.on_fav_paste,
@@ -158,6 +161,7 @@ class Application(Gtk.Application):
                     "on_bouquet_export": self.on_bouquet_export,
                     "on_bouquet_export_to_m3u": self.on_bouquet_export_to_m3u,
                     "on_export_iptv_to_m3u": self.on_export_iptv_to_m3u,
+                    "on_export_all_iptv_to_m3u": self.on_export_all_iptv_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
                     "on_insert_marker": self.on_insert_marker,
                     "on_insert_space": self.on_insert_space,
@@ -167,9 +171,12 @@ class Application(Gtk.Application):
                     "on_services_mark_not_in_bouquets": self.on_services_mark_not_in_bouquets,
                     "on_services_clear_marked": self.on_services_clear_marked,
                     "on_filter_changed": self.on_filter_changed,
+                    "on_iptv_filter_changed": self.on_iptv_filter_changed,
                     "on_filter_type_toggled": self.on_filter_type_toggled,
                     "on_services_filter_toggled": self.on_services_filter_toggled,
+                    "on_iptv_services_filter_toggled": self.on_iptv_services_filter_toggled,
                     "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
+                    "on_filter_bouquet_toggled": self.on_filter_bouquet_toggled,
                     "on_filter_in_bq_toggled": self.on_filter_in_bq_toggled,
                     "on_assign_picon_file": self.on_assign_picon_file,
                     "on_assign_picon": self.on_assign_picon,
@@ -203,6 +210,7 @@ class Application(Gtk.Application):
                     "on_telnet_realize": self.on_telnet_realize,
                     "on_logs_realize": self.on_logs_realize,
                     "on_visible_page": self.on_visible_page,
+                    "on_iptv_toggled": self.on_iptv_toggled,
                     "on_data_paned_realize": self.init_main_paned_position}
 
         self._settings = Settings.get_instance()
@@ -220,6 +228,7 @@ class Application(Gtk.Application):
         self._alt_counter = 1
         self._data_hash = 0
         self._filter_cache = {}
+        self._iptv_filter_cache = {}
         self._in_bouquets = set()
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
@@ -231,7 +240,9 @@ class Application(Gtk.Application):
         # Current satellite positions in the services list
         self._sat_positions = set()
         self._service_types = set()
+        self._bq_names = set()
         self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
+        self._services_models = {self.SERVICE_MODEL, self.IPTV_MODEL}
         # Tools
         self._links_transmitter = None
         self._satellite_tool = None
@@ -280,20 +291,27 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("epg-dat-downloaded", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("iptv-service-edited", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("iptv-service-added", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
         self._stack = builder.get_object("stack")
+        self._services_stack = builder.get_object("services_stack")
         self._fav_paned = builder.get_object("fav_paned")
         self._bq_frame = builder.get_object("bq_frame")
         self._fav_frame = builder.get_object("fav_frame")
         self._services_view = builder.get_object("services_tree_view")
+        self._iptv_services_view = builder.get_object("iptv_services_view")
         self._fav_view = builder.get_object("fav_tree_view")
         self._bouquets_view = builder.get_object("bouquets_tree_view")
         self._fav_model = builder.get_object("fav_list_store")
         self._services_model = builder.get_object("services_list_store")
         self._bouquets_model = builder.get_object("bouquets_tree_store")
         self._bq_name_label = builder.get_object("bq_name_label")
+        self._iptv_model = builder.get_object("iptv_list_store")
         self._iptv_menu_button = builder.get_object("iptv_menu_button")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
@@ -320,7 +338,9 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
+        self._iptv_count_label = builder.get_object("iptv_count_label")
         self._services_load_spinner = builder.get_object("services_load_spinner")
+        self._iptv_services_load_spinner = builder.get_object("iptv_services_load_spinner")
         self._save_tool_button = builder.get_object("save_tool_button")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
@@ -334,6 +354,7 @@ class Application(Gtk.Application):
         self._alt_revealer.bind_property("visible", self._alt_revealer, "reveal-child")
         # Force Ctrl press event for view. Multiple selections in lists only with Space key(as in file managers)!!!
         self._services_view.connect("key-press-event", self.force_ctrl)
+        self._iptv_services_view.connect("key-press-event", self.force_ctrl)
         self._fav_view.connect("key-press-event", self.force_ctrl)
         # Clipboard
         self._clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
@@ -342,15 +363,21 @@ class Application(Gtk.Application):
         # Filter
         self._services_model_filter = builder.get_object("services_model_filter")
         self._services_model_filter.set_visible_func(self.services_filter_function)
+        self._iptv_services_model_filter = builder.get_object("iptv_services_model_filter")
+        self._iptv_services_model_filter.set_visible_func(self.iptv_services_filter_function)
         self._filter_services_button = builder.get_object("filter_services_button")
         self._filter_entry = builder.get_object("filter_entry")
+        self._iptv_filter_entry = builder.get_object("iptv_filter_entry")
         self._filter_box = builder.get_object("filter_box")
+        self._iptv_filter_box = builder.get_object("iptv_filter_box")
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
+        self._filter_bouquet_model = builder.get_object("filter_bouquet_list_store")
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         self._filter_not_in_bq_button = builder.get_object("filter_not_in_bq_button")
         self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
         self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
+        self._filter_iptv_services_button = builder.get_object("filter_iptv_services_button")
         # Search.
         services_search_provider = SearchProvider(self._services_view,
                                                   builder.get_object("services_search_entry"),
@@ -368,6 +395,14 @@ class Application(Gtk.Application):
         self._fav_search_button = builder.get_object("fav_search_button")
         self._fav_search_button.bind_property("active", builder.get_object("fav_search_box"), "visible")
         self._fav_search_button.connect("toggled", fav_search_provider.on_search_toggled)
+        iptv_search_provider = SearchProvider(self._iptv_services_view,
+                                              builder.get_object("iptv_search_entry"),
+                                              builder.get_object("iptv_search_down_button"),
+                                              builder.get_object("iptv_search_up_button"),
+                                              (Column.IPTV_SERVICE,))
+        self._iptv_search_button = builder.get_object("iptv_search_button")
+        self._iptv_search_button.bind_property("active", builder.get_object("iptv_search_box"), "visible")
+        self._iptv_search_button.connect("toggled", iptv_search_provider.on_search_toggled)
         # Playback.
         self._player_box = PlayerBox(self)
         self._player_box.bind_property("visible", self._profile_combo_box, "visible", 4)
@@ -443,8 +478,36 @@ class Application(Gtk.Application):
         self._fav_picon_renderer = builder.get_object("fav_picon_renderer")
         self._fav_picon_column = builder.get_object("fav_picon_column")
         self._fav_picon_column.set_cell_data_func(self._fav_picon_renderer, self.fav_picon_data_func)
+        self._iptv_picon_renderer = builder.get_object("iptv_picon_renderer")
+        self._iptv_picon_column = builder.get_object("iptv_picon_column")
+        self._iptv_picon_column.set_cell_data_func(self._iptv_picon_renderer, self.iptv_picon_data_func)
         self._picon_column.set_visible(self._settings.display_picons)
         self._fav_picon_column.set_visible(self._settings.display_picons)
+        self._iptv_picon_column.set_visible(self._settings.display_picons)
+        # IPTV tab.
+        self._iptv_button = builder.get_object("iptv_button")
+        self._dvb_button = builder.get_object("dvb_button")
+        iptv_type_column = builder.get_object("iptv_type_column")
+        iptv_type_column.set_cell_data_func(builder.get_object("iptv_type_renderer"), self.iptv_type_data_func)
+        iptv_ref_column = builder.get_object("iptv_ref_column")
+        iptv_ref_column.set_cell_data_func(builder.get_object("iptv_ref_renderer"), self.iptv_ref_data_func)
+        iptv_button = builder.get_object("iptv_button")
+        iptv_button.bind_property("active", self._filter_services_button, "visible", 4)
+        iptv_button.bind_property("active", self._srv_search_button, "visible", 4)
+        iptv_button.bind_property("active", builder.get_object("enigma_hide_button"), "visible", 4)
+        iptv_button.bind_property("active", builder.get_object("enigma_locked_button"), "visible", 4)
+        iptv_button.bind_property("active", self._filter_iptv_services_button, "visible")
+        iptv_button.bind_property("active", self._iptv_search_button, "visible")
+        iptv_button.bind_property("active", builder.get_object("iptv_export_to_m3u_button"), "visible")
+        self._iptv_services_load_spinner.bind_property("active", self._filter_iptv_services_button, "sensitive", 4)
+        self._iptv_services_load_spinner.bind_property("active", self._profile_combo_box, "sensitive", 4)
+        self._iptv_services_load_spinner.bind_property("active", self._dvb_button, "sensitive", 4)
+        self._services_load_spinner.bind_property("active", self._iptv_button, "sensitive", 4)
+        self.connect("profile-changed", self.init_iptv)
+        self.connect("iptv-service-added", self.on_iptv_service_added)
+        self.connect("iptv-service-edited", self.on_iptv_service_edited)
+        # Hiding for Neutrino.
+        self.bind_property("is_enigma", builder.get_object("services_button_box"), "visible")
         # Setting the last size of the window if it was saved.
         main_window_size = self._settings.get("window_size")
         if main_window_size:
@@ -514,6 +577,7 @@ class Application(Gtk.Application):
         filter_action.connect("activate", lambda a, v: self.emit("filter-toggled", None))
         self._main_window.add_action(filter_action)  # For "win.*" actions!
         self.connect("filter-toggled", self.on_services_filter_toggled)
+        self.connect("filter-toggled", self.on_iptv_services_filter_toggled)
         # Lock, Hide.
         self.set_action("on_hide", self.on_hide)
         self.set_action("on_locked", self.on_locked)
@@ -660,6 +724,7 @@ class Application(Gtk.Application):
         bq_target = []
 
         self._services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
+        self._iptv_services_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target, Gdk.DragAction.COPY)
         self._services_view.enable_model_drag_dest([], Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
         self._fav_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, target,
                                                 Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE | Gdk.DragAction.COPY)
@@ -680,6 +745,9 @@ class Application(Gtk.Application):
         self._services_view.drag_dest_add_text_targets()
         self._services_view.drag_dest_add_uri_targets()
 
+        self._iptv_services_view.drag_source_set_target_list(None)
+        self._iptv_services_view.drag_source_add_text_targets()
+
         self._bouquets_view.drag_dest_set_target_list(None)
         self._bouquets_view.drag_source_set_target_list(None)
         self._bouquets_view.drag_dest_add_text_targets()
@@ -692,9 +760,10 @@ class Application(Gtk.Application):
         self._app_info_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._app_info_box.drag_dest_add_text_targets()
         # For multiple selection.
-        self._services_view.get_selection().set_select_function(lambda *args: self._select_enabled)
-        self._fav_view.get_selection().set_select_function(lambda *args: self._select_enabled)
-        self._bouquets_view.get_selection().set_select_function(lambda *args: self._select_enabled)
+        self._services_view.get_selection().set_select_function(self.view_selection_func)
+        self._iptv_services_view.get_selection().set_select_function(self.view_selection_func)
+        self._fav_view.get_selection().set_select_function(self.view_selection_func)
+        self._bouquets_view.get_selection().set_select_function(self.view_selection_func)
 
     def init_appearance(self, update=False):
         """ Appearance initialisation.
@@ -715,6 +784,7 @@ class Application(Gtk.Application):
 
         self._picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
         self._fav_picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
+        self._iptv_picon_renderer.set_fixed_size(self._picons_size, self._picons_size * 0.65)
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._use_colors = self._settings.use_colors
@@ -764,10 +834,26 @@ class Application(Gtk.Application):
         """ Initializes new models for main services view. """
         column_types = (self._services_model.get_column_type(i) for i in range(self._services_model.get_n_columns()))
         self._services_model = Gtk.ListStore(*column_types)
-        self._services_model.set_name(self.SERVICE_MODEL_NAME)
+        self._services_model.set_name(self.SERVICE_MODEL)
         self._services_model_filter = self._services_model.filter_new()
         self._services_model_filter.set_visible_func(self.services_filter_function)
         self._services_view.set_model(Gtk.TreeModelSort(model=self._services_model_filter))
+
+    def init_new_iptv_models(self):
+        """ Initializes new models for IPTV services view. """
+        column_types = (self._iptv_model.get_column_type(i) for i in range(self._iptv_model.get_n_columns()))
+        self._iptv_model = Gtk.ListStore(*column_types)
+        self._iptv_model.set_name(self.IPTV_MODEL)
+        self._iptv_services_model_filter = self._iptv_model.filter_new()
+        self._iptv_services_model_filter.set_visible_func(self.iptv_services_filter_function)
+        self._iptv_services_view.set_model(Gtk.TreeModelSort(model=self._iptv_services_model_filter))
+
+    def init_iptv(self, app, profile):
+        """ Initializes IPTV after profile change. """
+        self._dvb_button.set_active(True)
+        # We will recreate the models every time. At the moment it looks the best.
+        self._iptv_count_label.set_text("0")
+        self.init_new_iptv_models()
 
     def update_background_colors(self, new_color, extra_color):
         if extra_color != self._EXTRA_COLOR:
@@ -786,7 +872,8 @@ class Application(Gtk.Application):
         self._EXTRA_COLOR = extra_color
         yield True
 
-    def force_ctrl(self, view, event):
+    @staticmethod
+    def force_ctrl(view, event):
         """ Function for force ctrl press event for view """
         if not event.state & Gdk.ModifierType.SHIFT_MASK:
             event.state |= MOD_MASK
@@ -800,7 +887,7 @@ class Application(Gtk.Application):
         self._settings.add("data_paned_position", self._data_paned.get_position())
         self._settings.add("fav_paned_position", self._fav_paned.get_position())
 
-        if self._services_load_spinner.get_property("active"):
+        if self.is_data_loading():
             msg = f"{get_message('Data loading in progress!')}\n\n\t{get_message('Are you sure?')}"
             if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                 return True
@@ -892,6 +979,14 @@ class Application(Gtk.Application):
         self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
         self.emit("page-changed", self._page)
 
+    def on_iptv_toggled(self, button):
+        is_iptv = button.get_active()
+        self._services_stack.set_visible_child_name("iptv" if is_iptv else "dvb")
+        # We add data only if the model is empty.
+        if is_iptv and not len(self._iptv_model):
+            gen = self.append_iptv_data()
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
     def on_page_show(self, action, value):
         action.set_state(value)
         self._settings.add(action.get_name(), bool(value))
@@ -922,10 +1017,53 @@ class Application(Gtk.Application):
 
         self.init_bq_position()
 
+    # ****************** Custom data functions ***************** #
+
+    def iptv_type_data_func(self, column, renderer, model, itr, data):
+        fav_id = model.get_value(itr, Column.IPTV_FAV_ID)
+        f_data = fav_id.split(":", maxsplit=1)
+        renderer.set_property("text", f"{StreamType(f_data[0].strip() if f_data else '0').name}")
+
+    def iptv_ref_data_func(self, column, renderer, model, itr, data):
+        p_id = model.get_value(itr, Column.IPTV_PICON_ID)
+        renderer.set_property("text", p_id.rstrip(".png").replace("_", ":") if p_id else None)
+
+    def iptv_picon_data_func(self, column, renderer, model, itr, data):
+        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.IPTV_PICON_ID)))
+
+    def picon_data_func(self, column, renderer, model, itr, data):
+        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.SRV_PICON_ID)))
+
+    def fav_picon_data_func(self, column, renderer, model, itr, data):
+        srv = self._services.get(model.get_value(itr, Column.FAV_ID), None)
+        if not srv:
+            return True
+
+        picon = self._picons.get(srv.picon_id, None)
+        # Alternatives.
+        if srv.service_type == BqServiceType.ALT.name:
+            alt_servs = srv.transponder
+            if alt_servs:
+                alt_srv = self._services.get(alt_servs[0].data, None)
+                if alt_srv:
+                    picon = self._picons.get(alt_srv.picon_id, None) if srv else None
+
+        renderer.set_property("pixbuf", picon)
+
+    def view_selection_func(self, *args):
+        """ Used to control selection via drag and drop in views [via _select_enabled field].
+
+            Prevents deselection when the mouse is clicked.
+        """
+        return self._select_enabled
+
     # ***************** Copy - Cut - Paste ********************* #
 
     def on_services_copy(self, view):
         self.on_copy(view, target=ViewTarget.FAV)
+
+    def on_iptv_services_copy(self, view):
+        self.on_copy(view, target=ViewTarget.IPTV)
 
     def on_fav_copy(self, view):
         self.on_copy(view, target=ViewTarget.SERVICES)
@@ -942,6 +1080,10 @@ class Application(Gtk.Application):
                                                     Column.SRV_FAV_ID, Column.SRV_PICON), None, None) for path in paths)
         elif target is ViewTarget.SERVICES:
             self._rows_buffer.extend(model[path][:] for path in paths)
+        elif target is ViewTarget.IPTV:
+            self._rows_buffer.extend(((0, None, row[Column.IPTV_SERVICE], None, None, BqServiceType.IPTV.name, None,
+                                       row[Column.IPTV_FAV_ID], row[Column.IPTV_PICON], None, None) for row in
+                                      (model[path][:] for path in paths)))
         elif target is ViewTarget.BOUQUET:
             to_copy = list(map(model.get_iter, filter(lambda p: p.get_depth() == 2, paths)))
             if to_copy:
@@ -996,7 +1138,7 @@ class Application(Gtk.Application):
             model.insert(dest_index, row)
             fav_bouquet.insert(dest_index, row[Column.FAV_ID])
 
-        if model.get_name() == self.FAV_MODEL_NAME:
+        if model.get_name() == self.FAV_MODEL:
             self.update_fav_num_column(model)
 
         self._rows_buffer.clear()
@@ -1021,14 +1163,14 @@ class Application(Gtk.Application):
         self._bouquets_buffer.clear()
         self.update_bouquets_type()
 
-    # ***************** Deletion *********************#
+    # ***************** Deletion ********************* #
 
     def on_delete(self, view):
         """ Delete selected items from view
 
             returns deleted rows list!
         """
-        if self._services_load_spinner.get_property("active"):
+        if self.is_data_loading():
             show_dialog(DialogType.ERROR, self._main_window, get_message("Data loading in progress!"))
             return
 
@@ -1043,14 +1185,16 @@ class Application(Gtk.Application):
 
         priority = GLib.PRIORITY_LOW
 
-        if model_name == self.FAV_MODEL_NAME:
+        if model_name == self.FAV_MODEL:
             gen = self.remove_favs(itrs, model)
-        elif model_name == self.BQ_MODEL_NAME:
+        elif model_name == self.BQ_MODEL:
             gen = self.delete_bouquets(itrs, model)
             priority = GLib.PRIORITY_DEFAULT
-        elif model_name == self.SERVICE_MODEL_NAME:
-            gen = self.delete_services(itrs, model, rows)
-        elif model_name == self.ALT_MODEL_NAME:
+        elif model_name == self.SERVICE_MODEL:
+            gen = self.delete_services(itrs, model, rows, self._services_model)
+        elif model_name == self.IPTV_MODEL:
+            gen = self.delete_services(itrs, model, rows, self._iptv_model, Column.IPTV_FAV_ID)
+        elif model_name == self.ALT_MODEL:
             gen = self.delete_alts(itrs, model, rows)
 
         GLib.idle_add(lambda: next(gen, False), priority=priority)
@@ -1059,7 +1203,7 @@ class Application(Gtk.Application):
         return rows
 
     def remove_favs(self, itrs, model):
-        """ Deleting bouquet services """
+        """ Deleting bouquet services. """
         if self._bq_selected:
             fav_bouquet = self._bouquets.get(self._bq_selected, None)
             if fav_bouquet:
@@ -1074,10 +1218,10 @@ class Application(Gtk.Application):
         self._wait_dialog.hide()
         yield True
 
-    def delete_services(self, itrs, model, rows):
-        """ Deleting services """
+    def delete_services(self, itrs, model, rows, srv_model, fav_column=Column.SRV_FAV_ID):
+        """ Deleting services. """
         for index, s_itr in enumerate(get_base_itrs(itrs, model)):
-            self._services_model.remove(s_itr)
+            srv_model.remove(s_itr)
             if index % self.DEL_FACTOR == 0:
                 yield True
 
@@ -1085,7 +1229,7 @@ class Application(Gtk.Application):
         for row in rows:
             # There are channels with the same parameters except for the name.
             # None because it can have duplicates! Need fix
-            fav_id = row[Column.SRV_FAV_ID]
+            fav_id = row[fav_column]
             for bq in self._bouquets:
                 services = self._bouquets[bq]
                 if services:
@@ -1097,11 +1241,15 @@ class Application(Gtk.Application):
         for f_itr in filter(lambda r: r[Column.FAV_ID] in srv_ids_to_delete, self._fav_model):
             self._fav_model.remove(f_itr.iter)
 
-        self.on_model_changed(self._services_model)
         self.update_fav_num_column(self._fav_model)
-        self.update_sat_positions()
+        self.refresh_counters(srv_model)
         self._wait_dialog.hide()
         yield True
+
+    @run_with_delay(1)
+    def refresh_counters(self, srv_model):
+        self.on_model_changed(srv_model)
+        self.update_sat_positions()
 
     def delete_bouquets(self, itrs, model):
         """ Deleting bouquets """
@@ -1197,6 +1345,8 @@ class Application(Gtk.Application):
         """ Edit header bar button """
         if self._services_view.is_focus():
             self.on_service_edit(self._services_view)
+        elif self._iptv_services_view.is_focus():
+            self.on_service_edit(self._iptv_services_view)
         elif self._fav_view.is_focus():
             self.on_service_edit(self._fav_view)
         elif self._bouquets_view.is_focus():
@@ -1453,12 +1603,14 @@ class Application(Gtk.Application):
 
         name, model = get_model_data(view)
         name_column, type_column = Column.SRV_SERVICE, Column.SRV_TYPE
-        if name == self.FAV_MODEL_NAME:
+        if name == self.FAV_MODEL:
             name_column, type_column = Column.FAV_SERVICE, Column.FAV_TYPE
-        elif name == self.BQ_MODEL_NAME:
+        elif name == self.BQ_MODEL:
             name_column, type_column = Column.BQ_NAME, Column.BQ_TYPE
-        elif name == self.ALT_MODEL_NAME:
+        elif name == self.ALT_MODEL:
             name_column, type_column = Column.ALT_SERVICE, Column.ALT_TYPE
+        elif name == self.IPTV_MODEL:
+            name_column, type_column = Column.IPTV_SERVICE, Column.IPTV_TYPE
         # https://stackoverflow.com/a/52248549
         Gtk.drag_set_icon_pixbuf(context, self.get_drag_icon_pixbuf(top_model, paths, name_column, type_column), 0, 0)
         return True
@@ -1545,9 +1697,9 @@ class Application(Gtk.Application):
         name, model = get_model_data(view)
 
         if txt:
-            if txt.startswith("file://") and name == self.SERVICE_MODEL_NAME:
+            if txt.startswith("file://") and name == self.SERVICE_MODEL:
                 self.on_import_data(urlparse(unquote(txt)).path.strip())
-            elif name == self.FAV_MODEL_NAME:
+            elif name == self.FAV_MODEL:
                 self.receive_selection(view=view, drop_info=view.get_dest_row_at_pos(x, y), data=txt)
 
         if uris:
@@ -1575,7 +1727,7 @@ class Application(Gtk.Application):
             return
 
         itr_str, sep, source = data.partition(self.DRAG_SEP)
-        if source != self.BQ_MODEL_NAME:
+        if source != self.BQ_MODEL:
             return
 
         if drop_info:
@@ -1620,7 +1772,7 @@ class Application(Gtk.Application):
         """  Update fav view  after data received  """
         try:
             itr_str, sep, source = data.partition(self.DRAG_SEP)
-            if source == self.BQ_MODEL_NAME:
+            if source == self.BQ_MODEL:
                 return
 
             bq_selected = self.check_bouquet_selection()
@@ -1628,40 +1780,46 @@ class Application(Gtk.Application):
                 return
 
             model = get_base_model(view.get_model())
-            dest_index = -1
+            dst_index = -1
 
             if drop_info:
                 path, position = drop_info
-                dest_index = path.get_indices()[0]
+                dst_index = path.get_indices()[0]
 
             fav_bouquet = self._bouquets[bq_selected]
             itrs = itr_str.split(",")
 
-            if source == self.SERVICE_MODEL_NAME:
+            if source == self.SERVICE_MODEL:
                 ext_model = self._services_view.get_model()
-                ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
-                ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
-
-                for ext_row in ext_rows:
-                    dest_index += 1
-                    fav_id = ext_row[Column.SRV_FAV_ID]
-                    ch = self._services[fav_id]
-                    model.insert(dest_index, (0, ch.coded, ch.service, ch.locked, ch.hide, ch.service_type, ch.pos,
-                                              ch.fav_id, self._picons.get(ch.picon_id, None), None, None))
-                    fav_bouquet.insert(dest_index, ch.fav_id)
-            elif source == self.FAV_MODEL_NAME:
+                self.receive_data_to_fav(dst_index, fav_bouquet, itrs, model, ext_model, Column.SRV_FAV_ID)
+            elif source == self.FAV_MODEL:
                 in_itrs = [model.get_iter_from_string(itr) for itr in itrs]
                 in_rows = [model[in_itr][:] for in_itr in in_itrs]
                 for row in in_rows:
-                    model.insert(dest_index, row)
-                    fav_bouquet.insert(dest_index, row[Column.FAV_ID])
-                    dest_index += 1
+                    model.insert(dst_index, row)
+                    fav_bouquet.insert(dst_index, row[Column.FAV_ID])
+                    dst_index += 1
                 for in_itr in in_itrs:
                     del fav_bouquet[int(model.get_path(in_itr)[0])]
                     model.remove(in_itr)
+            elif source == self.IPTV_MODEL:
+                ext_model = self._iptv_services_view.get_model()
+                self.receive_data_to_fav(dst_index, fav_bouquet, itrs, model, ext_model, Column.IPTV_FAV_ID)
             self.update_fav_num_column(model)
         except ValueError as e:
             self.show_error_message(str(e))
+
+    def receive_data_to_fav(self, dst_index, fav_bouquet, itrs, model, ext_model, fav_column):
+        """ Adds data obtained via drag and drop to the favorites model. """
+        ext_itrs = [ext_model.get_iter_from_string(itr) for itr in itrs]
+        ext_rows = [ext_model[ext_itr][:] for ext_itr in ext_itrs]
+        for ext_row in ext_rows:
+            dst_index += 1
+            fav_id = ext_row[fav_column]
+            ch = self._services[fav_id]
+            model.insert(dst_index, (0, ch.coded, ch.service, ch.locked, ch.hide, ch.service_type, ch.pos,
+                                     ch.fav_id, self._picons.get(ch.picon_id, None), None, None))
+            fav_bouquet.insert(dst_index, ch.fav_id)
 
     def on_view_press(self, view, event):
         """ Handles a mouse click (press) to view. """
@@ -1681,12 +1839,14 @@ class Application(Gtk.Application):
         self._select_enabled = True
 
     def delete_views_selection(self, name):
-        if name == self.SERVICE_MODEL_NAME:
+        if name == self.SERVICE_MODEL:
             self.delete_selection(self._fav_view)
-        elif name == self.FAV_MODEL_NAME:
-            self.delete_selection(self._services_view)
-        elif name == self.BQ_MODEL_NAME:
-            self.delete_selection(self._services_view, self._fav_view)
+        elif name == self.FAV_MODEL:
+            self.delete_selection(self._services_view, self._iptv_services_view)
+        elif name == self.BQ_MODEL:
+            self.delete_selection(self._services_view, self._fav_view, self._iptv_services_view)
+        elif name == self.IPTV_MODEL:
+            self.delete_selection(self._fav_view)
 
     def on_view_popup_menu(self, menu, event):
         """ Shows popup menu for any view """
@@ -1790,6 +1950,10 @@ class Application(Gtk.Application):
 
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
+        if self.is_data_loading():
+            self.show_error_message("Data loading in progress!")
+            return
+
         if data_path and os.path.isfile(data_path):
             self.open_compressed_data(data_path)
         else:
@@ -2029,6 +2193,22 @@ class Application(Gtk.Application):
                 yield True
 
         self._services_load_spinner.stop()
+        yield True
+
+    def append_iptv_data(self, services=None):
+        self._iptv_services_load_spinner.start()
+        services = services or self._services.values()
+        services = ((s.service, None, None, None, s.fav_id, s.picon_id) for s in services if
+                    s.service_type == BqServiceType.IPTV.name)
+
+        for index, s in enumerate(services, start=1):
+            self._iptv_model.append(s)
+            if index % self.DEL_FACTOR == 0:
+                self._iptv_count_label.set_text(str(index))
+                yield True
+
+        self._iptv_count_label.set_text(str(len(self._iptv_model)))
+        self._iptv_services_load_spinner.stop()
         yield True
 
     def get_new_background(self, flags):
@@ -2410,6 +2590,7 @@ class Application(Gtk.Application):
         self._stack_timers_box.set_visible(is_enigma and self._settings.get("show_timers", True))
         self._stack_recordings_box.set_visible(is_enigma and self._settings.get("show_recordings", True))
         self._stack_control_box.set_visible(is_enigma and self._settings.get("show_control", True))
+        self._iptv_button.set_active(False)
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
@@ -2427,24 +2608,34 @@ class Application(Gtk.Application):
         ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key in MOVE_KEYS:
+        if ctrl and key is KeyboardKey.INSERT:
+            # Move items from app to fav list
+            if model_name in self._services_models:
+                self.on_to_fav_copy(view)
+            elif model_name == self.BQ_MODEL:
+                self.on_new_bouquet(view)
+        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name in self._services_models:
+            self.on_to_fav_end_copy(view)
+        elif ctrl and key in MOVE_KEYS:
             self.move_items(key)
         elif ctrl and key is KeyboardKey.C:
-            if model_name == self.SERVICE_MODEL_NAME:
+            if model_name == self.SERVICE_MODEL:
                 self.on_copy(view, ViewTarget.FAV)
-            elif model_name == self.FAV_MODEL_NAME:
+            elif model_name == self.FAV_MODEL:
                 self.on_copy(view, ViewTarget.SERVICES)
+            elif model_name == self.IPTV_MODEL:
+                self.on_copy(view, ViewTarget.IPTV)
             else:
                 self.on_copy(view, ViewTarget.BOUQUET)
         elif ctrl and key is KeyboardKey.X:
-            if model_name == self.FAV_MODEL_NAME:
+            if model_name == self.FAV_MODEL:
                 self.on_cut(view, ViewTarget.FAV)
-            elif model_name == self.BQ_MODEL_NAME:
+            elif model_name == self.BQ_MODEL:
                 self.on_cut(view, ViewTarget.BOUQUET)
         elif ctrl and key is KeyboardKey.V:
-            if model_name == self.FAV_MODEL_NAME:
+            if model_name == self.FAV_MODEL:
                 self.on_paste(view, ViewTarget.FAV)
-            elif model_name == self.BQ_MODEL_NAME:
+            elif model_name == self.BQ_MODEL:
                 self.on_paste(view, ViewTarget.BOUQUET)
         elif key is KeyboardKey.DELETE:
             self.on_delete(view)
@@ -2459,19 +2650,11 @@ class Application(Gtk.Application):
         ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key is KeyboardKey.INSERT:
-            # Move items from app to fav list
-            if model_name == self.SERVICE_MODEL_NAME:
-                self.on_to_fav_copy(view)
-            elif model_name == self.BQ_MODEL_NAME:
-                self.on_new_bouquet(view)
-        elif ctrl and key is KeyboardKey.BACK_SPACE and model_name == self.SERVICE_MODEL_NAME:
-            self.on_to_fav_end_copy(view)
-        elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
+        if ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
             self.on_rename(view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-        elif ctrl and model_name == self.FAV_MODEL_NAME:
+        elif ctrl and model_name == self.FAV_MODEL:
             if key is KeyboardKey.P:
                 self.emit("fav-clicked", FavClickMode.STREAM)
             if key is KeyboardKey.W:
@@ -2485,9 +2668,9 @@ class Application(Gtk.Application):
     def on_view_focus(self, view, focus_event=None):
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0 if model else False
-        is_service = model_name == self.SERVICE_MODEL_NAME
+        is_service = model_name == self.SERVICE_MODEL
 
-        if model_name == self.BQ_MODEL_NAME:
+        if model_name == self.BQ_MODEL:
             for elem in self._tool_elements:
                 self._tool_elements[elem].set_sensitive(False)
             for elem in self._BOUQUET_ELEMENTS:
@@ -2543,11 +2726,13 @@ class Application(Gtk.Application):
     def on_model_changed(self, model, path=None, itr=None):
         model_name = model.get_name()
 
-        if model_name == self.FAV_MODEL_NAME:
+        if model_name == self.FAV_MODEL:
             self._fav_count_label.set_text(str(len(model)))
-        elif model_name == self.SERVICE_MODEL_NAME:
+        elif model_name == self.SERVICE_MODEL:
             self.update_services_counts(len(model))
-        elif model_name == self.BQ_MODEL_NAME:
+        elif model_name == self.IPTV_MODEL:
+            self._iptv_count_label.set_text(str(len(model)))
+        elif model_name == self.BQ_MODEL:
             self._bouquets_count_label.set_text(str(len(self._bouquets.keys())))
 
     @lru_cache(maxsize=1)
@@ -2593,14 +2778,41 @@ class Application(Gtk.Application):
     # ***************** IPTV *********************#
 
     def on_iptv(self, action, value=None):
-        response = IptvDialog(self._main_window,
-                              self._fav_view,
-                              self._services,
-                              self._bouquets.get(self._bq_selected, None),
-                              self._settings,
-                              Action.ADD).show()
+        response = IptvDialog(self, self._fav_view, self._bouquets.get(self._bq_selected, None), Action.ADD).show()
         if response != Gtk.ResponseType.CANCEL:
             self.update_fav_num_column(self._fav_model)
+
+    def on_iptv_service_added(self, app, services):
+        if len(self._iptv_model) or self._iptv_button.get_active():
+            gen = self.append_iptv_data(services)
+            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def on_iptv_service_edit(self, fav_id, view):
+        service = self._services.get(fav_id, None)
+        if service:
+            IptvDialog(self, view, service=service, action=Action.EDIT).show()
+        else:
+            log(f"Error. Service with id '{fav_id}' not found!")
+
+    @run_idle
+    def on_iptv_service_edited(self, app, services):
+        old, new = services
+        fav_id = old.fav_id
+        name, new_fav_id = new.service, new.fav_id
+        for srvs in self._bouquets.values():
+            for i, s in enumerate(srvs):
+                if s == fav_id:
+                    srvs[i] = new.fav_id
+
+        for r in self._fav_model:
+            if r[Column.FAV_ID] == fav_id:
+                r[Column.FAV_SERVICE] = name
+                r[Column.FAV_ID] = new_fav_id
+
+        for r in self._iptv_model:
+            if r[Column.IPTV_FAV_ID] == fav_id:
+                r[Column.IPTV_SERVICE] = name
+                r[Column.IPTV_FAV_ID] = new_fav_id
 
     @run_idle
     def on_iptv_list_configuration(self, action, value=None):
@@ -2656,11 +2868,11 @@ class Application(Gtk.Application):
     # ***************** Import ******************** #
 
     def on_import_yt_list(self, action, value=None):
-        """ Import playlist from YouTube """
+        """ Import playlist from YouTube. """
         if not self._bq_selected:
             return
 
-        YtListImportDialog(self._main_window, self._settings, self.append_imported_services).show()
+        YtListImportDialog(self).show()
 
     def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
@@ -2684,9 +2896,10 @@ class Application(Gtk.Application):
 
         gen = self.update_bouquet_services(self._fav_model, None, self._bq_selected)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+        self.emit("iptv-service-added", services)
 
     def on_import_data(self, path):
-        if self._services_load_spinner.get_property("active"):
+        if self.is_data_loading():
             self.show_error_message("Data loading in progress!")
             return
 
@@ -2834,7 +3047,15 @@ class Application(Gtk.Application):
 
         self.save_bouquet_to_m3u(bq_services)
 
-    def save_bouquet_to_m3u(self, bq_services, url=None):
+    @run_idle
+    def on_export_all_iptv_to_m3u(self, action, value=None):
+        if self.is_data_loading():
+            return self.show_error_message("Data loading in progress!")
+
+        self.save_bouquet_to_m3u((BouquetService(r[Column.IPTV_SERVICE], BqServiceType.IPTV, r[Column.IPTV_FAV_ID], i)
+                                  for i, r in enumerate(self._iptv_model)), name="IPTV")
+
+    def save_bouquet_to_m3u(self, bq_services, url=None, name=None):
         """ Saves bouquet services to *.m3u file. """
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
                                buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
@@ -2842,7 +3063,7 @@ class Application(Gtk.Application):
             return
 
         try:
-            bq = Bouquet(self._current_bq_name, None, bq_services, None, None)
+            bq = Bouquet(name or self._current_bq_name, None, bq_services, None, None)
             export_to_m3u(response, bq, self._s_type, url)
         except Exception as e:
             self.show_error_message(str(e))
@@ -3202,7 +3423,10 @@ class Application(Gtk.Application):
     # ***************** Filter and search ********************* #
 
     def on_services_filter_toggled(self, app=None, value=None):
-        if self._page is not Page.SERVICES and self._services_load_spinner.get_property("active"):
+        if self._page is not Page.SERVICES:
+            return True
+
+        if self.is_data_loading() or self._iptv_button.get_active():
             return True
 
         active = not self._filter_box.get_visible()
@@ -3210,6 +3434,16 @@ class Application(Gtk.Application):
         self._filter_entry.grab_focus() if active else self.on_filter_changed()
         self.filter_set_default()
         self._filter_box.set_visible(active)
+
+    def on_iptv_services_filter_toggled(self, app=None, value=None):
+        if self._page is not Page.SERVICES or not self._iptv_button.get_active():
+            return True
+
+        active = not self._iptv_filter_box.get_visible()
+        self._iptv_filter_entry.grab_focus() if active else self.on_iptv_filter_changed()
+        self._iptv_filter_box.set_visible(active)
+        # Defaults.
+        self.iptv_filter_set_default()
 
     @run_idle
     def filter_set_default(self):
@@ -3220,6 +3454,17 @@ class Application(Gtk.Application):
         self._filter_types_model.foreach(lambda m, p, i: m.set_value(i, 1, True))
         self._service_types.update({r[0] for r in self._filter_types_model})
         self.update_sat_positions()
+
+    @run_idle
+    def iptv_filter_set_default(self):
+        """ Setting defaults for IPTV filter elements. """
+        self._iptv_filter_entry.set_text("")
+        first = self._filter_bouquet_model[self._filter_bouquet_model.get_iter_first()][:]
+        self._filter_bouquet_model.clear()
+        self._filter_bouquet_model.append((first[0], True))
+        self._bq_names.clear()
+        self._bq_names.update((b[:b.rindex(":")] for b in self._bouquets))
+        list(map(lambda b: self._filter_bouquet_model.append((b, True)), self._bq_names))
 
     def init_sat_positions(self):
         self._sat_positions.clear()
@@ -3268,10 +3513,21 @@ class Application(Gtk.Application):
         self.update_filter_cache()
         self.update_filter_state()
 
+    @run_with_delay(2)
+    def on_iptv_filter_changed(self, item=None):
+        self._iptv_filter_box.set_sensitive(False)
+        self.update_iptv_filter_cache()
+        self.update_iptv_filter_state()
+
     @run_idle
     def update_filter_state(self):
         self._services_model_filter.refilter()
         GLib.idle_add(self._services_load_spinner.stop)
+
+    @run_idle
+    def update_iptv_filter_state(self):
+        self._iptv_services_model_filter.refilter()
+        GLib.idle_add(self._iptv_filter_box.set_sensitive, True)
 
     def update_filter_cache(self):
         self._filter_cache.clear()
@@ -3291,14 +3547,37 @@ class Application(Gtk.Application):
                                                               r[Column.SRV_SSID],
                                                               r[Column.SRV_POS])).upper()))
 
+    def update_iptv_filter_cache(self):
+        self._iptv_filter_cache.clear()
+        if not self._iptv_filter_box.is_visible():
+            return
+
+        ids = {}
+        for k, v in self._bouquets.items():
+            for f_id in v:
+                ids[f_id] = k[:k.rindex(":")]
+
+        selected_bqs = {r[0] for r in self._filter_bouquet_model if r[1]}
+        txt = self._iptv_filter_entry.get_text().upper()
+        for r in self._iptv_model:
+            fav_id = r[Column.IPTV_FAV_ID]
+            self._iptv_filter_cache[fav_id] = all((txt in r[Column.IPTV_SERVICE].upper(),
+                                                   ids.get(fav_id, "") in selected_bqs))
+
     def services_filter_function(self, model, itr, data):
         return self._filter_cache.get(model.get_value(itr, Column.SRV_FAV_ID), True)
 
+    def iptv_services_filter_function(self, model, itr, data):
+        return self._iptv_filter_cache.get(model.get_value(itr, Column.IPTV_FAV_ID), True)
+
     def on_filter_type_toggled(self, toggle, path):
-        self.update_filter_toogle_model(self._filter_types_model, toggle, path, self._service_types)
+        self.update_filter_toggle_model(self._filter_types_model, toggle, path, self._service_types)
 
     def on_filter_satellite_toggled(self, toggle, path):
-        self.update_filter_toogle_model(self._filter_sat_pos_model, toggle, path, self._sat_positions)
+        self.update_filter_toggle_model(self._filter_sat_pos_model, toggle, path, self._sat_positions)
+
+    def on_filter_bouquet_toggled(self, toggle, path):
+        self.update_filter_toggle_model(self._filter_bouquet_model, toggle, path, self._bq_names)
 
     @run_idle
     def on_filter_in_bq_toggled(self, button):
@@ -3310,7 +3589,7 @@ class Application(Gtk.Application):
         if self._filter_services_button.get_active():
             self.on_filter_changed()
 
-    def update_filter_toogle_model(self, model, toggle, path, values_set):
+    def update_filter_toggle_model(self, model, toggle, path, values_set):
         active = not toggle.get_active()
         if path == "0":
             model.foreach(lambda m, p, i: m.set_value(i, 1, active))
@@ -3323,7 +3602,7 @@ class Application(Gtk.Application):
 
         values_set.clear()
         values_set.update({r[0] for r in model if r[1]})
-        self.on_filter_changed()
+        self.on_iptv_filter_changed() if self._iptv_button.get_active() else self.on_filter_changed()
 
     def activate_search_state(self, view):
         if view is self._services_view:
@@ -3334,10 +3613,13 @@ class Application(Gtk.Application):
     # ***************** Editing *********************#
 
     def on_service_edit(self, view):
+        if self.is_data_loading():
+            return self.show_error_message("Data loading in progress!")
+
         model, paths = view.get_selection().get_selected_rows()
         if is_only_one_item_selected(paths, self._main_window):
             model_name = get_base_model(model).get_name()
-            if model_name == self.FAV_MODEL_NAME:
+            if model_name == self.FAV_MODEL:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
                 if srv_type == BqServiceType.ALT.name:
                     return self.show_error_message("Operation not allowed in this context!")
@@ -3345,32 +3627,18 @@ class Application(Gtk.Application):
                 if srv_type in self._marker_types:
                     return self.on_rename(view)
                 elif srv_type == BqServiceType.IPTV.name:
-                    return IptvDialog(self._main_window,
-                                      self._fav_view,
-                                      self._services,
-                                      self._bouquets.get(self._bq_selected, None),
-                                      self._settings,
-                                      Action.EDIT).show()
+                    return self.on_iptv_service_edit(model[paths][Column.FAV_ID], view)
+
+                self._dvb_button.set_active(True)
                 self.on_locate_in_services(view)
 
-            dialog = ServiceDetailsDialog(self._main_window,
-                                          self._settings,
-                                          self._services_view,
-                                          self._fav_view,
-                                          self._services,
-                                          self._bouquets,
-                                          self._NEW_COLOR)
-            dialog.show()
+            if model_name == self.IPTV_MODEL:
+                self.on_iptv_service_edit(model[paths][Column.IPTV_FAV_ID], view)
+            else:
+                ServiceDetailsDialog(self, self._NEW_COLOR).show()
 
     def on_services_add_new(self, item):
-        dialog = ServiceDetailsDialog(self._main_window,
-                                      self._settings,
-                                      self._services_view,
-                                      self._fav_view,
-                                      self._services,
-                                      self._bouquets,
-                                      action=Action.ADD)
-        dialog.show()
+        ServiceDetailsDialog(self, action=Action.ADD).show()
 
     def on_bouquets_edit(self, view):
         """ Renaming bouquets. """
@@ -3406,12 +3674,12 @@ class Application(Gtk.Application):
 
     def on_rename(self, view):
         name, model = get_model_data(view)
-        if name == self.BQ_MODEL_NAME:
+        if name == self.BQ_MODEL:
             self.on_bouquets_edit(view)
-        elif name == self.FAV_MODEL_NAME:
+        elif name == self.FAV_MODEL:
             rename(view, self._main_window, ViewTarget.FAV, service_view=self._services_view,
                    services=self._services)
-        elif name == self.SERVICE_MODEL_NAME:
+        elif name == self.SERVICE_MODEL:
             rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, services=self._services)
 
     def on_rename_for_bouquet(self, item):
@@ -3471,7 +3739,10 @@ class Application(Gtk.Application):
                                           Column.FAV_BACKGROUND: None})
 
     def on_locate_in_services(self, view):
-        locate_in_services(view, self._services_view, self._main_window)
+        is_iptv = self._iptv_button.get_active()
+        locate_view = self._iptv_services_view if is_iptv else self._services_view
+        column = Column.IPTV_FAV_ID if is_iptv else Column.SRV_FAV_ID
+        locate_in_services(view, locate_view, column, self._main_window)
 
     def on_mark_duplicates(self, item):
         """ Marks services with duplicate [names] in the fav list.  """
@@ -3485,7 +3756,7 @@ class Application(Gtk.Application):
                 r[Column.FAV_BACKGROUND] = self._NEW_COLOR
 
     def on_services_mark_not_in_bouquets(self, item):
-        if self._services_load_spinner.get_property("active"):
+        if self.is_data_loading():
             self.show_error_message("Data loading in progress!")
             return
 
@@ -3508,7 +3779,7 @@ class Application(Gtk.Application):
         yield True
 
     def on_services_clear_marked(self, item):
-        if self._services_load_spinner.get_property("active"):
+        if self.is_data_loading():
             self.show_error_message("Data loading in progress!")
             return
 
@@ -3534,6 +3805,7 @@ class Application(Gtk.Application):
         self._settings.display_picons = set_display
         self._picon_column.set_visible(set_display)
         self._fav_picon_column.set_visible(set_display)
+        self._iptv_picon_column.set_visible(set_display)
         self.refresh_models()
 
     @run_idle
@@ -3543,25 +3815,9 @@ class Application(Gtk.Application):
         self._services_view.set_model(model)
         self._fav_view.set_model(None)
         self._fav_view.set_model(self._fav_model)
-
-    def picon_data_func(self, column, renderer, model, itr, data):
-        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.SRV_PICON_ID)))
-
-    def fav_picon_data_func(self, column, renderer, model, itr, data):
-        srv = self._services.get(model.get_value(itr, Column.FAV_ID), None)
-        if not srv:
-            return True
-
-        picon = self._picons.get(srv.picon_id, None)
-        # Alternatives.
-        if srv.service_type == BqServiceType.ALT.name:
-            alt_servs = srv.transponder
-            if alt_servs:
-                alt_srv = self._services.get(alt_servs[0].data, None)
-                if alt_srv:
-                    picon = self._picons.get(alt_srv.picon_id, None) if srv else None
-
-        renderer.set_property("pixbuf", picon)
+        model = self._iptv_services_view.get_model()
+        self._iptv_services_view.set_model(None)
+        self._iptv_services_view.set_model(model)
 
     @run_idle
     def update_picons(self):
@@ -3616,7 +3872,7 @@ class Application(Gtk.Application):
         self.create_bouquets(BqGenType.EACH_TYPE)
 
     def create_bouquets(self, g_type):
-        if self._services_load_spinner.get_property("active"):
+        if self.is_data_loading():
             self.show_error_message("Data loading in progress!")
             return
 
@@ -3722,11 +3978,11 @@ class Application(Gtk.Application):
         txt = data.get_text()
         if txt:
             itr_str, sep, source = txt.partition(self.DRAG_SEP)
-            if source == self.SERVICE_MODEL_NAME:
+            if source == self.SERVICE_MODEL:
                 model, id_col, t_col = self._services_view.get_model(), Column.SRV_FAV_ID, Column.SRV_TYPE
-            elif source == self.FAV_MODEL_NAME:
+            elif source == self.FAV_MODEL:
                 model, id_col, t_col = self._fav_view.get_model(), Column.FAV_ID, Column.FAV_TYPE
-            elif source == self.ALT_MODEL_NAME:
+            elif source == self.ALT_MODEL:
                 return self.on_alt_move(itr_str, view.get_dest_row_at_pos(x, y), srv)
             else:
                 return True
@@ -3818,6 +4074,10 @@ class Application(Gtk.Application):
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)
 
+    def is_data_loading(self):
+        is_services_loading = self._services_load_spinner.get_property("active")
+        return is_services_loading or self._iptv_services_load_spinner.get_property("active")
+
     def is_data_saved(self):
         if self._data_hash != 0 and self._data_hash != self.get_data_hash():
             msg = "There are unsaved changes.\n\n\t Save them now?"
@@ -3840,6 +4100,10 @@ class Application(Gtk.Application):
     @property
     def services_view(self):
         return self._services_view
+
+    @property
+    def iptv_services_view(self):
+        return self._iptv_services_view
 
     @property
     def bouquets_view(self):

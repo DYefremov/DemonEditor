@@ -617,10 +617,10 @@ class TimerTool(Gtk.Box):
                 return
 
             fav_id = None
-            if source == self._app.FAV_MODEL_NAME:
+            if source == self._app.FAV_MODEL:
                 model = self._app.fav_view.get_model()
                 fav_id = model.get_value(model.get_iter_from_string(itrs[0]), Column.FAV_ID)
-            elif source == self._app.SERVICE_MODEL_NAME:
+            elif source == self._app.SERVICE_MODEL:
                 model = self._app.services_view.get_model()
                 fav_id = model.get_value(model.get_iter_from_string(itrs[0]), Column.SRV_FAV_ID)
 
