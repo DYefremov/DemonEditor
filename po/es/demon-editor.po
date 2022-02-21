@@ -17,7 +17,7 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 msgid "translator-credits"
-msgstr "Víctor Pont <victor@pont.cat>"
+msgstr "Víctor Pont <victor@pont.cat>\nFrank Neirynck <frank@insink.be>"
 
 # Main
 msgid "Service"
