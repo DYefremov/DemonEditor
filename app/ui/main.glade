@@ -4560,6 +4560,7 @@ Author: Dmitriy Yefremov
                 <property name="image">edit_image_1</property>
                 <property name="use_stock">False</property>
                 <signal name="activate" handler="on_rename_for_bouquet" swapped="no"/>
+                <accelerator key="r" signal="activate" modifiers="GDK_SHIFT_MASK | Primary"/>
               </object>
             </child>
             <child>

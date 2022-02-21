@@ -2639,6 +2639,11 @@ class Application(Gtk.Application):
                 self.on_paste(view, ViewTarget.BOUQUET)
         elif key is KeyboardKey.DELETE:
             self.on_delete(view)
+        elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
+            if event.state & Gdk.ModifierType.SHIFT_MASK:
+                self.on_rename_for_bouquet()
+            else:
+                self.on_rename(view)
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
@@ -2650,9 +2655,7 @@ class Application(Gtk.Application):
         ctrl = event.state & MOD_MASK
         model_name, model = get_model_data(view)
 
-        if ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
-            self.on_rename(view)
-        elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
+        if key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
         elif ctrl and model_name == self.FAV_MODEL:
             if key is KeyboardKey.P:
@@ -3682,13 +3685,12 @@ class Application(Gtk.Application):
         elif name == self.SERVICE_MODEL:
             rename(view, self._main_window, ViewTarget.SERVICES, fav_view=self._fav_view, services=self._services)
 
-    def on_rename_for_bouquet(self, item):
-        selection = get_selection(self._fav_view, self._main_window)
-        if not selection:
+    def on_rename_for_bouquet(self, item=None):
+        path, column = self._fav_view.get_cursor()
+        if not self._fav_view.is_focus() or path is None:
             return
 
-        model, paths = selection
-        data = model[paths][:]
+        data = self._fav_model[path][:]
         cur_name, srv_type, fav_id = data[Column.FAV_SERVICE], data[Column.FAV_TYPE], data[Column.FAV_ID]
 
         if srv_type == BqServiceType.IPTV.name or srv_type == BqServiceType.MARKER.name:
@@ -3712,8 +3714,8 @@ class Application(Gtk.Application):
             else:
                 self._extra_bouquets[self._bq_selected] = {fav_id: response}
 
-        model.set(model.get_iter(paths), {Column.FAV_SERVICE: response, Column.FAV_TOOLTIP: None,
-                                          Column.FAV_BACKGROUND: self._EXTRA_COLOR})
+        self._fav_model.set(self._fav_model.get_iter(path), {Column.FAV_SERVICE: response, Column.FAV_TOOLTIP: None,
+                                                             Column.FAV_BACKGROUND: self._EXTRA_COLOR})
 
     def on_set_default_name_for_bouquet(self, item):
         selection = get_selection(self._fav_view, self._main_window)
