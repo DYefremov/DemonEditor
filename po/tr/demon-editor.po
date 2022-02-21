@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2021-11-11 23:49+0300\n"
+"PO-Revision-Date: 2022-02-21 22:06+0300\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -52,6 +52,9 @@ msgstr "Geçerli IP:"
 
 msgid "Assign"
 msgstr "Ata"
+
+msgid "Assign file"
+msgstr "Dosya ata"
 
 msgid "Bouquet details"
 msgstr "Buket detayları"
@@ -232,6 +235,9 @@ msgstr "Profili sıfırla"
 
 msgid "Satellites"
 msgstr "Uydular"
+
+msgid "Transponders"
+msgstr "Transponders"
 
 msgid "Satellites.xml file:"
 msgstr "Satellites.xml dosyası:"
@@ -1329,3 +1335,30 @@ msgstr "Hizmetleri istediğiniz simgeye veya simgeyi seçili hizmetler listesine
 
 msgid "Sets the profile folder as default to store picons, backups, etc."
 msgstr "Picon'ları, yedekleri vb. depolamak için profil klasörünü varsayılan olarak ayarlar."
+
+msgid "New sub-bouquet"
+msgstr "Yeni alt buket"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Buketlerde olmayanları işaretleyin"
+
+msgid "Not in Bouquets"
+msgstr "Buketlerde Değil"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Buketlerde bulunan hizmetleri göstermeyin."
+
+msgid "IPTV services only"
+msgstr "Yalnızca IPTV hizmetleri"
+
+msgid "Display picons"
+msgstr "Display piconlar"
+
+msgid "Alternate layout"
+msgstr "Alternatif düzen"
+
+msgid "Layout of elements has been changed!"
+msgstr "Öğelerin düzeni değiştirildi!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Tüm değişiklikleri uygulamak için programı yeniden başlatın."
