@@ -1347,3 +1347,19 @@ msgstr "Das Layout der Elemente wurde geändert!"
 
 msgid "Restart the program to apply all changes."
 msgstr "Starte das Programm neu, um alle Änderungen zu übernehmen."
+
+msgid "New folder"
+msgstr "Ordner erstellen"
+
+msgid "Rename"
+msgstr "Umbenennen"
+
+msgid "Bookmarks"
+msgstr "Lesezeichen"
+
+msgid "Add bookmark"
+msgstr "Lesezeichen hinzufügen"
+
+msgid "All bouquets"
+msgstr "Alle Bouquets"
+
