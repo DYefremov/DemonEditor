@@ -335,6 +335,10 @@ class FtpClientBox(Gtk.HBox):
 
         if size == self.FOLDER or f_path == self.ROOT:
             self.init_ftp_data(f_path)
+        elif size == self.LINK:
+            name, sep, f_path = f_path.partition("->")
+            if f_path:
+                self.init_ftp_data(f_path.strip())
         else:
             b_size = row[self.Column.EXTRA]
             if b_size.isdigit() and int(b_size) > self.MAX_SIZE:
