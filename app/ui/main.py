@@ -3610,6 +3610,8 @@ class Application(Gtk.Application):
     def activate_search_state(self, view):
         if view is self._services_view:
             self._srv_search_button.set_active(True)
+        elif view is self._iptv_services_view:
+            self._iptv_search_button.set_active(True)
         elif view is self._fav_view:
             self._fav_search_button.set_active(True)
 
