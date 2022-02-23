@@ -10,10 +10,22 @@
   margin: 1px;
 }
 
+#stack-switch-button {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
 paned > separator {
   background-repeat: no-repeat;
   background-position: center;
+}
+
+paned.horizontal > separator {
   background-size: 2px 24px;
+}
+
+paned.vertical > separator {
+  background-size: 24px 2px;
 }
 
 .red-button {

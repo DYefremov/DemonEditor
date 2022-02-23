@@ -1717,6 +1717,7 @@ Author: Dmitriy Yefremov
                                         <property name="layout_style">expand</property>
                                         <child>
                                           <object class="GtkRadioButton" id="dvb_button">
+                                            <property name="name">stack-switch-button</property>
                                             <property name="label" translatable="yes">DVB</property>
                                             <property name="width_request">80</property>
                                             <property name="visible">True</property>
@@ -1734,6 +1735,7 @@ Author: Dmitriy Yefremov
                                         </child>
                                         <child>
                                           <object class="GtkRadioButton" id="iptv_button">
+                                            <property name="name">stack-switch-button</property>
                                             <property name="label" translatable="yes">IPTV</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
