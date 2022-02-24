@@ -17,7 +17,9 @@ msgstr ""
 "X-Generator: Poedit 3.0.1\n"
 
 msgid "translator-credits"
-msgstr "Víctor Pont <victor@pont.cat>\nFrank Neirynck <frank@insink.be>"
+msgstr ""
+"Víctor Pont <victor@pont.cat>\n"
+"Frank Neirynck <frank@insink.be>"
 
 # Main
 msgid "Service"
@@ -168,10 +170,10 @@ msgid "Satellites downloader"
 msgstr "Descarga de satélites"
 
 msgid "Remove"
-msgstr "Quitar"
+msgstr "Borrar"
 
 msgid "Remove all unavailable"
-msgstr "Quitar todo lo indisponible"
+msgstr "Borrar lo que no esté disponible"
 
 msgid "Satellites editor"
 msgstr "Editor de satélites"
@@ -231,7 +233,7 @@ msgid "Receiver IP:"
 msgstr "IP del receptor:"
 
 msgid "Remove unused bouquets"
-msgstr "Quitar bouquets sin usar"
+msgstr "Borrar bouquets sin usar"
 
 msgid "Reset profile"
 msgstr "Restablecer perfil"
@@ -384,7 +386,7 @@ msgid "Satellites update"
 msgstr "Actualizar satélites"
 
 msgid "Remove selection"
-msgstr "Quitar selección"
+msgstr "Borrar selección"
 
 # Service details dialog
 msgid "Service data:"
@@ -501,7 +503,7 @@ msgid "Error. No bouquet is selected!"
 msgstr "Error. ¡Ningún bouquet seleccionado!"
 
 msgid "This item is not allowed to be removed!"
-msgstr "¡Este elemento no puede ser quitado!"
+msgstr "¡Este elemento no puede ser borrado!"
 
 msgid "This item is not allowed to edit!"
 msgstr "¡Este elemento no puede ser editado!"
@@ -668,7 +670,7 @@ msgid "No bouquet file is selected!"
 msgstr "¡No se ha seleccionado nigún fichero de bouquet!"
 
 msgid "Remove all unused"
-msgstr "Quitar todos sin usar"
+msgstr "Borrar los que están sin usar"
 
 msgid "Test"
 msgstr "Probar"
@@ -828,7 +830,7 @@ msgid "Drag  or paste the link here"
 msgstr "Soltar o pegar en enlace aquí"
 
 msgid "Remove added links in the playlist"
-msgstr "Quitar los enlaces añadidos en la lista de reproducción"
+msgstr "Borrar los enlaces añadidos a la lista de reproducción"
 
 msgid "A bouquet with that name exists!"
 msgstr "¡Ya existe un bouquet con ese nombre!"
@@ -999,7 +1001,7 @@ msgid "Download from the receiver"
 msgstr "Descargar desde el receptor"
 
 msgid "Remove all picons from the receiver"
-msgstr "Eliminar todos los picons del receptor"
+msgstr "Borrar todos los picons del receptor"
 
 msgid "Service reference"
 msgstr "Referencia del servicio"
@@ -1042,7 +1044,7 @@ msgstr ""
 "\t de servicios en este bouquet?"
 
 msgid "Remove from the receiver"
-msgstr "Eliminar del receptor"
+msgstr "Borrar del receptor"
 
 msgid "Screenshot"
 msgstr "Captura de pantalla"
@@ -1084,7 +1086,7 @@ msgid "Open archive"
 msgstr "Abrir fichero"
 
 msgid "Import from Web"
-msgstr "Importar de la Web"
+msgstr "Importar de Internet"
 
 msgid "Control"
 msgstr "Control"
@@ -1364,4 +1366,19 @@ msgid "Layout of elements has been changed!"
 msgstr "¡El diseño de los elementos ha cambiado!"
 
 msgid "Restart the program to apply all changes."
-msgstr "Reiniciar el programa para aplicar los cambios."
+msgstr "Reinicia el programa para aplicar los cambios."
+
+msgid "New folder"
+msgstr "Nueva carpeta"
+
+msgid "Rename"
+msgstr "Renombrar"
+
+msgid "Bookmarks"
+msgstr "Marcadores"
+
+msgid "Add bookmark"
+msgstr "Añadir marcador"
+
+msgid "All bouquets"
+msgstr "Todos los bouquets"
