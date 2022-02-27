@@ -1,16 +1,11 @@
 * {
-  -GtkDialog-action-area-border: 6;
-}
-
-button {
-  min-height: 24px;
-  min-width: 24px;
-}
-
-entry {
-  min-height: 24px;
+  -GtkDialog-action-area-border: 12;
 }
 
 switch {
- margin-right: 2px;
+  margin-right: 2px;
+}
+
+spinbutton entry {
+  min-height: 16px;
 }

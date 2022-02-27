@@ -195,14 +195,14 @@ Author: Dmitriy Yefremov
                         <child>
                           <object class="GtkToggleButton" id="bookmarks_button">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
                             <property name="receives_default">True</property>
                             <property name="tooltip_text" translatable="yes">Bookmarks</property>
                             <child>
                               <object class="GtkImage" id="bookmark_image">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="icon_name">user-bookmarks</property>
+                                <property name="icon_name">user-bookmarks-symbolic</property>
                               </object>
                             </child>
                           </object>
@@ -216,7 +216,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkButton" id="add_ftp_bookmark_button">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
                             <property name="receives_default">True</property>
                             <property name="tooltip_text" translatable="yes">Add bookmark</property>
                             <signal name="clicked" handler="on_bookmark_add" swapped="no"/>
@@ -224,7 +224,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkImage" id="ftp_remove_button_image1">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="icon_name">bookmark-new</property>
+                                <property name="icon_name">bookmark-new-symbolic</property>
                               </object>
                             </child>
                           </object>

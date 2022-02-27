@@ -1,3 +1,7 @@
+* {
+  -GtkDialog-action-area-border: 6;
+}
+
 #digit-entry {
   border-color: Red;
 }
