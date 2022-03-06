@@ -37,10 +37,6 @@ from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT, IS_GNOME_SESSION
 
 
-def show_settings_dialog(transient, options):
-    return SettingsDialog(transient, options).show()
-
-
 class SettingsDialog:
     _DIGIT_ENTRY_NAME = "digit-entry"
     _DIGIT_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
@@ -151,12 +147,8 @@ class SettingsDialog:
         self._edit_preset_switch.bind_property("active", self._apply_presets_button, "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("video_options_frame"), "sensitive")
         self._edit_preset_switch.bind_property("active", builder.get_object("audio_options_frame"), "sensitive")
-        self._play_in_built_radio_button = builder.get_object("play_in_built_radio_button")
-        self._play_in_window_radio_button = builder.get_object("play_in_window_radio_button")
-        self._get_m3u_radio_button = builder.get_object("get_m3u_radio_button")
-        self._gst_lib_button = builder.get_object("gst_lib_button")
-        self._vlc_lib_button = builder.get_object("vlc_lib_button")
-        self._mpv_lib_button = builder.get_object("mpv_lib_button")
+        self._play_streams_combo_box = builder.get_object("play_streams_combo_box")
+        self._stream_lib_combo_box = builder.get_object("stream_lib_combo_box")
         # Program.
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
@@ -324,8 +316,8 @@ class SettingsDialog:
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self.set_fav_click_mode(self._settings.fav_click_mode)
-        self.set_play_stream_mode(self._settings.play_streams_mode)
-        self.set_stream_lib(self._settings.stream_lib)
+        self._play_streams_combo_box.set_active(self._settings.play_streams_mode.value)
+        self._stream_lib_combo_box.set_active_id(self._settings.stream_lib)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
         self._bouquet_hints_switch.set_active(self._settings.show_bq_hints)
         self._services_hints_switch.set_active(self._settings.show_srv_hints)
@@ -387,8 +379,8 @@ class SettingsDialog:
         self._ext_settings.backup_before_save = self._before_save_switch.get_active()
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
         self._ext_settings.fav_click_mode = self.get_fav_click_mode()
-        self._ext_settings.play_streams_mode = self.get_play_stream_mode()
-        self._ext_settings.stream_lib = self.get_stream_lib()
+        self._ext_settings.play_streams_mode = PlayStreamsMode(self._play_streams_combo_box.get_active())
+        self._ext_settings.stream_lib = self._stream_lib_combo_box.get_active_id()
         self._ext_settings.language = self._lang_combo_box.get_active_id()
         self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
@@ -668,47 +660,10 @@ class SettingsDialog:
         return FavClickMode.DISABLED
 
     def on_play_mode_changed(self, button):
-        if self._main_stack.get_visible_child_name() != "streaming" or not button.get_active():
+        if self._main_stack.get_visible_child_name() != "streaming":
             return
 
-        if self._settings.is_darwin:
-            is_gst = self._gst_lib_button.get_active()
-            self._play_in_built_radio_button.set_sensitive(is_gst)
-            self._play_in_window_radio_button.set_active(not is_gst and self._play_in_built_radio_button.get_active())
-
-        if button.get_active():
-            self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
-
-    @run_idle
-    def set_play_stream_mode(self, mode):
-        self._play_in_built_radio_button.set_active(mode is PlayStreamsMode.BUILT_IN)
-        self._play_in_window_radio_button.set_active(mode is PlayStreamsMode.WINDOW)
-        self._get_m3u_radio_button.set_active(mode is PlayStreamsMode.M3U)
-
-        if self._settings.is_darwin and self._settings.stream_lib != "gst":
-            self._play_in_built_radio_button.set_sensitive(False)
-
-    def get_play_stream_mode(self):
-        if self._play_in_built_radio_button.get_active():
-            return PlayStreamsMode.BUILT_IN
-        if self._play_in_window_radio_button.get_active():
-            return PlayStreamsMode.WINDOW
-        if self._get_m3u_radio_button.get_active():
-            return PlayStreamsMode.M3U
-
-        return self._settings.play_streams_mode
-
-    def set_stream_lib(self, mode):
-        self._vlc_lib_button.set_active(mode == "vlc")
-        self._gst_lib_button.set_active(mode == "gst")
-        self._mpv_lib_button.set_active(mode == "mpv")
-
-    def get_stream_lib(self):
-        if self._gst_lib_button.get_active():
-            return "gst"
-        elif self._vlc_lib_button.get_active():
-            return "vlc"
-        return "mpv"
+        self.show_info_message("Save and restart the program to apply the settings.", Gtk.MessageType.WARNING)
 
     def on_transcoding_preset_changed(self, button):
         presets = self._settings.transcoding_presets

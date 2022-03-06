@@ -168,7 +168,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="profile_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_bottom">5</property>
                     <property name="label_xalign">0.05000000074505806</property>
                     <property name="shadow_type">in</property>
                     <child>
@@ -372,7 +371,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="network_settings_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_bottom">5</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child type="label">
@@ -399,11 +397,8 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="paths_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">2</property>
+                <property name="spacing">5</property>
                 <child>
                   <object class="GtkFrame" id="local_file_paths_frame">
                     <property name="visible">True</property>
@@ -584,8 +579,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="record_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
@@ -637,7 +630,7 @@ Author: Dmitriy Yefremov
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
                   </packing>
@@ -653,11 +646,130 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="streaming_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
+                <child>
+                  <object class="GtkFrame" id="streaming_box_frame">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkBox" id="playback_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkBox" id="streams_lib_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel" id="streams_lib_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Use to play streams:</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="stream_lib_combo_box">
+                                <property name="width_request">175</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">0</property>
+                                <property name="active_id">vlc</property>
+                                <items>
+                                  <item id="vlc" translatable="yes">VLC Player</item>
+                                  <item id="gst" translatable="yes">GStreamer</item>
+                                  <item id="mpv" translatable="yes">MPV</item>
+                                </items>
+                                <signal name="changed" handler="on_play_mode_changed" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="play_streams_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel" id="play_streams_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Play streams mode:</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="play_streams_combo_box">
+                                <property name="width_request">175</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="active">0</property>
+                                <property name="active_id">Built-in player</property>
+                                <items>
+                                  <item id="0" translatable="yes">Built-in player</item>
+                                  <item id="1" translatable="yes">In a separate window</item>
+                                  <item id="2" translatable="yes">Only get m3u file</item>
+                                </items>
+                                <signal name="changed" handler="on_play_mode_changed" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Playback</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
                 <child>
                   <object class="GtkFrame" id="record_to_disk_frame">
                     <property name="visible">True</property>
@@ -670,6 +782,7 @@ Author: Dmitriy Yefremov
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
+                        <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
@@ -677,6 +790,8 @@ Author: Dmitriy Yefremov
                           <object class="GtkBox" id="enable_transcoding_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="margin_top">5</property>
+                            <property name="margin_bottom">5</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="enable_transcoding_labe">
@@ -704,7 +819,7 @@ Author: Dmitriy Yefremov
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
@@ -736,6 +851,7 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkComboBoxText" id="presets_combo_box">
+                                    <property name="width_request">175</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="active_id">720p TV/device</property>
@@ -746,7 +862,7 @@ Author: Dmitriy Yefremov
                                     <signal name="changed" handler="on_transcoding_preset_changed" swapped="no"/>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
+                                    <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
@@ -791,7 +907,7 @@ Author: Dmitriy Yefremov
                                 </child>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
+                                <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
@@ -801,6 +917,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_bottom">5</property>
                                 <property name="label_xalign">0.5</property>
                                 <property name="shadow_type">in</property>
                                 <child>
@@ -932,6 +1049,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_bottom">5</property>
                                 <property name="label_xalign">0.5</property>
                                 <property name="shadow_type">in</property>
                                 <child>
@@ -1084,167 +1202,9 @@ Author: Dmitriy Yefremov
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="play_streams_frame">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0.019999999552965164</property>
-                    <property name="shadow_type">in</property>
-                    <child>
-                      <object class="GtkBox" id="play_streams_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">center</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkRadioButton" id="play_in_built_radio_button">
-                            <property name="label" translatable="yes">Built-in player</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">get_m3u_radio_button</property>
-                            <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="play_in_window_radio_button">
-                            <property name="label" translatable="yes">In a separate window</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">get_m3u_radio_button</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="get_m3u_radio_button">
-                            <property name="label" translatable="yes">Only get m3u file</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="play_streams_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Play streams mode:</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="streams_lib_frame">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0.019999999552965164</property>
-                    <property name="shadow_type">in</property>
-                    <child>
-                      <object class="GtkBox" id="streams_lib_box">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">center</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkRadioButton" id="gst_lib_button">
-                            <property name="label" translatable="yes">GStreamer</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">EXPERIMENTAL!</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">mpv_lib_button</property>
-                            <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="vlc_lib_button">
-                            <property name="label" translatable="yes">VLC Player</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">mpv_lib_button</property>
-                            <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="mpv_lib_button">
-                            <property name="label" translatable="yes">MPV</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">EXPERIMENTAL!</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">gst_lib_button</property>
-                            <signal name="toggled" handler="on_play_mode_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="streams_lib_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Use to play streams:</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -1258,10 +1218,6 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="program_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
@@ -1292,7 +1248,7 @@ Author: Dmitriy Yefremov
                         </child>
                         <child>
                           <object class="GtkComboBoxText" id="lang_combo_box">
-                            <property name="width_request">150</property>
+                            <property name="width_request">175</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="focus_on_click">False</property>
@@ -1725,10 +1681,6 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="appearance_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
@@ -2477,11 +2429,8 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="extra_box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_top">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">5</property>
+                <property name="spacing">10</property>
                 <child>
                   <object class="GtkFrame" id="bq_naming_frame">
                     <property name="visible">True</property>
@@ -2540,23 +2489,51 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="enable_experimental_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label_xalign">0.019999999552965164</property>
+                    <property name="label_xalign">0.5</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkBox" id="enable_experimental_box">
+                      <object class="GtkBox" id="experimental_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
                         <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
-                        <property name="spacing">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
                         <child>
-                          <object class="GtkLabel" id="enable_experimental_label">
+                          <object class="GtkBox" id="enable_experimental_box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">start</property>
-                            <property name="label" translatable="yes">Enable experimental features</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel" id="enable_experimental_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Enable experimental features</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="enable_experimental_switch">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="halign">end</property>
+                                <property name="valign">center</property>
+                                <signal name="state-set" handler="on_experimental_switch" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack_type">end</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2565,65 +2542,10 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSwitch" id="enable_experimental_switch">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <signal name="state-set" handler="on_experimental_switch" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="pack_type">end</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label_item">
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">EXPERIMENTAL!</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="experimental_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <object class="GtkFrame" id="v5_frame">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label_xalign">0.019999999552965164</property>
-                        <property name="shadow_type">in</property>
-                        <child>
                           <object class="GtkBox" id="v5_support_box">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
-                            <property name="margin_bottom">5</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
@@ -2652,32 +2574,19 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame" id="yt_dl_frame">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label_xalign">0.019999999552965164</property>
-                        <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkBox" id="yt_dl_box">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
-                            <property name="margin_bottom">5</property>
+                            <property name="margin_top">10</property>
+                            <property name="margin_bottom">10</property>
                             <property name="orientation">vertical</property>
                             <property name="spacing">5</property>
                             <child>
@@ -2778,32 +2687,17 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
                         </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame" id="direct_playback_frame">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkBox" id="enable_direct_playback_box">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">5</property>
-                            <property name="margin_right">5</property>
-                            <property name="margin_top">5</property>
-                            <property name="margin_bottom">5</property>
                             <child>
                               <object class="GtkLabel" id="enable_send_to_label">
                                 <property name="visible">True</property>
@@ -2833,22 +2727,26 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                           </object>
-                        </child>
-                        <child type="label_item">
-                          <placeholder/>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
                         </child>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">EXPERIMENTAL!</property>
+                      </object>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">8</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
@@ -3005,8 +2903,8 @@ Author: Dmitriy Yefremov
   <object class="GtkBox" id="network_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="margin_left">5</property>
-    <property name="margin_right">5</property>
+    <property name="margin_left">10</property>
+    <property name="margin_right">10</property>
     <property name="margin_top">5</property>
     <property name="margin_bottom">5</property>
     <property name="orientation">vertical</property>
@@ -3015,8 +2913,6 @@ Author: Dmitriy Yefremov
       <object class="GtkGrid" id="network_grid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
         <property name="row_spacing">5</property>
         <property name="column_spacing">5</property>
         <child>
@@ -3538,8 +3434,6 @@ Author: Dmitriy Yefremov
       <object class="GtkBox" id="test_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
         <property name="margin_top">5</property>
         <child>
           <object class="GtkButtonBox" id="test_button_box">
@@ -3550,6 +3444,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkRadioButton" id="ftp_radio_button">
                 <property name="label" translatable="yes">FTP</property>
+                <property name="width_request">75</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -3565,6 +3460,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkRadioButton" id="http_radio_button">
                 <property name="label" translatable="yes">HTTP</property>
+                <property name="width_request">75</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -3580,6 +3476,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkRadioButton" id="telnet_radio_button">
                 <property name="label" translatable="yes">Telnet</property>
+                <property name="width_request">75</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
