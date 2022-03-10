@@ -57,6 +57,8 @@ class PlayerBox(Gtk.Box):
 
         self._app = app
         self._app.connect("fav-clicked", self.on_fav_clicked)
+        self._app.connect("srv-clicked", self.on_srv_clicked)
+        self._app.connect("iptv-clicked", self.on_iptv_clicked)
         self._app.connect("page-changed", self.on_page_changed)
         self._app.connect("play-current", self.on_play_current)
         self._app.connect("play-recording", self.on_play_recording)
@@ -111,6 +113,21 @@ class PlayerBox(Gtk.Box):
             self._app.on_zap(self.on_watch)
         elif mode is FavClickMode.PLAY:
             self.on_play_service()
+
+    def on_srv_clicked(self, app, mode):
+        if not self._app.http_api:
+            return
+
+    def on_iptv_clicked(self, app, mode):
+        if not self._app.http_api:
+            return
+
+        view = self._app.iptv_services_view
+        path, column = view.get_cursor()
+        if path:
+            row = view.get_model()[path][:]
+            url = get_iptv_url(row, self._app.app_settings.setting_type, Column.IPTV_FAV_ID)
+            self.play(url, row[Column.IPTV_SERVICE]) if url else self.on_error(None, "No reference is present!")
 
     def on_play_current(self, app, url):
         self.on_watch()
@@ -302,7 +319,7 @@ class PlayerBox(Gtk.Box):
         widget.set_size_request(w * 0.6, -1)
 
     @run_idle
-    def show_playback_window(self):
+    def show_playback_window(self, title=None):
         width, height = 480, 240
         size = self._app.app_settings.get("playback_window_size")
         if size:
@@ -310,9 +327,9 @@ class PlayerBox(Gtk.Box):
 
         if self._playback_window:
             self._playback_window.show()
-            self._playback_window.set_title(self.get_playback_title())
+            self._playback_window.set_title(title or self.get_playback_title())
         else:
-            self._playback_window = Gtk.Window(title=self.get_playback_title(),
+            self._playback_window = Gtk.Window(title=title or self.get_playback_title(),
                                                window_position=Gtk.WindowPosition.CENTER,
                                                icon_name="demon-editor")
 
@@ -381,7 +398,7 @@ class PlayerBox(Gtk.Box):
         url = self._app.get_url_from_m3u(data)
         GLib.timeout_add_seconds(1, self.play, url) if url else self.on_error(None, "Can't Playback!")
 
-    def play(self, url):
+    def play(self, url, title=None):
         if self._play_mode is PlayStreamsMode.M3U:
             self._app.save_stream_to_m3u(url)
             return
@@ -393,7 +410,7 @@ class PlayerBox(Gtk.Box):
         if self._play_mode is PlayStreamsMode.BUILT_IN:
             self.show()
         elif self._play_mode is PlayStreamsMode.WINDOW:
-            self.show_playback_window()
+            self.show_playback_window(title)
 
         if self._player:
             self.emit("play", url)

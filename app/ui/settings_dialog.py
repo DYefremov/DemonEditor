@@ -149,6 +149,8 @@ class SettingsDialog:
         self._edit_preset_switch.bind_property("active", builder.get_object("audio_options_frame"), "sensitive")
         self._play_streams_combo_box = builder.get_object("play_streams_combo_box")
         self._stream_lib_combo_box = builder.get_object("stream_lib_combo_box")
+        self._double_click_combo_box = builder.get_object("double_click_combo_box")
+        self._allow_main_list_playback_switch = builder.get_object("allow_main_list_playback_switch")
         # Program.
         self._before_save_switch = builder.get_object("before_save_switch")
         self._before_downloading_switch = builder.get_object("before_downloading_switch")
@@ -169,13 +171,6 @@ class SettingsDialog:
         self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
         self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
         self._enable_send_to_switch = builder.get_object("enable_send_to_switch")
-        self._click_mode_disabled_button = builder.get_object("click_mode_disabled_button")
-        self._click_mode_stream_button = builder.get_object("click_mode_stream_button")
-        self._click_mode_play_button = builder.get_object("click_mode_play_button")
-        self._click_mode_zap_button = builder.get_object("click_mode_zap_button")
-        self._click_mode_zap_and_play_button = builder.get_object("click_mode_zap_and_play_button")
-        self._click_mode_zap_button.bind_property("sensitive", self._click_mode_play_button, "sensitive")
-        self._click_mode_zap_button.bind_property("sensitive", self._click_mode_zap_and_play_button, "sensitive")
         # EXPERIMENTAL.
         self._enable_exp_switch = builder.get_object("enable_experimental_switch")
         self._enable_exp_switch.bind_property("active", builder.get_object("yt_dl_box"), "sensitive")
@@ -184,9 +179,9 @@ class SettingsDialog:
         self._enable_exp_switch.bind_property("active", builder.get_object("enable_direct_playback_box"), "sensitive")
         # Enigma2 only.
         self._enigma_radio_button.bind_property("active", builder.get_object("bq_naming_grid"), "sensitive")
-        self._enigma_radio_button.bind_property("active", builder.get_object("enable_experimental_box"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("program_frame"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("experimental_box"), "sensitive")
+        self._enigma_radio_button.bind_property("active", builder.get_object("allow_double_click_box"), "sensitive")
         # Profiles.
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
@@ -237,7 +232,6 @@ class SettingsDialog:
         self._neutrino_radio_button.set_active(self._s_type is SettingsType.NEUTRINO_MP)
         self.update_picon_paths()
         self.update_title()
-        self._click_mode_zap_button.set_sensitive(self._support_http_api_switch.get_active())
         self._lang_combo_box.set_active_id(self._ext_settings.language)
         self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
             "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
@@ -315,9 +309,10 @@ class SettingsDialog:
         self._record_data_path_field.set_text(self._settings.records_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
-        self.set_fav_click_mode(self._settings.fav_click_mode)
         self._play_streams_combo_box.set_active(self._settings.play_streams_mode.value)
         self._stream_lib_combo_box.set_active_id(self._settings.stream_lib)
+        self._double_click_combo_box.set_active_id(str(self._settings.fav_click_mode))
+        self._allow_main_list_playback_switch.set_active(self._settings.main_list_playback)
         self._load_on_startup_switch.set_active(self._settings.load_last_config)
         self._bouquet_hints_switch.set_active(self._settings.show_bq_hints)
         self._services_hints_switch.set_active(self._settings.show_srv_hints)
@@ -378,9 +373,10 @@ class SettingsDialog:
         self._ext_settings.profiles = self._settings.profiles
         self._ext_settings.backup_before_save = self._before_save_switch.get_active()
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
-        self._ext_settings.fav_click_mode = self.get_fav_click_mode()
         self._ext_settings.play_streams_mode = PlayStreamsMode(self._play_streams_combo_box.get_active())
         self._ext_settings.stream_lib = self._stream_lib_combo_box.get_active_id()
+        self._ext_settings.fav_click_mode = int(self._double_click_combo_box.get_active_id())
+        self._ext_settings.main_list_playback = self._allow_main_list_playback_switch.get_active()
         self._ext_settings.language = self._lang_combo_box.get_active_id()
         self._ext_settings.load_last_config = self._load_on_startup_switch.get_active()
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
@@ -486,11 +482,8 @@ class SettingsDialog:
         self._colors_grid.set_sensitive(state)
 
     def on_http_mode_switch(self, switch, state):
-        self._click_mode_zap_button.set_sensitive(state)
-        if any((self._click_mode_play_button.get_active(),
-                self._click_mode_zap_button.get_active(),
-                self._click_mode_zap_and_play_button.get_active())):
-            self._click_mode_disabled_button.set_active(True)
+        if self._main_stack.get_visible_child_name() == "program" and not state:
+            self.show_info_message("May affect some features availability! ", Gtk.MessageType.WARNING)
 
     def on_experimental_switch(self, switch, state):
         if not state:
@@ -520,7 +513,7 @@ class SettingsDialog:
         name = "profile"
         while name in self._profiles:
             count += 1
-            name = "profile{}".format(count)
+            name = f"profile{count}"
 
         self._profiles[name] = self._s_type.get_default_settings()
         model.append((name, None))
@@ -629,35 +622,20 @@ class SettingsDialog:
         self._settings.http_port = port
 
     def on_click_mode_togged(self, button):
-        if self._main_stack.get_visible_child_name() != "extra":
+        if self._main_stack.get_visible_child_name() != "streaming":
             return
 
-        mode = self.get_fav_click_mode()
+        mode = FavClickMode(int(self._double_click_combo_box.get_active_id()))
         if mode is FavClickMode.PLAY:
             self.show_info_message("Operates in standby mode or current active transponder!", Gtk.MessageType.WARNING)
+        elif mode is FavClickMode.STREAM:
+            self.show_info_message("Playback IPTV streams only!", Gtk.MessageType.WARNING)
+        elif mode is FavClickMode.DISABLED:
+            self._allow_main_list_playback_switch.set_active(False)
         else:
             self.on_info_bar_close()
 
-    @run_idle
-    def set_fav_click_mode(self, mode):
-        mode = FavClickMode(mode)
-        self._click_mode_disabled_button.set_active(mode is FavClickMode.DISABLED)
-        self._click_mode_stream_button.set_active(mode is FavClickMode.STREAM)
-        self._click_mode_play_button.set_active(mode is FavClickMode.PLAY)
-        self._click_mode_zap_button.set_active(mode is FavClickMode.ZAP)
-        self._click_mode_zap_and_play_button.set_active(mode is FavClickMode.ZAP_PLAY)
-
-    def get_fav_click_mode(self):
-        if self._click_mode_zap_button.get_active():
-            return FavClickMode.ZAP
-        if self._click_mode_play_button.get_active():
-            return FavClickMode.PLAY
-        if self._click_mode_zap_and_play_button.get_active():
-            return FavClickMode.ZAP_PLAY
-        if self._click_mode_stream_button.get_active():
-            return FavClickMode.STREAM
-
-        return FavClickMode.DISABLED
+        self._allow_main_list_playback_switch.set_sensitive(mode is not FavClickMode.DISABLED)
 
     def on_play_mode_changed(self, button):
         if self._main_stack.get_visible_child_name() != "streaming":

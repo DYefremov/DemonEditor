@@ -686,9 +686,9 @@ def append_text_to_tview(char, view):
     view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
 
 
-def get_iptv_url(row, s_type):
+def get_iptv_url(row, s_type, column=Column.FAV_ID):
     """ Returns url from iptv type row """
-    data = row[Column.FAV_ID].split(":" if s_type is SettingsType.ENIGMA_2 else "::")
+    data = row[column].split(":" if s_type is SettingsType.ENIGMA_2 else "::")
     if s_type is SettingsType.ENIGMA_2:
         data = list(filter(lambda x: "http" in x, data))
     if data:

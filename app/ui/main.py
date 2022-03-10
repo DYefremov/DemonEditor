@@ -273,6 +273,10 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-clicked", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("srv-clicked", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("iptv-clicked", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("page-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("change-page", self, GObject.SIGNAL_RUN_LAST,
@@ -450,7 +454,6 @@ class Application(Gtk.Application):
         if IS_GNOME_SESSION:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
             header_bar.pack_start(builder.get_object("file_header_button"))
-            header_bar.pack_start(Gtk.Separator(visible=True))
             header_bar.pack_start(profile_box)
             header_bar.pack_start(toolbar_box)
             header_bar.set_custom_title(builder.get_object("stack_switcher"))
@@ -1832,6 +1835,12 @@ class Application(Gtk.Application):
 
             name, model = get_model_data(view)
             self.delete_views_selection(name)
+        elif event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
+            if self._settings.main_list_playback and self._fav_click_mode is not FavClickMode.DISABLED:
+                if view is self._services_view:
+                    self.emit("srv-clicked", self._fav_click_mode)
+                elif view is self._iptv_services_view:
+                    self.emit("iptv-clicked", self._fav_click_mode)
 
     def on_view_release(self, view, event):
         """ Handles a mouse click (release) to view. """
