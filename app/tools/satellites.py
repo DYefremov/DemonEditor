@@ -327,7 +327,7 @@ class SatellitesParser(HTMLParser):
                         if is_transponder_valid(tr):
                             n_trs.append(tr)
 
-                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None)
+                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None, None)
                 if is_transponder_valid(tr):
                     trs.append(tr)
 
@@ -363,7 +363,7 @@ class SatellitesParser(HTMLParser):
             if plp is not None:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id)
+            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -400,7 +400,7 @@ class SatellitesParser(HTMLParser):
             if t2_mi:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id)
+            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -61,8 +61,8 @@ BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 
 Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
 
-Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner",
-                                         "system", "modulation", "pls_mode", "pls_code", "is_id"])
+Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner", "system",
+                                         "modulation", "pls_mode", "pls_code", "is_id", "t2mi_plp_id"])
 
 
 class TrType(Enum):
@@ -247,6 +247,7 @@ def is_transponder_valid(tr: Transponder):
         tr.pls_mode is None or int(tr.pls_mode)
         tr.pls_code is None or int(tr.pls_code)
         tr.is_id is None or int(tr.is_id)
+        tr.t2mi_plp_id is None or int(tr.t2mi_plp_id)
     except (TypeError, ValueError) as e:
         log(f"Transponder validation error: {e}\n{tr}")
         return False

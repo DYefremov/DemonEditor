@@ -304,6 +304,7 @@ class TransponderDialog:
         self._pls_mode_box = builder.get_object("pls_mode_box")
         self._pls_code_entry = builder.get_object("pls_code_entry")
         self._is_id_entry = builder.get_object("is_id_entry")
+        self._t2mi_plp_id_entry = builder.get_object("t2mi_plp_id_entry")
         # pattern for frequency and rate entries (only digits)
         self._pattern = re.compile(r"\D")
         # style
@@ -336,6 +337,7 @@ class TransponderDialog:
         self._pls_mode_box.set_active_id(PLS_MODE.get(transponder.pls_mode, None))
         self._is_id_entry.set_text(transponder.is_id if transponder.is_id else "")
         self._pls_code_entry.set_text(transponder.pls_code if transponder.pls_code else "")
+        self._t2mi_plp_id_entry.set_text(transponder.t2mi_plp_id if transponder.t2mi_plp_id else "")
 
     def to_transponder(self):
         return Transponder(frequency=self._freq_entry.get_text(),
@@ -346,7 +348,8 @@ class TransponderDialog:
                            modulation=self._mod_box.get_active_id(),
                            pls_mode=get_key_by_value(PLS_MODE, self._pls_mode_box.get_active_id()),
                            pls_code=self._pls_code_entry.get_text(),
-                           is_id=self._is_id_entry.get_text())
+                           is_id=self._is_id_entry.get_text(),
+                           t2mi_plp_id=self._t2mi_plp_id_entry.get_text())
 
     def on_entry_changed(self, entry):
         entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
@@ -359,6 +362,8 @@ class TransponderDialog:
         elif None in (tr.polarization, tr.fec_inner, tr.system, tr.modulation):
             return False
         elif self._pattern.search(tr.pls_code) or self._pattern.search(tr.is_id):
+            return False
+        elif self._pattern.search(tr.t2mi_plp_id):
             return False
 
         return True
