@@ -2783,6 +2783,7 @@ Author: Dmitriy Yefremov
                                                 <property name="fixed_height_mode">True</property>
                                                 <property name="rubber_banding">True</property>
                                                 <property name="enable_grid_lines">both</property>
+                                                <property name="tooltip_column">3</property>
                                                 <property name="activate_on_single_click">True</property>
                                                 <signal name="button-press-event" handler="on_view_popup_menu" object="iptv_popup_menu" swapped="no"/>
                                                 <signal name="button-press-event" handler="on_view_press" swapped="no"/>
@@ -2792,6 +2793,7 @@ Author: Dmitriy Yefremov
                                                 <signal name="drag-drop" handler="on_services_view_drag_drop" swapped="no"/>
                                                 <signal name="drag-end" handler="on_view_drag_end" swapped="no"/>
                                                 <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
+                                                <signal name="query-tooltip" handler="on_iptv_view_query_tooltip" swapped="no"/>
                                                 <child internal-child="selection">
                                                   <object class="GtkTreeSelection" id="iptv_services_selection">
                                                     <property name="mode">multiple</property>

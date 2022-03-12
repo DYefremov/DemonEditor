@@ -143,6 +143,7 @@ class Application(Gtk.Application):
                     "on_bq_view_query_tooltip": self.on_bq_view_query_tooltip,
                     "on_fav_view_query_tooltip": self.on_fav_view_query_tooltip,
                     "on_services_view_query_tooltip": self.on_services_view_query_tooltip,
+                    "on_iptv_view_query_tooltip": self.on_iptv_view_query_tooltip,
                     "on_view_drag_begin": self.on_view_drag_begin,
                     "on_view_drag_end": self.on_view_drag_end,
                     "on_view_drag_data_get": self.on_view_drag_data_get,
@@ -1537,8 +1538,29 @@ class Application(Gtk.Application):
 
         return self.get_tooltip(view, result, tooltip, target=ViewTarget.SERVICES)
 
-    def get_tooltip(self, view, dest_row, tooltip, target=ViewTarget.FAV):
-        path, pos = dest_row
+    def on_iptv_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        if not self._main_window.is_active():
+            return False
+
+        result = view.get_dest_row_at_pos(x, y)
+        if not result or not self._settings.show_srv_hints:
+            return False
+
+        path, pos = result
+        srv = self._services.get(view.get_model()[path][Column.IPTV_FAV_ID], None)
+        if srv and srv.picon_id:
+            tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
+                                              size=self._settings.tooltip_logo_size))
+            fav_id = srv.fav_id
+            names = (b[:b.rindex(":")] for b, ids in self._bouquets.items() if fav_id in ids)
+            text = f"{get_message('Name')}: {srv.service}\n{get_message('Bouquets')}: {', '.join(names)}"
+            tooltip.set_text(text)
+            view.set_tooltip_row(tooltip, path)
+            return True
+        return False
+
+    def get_tooltip(self, view, dst_row, tooltip, target=ViewTarget.FAV):
+        path, pos = dst_row
         model = view.get_model()
 
         target_column = Column.FAV_ID if target is ViewTarget.FAV else Column.SRV_FAV_ID
