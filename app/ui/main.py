@@ -3322,18 +3322,21 @@ class Application(Gtk.Application):
             if srv_type == BqServiceType.IPTV.name:
                 return srv.fav_id.strip()
             elif srv.picon_id:
-                ref = srv.picon_id.rstrip(".png").replace("_", ":")
-                if self._s_type is SettingsType.ENIGMA_2:
-                    return ref
-                elif self._s_type is SettingsType.NEUTRINO_MP:
-                    # It may require some correction for cable and terrestrial channels!
-                    try:
-                        pos, freq = int(self.get_pos_num(srv.pos)) * 10, int(srv.freq)
-                        tid, nid, sid = int(ref[: -8], 16), int(ref[-8: -4], 16), int(srv.ssid, 16)
-                    except ValueError:
-                        log(f"Error getting reference for: {srv}")
-                    else:
-                        return format((pos + freq * 4 << 48 | tid << 32 | nid << 16 | sid), "x")
+                return self.get_service_ref_data(srv)
+
+    def get_service_ref_data(self, srv):
+        ref = srv.picon_id.rstrip(".png").replace("_", ":")
+        if self._s_type is SettingsType.ENIGMA_2:
+            return ref
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            # It may require some correction for cable and terrestrial channels!
+            try:
+                pos, freq = int(self.get_pos_num(srv.pos)) * 10, int(srv.freq)
+                tid, nid, sid = int(ref[: -8], 16), int(ref[-8: -4], 16), int(srv.ssid, 16)
+            except ValueError:
+                log(f"Error getting reference for: {srv}")
+            else:
+                return format((pos + freq * 4 << 48 | tid << 32 | nid << 16 | sid), "x")
 
     def update_info(self, req, cb):
         """ Updating current info over HTTP API. """

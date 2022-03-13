@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -117,6 +117,27 @@ class PlayerBox(Gtk.Box):
     def on_srv_clicked(self, app, mode):
         if not self._app.http_api:
             return
+
+        view = self._app.services_view
+        path, column = view.get_cursor()
+        if path:
+            srv = self._app.current_services.get(view.get_model()[path][Column.SRV_FAV_ID], None)
+            if not srv or not srv.picon_id:
+                return
+
+            ref = self._app.get_service_ref_data(srv)
+            s_type = self._app.app_settings.setting_type
+            error_msg = "No connection to the receiver!"
+            if s_type is SettingsType.ENIGMA_2:
+                def zap(rq):
+                    self.on_watch() if rq and rq.get("e2state", False) else self.on_error(None, error_msg)
+
+                self._app.http_api.send(HttpAPI.Request.ZAP, ref, zap)
+            elif self._s_type is SettingsType.NEUTRINO_MP:
+                def zap(rq):
+                    self.on_watch() if rq and rq.get("data", None) == "ok" else self.on_error(None, error_msg)
+
+                self._app.http_api.send(HttpAPI.Request.N_ZAP, f"?{ref}", zap)
 
     def on_iptv_clicked(self, app, mode):
         if not self._app.http_api:
@@ -283,7 +304,7 @@ class PlayerBox(Gtk.Box):
         if click_mode is FavClickMode.PLAY:
             self.on_play_service()
         elif click_mode is FavClickMode.ZAP_PLAY:
-            self.on_zap(self.on_watch)
+            self._app.on_zap(self.on_watch)
         elif click_mode is FavClickMode.STREAM:
             self.on_play_stream()
 
