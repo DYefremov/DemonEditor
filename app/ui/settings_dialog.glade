@@ -128,8 +128,8 @@ Author: Dmitriy Yefremov
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -357,7 +357,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Profile</property>
+                        <property name="label" translatable="yes">Profile:</property>
                       </object>
                     </child>
                   </object>
@@ -377,7 +377,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Network settings</property>
+                        <property name="label" translatable="yes">Network settings:</property>
                       </object>
                     </child>
                   </object>
@@ -565,7 +565,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Local file paths</property>
+                        <property name="label" translatable="yes">Local file paths:</property>
                       </object>
                     </child>
                   </object>
@@ -810,7 +810,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="allow_double_click_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Allow streams playback from the main list</property>
+                                <property name="label" translatable="yes">Allow playback from the main list</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -843,7 +843,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Playback</property>
+                        <property name="label" translatable="yes">Playback:</property>
                       </object>
                     </child>
                   </object>
@@ -932,6 +932,44 @@ Author: Dmitriy Yefremov
                                   </packing>
                                 </child>
                                 <child>
+                                  <object class="GtkBox" id="edit_preset_box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="tooltip_text" translatable="yes">Edit</property>
+                                    <property name="halign">end</property>
+                                    <property name="spacing">5</property>
+                                    <child>
+                                      <object class="GtkImage" id="edit_preset_switch_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">document-edit-symbolic</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSwitch" id="edit_preset_switch">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkComboBoxText" id="presets_combo_box">
                                     <property name="width_request">185</property>
                                     <property name="visible">True</property>
@@ -946,7 +984,7 @@ Author: Dmitriy Yefremov
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -957,167 +995,127 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox" id="edit_preset_box">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Edit</property>
-                                <property name="halign">end</property>
-                                <property name="spacing">5</property>
-                                <child>
-                                  <object class="GtkImage" id="edit_preset_switch_image">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">document-edit-symbolic</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkSwitch" id="edit_preset_switch">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="pack_type">end</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkFrame" id="video_options_frame">
+                              <object class="GtkGrid" id="video_options_grid">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_top">5</property>
                                 <property name="margin_bottom">5</property>
-                                <property name="label_xalign">0.5</property>
-                                <property name="shadow_type">in</property>
+                                <property name="row_spacing">2</property>
+                                <property name="column_spacing">5</property>
                                 <child>
-                                  <object class="GtkGrid" id="video_options_grid">
+                                  <object class="GtkLabel" id="coding_format_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="margin_left">5</property>
-                                    <property name="margin_right">5</property>
-                                    <property name="margin_top">5</property>
-                                    <property name="margin_bottom">5</property>
-                                    <property name="row_spacing">2</property>
-                                    <property name="column_spacing">5</property>
-                                    <child>
-                                      <object class="GtkEntry" id="video_bitrate_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="input_purpose">number</property>
-                                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="video_bitrate_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Bitrate (kb/s):</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="video_width_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="tooltip_text" translatable="yes">
-                                        </property>
-                                        <property name="input_purpose">number</property>
-                                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="video_width_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Width (px):</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="coding_format_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Codec:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkRadioButton" id="h246_radio_button">
-                                        <property name="label">h264</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="receives_default">False</property>
-                                        <property name="halign">center</property>
-                                        <property name="active">True</property>
-                                        <property name="draw_indicator">True</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="video_height_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="input_purpose">number</property>
-                                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="video_height_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Height (px):</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
+                                    <property name="label" translatable="yes">Codec:</property>
                                   </object>
+                                  <packing>
+                                    <property name="left_attach">4</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
                                 </child>
-                                <child type="label">
+                                <child>
+                                  <object class="GtkRadioButton" id="h246_radio_button">
+                                    <property name="label">h264</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="halign">center</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">4</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="video_height_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Height (px):</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="video_height_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="input_purpose">number</property>
+                                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="video_width_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Width (px):</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">2</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="video_width_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="tooltip_text" translatable="yes">
+                                        </property>
+                                    <property name="input_purpose">number</property>
+                                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">2</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="video_bitrate_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Bitrate (kb/s):</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="video_bitrate_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="input_purpose">number</property>
+                                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Video options:</property>
+                                    <property name="xalign">0</property>
                                   </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
@@ -1127,143 +1125,144 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkFrame" id="audio_options_frame">
+                              <object class="GtkGrid" id="audio_options_grid">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_left">5</property>
+                                <property name="margin_right">5</property>
+                                <property name="margin_top">5</property>
                                 <property name="margin_bottom">5</property>
-                                <property name="label_xalign">0.5</property>
-                                <property name="shadow_type">in</property>
+                                <property name="row_spacing">2</property>
+                                <property name="column_spacing">5</property>
                                 <child>
-                                  <object class="GtkGrid" id="audio_options_grid">
+                                  <object class="GtkLabel" id="coding_format_label1">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="margin_left">5</property>
-                                    <property name="margin_right">5</property>
-                                    <property name="margin_top">5</property>
-                                    <property name="margin_bottom">5</property>
-                                    <property name="row_spacing">2</property>
-                                    <property name="column_spacing">5</property>
-                                    <child>
-                                      <object class="GtkEntry" id="audio_bitrate_field">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="input_purpose">number</property>
-                                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="audio_bitrate_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Bitrate (kb/s):</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="audio_channels_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Channels:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="coding_format_label1">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Codec:</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel" id="sample_rate_label">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Sample rate (Hz):</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkComboBoxText" id="audio_channels_combo_box">
-                                        <property name="width_request">75</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="active_id">2</property>
-                                        <items>
-                                          <item id="1" translatable="yes">1</item>
-                                          <item id="2" translatable="yes">2</item>
-                                        </items>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkComboBoxText" id="audio_sample_rate_combo_box">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="active_id">44100</property>
-                                        <items>
-                                          <item id="8000" translatable="yes">8000</item>
-                                          <item id="11025" translatable="yes">11025</item>
-                                          <item id="22050" translatable="yes">22050</item>
-                                          <item id="44100" translatable="yes">44100</item>
-                                          <item id="48000" translatable="yes">48000</item>
-                                        </items>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">2</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkComboBoxText" id="audio_codec_combo_box">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="active_id">mp3</property>
-                                        <items>
-                                          <item id="mp3" translatable="yes">mp3</item>
-                                          <item id="a52" translatable="yes">AC3</item>
-                                        </items>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">3</property>
-                                        <property name="top_attach">1</property>
-                                      </packing>
-                                    </child>
+                                    <property name="label" translatable="yes">Codec:</property>
                                   </object>
+                                  <packing>
+                                    <property name="left_attach">4</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
                                 </child>
-                                <child type="label">
+                                <child>
+                                  <object class="GtkComboBoxText" id="audio_codec_combo_box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="valign">center</property>
+                                    <property name="active_id">mp3</property>
+                                    <items>
+                                      <item id="mp3" translatable="yes">mp3</item>
+                                      <item id="a52" translatable="yes">AC3</item>
+                                    </items>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">4</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="sample_rate_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Sample rate (Hz):</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="audio_sample_rate_combo_box">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="valign">center</property>
+                                    <property name="active_id">44100</property>
+                                    <items>
+                                      <item id="8000" translatable="yes">8000</item>
+                                      <item id="11025" translatable="yes">11025</item>
+                                      <item id="22050" translatable="yes">22050</item>
+                                      <item id="44100" translatable="yes">44100</item>
+                                      <item id="48000" translatable="yes">48000</item>
+                                    </items>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="audio_channels_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Channels:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">2</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="audio_channels_combo_box">
+                                    <property name="width_request">75</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="valign">center</property>
+                                    <property name="active_id">2</property>
+                                    <items>
+                                      <item id="1" translatable="yes">1</item>
+                                      <item id="2" translatable="yes">2</item>
+                                    </items>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">2</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="audio_bitrate_label">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">Bitrate (kb/s):</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="audio_bitrate_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="input_purpose">number</property>
+                                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkLabel" id="audio_options_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Audio options:</property>
+                                    <property name="xalign">0</property>
                                   </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="position">3</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                           </object>
@@ -1279,7 +1278,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel" id="record_to_disk_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Record to disk</property>
+                        <property name="label" translatable="yes">Record to disk:</property>
                       </object>
                     </child>
                   </object>
@@ -2823,7 +2822,7 @@ Author: Dmitriy Yefremov
         <property name="image">set_default_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_profile_set_default" swapped="no"/>
-        <accelerator key="d" signal="activate" modifiers="Primary"/>
+        <accelerator key="d" signal="activate"/>
       </object>
     </child>
     <child>
@@ -3386,7 +3385,46 @@ Author: Dmitriy Yefremov
       <object class="GtkBox" id="test_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="valign">center</property>
         <property name="margin_top">5</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkButton" id="test_connection_button">
+            <property name="label" translatable="yes">Test</property>
+            <property name="width_request">110</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Test connection</property>
+            <property name="image">test_button_image</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_connection_test" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkAlignment" id="test_spinner_alignment">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xscale">0.30000001192092896</property>
+            <property name="yscale">0.30000001192092896</property>
+            <child>
+              <object class="GtkSpinner" id="test_spinner">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkButtonBox" id="test_button_box">
             <property name="visible">True</property>
@@ -3445,66 +3483,8 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkAlignment">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSpinner" id="test_spinner">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="test_connection_button">
-            <property name="label" translatable="yes">Test</property>
-            <property name="width_request">110</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Test connection</property>
-            <property name="valign">center</property>
-            <property name="image">test_button_image</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_connection_test" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkAlignment">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
           </packing>
         </child>
       </object>
@@ -3512,7 +3492,7 @@ Author: Dmitriy Yefremov
         <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="pack_type">end</property>
-        <property name="position">2</property>
+        <property name="position">1</property>
       </packing>
     </child>
   </object>
