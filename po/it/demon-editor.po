@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr "Massimo Pissarello, Nicola Fanghella"
+msgstr "Massimo Pissarello\nNicola Fanghella"
 
 # Main
 msgid "Service"
@@ -1284,7 +1284,7 @@ msgid "Audio"
 msgstr "Audio"
 
 msgid "Audio Track"
-msgstr Traccia audio"
+msgstr "Traccia audio"
 
 msgid "Subtitle"
 msgstr "Sottotitolo"
