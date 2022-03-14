@@ -1284,7 +1284,7 @@ msgid "Audio"
 msgstr "Audio"
 
 msgid "Audio Track"
-msgstr Traccia audio"
+msgstr "Traccia audio"
 
 msgid "Subtitle"
 msgstr "Sottotitolo"
