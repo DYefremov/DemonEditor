@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr "Massimo Pissarello\nNicola Fanghella"
+msgstr "Massimo Pissarello"
 
 # Main
 msgid "Service"
@@ -27,25 +27,25 @@ msgid "Picon"
 msgstr "Picon"
 
 msgid "Freq"
-msgstr "Freq"
+msgstr "Frequenza"
 
 msgid "Rate"
 msgstr "Rate"
 
 msgid "Pol"
-msgstr "Pol"
+msgstr "Polarizzazione"
 
 msgid "System"
 msgstr "Sistema"
 
 msgid "Pos"
-msgstr "Pos"
+msgstr "Posizione"
 
 msgid "Num"
-msgstr "Num"
+msgstr "Numero"
 
 msgid "Current IP:"
-msgstr "IP attuale:"
+msgstr "IP/Host attuale:"
 
 msgid "Assign"
 msgstr "Assegna"
@@ -54,7 +54,7 @@ msgid "Assign file"
 msgstr "Assegna file"
 
 msgid "Bouquet Details"
-msgstr "Dettagli Bouquet"
+msgstr "Dettagli bouquet"
 
 msgid "Bouquets"
 msgstr "Bouquets"
@@ -99,7 +99,7 @@ msgid "List configuration"
 msgstr "Visualizza configurazione"
 
 msgid "Rename for this bouquet"
-msgstr "Rinomina questo Bouquet"
+msgstr "Rinomina questo bouquet"
 
 msgid "Set default name"
 msgstr "Imposta il nome predefinito"
@@ -111,7 +111,7 @@ msgid "Insert space"
 msgstr "Inserisci spazio"
 
 msgid "Locate in services"
-msgstr "Localizza nei Servizi"
+msgstr "Localizza nei servizi"
 
 msgid "Locked"
 msgstr "Bloccato"
@@ -123,13 +123,13 @@ msgid "New"
 msgstr "Nuovo"
 
 msgid "New bouquet"
-msgstr "Nuovo Bouquet"
+msgstr "Nuovo bouquet"
 
 msgid "Create bouquet"
-msgstr "Crea Bouquet"
+msgstr "Crea bouquet"
 
 msgid "For current satellite"
-msgstr "Per questo Satellite"
+msgstr "Per questo satellite"
 
 msgid "For current package"
 msgstr "Per questo pacchetto"
@@ -138,7 +138,7 @@ msgid "For current type"
 msgstr "Per questo tipo"
 
 msgid "For each satellite"
-msgstr "Per tutti i Satelliti"
+msgstr "Per tutti i satelliti"
 
 msgid "For each package"
 msgstr "Per tutti i pacchetti"
@@ -156,10 +156,10 @@ msgid "Picons"
 msgstr "Picons"
 
 msgid "Picons downloader"
-msgstr "Scarica Picons"
+msgstr "Scarica picons"
 
 msgid "Satellites downloader"
-msgstr "Scarica Satelliti"
+msgstr "Scarica satelliti"
 
 msgid "Remove"
 msgstr "Rimuovi"
@@ -168,7 +168,7 @@ msgid "Remove all unavailable"
 msgstr "Rimuovi tutti quelli non disponibili"
 
 msgid "Satellites editor"
-msgstr "Editor dei Satelliti"
+msgstr "Editor dei satelliti"
 
 msgid "Save"
 msgstr "Salva"
@@ -180,7 +180,7 @@ msgid "Services"
 msgstr "Servizi"
 
 msgid "Services filter"
-msgstr "Filtro Servizi"
+msgstr "Filtro servizi"
 
 msgid "Settings"
 msgstr "Impostazioni"
@@ -222,10 +222,10 @@ msgid "Receive files from receiver"
 msgstr "Scarica i files dal ricevitore"
 
 msgid "Receiver IP:"
-msgstr "IP del ricevitore:"
+msgstr "IP/Host del ricevitore:"
 
 msgid "Remove unused bouquets"
-msgstr "Elimina i Bouquets non utilizzati"
+msgstr "Elimina i bouquets non utilizzati"
 
 msgid "Reset profile"
 msgstr "Resetta il profilo"
@@ -243,16 +243,16 @@ msgid "Selected"
 msgstr "Selezionati"
 
 msgid "Send"
-msgstr "Invio"
+msgstr "Invia"
 
 msgid "Send files to receiver"
 msgstr "Invia i files al ricevitore"
 
 msgid "Services and Bouquets files:"
-msgstr "Files dei Servizi e dei Bouquets:"
+msgstr "Files dei servizi e dei bouquets:"
 
 msgid "User bouquet files:"
-msgstr "Files Bouquet utente:"
+msgstr "File bouquet utente:"
 
 msgid "Extra:"
 msgstr "Extra:"
@@ -269,7 +269,7 @@ msgstr "Tutti i tipi"
 
 # Streams player
 msgid "Play"
-msgstr "Play"
+msgstr "Riproduci"
 
 msgid "Stop playback"
 msgstr "Ferma riproduzione"
@@ -288,13 +288,13 @@ msgstr "Chiudi"
 
 # Picons dialog
 msgid "Load providers"
-msgstr "Scarica Provider"
+msgstr "Scarica provider"
 
 msgid "Providers"
 msgstr "Provider"
 
 msgid "Receive picons"
-msgstr "Ricevi Picons"
+msgstr "Ricevi picons"
 
 msgid "Picons name format:"
 msgstr "Formato del nome:"
@@ -303,13 +303,13 @@ msgid "Resize:"
 msgstr "Ridimensiona:"
 
 msgid "Current picons path:"
-msgstr "Percorso attuale Picons:"
+msgstr "Percorso attuale picons:"
 
 msgid "Receiver picons path:"
-msgstr "Percorso di ricezione Picons:"
+msgstr "Percorso di ricezione picons:"
 
 msgid "Picons download tool"
-msgstr "Strumento per scaricare Picons"
+msgstr "Strumento per scaricare picons"
 
 msgid "Transfer to receiver"
 msgstr "Trasferisci  al ricevitore"
@@ -327,7 +327,7 @@ msgid "Path to save:"
 msgstr "Percorso salvataggio:"
 
 msgid "Path to Enigma2 picons:"
-msgstr "Persorso Picons su Enigma2:"
+msgstr "Persorso picons su Enigma2:"
 
 msgid "Specify the correct position value for the provider!"
 msgstr "Specificare il valore della posizione per il provider!"
@@ -336,17 +336,17 @@ msgid "Converter between name formats"
 msgstr "Convertitore per il formato dei nomi"
 
 msgid "Receive picons for providers"
-msgstr "Riceve Picon per Providers"
+msgstr "Ricevi picons per providers"
 
 msgid "Load satellite providers."
-msgstr "Caricare i Providers satellitari"
+msgstr "Carica i providers satellitari"
 
 msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
-msgstr "Per impostare automaticamente gli identificatori dei Picons,\ncarica prima la lista dei Servizi nella finestra principale."
+msgstr "Per impostare automaticamente gli identificatori dei picons,\ncarica prima la lista dei servizi nella finestra principale."
 
 # Satellites editor
 msgid "Satellites edit tool"
-msgstr "Strumento per modificare i Satelliti"
+msgstr "Strumento per modificare i satelliti"
 
 msgid "Add"
 msgstr "Aggiungi"
@@ -358,10 +358,10 @@ msgid "Transponder"
 msgstr "Transponder"
 
 msgid "Satellite properties:"
-msgstr "Proprietà del Satellite:"
+msgstr "Proprietà del satellite:"
 
 msgid "Transponder properties:"
-msgstr "Proprietà del Transponder:"
+msgstr "Proprietà del transponder:"
 
 msgid "Name"
 msgstr "Nome"
@@ -371,26 +371,26 @@ msgstr "Posizione"
 
 # Satellites update dialog
 msgid "Satellites update"
-msgstr "Aggiornamento Satelliti"
+msgstr "Aggiornamento satelliti"
 
 msgid "Remove selection"
 msgstr "Elimina selezione"
 
 # Service details dialog
 msgid "Service data:"
-msgstr "Dati del Servizio:"
+msgstr "Dati del servizio:"
 
 msgid "Transponder data:"
-msgstr "Dati del Transponder:"
+msgstr "Dati del transponder:"
 
 msgid "Service data"
-msgstr "Dati del Servizio"
+msgstr "Dati del servizio"
 
 msgid "Transponder details"
-msgstr "Dettagli Transponder"
+msgstr "Dettagli transponder"
 
 msgid "Changes will be applied to all services of this transponder!\nContinue?"
-msgstr "I cambiamenti saranno applicati a tutti i Servizi di questo Transponder!\nContinuo?"
+msgstr "I cambiamenti saranno applicati a tutti i servizi di questo transponder!\nContinuo?"
 
 msgid "Reference"
 msgstr "Riferimento"
@@ -414,7 +414,7 @@ msgid "Source:"
 msgstr "Sorgente:"
 
 msgid "Cancel"
-msgstr "Cancella"
+msgstr "Annulla"
 
 msgid "Update"
 msgstr "Aggiorna"
@@ -471,20 +471,20 @@ msgid "Data path:"
 msgstr "Percorso dati:"
 
 msgid "Picons path:"
-msgstr "Percorso Picons:"
+msgstr "Percorso picons:"
 
 msgid "Network settings:"
 msgstr "Impostazioni rete:"
 
 msgid "STB file paths:"
-msgstr "Percorso files ricevitore:"
+msgstr "Percorso dei files sul ricevitore:"
 
 msgid "Local file paths:"
 msgstr "Percorso files locali:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
-msgstr "Errore. Nessun Bouquet selezionato!"
+msgstr "Errore. Nessun bouquet selezionato!"
 
 msgid "This item is not allowed to be removed!"
 msgstr "Questo elemento non può essere rimosso!"
@@ -541,10 +541,10 @@ msgid "Select paths!"
 msgstr "Seleziona i persorsi!"
 
 msgid "No satellite is selected!"
-msgstr "Nessun Satellite selezionato!"
+msgstr "Nessun satellite selezionato!"
 
 msgid "Please, select only one satellite!"
-msgstr "Per favore, seleziona un solo Satellite!"
+msgstr "Per favore, seleziona un solo satellite!"
 
 msgid "Please check your parameters and try again."
 msgstr "Per favore, controlla i parametri e riprova di nuovo!"
@@ -605,7 +605,7 @@ msgid "Backup path:"
 msgstr "Percorso copia di sicurezza:"
 
 msgid "Restore bouquets"
-msgstr "Ripristina i Bouquets"
+msgstr "Ripristina i bouquets"
 
 msgid "Restore all"
 msgstr "Ripristina tutto"
@@ -617,13 +617,13 @@ msgid "Before downloading from the receiver"
 msgstr "Prima di scaricare dal ricevitore"
 
 msgid "Set background color for the services"
-msgstr "Stabilire colori di fondo per i Servizi"
+msgstr "Imposta i colori di sfondo per i servizi"
 
 msgid "Marked as new:"
 msgstr "Contrassegnato come nuovo:"
 
 msgid "With an extra name in the bouquet:"
-msgstr "Con un nome extra nel Bouquet:"
+msgstr "Con un nome extra nel bouquet:"
 
 msgid "Select"
 msgstr "Seleziona"
@@ -645,13 +645,13 @@ msgid "Bouquet"
 msgstr "Bouquet"
 
 msgid "Bouquets and services"
-msgstr "Bouquets e Servizi"
+msgstr "Bouquets e servizi"
 
 msgid "The main list does not contain services for this bouquet!"
-msgstr "La lista principale non contiene Servizi per questo Bouquet!"
+msgstr "La lista principale non contiene servizi per questo bouquet!"
 
 msgid "No bouquet file is selected!"
-msgstr "Non è stato selezionato alcun file contenente Bouquet"
+msgstr "Non è stato selezionato alcun file contenente bouquet"
 
 msgid "Remove all unused"
 msgstr "Eliminare tutti quelli non usati"
@@ -663,7 +663,7 @@ msgid "Test connection"
 msgstr "Test connessione"
 
 msgid "Double click on the service in the bouquet list:"
-msgstr "Doppio click sul Servizio nella lista dei Bouquets:"
+msgstr "Doppio click sul servizio nella lista dei bouquets:"
 
 msgid "Zap"
 msgstr "Zap"
@@ -678,7 +678,7 @@ msgid "Enable lamedb ver. 5 support"
 msgstr "Abilita il supporto a lamedb ver. 5"
 
 msgid "Enable HTTP API"
-msgstr "Abilita HTTP API"
+msgstr "Abilita le API HTTP"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
 msgstr "Cambia canale (Ctrl + Z)"
@@ -702,10 +702,10 @@ msgid "EPG source"
 msgstr "Sorgente EPG"
 
 msgid "Service names source:"
-msgstr "Sorgente nomi dei Servizi:"
+msgstr "Sorgente nomi dei servizi:"
 
 msgid "Main service list"
-msgstr "Lista dei Servizi principali:"
+msgstr "Lista dei servizi principali:"
 
 msgid "XML file"
 msgstr "File XML"
@@ -735,7 +735,7 @@ msgid "Update on start"
 msgstr "Aggiorna all'avvio"
 
 msgid "Auto configuration by service names."
-msgstr "Configurazione automatica in base ai nomi dei Servizi."
+msgstr "Configurazione automatica in base ai nomi dei servizi."
 
 msgid "Save list to xml."
 msgstr "Salva la lista in XML"
@@ -753,10 +753,10 @@ msgid "XML parsing error:"
 msgstr "Errore di analisi XML:"
 
 msgid "Count of successfully configured services:"
-msgstr "Conteggio dei Servizi configurati correttamente:"
+msgstr "Conteggio dei servizi configurato correttamente:"
 
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
-msgstr "Il file epg.dat non contiene riferimenti per i Servizi di questo Bouquet!"
+msgstr "Il file epg.dat non contiene riferimenti per i servizi di questo bouquet!"
 
 msgid "Use HTTP"
 msgstr "Usa HTTP"
@@ -792,7 +792,7 @@ msgid "Language:"
 msgstr "Lingua:"
 
 msgid "Load the last open configuration at program startup"
-msgstr "Carica l'ultima configurazione aperta all'avvio"
+msgstr "Carica l'ultima configurazione utilizzata all'avvio"
 
 msgid "Enable direct playback bar"
 msgstr "Abilita la barra di riproduzione diretta"
@@ -813,7 +813,7 @@ msgid "Remove added links in the playlist"
 msgstr "Elimina i link aggiunti nella playlist"
 
 msgid "A bouquet with that name exists!"
-msgstr "Nome del Bouquet già esistente!"
+msgstr "Nome del bouquet già esistente!"
 
 msgid "Details"
 msgstr "Dettagli"
@@ -828,13 +828,13 @@ msgid "File"
 msgstr "File"
 
 msgid "Picons manager"
-msgstr "Gestione Picons"
+msgstr "Gestione picons"
 
 msgid "Explorer"
 msgstr "Esplora"
 
 msgid "Satellite url:"
-msgstr "URL Satellite:"
+msgstr "URL satellite:"
 
 msgid "Cut"
 msgstr "Taglia"
@@ -933,7 +933,7 @@ msgid "Some images may have problems displaying the favorites list!"
 msgstr "Alcune immagini potrebbero avere dei problemi a visualizzare la lista dei preferiti!"
 
 msgid "Operates in standby mode or current active transponder!"
-msgstr "Funziona in standby o con il Transponder attualmente attivo!"
+msgstr "Funziona in standby o con il transponder attualmente attivo!"
 
 msgid "No connection to the receiver!"
 msgstr "Nessun connessione con il ricevitore!"
@@ -942,22 +942,22 @@ msgid "Signal level"
 msgstr "Livello del segnale"
 
 msgid "Receiver info"
-msgstr "Informazioni sul ricevitore"
+msgstr "Informazioni ricevitore"
 
 msgid "A profile with that name exists!"
 msgstr "Nome del profilo già esistente!"
 
 msgid "Show short info as hints in the main services list"
-msgstr "Mostra suggerimenti nella lista principale dei Servizi"
+msgstr "Mostra suggerimenti nella lista principale dei servizi"
 
 msgid "Show detailed info as hints in the bouquet list"
-msgstr "Mostra informazioni dettagliate come suggerimenti nell'elenco dei Bouquets"
+msgstr "Mostra informazioni dettagliate come suggerimenti nell'elenco dei bouquets"
 
 msgid "Enable alternate bouquet file naming"
-msgstr "Abilita nomi alternativi per i Bouquets"
+msgstr "Abilita nomi alternativi per i bouquets"
 
 msgid "Allows you to name bouquet files using their names."
-msgstr "Permetti di nominare i files dei Bouquets usando i nomi dei Bouquets."
+msgstr "Permetti di nominare i files dei bouquets usando i nomi dei bouquets."
 
 msgid "Appearance"
 msgstr "Aspetto"
@@ -981,7 +981,7 @@ msgid "Download from the receiver"
 msgstr "Scarica dal ricevitore"
 
 msgid "Remove all picons from the receiver"
-msgstr "Elimina tutti i Picons dal ricevitore"
+msgstr "Elimina tutti i picons dal ricevitore"
 
 msgid "Service reference"
 msgstr "Servizio di riferimento"
@@ -993,10 +993,10 @@ msgid "Auto-check for updates"
 msgstr "Verifica automatica degli aggiornamenti"
 
 msgid "Filter services"
-msgstr "Filtro Servizi"
+msgstr "Filtro servizi"
 
 msgid "Filter services in the main list."
-msgstr "Filtra i Servizi nella lista principale."
+msgstr "Filtra i servizi nella lista principale."
 
 msgid "Destination:"
 msgstr "Destinazione:"
@@ -1011,7 +1011,7 @@ msgid "There are unsaved changes.\n\n\t Save them now?"
 msgstr "Ci sono cambiamenti non salvati.\n\n\t Vuoi salvarli adesso?"
 
 msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
-msgstr "Sei sicuro di voler cambiare l'ordine\n\t dei Servizi di questo Bouquet?"
+msgstr "Sei sicuro di voler cambiare l'ordine\n\t dei servizi di questo bouquet?"
 
 msgid "Remove from the receiver"
 msgstr "Elimina dal ricevitore"
@@ -1035,7 +1035,7 @@ msgid "Enable Dark Mode"
 msgstr "Abilita modalità scura"
 
 msgid "Extract..."
-msgstr "Estrazione..."
+msgstr "Estrai file compresso"
 
 msgid "Unsupported format!"
 msgstr "Formato non supportato!"
@@ -1059,7 +1059,7 @@ msgid "Import from Web"
 msgstr "Importa dal Web"
 
 msgid "Control"
-msgstr "Controllo"
+msgstr "Controllo ricevitore"
 
 msgid "Timers"
 msgstr "Timers"
@@ -1092,7 +1092,7 @@ msgid "Restart GUI"
 msgstr "Riavvia GUI"
 
 msgid "Shutdown"
-msgstr "Spegnimento"
+msgstr "Spegni"
 
 msgid "Shut down"
 msgstr "Spegnimento"
@@ -1167,7 +1167,7 @@ msgid "Set"
 msgstr "Imposta"
 
 msgid "Services update"
-msgstr "Aggiornamento Servizi"
+msgstr "Aggiornamento servizi"
 
 msgid "Create folder"
 msgstr "Crea cartella"
@@ -1203,19 +1203,19 @@ msgid "DreamOS only!"
 msgstr "Solo DreamOS!"
 
 msgid "A similar service is already in this list!"
-msgstr "Un Servizio simile è già presente nella lista!"
+msgstr "Un servizio simile è già presente nella lista!"
 
 msgid "Play mode has been changed!\nRestart the program to apply the settings."
 msgstr "La modalitá di riproduzione è stata cambiata!\nRiavvia il programma per applicare i cambiamenti."
 
 msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
-msgstr "Stabilisci i valori TID, NID e Namespace per nominare correttamente i Picons!"
+msgstr "Stabilisci i valori TID, NID e Namespace per nominare correttamente i picons!"
 
 msgid "Streams detected:"
 msgstr "Rilevati streams:"
 
 msgid "Download picons"
-msgstr "Scarica Picons"
+msgstr "Scarica picons"
 
 msgid "Errors:"
 msgstr "Errori:"
@@ -1224,10 +1224,10 @@ msgid "Use to play streams:"
 msgstr "Utilizza per riprodurre gli streams:"
 
 msgid "Font in the lists:"
-msgstr "Font nelle liste:"
+msgstr "Carattere nelle liste:"
 
 msgid "Picons size in the lists:"
-msgstr "Dimensione Picons nelle liste:"
+msgstr "Dimensione picons nelle liste:"
 
 msgid "Logo size in tooltips:"
 msgstr "Dimensione logo nei suggerimenti:"
@@ -1236,10 +1236,10 @@ msgid "Save as"
 msgstr "Salva come"
 
 msgid "Mark duplicates"
-msgstr "Seleziona duplicati"
+msgstr "Contrassegna i duplicati"
 
 msgid "Load only for selected bouquet"
-msgstr "Scarica solo per i Bouquet selezionati"
+msgstr "Scarica solo per i bouquet selezionati"
 
 msgid "The task is canceled!"
 msgstr "Operazione cancellata!"
@@ -1254,10 +1254,10 @@ msgid "Help"
 msgstr "Aiuto"
 
 msgid "HTTP API is not activated. Check your settings!"
-msgstr "HTTP API non è attivata. Controlla le tue impostazioni!"
+msgstr "Le API HTTP non sono attivate. Controlla le tue impostazioni!"
 
 msgid "Add picons"
-msgstr "Aggiungi Picons"
+msgstr "Aggiungi picons"
 
 msgid "Logs"
 msgstr "Logs"
@@ -1299,28 +1299,28 @@ msgid "This may change the settings of other profiles!"
 msgstr "Questo potrebbe modificare le impostazioni di altri profili!"
 
 msgid "Drag the services to the desired picon or picon to the list of selected services."
-msgstr "Trascina i Servizi sul Picon desiderato o il Picon sull'elenco dei Servizi selezionati."
+msgstr "Trascina i servizi sul picon desiderato o il picon sull'elenco dei servizi selezionati."
 
 msgid "Sets the profile folder as default to store picons, backups, etc."
-msgstr "Imposta la cartella del profilo come predefinita per memorizzare Picons, backups, etc."
+msgstr "Imposta la cartella del profilo come predefinita per memorizzare picons, backups, etc."
 
 msgid "New sub-bouquet"
 msgstr "Nuovo sotto-bouquet"
 
 msgid "Mark not presented in Bouquets"
-msgstr "Segno non presentato in Bouquets"
+msgstr "Seleziona servizi non presenti nei bouquets"
 
 msgid "Not in Bouquets"
-msgstr "No nei Bouquets"
+msgstr "No nei bouquets"
 
 msgid "Do not show services present in Bouquets."
-msgstr "Non mostrare i Servizi presenti nei Bouquets."
+msgstr "Non mostrare i servizi presenti nei bouquets."
 
 msgid "IPTV services only"
-msgstr "Solo Servizi IPTV"
+msgstr "Solo servizi IPTV"
 
 msgid "Display picons"
-msgstr "Visualizza Picons"
+msgstr "Visualizza picons"
 
 msgid "Alternate layout"
 msgstr "Disposizione alternativa"
@@ -1344,4 +1344,4 @@ msgid "Add bookmark"
 msgstr "Aggiungi segnalibro"
 
 msgid "All bouquets"
-msgstr "Tutti i Bouquets"
+msgstr "Tutti i bouquets"
