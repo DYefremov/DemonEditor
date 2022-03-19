@@ -379,9 +379,13 @@ class SearchUnavailableDialog:
 
     @run_task
     def do_search(self):
-        import concurrent.futures
+        import ssl
+        import certifi
+
+        context = ssl.create_default_context(cafile=certifi.where())
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {executor.submit(self.get_unavailable, row): row for row in self._iptv_rows}
+            futures = {executor.submit(self.get_unavailable, row, context): row for row in self._iptv_rows}
             for future in concurrent.futures.as_completed(futures):
                 if not self._download_task:
                     executor.shutdown()
@@ -390,13 +394,13 @@ class SearchUnavailableDialog:
             self._download_task = False
         self.on_close()
 
-    def get_unavailable(self, row):
+    def get_unavailable(self, row, context):
         if not self._download_task:
             return
         try:
             req = Request(get_iptv_url(row, self._s_type))
             self.update_bar()
-            urlopen(req, timeout=2)
+            urlopen(req, context=context, timeout=2)
         except HTTPError as e:
             if e.code != 403:
                 self.append_data(row)
