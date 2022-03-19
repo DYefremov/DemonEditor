@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -98,7 +98,7 @@ class BouquetsWriter:
                         self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bqs.type}", bq.name, bq.services)
                     line.append(self._SERVICE.format(2 if bqs.type == BqType.RADIO.value else 1, bq_name, bqs.type))
 
-            with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8") as file:
+            with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8", newline="\n") as file:
                 file.writelines(line)
 
     def write_bouquet(self, path, name, services):
@@ -136,7 +136,7 @@ class BouquetsWriter:
                 else:
                     bouquet.append(f"#SERVICE {data}\n")
 
-        with open(path, "w", encoding="utf-8") as file:
+        with open(path, "w", encoding="utf-8", newline="\n") as file:
             file.writelines(bouquet)
 
     def write_sub_bouquet(self, path, file_name, bq, bq_type):
@@ -148,7 +148,7 @@ class BouquetsWriter:
             self.write_bouquet(f"{path}{bq_name}", sb.name, sb.services)
             bouquet.append(f"#SERVICE 1:7:{sb_type}:0:0:0:0:0:0:0:FROM BOUQUET \"{bq_name}\" ORDER BY bouquet\n")
 
-        with open(f"{self._path}userbouquet.{file_name}.{bq_type}", "w", encoding="utf-8") as file:
+        with open(f"{self._path}userbouquet.{file_name}.{bq_type}", "w", encoding="utf-8", newline="\n") as file:
             file.writelines(bouquet)
 
 
