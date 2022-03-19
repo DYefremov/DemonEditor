@@ -27,22 +27,22 @@ msgid "Picon"
 msgstr "Picon"
 
 msgid "Freq"
-msgstr "Frequenza"
+msgstr "Freq"
 
 msgid "Rate"
 msgstr "Rate"
 
 msgid "Pol"
-msgstr "Polarizzazione"
+msgstr "Pol"
 
 msgid "System"
-msgstr "Sistema"
+msgstr "System"
 
 msgid "Pos"
-msgstr "Posizione"
+msgstr "Pos"
 
 msgid "Num"
-msgstr "Numero"
+msgstr "Num"
 
 msgid "Current IP:"
 msgstr "IP/Host attuale:"
