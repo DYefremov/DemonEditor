@@ -14,4 +14,13 @@ Recommends: libmpv1,
             python3-chardet,
             libgtksourceview (>= 3.0)
 Maintainer: Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>
+Homepage: https://dyefremov.github.io/DemonEditor
 Description: Enigma2 channel and satellite list editor
+ Editing bouquets, channels, satellites, importing services,
+ downloading picons and updating satellites from the Web, 
+ extended support of IPTV, assignment of EPG from DVB or
+ XML for IPTV services, playback of IPTV or other streams
+ directly from the bouquet list, control panel (via HTTP API),
+ ability to view EPG and manage timers (via HTTP API), 
+ simple FTP client (experimental).
+ 
