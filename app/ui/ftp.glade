@@ -349,6 +349,7 @@ Author: Dmitriy Yefremov
                                 <property name="headers_visible">False</property>
                                 <property name="search_column">0</property>
                                 <property name="tooltip_column">0</property>
+                                <property name="activate_on_single_click">True</property>
                                 <signal name="button-press-event" handler="on_view_popup_menu" object="bookmark_popup_menu" swapped="no"/>
                                 <signal name="key-press-event" handler="on_view_key_press" swapped="no"/>
                                 <signal name="row-activated" handler="on_bookmark_activated" swapped="no"/>
