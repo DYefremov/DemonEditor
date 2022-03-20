@@ -23,4 +23,3 @@ Description: Enigma2 channel and satellite list editor
  directly from the bouquet list, control panel (via HTTP API),
  ability to view EPG and manage timers (via HTTP API), 
  simple FTP client (experimental).
- 
