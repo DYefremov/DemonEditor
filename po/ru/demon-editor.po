@@ -1280,6 +1280,9 @@ msgstr "Автоматическая установка имени из спис
 msgid "Playback"
 msgstr "Воспроизведение"
 
+msgid "Playback:"
+msgstr "Воспроизведение:"
+
 msgid "Audio"
 msgstr "Аудио"
 
@@ -1345,3 +1348,6 @@ msgstr "Добавить в закладки"
 
 msgid "All bouquets"
 msgstr "Все букеты"
+
+msgid "Playback from the main list"
+msgstr "Воспроизведение из основного списка"

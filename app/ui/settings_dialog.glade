@@ -810,7 +810,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="allow_double_click_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Allow playback from the main list</property>
+                                <property name="label" translatable="yes">Playback from the main list</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>

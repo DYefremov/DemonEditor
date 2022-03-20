@@ -935,7 +935,7 @@ msgid "Built-in player"
 msgstr "Integrierter Player"
 
 msgid "In a separate window"
-msgstr "In einem separaten Fenster"
+msgstr "In separatem Fenster"
 
 msgid "Only get m3u file"
 msgstr "Nur m3u-Datei erhalten"
@@ -1297,8 +1297,11 @@ msgstr "Automatisch den in der Favoritenliste ausgewählten Namen einstellen."
 msgid "Playback"
 msgstr "Wiedergabe"
 
+msgid "Playback:"
+msgstr "Wiedergabe:"
+
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 msgid "Audio Track"
 msgstr "Audio"
@@ -1363,3 +1366,5 @@ msgstr "Lesezeichen hinzufügen"
 msgid "All bouquets"
 msgstr "Alle Bouquets"
 
+msgid "Playback from the main list"
+msgstr "Wiedergabe aus der Hauptliste"
