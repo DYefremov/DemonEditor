@@ -136,7 +136,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkStackSwitcher" id="main_stack_switcher">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
             <property name="halign">center</property>
             <property name="margin_left">15</property>
             <property name="margin_right">15</property>
@@ -3392,7 +3392,7 @@ Author: Dmitriy Yefremov
         <child>
           <object class="GtkButton" id="test_connection_button">
             <property name="label" translatable="yes">Test</property>
-            <property name="width_request">110</property>
+            <property name="width_request">120</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>

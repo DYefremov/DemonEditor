@@ -309,7 +309,7 @@ class SettingsDialog:
         self._record_data_path_field.set_text(self._settings.records_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
-        self._play_streams_combo_box.set_active(self._settings.play_streams_mode.value)
+        self._play_streams_combo_box.set_active_id(str(self._settings.play_streams_mode.value))
         self._stream_lib_combo_box.set_active_id(self._settings.stream_lib)
         self._double_click_combo_box.set_active_id(str(self._settings.fav_click_mode))
         self._allow_main_list_playback_switch.set_active(self._settings.main_list_playback)
@@ -373,7 +373,7 @@ class SettingsDialog:
         self._ext_settings.profiles = self._settings.profiles
         self._ext_settings.backup_before_save = self._before_save_switch.get_active()
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()
-        self._ext_settings.play_streams_mode = PlayStreamsMode(self._play_streams_combo_box.get_active())
+        self._ext_settings.play_streams_mode = PlayStreamsMode(int(self._play_streams_combo_box.get_active_id()))
         self._ext_settings.stream_lib = self._stream_lib_combo_box.get_active_id()
         self._ext_settings.fav_click_mode = int(self._double_click_combo_box.get_active_id())
         self._ext_settings.main_list_playback = self._allow_main_list_playback_switch.get_active()
