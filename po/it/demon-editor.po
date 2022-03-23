@@ -1059,7 +1059,7 @@ msgid "Import from Web"
 msgstr "Importa dal Web"
 
 msgid "Control"
-msgstr "Controllo ricevitore"
+msgstr "Controllo"
 
 msgid "Timers"
 msgstr "Timers"
