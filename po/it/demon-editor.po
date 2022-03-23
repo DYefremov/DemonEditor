@@ -1278,7 +1278,10 @@ msgid "Automatically set the name selected in the favorites list."
 msgstr "Imposta automaticamente il nome selezionato nell'elenco dei preferiti."
 
 msgid "Playback"
-msgstr "Playback"
+msgstr "Riproduzione"
+
+msgid "Playback:"
+msgstr "Riproduzione:"
 
 msgid "Audio"
 msgstr "Audio"
@@ -1338,10 +1341,13 @@ msgid "Rename"
 msgstr "Rinomina"
 
 msgid "Bookmarks"
-msgstr "Segnalibro"
+msgstr "Segnalibri"
 
 msgid "Add bookmark"
 msgstr "Aggiungi segnalibro"
 
 msgid "All bouquets"
 msgstr "Tutti i bouquets"
+
+msgid "Playback from the main list"
+msgstr "Riproduzione dalla lista principale"
