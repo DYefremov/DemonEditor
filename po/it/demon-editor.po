@@ -330,7 +330,7 @@ msgid "Path to Enigma2 picons:"
 msgstr "Persorso picons su Enigma2:"
 
 msgid "Specify the correct position value for the provider!"
-msgstr "Specificare il valore della posizione per il provider!"
+msgstr "Specifica il valore della posizione per il provider!"
 
 msgid "Converter between name formats"
 msgstr "Convertitore per il formato dei nomi"
@@ -654,7 +654,7 @@ msgid "No bouquet file is selected!"
 msgstr "Non è stato selezionato alcun file contenente bouquet"
 
 msgid "Remove all unused"
-msgstr "Eliminare tutti quelli non usati"
+msgstr "Elimina tutti quelli non usati"
 
 msgid "Test"
 msgstr "Test"
@@ -717,7 +717,7 @@ msgid "Url to *.xml.gz file:"
 msgstr "Da URL a file *.xml.gz:"
 
 msgid "Enable filtering"
-msgstr "Abilitare filtri"
+msgstr "Abilita filtri"
 
 msgid "Filter by presence in the epg.dat file."
 msgstr "Filtra in base alla presenza su epg.dat."
@@ -801,7 +801,7 @@ msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Abilita l'invio e la riproduzione di links multimediali sul ricevitore"
 
 msgid "Watch the channel in the program"
-msgstr "Guardare il canale nel programma"
+msgstr "Guarda il canale nel programma"
 
 msgid "Zap and Play"
 msgstr "Zap e riproduci"
