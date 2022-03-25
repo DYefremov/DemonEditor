@@ -36,6 +36,7 @@ from urllib.parse import quote
 from gi.repository import GLib
 
 from .dialogs import get_builder, show_dialog, DialogType, get_message
+from .main_helper import get_base_paths, get_base_model
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Page, Column, KeyboardKey, IS_GNOME_SESSION
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI, UtfFTP
@@ -659,13 +660,20 @@ class RecordingsTool(Gtk.Box):
                     "on_path_activated": self.on_path_activated,
                     "on_recordings_activated": self.on_recordings_activated,
                     "on_recording_remove": self.on_recording_remove,
-                    "on_recordings_model_changed": self.on_recordings_model_changed}
+                    "on_recordings_model_changed": self.on_recordings_model_changed,
+                    "on_recordings_filter_changed": self.on_recordings_filter_changed,
+                    "on_recordings_filter_toggled": self.on_recordings_filter_toggled}
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
-                              objects=("recordings_box", "recordings_model", "rec_paths_model"))
+                              objects=("recordings_box", "recordings_model", "rec_paths_model",
+                                       "recordings_sort_model", "recordings_filter_model"))
         self._rec_view = builder.get_object("recordings_view")
         self._paths_view = builder.get_object("recordings_paths_view")
         self._paned = builder.get_object("recordings_paned")
+        self._model = builder.get_object("recordings_model")
+        self._filter_model = builder.get_object("recordings_filter_model")
+        self._filter_model.set_visible_func(self.recordings_filter_function)
+        self._filter_entry = builder.get_object("recordings_filter_entry")
         self._recordings_count_label = builder.get_object("recordings_count_label")
         self.pack_start(builder.get_object("recordings_box"), True, True, 0)
         if settings.alternate_layout:
@@ -675,7 +683,7 @@ class RecordingsTool(Gtk.Box):
         self.show()
 
     def clear_data(self):
-        self._rec_view.get_model().clear()
+        self._model.clear()
         self._paths_view.get_model().clear()
 
     def on_layout_changed(self, app, alt_layout):
@@ -752,9 +760,8 @@ class RecordingsTool(Gtk.Box):
 
     @run_idle
     def update_recordings_data(self, recordings):
-        model = self._rec_view.get_model()
-        model.clear()
-        list(map(model.append, (self.get_recordings_row(r) for r in recordings.get("recordings", []))))
+        self._model.clear()
+        list(map(self._model.append, (self.get_recordings_row(r) for r in recordings.get("recordings", []))))
 
     def get_recordings_row(self, rec):
         service = rec.get("e2servicename")
@@ -781,6 +788,9 @@ class RecordingsTool(Gtk.Box):
             return
 
         model, paths = self._rec_view.get_selection().get_selected_rows()
+        paths = get_base_paths(paths, model)
+        model = get_base_model(model)
+
         if paths and self._ftp:
             for file, itr in ((model[p][-1].get("e2filename", ""), model.get_iter(p)) for p in paths):
                 resp = self._ftp.delete_file(file)
@@ -792,6 +802,17 @@ class RecordingsTool(Gtk.Box):
 
     def on_recordings_model_changed(self, model, path, itr=None):
         self._recordings_count_label.set_text(str(len(model)))
+
+    def on_recordings_filter_changed(self, entry):
+        self._filter_model.refilter()
+
+    def recordings_filter_function(self, model, itr, data):
+        txt = self._filter_entry.get_text().upper()
+        return next((s for s in model.get(itr, 0, 1, 2, 3, 4, 5) if s and txt in s.upper()), False)
+
+    def on_recordings_filter_toggled(self, button):
+        if not button.get_active():
+            self._filter_entry.set_text("")
 
     def on_playback(self, box, state):
         """ Updates state of the UI elements for playback mode. """
@@ -820,10 +841,11 @@ class ControlTool(Gtk.Box):
         self._pix = None
 
         handlers = {"on_volume_changed": self.on_volume_changed,
-                    "on_screenshot_draw": self.on_screenshot_draw}
+                    "on_screenshot_draw": self.on_screenshot_draw,
+                    "on_network_toggled": self.on_network_toggled}
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
-                              objects=("control_box", "volume_adjustment"))
+                              objects=("control_box", "volume_adjustment", "network_model"))
 
         self.pack_start(builder.get_object("control_box"), True, True, 0)
         self._remote_box = builder.get_object("remote_box")
@@ -839,6 +861,7 @@ class ControlTool(Gtk.Box):
         self._agc_level_bar = builder.get_object("agc_level_bar")
         self._volume_button = builder.get_object("volume_button")
         self.init_actions(app)
+
         if settings.alternate_layout:
             self.on_layout_changed(app, True)
 
@@ -1006,3 +1029,9 @@ class ControlTool(Gtk.Box):
         self._snr_level_bar.set_value(int(snr.strip("%N/A") or 0))
         self._agc_level_bar.set_value(int(acg.rstrip("%N/A") or 0))
         self._ber_level_bar.set_value(int(ber.rstrip("N/A") or 0))
+
+    # ***************** Network explorer ********************** #
+
+    @run_task
+    def on_network_toggled(self, button):
+        pass

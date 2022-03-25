@@ -2671,7 +2671,7 @@ class Application(Gtk.Application):
         elif key is KeyboardKey.DELETE:
             self.on_delete(view)
         elif ctrl and key is KeyboardKey.R or key is KeyboardKey.F2:
-            if event.state & Gdk.ModifierType.SHIFT_MASK:
+            if event.state & Gdk.ModifierType.MOD1_MASK:  # ALT
                 self.on_rename_for_bouquet()
             else:
                 self.on_rename(view)
