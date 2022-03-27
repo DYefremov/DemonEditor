@@ -478,9 +478,11 @@ class ServicesParser(HTMLParser):
                         if a[0] != "title":
                             continue
                         txt = a[1]
-                        if txt and txt.startswith("Id: "):
+                        sep = "Id: "
+                        if txt and txt.startswith(sep):
                             # Saving the 'short' name.
-                            self._current_cell.text = txt.lstrip("Id: ")
+                            _, sep, name = txt.partition(sep)
+                            self._current_cell.text = name
         elif tag == "img":
             img_link = attrs[0][1]
             if self._source is SatelliteSource.LYNGSAT:
