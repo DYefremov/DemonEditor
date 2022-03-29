@@ -1,6 +1,11 @@
 * {
-  -GtkDialog-action-area-border: 6em;
+  background-clip: padding-box;
+  -GtkScrolledWindow-scrollbar-spacing: 0;
+  -GtkToolItemGroup-expander-size: 11;
+  -GtkWidget-text-handle-width: 20;
+  -GtkWidget-text-handle-height: 20;
   -GtkDialog-button-spacing: 12;
+  -GtkDialog-action-area-border: 6;
 }
 
 entry {
@@ -9,11 +14,18 @@ entry {
 
 button {
   min-height: 1.5em;
-  min-width: 1em;
-  padding-left: 0.4em;
-  padding-right: 0.4em;
+  min-width: 1.5em;
   padding-top: 0.1em;
   padding-bottom: 0.1em;
+}
+
+button:active, button:checked {
+  color: @theme_selected_fg_color;
+  background-image: linear-gradient(@theme_selected_bg_color, @theme_selected_bg_color);
+}
+
+combobox {
+  min-height: 2.1em;
 }
 
 spinbutton {
@@ -33,9 +45,19 @@ infobar {
   min-height: 2em;
 }
 
+revealer > box > button {
+  padding: 0.2em;
+}
+
 switch slider {
   min-height: 1.5em;
   min-width: 1.5em;
+}
+
+.font > box {
+  min-height: 1.5em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
 }
 
 .dialog-action-area button {
