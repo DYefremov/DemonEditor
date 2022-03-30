@@ -757,6 +757,14 @@ class Settings:
     def is_darwin(self):
         return IS_DARWIN
 
+    @property
+    def force_external_themes(self):
+        return self._settings.get("force_external_themes", False)
+
+    @force_external_themes.setter
+    def force_external_themes(self, value):
+        self._settings["force_external_themes"] = value
+
     # *********** Download dialog *********** #
 
     @property

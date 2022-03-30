@@ -216,6 +216,8 @@ class SettingsDialog:
             builder.get_object("themes_support_frame").set_visible(True)
             self._layout_switch = builder.get_object("layout_switch")
             self._layout_switch.set_active(self._ext_settings.alternate_layout)
+            self._force_ext_themes_switch = builder.get_object("force_ext_themes_switch")
+            self._force_ext_themes_switch.set_active(self._settings.force_external_themes)
             self._theme_frame = builder.get_object("theme_frame")
             self._theme_frame.set_visible(True)
             self._theme_thumbnail_image = builder.get_object("theme_thumbnail_image")
@@ -399,6 +401,7 @@ class SettingsDialog:
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
+            self._ext_settings.force_external_themes = self._force_ext_themes_switch.get_active()
 
         if self._s_type is SettingsType.ENIGMA_2:
             self._ext_settings.is_enable_experimental = self._enable_exp_switch.get_active()
