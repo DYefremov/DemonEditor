@@ -136,7 +136,7 @@ class PiconsCzDownloader:
             raise PiconsError("7-zip [7z] archiver not found!")
 
         if IS_WIN:
-            exe = f"C:{os.sep}Program Files{os.sep}DemonEditor{os.sep}{exe}.exe"
+            exe = f".{exe}.exe"
             if not os.path.isfile(exe):
                 raise PiconsError("7-Zip executable not found!")
 
