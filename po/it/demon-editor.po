@@ -53,7 +53,7 @@ msgstr "Assegna"
 msgid "Assign file"
 msgstr "Assegna file"
 
-msgid "Bouquet Details"
+msgid "Bouquet details"
 msgstr "Dettagli bouquet"
 
 msgid "Bouquets"
@@ -312,7 +312,7 @@ msgid "Picons download tool"
 msgstr "Strumento per scaricare picons"
 
 msgid "Transfer to receiver"
-msgstr "Trasferisci  al ricevitore"
+msgstr "Trasferisci al ricevitore"
 
 msgid "Downloader"
 msgstr "Scarica"
@@ -876,7 +876,7 @@ msgid "Record"
 msgstr "Registra"
 
 msgid "Record:"
-msgstr "Registra:"
+msgstr "Registrazioni:"
 
 msgid "Record to disk:"
 msgstr "Registra su disco:"
