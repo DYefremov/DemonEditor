@@ -377,7 +377,7 @@ class PiconManager(Gtk.Box):
             return
 
         itr_str, sep, src = txt.partition(self._app.DRAG_SEP)
-        if src == self._app.BQ_MODEL_NAME:
+        if src == self._app.BQ_MODEL:
             return
 
         path, pos = view.get_dest_row_at_pos(x, y) or (None, None)
@@ -385,7 +385,7 @@ class PiconManager(Gtk.Box):
             return
 
         model = view.get_model()
-        if src == self._app.FAV_MODEL_NAME:
+        if src == self._app.FAV_MODEL:
             target_view = self._app.fav_view
             c_id = Column.FAV_ID
         else:

@@ -935,7 +935,7 @@ msgid "Built-in player"
 msgstr "Integrierter Player"
 
 msgid "In a separate window"
-msgstr "In einem separaten Fenster"
+msgstr "In separatem Fenster"
 
 msgid "Only get m3u file"
 msgstr "Nur m3u-Datei erhalten"
@@ -1297,8 +1297,11 @@ msgstr "Automatisch den in der Favoritenliste ausgewählten Namen einstellen."
 msgid "Playback"
 msgstr "Wiedergabe"
 
+msgid "Playback:"
+msgstr "Wiedergabe:"
+
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 msgid "Audio Track"
 msgstr "Audio"
@@ -1347,3 +1350,21 @@ msgstr "Das Layout der Elemente wurde geändert!"
 
 msgid "Restart the program to apply all changes."
 msgstr "Starte das Programm neu, um alle Änderungen zu übernehmen."
+
+msgid "New folder"
+msgstr "Ordner erstellen"
+
+msgid "Rename"
+msgstr "Umbenennen"
+
+msgid "Bookmarks"
+msgstr "Lesezeichen"
+
+msgid "Add bookmark"
+msgstr "Lesezeichen hinzufügen"
+
+msgid "All bouquets"
+msgstr "Alle Bouquets"
+
+msgid "Playback from the main list"
+msgstr "Wiedergabe aus der Hauptliste"

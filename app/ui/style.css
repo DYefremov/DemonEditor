@@ -1,3 +1,7 @@
+* {
+  -GtkDialog-action-area-border: 6;
+}
+
 #digit-entry {
   border-color: Red;
 }
@@ -10,10 +14,22 @@
   margin: 1px;
 }
 
+#stack-switch-button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 paned > separator {
   background-repeat: no-repeat;
   background-position: center;
+}
+
+paned.horizontal > separator {
   background-size: 2px 24px;
+}
+
+paned.vertical > separator {
+  background-size: 24px 2px;
 }
 
 .red-button {

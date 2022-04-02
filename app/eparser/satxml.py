@@ -1,4 +1,32 @@
-""" Module foe parsing Satellites.xml
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2022 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
+""" Module for parsing satellites.xml file.
 
     For more info see __COMMENT
 """
@@ -62,6 +90,8 @@ def write_satellites(satellites, data_path):
                 transponder_child.setAttribute("pls_code", tr.pls_code)
             if tr.is_id:
                 transponder_child.setAttribute("is_id", tr.is_id)
+            if tr.t2mi_plp_id:
+                transponder_child.setAttribute("t2mi_plp_id", tr.t2mi_plp_id)
             sat_child.appendChild(transponder_child)
         root.appendChild(sat_child)
     doc.writexml(open(data_path, "w"),
@@ -87,9 +117,10 @@ def parse_transponders(elem, sat_name):
                                  MODULATION[atr["modulation"].value],
                                  atr["pls_mode"].value if "pls_mode" in atr else None,
                                  atr["pls_code"].value if "pls_code" in atr else None,
-                                 atr["is_id"].value if "is_id" in atr else None)
+                                 atr["is_id"].value if "is_id" in atr else None,
+                                 atr["t2mi_plp_id"].value if "t2mi_plp_id" in atr else None)
             except Exception as e:
-                message = "Error: can't parse transponder for '{}' satellite! {}".format(sat_name, repr(e))
+                message = f"Error: can't parse transponder for '{sat_name}' satellite! {repr(e)}"
                 log(message)
             else:
                 transponders.append(tr)
@@ -97,7 +128,7 @@ def parse_transponders(elem, sat_name):
 
 
 def parse_sat(elem):
-    """ Parsing satellite """
+    """ Parsing satellite. """
     sat_name = elem.attributes["name"].value
     return Satellite(sat_name,
                      elem.attributes["flags"].value,
@@ -106,7 +137,7 @@ def parse_sat(elem):
 
 
 def parse_satellites(path):
-    """ Parsing satellites from xml"""
+    """ Parsing satellites from xml. """
     dom = parse(path)
     satellites = []
 

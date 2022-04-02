@@ -195,36 +195,37 @@ class SatellitesParser(HTMLParser):
         names = []
         pos = ""
         pos_url = ""
+        satellites = []
 
         def normalize_pos(p):
             return f"{float(p[:-1])}{p[-1]}" if "." not in p else p
 
-        def get_sat(r):
-            nonlocal pos
-            nonlocal pos_url
-            # Uniting satellites in position.
-            if re.match(pos_pat, r[2]):
-                pos_url = r[2]
-                name = r[1]
-                pos = normalize_pos(self.parse_position(r[3]))
+        for row in filter(lambda x: len(x) > 6, self._rows):
+            if re.match(sat_pat, row[1]):
+                row.pop(0)
 
-                names.append(name)
-                return name, pos, r[5], r[0], False
-
-            r_size = len(r)
-            if r_size == 5:
-                name = r[1]
-                names.append(name)
-                return name, pos, r[3], r[0], False
-            if r_size == 6:
-                if names:
-                    name = "/".join(names)
+            if re.match(sat_pat, row[0]) and row[-2]:  # r[-2] -> skip EMPTY satellites!
+                if re.match(pos_pat, row[0]):
                     names.clear()
-                    return name, pos, None, pos_url, False
+                    pos_url = row[0]
+                    name = row[3]
+                    pos = normalize_pos(self.parse_position(row[-4]))
+                    names.append(name)
+                    satellites.append((name, pos, row[-2], row[2], False))
 
-                return r[1], normalize_pos(self.parse_position(r[2])), r[4], r[0], False
+                if len(row) == 7:
+                    single_pos = normalize_pos(self.parse_position(row[-4]))
+                    name = row[1]
+                    if pos == single_pos:
+                        names.append(name)
+                    else:
+                        # Uniting satellites in position.
+                        if len(names) > 1:
+                            satellites.append(("/".join(names), pos, None, pos_url, False))
+                        names.clear()
+                    satellites.append((name, single_pos, row[-2], row[0], False))
 
-        return list(filter(None, map(get_sat, filter(lambda row: row and re.match(sat_pat, row[0]), self._rows))))
+        return satellites
 
     def get_satellites_for_lyng_sat(self):
         base_url = "https://www.lyngsat.com/"
@@ -326,7 +327,7 @@ class SatellitesParser(HTMLParser):
                         if is_transponder_valid(tr):
                             n_trs.append(tr)
 
-                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None)
+                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None, None)
                 if is_transponder_valid(tr):
                     trs.append(tr)
 
@@ -362,7 +363,7 @@ class SatellitesParser(HTMLParser):
             if plp is not None:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id)
+            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -399,7 +400,7 @@ class SatellitesParser(HTMLParser):
             if t2_mi:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id)
+            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -477,9 +478,11 @@ class ServicesParser(HTMLParser):
                         if a[0] != "title":
                             continue
                         txt = a[1]
-                        if txt and txt.startswith("Id: "):
+                        sep = "Id: "
+                        if txt and txt.startswith(sep):
                             # Saving the 'short' name.
-                            self._current_cell.text = txt.lstrip("Id: ")
+                            _, sep, name = txt.partition(sep)
+                            self._current_cell.text = name
         elif tag == "img":
             img_link = attrs[0][1]
             if self._source is SatelliteSource.LYNGSAT:

@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2021 Dmitriy Yefremov
+Copyright (c) 2018-2022 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -399,7 +399,7 @@ Author: Dmitriy Yefremov
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
                 <property name="margin_bottom">5</property>
-                <property name="column_spacing">2</property>
+                <property name="column_spacing">5</property>
                 <child>
                   <object class="GtkLabel" id="label11">
                     <property name="visible">True</property>
@@ -579,7 +579,7 @@ Author: Dmitriy Yefremov
             <property name="margin_right">5</property>
             <property name="margin_top">5</property>
             <property name="margin_bottom">5</property>
-            <property name="label_xalign">0.019999999552965164</property>
+            <property name="label_xalign">0.02</property>
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkBox" id="tr_box">
@@ -594,7 +594,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkGrid" id="tr_dialog_grid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="column_spacing">2</property>
+                    <property name="column_spacing">5</property>
                     <child>
                       <object class="GtkLabel" id="label1">
                         <property name="visible">True</property>
@@ -666,7 +666,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="max_width_chars">14</property>
                         <property name="primary_icon_name">document-edit-symbolic</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
@@ -685,7 +685,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">12</property>
-                        <property name="max_width_chars">10</property>
+                        <property name="max_width_chars">14</property>
                         <property name="primary_icon_name">document-edit-symbolic</property>
                         <property name="placeholder_text" translatable="yes">27500000</property>
                         <property name="input_purpose">digits</property>
@@ -703,7 +703,7 @@ Author: Dmitriy Yefremov
                         <property name="model">pol_store</property>
                         <property name="id_column">0</property>
                         <child>
-                          <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                          <object class="GtkCellRendererText" id="pol_cellrenderertext"/>
                           <attributes>
                             <attribute name="text">0</attribute>
                           </attributes>
@@ -784,9 +784,9 @@ Author: Dmitriy Yefremov
                       <object class="GtkGrid" id="tr_dialog_grid2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="column_spacing">2</property>
+                        <property name="column_spacing">5</property>
                         <child>
-                          <object class="GtkLabel" id="label7">
+                          <object class="GtkLabel" id="tr_pls_mode_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Pls mode</property>
@@ -797,7 +797,7 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label8">
+                          <object class="GtkLabel" id="tr_pls_code_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Pls code</property>
@@ -808,7 +808,7 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label9">
+                          <object class="GtkLabel" id="id_id_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Is ID</property>
@@ -870,6 +870,34 @@ Author: Dmitriy Yefremov
                             <property name="top_attach">1</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkLabel" id="tr_t2mi_plp_id_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">T2-MI PLP ID</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="t2mi_plp_id_entry">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="width_chars">5</property>
+                            <property name="max_width_chars">12</property>
+                            <property name="primary_icon_name">document-edit-symbolic</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="placeholder_text" translatable="yes">0 - 255</property>
+                            <property name="input_purpose">digits</property>
+                            <signal name="changed" handler="on_entry_changed" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                     <child type="label">
@@ -928,6 +956,8 @@ Author: Dmitriy Yefremov
       <!-- column-name pls_code -->
       <column type="gchararray"/>
       <!-- column-name is_id -->
+      <column type="gchararray"/>
+      <!-- column-name t2mi_plp_id -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -1306,6 +1336,18 @@ Author: Dmitriy Yefremov
                               <object class="GtkCellRendererText" id="is_id_cellrenderertext"/>
                               <attributes>
                                 <attribute name="text">8</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="t2mi_plp_id_column">
+                            <property name="visible">False</property>
+                            <property name="title" translatable="yes">T2-MI PLP ID</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="t2mi_plp_id_cellrenderertext"/>
+                              <attributes>
+                                <attribute name="text">9</attribute>
                               </attributes>
                             </child>
                           </object>

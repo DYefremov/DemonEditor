@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
-from app.ui.main_helper import get_base_model, get_iptv_url, on_popup_menu, get_picon_pixbuf
+from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf
 from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
@@ -77,7 +77,7 @@ def get_stream_type(box):
 
 class IptvDialog:
 
-    def __init__(self, transient, view, services, bouquet, settings, action=Action.ADD):
+    def __init__(self, app, view, bouquet=None, service=None, action=Action.ADD):
         handlers = {"on_response": self.on_response,
                     "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
@@ -86,11 +86,11 @@ class IptvDialog:
                     "on_yt_quality_changed": self.on_yt_quality_changed,
                     "on_info_bar_close": self.on_info_bar_close}
 
+        self._app = app
         self._action = action
-        self._s_type = settings.setting_type
-        self._settings = settings
+        self._settings = app.app_settings
+        self._s_type = self._settings.setting_type
         self._bouquet = bouquet
-        self._services = services
         self._yt_links = None
         self._yt_dl = None
 
@@ -98,7 +98,7 @@ class IptvDialog:
                               objects=("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
 
         self._dialog = builder.get_object("iptv_dialog")
-        self._dialog.set_transient_for(transient)
+        self._dialog.set_transient_for(app.app_window)
         self._name_entry = builder.get_object("name_entry")
         self._description_entry = builder.get_object("description_entry")
         self._url_entry = builder.get_object("url_entry")
@@ -142,7 +142,7 @@ class IptvDialog:
                 self.update_reference_entry()
                 self._stream_type_combobox.set_active(1)
         elif self._action is Action.EDIT:
-            self._current_srv = get_base_model(self._model)[self._paths][:]
+            self._current_srv = service
             self.init_data(self._current_srv)
 
     def show(self):
@@ -167,8 +167,8 @@ class IptvDialog:
         self._dialog.destroy()
 
     def init_data(self, srv):
-        name, fav_id = srv[2], srv[7]
-        self._name_entry.set_text(name)
+        fav_id = srv.fav_id
+        self._name_entry.set_text(srv.service)
         self.init_enigma2_data(fav_id) if self._s_type is SettingsType.ENIGMA_2 else self.init_neutrino_data(fav_id)
 
     def init_enigma2_data(self, fav_id):
@@ -307,11 +307,12 @@ class IptvDialog:
                                               int(self._namespace_entry.get_text()),
                                               quote(self._url_entry.get_text()),
                                               name, name)
+
         self.update_bouquet_data(name, fav_id)
 
     def save_neutrino_data(self):
         if self._action is Action.EDIT:
-            id_data = self._current_srv[7].split("::")
+            id_data = self._current_srv.fav_id.split("::")
         else:
             id_data = ["", "", "0", None, None, None, None, "", "", "1"]
         id_data[0] = self._url_entry.get_text()
@@ -320,20 +321,25 @@ class IptvDialog:
         self._dialog.destroy()
 
     def update_bouquet_data(self, name, fav_id):
+        picon_id = f"{self._reference_entry.get_text().replace(':', '_')}.png"
+
         if self._action is Action.EDIT:
-            old_srv = self._services.pop(self._current_srv[7])
-            self._services[fav_id] = old_srv._replace(service=name, fav_id=fav_id)
-            self._bouquet[self._paths[0][0]] = fav_id
-            self._model.set(self._model.get_iter(self._paths), {Column.FAV_SERVICE: name, Column.FAV_ID: fav_id})
+            services = self._app.current_services
+            old_srv = services.pop(self._current_srv.fav_id)
+            new_service = old_srv._replace(service=name, fav_id=fav_id, picon_id=picon_id)
+            services[fav_id] = new_service
+            self._app.emit("iptv-service-edited", (old_srv, new_service))
         else:
-            aggr = [None] * 10
+            aggr = [None] * 8
             s_type = BqServiceType.IPTV.name
             srv = (None, None, name, None, None, s_type, None, fav_id, *aggr[0:3])
             itr = self._model.insert_after(self._model.get_iter(self._paths[0]),
                                            srv) if self._paths else self._model.insert(0, srv)
             self._model.set_value(itr, 1, IPTV_ICON)
             self._bouquet.insert(self._model.get_path(itr)[0], fav_id)
-            self._services[fav_id] = Service(None, None, IPTV_ICON, name, *aggr[0:3], s_type, *aggr, fav_id, None)
+            service = Service(None, None, IPTV_ICON, name, *aggr[0:3], s_type, None, picon_id, *aggr, fav_id, None)
+            self._app.current_services[fav_id] = service
+            self._app.emit("iptv-service-added", (service,))
 
     @run_idle
     def on_info_bar_close(self, bar=None, resp=None):
@@ -373,9 +379,13 @@ class SearchUnavailableDialog:
 
     @run_task
     def do_search(self):
-        import concurrent.futures
+        import ssl
+        import certifi
+
+        context = ssl.create_default_context(cafile=certifi.where())
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {executor.submit(self.get_unavailable, row): row for row in self._iptv_rows}
+            futures = {executor.submit(self.get_unavailable, row, context): row for row in self._iptv_rows}
             for future in concurrent.futures.as_completed(futures):
                 if not self._download_task:
                     executor.shutdown()
@@ -384,13 +394,13 @@ class SearchUnavailableDialog:
             self._download_task = False
         self.on_close()
 
-    def get_unavailable(self, row):
+    def get_unavailable(self, row, context):
         if not self._download_task:
             return
         try:
             req = Request(get_iptv_url(row, self._s_type))
             self.update_bar()
-            urlopen(req, timeout=2)
+            urlopen(req, context=context, timeout=2)
         except HTTPError as e:
             if e.code != 403:
                 self.append_data(row)
@@ -833,7 +843,7 @@ class M3uImportDialog(IptvListDialog):
 
 
 class YtListImportDialog:
-    def __init__(self, transient, settings, appender):
+    def __init__(self, app):
         handlers = {"on_import": self.on_import,
                     "on_receive": self.on_receive,
                     "on_yt_url_entry_changed": self.on_url_entry_changed,
@@ -845,12 +855,13 @@ class YtListImportDialog:
                     "on_key_press": self.on_key_press,
                     "on_close": self.on_close}
 
-        self.appender = appender
-        self._s_type = settings.setting_type
+        # self._main_window, self._settings, self.append_imported_services
+        self.appender = app.append_imported_services
+        self._settings = app.app_settings
+        self._s_type = self._settings.setting_type
         self._download_task = False
         self._yt_list_id = None
         self._yt_list_title = None
-        self._settings = settings
         self._yt = None
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
@@ -859,7 +870,7 @@ class YtListImportDialog:
                                        "yt_import_image"))
 
         self._dialog = builder.get_object("yt_import_dialog_window")
-        self._dialog.set_transient_for(transient)
+        self._dialog.set_transient_for(app.app_window)
         self._list_view_scrolled_window = builder.get_object("yt_list_view_scrolled_window")
         self._model = builder.get_object("yt_liststore")
         self._progress_bar = builder.get_object("yt_progress_bar")

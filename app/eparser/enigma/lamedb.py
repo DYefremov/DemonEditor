@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -310,7 +310,7 @@ class LameDbWriter:
     def write(self):
         if self._fmt == 4:
             # Writing lamedb file ver.4
-            with open(self._path + _FILE_NAME, "w", encoding="utf-8") as file:
+            with open(self._path + _FILE_NAME, "w", encoding="utf-8", newline="\n") as file:
                 file.writelines(LameDbReader.get_services_lines(self._services))
         elif self._fmt == 5:
             self.write_to_lamedb5()
@@ -335,7 +335,7 @@ class LameDbWriter:
         lines.extend(services_lines)
         lines.append(_END_LINE)
 
-        with open(self._path + "lamedb5", "w", encoding="utf-8") as file:
+        with open(self._path + "lamedb5", "w", encoding="utf-8", newline="\n") as file:
             file.writelines(lines)
 
 

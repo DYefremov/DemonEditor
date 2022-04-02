@@ -1,17 +1,17 @@
-# Copyright (C) 2018-2021 Dmitriy Yefremov
+# Copyright (C) 2018-2022 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
 msgid ""
 msgstr ""
-"Last-Translator: Nicola Fanghella\n"
+"Last-Translator: Massimo Pissarello\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr "Nicola Fanghella"
+msgstr "Massimo Pissarello\nNicola Fanghella"
 
 # Main
 msgid "Service"
@@ -27,16 +27,16 @@ msgid "Picon"
 msgstr "Picon"
 
 msgid "Freq"
-msgstr "Frequenza"
+msgstr "Freq"
 
 msgid "Rate"
-msgstr "Symbol Rate"
+msgstr "Rate"
 
 msgid "Pol"
 msgstr "Pol"
 
 msgid "System"
-msgstr "Sistema"
+msgstr "System"
 
 msgid "Pos"
 msgstr "Pos"
@@ -45,13 +45,16 @@ msgid "Num"
 msgstr "Num"
 
 msgid "Current IP:"
-msgstr "IP Attuale:"
+msgstr "IP/Host attuale:"
 
 msgid "Assign"
 msgstr "Assegna"
 
+msgid "Assign file"
+msgstr "Assegna file"
+
 msgid "Bouquet Details"
-msgstr "Dettagli Bouquet"
+msgstr "Dettagli bouquet"
 
 msgid "Bouquets"
 msgstr "Bouquets"
@@ -60,22 +63,22 @@ msgid "Copy"
 msgstr "Copia"
 
 msgid "Copy reference"
-msgstr "Copia Referenza"
+msgstr "Copia riferimento"
 
 msgid "Download"
-msgstr "Scaricare"
+msgstr "Scarica"
 
 msgid "Edit"
-msgstr "Editare"
+msgstr "Modifica"
 
 msgid "Edit mаrker text"
-msgstr "Editare Etichetta"
+msgstr "Modifica etichetta"
 
 msgid "FTP-transfer"
 msgstr "Trasferimento FTP"
 
 msgid "Global search"
-msgstr "Ricerca Globale"
+msgstr "Ricerca globale"
 
 msgid "Hide"
 msgstr "Nascondi"
@@ -93,13 +96,13 @@ msgid "Import m3u file"
 msgstr "Importa file m3u"
 
 msgid "List configuration"
-msgstr "Visualizzare configurazione"
+msgstr "Visualizza configurazione"
 
 msgid "Rename for this bouquet"
-msgstr "Rinomina per questo bouquet"
+msgstr "Rinomina questo bouquet"
 
 msgid "Set default name"
-msgstr "Stabilisci nome di default"
+msgstr "Imposta il nome predefinito"
 
 msgid "Insert marker"
 msgstr "Inserisci etichetta"
@@ -108,7 +111,7 @@ msgid "Insert space"
 msgstr "Inserisci spazio"
 
 msgid "Locate in services"
-msgstr "Localizza nei Servizi"
+msgstr "Localizza nei servizi"
 
 msgid "Locked"
 msgstr "Bloccato"
@@ -120,10 +123,10 @@ msgid "New"
 msgstr "Nuovo"
 
 msgid "New bouquet"
-msgstr "Nuovo Bouquet"
+msgstr "Nuovo bouquet"
 
 msgid "Create bouquet"
-msgstr "Crea Bouquet"
+msgstr "Crea bouquet"
 
 msgid "For current satellite"
 msgstr "Per questo satellite"
@@ -153,19 +156,19 @@ msgid "Picons"
 msgstr "Picons"
 
 msgid "Picons downloader"
-msgstr "Scarica Picons"
+msgstr "Scarica picons"
 
 msgid "Satellites downloader"
-msgstr "Scarica Satelliti"
+msgstr "Scarica satelliti"
 
 msgid "Remove"
 msgstr "Rimuovi"
 
 msgid "Remove all unavailable"
-msgstr "Rimuovi tutti i non disponibili"
+msgstr "Rimuovi tutti quelli non disponibili"
 
 msgid "Satellites editor"
-msgstr "Editor dei Satelliti"
+msgstr "Editor dei satelliti"
 
 msgid "Save"
 msgstr "Salva"
@@ -177,10 +180,10 @@ msgid "Services"
 msgstr "Servizi"
 
 msgid "Services filter"
-msgstr "Filtro Servizi"
+msgstr "Filtro servizi"
 
 msgid "Settings"
-msgstr "Settaggi"
+msgstr "Impostazioni"
 
 msgid "Up"
 msgstr "Sopra"
@@ -204,25 +207,25 @@ msgid "Data:"
 msgstr "Dati:"
 
 msgid "Enigma2 channel and satellite list editor for GNU/Linux."
-msgstr "Editore per Enigma2 di canali e satelliti in GNU/Linux."
+msgstr "Editor di liste canali e satelliti per Enigma2 su GNU/Linux."
 
 msgid "Host:"
-msgstr "Host/Anfitrione:"
+msgstr "Host:"
 
 msgid "Loading data..."
-msgstr "Caricando dati..."
+msgstr "Sto caricando i dati..."
 
 msgid "Receive"
-msgstr "Ricezione"
+msgstr "Scarica"
 
 msgid "Receive files from receiver"
-msgstr "Scarica files dal ricevitore"
+msgstr "Scarica i files dal ricevitore"
 
 msgid "Receiver IP:"
-msgstr "IP del ricevitore:"
+msgstr "IP/Host del ricevitore:"
 
 msgid "Remove unused bouquets"
-msgstr "Eliminare i bouquets non in uso"
+msgstr "Elimina i bouquets non utilizzati"
 
 msgid "Reset profile"
 msgstr "Resetta il profilo"
@@ -230,14 +233,17 @@ msgstr "Resetta il profilo"
 msgid "Satellites"
 msgstr "Satelliti"
 
+msgid "Transponders"
+msgstr "Transponders"
+
 msgid "Satellites.xml file:"
-msgstr "File Satellites.xml:"
+msgstr "File satellites.xml:"
 
 msgid "Selected"
 msgstr "Selezionati"
 
 msgid "Send"
-msgstr "Invio"
+msgstr "Invia"
 
 msgid "Send files to receiver"
 msgstr "Invia i files al ricevitore"
@@ -246,7 +252,7 @@ msgid "Services and Bouquets files:"
 msgstr "Files dei servizi e dei bouquets:"
 
 msgid "User bouquet files:"
-msgstr "File Bouquet utente:"
+msgstr "File bouquet utente:"
 
 msgid "Extra:"
 msgstr "Extra:"
@@ -263,19 +269,19 @@ msgstr "Tutti i tipi"
 
 # Streams player
 msgid "Play"
-msgstr "Play"
+msgstr "Riproduci"
 
 msgid "Stop playback"
-msgstr "Frma riproduzione"
+msgstr "Ferma riproduzione"
 
 msgid "Previous stream in the list"
-msgstr "Stream precedente"
+msgstr "Stream precedente della lista"
 
 msgid "Next stream in the list"
-msgstr "Stream successivo"
+msgstr "Stream successivo della lista"
 
 msgid "Toggle in fullscreen"
-msgstr "Commutazione schermo intero"
+msgstr "Commuta a schermo intero"
 
 msgid "Close"
 msgstr "Chiudi"
@@ -288,7 +294,7 @@ msgid "Providers"
 msgstr "Provider"
 
 msgid "Receive picons"
-msgstr "Ricevi Picons"
+msgstr "Ricevi picons"
 
 msgid "Picons name format:"
 msgstr "Formato del nome:"
@@ -297,16 +303,16 @@ msgid "Resize:"
 msgstr "Ridimensiona:"
 
 msgid "Current picons path:"
-msgstr "Percorso attuale per i picons:"
+msgstr "Percorso attuale picons:"
 
 msgid "Receiver picons path:"
-msgstr "Percorso di ricezione dei picons:"
+msgstr "Percorso di ricezione picons:"
 
 msgid "Picons download tool"
-msgstr "Utilitá per scaricare Picons"
+msgstr "Strumento per scaricare picons"
 
 msgid "Transfer to receiver"
-msgstr "Trasferire al ricevitore"
+msgstr "Trasferisci  al ricevitore"
 
 msgid "Downloader"
 msgstr "Scarica"
@@ -324,26 +330,26 @@ msgid "Path to Enigma2 picons:"
 msgstr "Persorso picons su Enigma2:"
 
 msgid "Specify the correct position value for the provider!"
-msgstr "Specificare il valore della posizione per il provider!"
+msgstr "Specifica il valore della posizione per il provider!"
 
 msgid "Converter between name formats"
 msgstr "Convertitore per il formato dei nomi"
 
 msgid "Receive picons for providers"
-msgstr "Riceve i picon per provider"
+msgstr "Ricevi picons per providers"
 
 msgid "Load satellite providers."
-msgstr "Caricare il provider satellitare"
+msgstr "Carica i providers satellitari"
 
 msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
-msgstr "Per settare automaticamente le referenze dei picon, \nprima caricare la lista dei servizi nella finestra principale dell'applicazione."
+msgstr "Per impostare automaticamente gli identificatori dei picons,\ncarica prima la lista dei servizi nella finestra principale."
 
 # Satellites editor
 msgid "Satellites edit tool"
-msgstr "Utilità per editare i satelliti"
+msgstr "Strumento per modificare i satelliti"
 
 msgid "Add"
-msgstr "Aggiungere"
+msgstr "Aggiungi"
 
 msgid "Satellite"
 msgstr "Satellite"
@@ -355,7 +361,7 @@ msgid "Satellite properties:"
 msgstr "Proprietà del satellite:"
 
 msgid "Transponder properties:"
-msgstr "Proprietà del Transponder:"
+msgstr "Proprietà del transponder:"
 
 msgid "Name"
 msgstr "Nome"
@@ -384,10 +390,10 @@ msgid "Transponder details"
 msgstr "Dettagli transponder"
 
 msgid "Changes will be applied to all services of this transponder!\nContinue?"
-msgstr "I cambiamenti saranno applicati a tutti i servizi di questo ransponder!\nContinuare?"
+msgstr "I cambiamenti saranno applicati a tutti i servizi di questo transponder!\nContinuo?"
 
 msgid "Reference"
-msgstr "Referenza"
+msgstr "Riferimento"
 
 msgid "Namespace"
 msgstr "Nome"
@@ -408,7 +414,7 @@ msgid "Source:"
 msgstr "Sorgente:"
 
 msgid "Cancel"
-msgstr "Cancella"
+msgstr "Annulla"
 
 msgid "Update"
 msgstr "Aggiorna"
@@ -428,12 +434,12 @@ msgid "Starting values"
 msgstr "Valori di partenza"
 
 msgid "Reset to default"
-msgstr "Reset iniziale"
+msgstr "Torna alle impostazioni predefinite"
 
 msgid "IPTV streams list configuration"
 msgstr "Lista di configurazione degli streams IPTV"
 
-#Settings dialog Italiano
+#Settings dialog
 msgid "Preferences"
 msgstr "Preferenze"
 
@@ -441,13 +447,13 @@ msgid "Profile:"
 msgstr "Profilo"
 
 msgid "Timeout between commands in seconds"
-msgstr "Timeout dei comandi esaurito."
+msgstr "Timeout tra i comandi in secondi"
 
 msgid "Timeout:"
 msgstr "Timeout:"
 
 msgid "Login:"
-msgstr "Login utente:"
+msgstr "Login:"
 
 msgid "Options"
 msgstr "Opzioni"
@@ -468,29 +474,29 @@ msgid "Picons path:"
 msgstr "Percorso picons:"
 
 msgid "Network settings:"
-msgstr "Settaggi collegamenti in rete:"
+msgstr "Impostazioni rete:"
 
 msgid "STB file paths:"
-msgstr "Percorso files nel ricevitore:"
+msgstr "Percorso dei files sul ricevitore:"
 
 msgid "Local file paths:"
-msgstr "Prcorso locale dei files:"
+msgstr "Percorso files locali:"
 
 # Dialogs messages
 msgid "Error. No bouquet is selected!"
-msgstr "Errore. Nessun bouquet selezionato"
+msgstr "Errore. Nessun bouquet selezionato!"
 
 msgid "This item is not allowed to be removed!"
 msgstr "Questo elemento non può essere rimosso!"
 
 msgid "This item is not allowed to edit!"
-msgstr "Questo elemento non può essere editato!"
+msgstr "Questo elemento non può essere modificato!"
 
 msgid "Not allowed in this context!"
-msgstr "Non é permesso in questo contesto!"
+msgstr "Non è permesso in questo contesto!"
 
 msgid "Please, download files from receiver or setup your path for read data!"
-msgstr "Per favore, scarica i files dal ricevitore o seleziona il percorso per la lettura dei dati!"
+msgstr "Per favore, scarica i files dal ricevitore o seleziona il percorso dei dati!"
 
 msgid "Reading data error!"
 msgstr "Errore nella lettura dei dati!"
@@ -499,10 +505,10 @@ msgid "No m3u file is selected!"
 msgstr "Nessun file m3u selezionato!"
 
 msgid "Not implemented yet!"
-msgstr "Non ancora implementato!"
+msgstr "Funzionalità non ancora sviluppata!"
 
 msgid "The text of marker is empty, please try again!"
-msgstr "Il teso dell'etichetta é vuoto, riprova di nuovo!"
+msgstr "Il testo dell'etichetta é vuoto, riprova di nuovo!"
 
 msgid "Please, select only one item!"
 msgstr "Seleziona un solo elemento!"
@@ -514,7 +520,7 @@ msgid "No profile selected!"
 msgstr "Nessun profilo selezionato!"
 
 msgid "No reference is present!"
-msgstr "Referenza mancante!"
+msgstr "Riferimento mancante!"
 
 msgid "No selected item!"
 msgstr "Nessun elemento selezionato!"
@@ -529,7 +535,7 @@ msgid "Please, wait..."
 msgstr "Attendere prego!..."
 
 msgid "Resizing..."
-msgstr "Ridimensionando..."
+msgstr "Sto ridimensionando..."
 
 msgid "Select paths!"
 msgstr "Seleziona i persorsi!"
@@ -544,7 +550,7 @@ msgid "Please check your parameters and try again."
 msgstr "Per favore, controlla i parametri e riprova di nuovo!"
 
 msgid "No satellites.xml file is selected!"
-msgstr "Non é stato selezionato alcun file satellite.xml!"
+msgstr "Non é stato selezionato alcun file satellites.xml!"
 
 msgid "Error. Verify the data!"
 msgstr "Errore. Verifica i dati!"
@@ -599,10 +605,10 @@ msgid "Backup path:"
 msgstr "Percorso copia di sicurezza:"
 
 msgid "Restore bouquets"
-msgstr "Ristabilire bouquets"
+msgstr "Ripristina i bouquets"
 
 msgid "Restore all"
-msgstr "Ristabilire tutto"
+msgstr "Ripristina tutto"
 
 msgid "Before saving"
 msgstr "Prima di salvare"
@@ -611,35 +617,35 @@ msgid "Before downloading from the receiver"
 msgstr "Prima di scaricare dal ricevitore"
 
 msgid "Set background color for the services"
-msgstr "Stabilire colori di fondo per i servizi"
+msgstr "Imposta i colori di sfondo per i servizi"
 
 msgid "Marked as new:"
-msgstr "Segnalato come nuovo:"
+msgstr "Contrassegnato come nuovo:"
 
 msgid "With an extra name in the bouquet:"
 msgstr "Con un nome extra nel bouquet:"
 
 msgid "Select"
-msgstr "Selezione"
+msgstr "Seleziona"
 
 msgid "About"
 msgstr "A proposito"
 
 msgid "Exit"
-msgstr "Escire"
+msgstr "Esci"
 
 msgid "Tools"
 msgstr "Strumenti"
 
 #Import
 msgid "Import"
-msgstr "Importare"
+msgstr "Importa"
 
 msgid "Bouquet"
 msgstr "Bouquet"
 
 msgid "Bouquets and services"
-msgstr "Bouquets e Servizi"
+msgstr "Bouquets e servizi"
 
 msgid "The main list does not contain services for this bouquet!"
 msgstr "La lista principale non contiene servizi per questo bouquet!"
@@ -648,40 +654,40 @@ msgid "No bouquet file is selected!"
 msgstr "Non è stato selezionato alcun file contenente bouquet"
 
 msgid "Remove all unused"
-msgstr "Eliminare tutti i non usati"
+msgstr "Elimina tutti quelli non usati"
 
 msgid "Test"
-msgstr "Prova"
+msgstr "Test"
 
 msgid "Test connection"
-msgstr "Prova collegamento"
+msgstr "Test connessione"
 
 msgid "Double click on the service in the bouquet list:"
-msgstr "Doppio click sul servizio nella lista del bouquet:"
+msgstr "Doppio click sul servizio nella lista dei bouquets:"
 
 msgid "Zap"
 msgstr "Zap"
 
 msgid "Play  stream"
-msgstr "Visionare stream"
+msgstr "Riproduci stream"
 
 msgid "Disabled"
-msgstr "Disabilitato."
+msgstr "Disabilitato"
 
 msgid "Enable lamedb ver. 5 support"
-msgstr "Abilitare il supporto per lamedb ver. 5"
+msgstr "Abilita il supporto a lamedb v5"
 
 msgid "Enable HTTP API"
-msgstr "Abilitare HTTP API"
+msgstr "Abilita le API HTTP"
 
 msgid "Switch(zap) the channel(Ctrl + Z)"
-msgstr "Cambia canale(Ctrl + Z)"
+msgstr "Cambia sul canale (Ctrl + Z)"
 
 msgid "Switch the channel and watch in the program(Ctrl + W)"
-msgstr "Cambia canale e guarda il programma(Ctrl + W)."
+msgstr "Cambia canale e guarda il programma (Ctrl + W)."
 
 msgid "Play IPTV or other stream in the program(Ctrl + P)"
-msgstr "Visiona IPTV o altro stream nel programma(Ctrl + P)"
+msgstr "Riproduci IPTV o altro stream nel programma (Ctrl + P)"
 
 msgid "Export to m3u"
 msgstr "Esporta m3u"
@@ -711,19 +717,19 @@ msgid "Url to *.xml.gz file:"
 msgstr "Da URL a file *.xml.gz:"
 
 msgid "Enable filtering"
-msgstr "Abilitare il filtraggio"
+msgstr "Abilita filtri"
 
 msgid "Filter by presence in the epg.dat file."
-msgstr "Filtraggio in base alla presenza sul file epg.dat."
+msgstr "Filtra in base alla presenza su epg.dat."
 
 msgid "Paths to the epg.dat file:"
-msgstr "Percorso verso il file epg.dat:"
+msgstr "Percorso dek file epg.dat:"
 
 msgid "Local path:"
 msgstr "Percorso locale:"
 
 msgid "STB path:"
-msgstr "Persorso sul ricevitore:"
+msgstr "Persorso ricevitore:"
 
 msgid "Update on start"
 msgstr "Aggiorna all'avvio"
@@ -732,22 +738,22 @@ msgid "Auto configuration by service names."
 msgstr "Configurazione automatica in base ai nomi dei servizi."
 
 msgid "Save list to xml."
-msgstr "Salva la lista su file XML."
+msgstr "Salva la lista in XML"
 
 msgid "Download XML file error."
-msgstr "Scarica il file degli errori in formato XML."
+msgstr "Scarica il file XML degli errori."
 
 msgid "Unsupported file type:"
 msgstr "Tipo di file non supportato:"
 
 msgid "Unpacking data error."
-msgstr "Spacchettando il file degli errori."
+msgstr "Errore di decompressione dei dati."
 
 msgid "XML parsing error:"
-msgstr "Acquisendo errori da XML:"
+msgstr "Errore di analisi XML:"
 
 msgid "Count of successfully configured services:"
-msgstr "Riconto dei servizi configurati correttamente:"
+msgstr "Conteggio dei servizi configurato correttamente:"
 
 msgid "Current epg.dat file does not contains references for the services of this bouquet!"
 msgstr "Il file epg.dat non contiene riferimenti per i servizi di questo bouquet!"
@@ -759,13 +765,13 @@ msgid "Close playback"
 msgstr "Ferma riproduzione"
 
 msgid "Import YouTube playlist"
-msgstr "Importa lista di riproduzione da YouTube"
+msgstr "Importa playlist da YouTube"
 
 msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-msgstr "Trovato un link verso una risorsa YouTube!\nProvare a ricavare un link diretto per questo video?"
+msgstr "Trovato un link verso una risorsa YouTube!\nProvo ad ottenere un link diretto per questo video?"
 
 msgid "Playlist import"
-msgstr "Importa lista di riproduzione"
+msgstr "Importa playlist"
 
 msgid "Getting link error:"
 msgstr "Errore nel link:"
@@ -774,19 +780,19 @@ msgid "Extra"
 msgstr "Extra"
 
 msgid "Apply profile settings"
-msgstr "Applicare i settaggi del profilo"
+msgstr "Applica le impostazioni al profilo"
 
 msgid "Settings type:"
-msgstr "Tipo di settaggi:"
+msgstr "Tipo di impostazioni:"
 
 msgid "Set default"
-msgstr "Settaggi di base (default)"
+msgstr "Impostazioni predefinite"
 
 msgid "Language:"
 msgstr "Lingua:"
 
 msgid "Load the last open configuration at program startup"
-msgstr "Carica l'ultima configurazione aperta all'inizio del programma"
+msgstr "Carica l'ultima configurazione utilizzata all'avvio"
 
 msgid "Enable direct playback bar"
 msgstr "Abilita la barra di riproduzione diretta"
@@ -795,7 +801,7 @@ msgid "Enables direct sending and playback of media links on the receiver"
 msgstr "Abilita l'invio e la riproduzione di links multimediali sul ricevitore"
 
 msgid "Watch the channel in the program"
-msgstr "Guardare il canale nel programma"
+msgstr "Guarda il canale nel programma"
 
 msgid "Zap and Play"
 msgstr "Zap e riproduci"
@@ -804,7 +810,7 @@ msgid "Drag  or paste the link here"
 msgstr "Trascina o incolla qui il link"
 
 msgid "Remove added links in the playlist"
-msgstr "Elimina i link aggiunti nella lista di riproduzione"
+msgstr "Elimina i link aggiunti nella playlist"
 
 msgid "A bouquet with that name exists!"
 msgstr "Nome del bouquet già esistente!"
@@ -816,19 +822,19 @@ msgid "Profile"
 msgstr "Profilo"
 
 msgid "Reset"
-msgstr "Reinizio/Reset"
+msgstr "Reimposta"
 
 msgid "File"
 msgstr "File"
 
 msgid "Picons manager"
-msgstr "Gestore Picons"
+msgstr "Gestione picons"
 
 msgid "Explorer"
-msgstr "Esploratore"
+msgstr "Esplora"
 
 msgid "Satellite url:"
-msgstr "URL Satellite:"
+msgstr "URL satellite:"
 
 msgid "Cut"
 msgstr "Taglia"
@@ -858,10 +864,10 @@ msgid "IPTV tools"
 msgstr "Strumenti IPTV"
 
 msgid "Make profile folder as default for the additional data"
-msgstr "Rendere la cartella del profilo come cartella di default per i profili aggiuntivi"
+msgstr "Imposta la cartella del profilo come predefinita per i profili aggiuntivi"
 
 msgid "Default data path:"
-msgstr "Percorso per i dati:"
+msgstr "Percorso predefinito per i dati:"
 
 msgid "Streams record path:"
 msgstr "Percorso per le registrazioni da stream:"
@@ -876,13 +882,13 @@ msgid "Record to disk:"
 msgstr "Registra su disco:"
 
 msgid "Streaming"
-msgstr "Flusso/Streaming"
+msgstr "Streaming"
 
 msgid "Activate transcoding"
-msgstr "Attivare la transcodifica"
+msgstr "Attiva la transcodifica"
 
 msgid "Presets:"
-msgstr "Preselezione:"
+msgstr "Preimpostazioni:"
 
 msgid "Video options:"
 msgstr "Opzioni video:"
@@ -897,61 +903,61 @@ msgid "Codec:"
 msgstr "Codec:"
 
 msgid "Width (px):"
-msgstr "Ampiezza/Width (px):"
+msgstr "Larghezza (px):"
 
 msgid "Height (px):"
-msgstr "Altezza/Height (px):"
+msgstr "Altezza (px):"
 
 msgid "Channels:"
 msgstr "Canali:"
 
 msgid "Sample rate (Hz):"
-msgstr "Sample rate (Hz):"
+msgstr "Frequenza di campionamento (Hz):"
 
 msgid "Play streams mode:"
-msgstr "Modalità di riprodzione dei flussi:"
+msgstr "Modalità di riprodzione streams:"
 
 msgid "Built-in player"
 msgstr "Riproduttore integrato"
 
 msgid "In a separate window"
-msgstr "In finestra separata"
+msgstr "In una finestra separata"
 
 msgid "Only get m3u file"
-msgstr "File m3u esclusivamente"
+msgstr "Scarica solo file m3u"
 
 msgid "Save and restart the program to apply the settings."
-msgstr "Salva e riavvia il programma per rendere effettivi i settaggi."
+msgstr "Salva e riavvia il programma per applicare le impostazioni."
 
 msgid "Some images may have problems displaying the favorites list!"
-msgstr "Alcune immagini potrebbero avere dei problemi per visualizzare la lista dei favoriti!"
+msgstr "Alcune immagini potrebbero avere dei problemi a visualizzare la lista dei preferiti!"
 
 msgid "Operates in standby mode or current active transponder!"
-msgstr "Funziona in modalità standby o transponder attualmente attivo!"
+msgstr "Funziona in standby o con il transponder attualmente attivo!"
 
 msgid "No connection to the receiver!"
-msgstr "Nessun collegamento con il ricevitore!"
+msgstr "Nessun connessione con il ricevitore!"
 
 msgid "Signal level"
 msgstr "Livello del segnale"
 
 msgid "Receiver info"
-msgstr "Informazioni sul ricevitore"
+msgstr "Informazioni ricevitore"
 
 msgid "A profile with that name exists!"
-msgstr "Nome del prfilo già esistente!"
+msgstr "Nome del profilo già esistente!"
 
 msgid "Show short info as hints in the main services list"
 msgstr "Mostra suggerimenti nella lista principale dei servizi"
 
 msgid "Show detailed info as hints in the bouquet list"
-msgstr "Mostra suggerimenti nella lista dei bouquets"
+msgstr "Mostra informazioni dettagliate come suggerimenti nell'elenco dei bouquets"
 
 msgid "Enable alternate bouquet file naming"
-msgstr "Abilita nomi alternativi per il bouquet"
+msgstr "Abilita nomi alternativi per i bouquets"
 
 msgid "Allows you to name bouquet files using their names."
-msgstr "Permette rinominare i files dei bouquets usando i loro nomi."
+msgstr "Permetti di nominare i files dei bouquets usando i nomi dei bouquets."
 
 msgid "Appearance"
 msgstr "Aspetto"
@@ -963,34 +969,34 @@ msgid "Gtk3 Theme:"
 msgstr "Tema Gtk3:"
 
 msgid "Icon Theme:"
-msgstr "Icone:"
+msgstr "Tema delle icone:"
 
 msgid "Gtk3 Themes and Icons:"
 msgstr "Temi e icone Gtk3:"
 
 msgid "Deleting data..."
-msgstr "Eliminazione dati ..."
+msgstr "Sto eliminando i dati ..."
 
 msgid "Download from the receiver"
-msgstr "Scaricare dal ricevitore"
+msgstr "Scarica dal ricevitore"
 
 msgid "Remove all picons from the receiver"
-msgstr "Eliminare tutti i picons dal ricevitore"
+msgstr "Elimina tutti i picons dal ricevitore"
 
 msgid "Service reference"
-msgstr "Referenza del servizio"
+msgstr "Servizio di riferimento"
 
 msgid "Enable support for"
 msgstr "Abilita supporto per"
 
 msgid "Auto-check for updates"
-msgstr "Controllo aggiornamenti"
+msgstr "Verifica automatica degli aggiornamenti"
 
 msgid "Filter services"
 msgstr "Filtro servizi"
 
 msgid "Filter services in the main list."
-msgstr "Filtrare servizi nella lista principale"
+msgstr "Filtra i servizi nella lista principale."
 
 msgid "Destination:"
 msgstr "Destinazione:"
@@ -999,16 +1005,16 @@ msgid "EXPERIMENTAL!"
 msgstr "SPERIMENTALE!"
 
 msgid "Sorting data..."
-msgstr "Ordinando dati..."
+msgstr "Sto ordinando i dati..."
 
 msgid "There are unsaved changes.\n\n\t Save them now?"
-msgstr "Ci sono cambiamenti non salvati.\n\n\t Salvarli adesso?"
+msgstr "Ci sono cambiamenti non salvati.\n\n\t Vuoi salvarli adesso?"
 
 msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
-msgstr "Sicuro di voler cambiare l'ordine\n\t dei servizi in questo bouquet?"
+msgstr "Sei sicuro di voler cambiare l'ordine\n\t dei servizi di questo bouquet?"
 
 msgid "Remove from the receiver"
-msgstr "Eliminare dal ricevitore"
+msgstr "Elimina dal ricevitore"
 
 msgid "Screenshot"
 msgstr "Cattura schermata"
@@ -1017,10 +1023,10 @@ msgid "Video"
 msgstr "Video"
 
 msgid "The Neutrino has only experimental support. Not all features are supported!"
-msgstr "Neutrino ha un supporto a livello sperimentale. Non tutte le caratteristiche sono supportate!"
+msgstr "Il Neutrino ha un supporto a livello sperimentale. Non tutte le caratteristiche sono supportate!"
 
 msgid "Enable experimental features"
-msgstr "Abilitare le caratteristiche sperimentali"
+msgstr "Abilita le caratteristiche sperimentali"
 
 msgid "Can't Playback!"
 msgstr "Riproduzione impossibile!"
@@ -1029,13 +1035,13 @@ msgid "Enable Dark Mode"
 msgstr "Abilita modalità scura"
 
 msgid "Extract..."
-msgstr "Estrazione..."
+msgstr "Estrai file compresso"
 
 msgid "Unsupported format!"
-msgstr "ormato non supportato!"
+msgstr "Formato non supportato!"
 
 msgid "Combine with the current data?"
-msgstr "Combinare con i dati attuali?"
+msgstr "Combino con i dati attuali?"
 
 msgid "Importing data done!"
 msgstr "Importazione dati effettuata!"
@@ -1044,13 +1050,13 @@ msgid "Current service"
 msgstr "Servizio attuale"
 
 msgid "Open folder"
-msgstr "Aprire cartella"
+msgstr "Apri cartella"
 
 msgid "Open archive"
-msgstr "Aprire archivio"
+msgstr "Apri archivio"
 
 msgid "Import from Web"
-msgstr "Importare dal Web"
+msgstr "Importa dal Web"
 
 msgid "Control"
 msgstr "Controllo"
@@ -1065,34 +1071,34 @@ msgid "Add timer"
 msgstr "Aggiungi timer"
 
 msgid "Hr."
-msgstr "Ora"
+msgstr "Ora."
 
 msgid "Min."
 msgstr "Minuti."
 
 msgid "Power"
-msgstr "Accenzione"
+msgstr "Accendi"
 
 msgid "Standby"
-msgstr "Pausa"
+msgstr "Standby"
 
 msgid "Wake Up"
 msgstr "Riprendi"
 
 msgid "Reboot"
-msgstr "Riavvio"
+msgstr "Riavvia"
 
 msgid "Restart GUI"
-msgstr "Ricarica GUI"
+msgstr "Riavvia GUI"
 
 msgid "Shutdown"
-msgstr "Spegnimento"
+msgstr "Spegni"
 
 msgid "Shut down"
 msgstr "Spegnimento"
 
 msgid "Do Nothing"
-msgstr "non fare nulla"
+msgstr "Non fare nulla"
 
 msgid "Auto"
 msgstr "Аuto"
@@ -1113,19 +1119,19 @@ msgid "Service:"
 msgstr "Servizio:"
 
 msgid "Service reference:"
-msgstr "Referenza del servizio:"
+msgstr "Servizio di riferimento:"
 
 msgid "Event ID:"
 msgstr "ID evento:"
 
 msgid "Begins:"
-msgstr "Inizi:"
+msgstr "Inizia:"
 
 msgid "Ends:"
-msgstr "Finali:"
+msgstr "Termina:"
 
 msgid "Repeated:"
-msgstr "Ripetuti:"
+msgstr "Ripetuto:"
 
 msgid "Action:"
 msgstr "Azione:"
@@ -1158,13 +1164,13 @@ msgid "Su"
 msgstr "Dom"
 
 msgid "Set"
-msgstr "Seleziona"
+msgstr "Imposta"
 
 msgid "Services update"
-msgstr "Aggiornamento servizio"
+msgstr "Aggiornamento servizi"
 
 msgid "Create folder"
-msgstr "Creare cartella"
+msgstr "Crea cartella"
 
 msgid "FTP client"
 msgstr "Cliente FTP"
@@ -1185,7 +1191,7 @@ msgid "Date"
 msgstr "Data"
 
 msgid "Toggle display position"
-msgstr "Attiva/Disattiva la posizione del display"
+msgstr "Commuta la posizione di visualizzazione"
 
 msgid "Alternatives"
 msgstr "Alternative"
@@ -1194,43 +1200,43 @@ msgid "Add alternatives"
 msgstr "Aggiungi alternative"
 
 msgid "DreamOS only!"
-msgstr "Esclusivo DreamOS!"
+msgstr "Solo DreamOS!"
 
 msgid "A similar service is already in this list!"
-msgstr "Un servizio similare è già presente nella lista!"
+msgstr "Un servizio simile è già presente nella lista!"
 
 msgid "Play mode has been changed!\nRestart the program to apply the settings."
 msgstr "La modalitá di riproduzione è stata cambiata!\nRiavvia il programma per applicare i cambiamenti."
 
 msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
-msgstr "Stabilisci i valori TID, NID e Namespace per una corretta nomenclatura dei picons!"
+msgstr "Stabilisci i valori TID, NID e Namespace per nominare correttamente i picons!"
 
 msgid "Streams detected:"
-msgstr "Rilevati flussi:"
+msgstr "Rilevati streams:"
 
 msgid "Download picons"
-msgstr "Scaricare picons"
+msgstr "Scarica picons"
 
 msgid "Errors:"
-msgstr "Errore:"
+msgstr "Errori:"
 
 msgid "Use to play streams:"
-msgstr "Usa per riprodurre i flussi:"
+msgstr "Per riprodurre gli streams usa:"
 
 msgid "Font in the lists:"
-msgstr "Caratteri nella lista:"
+msgstr "Carattere nelle liste:"
 
 msgid "Picons size in the lists:"
-msgstr "Dimensione dei picons nella lista:"
+msgstr "Dimensione picons nelle liste:"
 
 msgid "Logo size in tooltips:"
 msgstr "Dimensione logo nei suggerimenti:"
 
 msgid "Save as"
-msgstr "Salvare come"
+msgstr "Salva come"
 
 msgid "Mark duplicates"
-msgstr "Seleziona duplicati"
+msgstr "Contrassegna i duplicati"
 
 msgid "Load only for selected bouquet"
 msgstr "Scarica solo per i bouquet selezionati"
@@ -1246,3 +1252,102 @@ msgstr "Registrazioni"
 
 msgid "Help"
 msgstr "Aiuto"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "Le API HTTP non sono attivate. Controlla le tue impostazioni!"
+
+msgid "Add picons"
+msgstr "Aggiungi picons"
+
+msgid "Logs"
+msgstr "Logs"
+
+msgid "Title"
+msgstr "Titolo"
+
+msgid "Time"
+msgstr "Time"
+
+msgid "Length"
+msgstr "Durata"
+
+msgid "Additional source"
+msgstr "Fonte aggiuntiva"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Imposta automaticamente il nome selezionato nell'elenco dei preferiti."
+
+msgid "Playback"
+msgstr "Riproduzione"
+
+msgid "Playback:"
+msgstr "Riproduzione:"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Audio Track"
+msgstr "Traccia audio"
+
+msgid "Subtitle"
+msgstr "Sottotitolo"
+
+msgid "Subtitle Track"
+msgstr "Traccia sottotitolo"
+
+msgid "Aspect ratio"
+msgstr "Proporzioni"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Questo potrebbe modificare le impostazioni di altri profili!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Trascina i servizi sul picon desiderato o il picon sull'elenco dei servizi selezionati."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Imposta la cartella del profilo come predefinita per memorizzare picons, backups, etc."
+
+msgid "New sub-bouquet"
+msgstr "Nuovo sotto-bouquet"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Seleziona servizi non presenti nei bouquets"
+
+msgid "Not in Bouquets"
+msgstr "No nei bouquets"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Non mostrare i servizi presenti nei bouquets."
+
+msgid "IPTV services only"
+msgstr "Solo servizi IPTV"
+
+msgid "Display picons"
+msgstr "Visualizza picons"
+
+msgid "Alternate layout"
+msgstr "Disposizione alternativa"
+
+msgid "Layout of elements has been changed!"
+msgstr "La disposizione degli elementi è stata modificata!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Riavvia il programma per applicare tutte le modifiche."
+
+msgid "New folder"
+msgstr "Nuova cartella"
+
+msgid "Rename"
+msgstr "Rinomina"
+
+msgid "Bookmarks"
+msgstr "Segnalibri"
+
+msgid "Add bookmark"
+msgstr "Aggiungi segnalibro"
+
+msgid "All bouquets"
+msgstr "Tutti i bouquets"
+
+msgid "Playback from the main list"
+msgstr "Riproduzione dalla lista principale"

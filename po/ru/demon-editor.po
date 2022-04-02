@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Dmitriy Yefremov
+# Copyright (C) 2018-2022 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1280,6 +1280,9 @@ msgstr "Автоматическая установка имени из спис
 msgid "Playback"
 msgstr "Воспроизведение"
 
+msgid "Playback:"
+msgstr "Воспроизведение:"
+
 msgid "Audio"
 msgstr "Аудио"
 
@@ -1330,3 +1333,21 @@ msgstr "Изменено расположение элементов!"
 
 msgid "Restart the program to apply all changes."
 msgstr "Перезапустите программу, чтобы применить все изменения."
+
+msgid "New folder"
+msgstr "Создать папку"
+
+msgid "Rename"
+msgstr "Переименовать"
+
+msgid "Bookmarks"
+msgstr "Закладки"
+
+msgid "Add bookmark"
+msgstr "Добавить в закладки"
+
+msgid "All bouquets"
+msgstr "Все букеты"
+
+msgid "Playback from the main list"
+msgstr "Воспроизведение из основного списка"

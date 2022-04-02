@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,10 @@
 
 """ Common module for showing dialogs """
 import gettext
+import xml.etree.ElementTree as ET
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-import xml.etree.ElementTree as ET
 
 from app.commons import run_idle
 from app.settings import SEP, IS_WIN
@@ -238,15 +238,16 @@ def get_builder(path, handlers=None, use_str=False, objects=None, tag="property"
 
 
 def translate_xml(path, tag="property"):
-    """
-        Used to translate GUI from * .glade files in MS Windows.
+    """ Used to translate GUI from * .glade files in MS Windows.
 
         More info: https://gitlab.gnome.org/GNOME/gtk/-/issues/569
     """
     et = ET.parse(path)
     root = et.getroot()
-    for e in root.iter(tag):
-        if e.attrib.get("translatable", None) == "yes":
+    for e in root.iter():
+        if e.tag == tag and e.attrib.get("translatable", None) == "yes":
+            e.text = get_message(e.text)
+        elif e.tag == "item" and e.attrib.get("translatable", None) == "yes":
             e.text = get_message(e.text)
 
     return ET.tostring(root, encoding="unicode", method="xml")

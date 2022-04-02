@@ -135,8 +135,8 @@ class UtfFTP(FTP):
         files = []
         self.dir(path, files.append)
         for f in files:
-            f_data = f.split()
-            f_path = os.path.join(path, " ".join(f_data[8:]))
+            f_data = self.get_file_data(f)
+            f_path = f_data[8]
 
             if f_data[0][0] == "d":
                 try:
@@ -310,9 +310,8 @@ class UtfFTP(FTP):
         files = []
         self.dir(path, files.append)
         for f in files:
-            f_data = f.split()
-            name = " ".join(f_data[8:])
-            f_path = path + "/" + name
+            f_data = self.get_file_data(f)
+            f_path = f"{path}/{f_data[8]}"
 
             if f_data[0][0] == "d":
                 self.delete_dir(f_path, callback)
@@ -350,6 +349,15 @@ class UtfFTP(FTP):
             callback(msg)
 
         return resp
+
+    @staticmethod
+    def get_file_data(file):
+        """ Returns a prepared list of file data from a file string. """
+        f_data = file.split()
+        # Ignoring space in file name.
+        f_data = f_data[0:9]
+        f_data[8] = file[file.index(f_data[8]):]
+        return f_data
 
 
 def download_data(*, settings, download_type=DownloadType.ALL, callback=log, files_filter=None):

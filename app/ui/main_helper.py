@@ -360,7 +360,7 @@ def has_locked_hide(model, paths, col_num):
 
 # ***************** Location *******************#
 
-def locate_in_services(fav_view, services_view, parent_window):
+def locate_in_services(fav_view, services_view, column, parent_window):
     """ Locating and scrolling to the service """
     model, paths = fav_view.get_selection().get_selected_rows()
 
@@ -372,7 +372,7 @@ def locate_in_services(fav_view, services_view, parent_window):
 
     fav_id = model.get_value(model.get_iter(paths[0]), Column.FAV_ID)
     for index, row in enumerate(services_view.get_model()):
-        if row[Column.SRV_FAV_ID] == fav_id:
+        if row[column] == fav_id:
             scroll_to(index, services_view)
             break
 
@@ -686,9 +686,9 @@ def append_text_to_tview(char, view):
     view.scroll_to_mark(insert, 0.0, True, 0.0, 1.0)
 
 
-def get_iptv_url(row, s_type):
+def get_iptv_url(row, s_type, column=Column.FAV_ID):
     """ Returns url from iptv type row """
-    data = row[Column.FAV_ID].split(":" if s_type is SettingsType.ENIGMA_2 else "::")
+    data = row[column].split(":" if s_type is SettingsType.ENIGMA_2 else "::")
     if s_type is SettingsType.ENIGMA_2:
         data = list(filter(lambda x: "http" in x, data))
     if data:

@@ -1283,6 +1283,9 @@ msgstr "Аўтаматычная ўсталёўка імя са спіса аб�
 msgid "Playback"
 msgstr "Прайграванне"
 
+msgid "Playback:"
+msgstr "Прайграванне:"
+
 msgid "Audio"
 msgstr "Аўдыё"
 
@@ -1333,3 +1336,21 @@ msgstr "Зменена месцаванне элементаў!"
 
 msgid "Restart the program to apply all changes."
 msgstr "Перазапусціце праграму, каб ужыць усе змены."
+
+msgid "New folder"
+msgstr "Стварыць тэчку"
+
+msgid "Rename"
+msgstr "Змяніць назву"
+
+msgid "Bookmarks"
+msgstr "Закладкі"
+
+msgid "Add bookmark"
+msgstr "Дадаць закладку"
+
+msgid "All bouquets"
+msgstr "Усе букеты"
+
+msgid "Playback from the main list"
+msgstr "Прайграванне з асноўнага спіса"

@@ -189,6 +189,7 @@ class ViewTarget(Enum):
     BOUQUET = 0
     FAV = 1
     SERVICES = 2
+    IPTV = 3
 
 
 class BqGenType(Enum):
@@ -259,6 +260,13 @@ class Column(IntEnum):
     REC_LEN = 3
     REC_FILE = 4
     REC_DESC = 5
+    # IPTV view
+    IPTV_SERVICE = 0
+    IPTV_TYPE = 1
+    IPTV_PICON = 2
+    IPTV_REF = 3
+    IPTV_FAV_ID = 4
+    IPTV_PICON_ID = 5
 
     def __index__(self):
         """ Overridden to get the index in slices directly """

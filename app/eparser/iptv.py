@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,7 @@ from app.ui.uicommons import IPTV_ICON
 NEUTRINO_FAV_ID_FORMAT = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}"
 ENIGMA2_FAV_ID_FORMAT = " {}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION: {}\n"
 MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
+PICON_FORMAT = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 
 
 class StreamType(Enum):
@@ -49,6 +50,11 @@ class StreamType(Enum):
     NONE_REC_2 = "5002"
     E_SERVICE_URI = "8193"
     E_SERVICE_HLS = "8739"
+    UNKNOWN = "0"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.UNKNOWN
 
 
 def parse_m3u(path, s_type, detect_encoding=True, params=None):
@@ -76,6 +82,7 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
         p_id = "1_0_1_0_0_0_0_0_0_0.png"
         st = BqServiceType.IPTV.name
         params = params or [0, 0, 0, 0]
+        m_name = BqServiceType.MARKER.name
 
         for line in str(data, encoding=encoding, errors="ignore").splitlines():
             if line.startswith("#EXTINF"):
@@ -88,26 +95,30 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                 d = {data[i].lower().strip(" ="): data[i + 1] for i in range(0, len(data) - 1, 2)}
                 picon = d.get("tvg-logo", None)
 
-                grp_name = d.get("group-title", None)
-                if grp_name not in groups:
-                    groups.add(grp_name)
-                    fav_id = MARKER_FORMAT.format(marker_counter, grp_name, grp_name)
-                    marker_counter += 1
-                    mr = Service(None, None, None, grp_name, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None)
-                    services.append(mr)
+                if s_type is SettingsType.ENIGMA_2:
+                    grp_name = d.get("group-title", None)
+                    if grp_name not in groups:
+                        groups.add(grp_name)
+                        fav_id = MARKER_FORMAT.format(marker_counter, grp_name, grp_name)
+                        marker_counter += 1
+                        mr = Service(None, None, None, grp_name, *aggr[0:3], m_name, *aggr, fav_id, None)
+                        services.append(mr)
             elif line.startswith("#EXTGRP") and s_type is SettingsType.ENIGMA_2:
                 grp_name = line.strip("#EXTGRP:").strip()
                 if grp_name not in groups:
                     groups.add(grp_name)
                     fav_id = MARKER_FORMAT.format(marker_counter, grp_name, grp_name)
                     marker_counter += 1
-                    mr = Service(None, None, None, grp_name, *aggr[0:3], BqServiceType.MARKER.name, *aggr, fav_id, None)
+                    mr = Service(None, None, None, grp_name, *aggr[0:3], m_name, *aggr, fav_id, None)
                     services.append(mr)
             elif not line.startswith("#"):
                 url = line.strip()
                 params[0] = sid_counter
                 sid_counter += 1
                 fav_id = get_fav_id(url, name, s_type, params)
+                if s_type is SettingsType.ENIGMA_2:
+                    p_id = get_picon_id(params)
+
                 if all((name, url, fav_id)):
                     srv = Service(None, None, IPTV_ICON, name, *aggr[0:3], st, picon, p_id, *s_aggr, url, fav_id, None)
                     services.append(srv)
@@ -150,6 +161,12 @@ def get_fav_id(url, name, settings_type, params=None, st_type=None, s_id=0, srv_
         return ENIGMA2_FAV_ID_FORMAT.format(st_type, s_id, srv_type, *params, quote(url), name, name, None)
     elif settings_type is SettingsType.NEUTRINO_MP:
         return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
+
+
+def get_picon_id(params=None, st_type=None, s_id=0, srv_type=1):
+    st_type = st_type or StreamType.NONE_TS.value
+    params = params or (0, 0, 0, 0)
+    return PICON_FORMAT.format(st_type, s_id, srv_type, *params)
 
 
 if __name__ == "__main__":

@@ -92,6 +92,7 @@ class Defaults(Enum):
     FAV_CLICK_MODE = 0
     PLAY_STREAMS_MODE = 1 if IS_DARWIN else 0
     STREAM_LIB = "mpv" if IS_WIN else "vlc"
+    MAIN_LIST_PLAYBACK = False
     PROFILE_FOLDER_DEFAULT = False
     RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
     ACTIVATE_TRANSCODING = False
@@ -416,7 +417,7 @@ class Settings:
 
     @property
     def profile_data_path(self):
-        return "{}data{}{}{}".format(self.default_data_path, SEP, self._current_profile, SEP)
+        return f"{self.default_data_path}data{SEP}{self._current_profile}{SEP}"
 
     @profile_data_path.setter
     def profile_data_path(self, value):
@@ -425,8 +426,8 @@ class Settings:
     @property
     def profile_picons_path(self):
         if self.profile_folder_is_default:
-            return "{}picons{}".format(self.profile_data_path, SEP)
-        return "{}{}{}".format(self.default_picon_path, self._current_profile, SEP)
+            return f"{self.profile_data_path}picons{SEP}"
+        return f"{self.default_picon_path}{self._current_profile}{SEP}"
 
     @profile_picons_path.setter
     def profile_picons_path(self, value):
@@ -435,8 +436,8 @@ class Settings:
     @property
     def profile_backup_path(self):
         if self.profile_folder_is_default:
-            return "{}backup{}".format(self.profile_data_path, SEP)
-        return "{}{}{}".format(self.default_backup_path, self._current_profile, SEP)
+            return f"{self.profile_data_path}backup{SEP}"
+        return f"{self.default_backup_path}{self._current_profile}{SEP}"
 
     @profile_backup_path.setter
     def profile_backup_path(self, value):
@@ -492,6 +493,22 @@ class Settings:
     def stream_lib(self, value):
         self._settings["stream_lib"] = value
 
+    @property
+    def fav_click_mode(self):
+        return self._settings.get("fav_click_mode", Defaults.FAV_CLICK_MODE.value)
+
+    @fav_click_mode.setter
+    def fav_click_mode(self, value):
+        self._settings["fav_click_mode"] = value
+
+    @property
+    def main_list_playback(self):
+        return self._settings.get("main_list_playback", Defaults.MAIN_LIST_PLAYBACK.value)
+
+    @main_list_playback.setter
+    def main_list_playback(self, value):
+        self._settings["main_list_playback"] = value
+
     # *********** EPG ************ #
 
     @property
@@ -502,6 +519,16 @@ class Settings:
     @epg_options.setter
     def epg_options(self, value):
         self._cp_settings["epg_options"] = value
+
+    # *********** FTP ************ #
+
+    @property
+    def ftp_bookmarks(self):
+        return self._cp_settings.get("ftp_bookmarks", [])
+
+    @ftp_bookmarks.setter
+    def ftp_bookmarks(self, value):
+        self._cp_settings["ftp_bookmarks"] = value
 
     # ***** Program settings ***** #
 
@@ -568,14 +595,6 @@ class Settings:
     @enable_send_to.setter
     def enable_send_to(self, value):
         self._settings["enable_send_to"] = value
-
-    @property
-    def fav_click_mode(self):
-        return self._settings.get("fav_click_mode", Defaults.FAV_CLICK_MODE.value)
-
-    @fav_click_mode.setter
-    def fav_click_mode(self, value):
-        self._settings["fav_click_mode"] = value
 
     @property
     def language(self):
@@ -738,6 +757,14 @@ class Settings:
     def is_darwin(self):
         return IS_DARWIN
 
+    @property
+    def force_external_themes(self):
+        return self._settings.get("force_external_themes", False)
+
+    @force_external_themes.setter
+    def force_external_themes(self, value):
+        self._settings["force_external_themes"] = value
+
     # *********** Download dialog *********** #
 
     @property
@@ -785,7 +812,10 @@ class Settings:
             Settings.write_settings(Settings.get_default_settings())
 
         with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
-            return json.load(config_file)
+            try:
+                return json.load(config_file)
+            except ValueError as e:
+                raise SettingsReadException(e)
 
     @staticmethod
     def get_default_settings(profile_name="default"):
