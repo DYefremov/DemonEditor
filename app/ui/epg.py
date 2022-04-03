@@ -108,7 +108,7 @@ class EpgDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._assign_ref_popup_item = builder.get_object("bouquet_assign_ref_popup_item")
-        self._left_header_box = builder.get_object("left_header_box")
+        self._left_action_box = builder.get_object("left_action_box")
         self._xml_download_progress_bar = builder.get_object("xml_download_progress_bar")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
@@ -500,7 +500,7 @@ class EpgDialog:
 
     @run_idle
     def update_active_header_elements(self, state):
-        self._left_header_box.set_sensitive(state)
+        self._left_action_box.set_sensitive(state)
         self._xml_download_progress_bar.set_visible(not state)
         self._source_info_label.set_text("" if state else "Downloading XML:")
 
