@@ -14,14 +14,15 @@ entry {
 }
 
 entry > image {
-  padding-left: 0.4em;
+  padding-left: 0.3em;
+  padding-right: 0.3em;
 }
 
 button {
-  min-height: 1.5em;
+  min-height: 1.2em;
   min-width: 1.5em;
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
 }
 
 button:active, button:checked {
