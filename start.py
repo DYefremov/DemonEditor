@@ -6,19 +6,19 @@ def update_icon():
     need_update = False
     icon_name = "DemonEditor.desktop"
 
-    with open(icon_name, "r") as f:
+    with open(icon_name, "r", encoding="utf-8") as f:
         lines = f.readlines()
         for i, line in enumerate(lines):
             if line.startswith("Icon="):
                 icon_path = line.lstrip("Icon=")
-                current_path = "{}/app/ui/icons/hicolor/96x96/apps/demon-editor.png".format(os.getcwd())
+                current_path = f"{os.getcwd()}/app/ui/icons/hicolor/96x96/apps/demon-editor.png"
                 if icon_path != current_path:
                     need_update = True
-                    lines[i] = "Icon={}\n".format(current_path)
+                    lines[i] = f"Icon={current_path}\n"
                 break
 
     if need_update:
-        with open(icon_name, "w") as f:
+        with open(icon_name, "w", encoding="utf-8") as f:
             f.writelines(lines)
 
 
