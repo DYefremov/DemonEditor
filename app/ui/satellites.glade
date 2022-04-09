@@ -195,7 +195,6 @@ Author: Dmitriy Yefremov
   <object class="GtkMenu" id="transponder_popup_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="reserve_toggle_size">False</property>
     <child>
       <object class="GtkImageMenuItem" id="add_tr_popup_menu_item">
         <property name="label" translatable="yes">Add</property>
