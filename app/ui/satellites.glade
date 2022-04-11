@@ -1467,7 +1467,6 @@ Author: Dmitriy Yefremov
                     <property name="tooltip_text" translatable="yes">Source</property>
                     <property name="active">0</property>
                     <items>
-                      <item id="FLYSAT" translatable="yes">FlySat</item>
                       <item id="LYNGSAT" translatable="yes">LyngSat</item>
                       <item id="KINGOFSAT" translatable="yes">KingOfSat</item>
                     </items>

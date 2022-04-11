@@ -530,11 +530,11 @@ class UpdateDialog:
 
     @run_task
     def get_sat_list(self, src, callback):
-        sat_src = SatelliteSource.FLYSAT
+        sat_src = SatelliteSource.LYNGSAT
         if src == 1:
-            sat_src = SatelliteSource.LYNGSAT
-        elif src == 2:
             sat_src = SatelliteSource.KINGOFSAT
+        elif src == 2:
+            sat_src = SatelliteSource.FLYSAT
 
         sats = self._parser.get_satellites_list(sat_src)
         callback(sats)
@@ -744,9 +744,7 @@ class ServicesUpdateDialog(UpdateDialog):
         self._transponder_view.connect("select_all", lambda w: self.update_transponder_selection(True))
 
         self._transponder_paned.set_visible(True)
-        self._source_box.remove(0)
         self._source_box.connect("changed", self.on_update_satellites_list)
-        self._source_box.set_active(0)
 
     @run_idle
     def on_receive_data(self, item):
@@ -843,8 +841,8 @@ class ServicesUpdateDialog(UpdateDialog):
         sat_src = SatelliteSource.LYNGSAT
         if src == 1:
             sat_src = SatelliteSource.KINGOFSAT
-            self._services_parser.source = sat_src
 
+        self._services_parser.source = sat_src
         sats = self._parser.get_satellites_list(sat_src)
         callback(sats)
         self.is_download = False

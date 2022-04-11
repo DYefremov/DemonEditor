@@ -164,16 +164,15 @@ class SatellitesParser(HTMLParser):
 
         for src in SatelliteSource.get_sources(self._source):
             try:
-                request = requests.get(url=src, headers=_HEADERS, timeout=_TIMEOUT)
+                resp = requests.get(url=src, headers=_HEADERS, timeout=_TIMEOUT)
             except requests.exceptions.RequestException as e:
                 log(f"Getting satellite list error: {repr(e)}")
-                return []
             else:
-                reason = request.reason
+                reason = resp.reason
                 if reason == "OK":
-                    self.feed(request.text)
+                    self.feed(resp.text)
                 else:
-                    log(reason)
+                    log(f"Getting satellite list error: {reason} -> {resp.url}")
 
         if self._rows:
             if self._source is SatelliteSource.FLYSAT:
@@ -182,6 +181,8 @@ class SatellitesParser(HTMLParser):
                 return self.get_satellites_for_lyng_sat()
             elif source is SatelliteSource.KINGOFSAT:
                 return self.get_satellites_for_king_of_sat()
+
+        return []
 
     def get_satellite(self, sat):
         pos = sat[1]
