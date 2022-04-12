@@ -453,12 +453,12 @@ class PiconManager(Gtk.Box):
     def on_send_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
         path = self.get_path_from_uris(data)
         if path:
-            self.on_send(files_filter={path.name}, path=path.parent)
+            self.on_picons_send(files_filter={path.name}, path=path.parent)
 
     def on_download_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
         path = self.get_path_from_uris(data)
         if path:
-            self.on_download(files_filter={path.name})
+            self.on_picons_download(files_filter={path.name})
 
     def on_remove_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
         path = self.get_path_from_uris(data)
@@ -526,12 +526,12 @@ class PiconManager(Gtk.Box):
     def on_selective_send(self, view):
         path = self.get_selected_path(view)
         if path:
-            self.on_send(files_filter={path.name}, path=path.parent)
+            self.on_picons_send(files_filter={path.name}, path=path.parent)
 
     def on_selective_download(self, view):
         path = self.get_selected_path(view)
         if path:
-            self.on_download(files_filter={path.name})
+            self.on_picons_download(files_filter={path.name})
 
     def on_selective_remove(self, view):
         path = self.get_selected_path(view)
@@ -541,20 +541,32 @@ class PiconManager(Gtk.Box):
     def on_local_remove(self, view):
         model, paths = view.get_selection().get_selected_rows()
         if paths and show_dialog(DialogType.QUESTION, self._app_window) == Gtk.ResponseType.OK:
-            itr = model.get_iter(paths.pop())
-            p_path = Path(model.get_value(itr, 2)).resolve()
-            if p_path.is_file():
-                p_path.unlink()
-                base_model = get_base_model(model)
-                filter_model = model.get_model()
-                itr = filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr))
-                base_model.remove(itr)
-                self._app.update_picons()
+            base_model = get_base_model(model)
+            filter_model = model.get_model()
+            to_del = []
+
+            for p in paths:
+                itr = model.get_iter(p)
+                p_path = Path(model.get_value(itr, 2)).resolve()
+                if p_path.is_file():
+                    p_path.unlink()
+                    to_del.append(filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(itr)))
+
+            list(map(base_model.remove, to_del))
+            self._app.update_picons()
 
         if view is self._picons_dest_view:
             self._dst_count_label.set_text(str(len(model)))
 
-    def on_send(self, item=None, files_filter=None, path=None):
+    def on_send(self, item=None):
+        view = self._picons_src_view if self._picons_src_view.is_focus() else self._picons_dest_view
+        model, paths = view.get_selection().get_selected_rows()
+        if paths:
+            self.on_picons_send(files_filter={Path(model[p][-1]).resolve().name for p in paths})
+        else:
+            self._app.show_error_message("No selected item!")
+
+    def on_picons_send(self, item=None, files_filter=None, path=None):
         dest_path = path or self._settings.profile_picons_path
         settings = Settings(self._settings.settings)
         settings.profile_picons_path = f"{dest_path}{SEP}"
@@ -567,7 +579,10 @@ class PiconManager(Gtk.Box):
                                                                                        Gtk.MessageType.INFO),
                                           files_filter=files_filter))
 
-    def on_download(self, item=None, files_filter=None, path=None):
+    def on_download(self, item=None):
+        self.on_picons_download()
+
+    def on_picons_download(self, item=None, files_filter=None, path=None):
         path = path or self._settings.profile_picons_path
         settings = Settings(self._settings.settings)
         settings.profile_picons_path = path + SEP
