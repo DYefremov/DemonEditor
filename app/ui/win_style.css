@@ -9,3 +9,12 @@ switch {
 spinbutton entry {
   min-height: 16px;
 }
+
+button > image {
+  padding: 2px;
+}
+
+grid > button {
+  padding-left: 15px;
+  padding-right: 15px;
+}
