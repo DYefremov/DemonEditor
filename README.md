@@ -36,7 +36,8 @@ Clipboard is **"rubber"**. There is an accumulation before the insertion!
   beginning or inserts (creates) a new bouquet.  
 * **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.
 * **Ctrl + E** - edit.                                                                                                                                                                                                                                                                                                                    
-* **Ctrl + R, F2** - rename.                                                                                                                                                                                                                                                                                                                     
+* **Ctrl + R, F2** - rename.  
+* **Ctrl + Alt + R** - rename for bouquet.    
 * **Ctrl + S, T** in Satellites edit tool for create satellite or transponder.                                                                 
 * **Ctrl + L** - parental lock.                                                                                                          
 * **Ctrl + H** - hide/skip.                                                                                                                                                                                                 
@@ -85,7 +86,8 @@ Recommended copy the package to the **Application** directory.
 Perhaps in the security settings it will be necessary to allow the launch of this application!  
 
 * ### MS Windows  
-**Windows users can also run this program.** One way is to use the [MSYS2](https://www.msys2.org/) platform.  
+**Windows users can also run this program.**  
+One way is to use the [MSYS2](https://www.msys2.org/) platform. You can use [this](https://github.com/DYefremov/DemonEditor/blob/master/build/BUILD_WIN.md) quick guide.   
 In addition, you can download a ready-made build (**64-bit**) from the [releases](https://github.com/DYefremov/DemonEditor/releases) page.  
 
 **All builds may contain components distributed under the GPL [v3](http://www.gnu.org/licenses/gpl-3.0.html) or lower license.  

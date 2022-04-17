@@ -57,7 +57,7 @@ class PiconsCzDownloader:
     _PERM_URL = "https://picon.cz/download/7337"
     _BASE_URL = "https://picon.cz/download/"
     _BASE_LOGO_URL = "https://picon.cz/picon/0/"
-    _HEADER = {"User-Agent": "DemonEditor/2.2.2", "Referer": ""}
+    _HEADER = {"User-Agent": "DemonEditor/2.2.3", "Referer": ""}
     _LINK_PATTERN = re.compile(r"((.*)-\d+x\d+)-(.*)_by_chocholousek.7z$")
     _FILE_PATTERN = re.compile(b"\\s+(1_.*\\.png).*")
 
@@ -136,7 +136,7 @@ class PiconsCzDownloader:
             raise PiconsError("7-zip [7z] archiver not found!")
 
         if IS_WIN:
-            exe = f"C:{os.sep}Program Files{os.sep}7-Zip{os.sep}{exe}.exe"
+            exe = f"{exe}.exe" if GTK_PATH else f"C:{os.sep}Program Files{os.sep}7-Zip{os.sep}{exe}.exe"
             if not os.path.isfile(exe):
                 raise PiconsError("7-Zip executable not found!")
 

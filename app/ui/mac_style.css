@@ -10,13 +10,19 @@
 
 entry {
   min-height: 2.0em;
+  padding: 0.2em;
+}
+
+entry > image {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
 }
 
 button {
-  min-height: 1.5em;
+  min-height: 1.2em;
   min-width: 1.5em;
-  padding-top: 0.1em;
-  padding-bottom: 0.1em;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
 }
 
 button:active, button:checked {
@@ -25,7 +31,7 @@ button:active, button:checked {
 }
 
 combobox {
-  min-height: 2.1em;
+  min-height: 2.2em;
 }
 
 spinbutton {
@@ -52,6 +58,10 @@ revealer > box > button {
 switch slider {
   min-height: 1.5em;
   min-width: 1.5em;
+}
+
+popover .view {
+  background-color: transparent;
 }
 
 .font > box {

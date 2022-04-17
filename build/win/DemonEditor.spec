@@ -30,6 +30,16 @@ a = Analysis([EXE_NAME],
              hiddenimports=['fileinput', 'uuid', 'ctypes.wintypes'],
              hookspath=[],
              runtime_hooks=[],
+             hooksconfig={
+                "gi": {
+                    "languages": ["en", "be", "es", "it", "nl",
+                                  "pl", "pt", "ru", "tr", "zh_CN"],
+                    "module-versions": {
+                        "Gtk": "3.0",
+                        "GtkSource": "3",
+                    },
+                },
+             },
              excludes=excludes,
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
