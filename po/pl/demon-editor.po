@@ -16,7 +16,9 @@ msgstr ""
 "X-Generator: Poedit 2.3\n"
 
 msgid "translator-credits"
-msgstr "wwns"
+msgstr ""
+"lareq <lareq@lareq.eu>\n"
+"wwns <https://github.com/wwns>"
 
 # Main
 msgid "Service"
