@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Last-Translator: wwns <https://github.com/wwns>\n"
+"Last-Translator: lareq <lareq@lareq.eu>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 3.0\n"
+"X-Generator: Poedit 2.3\n"
 
 msgid "translator-credits"
 msgstr "wwns"
@@ -215,7 +215,7 @@ msgid "Host:"
 msgstr "Host:"
 
 msgid "Loading data..."
-msgstr "Ładowanie danych…"
+msgstr "Ładowanie danych..."
 
 msgid "Receive"
 msgstr "Pobierz"
@@ -542,10 +542,10 @@ msgid "Done!"
 msgstr "Zrobione!"
 
 msgid "Please, wait..."
-msgstr "Proszę czekać…"
+msgstr "Proszę czekać..."
 
 msgid "Resizing..."
-msgstr "Zmiana rozmiaru…"
+msgstr "Zmiana rozmiaru..."
 
 msgid "Select paths!"
 msgstr "Wybierz ścieżki!"
@@ -573,7 +573,7 @@ msgstr "Nie znaleziono VLC. Sprawdź, czy jest zainstalowany!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Proszę czekać, trwa testowanie strumieni…"
+msgstr "Proszę czekać, trwa testowanie strumieni..."
 
 msgid "Found"
 msgstr "Znaleziono"
@@ -989,7 +989,7 @@ msgid "Gtk3 Themes and Icons:"
 msgstr "Gtk3 motywy i ikony:"
 
 msgid "Deleting data..."
-msgstr "Usuwanie danych…"
+msgstr "Usuwanie danych..."
 
 msgid "Download from the receiver"
 msgstr "Pobierz z odbiornika"
@@ -1019,7 +1019,7 @@ msgid "EXPERIMENTAL!"
 msgstr "EKSPERYMENTALNE!"
 
 msgid "Sorting data..."
-msgstr "Sortowanie danych…"
+msgstr "Sortowanie danych..."
 
 msgid ""
 "There are unsaved changes.\n"
@@ -1059,7 +1059,7 @@ msgid "Enable Dark Mode"
 msgstr "Włącz tryb ciemny"
 
 msgid "Extract..."
-msgstr "Rozpakuj…"
+msgstr "Rozpakuj..."
 
 msgid "Unsupported format!"
 msgstr "Format nieobsługiwany!"
@@ -1331,3 +1331,45 @@ msgstr "Przeciągnij usługi na żądaną ikonę lub na listę wybranych usług.
 
 msgid "Sets the profile folder as default to store picons, backups, etc."
 msgstr "Ustawia folder profilu jako domyślny do przechowywania pikonów, kopii zapasowych itp."
+
+msgid "New sub-bouquet"
+msgstr "Nowy sub-bukiet"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Zaznacz te, których nie ma w bukietach"
+
+msgid "Not in Bouquets"
+msgstr "Nie ma w bukietach"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Nie pokazuj usług obecnych w bukietach."
+
+msgid "IPTV services only"
+msgstr "Tylko serwisy IPTV"
+
+msgid "Display picons"
+msgstr "Wyświetl pikony"
+
+msgid "Alternate layout"
+msgstr "Alternatywny wygląd"
+
+msgid "Layout of elements has been changed!"
+msgstr "Zmieniono układ elementów!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Uruchom ponownie program, aby zastosować wszystkie zmiany."
+
+msgid "New folder"
+msgstr "Nowy katalog"
+
+msgid "Bookmarks"
+msgstr "Zakładki"
+
+msgid "Add bookmark"
+msgstr "Dodaj zakładkę"
+
+msgid "All bouquets"
+msgstr "Wszystkie bukiety"
+
+msgid "Playback from the main list"
+msgstr "Odtwarzanie z listy głównej"
