@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -860,6 +860,8 @@ class ControlTool(Gtk.Box):
         self._ber_level_bar = builder.get_object("ber_level_bar")
         self._agc_level_bar = builder.get_object("agc_level_bar")
         self._volume_button = builder.get_object("volume_button")
+        self._network_button = builder.get_object("control_network_button")
+        self._header_box = builder.get_object("control_header_box")
         self.init_actions(app)
 
         if settings.alternate_layout:
@@ -899,7 +901,11 @@ class ControlTool(Gtk.Box):
         app.set_action("on_screenshot_osd", self.on_screenshot_osd)
 
     def on_layout_changed(self, app, alt_layout):
-        self._remote_box.reorder_child(self._remote_box.get_children()[0], 1)
+        children = self._remote_box.get_children()
+        self._remote_box.reorder_child(children[0], len(children) - 1)
+        self._remote_box.reorder_child(children[-1], 0)
+        pack_type = Gtk.PackType.END if alt_layout else Gtk.PackType.START
+        self._header_box.set_child_packing(self._network_button, False, False, 0, pack_type)
 
     # ***************** Remote controller ********************* #
 
