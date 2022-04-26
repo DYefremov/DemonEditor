@@ -1250,6 +1250,9 @@ msgstr "Выполняется загрузка данных!"
 msgid "Recordings"
 msgstr "Записи"
 
+msgid "Recordings:"
+msgstr "Записи:"
+
 msgid "Help"
 msgstr "Справка"
 
@@ -1351,3 +1354,6 @@ msgstr "Все букеты"
 
 msgid "Playback from the main list"
 msgstr "Воспроизведение из основного списка"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Включает анализ URL-адресов с помощью youtube-dl для получения прямых ссылок на медиа."

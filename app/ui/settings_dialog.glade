@@ -627,7 +627,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel" id="record_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Record:</property>
+                        <property name="label" translatable="yes">Recordings:</property>
                       </object>
                     </child>
                   </object>
@@ -2551,7 +2551,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkBox" id="enable_yt_dl_box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Enables parsing links using youtube-dl to get direct media links.</property>
+                                <property name="tooltip_text" translatable="yes">Enables URL parsing using youtube-dl to get direct links to media.</property>
                                 <child>
                                   <object class="GtkLabel" id="enable_yt_dl_label">
                                     <property name="visible">True</property>
@@ -2569,7 +2569,6 @@ Author: Dmitriy Yefremov
                                   <object class="GtkSwitch" id="enable_yt_dl_switch">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Enables parsing links using youtube-dl to get direct links to media</property>
                                     <property name="halign">end</property>
                                     <property name="valign">center</property>
                                   </object>
@@ -2689,45 +2688,6 @@ Author: Dmitriy Yefremov
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="force_ext_themes_box">
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_text" translatable="yes">Enables forced use of external themes on macOS. </property>
-                            <property name="margin_top">5</property>
-                            <child>
-                              <object class="GtkLabel" id="force_ext_themes_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="hexpand">True</property>
-                                <property name="label" translatable="yes">Force external themes on macOS </property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSwitch" id="force_ext_themes_switch">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="halign">end</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="pack_type">end</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>

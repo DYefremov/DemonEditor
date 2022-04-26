@@ -666,7 +666,7 @@ class M3uImportDialog(IptvListDialog):
         progress_box.pack_start(load_label, False, False, 0)
         # Picons
         self._picons_switch = Gtk.Switch(visible=True)
-        self._picon_box = Gtk.HBox(visible=True, sensitive=False, spacing=2)
+        self._picon_box = Gtk.HBox(visible=True, sensitive=False, spacing=5)
         self._picon_box.pack_end(self._picons_switch, False, False, 0)
         self._picon_box.pack_end(Gtk.Label(visible=True, label=get_message("Download picons")), False, False, 0)
         # Extra box

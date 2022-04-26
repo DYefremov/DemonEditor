@@ -1267,6 +1267,9 @@ msgstr "Daten werden geladen!"
 msgid "Recordings"
 msgstr "Aufnahmen"
 
+msgid "Recordings:"
+msgstr "Aufnahmen:"
+
 msgid "Help"
 msgstr "Hilfe"
 
@@ -1368,3 +1371,6 @@ msgstr "Alle Bouquets"
 
 msgid "Playback from the main list"
 msgstr "Wiedergabe aus der Hauptliste"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Aktiviert URL-Parsing mit youtube-dl, um direkte Links zu Medien zu erhalten."
