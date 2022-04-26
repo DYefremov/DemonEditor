@@ -93,7 +93,7 @@ msgid "Import m3u"
 msgstr "Importa m3u"
 
 msgid "Import m3u file"
-msgstr "Importa file m3u"
+msgstr "Importa m3u"
 
 msgid "List configuration"
 msgstr "Visualizza configurazione"
@@ -294,7 +294,7 @@ msgid "Providers"
 msgstr "Provider"
 
 msgid "Receive picons"
-msgstr "Ricevi picons"
+msgstr "Scarica picons"
 
 msgid "Picons name format:"
 msgstr "Formato del nome:"
@@ -336,7 +336,7 @@ msgid "Converter between name formats"
 msgstr "Convertitore per il formato dei nomi"
 
 msgid "Receive picons for providers"
-msgstr "Ricevi picons per providers"
+msgstr "Scarica picons per providers"
 
 msgid "Load satellite providers."
 msgstr "Carica i providers satellitari"
@@ -1250,6 +1250,8 @@ msgstr "Caricamento dati in corso!"
 msgid "Recordings"
 msgstr "Registrazioni"
 
+msgid "Recordings:"
+msgstr "Registrazioni:"
 msgid "Help"
 msgstr "Aiuto"
 
@@ -1351,3 +1353,6 @@ msgstr "Tutti i bouquets"
 
 msgid "Playback from the main list"
 msgstr "Riproduzione dalla lista principale"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Abilita l'analisi degli URL utilizzando youtube-dl per ottenere collegamenti diretti ai media."
