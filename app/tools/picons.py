@@ -116,11 +116,11 @@ class PiconsCzDownloader:
         with requests.get(url=provider.url, headers=self._HEADER, stream=True) as request:
             if request.reason == "OK":
                 dest = f"{picons_path}{provider.on_id}.7z"
-                self._appender(f"Downloading: {provider.url}\n")
+                self._appender(f"Downloading: {provider.url}")
                 with open(dest, mode="bw") as f:
                     for data in request.iter_content(chunk_size=1024):
                         f.write(data)
-                self._appender(f"Extracting: {provider.on_id}\n")
+                self._appender(f"Extracting: {provider.on_id}")
                 self.extract(dest, picons_path, picon_ids)
             else:
                 log(f"{self.__class__.__name__} [download] error: {request.reason}")
@@ -486,20 +486,16 @@ def parse_providers(url):
     return providers
 
 
-def download_picon(src_url, dest_path, callback):
+def download_picon(src_url, dest_path):
     """ Downloads and saves the picon to file.  """
     err_msg = "Picon download error: {}  [{}]"
     timeout = (3, 5)  # connect and read timeouts
-
-    if callback:
-        callback("Downloading: {}.\n".format(os.path.basename(dest_path)))
+    log("Downloading: {}.".format(os.path.basename(dest_path)))
 
     req = requests.get(src_url, timeout=timeout, stream=True)
     if req.status_code != 200:
         err_msg = err_msg.format(src_url, req.reason)
         log(err_msg)
-        if callback:
-            callback(err_msg + "\n")
     else:
         try:
             with open(dest_path, "wb") as f:
@@ -508,12 +504,10 @@ def download_picon(src_url, dest_path, callback):
         except OSError as e:
             err_msg = "Saving picon [{}] error: {}".format(dest_path, e)
             log(err_msg)
-            if callback:
-                callback(err_msg + "\n")
 
 
 @run_task
-def convert_to(src_path, dest_path, s_type, callback, done_callback):
+def convert_to(src_path, dest_path, s_type, done_callback):
     """ Converts names format of picons.
 
         Copies resulting files from src to dest and writes state to callback.
@@ -524,7 +518,7 @@ def convert_to(src_path, dest_path, s_type, callback, done_callback):
         pic_data = base_name.rstrip(".png").split("_")
         dest_file = _NEUTRINO_PICON_KEY.format(int(pic_data[4], 16), int(pic_data[5], 16), int(pic_data[3], 16))
         dest = "{}/{}".format(dest_path, dest_file)
-        callback('Converting "{}" to "{}"\n'.format(base_name, dest_file))
+        log('Converting "{}" to "{}"'.format(base_name, dest_file))
         shutil.copyfile(file, dest)
 
     done_callback()

@@ -58,10 +58,19 @@
         </item>
       </section>
       <section>
-        <item>
+        <submenu>
           <attribute name="label" translatable="yes">FTP-transfer</attribute>
-          <attribute name="action">app.on_download</attribute>
-        </item>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Download from the receiver</attribute>
+              <attribute name="action">app.on_receive</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Transfer to receiver</attribute>
+              <attribute name="action">app.on_send</attribute>
+            </item>
+          </section>
+        </submenu>
       </section>
       <section>
         <item>
@@ -270,10 +279,19 @@
         </item>
       </section>
       <section>
-        <item>
+        <submenu>
           <attribute name="label" translatable="yes">FTP-transfer</attribute>
-          <attribute name="action">app.on_download</attribute>
-        </item>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Download from the receiver</attribute>
+              <attribute name="action">app.on_receive</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Transfer to receiver</attribute>
+              <attribute name="action">app.on_send</attribute>
+            </item>
+          </section>
+        </submenu>
       </section>
     </submenu>
     <submenu>

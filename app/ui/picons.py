@@ -56,6 +56,8 @@ class PiconManager(Gtk.Box):
         super().__init__(*args, **kwargs)
 
         self._app = app
+        self._app.connect("data-receive", self.on_download)
+        self._app.connect("data-send", self.on_send)
         self._app.connect("page-changed", self.update_picons_dest)
         self._app.connect("filter-toggled", self.on_app_filter_toggled)
         self._app.connect("profile-changed", self.on_profile_changed)
@@ -84,8 +86,6 @@ class PiconManager(Gtk.Box):
                     "on_extract": self.on_extract,
                     "on_receive": self.on_receive,
                     "on_cancel": self.on_cancel,
-                    "on_send": self.on_send,
-                    "on_download": self.on_download,
                     "on_remove": self.on_remove,
                     "on_picons_dir_open": self.on_picons_dir_open,
                     "on_selected_toggled": self.on_selected_toggled,
@@ -98,9 +98,6 @@ class PiconManager(Gtk.Box):
                     "on_picons_view_drag_data_received": self.on_picons_view_drag_data_received,
                     "on_picons_view_drag_end": self.on_picons_view_drag_end,
                     "on_picon_info_image_drag_data_received": self.on_picon_info_image_drag_data_received,
-                    "on_send_button_drag_data_received": self.on_send_button_drag_data_received,
-                    "on_download_button_drag_data_received": self.on_download_button_drag_data_received,
-                    "on_remove_button_drag_data_received": self.on_remove_button_drag_data_received,
                     "on_selective_send": self.on_selective_send,
                     "on_selective_download": self.on_selective_download,
                     "on_selective_remove": self.on_selective_remove,
@@ -167,10 +164,6 @@ class PiconManager(Gtk.Box):
         self._info_check_button = builder.get_object("info_check_button")
         self._picon_info_image = builder.get_object("picon_info_image")
         self._picon_info_label = builder.get_object("picon_info_label")
-        self._info_view = builder.get_object("info_view")
-        self._info_bar = builder.get_object("info_bar")
-        self._info_bar.bind_property("visible", builder.get_object("info_bar_frame"), "visible")
-        self._info_bar.connect("response", lambda b, r: b.set_visible(False))
         # Filter.
         self._filter_bar = builder.get_object("filter_bar")
         self._auto_filter_switch = builder.get_object("auto_filter_switch")
@@ -179,8 +172,6 @@ class PiconManager(Gtk.Box):
         self._filter_button.bind_property("active", self._src_filter_button, "visible")
         self._filter_button.bind_property("active", self._dst_filter_button, "visible")
         self._filter_button.bind_property("visible", self._info_check_button, "visible")
-        self._filter_button.bind_property("visible", self._send_button, "visible")
-        self._filter_button.bind_property("visible", self._download_button, "visible")
         self._filter_button.bind_property("visible", self._remove_button, "visible")
         self._src_button = builder.get_object("src_button")
         self._src_button.bind_property("active", builder.get_object("explorer_dst_label"), "visible")
@@ -343,15 +334,6 @@ class PiconManager(Gtk.Box):
         self._picon_info_image.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._picon_info_image.drag_dest_add_uri_targets()
 
-        self._send_button.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
-        self._send_button.drag_dest_add_uri_targets()
-
-        self._download_button.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
-        self._download_button.drag_dest_add_uri_targets()
-
-        self._remove_button.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
-        self._remove_button.drag_dest_add_uri_targets()
-
     def on_picons_view_drag_data_get(self, view, drag_context, data, info, time):
         model, path = view.get_selection().get_selected_rows()
         if path:
@@ -419,13 +401,12 @@ class PiconManager(Gtk.Box):
 
     @run_idle
     def show_assign_info(self, fav_ids):
-        self._info_bar.show()
-        self._info_view.get_buffer().set_text("")
+        self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
         for i in fav_ids:
             srv = self._app.current_services.get(i, None)
             if srv:
                 info = self._app.get_hint_for_srv_list(srv)
-                self.append_output(f"Picon assignment for the service:\n{info}\n{' * ' * 30}\n")
+                log(f"Picon assignment for the service:\n{info}\n{' * ' * 30}\n")
 
     def on_picons_view_drag_end(self, view, drag_context):
         self.update_picons_dest_view(self._app.picons_buffer)
@@ -449,21 +430,6 @@ class PiconManager(Gtk.Box):
 
                 gen = self.update_picon_in_lists(dst, fav_id)
                 GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-    def on_send_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
-        path = self.get_path_from_uris(data)
-        if path:
-            self.on_picons_send(files_filter={path.name}, path=path.parent)
-
-    def on_download_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
-        path = self.get_path_from_uris(data)
-        if path:
-            self.on_picons_download(files_filter={path.name})
-
-    def on_remove_button_drag_data_received(self, button, drag_context, x, y, data, info, time):
-        path = self.get_path_from_uris(data)
-        if path:
-            self.on_remove(files_filter={path.name})
 
     def get_path_from_uris(self, data):
         uris = data.get_uris()
@@ -558,13 +524,14 @@ class PiconManager(Gtk.Box):
         if view is self._picons_dest_view:
             self._dst_count_label.set_text(str(len(model)))
 
-    def on_send(self, item=None):
-        view = self._picons_src_view if self._picons_src_view.is_focus() else self._picons_dest_view
-        model, paths = view.get_selection().get_selected_rows()
-        if paths:
-            self.on_picons_send(files_filter={Path(model[p][-1]).resolve().name for p in paths})
-        else:
-            self._app.show_error_message("No selected item!")
+    def on_send(self, app, page):
+        if page is Page.PICONS:
+            view = self._picons_src_view if self._picons_src_view.is_focus() else self._picons_dest_view
+            model, paths = view.get_selection().get_selected_rows()
+            if paths:
+                self.on_picons_send(files_filter={Path(model[p][-1]).resolve().name for p in paths})
+            else:
+                self._app.show_error_message("No selected item!")
 
     def on_picons_send(self, item=None, files_filter=None, path=None):
         dest_path = path or self._settings.profile_picons_path
@@ -574,13 +541,13 @@ class PiconManager(Gtk.Box):
         self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
-                                          callback=self.append_output,
                                           done_callback=lambda: self.show_info_message(get_message("Done!"),
                                                                                        Gtk.MessageType.INFO),
                                           files_filter=files_filter))
 
-    def on_download(self, item=None):
-        self.on_picons_download()
+    def on_download(self, app, page):
+        if page is Page.PICONS:
+            self.on_picons_download()
 
     def on_picons_download(self, item=None, files_filter=None, path=None):
         path = path or self._settings.profile_picons_path
@@ -589,7 +556,6 @@ class PiconManager(Gtk.Box):
         settings.current_profile = self._settings.current_profile
         self.run_func(lambda: download_data(settings=settings,
                                             download_type=DownloadType.PICONS,
-                                            callback=self.append_output,
                                             files_filter=files_filter), True)
 
     def on_remove(self, item=None, files_filter=None):
@@ -597,7 +563,6 @@ class PiconManager(Gtk.Box):
             return
 
         self.run_func(lambda: remove_picons(settings=self._settings,
-                                            callback=self.append_output,
                                             done_callback=lambda: self.show_info_message(get_message("Done!"),
                                                                                          Gtk.MessageType.INFO),
                                             files_filter=files_filter))
@@ -678,7 +643,7 @@ class PiconManager(Gtk.Box):
             self.show_info_message("Getting satellites list error!", Gtk.MessageType.ERROR)
 
         self._sat_names = {s[1]: s[0] for s in self._sats}  # position -> satellite name
-        self._picon_cz_downloader = PiconsCzDownloader(self._picon_ids, self.append_output)
+        self._picon_cz_downloader = PiconsCzDownloader(self._picon_ids)
         self.init_satellites(view)
 
     @run_task
@@ -766,7 +731,7 @@ class PiconManager(Gtk.Box):
     @run_task
     def start_download(self, providers):
         self._is_downloading = True
-        GLib.idle_add(self._info_bar.set_visible, True)
+        self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
 
         for prv in providers:
             if self._download_src is self.DownloadSource.LYNG_SAT and not self._POS_PATTERN.match(prv[2]):
@@ -812,7 +777,7 @@ class PiconManager(Gtk.Box):
                 if pic:
                     picons.extend(pic)
             # Getting picon images.
-            futures = {executor.submit(download_picon, *pic, self.append_output): pic for pic in picons}
+            futures = {executor.submit(download_picon, *pic): pic for pic in picons}
             done, not_done = concurrent.futures.wait(futures, timeout=0)
             while self._is_downloading and not_done:
                 done, not_done = concurrent.futures.wait(not_done, timeout=5)
@@ -858,10 +823,6 @@ class PiconManager(Gtk.Box):
         self.append_output(f"Getting links to picons for: {prv.name}.\n")
         return PiconsParser.parse(prv, picons_path, self._picon_ids, self.get_picons_format())
 
-    @run_idle
-    def append_output(self, char):
-        append_text_to_tview(char, self._info_view)
-
     @run_task
     def resize(self, path):
         self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
@@ -896,7 +857,7 @@ class PiconManager(Gtk.Box):
     @run_task
     def run_func(self, func, update=False):
         try:
-            GLib.idle_add(self._info_bar.set_visible, True)
+            self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
             GLib.idle_add(self._header_download_box.set_sensitive, False)
             func()
         except OSError as e:
@@ -1048,11 +1009,10 @@ class PiconManager(Gtk.Box):
             self._app.show_error_message("Select paths!")
             return
 
-        self._info_bar.set_visible(True)
+        self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
         convert_to(src_path=picons_path,
                    dest_path=save_path,
                    s_type=SettingsType.ENIGMA_2,
-                   callback=self.append_output,
                    done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
 
     @run_idle

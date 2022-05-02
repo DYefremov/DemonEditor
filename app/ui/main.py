@@ -58,7 +58,6 @@ from app.ui.telnet import TelnetClient
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
-from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import *
@@ -300,6 +299,14 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("iptv-service-added", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-receive", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-send", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-save", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-save-as", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -351,7 +358,6 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
-        self._save_tool_button.bind_property("visible", builder.get_object("fav_assign_picon_popup_item"), "sensitive")
         # Alternatives
         self._alt_view = builder.get_object("alt_tree_view")
         self._alt_model = builder.get_object("alt_list_store")
@@ -449,6 +455,12 @@ class Application(Gtk.Application):
         self._telnet_box = builder.get_object("telnet_box")
         self._logs_box = builder.get_object("logs_box")
         self._bottom_paned = builder.get_object("bottom_paned")
+        # Send/Receive.
+        self.connect("data-receive", self.on_download)
+        self.connect("data-send", self.on_upload)
+        # Data save.
+        self.connect("data-save", self.on_data_save)
+        self.connect("data-save-as", self.on_data_save_as)
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
@@ -587,12 +599,12 @@ class Application(Gtk.Application):
         self.set_action("on_locked", self.on_locked)
         # Open and download/upload data.
         self.set_action("open_data", lambda a, v: self.open_data())
-        self.set_action("on_download_data", self.on_download_data)
         self.set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
         self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
-        self.set_action("on_data_save", self.on_data_save)
-        self.set_action("on_data_save_as", self.on_data_save_as)
-        self.set_action("on_download", self.on_download)
+        self.set_action("on_data_save", lambda a, v: self.emit("data-save", self._page))
+        self.set_action("on_data_save_as", lambda a, v: self.emit("data-save-as", self._page))
+        self.set_action("on_receive", self.on_receive)
+        self.set_action("on_send", self.on_send)
         self.set_action("on_data_open", self.on_data_open)
         self.set_action("on_archive_open", self.on_archive_open)
         # Edit.
@@ -1614,7 +1626,7 @@ class Application(Gtk.Application):
 
         return f"SID: 0x{sid.upper()}"
 
-    # ***************** Drag-and-drop *********************#
+    # ***************** Drag-and-drop ********************* #
 
     def on_view_drag_begin(self, view, context):
         """ Sets its own icon for dragging.
@@ -1896,31 +1908,45 @@ class Application(Gtk.Application):
             menu.popup(None, None, None, None, event.button, event.time)
             return True
 
-    def on_download(self, action=None, value=None):
-        dialog = DownloadDialog(self._main_window, self._settings, self.open_data, self.update_settings)
+    # ***************** Send/Receive data ********************* #
 
-        if not self.is_data_saved():
-            gen = self.save_data(dialog.show)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-        else:
-            dialog.show()
+    def on_receive(self, action=None, value=None):
+        self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+        self.emit("data-receive", self._page)
+
+    def on_send(self, action=None, value=None):
+        self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+        self.emit("data-send", self._page)
+
+    def on_download(self, app, page):
+        if page is Page.SERVICES or page is Page.INFO:
+            self.on_download_data()
+
+    def on_upload(self, app, page):
+        if page is Page.SERVICES or page is Page.INFO:
+            if not self.is_data_saved():
+                gen = self.save_data(self.upload_data)
+                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            else:
+                self.on_upload_data()
 
     @run_task
-    def on_download_data(self, *args):
+    def on_download_data(self, download_type=DownloadType.ALL):
         try:
-            download_data(settings=self._settings,
-                          download_type=DownloadType.ALL,
-                          callback=lambda x: print(x, end=""))
+            download_data(settings=self._settings, download_type=download_type)
         except Exception as e:
             msg = "Downloading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_message(str(e))
         else:
-            GLib.idle_add(self.open_data)
+            if download_type is DownloadType.SATELLITES:
+                self._satellite_tool.load_satellites_list()
+            else:
+                GLib.idle_add(self.open_data)
 
-    def on_upload_data(self, download_type):
+    def on_upload_data(self, download_type=DownloadType.ALL):
         if not self.is_data_saved():
-            gen = self.save_data(lambda: self.on_upload_data(download_type))
+            gen = self.save_data(lambda: self.upload_data(download_type))
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         else:
             self.upload_data(download_type)
@@ -1939,14 +1965,11 @@ class Application(Gtk.Application):
                               use_ssl=opts.http_use_ssl,
                               skip_message=True,
                               s_type=self._s_type)
-                except (TestException, HttpApiException):
+                except (TestException, HttpApiException) as e:
+                    log(e)
                     use_http = False
 
-            upload_data(settings=opts,
-                        download_type=download_type,
-                        remove_unused=True,
-                        callback=lambda x: print(x, end=""),
-                        use_http=use_http)
+            upload_data(settings=opts, download_type=download_type, remove_unused=True, use_http=use_http)
         except Exception as e:
             msg = "Uploading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
@@ -2282,22 +2305,15 @@ class Application(Gtk.Application):
         self._wait_dialog.set_text(None)
         yield True
 
-    def on_data_save(self, *args):
-        if self._page is Page.SERVICES:
+    def on_data_save(self, app, page):
+        if page is Page.SERVICES:
             self.on_services_save()
-        elif self._page is Page.SATELLITE:
-            self._satellite_tool.on_save()
 
-    def on_data_save_as(self, action=None, value=None):
-        if self._page is Page.SERVICES:
+    def on_data_save_as(self, app, page):
+        if page is Page.SERVICES:
             self.on_services_save_as()
-        elif self._page is Page.SATELLITE:
-            self._satellite_tool.on_save_as()
 
     def on_services_save(self):
-        if self._app_info_box.get_visible():
-            return
-
         if len(self._bouquets_model) == 0:
             self.show_error_message("No data to save!")
             return

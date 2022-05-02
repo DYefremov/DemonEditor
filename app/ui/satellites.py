@@ -35,24 +35,31 @@ from pyexpat import ExpatError
 from gi.repository import GLib
 
 from app.commons import run_idle, run_task, log
+from app.connections import DownloadType
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import PLS_MODE, get_key_by_value
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from .main_helper import move_items, append_text_to_tview, get_base_model, on_popup_menu
 from .search import SearchProvider
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
 
 _UI_PATH = UI_RESOURCES_PATH + "satellites.glade"
 
 
 class SatellitesTool(Gtk.Box):
+    """ Class to processing satellite data. """
     _aggr = [None for x in range(9)]  # aggregate
 
     def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._app = app
+        self._app.connect("data-save", self.on_save)
+        self._app.connect("data-save-as", self.on_save_as)
+        self._app.connect("data-receive", self.on_download)
+        self._app.connect("data-send", self.on_upload)
+
         self._settings = settings
         self._current_sat_path = None
 
@@ -267,15 +274,21 @@ class SatellitesTool(Gtk.Box):
         renderer.set_property("text", f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}")
 
     @run_idle
-    def on_save(self):
-        if show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.CANCEL:
-            return
+    def on_save(self, app, page):
+        if page is Page.SATELLITE and show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.OK:
+            write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
+                             self._settings.profile_data_path + "satellites.xml")
 
-        write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
-                         self._settings.profile_data_path + "satellites.xml")
-
-    def on_save_as(self):
+    def on_save_as(self, app, page):
         show_dialog(DialogType.ERROR, transient=self._app.app_window, text="Not implemented yet!")
+
+    def on_download(self, app, page):
+        if page is Page.SATELLITE:
+            self._app.on_download_data(DownloadType.SATELLITES)
+
+    def on_upload(self, app, page):
+        if page is Page.SATELLITE:
+            self._app.upload_data(DownloadType.SATELLITES)
 
     @run_idle
     def on_update(self, item):
@@ -372,7 +385,7 @@ class TransponderDialog:
 # ***************** Satellite dialog *******************#
 
 class SatelliteDialog:
-    """ Shows dialog for adding or edit satellite """
+    """ Shows dialog for adding or edit satellite. """
 
     def __init__(self, transient, satellite=None):
         builder = get_builder(_UI_PATH, use_str=True, objects=("satellite_dialog", "side_store", "pos_adjustment"))
@@ -412,7 +425,7 @@ class SatelliteDialog:
 # ********************** Update dialogs ************************ #
 
 class UpdateDialog:
-    """ Base dialog for update satellites, transponders and services from the web."""
+    """ Base dialog for update satellites, transponders and services from the Web."""
 
     def __init__(self, transient, settings, title=None):
         handlers = {"on_update_satellites_list": self.on_update_satellites_list,
@@ -648,7 +661,7 @@ class UpdateDialog:
 
 
 class SatellitesUpdateDialog(UpdateDialog):
-    """ Dialog for update satellites from the web. """
+    """ Dialog for update satellites from the Web. """
 
     def __init__(self, transient, settings, main_model):
         super().__init__(transient=transient, settings=settings)
@@ -716,7 +729,7 @@ class SatellitesUpdateDialog(UpdateDialog):
 
 
 class ServicesUpdateDialog(UpdateDialog):
-    """ Dialog for updating services from the web. """
+    """ Dialog for updating services from the Web. """
 
     def __init__(self, transient, settings, callback):
         super().__init__(transient=transient, settings=settings, title="Services update")

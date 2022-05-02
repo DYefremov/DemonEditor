@@ -349,58 +349,12 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="send_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Transfer to receiver</property>
-                    <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="on_send" swapped="no"/>
-                    <signal name="drag-data-received" handler="on_send_button_drag_data_received" swapped="no"/>
-                    <child>
-                      <object class="GtkImage" id="send_button_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="stock">gtk-go-up</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="download_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Download from the receiver</property>
-                    <signal name="clicked" handler="on_download" swapped="no"/>
-                    <signal name="drag-data-received" handler="on_download_button_drag_data_received" swapped="no"/>
-                    <child>
-                      <object class="GtkImage" id="download_button_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="stock">gtk-go-down</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">5</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkButton" id="remove_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Remove all picons from the receiver</property>
                     <signal name="clicked" handler="on_remove" swapped="no"/>
-                    <signal name="drag-data-received" handler="on_remove_button_drag_data_received" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="remove_button_image">
                         <property name="visible">True</property>
@@ -1734,81 +1688,6 @@ Author: Dmitriy Yefremov
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame" id="info_bar_frame">
-            <property name="can_focus">False</property>
-            <property name="margin_top">5</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkInfoBar" id="info_bar">
-                <property name="can_focus">False</property>
-                <property name="baseline_position">bottom</property>
-                <property name="message_type">other</property>
-                <property name="show_close_button">True</property>
-                <child internal-child="action_area">
-                  <object class="GtkButtonBox">
-                    <property name="can_focus">False</property>
-                    <property name="layout_style">end</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child internal-child="content_area">
-                  <object class="GtkBox" id="info_bar_box">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkScrolledWindow" id="info_scrolled_window">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkTextView" id="info_view">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="editable">False</property>
-                            <property name="left_margin">5</property>
-                            <property name="right_margin">5</property>
-                            <property name="top_margin">2</property>
-                            <property name="bottom_margin">2</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-            </child>
-            <child type="label_item">
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
           </packing>
         </child>
         <child>
