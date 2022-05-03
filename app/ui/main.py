@@ -505,8 +505,6 @@ class Application(Gtk.Application):
         self._dvb_button = builder.get_object("dvb_button")
         iptv_type_column = builder.get_object("iptv_type_column")
         iptv_type_column.set_cell_data_func(builder.get_object("iptv_type_renderer"), self.iptv_type_data_func)
-        iptv_ref_column = builder.get_object("iptv_ref_column")
-        iptv_ref_column.set_cell_data_func(builder.get_object("iptv_ref_renderer"), self.iptv_ref_data_func)
         iptv_button = builder.get_object("iptv_button")
         iptv_button.bind_property("active", self._filter_services_button, "visible", 4)
         iptv_button.bind_property("active", self._srv_search_button, "visible", 4)
@@ -1039,10 +1037,6 @@ class Application(Gtk.Application):
         fav_id = model.get_value(itr, Column.IPTV_FAV_ID)
         f_data = fav_id.split(":", maxsplit=1)
         renderer.set_property("text", f"{StreamType(f_data[0].strip() if f_data else '0').name}")
-
-    def iptv_ref_data_func(self, column, renderer, model, itr, data):
-        p_id = model.get_value(itr, Column.IPTV_PICON_ID)
-        renderer.set_property("text", p_id.rstrip(".png").replace("_", ":") if p_id else None)
 
     def iptv_picon_data_func(self, column, renderer, model, itr, data):
         renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.IPTV_PICON_ID)))
@@ -2252,11 +2246,10 @@ class Application(Gtk.Application):
     def append_iptv_data(self, services=None):
         self._iptv_services_load_spinner.start()
         services = services or self._services.values()
-        services = ((s.service, None, None, None, s.fav_id, s.picon_id) for s in services if
-                    s.service_type == BqServiceType.IPTV.name)
 
-        for index, s in enumerate(services, start=1):
-            self._iptv_model.append(s)
+        for index, s in enumerate(filter(lambda x: x.service_type == BqServiceType.IPTV.name, services), start=1):
+            ref, url = get_iptv_data(s.fav_id)
+            self._iptv_model.append((s.service, None, None, ref, url, s.fav_id, s.picon_id, None))
             if index % self.DEL_FACTOR == 0:
                 self._iptv_count_label.set_text(str(index))
                 yield True
@@ -2861,7 +2854,10 @@ class Application(Gtk.Application):
 
         for r in self._iptv_model:
             if r[Column.IPTV_FAV_ID] == fav_id:
+                ref, url = get_iptv_data(new_fav_id)
                 r[Column.IPTV_SERVICE] = name
+                r[Column.IPTV_REF] = ref
+                r[Column.IPTV_URL] = url
                 r[Column.IPTV_FAV_ID] = new_fav_id
 
     @run_idle

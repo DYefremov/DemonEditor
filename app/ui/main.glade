@@ -488,9 +488,13 @@ Author: Dmitriy Yefremov
       <column type="GdkPixbuf"/>
       <!-- column-name ref -->
       <column type="gchararray"/>
+      <!-- column-name url -->
+      <column type="gchararray"/>
       <!-- column-name fav_id -->
       <column type="gchararray"/>
       <!-- column-name picon_id -->
+      <column type="gchararray"/>
+      <!-- column-name extra -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -2754,7 +2758,7 @@ Author: Dmitriy Yefremov
                                                 <property name="fixed_height_mode">True</property>
                                                 <property name="rubber_banding">True</property>
                                                 <property name="enable_grid_lines">both</property>
-                                                <property name="tooltip_column">3</property>
+                                                <property name="tooltip_column">7</property>
                                                 <property name="activate_on_single_click">True</property>
                                                 <signal name="button-press-event" handler="on_view_popup_menu" object="iptv_popup_menu" swapped="no"/>
                                                 <signal name="button-press-event" handler="on_view_press" swapped="no"/>
@@ -2776,7 +2780,6 @@ Author: Dmitriy Yefremov
                                                     <property name="sizing">fixed</property>
                                                     <property name="min_width">170</property>
                                                     <property name="title" translatable="yes">Service</property>
-                                                    <property name="expand">True</property>
                                                     <property name="clickable">True</property>
                                                     <property name="alignment">0.5</property>
                                                     <property name="sort_column_id">0</property>
@@ -2796,7 +2799,6 @@ Author: Dmitriy Yefremov
                                                     <property name="sizing">fixed</property>
                                                     <property name="min_width">100</property>
                                                     <property name="title" translatable="yes">Type</property>
-                                                    <property name="expand">True</property>
                                                     <property name="clickable">True</property>
                                                     <property name="alignment">0.5</property>
                                                     <property name="sort_column_id">1</property>
@@ -2815,7 +2817,6 @@ Author: Dmitriy Yefremov
                                                     <property name="sizing">fixed</property>
                                                     <property name="min_width">25</property>
                                                     <property name="title" translatable="yes">Picon</property>
-                                                    <property name="expand">True</property>
                                                     <property name="alignment">0.5</property>
                                                     <child>
                                                       <object class="GtkCellRendererPixbuf" id="iptv_picon_renderer">
@@ -2829,10 +2830,10 @@ Author: Dmitriy Yefremov
                                                 </child>
                                                 <child>
                                                   <object class="GtkTreeViewColumn" id="iptv_ref_column">
+                                                    <property name="resizable">True</property>
                                                     <property name="sizing">fixed</property>
                                                     <property name="min_width">150</property>
                                                     <property name="title" translatable="yes">Reference</property>
-                                                    <property name="expand">True</property>
                                                     <property name="clickable">True</property>
                                                     <property name="alignment">0.5</property>
                                                     <property name="sort_column_id">3</property>
@@ -2842,6 +2843,27 @@ Author: Dmitriy Yefremov
                                                       </object>
                                                       <attributes>
                                                         <attribute name="text">3</attribute>
+                                                      </attributes>
+                                                    </child>
+                                                  </object>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkTreeViewColumn" id="iptv_url_column">
+                                                    <property name="resizable">True</property>
+                                                    <property name="sizing">fixed</property>
+                                                    <property name="min_width">150</property>
+                                                    <property name="title" translatable="yes">URL</property>
+                                                    <property name="expand">True</property>
+                                                    <property name="clickable">True</property>
+                                                    <property name="alignment">0.5</property>
+                                                    <property name="sort_column_id">3</property>
+                                                    <child>
+                                                      <object class="GtkCellRendererText" id="iptv_url_renderer">
+                                                        <property name="xpad">5</property>
+                                                        <property name="ellipsize">end</property>
+                                                      </object>
+                                                      <attributes>
+                                                        <attribute name="text">4</attribute>
                                                       </attributes>
                                                     </child>
                                                   </object>

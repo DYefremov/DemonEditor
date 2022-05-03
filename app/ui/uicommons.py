@@ -265,8 +265,10 @@ class Column(IntEnum):
     IPTV_TYPE = 1
     IPTV_PICON = 2
     IPTV_REF = 3
-    IPTV_FAV_ID = 4
-    IPTV_PICON_ID = 5
+    IPTV_URL = 4
+    IPTV_FAV_ID = 5
+    IPTV_PICON_ID = 6
+    IPTV_TOOLTIP = 7
 
     def __index__(self):
         """ Overridden to get the index in slices directly """

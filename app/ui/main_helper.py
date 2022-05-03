@@ -32,7 +32,7 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
            "scroll_to", "get_base_model", "copy_picon_reference", "assign_picons", "remove_picon",
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
-           "update_entry_data", "append_text_to_tview", "on_popup_menu")
+           "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu")
 
 import os
 import shutil
@@ -694,6 +694,15 @@ def get_iptv_url(row, s_type, column=Column.FAV_ID):
     if data:
         url = data[0]
         return unquote(url) if s_type is SettingsType.ENIGMA_2 else url
+
+
+def get_iptv_data(fav_id):
+    """ Returns the reference and URL as a tuple from the fav_id. """
+    data, sep, desc = fav_id.partition("#DESCRIPTION")
+    data = data.split(":")
+    if len(data) < 11:
+        return None, None, desc
+    return ":".join(data[:10]), unquote(data[10].strip())
 
 
 def on_popup_menu(menu, event):
