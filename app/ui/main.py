@@ -56,7 +56,7 @@ from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
 from app.ui.telnet import TelnetClient
 from app.ui.transmitter import LinksTransmitter
-from .backup import BackupDialog, backup_data, clear_data_path
+from .backup import BackupDialog, backup_data, clear_data_path, restore_data
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
@@ -208,7 +208,6 @@ class Application(Gtk.Application):
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_telnet_realize": self.on_telnet_realize,
-                    "on_logs_realize": self.on_logs_realize,
                     "on_visible_page": self.on_visible_page,
                     "on_iptv_toggled": self.on_iptv_toggled,
                     "on_data_paned_realize": self.init_main_paned_position}
@@ -454,6 +453,7 @@ class Application(Gtk.Application):
         # Extra tools.
         self._telnet_box = builder.get_object("telnet_box")
         self._logs_box = builder.get_object("logs_box")
+        self._logs_box.pack_start(LogsClient(self), True, True, 0)
         self._bottom_paned = builder.get_object("bottom_paned")
         # Send/Receive.
         self.connect("data-receive", self.on_download)
@@ -983,9 +983,6 @@ class Application(Gtk.Application):
 
     def on_telnet_realize(self, box):
         box.pack_start(TelnetClient(self), True, True, 0)
-
-    def on_logs_realize(self, box):
-        box.pack_start(LogsClient(self), True, True, 0)
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
@@ -1926,12 +1923,20 @@ class Application(Gtk.Application):
 
     @run_task
     def on_download_data(self, download_type=DownloadType.ALL):
+        backup, backup_src, data_path = self._settings.backup_before_downloading, None, None
         try:
+            if backup and download_type is not DownloadType.SATELLITES:
+                data_path = self._settings.profile_data_path
+                backup_path = self._settings.profile_backup_path or self._settings.default_backup_path
+                backup_src = backup_data(data_path, backup_path, download_type is DownloadType.ALL)
+
             download_data(settings=self._settings, download_type=download_type)
         except Exception as e:
             msg = "Downloading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_message(str(e))
+            if all((backup, data_path)):
+                restore_data(backup_src, data_path)
         else:
             if download_type is DownloadType.SATELLITES:
                 self._satellite_tool.load_satellites_list()
