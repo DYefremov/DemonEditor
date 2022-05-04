@@ -757,7 +757,7 @@ class Settings:
     def is_darwin(self):
         return IS_DARWIN
 
-    # *********** Download dialog *********** #
+    # ************* Download  ************** #
 
     @property
     def use_http(self):
@@ -774,6 +774,14 @@ class Settings:
     @remove_unused_bouquets.setter
     def remove_unused_bouquets(self, value):
         self._settings["remove_unused_bouquets"] = value
+
+    @property
+    def compress_picons(self):
+        return self._settings.get("compress_picons", False)
+
+    @compress_picons.setter
+    def compress_picons(self, value):
+        self._settings["compress_picons"] = value
 
     # **************** Debug **************** #
 

@@ -471,7 +471,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
             if download_type is DownloadType.PICONS:
                 p_src, p_dst = settings.profile_picons_path, settings.picons_path
-                compress = files_filter and len(files_filter) > PICONS_MAX_NUM
+                compress = all((settings.compress_picons, files_filter, len(files_filter) > PICONS_MAX_NUM))
                 if compress:
                     from zipfile import ZipFile
 
