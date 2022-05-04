@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,14 +44,15 @@ from urllib.request import (urlopen, HTTPPasswordMgrWithDefaultRealm, HTTPBasicA
 from app.commons import log, run_task
 from app.settings import SettingsType
 
-BQ_FILES_LIST = ("tv", "radio",  # enigma 2
-                 "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # neutrino
+BQ_FILES_LIST = ("tv", "radio",  # Enigma2.
+                 "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # Neutrino.
 
 DATA_FILES_LIST = ("lamedb", "lamedb5", "blacklist", "whitelist",)
 
 STC_XML_FILE = ("satellites.xml", "terrestrial.xml", "cables.xml")
 WEB_TV_XML_FILE = ("webtv.xml",)
 PICONS_SUF = (".jpg", ".png")
+PICONS_MAX_NUM = 1000  # Maximum picon number for sending without compression.
 
 
 class DownloadType(Enum):
@@ -403,7 +404,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
     base_url = f"http{'s' if use_ssl else ''}://{host}:{port}"
     base = "web" if s_type is SettingsType.ENIGMA_2 else "control"
     url = f"{base_url}/{base}/"
-    tn, ht = None, None  # telnet, http
+    tn, ht = None, None  # Telnet, HTTP.
 
     try:
         if use_http:
@@ -469,9 +470,37 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 ftp.upload_files(data_path, DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
-                ftp.upload_picons(settings.profile_picons_path, settings.picons_path, callback, files_filter)
+                p_src, p_dst = settings.profile_picons_path, settings.picons_path
+                compress = files_filter and len(files_filter) > PICONS_MAX_NUM
+                if compress:
+                    from zipfile import ZipFile
 
-            if tn and not use_http:
+                    zip_file = f"{p_src}{os.sep}picons.zip"
+                    p_dst = "/tmp"
+                    log("Compressing picons...")
+                    with ZipFile(zip_file, "w") as zf:
+                        list(map(lambda p: zf.write(os.path.join(p_src, p), arcname=p), files_filter))
+
+                    files_filter = {"picons.zip"}
+
+                ftp.upload_picons(p_src, p_dst, callback, files_filter)
+
+                if compress:
+                    if not tn:
+                        callback("Telnet initialization ...")
+                        tn = telnet(host=host, user=settings.user, password=settings.password, timeout=2)
+                        next(tn)
+
+                    cmd = f"unzip -q {p_dst}/picons.zip -d {settings.picons_path}"
+                    callback("Extracting...")
+                    tn.send(cmd)
+                    ftp.delete_file("picons.zip")
+                    try:
+                        os.unlink(f"{p_src}{os.sep}picons.zip")
+                    except OSError:
+                        pass  # NOP
+
+            if all((tn, download_type is not DownloadType.PICONS, not use_http)):
                 # Resume Enigma2 or restart Neutrino.
                 tn.send("init 3" if s_type is SettingsType.ENIGMA_2 else "init 6")
                 callback("Starting..." if s_type is SettingsType.ENIGMA_2 else "Rebooting...")
