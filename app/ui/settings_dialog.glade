@@ -2396,7 +2396,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="bq_naming_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Allows you to name bouquet files using their names.</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
@@ -2413,21 +2412,35 @@ Author: Dmitriy Yefremov
                           <object class="GtkLabel" id="bq_naming_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Allows you to name bouquet files using their names.</property>
                             <property name="halign">start</property>
                             <property name="hexpand">True</property>
                             <property name="label" translatable="yes">Enable alternate bouquet file naming</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
+                            <property name="top_attach">3</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkSwitch" id="force_bq_name_switch">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">Allows you to name bouquet files using their names.</property>
                             <property name="halign">end</property>
                             <signal name="state-set" handler="on_force_bq_name" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="use_http_switch">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="halign">end</property>
+                            <property name="active">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -2435,11 +2448,23 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="enable_experimental_label">
+                          <object class="GtkLabel" id="use_http_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Enable experimental features</property>
+                            <property name="label" translatable="yes">Use HTTP to reload data in the receiver</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="remove_unused_bouquets_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Remove unused bouquets</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
@@ -2447,22 +2472,49 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkSwitch" id="enable_experimental_switch">
+                          <object class="GtkSwitch" id="remove_unused_bq_switch">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <signal name="state-set" handler="on_experimental_switch" swapped="no"/>
+                            <property name="active">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">1</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkLabel" id="compress_picons_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Enables upload as an archive if a large number of picon is selected.</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Enable picon compression</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="compress_picons_switch">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">Enables upload as an archive if a large number of picon is selected.</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="top_attach">2</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
-                    <child type="label_item">
-                      <placeholder/>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">FTP-transfer</property>
+                      </object>
                     </child>
                   </object>
                   <packing>
@@ -2481,6 +2533,47 @@ Author: Dmitriy Yefremov
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="experimental_features_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">5</property>
+                    <property name="margin_right">5</property>
+                    <child>
+                      <object class="GtkLabel" id="enable_experimental_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Enable experimental features</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="enable_experimental_switch">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <signal name="state-set" handler="on_experimental_switch" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -2535,7 +2628,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -2647,7 +2740,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -2687,7 +2780,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>

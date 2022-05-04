@@ -1955,19 +1955,7 @@ class Application(Gtk.Application):
         try:
             profile = self._s_type
             opts = self._settings
-            use_http = profile is SettingsType.ENIGMA_2
-
-            if profile is SettingsType.ENIGMA_2:
-                host, port, user, password = opts.host, opts.http_port, opts.user, opts.password
-                try:
-                    test_http(host, port, user, password,
-                              use_ssl=opts.http_use_ssl,
-                              skip_message=True,
-                              s_type=self._s_type)
-                except (TestException, HttpApiException) as e:
-                    log(e)
-                    use_http = False
-
+            use_http = profile is SettingsType.ENIGMA_2 and opts.use_http
             upload_data(settings=opts, download_type=download_type, remove_unused=True, use_http=use_http)
         except Exception as e:
             msg = "Uploading data error: {}"

@@ -129,8 +129,6 @@ class SettingsDialog:
         # Settings type.
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
-        self._support_ver5_switch = builder.get_object("support_ver5_switch")
-        self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
         # Streaming.
         self._apply_presets_button = builder.get_object("apply_presets_button")
         self._transcoding_switch = builder.get_object("transcoding_switch")
@@ -167,6 +165,11 @@ class SettingsDialog:
         self._new_color_button = builder.get_object("new_color_button")
         self._extra_color_button = builder.get_object("extra_color_button")
         # Extra.
+        self._use_http_switch = builder.get_object("use_http_switch")
+        self._remove_unused_bq_switch = builder.get_object("remove_unused_bq_switch")
+        self._compress_picons_switch = builder.get_object("compress_picons_switch")
+        self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
+        self._support_ver5_switch = builder.get_object("support_ver5_switch")
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
         self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
         self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
@@ -328,6 +331,9 @@ class SettingsDialog:
         if self._s_type is SettingsType.ENIGMA_2:
             self._enable_exp_switch.set_active(self._settings.is_enable_experimental)
             self._support_ver5_switch.set_active(self._settings.v5_support)
+            self._use_http_switch.set_active(self._settings.use_http)
+            self._remove_unused_bq_switch.set_active(self._settings.remove_unused_bouquets)
+            self._compress_picons_switch.set_active(self._settings.compress_picons)
             self._force_bq_name_switch.set_active(self._settings.force_bq_names)
             self._enable_yt_dl_switch.set_active(self._settings.enable_yt_dl)
             self._enable_update_yt_dl_switch.set_active(self._settings.enable_yt_dl_update)
@@ -406,6 +412,9 @@ class SettingsDialog:
             self._ext_settings.new_color = self._new_color_button.get_rgba().to_string()
             self._ext_settings.extra_color = self._extra_color_button.get_rgba().to_string()
             self._ext_settings.v5_support = self._support_ver5_switch.get_active()
+            self._ext_settings.use_http = self._use_http_switch.get_active()
+            self._ext_settings.remove_unused_bouquets = self._remove_unused_bq_switch.get_active()
+            self._ext_settings.compress_picons = self._compress_picons_switch.get_active()
             self._ext_settings.force_bq_names = self._force_bq_name_switch.get_active()
             self._ext_settings.enable_yt_dl = self._enable_yt_dl_switch.get_active()
             self._ext_settings.enable_yt_dl_update = self._enable_update_yt_dl_switch.get_active()
