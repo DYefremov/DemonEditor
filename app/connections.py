@@ -476,7 +476,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                     from zipfile import ZipFile
 
                     zip_file = f"{p_src}{os.sep}picons.zip"
-                    p_dst = "/tmp"
+                    p_dst = os.path.abspath(os.path.join(p_dst, os.pardir))
+
                     log("Compressing picons...")
                     with ZipFile(zip_file, "w") as zf:
                         list(map(lambda p: zf.write(os.path.join(p_src, p), arcname=p), files_filter))
@@ -488,7 +489,10 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 if compress:
                     if not tn:
                         callback("Telnet initialization ...")
-                        tn = telnet(host=host, user=settings.user, password=settings.password, timeout=2)
+                        tn = telnet(host=host,
+                                    user=settings.user,
+                                    password=settings.password,
+                                    timeout=settings.telnet_timeout)
                         next(tn)
 
                     cmd = f"unzip -q {p_dst}/picons.zip -d {settings.picons_path}"
