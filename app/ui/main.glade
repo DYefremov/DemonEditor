@@ -644,7 +644,78 @@ Author: Dmitriy Yefremov
         </child>
       </object>
       <packing>
-        <property name="submenu">submenu1</property>
+        <property name="submenu">import_submenu</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkGrid" id="ftp_popover_grid">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkModelButton" id="ftp_back_to_main_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="valign">start</property>
+            <property name="margin_left">5</property>
+            <property name="margin_top">5</property>
+            <property name="menu_name">main</property>
+            <property name="inverted">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="ftp_transfer_menu_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">5</property>
+            <property name="margin_bottom">5</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">2</property>
+            <child>
+              <object class="GtkModelButton" id="receive_ftp_menu_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">app.on_receive</property>
+                <property name="text" translatable="yes">Download from the receiver</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkModelButton" id="send_ftp_menu_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">app.on_send</property>
+                <property name="text" translatable="yes">Transfer to receiver</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">ftp_submenu</property>
         <property name="position">1</property>
       </packing>
     </child>
@@ -669,7 +740,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="text" translatable="yes">Import</property>
-                <property name="menu_name">submenu1</property>
+                <property name="menu_name">import_submenu</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -788,6 +859,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="text" translatable="yes">FTP-transfer</property>
+                <property name="menu_name">ftp_submenu</property>
               </object>
               <packing>
                 <property name="expand">False</property>
