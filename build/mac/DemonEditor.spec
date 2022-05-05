@@ -37,8 +37,7 @@ a = Analysis([EXE_NAME],
                     "languages": ["en", "be", "es", "it", "nl",
                                   "pl", "pt", "ru", "tr", "zh_CN"],
                     "module-versions": {
-                        "Gtk": "3.0",
-                        "GtkSource": "3",
+                        "Gtk": "3.0"
                     },
                 },
              },
@@ -79,7 +78,7 @@ app = BUNDLE(coll,
                  'CFBundleGetInfoString': "Enigma2 channel and satellite editor",
                  'LSApplicationCategoryType': 'public.app-category.utilities',
                  'LSMinimumSystemVersion': '10.13',
-                 'CFBundleShortVersionString': f"2.2.4.{BUILD_DATE} Beta",
+                 'CFBundleShortVersionString': f"3.0.0.{BUILD_DATE} Alpha",
                  'NSHumanReadableCopyright': u"Copyright © 2022, Dmitriy Yefremov",
                  'NSRequiresAquaSystemAppearance': 'false',
                  'NSHighResolutionCapable': 'true'
