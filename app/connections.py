@@ -479,7 +479,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                     p_dst = os.path.abspath(os.path.join(p_dst, os.pardir))
                     
                     log("Compressing picons...")
-                    with ZipFile(zip_file, "w") as zf:
+                    with ZipFile(zip_file, "w", compresslevel=None) as zf:
                         list(map(lambda p: zf.write(os.path.join(p_src, p), arcname=p), files_filter))
 
                     files_filter = {"picons.zip"}
