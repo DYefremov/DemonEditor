@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 #
 # The MIT License (MIT)
 #
@@ -477,9 +476,10 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                     from zipfile import ZipFile
 
                     zip_file = f"{p_src}{os.sep}picons.zip"
-                    p_dst = "/media/hdd/"
-                    log("Compressing picons in one file...")
-                    with ZipFile(zip_file, "w", compresslevel=None) as zf:
+                    p_dst = os.path.abspath(os.path.join(p_dst, os.pardir))
+                    
+                    log("Compressing picons...")
+                    with ZipFile(zip_file, "w") as zf:
                         list(map(lambda p: zf.write(os.path.join(p_src, p), arcname=p), files_filter))
 
                     files_filter = {"picons.zip"}
@@ -489,9 +489,12 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 if compress:
                     if not tn:
                         callback("Telnet initialization ...")
-                        tn = telnet(host=host, user=settings.user, password=settings.password, timeout=10)
+                        tn = telnet(host=host,
+                                    user=settings.user,
+                                    password=settings.password,
+                                    timeout=settings.telnet_timeout)
                         next(tn)
-
+                        
                     cmd = f"unzip -q {p_dst}/picons.zip -d {settings.picons_path}"
                     callback("Extracting...")
                     tn.send(cmd)
