@@ -168,9 +168,9 @@ class ServiceType(Enum):
 
 class BouquetsReader:
     """ Class for reading and parsing bouquets. """
-    _ALT_PAT = re.compile(".*alternatives\\.+(.*)\\.([tv|radio]+).*")
-    _BQ_PAT = re.compile(".*userbouquet\\.+(.*)\\.+[tv|radio].*")
-    _SUB_BQ_PAT = re.compile(".*subbouquet\\.+(.*)\\.([tv|radio]+).*")
+    _ALT_PAT = re.compile(r".*alternatives\.+(.*)\.([tv|radio]+).*")
+    _BQ_PAT = re.compile(r".*\s+\W(.*bouquet)\.+(.*)\.+[tv|radio].*")
+    _SUB_BQ_PAT = re.compile(r".*subbouquet\.+(.*)\.([tv|radio]+).*")
     _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
     __slots__ = ["_path"]
@@ -198,15 +198,15 @@ class BouquetsReader:
                 if "#SERVICE" in line:
                     name = re.match(self._BQ_PAT, line)
                     if name:
-                        b_name = name.group(1)
+                        prefix, b_name = name.group(1), name.group(2)
                         if b_name in b_names:
                             log(f"The list of bouquets contains duplicate [{b_name}] names!")
                         else:
                             b_names.add(b_name)
 
-                        rb_name, services = self.get_bouquet(self._path, b_name, bq_type)
+                        rb_name, services = self.get_bouquet(self._path, b_name, bq_type, prefix)
                         if rb_name in real_b_names:
-                            log(f"Bouquet file 'userbouquet.{b_name}.{bq_type}' has duplicate name: {rb_name}")
+                            log(f"Bouquet file '{prefix}.{b_name}.{bq_type}' has duplicate name: {rb_name}")
                             real_b_names[rb_name] += 1
                             rb_name = f"{rb_name} {real_b_names[rb_name]}"
                         else:
