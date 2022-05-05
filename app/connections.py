@@ -494,6 +494,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                     cmd = f"unzip -q {p_dst}/picons.zip -d {settings.picons_path}"
                     callback("Extracting...")
                     tn.send(cmd)
+                    next(tn)
                     ftp.delete_file("picons.zip")
                     try:
                         os.unlink(f"{p_src}{os.sep}picons.zip")
