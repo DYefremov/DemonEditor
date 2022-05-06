@@ -1915,11 +1915,7 @@ class Application(Gtk.Application):
 
     def on_upload(self, app, page):
         if page is Page.SERVICES or page is Page.INFO:
-            if not self.is_data_saved():
-                gen = self.save_data(self.upload_data)
-                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-            else:
-                self.on_upload_data()
+            self.on_upload_data()
 
     @run_task
     def on_download_data(self, download_type=DownloadType.ALL):
