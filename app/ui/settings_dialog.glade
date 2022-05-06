@@ -2489,7 +2489,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">Enables upload as an archive if a large number of picon (more than 1000) is selected.\nRecommended only if you have external storage.</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Enable Picons compression</property>
+                            <property name="label" translatable="yes">Enable picons compression</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
