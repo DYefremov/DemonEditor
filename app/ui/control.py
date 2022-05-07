@@ -28,6 +28,7 @@
 
 """ Receiver control module via HTTP API. """
 import os
+import re
 from datetime import datetime
 from enum import Enum
 from ftplib import all_errors
@@ -842,7 +843,8 @@ class ControlTool(Gtk.Box):
 
         handlers = {"on_volume_changed": self.on_volume_changed,
                     "on_screenshot_draw": self.on_screenshot_draw,
-                    "on_network_toggled": self.on_network_toggled}
+                    "on_network_toggled": self.on_network_toggled,
+                    "on_network_view_query_tooltip": self.on_network_view_query_tooltip}
 
         builder = get_builder(UI_RESOURCES_PATH + "control.glade", handlers,
                               objects=("control_box", "volume_adjustment", "network_model"))
@@ -860,8 +862,11 @@ class ControlTool(Gtk.Box):
         self._ber_level_bar = builder.get_object("ber_level_bar")
         self._agc_level_bar = builder.get_object("agc_level_bar")
         self._volume_button = builder.get_object("volume_button")
-        self._network_button = builder.get_object("control_network_button")
         self._header_box = builder.get_object("control_header_box")
+        # Network.
+        self._network_button = builder.get_object("control_network_button")
+        self._network_model = builder.get_object("network_model")
+
         self.init_actions(app)
 
         if settings.alternate_layout:
@@ -1038,6 +1043,72 @@ class ControlTool(Gtk.Box):
 
     # ***************** Network explorer ********************** #
 
-    @run_task
     def on_network_toggled(self, button):
-        pass
+        self._network_model.clear()
+        if button.get_active():
+            self.update_network()
+
+    @run_task
+    def update_network(self):
+        pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
+
+        ips = [match for match in re.findall(pattern, os.popen("arp -a").read())]
+        for ip in ips:
+            if not self._network_button.get_active():
+                break
+                
+            url = f"http://{ip}/web/{HttpAPI.Request.INFO.value}"
+            try:
+                resp = HttpAPI.get_response(HttpAPI.Request.INFO, url, timeout=5)
+            except OSError as e:
+                log(f"{ip} {e}")
+            else:
+                if resp.get("e2distroversion", None):
+                    log(f"Receiver found. Model: {resp.get('e2model', 'N/A')} [{ip} ]")
+                    self.append_box_data(resp)
+
+    @run_idle
+    def append_box_data(self, data):
+        ip = data.get('e2lanip', 'N/A')
+        itr = self._network_model.append((data.get("e2model", "N/A"), ip, None, data, None))
+        GLib.timeout_add_seconds(3, self.check_power_state, itr, priority=GLib.PRIORITY_LOW)
+
+    def on_network_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        result = view.get_dest_row_at_pos(x, y)
+        if not result:
+            return False
+
+        path, pos = result
+        model = view.get_model()
+        data = model[path][3]
+
+        dist = data.get("e2distroversion", "N/A")
+        img = data.get("e2imageversion", "N/A")
+        txt = f"Distro version: {dist}\nImage version: {img}"
+        tooltip.set_text(txt)
+        view.set_tooltip_row(tooltip, path)
+        return True
+
+    def check_power_state(self, itr):
+        active = self._network_button.get_active()
+        if not active:
+            return False
+
+        data = self._network_model.get_value(itr, 3)
+        url = f"http://{data.get('e2lanip', 'N/A')}/web/powerstate"
+        self.update_power_state(itr, url)
+        return active
+
+    @run_task
+    def update_power_state(self, itr, url):
+        try:
+            resp = HttpAPI.get_response(HttpAPI.Request.POWER, url, timeout=2)
+        except OSError as e:
+            log(e)
+        else:
+            state = get_message("On" if resp.get("e2instandby", "N/A").strip() == "false" else "Standby")
+            GLib.idle_add(self._network_model.set_value, itr, 2, state)
+
+
+if __name__ == "__main__":
+    pass

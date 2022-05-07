@@ -733,9 +733,9 @@ class HttpAPI:
         self._executor.shutdown()
 
     @staticmethod
-    def get_response(req_type, url, data=None, s_type=SettingsType.ENIGMA_2):
+    def get_response(req_type, url, data=None, s_type=SettingsType.ENIGMA_2, timeout=10):
         try:
-            with urlopen(Request(url, data=data), timeout=10) as f:
+            with urlopen(Request(url, data=data), timeout=timeout) as f:
                 if s_type is SettingsType.ENIGMA_2:
                     return HttpAPI.get_e2_response_data(req_type, f)
                 elif s_type is SettingsType.NEUTRINO_MP:
