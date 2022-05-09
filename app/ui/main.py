@@ -265,6 +265,7 @@ class Application(Gtk.Application):
         # Current page.
         self._page = Page.INFO
         self._fav_pages = {Page.SERVICES, Page.PICONS, Page.EPG, Page.TIMERS}
+        self._download_pages = {Page.INFO, Page.SERVICES, Page.SATELLITE, Page.PICONS}
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -1902,12 +1903,18 @@ class Application(Gtk.Application):
     # ***************** Send/Receive data ********************* #
 
     def on_receive(self, action=None, value=None):
-        self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
-        self.emit("data-receive", self._page)
+        if self._page in self._download_pages:
+            self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+            self.emit("data-receive", self._page)
+        else:
+            self.show_error_message("Not allowed in this context!")
 
     def on_send(self, action=None, value=None):
-        self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
-        self.emit("data-send", self._page)
+        if self._page in self._download_pages:
+            self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+            self.emit("data-send", self._page)
+        else:
+            self.show_error_message("Not allowed in this context!")
 
     def on_download(self, app, page):
         if page is Page.SERVICES or page is Page.INFO:

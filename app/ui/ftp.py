@@ -39,7 +39,7 @@ from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib
 
-from app.commons import log, run_task, run_idle
+from app.commons import log, run_task, run_idle, get_size_from_bytes
 from app.connections import UtfFTP
 from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
@@ -290,7 +290,7 @@ class FtpClientBox(Gtk.HBox):
                     r_size = self.LINK
                     icon = self._link_icon
                 else:
-                    r_size = self.get_size_from_bytes(size)
+                    r_size = get_size_from_bytes(size)
 
                 self._file_model.append(File(icon, p.name, r_size, date, str(p.resolve()), size))
 
@@ -314,7 +314,7 @@ class FtpClientBox(Gtk.HBox):
                 r_size = self.LINK
                 icon = self._link_icon
             else:
-                r_size = self.get_size_from_bytes(size)
+                r_size = get_size_from_bytes(size)
 
             date = f"{f_data[5]}, {f_data[6]}  {f_data[7]}"
             self._ftp_model.append(File(icon, f_data[8], r_size, date, f_data[0], size))
@@ -801,25 +801,6 @@ class FtpClientBox(Gtk.HBox):
         """ Sets default homogeneous sizes. """
         paned.set_position(0.5 * allocation.width)
 
-    @staticmethod
-    def get_size_from_bytes(size):
-        """ Simple convert function from bytes to other units like K, M or G. """
-        try:
-            b = float(size)
-        except ValueError:
-            return size
-        else:
-            kb, mb, gb = 1024.0, 1048576.0, 1073741824.0
 
-            if b < kb:
-                return str(b)
-            elif kb <= b < mb:
-                return f"{b / kb:.1f} K"
-            elif mb <= b < gb:
-                return f"{b / mb:.1f} M"
-            elif gb <= b:
-                return f"{b / gb:.1f} G"
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

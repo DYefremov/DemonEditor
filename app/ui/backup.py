@@ -33,8 +33,9 @@ import time
 import zipfile
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 
-from app.commons import run_idle
+from app.commons import run_idle, get_size_from_bytes
 from app.settings import SettingsType, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
@@ -74,6 +75,7 @@ class BackupDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        self._file_count_label = builder.get_object("file_count_label")
 
         if IS_GNOME_SESSION:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
@@ -106,9 +108,13 @@ class BackupDialog:
     def init_data(self):
         if os.path.isdir(self._backup_path):
             for file in filter(lambda x: x.endswith(".zip"), os.listdir(self._backup_path)):
-                self._model.append((file.rstrip(".zip"), False))
+                p = Path(os.path.join(self._backup_path, file))
+                if p.is_file():
+                    self._model.append((p.stem, get_size_from_bytes(p.stat().st_size)))
         else:
             os.makedirs(os.path.dirname(self._backup_path), exist_ok=True)
+
+        self._file_count_label.set_text(str(len(self._model)))
 
     def on_restore_bouquets(self, item):
         self.restore(RestoreType.BOUQUETS)
@@ -135,6 +141,8 @@ class BackupDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             list(map(model.remove, itrs_to_delete))
+
+        self._file_count_label.set_text(str(len(self._model)))
 
     def on_view_popup_menu(self, menu, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:

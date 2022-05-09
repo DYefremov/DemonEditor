@@ -77,6 +77,25 @@ def run_with_delay(timeout=5):
     return run_with
 
 
+def get_size_from_bytes(size):
+    """ Simple convert function from bytes to other units like K, M or G. """
+    try:
+        b = float(size)
+    except ValueError:
+        return size
+    else:
+        kb, mb, gb = 1024.0, 1048576.0, 1073741824.0
+
+        if b < kb:
+            return str(b)
+        elif kb <= b < mb:
+            return f"{b / kb:.1f} K"
+        elif mb <= b < gb:
+            return f"{b / mb:.1f} M"
+        elif gb <= b:
+            return f"{b / gb:.1f} G"
+
+
 class DefaultDict(defaultdict):
     """ Extended to support functions with params as default factory. """
 
