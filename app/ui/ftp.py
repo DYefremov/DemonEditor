@@ -50,13 +50,24 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GN
 File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
 
 
-class TextEditDialog(Gtk.Dialog):
+class BaseDialog(Gtk.Dialog):
+    """ Base class for additional FTP dialogs. """
+    def __init__(self, title, use_header_bar=0, *args, **kwargs):
+        super().__init__(title=title, use_header_bar=use_header_bar, *args, **kwargs)
+
+        self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        self.set_modal(True)
+        self.set_skip_pager_hint(True)
+        self.set_skip_taskbar_hint(True)
+        self.set_position(Gtk.PositionType.BOTTOM)
+        self.set_default_icon_name("document-properties-symbolic")
+
+
+class TextEditDialog(BaseDialog):
     """ Simple text edit dialog. """
 
     def __init__(self, path, use_header_bar=0, *args, **kwargs):
         super().__init__(title=f"DemonEditor [{path}]", use_header_bar=use_header_bar, *args, **kwargs)
-
-        self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK, )
 
         content_box = self.get_content_area()
         self._search_entry = Gtk.SearchEntry(visible=True, primary_icon_name="system-search-symbolic")
@@ -131,14 +142,14 @@ class TextEditDialog(Gtk.Dialog):
             GLib.idle_add(self.search_and_mark, text, match_end, False)
 
 
-class AttributesDialog(Gtk.Dialog):
+class AttributesDialog(BaseDialog):
     """ Dialog for editing file attributes (permissions). """
 
     def __init__(self, attrs, use_header_bar=0, *args, **kwargs):
         super().__init__(title=get_message("Permissions"), use_header_bar=use_header_bar, *args, **kwargs)
 
-        self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
         self.set_default_size(360, 100)
+        self.set_resizable(False)
 
         builder = get_builder(f"{UI_RESOURCES_PATH}ftp.glade", use_str=True, objects=("attributes_box",))
         content_box = self.get_content_area()
