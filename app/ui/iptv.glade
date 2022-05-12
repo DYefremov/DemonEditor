@@ -425,7 +425,6 @@ Author: Dmitriy Yefremov
                     <property name="margin_bottom">5</property>
                     <property name="row_spacing">2</property>
                     <property name="column_spacing">5</property>
-                    <property name="column_homogeneous">True</property>
                     <child>
                       <object class="GtkComboBox" id="stream_type_list_combobox">
                         <property name="visible">True</property>
@@ -502,6 +501,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkEntry" id="list_namespace_entry">
+                        <property name="width_request">120</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -545,6 +545,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkEntry" id="list_nid_entry">
+                        <property name="width_request">75</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -588,6 +589,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkEntry" id="list_tid_entry">
+                        <property name="width_request">75</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -631,6 +633,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkEntry" id="list_sid_entry">
+                        <property name="width_request">75</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -674,6 +677,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkEntry" id="list_srv_id_entry">
+                        <property name="width_request">75</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -717,6 +721,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkEntry" id="list_srv_type_entry">
+                        <property name="width_request">75</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
