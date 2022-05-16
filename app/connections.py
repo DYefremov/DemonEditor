@@ -33,7 +33,7 @@ import time
 import urllib
 import xml.etree.ElementTree as ETree
 from enum import Enum
-from ftplib import FTP, CRLF, Error, error_perm
+from ftplib import FTP, CRLF, Error, all_errors
 from http.client import RemoteDisconnected
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
@@ -115,7 +115,7 @@ class UtfFTP(FTP):
             msg = "Downloading file: {}.   Status: {}"
             try:
                 resp = str(self.retrbinary("RETR " + name, f.write))
-            except error_perm as e:
+            except all_errors as e:
                 resp = str(e)
                 msg = msg.format(name, e)
                 log(msg.rstrip())
@@ -171,7 +171,7 @@ class UtfFTP(FTP):
     def download_picons(self, src, dest, callback, files_filter=None):
         try:
             self.cwd(src)
-        except error_perm as e:
+        except all_errors as e:
             callback(str(e))
             return
 
@@ -201,7 +201,7 @@ class UtfFTP(FTP):
     def upload_picons(self, src, dest, callback, files_filter=None):
         try:
             self.cwd(dest)
-        except error_perm as e:
+        except all_errors as e:
             if str(e).startswith("550"):
                 self.mkd(dest)  # if not exist
                 self.cwd(dest)
@@ -227,15 +227,14 @@ class UtfFTP(FTP):
             msg = "Uploading file: {}.   Status: {}"
             try:
                 resp = str(self.storbinary("STOR " + file_name, f))
-            except Error as e:
+            except all_errors as e:
                 resp = str(e)
                 msg = msg.format(file_name, resp)
                 log(msg)
             else:
                 msg = msg.format(file_name, resp)
-
-            if callback:
-                callback(msg)
+                if callback:
+                    callback(msg)
 
         return resp
 
@@ -259,12 +258,12 @@ class UtfFTP(FTP):
                 elif os.path.isdir(file):
                     try:
                         self.mkd(f)
-                    except Error:
+                    except all_errors:
                         pass  # NOP
 
                     try:
                         self.cwd(f)
-                    except Error as e:
+                    except all_errors as e:
                         resp = str(e)
                         log(msg.format(f, resp))
                     else:
@@ -284,7 +283,7 @@ class UtfFTP(FTP):
         if dest:
             try:
                 self.cwd(dest)
-            except Error as e:
+            except all_errors as e:
                 callback(str(e))
                 return
 
@@ -295,7 +294,7 @@ class UtfFTP(FTP):
         msg = "Deleting file: {}.   Status: {}"
         try:
             resp = self.delete(file)
-        except Error as e:
+        except all_errors as e:
             resp = str(e)
             msg = msg.format(file, resp)
             log(msg)
@@ -322,7 +321,7 @@ class UtfFTP(FTP):
         msg = "Remove directory {}.   Status: {}"
         try:
             resp = self.rmd(path)
-        except Error as e:
+        except all_errors as e:
             msg = msg.format(path, e)
             log(msg)
             return "500"
@@ -339,7 +338,7 @@ class UtfFTP(FTP):
         msg = "File rename: {}.   Status: {}"
         try:
             resp = self.rename(from_name, to_name)
-        except Error as e:
+        except all_errors as e:
             resp = str(e)
             msg = msg.format(from_name, resp)
             log(msg)
@@ -401,14 +400,21 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
     s_type = settings.setting_type
     data_path = settings.profile_data_path
     host, port, use_ssl = settings.host, settings.http_port, settings.http_use_ssl
+    user, password = settings.user, settings.password
     base_url = f"http{'s' if use_ssl else ''}://{host}:{port}"
     base = "web" if s_type is SettingsType.ENIGMA_2 else "control"
     url = f"{base_url}/{base}/"
     tn, ht = None, None  # Telnet, HTTP.
 
     try:
+        use_http = use_http and test_http(host, port, user, password, use_ssl=use_ssl, skip_message=True, s_type=s_type)
+    except TestException:
+        log("HTTP test failed.")
+        use_http = False
+
+    try:
         if use_http:
-            ht = http(settings.user, settings.password, base_url, callback, use_ssl, s_type)
+            ht = http(user, password, base_url, callback, use_ssl, s_type)
             next(ht)
             message = ""
             if download_type is DownloadType.BOUQUETS:
@@ -434,17 +440,14 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
         else:
             if download_type is not DownloadType.PICONS:
                 # Telnet
-                tn = telnet(host=host,
-                            user=settings.user,
-                            password=settings.password,
-                            timeout=settings.telnet_timeout)
+                tn = telnet(host=host, user=user, password=password, timeout=settings.telnet_timeout)
                 next(tn)
                 # Terminate Enigma2 or Neutrino.
                 callback("Telnet initialization ...")
                 tn.send("init 4")
                 callback("Stopping GUI...")
 
-        with UtfFTP(host=host, user=settings.user, passwd=settings.password) as ftp:
+        with UtfFTP(host=host, user=user, passwd=password) as ftp:
             ftp.encoding = "utf-8"
             callback("FTP OK.")
             sat_xml_path = settings.satellites_xml_path
@@ -475,33 +478,41 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                 if compress:
                     from zipfile import ZipFile
 
-                    zip_file = f"{p_src}{os.sep}picons.zip"
+                    z_name = "picons.zip"
+                    zip_file = f"{p_src}{z_name}"
                     p_dst = os.path.abspath(os.path.join(p_dst, os.pardir))
+
+                    if files_filter and z_name in files_filter:
+                        files_filter.remove(z_name)
+
+                    if os.path.isfile(zip_file):
+                        try:
+                            os.unlink(zip_file)
+                        except OSError:
+                            pass  # NOP
 
                     log("Compressing picons...")
                     with ZipFile(zip_file, "w") as zf:
                         list(map(lambda p: zf.write(os.path.join(p_src, p), arcname=p), files_filter))
 
-                    files_filter = {"picons.zip"}
+                    files_filter = {z_name}
 
+                log("Uploading...")
                 ftp.upload_picons(p_src, p_dst, callback, files_filter)
 
                 if compress:
                     if not tn:
-                        callback("Telnet initialization ...")
-                        tn = telnet(host=host,
-                                    user=settings.user,
-                                    password=settings.password,
-                                    timeout=settings.telnet_timeout)
+                        callback("Telnet initialization...")
+                        tn = telnet(host=host, user=user, password=password, timeout=settings.telnet_timeout)
                         next(tn)
 
-                    cmd = f"unzip -q {p_dst}/picons.zip -d {settings.picons_path}"
                     callback("Extracting...")
+                    cmd = f"mkdir -p {settings.picons_path} && unzip -o -q {p_dst}/{z_name} -d {settings.picons_path}"
                     tn.send(cmd)
-                    next(tn)
-                    ftp.delete_file("picons.zip")
+                    ftp.delete_file(z_name)
+
                     try:
-                        os.unlink(f"{p_src}{os.sep}picons.zip")
+                        os.unlink(zip_file)
                     except OSError:
                         pass  # NOP
 
@@ -572,16 +583,23 @@ def telnet(host, port=23, user="", password="", timeout=5):
             tn.read_until(b"Password: ", timeout)
             tn.write(password.encode("utf-8") + b"\n")
             time.sleep(timeout)
-        tn.write("{}\r\n".format(command).encode("utf-8"))
-        time.sleep(timeout)
+
+        command = f"{command}\r\n".encode("utf-8")
+        tn.write(command)
+
+        msg = tn.read_until(command, timeout)
+        while msg.endswith(command) or not msg:
+            time.sleep(timeout)
+            msg = tn.read_until(command, timeout)
+
         command = yield
         time.sleep(timeout)
-        tn.write("{}\r\n".format(command).encode("utf-8"))
+        tn.write(f"{command}\r\n".encode("utf-8"))
         time.sleep(timeout)
         yield
 
 
-# ***************** HTTP API *******************#
+# ***************** HTTP API ******************* #
 
 class HttpAPI:
     __MAX_WORKERS = 4
@@ -746,7 +764,7 @@ class HttpAPI:
             if req_type is HttpAPI.Request.TEST:
                 raise e
             return {"error_code": e.code}
-        except (URLError, RemoteDisconnected, ConnectionResetError) as e:
+        except OSError as e:
             if req_type is HttpAPI.Request.TEST:
                 raise e
         except ETree.ParseError as e:
@@ -825,7 +843,7 @@ def test_ftp(host, port, user, password, timeout=5):
     try:
         with FTP(host=host, user=user, passwd=password, timeout=timeout) as ftp:
             return ftp.getwelcome()
-    except (error_perm, ConnectionRefusedError, OSError) as e:
+    except all_errors as e:
         raise TestException(e)
 
 
