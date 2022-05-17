@@ -2928,7 +2928,7 @@ Author: Dmitriy Yefremov
                                                     <property name="expand">True</property>
                                                     <property name="clickable">True</property>
                                                     <property name="alignment">0.5</property>
-                                                    <property name="sort_column_id">3</property>
+                                                    <property name="sort_column_id">4</property>
                                                     <child>
                                                       <object class="GtkCellRendererText" id="iptv_url_renderer">
                                                         <property name="xpad">5</property>
