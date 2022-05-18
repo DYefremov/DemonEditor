@@ -1074,16 +1074,16 @@ msgid "Hr."
 msgstr "Ora."
 
 msgid "Min."
-msgstr "Minuti."
+msgstr "Min."
 
 msgid "Power"
-msgstr "Accendi"
+msgstr "Power"
 
 msgid "Standby"
 msgstr "Standby"
 
 msgid "Wake Up"
-msgstr "Riprendi"
+msgstr "Accendi"
 
 msgid "Reboot"
 msgstr "Riavvia"
