@@ -32,6 +32,10 @@ paned.vertical > separator {
   background-size: 24px 2px;
 }
 
+popover .view {
+  background-color: transparent;
+}
+
 .red-button {
   background-image: none;
   background-color: red;
