@@ -38,8 +38,7 @@ from urllib.parse import urlparse, unquote
 from gi.repository import GLib, Gio, GObject
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger, DefaultDict
-from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
-                             HttpApiException, STC_XML_FILE)
+from app.connections import (HttpAPI, download_data, DownloadType, upload_data, STC_XML_FILE)
 from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
@@ -49,12 +48,14 @@ from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
                           IS_DARWIN, PlayStreamsMode, IS_LINUX)
 from app.tools.media import Recorder
-from app.ui.control import ControlTool, EpgTool, TimerTool, RecordingsTool
-from app.ui.epg import EpgDialog
+from app.ui.control import ControlTool
+from app.ui.epg import EpgDialog, EpgTool
 from app.ui.ftp import FtpClientBox
 from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
+from app.ui.recordings import RecordingsTool
 from app.ui.telnet import TelnetClient
+from app.ui.timers import TimerTool
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path, restore_data
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder

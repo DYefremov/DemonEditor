@@ -26,30 +26,133 @@
 #
 
 
+""" Module for working with EPG. """
 import gzip
 import locale
 import os
 import re
 import shutil
 import urllib.request
+from datetime import datetime
 from enum import Enum
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote
 
 from gi.repository import GLib
 
 from app.commons import run_idle, run_task, run_with_delay
-from app.connections import download_data, DownloadType
+from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP
 from app.tools.epg import EPG, ChannelsParser
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
+from app.ui.timers import TimerTool
 from .main_helper import on_popup_menu, update_entry_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
 
 
 class RefsSource(Enum):
     SERVICES = 0
     XML = 1
+
+
+class EpgTool(Gtk.Box):
+    def __init__(self, app, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._app = app
+        self._app.connect("fav-changed", self.on_service_changed)
+
+        handlers = {"on_epg_press": self.on_epg_press,
+                    "on_timer_add": self.on_timer_add,
+                    "on_epg_filter_changed": self.on_epg_filter_changed,
+                    "on_epg_filter_toggled": self.on_epg_filter_toggled}
+
+        builder = get_builder(UI_RESOURCES_PATH + "epg.glade", handlers)
+
+        self._view = builder.get_object("epg_view")
+        self._model = builder.get_object("epg_model")
+        self._filter_model = builder.get_object("epg_filter_model")
+        self._filter_model.set_visible_func(self.epg_filter_function)
+        self._filter_entry = builder.get_object("epg_filter_entry")
+        builder.get_object("epg_filter_button").bind_property("active", self._filter_entry, "visible")
+        self.pack_start(builder.get_object("epg_frame"), True, True, 0)
+        self.show()
+
+    def on_timer_add(self, action=None, value=None):
+        model, paths = self._view.get_selection().get_selected_rows()
+        p_count = len(paths)
+
+        if p_count == 1:
+            dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1])
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                gen = self.write_timers_list([dialog.get_request()])
+                GLib.idle_add(lambda: next(gen, False))
+            dialog.destroy()
+        elif p_count > 1:
+            if show_dialog(DialogType.QUESTION, self._app.app_window,
+                           "Add timers for selected events?") != Gtk.ResponseType.OK:
+                return True
+
+            self.add_timers_list((model[p][-1] for p in paths))
+        else:
+            self._app.show_error_message("No selected item!")
+
+    def add_timers_list(self, paths):
+        ref_str = "timeraddbyeventid?sRef={}&eventid={}&justplay=0"
+        refs = [ref_str.format(ev.get("e2eventservicereference", ""), ev.get("e2eventid", "")) for ev in paths]
+
+        gen = self.write_timers_list(refs)
+        GLib.idle_add(lambda: next(gen, False))
+
+    def write_timers_list(self, refs):
+        self._app.wait_dialog.show()
+        tasks = list(refs)
+        for ref in refs:
+            self._app.send_http_request(HttpAPI.Request.TIMER, ref, lambda x: tasks.pop())
+            yield True
+
+        while tasks:
+            yield True
+
+        self._app.emit("change-page", Page.TIMERS.value)
+
+    def on_epg_press(self, view, event):
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(view.get_model()) > 0:
+            self.on_timer_add()
+
+    def on_service_changed(self, app, ref):
+        self._app.wait_dialog.show()
+        self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
+
+    @run_idle
+    def update_epg_data(self, epg):
+        self._model.clear()
+        list(map(self._model.append, (self.get_event_row(e) for e in epg.get("event_list", []))))
+        self._app.wait_dialog.hide()
+
+    def get_event_row(self, event):
+        title = event.get("e2eventtitle", "") or ""
+        desc = event.get("e2eventdescription", "") or ""
+
+        start = int(event.get("e2eventstart", "0"))
+        start_time = datetime.fromtimestamp(start)
+        end_time = datetime.fromtimestamp(start + int(event.get("e2eventduration", "0")))
+        time = f"{start_time.strftime('%A, %H:%M')} - {end_time.strftime('%H:%M')}"
+
+        return title, time, desc, event
+
+    def on_epg_filter_changed(self, entry):
+        self._filter_model.refilter()
+
+    def on_epg_filter_toggled(self, button):
+        if not button.get_active():
+            self._filter_entry.set_text("")
+
+    def epg_filter_function(self, model, itr, data):
+        txt = self._filter_entry.get_text().upper()
+        return next((s for s in model.get(itr, 0, 1, 2) if txt in s.upper()), False)
 
 
 class EpgDialog:
@@ -97,7 +200,7 @@ class EpgDialog:
         self._refs_source = RefsSource.SERVICES
         self._download_xml_is_active = False
 
-        builder = get_builder(UI_RESOURCES_PATH + "epg.glade", handlers)
+        builder = get_builder(f"{UI_RESOURCES_PATH}epg_dialog.glade", handlers)
 
         self._dialog = builder.get_object("epg_dialog_window")
         self._dialog.set_transient_for(self._app.app_window)
