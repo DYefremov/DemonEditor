@@ -4,7 +4,7 @@ import os
 
 def update_icon():
     need_update = False
-    icon_name = "DemonEditor.desktop"
+    icon_name = "demon-editor.desktop"
 
     with open(icon_name, "r", encoding="utf-8") as f:
         lines = f.readlines()

@@ -1,6 +1,8 @@
 [Desktop Entry]
 Version=1.0
 Name=DemonEditor
+GenericName=Enigma2 bouquets editor
+GenericName[it]=Editor di bouquet per Enigma2
 Comment=Channel and satellite list editor for Enigma2
 Comment[ru]=Редактор списка каналов и спутников для Enigma2
 Comment[be]=Рэдактар спіса каналаў і спадарожнікаў для Enigma2
