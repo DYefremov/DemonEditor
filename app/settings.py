@@ -39,9 +39,9 @@ from textwrap import dedent
 
 SEP = os.sep
 HOME_PATH = str(Path.home())
-CONFIG_PATH = HOME_PATH + "{}.config{}demon-editor{}".format(SEP, SEP, SEP)
+CONFIG_PATH = HOME_PATH + f"{SEP}.config{SEP}demon-editor{SEP}"
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = HOME_PATH + "{}DemonEditor{}".format(SEP, SEP)
+DATA_PATH = HOME_PATH + f"{SEP}DemonEditor{SEP}"
 GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_DARWIN = sys.platform == "darwin"
@@ -61,6 +61,7 @@ class Defaults(Enum):
     # Enigma2.
     BOX_SERVICES_PATH = "/etc/enigma2/"
     BOX_SATELLITE_PATH = "/etc/tuxbox/"
+    BOX_EPG_PATH = "/etc/enigma2/"
     BOX_PICON_PATH = "/usr/share/enigma2/picon/"
     BOX_PICON_PATHS = ("/usr/share/enigma2/picon/",
                        "/media/hdd/picon/",
@@ -73,8 +74,8 @@ class Defaults(Enum):
     NEUTRINO_BOX_PICON_PATH = "/usr/share/tuxbox/neutrino/icons/logo/"
     NEUTRINO_BOX_PICON_PATHS = ("/usr/share/tuxbox/neutrino/icons/logo/",)
     # Paths.
-    BACKUP_PATH = "{}backup{}".format(DATA_PATH, SEP)
-    PICON_PATH = "{}picons{}".format(DATA_PATH, SEP)
+    BACKUP_PATH = f"{DATA_PATH}backup{SEP}"
+    PICON_PATH = f"{DATA_PATH}picons{SEP}"
 
     DEFAULT_PROFILE = "default"
     BACKUP_BEFORE_DOWNLOADING = True
@@ -94,9 +95,9 @@ class Defaults(Enum):
     STREAM_LIB = "mpv" if IS_WIN else "vlc"
     MAIN_LIST_PLAYBACK = False
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
+    RECORDS_PATH = f"{DATA_PATH}records{SEP}"
     ACTIVATE_TRANSCODING = False
-    ACTIVE_TRANSCODING_PRESET = "720p TV{}device".format(SEP)
+    ACTIVE_TRANSCODING_PRESET = f"720p TV{SEP}device"
 
 
 class SettingsType(IntEnum):
@@ -110,12 +111,14 @@ class SettingsType(IntEnum):
             srv_path = Defaults.BOX_SERVICES_PATH.value
             sat_path = Defaults.BOX_SATELLITE_PATH.value
             picons_path = Defaults.BOX_PICON_PATH.value
+            epg_path = Defaults.BOX_EPG_PATH.value
             http_timeout = 5
             telnet_timeout = 5
         else:
             srv_path = Defaults.NEUTRINO_BOX_SERVICES_PATH.value
             sat_path = Defaults.NEUTRINO_BOX_SATELLITE_PATH.value
             picons_path = Defaults.NEUTRINO_BOX_PICON_PATH.value
+            epg_path = ""
             http_timeout = 2
             telnet_timeout = 1
 
@@ -133,6 +136,7 @@ class SettingsType(IntEnum):
                 "services_path": srv_path,
                 "user_bouquet_path": srv_path,
                 "satellites_xml_path": sat_path,
+                "epg_dat_path": epg_path,
                 "picons_path": picons_path}
 
 
@@ -358,6 +362,14 @@ class Settings:
     @satellites_xml_path.setter
     def satellites_xml_path(self, value):
         self._cp_settings["satellites_xml_path"] = value
+
+    @property
+    def epg_dat_path(self):
+        return self._cp_settings.get("epg_dat_path", self.get_default("epg_dat_path"))
+
+    @epg_dat_path.setter
+    def epg_dat_path(self, value):
+        self._cp_settings["epg_dat_path"] = value
 
     @property
     def picons_path(self):
@@ -702,6 +714,14 @@ class Settings:
     @display_picons.setter
     def display_picons(self, value):
         self._settings["display_picons"] = value
+
+    @property
+    def display_epg(self):
+        return self._settings.get("display_epg", False)
+
+    @display_epg.setter
+    def display_epg(self, value):
+        self._settings["display_epg"] = value
 
     @property
     def alternate_layout(self):

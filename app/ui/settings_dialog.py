@@ -112,6 +112,7 @@ class SettingsDialog:
         self._services_field = builder.get_object("services_field")
         self._user_bouquet_field = builder.get_object("user_bouquet_field")
         self._satellites_xml_field = builder.get_object("satellites_xml_field")
+        self._epg_dat_box = builder.get_object("epg_dat_box")
         self._picons_paths_box = builder.get_object("picons_paths_box")
         self._remove_picon_path_button = builder.get_object("remove_picon_path_button")
         # Paths.
@@ -191,7 +192,7 @@ class SettingsDialog:
         self._profile_remove_button = builder.get_object("profile_remove_button")
         # Network.
         # Separated due to a bug with response (presumably in the builder) in ubuntu 18.04 and derivatives.
-        builder.get_object("network_settings_frame").add(builder.get_object("network_box"))
+        builder.get_object("network_settings_frame").add(builder.get_object("network_grid"))
         # Style.
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -305,6 +306,7 @@ class SettingsDialog:
         self._services_field.set_text(self._settings.services_path)
         self._user_bouquet_field.set_text(self._settings.user_bouquet_path)
         self._satellites_xml_field.set_text(self._settings.satellites_xml_path)
+        self._epg_dat_box.set_active_id(self._settings.epg_dat_path)
         self._picons_paths_box.set_active_id(self._settings.picons_path)
         self._data_path_field.set_text(self._settings.default_data_path)
         self._picons_path_field.set_text(self._settings.default_picon_path)
@@ -368,7 +370,7 @@ class SettingsDialog:
         self._settings.telnet_timeout = int(self._telnet_timeout_spin_button.get_value())
         self._settings.services_path = self._services_field.get_text()
         self._settings.user_bouquet_path = self._user_bouquet_field.get_text()
-        self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
+        self._settings.epg_dat_path = self._epg_dat_box.get_active_id()
         self._settings.picons_path = self._picons_paths_box.get_active_id()
 
     def on_save_settings(self, item=None):
