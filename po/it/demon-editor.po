@@ -1152,7 +1152,7 @@ msgid "We"
 msgstr "Mer"
 
 msgid "Th"
-msgstr "Giv"
+msgstr "Gio"
 
 msgid "Fr"
 msgstr "Ven"
