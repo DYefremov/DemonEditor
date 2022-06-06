@@ -32,6 +32,7 @@ from collections import Counter
 from contextlib import suppress
 from datetime import datetime
 from functools import lru_cache
+from html import escape
 from itertools import chain
 from urllib.parse import urlparse, unquote
 
@@ -49,7 +50,7 @@ from app.settings import (SettingsType, Settings, SettingsException, SettingsRea
                           IS_DARWIN, PlayStreamsMode, IS_LINUX)
 from app.tools.media import Recorder
 from app.ui.control import ControlTool
-from app.ui.epg import EpgDialog, EpgTool
+from app.ui.epg import EpgDialog, EpgTool, EpgCache
 from app.ui.ftp import FtpClientBox
 from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
@@ -269,6 +270,8 @@ class Application(Gtk.Application):
         self._download_pages = {Page.INFO, Page.SERVICES, Page.SATELLITE, Page.PICONS}
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("bouquet-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -522,6 +525,11 @@ class Application(Gtk.Application):
         self.connect("profile-changed", self.init_iptv)
         self.connect("iptv-service-added", self.on_iptv_service_added)
         self.connect("iptv-service-edited", self.on_iptv_service_edited)
+        # EPG.
+        self._display_epg = False
+        self._epg_cache = None
+        fav_service_column = builder.get_object("fav_service_column")
+        fav_service_column.set_cell_data_func(builder.get_object("fav_service_renderer"), self.fav_service_data_func)
         # Hiding for Neutrino.
         self.bind_property("is_enigma", builder.get_object("services_button_box"), "visible")
         # Setting the last size of the window if it was saved.
@@ -632,6 +640,10 @@ class Application(Gtk.Application):
         self.bind_property("is-enigma", sa, "enabled")
         # Display picons.
         self.set_state_action("display_picons", self.set_display_picons, self._settings.display_picons)
+        # Display EPG.
+        sa = self.set_state_action("display_epg", self.set_display_epg, self._settings.display_epg)
+        self.change_action_state("display_epg", GLib.Variant.new_boolean(self._settings.display_epg))
+        self.bind_property("is_enigma", sa, "enabled")
         # Alternate layout.
         sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
         sa.connect("change-state", self.on_layout_change)
@@ -1058,6 +1070,21 @@ class Application(Gtk.Application):
                     picon = self._picons.get(alt_srv.picon_id, None) if srv else None
 
         renderer.set_property("pixbuf", picon)
+
+    def fav_service_data_func(self, column, renderer, model, itr, data):
+        if self._display_epg and self._s_type is SettingsType.ENIGMA_2:
+            srv_name = model.get_value(itr, Column.FAV_SERVICE)
+            if model.get_value(itr, Column.FAV_TYPE) in self._marker_types:
+                return True
+
+            event = self._epg_cache.get_current_event(srv_name)
+            if event:
+                # https://docs.gtk.org/Pango/pango_markup.html
+                renderer.set_property("markup", (f'{escape(srv_name)}\n\n'
+                                                 f'<span size="small" weight="bold">{escape(event.title)}</span>\n'
+                                                 f'<span size="small" style="italic">{event.time}</span>'))
+                return False
+        return True
 
     def view_selection_func(self, *args):
         """ Used to control selection via drag and drop in views [via _select_enabled field].
@@ -2486,6 +2513,7 @@ class Application(Gtk.Application):
             self._bouquets_view.expand_row(path, column)
 
         if len(path) > 1:
+            self.emit("bouquet-changed", self._bq_selected)
             gen = self.update_bouquet_services(model, path)
             GLib.idle_add(lambda: next(gen, False))
 
@@ -2894,7 +2922,14 @@ class Application(Gtk.Application):
             gen = self.remove_favs(response, self._fav_model)
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    # ****************** EPG  **********************#
+    # ****************** EPG  ********************** #
+
+    def set_display_epg(self, action, value):
+        action.set_state(value)
+        set_display = bool(value)
+        self._settings.display_epg = set_display
+        self._display_epg = set_display
+        self._epg_cache = EpgCache(self) if set_display else None
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
@@ -3318,11 +3353,11 @@ class Application(Gtk.Application):
         else:
             self.show_error_message("This type of settings is not supported!")
 
-    def get_service_ref(self, path):
+    def get_service_ref(self, path, show_error=True):
         row = self._fav_model[path][:]
         srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
 
-        if srv_type in self._marker_types:
+        if srv_type in self._marker_types and show_error:
             self.show_error_message("Not allowed in this context!")
             return
 
@@ -4169,6 +4204,10 @@ class Application(Gtk.Application):
         return self._bouquets
 
     @property
+    def current_bouquet_files(self):
+        return self._bq_file
+
+    @property
     def picons(self):
         return self._picons
 
@@ -4210,6 +4249,10 @@ class Application(Gtk.Application):
     @property
     def page(self):
         return self._page
+
+    @property
+    def display_epg(self):
+        return self._display_epg
 
 
 def start_app():

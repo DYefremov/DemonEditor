@@ -33,6 +33,7 @@ import os
 import re
 import shutil
 import urllib.request
+from collections import namedtuple
 from datetime import datetime
 from enum import Enum
 from urllib.error import HTTPError, URLError
@@ -50,10 +51,51 @@ from app.ui.timers import TimerTool
 from .main_helper import on_popup_menu, update_entry_data
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
 
+EpgEvent = namedtuple("EpgEvent", ["title", "time", "desc", "event_data"])
+EpgEvent.__new__.__defaults__ = ("N/A", "N/A", "N/A", None)  # For Python3 < 3.7
+
 
 class RefsSource(Enum):
     SERVICES = 0
     XML = 1
+
+
+class EpgCache(dict):
+    def __init__(self, app):
+        super().__init__()
+        self._current_bq = None
+        self._app = app
+        self._app.connect("bouquet-changed", self.on_bouquet_changed)
+        self._app.connect("profile-changed", self.on_profile_changed)
+
+        self.init()
+
+    def init(self):
+        GLib.timeout_add_seconds(3, self.update_epg_data, priority=GLib.PRIORITY_LOW)
+
+    def on_bouquet_changed(self, app, bq):
+        self._current_bq = bq
+
+    def on_profile_changed(self, app, bq):
+        self.clear()
+
+    def update_epg_data(self):
+        api = self._app.http_api
+        bq = self._app.current_bouquet_files.get(self._current_bq, None)
+
+        if bq and api:
+            req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"')
+            api.send(HttpAPI.Request.EPG_NOW, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_data)
+
+        return self._app.display_epg
+
+    @run_idle
+    def update_data(self, epg):
+        for e in (EpgTool.get_event(e, False) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit()):
+            self[e.event_data.get("e2eventservicename", "")] = e
+
+    def get_current_event(self, service_name):
+        return self.get(service_name, EpgEvent())
 
 
 class EpgTool(Gtk.Box):
@@ -129,19 +171,20 @@ class EpgTool(Gtk.Box):
     @run_idle
     def update_epg_data(self, epg):
         self._model.clear()
-        list(map(self._model.append, (self.get_event_row(e) for e in epg.get("event_list", []))))
+        list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", []))))
         self._app.wait_dialog.hide()
 
-    def get_event_row(self, event):
+    @staticmethod
+    def get_event(event, show_day=True):
         title = event.get("e2eventtitle", "") or ""
         desc = event.get("e2eventdescription", "") or ""
 
         start = int(event.get("e2eventstart", "0"))
         start_time = datetime.fromtimestamp(start)
         end_time = datetime.fromtimestamp(start + int(event.get("e2eventduration", "0")))
-        time = f"{start_time.strftime('%A, %H:%M')} - {end_time.strftime('%H:%M')}"
+        ev_time = f"{start_time.strftime('%A, %H:%M' if show_day else '%H:%M')} - {end_time.strftime('%H:%M')}"
 
-        return title, time, desc, event
+        return EpgEvent(title, ev_time, desc, event)
 
     def on_epg_filter_changed(self, entry):
         self._filter_model.refilter()
@@ -305,7 +348,9 @@ class EpgDialog:
         refs = None
         if self._enable_dat_filter:
             try:
-                refs = EPG.get_epg_refs(self._epg_dat_path_entry.get_text() + "epg.dat")
+                epg_reader = EPG.Reader(f"{self._epg_dat_path_entry.get_text()}epg.dat")
+                epg_reader.read()
+                refs = epg_reader.get_refs()
             except (OSError, ValueError) as e:
                 self.show_info_message(f"Read data error: {e}", Gtk.MessageType.ERROR)
                 return

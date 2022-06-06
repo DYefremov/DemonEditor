@@ -383,14 +383,8 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
             ftp.download_picons(settings.picons_path, picons_path, callback, files_filter)
         # epg.dat
         if download_type is DownloadType.EPG:
-            stb_path = settings.services_path
-            epg_options = settings.epg_options
-            if epg_options:
-                stb_path = epg_options.get("epg_dat_stb_path", stb_path)
-                save_path = epg_options.get("epg_dat_path", save_path)
-
-            ftp.cwd(stb_path)
-            ftp.download_files(save_path, "epg.dat", callback)
+            ftp.cwd(settings.epg_dat_path)
+            ftp.download_files(f"{settings.profile_data_path}epg{os.sep}", "epg.dat", callback)
 
         callback("*** Done. ***")
 
@@ -628,6 +622,7 @@ class HttpAPI:
         VOL = "vol?set=set"
         # EPG
         EPG = "epgservice?sRef="
+        EPG_NOW = "epgnow?bRef="
         # Timer
         TIMER = ""
         TIMER_LIST = "timerlist"
@@ -671,6 +666,7 @@ class HttpAPI:
                       Request.POWER,
                       Request.VOL,
                       Request.EPG,
+                      Request.EPG_NOW,
                       Request.TIMER,
                       Request.RECORDINGS,
                       Request.N_ZAP}
@@ -784,7 +780,7 @@ class HttpAPI:
         elif req_type is HttpAPI.Request.PLAYER_LIST:
             return [{el.tag: el.text for el in el.iter()} for el in
                     ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
-        elif req_type is HttpAPI.Request.EPG:
+        elif req_type is HttpAPI.Request.EPG or req_type is HttpAPI.Request.EPG_NOW:
             return {"event_list": [{el.tag: el.text for el in el.iter()} for el in
                                    ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
         elif req_type is HttpAPI.Request.TIMER_LIST:
