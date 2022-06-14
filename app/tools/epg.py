@@ -27,12 +27,21 @@
 
 
 """  Module for working with epg.dat file. """
+import abc
 import os
+import shutil
 import struct
+import sys
 from collections import namedtuple
 from datetime import datetime, timezone
+from tempfile import NamedTemporaryFile
+from urllib.parse import urlparse
 from xml.dom.minidom import parse, Node, Document
+import xml.etree.ElementTree as ET
 
+import requests
+
+from app.commons import log, run_task
 from app.eparser.ecommons import BqServiceType, BouquetService
 
 ENCODING = "utf-8"
@@ -44,6 +53,18 @@ except ModuleNotFoundError:
 else:
     DETECT_ENCODING = True
 
+EpgEvent = namedtuple("EpgEvent", ["title", "time", "desc", "event_data"])
+EpgEvent.__new__.__defaults__ = ("N/A", "N/A", "N/A", None)  # For Python3 < 3.7
+
+
+class Reader(metaclass=abc.ABCMeta):
+
+    @abc.abstractmethod
+    def download(self, clb=None): pass
+
+    @abc.abstractmethod
+    def get_current_events(self, ids: set) -> dict: pass
+
 
 class EPG:
     """ Base EPG class. """
@@ -51,7 +72,7 @@ class EPG:
     # datetime.datetime.toordinal(1858,11,17) => 678576
     ZERO_DAY = 678576
 
-    EpgEvent = namedtuple("EpgEvent", ["id", "data", "start", "duration", "title", "desc", "ext_desc"])
+    Event = namedtuple("EpgEvent", ["id", "data", "start", "duration", "title", "desc", "ext_desc"])
 
     class EventData:
         """ Event data representation class. """
@@ -86,7 +107,7 @@ class EPG:
             return EPG.get_from_bcd(self.raw_data[7]) * 3600 + EPG.get_from_bcd(
                 self.raw_data[8]) * 60 + EPG.get_from_bcd(self.raw_data[9])
 
-    class Reader:
+    class DatReader(Reader):
         """ The epd.dat file reading class.
 
             The read algorithm was taken from the eEPGCache::load() function from this source:
@@ -97,6 +118,12 @@ class EPG:
             self._path = path
             self._refs = {}
             self._desc = {}
+
+        def download(self, clb=None):
+            pass
+
+        def get_current_events(self, ids: set) -> dict:
+            pass
 
         def get_refs(self):
             return self._refs.keys()
@@ -135,7 +162,7 @@ class EPG:
                 elif desc_type == 78:  # Extended event descriptor -> 0x4e -> 78
                     ext_desc = data[9:].decode(encoding, errors="ignore") if data[7] and data[8] < 32 else None
 
-            return EPG.EpgEvent(e_id, evd, start, duration, title, desc, ext_desc)
+            return EPG.Event(e_id, evd, start, duration, title, desc, ext_desc)
 
         def get_events(self, ref):
             return self._refs.get(ref, {})
@@ -188,6 +215,152 @@ class EPG:
         if ((value & 0xF0) >= 0xA0) or ((value & 0xF) >= 0xA):
             return -1
         return ((value & 0xF0) >> 4) * 10 + (value & 0xF)
+
+
+class XmlTvReader(Reader):
+    PR_TAG = "programme"
+    CH_TAG = "channel"
+    DSP_NAME_TAG = "display-name"
+    ICON_TAG = "icon"
+    TITLE_TAG = "title"
+    DESC_TAG = "desc"
+
+    TIME_FORMAT_STR = "%Y%m%d%H%M%S %z"
+
+    Service = namedtuple("Service", ["id", "name", "logo", "events"])
+    Event = namedtuple("EpgEvent", ["start", "duration", "title", "desc"])
+
+    def __init__(self, path, url):
+        self._path = path
+        self._url = url
+        self._ids = {}
+
+    @run_task
+    def download(self, clb=None):
+        """ Downloads and processes an XMLTV file. """
+        res = urlparse(self._url)
+        if not all((res.scheme, res.netloc)):
+            log(f"{self.__class__.__name__} [download] error: Invalid URL {self._url}")
+            return
+
+        with requests.get(url=self._url, stream=True) as request:
+            if request.reason == "OK":
+                suf = self._url[self._url.rfind("."):]
+                if suf not in (".gz", ".xz", ".lzma"):
+                    log(f"{self.__class__.__name__} [download] error: Unsupported file extension.")
+                    return
+
+                data_len = request.headers.get("content-length")
+
+                with NamedTemporaryFile(suffix=suf) as tf:
+                    downloaded = 0
+                    data_len = int(data_len)
+                    log("Downloading XMLTV file...")
+                    for data in request.iter_content(chunk_size=1024):
+                        downloaded += len(data)
+                        tf.write(data)
+                        done = int(50 * downloaded / data_len)
+                        sys.stdout.write(f"\rDownloading XMLTV file [{'=' * done}{' ' * (50 - done)}]")
+                        sys.stdout.flush()
+                    tf.seek(0)
+                    sys.stdout.write("\n")
+
+                    os.makedirs(os.path.dirname(self._path), exist_ok=True)
+
+                    if suf.endswith(".gz"):
+                        try:
+                            shutil.copyfile(tf.name, self._path)
+                        except OSError as e:
+                            log(f"{self.__class__.__name__} [download *.gz] error: {e}")
+                    elif self._url.endswith((".xz", ".lzma")):
+                        import lzma
+
+                        try:
+                            with lzma.open(tf, "rb") as lzf:
+                                shutil.copyfileobj(lzf, self._path)
+                        except (lzma.LZMAError, OSError) as e:
+                            log(f"{self.__class__.__name__} [download *.xz] error: {e}")
+            else:
+                log(f"{self.__class__.__name__} [download] error: {request.reason}")
+
+        if clb:
+            clb()
+
+    def get_current_events(self, names: set) -> dict:
+        events = {}
+
+        dt = datetime.utcnow()
+        utc = dt.timestamp()
+        offset = datetime.now() - dt
+
+        for srv in filter(lambda s: s.name in names, self._ids.values()):
+            ev = list(filter(lambda s: s.start < utc, srv.events))
+            if ev:
+                ev = ev[-1]
+                start = datetime.fromtimestamp(ev.start) + offset
+                end_time = datetime.fromtimestamp(ev.duration) + offset
+                tm = f"{start.strftime('%H:%M')} - {end_time.strftime('%H:%M')}"
+                events[srv.name] = EpgEvent(ev.title, tm, ev.desc, ev)
+
+        return events
+
+    def parse(self):
+        """ Parses XML. """
+        try:
+            import gzip
+
+            with gzip.open(self._path, "rb") as gzf:
+                log("Processing XMLTV data...")
+                list(map(self.process_node, ET.iterparse(gzf)))
+                log("XMLTV data parsing is complete.")
+        except OSError as e:
+            log(f"{self.__class__.__name__} [parse] error: {e}")
+
+    def process_node(self, node):
+        event, element = node
+        if element.tag == self.CH_TAG:
+            ch_id = element.get("id", None)
+            name, logo = None, None
+            for c in element:
+                if c.tag == self.DSP_NAME_TAG:
+                    name = c.text
+                elif c.tag == self.ICON_TAG:
+                    logo = c.get("src", None)
+            self._ids[ch_id] = self.Service(ch_id, name, logo, [])
+        elif element.tag == self.PR_TAG:
+            channel = self._ids.get(element.get(self.CH_TAG, None), None)
+            if channel:
+                events = channel[-1]
+                start = element.get("start", None)
+                if start:
+                    start = self.get_utc_time(start)
+
+                stop = element.get("stop", None)
+                if stop:
+                    stop = self.get_utc_time(stop)
+
+                title, desc = None, None
+                for c in element:
+                    if c.tag == self.TITLE_TAG:
+                        title = c.text
+                    elif c.tag == self.DESC_TAG:
+                        desc = c.text
+
+                if all((start, stop, title)):
+                    events.append(self.Event(start, stop, title, desc))
+
+    def to_epg_dat(self):
+        """ Converts and saves imported data to 'epg.dat' file. """
+        raise ValueError("Not implemented yet!")
+
+    @staticmethod
+    def get_utc_time(time_str):
+        """ Returns the UTC time in seconds. """
+        t, sep, delta = time_str.partition(" ")
+        t = datetime(*map(int, (t[:4], t[4:6], t[6:8], t[8:10], t[10:12], t[12:]))).timestamp()
+        if delta:
+            t -= (3600 * int(delta) // 100)
+        return t
 
 
 class ChannelsParser:

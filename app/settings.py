@@ -155,6 +155,12 @@ class PlayStreamsMode(IntEnum):
     M3U = 2
 
 
+class EpgSource(IntEnum):
+    HTTP = 0  # HTTP API -> WebIf
+    DAT = 1  # epg.dat file
+    XML = 2  # XML TV
+
+
 class Settings:
     __INSTANCE = None
     __VERSION = 2
@@ -531,6 +537,30 @@ class Settings:
     @epg_options.setter
     def epg_options(self, value):
         self._cp_settings["epg_options"] = value
+
+    @property
+    def epg_source(self):
+        return EpgSource(self._cp_settings.get("epg_source", EpgSource.HTTP))
+
+    @epg_source.setter
+    def epg_source(self, value):
+        self._cp_settings["epg_source"] = value
+
+    @property
+    def epg_update_interval(self):
+        return self._cp_settings.get("epg_update_interval", 5)
+
+    @epg_update_interval.setter
+    def epg_update_interval(self, value):
+        self._cp_settings["epg_update_interval"] = value
+
+    @property
+    def epg_xml_source(self):
+        return self._cp_settings.get("epg_xml_source", "")
+
+    @epg_xml_source.setter
+    def epg_xml_source(self, value):
+        self._cp_settings["epg_xml_source"] = value
 
     # *********** FTP ************ #
 

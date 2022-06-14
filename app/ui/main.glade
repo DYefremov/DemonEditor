@@ -3282,7 +3282,25 @@ Author: Dmitriy Yefremov
                                       </packing>
                                     </child>
                                     <child>
-                                      <placeholder/>
+                                      <object class="GtkMenuButton" id="epg_menu_button">
+                                        <property name="can_focus">False</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">EPG source</property>
+                                        <child>
+                                          <object class="GtkImage" id="epg_menu_image">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="icon_name">insert-text-symbolic</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">4</property>
+                                      </packing>
                                     </child>
                                   </object>
                                   <packing>

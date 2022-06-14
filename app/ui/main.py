@@ -50,7 +50,7 @@ from app.settings import (SettingsType, Settings, SettingsException, SettingsRea
                           IS_DARWIN, PlayStreamsMode, IS_LINUX)
 from app.tools.media import Recorder
 from app.ui.control import ControlTool
-from app.ui.epg import EpgDialog, EpgTool, EpgCache
+from app.ui.epg.epg import EpgCache, EpgSettingsPopover, EpgDialog, EpgTool
 from app.ui.ftp import FtpClientBox
 from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
@@ -530,6 +530,9 @@ class Application(Gtk.Application):
         self._epg_cache = None
         fav_service_column = builder.get_object("fav_service_column")
         fav_service_column.set_cell_data_func(builder.get_object("fav_service_renderer"), self.fav_service_data_func)
+        self._epg_menu_button = builder.get_object("epg_menu_button")
+        self._epg_menu_button.connect("realize", lambda b: b.set_popover(EpgSettingsPopover(self)))
+        self.bind_property("is_enigma", self._epg_menu_button, "sensitive")
         # Hiding for Neutrino.
         self.bind_property("is_enigma", builder.get_object("services_button_box"), "visible")
         # Setting the last size of the window if it was saved.
@@ -2638,7 +2641,7 @@ class Application(Gtk.Application):
         self.update_profile_label()
         is_enigma = self._s_type is SettingsType.ENIGMA_2
         self.set_property("is-enigma", is_enigma)
-        self.update_stack_elements_visibility(is_enigma)
+        self.update_elements_visibility(is_enigma)
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()
@@ -2646,7 +2649,7 @@ class Application(Gtk.Application):
             self._profile_combo_box.append(p, p)
 
     @run_idle
-    def update_stack_elements_visibility(self, is_enigma=False):
+    def update_elements_visibility(self, is_enigma=False):
         self._stack_services_frame.set_visible(self._settings.get("show_bouquets", True))
         self._stack_satellite_box.set_visible(self._settings.get("show_satellites", True))
         self._stack_picon_box.set_visible(self._settings.get("show_picons", True))
@@ -2928,8 +2931,9 @@ class Application(Gtk.Application):
         action.set_state(value)
         set_display = bool(value)
         self._settings.display_epg = set_display
-        self._display_epg = set_display
+        self._epg_menu_button.set_visible(set_display)
         self._epg_cache = EpgCache(self) if set_display else None
+        self._display_epg = set_display
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:

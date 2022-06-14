@@ -33,7 +33,6 @@ import os
 import re
 import shutil
 import urllib.request
-from collections import namedtuple
 from datetime import datetime
 from enum import Enum
 from urllib.error import HTTPError, URLError
@@ -44,15 +43,12 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
-from app.settings import SEP
-from app.tools.epg import EPG, ChannelsParser
+from app.settings import SEP, EpgSource
+from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.timers import TimerTool
-from .main_helper import on_popup_menu, update_entry_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
-
-EpgEvent = namedtuple("EpgEvent", ["title", "time", "desc", "event_data"])
-EpgEvent.__new__.__defaults__ = ("N/A", "N/A", "N/A", None)  # For Python3 < 3.7
+from ..main_helper import on_popup_menu, update_entry_data
+from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
 
 
 class RefsSource(Enum):
@@ -64,38 +60,119 @@ class EpgCache(dict):
     def __init__(self, app):
         super().__init__()
         self._current_bq = None
+        self._reader = None
+        self._settings = app.app_settings
+        self._src = self._settings.epg_source
         self._app = app
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
 
         self.init()
 
+    @run_task
     def init(self):
-        GLib.timeout_add_seconds(3, self.update_epg_data, priority=GLib.PRIORITY_LOW)
+        if self._src is EpgSource.XML:
+            url = self._settings.epg_xml_source
+            gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
+            self._reader = XmlTvReader(gz_file, url)
+
+            if os.path.isfile(gz_file):
+                # Difference calculation between the current time and file modification.
+                dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
+                # We will update daily. -> Temporarily!!!
+                self._reader.download(self._reader.parse) if dif.days > 0 else self._reader.parse()
+            else:
+                self._reader.download(self._reader.parse)
+        elif self._src is EpgSource.DAT:
+            self._reader = EPG.DatReader(f"{self._settings.profile_data_path}epg{os.sep}epg.dat")
+            self._reader.download()
+
+        GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
     def on_bouquet_changed(self, app, bq):
         self._current_bq = bq
 
-    def on_profile_changed(self, app, bq):
+    def on_profile_changed(self, app, p):
         self.clear()
 
     def update_epg_data(self):
-        api = self._app.http_api
-        bq = self._app.current_bouquet_files.get(self._current_bq, None)
+        if self._src is EpgSource.HTTP:
+            api = self._app.http_api
+            bq = self._app.current_bouquet_files.get(self._current_bq, None)
 
-        if bq and api:
-            req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"')
-            api.send(HttpAPI.Request.EPG_NOW, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_data)
+            if bq and api:
+                req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"')
+                api.send(HttpAPI.Request.EPG_NOW, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_http_data)
+        elif self._src is EpgSource.XML:
+            self.update_xml_data()
 
         return self._app.display_epg
 
-    @run_idle
-    def update_data(self, epg):
+    def update_http_data(self, epg):
         for e in (EpgTool.get_event(e, False) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit()):
             self[e.event_data.get("e2eventservicename", "")] = e
 
+    def update_xml_data(self):
+        services = self._app.current_services
+        names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}
+        for name, e in self._reader.get_current_events(names).items():
+            self[name] = e
+
     def get_current_event(self, service_name):
         return self.get(service_name, EpgEvent())
+
+
+class EpgSettingsPopover(Gtk.Popover):
+
+    def __init__(self, app, **kwarg):
+        super().__init__(**kwarg)
+        self._app = app
+        self._app.connect("profile-changed", self.on_profile_changed)
+
+        handlers = {"on_save": self.on_save,
+                    "on_close": lambda b: self.popdown()}
+        builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}settings.glade", handlers)
+        self.add(builder.get_object("main_box"))
+
+        self._http_src_button = builder.get_object("http_src_button")
+        self._xml_src_button = builder.get_object("xml_src_button")
+        self._dat_src_button = builder.get_object("dat_src_button")
+        self._interval_button = builder.get_object("interval_button")
+        self._url_entry = builder.get_object("url_entry")
+        self._dat_path_box = builder.get_object("dat_path_box")
+
+        self.init()
+
+    def init(self):
+        settings = self._app.app_settings
+        src = settings.epg_source
+        if src is EpgSource.HTTP:
+            self._http_src_button.set_active(True)
+        elif src is EpgSource.XML:
+            self._xml_src_button.set_active(True)
+        else:
+            self._dat_src_button.set_active(True)
+
+        self._interval_button.set_value(settings.epg_update_interval)
+        self._url_entry.set_text(settings.epg_xml_source)
+        self._dat_path_box.set_active_id(settings.epg_dat_path)
+
+    def on_save(self, button):
+        settings = self._app.app_settings
+        if self._http_src_button.get_active():
+            settings.epg_source = EpgSource.HTTP
+        elif self._xml_src_button.get_active():
+            settings.epg_source = EpgSource.XML
+        else:
+            settings.epg_source = EpgSource.DAT
+
+        settings.epg_update_interval = self._interval_button.get_value()
+        settings.epg_xml_source = self._url_entry.get_text()
+        settings.epg_dat_path = self._dat_path_box.get_active_id()
+        self.popdown()
+
+    def on_profile_changed(self, app, p):
+        self.init()
 
 
 class EpgTool(Gtk.Box):
@@ -110,7 +187,7 @@ class EpgTool(Gtk.Box):
                     "on_epg_filter_changed": self.on_epg_filter_changed,
                     "on_epg_filter_toggled": self.on_epg_filter_toggled}
 
-        builder = get_builder(UI_RESOURCES_PATH + "epg.glade", handlers)
+        builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}tab.glade", handlers)
 
         self._view = builder.get_object("epg_view")
         self._model = builder.get_object("epg_model")
@@ -243,7 +320,7 @@ class EpgDialog:
         self._refs_source = RefsSource.SERVICES
         self._download_xml_is_active = False
 
-        builder = get_builder(f"{UI_RESOURCES_PATH}epg_dialog.glade", handlers)
+        builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}dialog.glade", handlers)
 
         self._dialog = builder.get_object("epg_dialog_window")
         self._dialog.set_transient_for(self._app.app_window)
@@ -348,7 +425,7 @@ class EpgDialog:
         refs = None
         if self._enable_dat_filter:
             try:
-                epg_reader = EPG.Reader(f"{self._epg_dat_path_entry.get_text()}epg.dat")
+                epg_reader = EPG.DatReader(f"{self._epg_dat_path_entry.get_text()}epg.dat")
                 epg_reader.read()
                 refs = epg_reader.get_refs()
             except (OSError, ValueError) as e:
