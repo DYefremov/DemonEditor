@@ -310,11 +310,14 @@ class XmlTvReader(Reader):
             import gzip
 
             with gzip.open(self._path, "rb") as gzf:
-                log("Processing XMLTV data...")
-                list(map(self.process_node, ET.iterparse(gzf)))
-                log("XMLTV data parsing is complete.")
+                self.process_data(gzf)
         except OSError as e:
             log(f"{self.__class__.__name__} [parse] error: {e}")
+
+    def process_data(self, data):
+        log("Processing XMLTV data...")
+        list(map(self.process_node, ET.iterparse(data)))
+        log("XMLTV data parsing is complete.")
 
     def process_node(self, node):
         event, element = node

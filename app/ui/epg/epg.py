@@ -129,7 +129,7 @@ class EpgSettingsPopover(Gtk.Popover):
         self._app = app
         self._app.connect("profile-changed", self.on_profile_changed)
 
-        handlers = {"on_save": self.on_save,
+        handlers = {"on_apply": self.on_apply,
                     "on_close": lambda b: self.popdown()}
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}settings.glade", handlers)
         self.add(builder.get_object("main_box"))
@@ -157,7 +157,7 @@ class EpgSettingsPopover(Gtk.Popover):
         self._url_entry.set_text(settings.epg_xml_source)
         self._dat_path_box.set_active_id(settings.epg_dat_path)
 
-    def on_save(self, button):
+    def on_apply(self, button):
         settings = self._app.app_settings
         if self._http_src_button.get_active():
             settings.epg_source = EpgSource.HTTP
@@ -170,6 +170,8 @@ class EpgSettingsPopover(Gtk.Popover):
         settings.epg_xml_source = self._url_entry.get_text()
         settings.epg_dat_path = self._dat_path_box.get_active_id()
         self.popdown()
+
+        self._app.change_action_state("display_epg", GLib.Variant.new_boolean(True))
 
     def on_profile_changed(self, app, p):
         self.init()

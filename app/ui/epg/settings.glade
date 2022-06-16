@@ -108,7 +108,7 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkRadioButton" id="dat_src_button">
                 <property name="label" translatable="yes">*.dat file</property>
-                <property name="visible">True</property>
+                <property name="visible">False</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -213,7 +213,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkLabel" id="download_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Download:</property>
+                    <property name="label" translatable="yes">Update:</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -255,7 +255,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkBox" id="dat_source_box">
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
@@ -318,12 +318,12 @@ Author: Dmitriy Yefremov
         <property name="homogeneous">True</property>
         <property name="layout_style">expand</property>
         <child>
-          <object class="GtkButton" id="save_button">
-            <property name="label" translatable="yes">Save</property>
+          <object class="GtkButton" id="apply_button">
+            <property name="label" translatable="yes">Apply</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="clicked" handler="on_save" swapped="no"/>
+            <signal name="clicked" handler="on_apply" swapped="no"/>
           </object>
           <packing>
             <property name="expand">True</property>
