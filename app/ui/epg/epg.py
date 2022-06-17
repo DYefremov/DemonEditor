@@ -69,20 +69,24 @@ class EpgCache(dict):
 
         self.init()
 
-    @run_task
+    @run_idle
     def init(self):
         if self._src is EpgSource.XML:
             url = self._settings.epg_xml_source
             gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
             self._reader = XmlTvReader(gz_file, url)
 
+            def process_data():
+                gen = self._reader.parse()
+                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
             if os.path.isfile(gz_file):
                 # Difference calculation between the current time and file modification.
                 dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
                 # We will update daily. -> Temporarily!!!
-                self._reader.download(self._reader.parse) if dif.days > 0 else self._reader.parse()
+                self._reader.download(process_data) if dif.days > 0 else process_data()
             else:
-                self._reader.download(self._reader.parse)
+                self._reader.download(process_data)
         elif self._src is EpgSource.DAT:
             self._reader = EPG.DatReader(f"{self._settings.profile_data_path}epg{os.sep}epg.dat")
             self._reader.download()

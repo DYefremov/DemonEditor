@@ -237,7 +237,7 @@ class XmlTvReader(Reader):
 
     @run_task
     def download(self, clb=None):
-        """ Downloads and processes an XMLTV file. """
+        """ Downloads an XMLTV file. """
         res = urlparse(self._url)
         if not all((res.scheme, res.netloc)):
             log(f"{self.__class__.__name__} [download] error: Invalid URL {self._url}")
@@ -310,14 +310,12 @@ class XmlTvReader(Reader):
             import gzip
 
             with gzip.open(self._path, "rb") as gzf:
-                self.process_data(gzf)
+                log("Processing XMLTV data...")
+                for n in ET.iterparse(gzf):
+                    yield from self.process_node(n)
+                log("XMLTV data parsing is complete.")
         except OSError as e:
             log(f"{self.__class__.__name__} [parse] error: {e}")
-
-    def process_data(self, data):
-        log("Processing XMLTV data...")
-        list(map(self.process_node, ET.iterparse(data)))
-        log("XMLTV data parsing is complete.")
 
     def process_node(self, node):
         event, element = node
@@ -351,6 +349,8 @@ class XmlTvReader(Reader):
 
                 if all((start, stop, title)):
                     events.append(self.Event(start, stop, title, desc))
+
+        yield node
 
     def to_epg_dat(self):
         """ Converts and saves imported data to 'epg.dat' file. """
