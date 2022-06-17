@@ -43,6 +43,7 @@ import requests
 
 from app.commons import log, run_task
 from app.eparser.ecommons import BqServiceType, BouquetService
+from app.settings import IS_WIN
 
 ENCODING = "utf-8"
 DETECT_ENCODING = False
@@ -252,7 +253,7 @@ class XmlTvReader(Reader):
 
                 data_len = request.headers.get("content-length")
 
-                with NamedTemporaryFile(suffix=suf) as tf:
+                with NamedTemporaryFile(suffix=suf, delete=not IS_WIN) as tf:
                     downloaded = 0
                     data_len = int(data_len)
                     log("Downloading XMLTV file...")
@@ -280,6 +281,10 @@ class XmlTvReader(Reader):
                                 shutil.copyfileobj(lzf, self._path)
                         except (lzma.LZMAError, OSError) as e:
                             log(f"{self.__class__.__name__} [download *.xz] error: {e}")
+
+                    if IS_WIN and os.path.isfile(tf.name):
+                        tf.close()
+                        os.remove(tf.name)
             else:
                 log(f"{self.__class__.__name__} [download] error: {request.reason}")
 
