@@ -64,7 +64,8 @@ from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import *
 from .picons import PiconManager
-from .satellites import SatellitesTool, ServicesUpdateDialog
+from .xml.dialogs import ServicesUpdateDialog
+from .xml.edit import SatellitesTool
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
