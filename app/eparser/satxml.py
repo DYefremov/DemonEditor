@@ -26,51 +26,63 @@
 #
 
 
-""" Module for parsing satellites.xml file.
+""" Module for parsing *.xml files.
 
-    For more info see __COMMENT
+    For more info see comments.
 """
 from xml.dom.minidom import parse, Document
 
 from app.commons import log
-from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value
+from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value, Terrestrial, \
+    Cable
 
-__COMMENT = ("   File was created in DemonEditor\n\n"
-             "usable flags are\n"
-             "	1: Network Scan\n"
-             "	2: use BAT\n"
-             "	4: use ONIT\n"
-             "	8: skip NITs of known networks\n"
-             "	and combinations of this.\n\n"
+_SAT_COMMENT = ("   File was created in DemonEditor\n\n"
+                "usable flags are\n"
+                "	1: Network Scan\n"
+                "	2: use BAT\n"
+                "	4: use ONIT\n"
+                "	8: skip NITs of known networks\n"
+                "	and combinations of this.\n\n"
 
-             "transponder parameters:\n"
-             "polarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular\n"
-             "fec_inner: 0 - Auto, 1 - 1/2, 2 - 2/3, 3 - 3/4, 4 - 5/6, 5 - 7/8, 6 -  8/9, 7 - 3/5,\n"
-             "8 - 4/5, 9 - 9/10, 15 - None\n"
-             "modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 4 - 16APSK, 5 - 32APSK\n"
-             "rolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto\n"
-             "pilot: 0 - Off, 1 - On, 2 - Auto\n"
-             "inversion: 0 = Off, 1 = On, 2 = Auto (default)\n"
-             "system: 0 = DVB-S, 1 = DVB-S2\n"
-             "is_id: 0 - 255\n"
-             "pls_mode: 0 - Root, 1 - Gold, 2 - Combo\n"
-             "pls_code: 0 - 262142\n\n")
+                "transponder parameters:\n"
+                "polarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular\n"
+                "fec_inner: 0 - Auto, 1 - 1/2, 2 - 2/3, 3 - 3/4, 4 - 5/6, 5 - 7/8, 6 -  8/9, 7 - 3/5,\n"
+                "8 - 4/5, 9 - 9/10, 15 - None\n"
+                "modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 4 - 16APSK, 5 - 32APSK\n"
+                "rolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto\n"
+                "pilot: 0 - Off, 1 - On, 2 - Auto\n"
+                "inversion: 0 = Off, 1 = On, 2 = Auto (default)\n"
+                "system: 0 = DVB-S, 1 = DVB-S2\n"
+                "is_id: 0 - 255\n"
+                "pls_mode: 0 - Root, 1 - Gold, 2 - Combo\n"
+                "pls_code: 0 - 262142\n\n")
 
 
 def get_satellites(path):
-    return parse_satellites(path)
+    """ Returns data [Satellite] list from *.xml. """
+    return [parse_sat(elem) for elem in parse(path).getElementsByTagName("sat") if elem.hasAttributes()]
+
+
+def get_terrestrial(path):
+    """ Returns data [Terrestrial] list from *.xml. """
+    return [parse_terrestrial(elem) for elem in parse(path).getElementsByTagName("terrestrial") if elem.hasAttributes()]
+
+
+def get_cable(path):
+    """ Returns data [Cable] list from *.xml. """
+    return [parse_cable(elem) for elem in parse(path).getElementsByTagName("cable") if elem.hasAttributes()]
 
 
 def write_satellites(satellites, data_path):
     """ Creation satellites.xml file """
     doc = Document()
-    comment = doc.createComment(__COMMENT)
+    comment = doc.createComment(_SAT_COMMENT)
     doc.appendChild(comment)
     root = doc.createElement("satellites")
     doc.appendChild(root)
 
     for sat in satellites:
-        #    Create Element
+        # Create Element
         sat_child = doc.createElement("sat")
         sat_child.setAttribute("name", sat.name)
         sat_child.setAttribute("flags", sat.flags)
@@ -136,16 +148,14 @@ def parse_sat(elem):
                      parse_transponders(elem, sat_name))
 
 
-def parse_satellites(path):
-    """ Parsing satellites from xml. """
-    dom = parse(path)
-    satellites = []
+def parse_terrestrial(elem):
+    atr = elem.attributes
+    return Terrestrial(atr["name"].value, None, None, [])
 
-    for elem in dom.getElementsByTagName("sat"):
-        if elem.hasAttributes():
-            satellites.append(parse_sat(elem))
 
-    return satellites
+def parse_cable(elem):
+    atr = elem.attributes
+    return Cable(atr["name"].value, None, None, None, [])
 
 
 if __name__ == "__main__":

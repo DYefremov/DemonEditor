@@ -37,6 +37,12 @@ Author: Dmitriy Yefremov
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
+      <!-- column-name flags -->
+      <column type="gchararray"/>
+      <!-- column-name satfeed -->
+      <column type="gchararray"/>
+      <!-- column-name countrycode -->
+      <column type="gchararray"/>
       <!-- column-name transponders -->
       <column type="PyObject"/>
     </columns>
@@ -205,7 +211,9 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
       <!-- column-name constellation -->
       <column type="gchararray"/>
-      <!-- column-name rate -->
+      <!-- column-name rate_hp -->
+      <column type="gchararray"/>
+      <!-- column-name rate_lp -->
       <column type="gchararray"/>
       <!-- column-name guard -->
       <column type="gchararray"/>
@@ -215,11 +223,19 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
       <!-- column-name inversion -->
       <column type="gchararray"/>
+      <!-- column-name plp_id -->
+      <column type="gchararray"/>
+      <!-- column-name comment -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkListStore" id="terrestrial_model">
     <columns>
       <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name flags -->
+      <column type="gchararray"/>
+      <!-- column-name countrycode -->
       <column type="gchararray"/>
       <!-- column-name transponders -->
       <column type="PyObject"/>
@@ -343,6 +359,7 @@ Author: Dmitriy Yefremov
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
                             <signal name="cursor-changed" handler="on_satellite_selection" swapped="no"/>
                             <signal name="key-release-event" handler="on_key_release" swapped="no"/>
+                            <signal name="realize" handler="on_satellite_view_realize" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="satellite_view_selection">
                                 <property name="mode">multiple</property>
@@ -455,6 +472,7 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
+                            <signal name="realize" handler="on_terrestrial_view_realize" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection">
                                 <property name="mode">multiple</property>
@@ -553,6 +571,7 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
+                            <signal name="realize" handler="on_cable_view_realize" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection">
                                 <property name="mode">multiple</property>
@@ -569,21 +588,6 @@ Author: Dmitriy Yefremov
                                   </object>
                                   <attributes>
                                     <attribute name="text">0</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="sat_pos_column2">
-                                <property name="fixed_width">85</property>
-                                <property name="title" translatable="yes">Pos</property>
-                                <property name="alignment">0.49000000953674316</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="sat_pos_renderer2">
-                                    <property name="xalign">0.49000000953674316</property>
-                                  </object>
-                                  <attributes>
-                                    <attribute name="text">2</attribute>
                                   </attributes>
                                 </child>
                               </object>

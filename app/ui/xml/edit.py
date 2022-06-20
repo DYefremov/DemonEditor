@@ -34,6 +34,7 @@ from gi.repository import GLib
 from app.commons import run_idle
 from app.connections import DownloadType
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
+from app.eparser.satxml import get_terrestrial, get_cable
 from .dialogs import SatelliteDialog, TransponderDialog, SatellitesUpdateDialog
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import move_items, on_popup_menu
@@ -65,7 +66,10 @@ class SatellitesTool(Gtk.Box):
         self._current_sat_path = None
         self._dvb_type = self.DVB.SAT
 
-        handlers = {"on_remove": self.on_remove,
+        handlers = {"on_satellite_view_realize": self.on_satellite_view_realize,
+                    "on_terrestrial_view_realize": self.on_terrestrial_view_realize,
+                    "on_cable_view_realize": self.on_cable_view_realize,
+                    "on_remove": self.on_remove,
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
@@ -90,7 +94,16 @@ class SatellitesTool(Gtk.Box):
         self._app.connect("profile-changed", lambda a, m: self.load_satellites_list())
         self.show()
 
+    def on_satellite_view_realize(self, view):
         self.load_satellites_list()
+
+    def on_terrestrial_view_realize(self, view):
+        gen = self.on_terrestrial_list_load()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def on_cable_view_realize(self, view):
+        gen = self.on_cable_list_load()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def load_satellites_list(self, path=None):
         gen = self.on_satellites_list_load(path)
@@ -145,12 +158,23 @@ class SatellitesTool(Gtk.Box):
 
     def on_satellites_list_load(self, path=None):
         """ Load satellites data into model """
-        model = self._satellite_view.get_model()
+        path = path or self._settings.profile_data_path + "satellites.xml"
+        yield from self.load_data(self._satellite_view, get_satellites, path)
+
+    def on_terrestrial_list_load(self, path=None):
+        path = path or self._settings.profile_data_path + "terrestrial.xml"
+        yield from self.load_data(self._terrestrial_view, get_terrestrial, path)
+
+    def on_cable_list_load(self, path=None):
+        path = path or self._settings.profile_data_path + "cables.xml"
+        yield from self.load_data(self._cable_view, get_cable, path)
+
+    def load_data(self, view, func, path):
+        model = view.get_model()
         model.clear()
 
         try:
-            path = path or self._settings.profile_data_path + "satellites.xml"
-            satellites = get_satellites(path)
+            data = func(path)
             yield True
         except FileNotFoundError as e:
             msg = get_message("Please, download files from receiver or setup your path for read data!")
@@ -159,8 +183,8 @@ class SatellitesTool(Gtk.Box):
             msg = f"The file [{path}] is not formatted correctly or contains invalid characters! Cause: {e}"
             self._app.show_error_message(msg)
         else:
-            for sat in satellites:
-                yield model.append(sat)
+            for d in data:
+                yield model.append(d)
 
     def on_add(self, item):
         """ Common adding. """

@@ -57,12 +57,18 @@ Bouquet.__new__.__defaults__ = (None, BqServiceType.DEFAULT, [], None, None, Non
 Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
 BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 
-# ***************** Satellites *******************#
+# *************** *.xml [Satellites, Terrestrial, Cable] ***************** #
 
 Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
+Terrestrial = namedtuple("Terrestrial", ["name", "flags", "countrycode", "transponders"])
+Cable = namedtuple("Cable", ["name", "flags", "satfeed", "countrycode", "transponders"])
 
 Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner", "system",
                                          "modulation", "pls_mode", "pls_code", "is_id", "t2mi_plp_id"])
+TerTransponder = namedtuple("TerTransponder", ["centre_frequency", "system", "bandwidth", "constellation",
+                                               "code_rate_hp", "code_rate_lp", "guard_interval", "transmission_mode",
+                                               "hierarchy_information", "inversion", "plp_id", "comment"])
+CableTransponder = namedtuple("CableTransponder", ["frequency", "symbol_rate", "fec_inner", "modulation"])
 
 
 class TrType(Enum):
