@@ -26,6 +26,7 @@
 #
 
 
+from enum import Enum
 from pyexpat import ExpatError
 
 from gi.repository import GLib
@@ -40,8 +41,16 @@ from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD
 
 
 class SatellitesTool(Gtk.Box):
-    """ Class to processing satellite data. """
+    """ Class to processing *.xml data. """
     _aggr = [None for x in range(9)]  # aggregate
+
+    class DVB(str, Enum):
+        SAT = "satellites"
+        TERRESTRIAL = "terrestrial"
+        CABLE = "cable"
+
+        def __str__(self):
+            return self.value
 
     def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,53 +63,45 @@ class SatellitesTool(Gtk.Box):
 
         self._settings = settings
         self._current_sat_path = None
+        self._dvb_type = self.DVB.SAT
 
         handlers = {"on_remove": self.on_remove,
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
                     "on_button_press": self.on_button_press,
-                    "on_satellite_add": self.on_satellite_add,
+                    "on_add": self.on_add,
                     "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
+                    "on_visible_page": self.on_visible_page,
                     "on_satellite_selection": self.on_satellite_selection}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}xml/editor.glade", handlers)
 
         self._satellite_view = builder.get_object("satellite_view")
-        self._transponder_view = builder.get_object("transponder_view")
+        self._terrestrial_view = builder.get_object("terrestrial_view")
+        self._cable_view = builder.get_object("cable_view")
+        self._sat_tr_view = builder.get_object("sat_tr_view")
         builder.get_object("sat_pos_column").set_cell_data_func(builder.get_object("sat_pos_renderer"),
                                                                 self.sat_pos_func)
-
-        self._stores = {3: builder.get_object("pol_store"),
-                        4: builder.get_object("fec_store"),
-                        5: builder.get_object("system_store"),
-                        6: builder.get_object("mod_store")}
-
-        self.pack_start(builder.get_object("satellite_editor_box"), True, True, 0)
+        self._transponders_stack = builder.get_object("transponders_stack")
+        self.pack_start(builder.get_object("main_paned"), True, True, 0)
         self._app.connect("profile-changed", lambda a, m: self.load_satellites_list())
         self.show()
+
         self.load_satellites_list()
 
     def load_satellites_list(self, path=None):
         gen = self.on_satellites_list_load(path)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    @run_idle
-    def on_open(self):
-        response = get_chooser_dialog(self._app.app_window, self._settings, "satellites.xml", ("*.xml",))
-        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
-            return
-
-        if not str(response).endswith("satellites.xml"):
-            self._app.show_error_message("No satellites.xml file is selected!")
-            return
-
-        self.load_satellites_list(response)
+    def on_visible_page(self, stack, param):
+        self._dvb_type = self.DVB(stack.get_visible_child_name())
+        self._transponders_stack.set_visible_child_name(self._dvb_type)
 
     def on_satellite_selection(self, view):
-        model = self._transponder_view.get_model()
+        model = self._sat_tr_view.get_model()
         model.clear()
 
         self._current_sat_path, column = view.get_cursor()
@@ -115,7 +116,7 @@ class SatellitesTool(Gtk.Box):
 
     def on_button_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.on_edit(self._satellite_view if self._satellite_view.is_focus() else self._transponder_view)
+            self.on_edit(self._satellite_view if self._satellite_view.is_focus() else self._sat_tr_view)
         else:
             on_popup_menu(menu, event)
 
@@ -161,15 +162,21 @@ class SatellitesTool(Gtk.Box):
             for sat in satellites:
                 yield model.append(sat)
 
-    def on_add(self, view):
-        """ Common adding """
-        self.on_edit(view, force=True)
+    def on_add(self, item):
+        """ Common adding. """
+        if self._dvb_type is self.DVB.SAT:
+            self.on_edit(self._satellite_view, force=True)
+        else:
+            self._app.show_error_message("Not implemented yet!")
 
     def on_satellite_add(self, item):
         self.on_satellite()
 
     def on_transponder_add(self, item):
-        self.on_transponder()
+        if self._dvb_type is self.DVB.SAT:
+            self.on_transponder()
+        else:
+            self._app.show_error_message("Not implemented yet!")
 
     def on_edit(self, view, force=False):
         """ Common edit """
@@ -181,10 +188,13 @@ class SatellitesTool(Gtk.Box):
         row = model[paths][:]
         itr = model.get_iter(paths)
 
-        if view is self._satellite_view:
-            self.on_satellite(None if force else Satellite(*row), itr)
-        elif view is self._transponder_view:
-            self.on_transponder(None if force else Transponder(*row), itr)
+        if self._dvb_type is self.DVB.SAT:
+            if view is self._satellite_view:
+                self.on_satellite(None if force else Satellite(*row), itr)
+            elif view is self._sat_tr_view:
+                self.on_transponder(None if force else Transponder(*row), itr)
+        else:
+            self._app.show_error_message("Not implemented yet!")
 
     def on_satellite(self, satellite=None, edited_itr=None):
         """ Create or edit satellite"""
@@ -220,7 +230,7 @@ class SatellitesTool(Gtk.Box):
         if tr:
             sat_model = self._satellite_view.get_model()
             transponders = sat_model[paths][-1]
-            tr_model, tr_paths = self._transponder_view.get_selection().get_selected_rows()
+            tr_model, tr_paths = self._sat_tr_view.get_selection().get_selected_rows()
 
             if transponder and edited_itr:
                 tr_model.set(edited_itr, {i: v for i, v in enumerate(tr)})
@@ -247,15 +257,18 @@ class SatellitesTool(Gtk.Box):
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
 
-        if view is self._satellite_view:
-            list(map(model.remove, [model.get_iter(path) for path in paths]))
-        elif view is self._transponder_view:
-            if self._current_sat_path:
-                trs = self._satellite_view.get_model()[self._current_sat_path][-1]
-                list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
+        if self._dvb_type is self.DVB.SAT:
+            if view is self._satellite_view:
                 list(map(model.remove, [model.get_iter(path) for path in paths]))
-            else:
-                self._app.show_error_message("No satellite is selected!")
+            elif view is self._sat_tr_view:
+                if self._current_sat_path:
+                    trs = self._satellite_view.get_model()[self._current_sat_path][-1]
+                    list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
+                    list(map(model.remove, [model.get_iter(path) for path in paths]))
+                else:
+                    self._app.show_error_message("No satellite is selected!")
+        else:
+            self._app.show_error_message("Not implemented yet!")
 
     def sat_pos_func(self, column, renderer, model, itr, data):
         """ Converts and sets the satellite position value to a readable format. """
@@ -263,10 +276,25 @@ class SatellitesTool(Gtk.Box):
         renderer.set_property("text", f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}")
 
     @run_idle
+    def on_open(self):
+        response = get_chooser_dialog(self._app.app_window, self._settings, "satellites.xml", ("*.xml",))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        if not str(response).endswith("satellites.xml"):
+            self._app.show_error_message("No satellites.xml file is selected!")
+            return
+
+        self.load_satellites_list(response)
+
+    @run_idle
     def on_save(self, app, page):
         if page is Page.SATELLITE and show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.OK:
-            write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
-                             self._settings.profile_data_path + "satellites.xml")
+            if self._dvb_type is self.DVB.SAT:
+                write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
+                                 self._settings.profile_data_path + "satellites.xml")
+            else:
+                self._app.show_error_message("Not implemented yet!")
 
     def on_save_as(self, app, page):
         show_dialog(DialogType.ERROR, transient=self._app.app_window, text="Not implemented yet!")
