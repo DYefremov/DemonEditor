@@ -64,6 +64,8 @@ class SatellitesTool(Gtk.Box):
 
         self._settings = settings
         self._current_sat_path = None
+        self._current_ter_path = None
+        self._current_cable_path = None
         self._dvb_type = self.DVB.SAT
 
         handlers = {"on_satellite_view_realize": self.on_satellite_view_realize,
@@ -79,7 +81,9 @@ class SatellitesTool(Gtk.Box):
                     "on_edit": self.on_edit,
                     "on_key_release": self.on_key_release,
                     "on_visible_page": self.on_visible_page,
-                    "on_satellite_selection": self.on_satellite_selection}
+                    "on_satellite_selection": self.on_satellite_selection,
+                    "on_terrestrial_selection": self.on_terrestrial_selection,
+                    "on_cable_selection": self.on_cable_selection}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}xml/editor.glade", handlers)
 
@@ -87,11 +91,17 @@ class SatellitesTool(Gtk.Box):
         self._terrestrial_view = builder.get_object("terrestrial_view")
         self._cable_view = builder.get_object("cable_view")
         self._sat_tr_view = builder.get_object("sat_tr_view")
-        builder.get_object("sat_pos_column").set_cell_data_func(builder.get_object("sat_pos_renderer"),
-                                                                self.sat_pos_func)
+        self._ter_tr_view = builder.get_object("ter_tr_view")
+        self._cable_tr_view = builder.get_object("cable_tr_view")
         self._transponders_stack = builder.get_object("transponders_stack")
+        self._add_header_button = builder.get_object("add_header_button")
+        self._update_header_button = builder.get_object("update_header_button")
         self.pack_start(builder.get_object("main_paned"), True, True, 0)
         self._app.connect("profile-changed", lambda a, m: self.load_satellites_list())
+        # Custom renderer
+        sat_pos_renderer = builder.get_object("sat_pos_renderer")
+        builder.get_object("sat_pos_column").set_cell_data_func(sat_pos_renderer, self.sat_pos_func)
+
         self.show()
 
     def on_satellite_view_realize(self, view):
@@ -112,6 +122,13 @@ class SatellitesTool(Gtk.Box):
     def on_visible_page(self, stack, param):
         self._dvb_type = self.DVB(stack.get_visible_child_name())
         self._transponders_stack.set_visible_child_name(self._dvb_type)
+        self._update_header_button.set_sensitive(self._dvb_type is self.DVB.SAT)
+        self._add_header_button.set_sensitive(self._dvb_type is self.DVB.SAT)
+
+        if self._dvb_type is self.DVB.SAT:
+            self._app.on_info_bar_close()
+        else:
+            self._app.show_info_message("Read mode only!", Gtk.MessageType.WARNING)
 
     def on_satellite_selection(self, view):
         model = self._sat_tr_view.get_model()
@@ -121,6 +138,22 @@ class SatellitesTool(Gtk.Box):
         if self._current_sat_path:
             list(map(model.append, view.get_model()[self._current_sat_path][-1]))
 
+    def on_terrestrial_selection(self, view):
+        model = self._ter_tr_view.get_model()
+        model.clear()
+
+        self._current_ter_path, column = view.get_cursor()
+        if self._current_ter_path:
+            list(map(model.append, view.get_model()[self._current_ter_path][-1]))
+
+    def on_cable_selection(self, view):
+        model = self._cable_tr_view.get_model()
+        model.clear()
+
+        self._current_cable_path, column = view.get_cursor()
+        if self._current_cable_path:
+            list(map(model.append, view.get_model()[self._current_cable_path][-1]))
+
     def on_up(self, item):
         move_items(KeyboardKey.UP, self._satellite_view)
 
@@ -128,10 +161,11 @@ class SatellitesTool(Gtk.Box):
         move_items(KeyboardKey.DOWN, self._satellite_view)
 
     def on_button_press(self, menu, event):
-        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.on_edit(self._satellite_view if self._satellite_view.is_focus() else self._sat_tr_view)
-        else:
-            on_popup_menu(menu, event)
+        if self._dvb_type is self.DVB.SAT:
+            if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+                self.on_edit(self._satellite_view if self._satellite_view.is_focus() else self._sat_tr_view)
+            else:
+                on_popup_menu(menu, event)
 
     def on_key_release(self, view, event):
         """  Handling  keystrokes  """

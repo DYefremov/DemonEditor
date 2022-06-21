@@ -67,7 +67,7 @@ Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarizati
                                          "modulation", "pls_mode", "pls_code", "is_id", "t2mi_plp_id"])
 TerTransponder = namedtuple("TerTransponder", ["centre_frequency", "system", "bandwidth", "constellation",
                                                "code_rate_hp", "code_rate_lp", "guard_interval", "transmission_mode",
-                                               "hierarchy_information", "inversion", "plp_id", "comment"])
+                                               "hierarchy_information", "inversion", "plp_id"])
 CableTransponder = namedtuple("CableTransponder", ["frequency", "symbol_rate", "fec_inner", "modulation"])
 
 
@@ -201,6 +201,8 @@ SERVICE_TYPE = {"-2": "Data", "1": "TV", "2": "Radio", "3": "Data", "10": "Radio
 # Terrestrial
 BANDWIDTH = {"0": "8MHz", "1": "7MHz", "2": "6MHz", "3": "Auto", "4": "5MHz", "5": "1/712MHz", "6": "10MHz"}
 
+CONSTELLATION = {"0": "QPSK", "1": "16-QAM", "2": "64-QAM", "3": "Auto"}
+
 T_MODULATION = {"0": "QPSK", "1": "QAM16", "2": "QAM64", "3": "Auto", "4": "QAM256"}
 
 TRANSMISSION_MODE = {"0": "2k", "1": "8k", "2": "Auto", "3": "4k", "4": "1k", "5": "16k", "6": "32k"}
@@ -215,7 +217,7 @@ T_FEC = {"0": "1/2", "1": "2/3", "2": "3/4", "3": "5/6", "4": "7/8", "5": "Auto"
 T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "-1": "DVB-T/T2"}
 
 # Cable
-C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
+C_MODULATION = {"0": "QPSK", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256", "6": "Auto"}
 
 # ATSC
 A_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256", "6": "8VSB",

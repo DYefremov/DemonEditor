@@ -30,11 +30,12 @@
 
     For more info see comments.
 """
-from xml.dom.minidom import parse, Document
+from xml.dom.minidom import Document
+import xml.etree.ElementTree as ETree
 
-from app.commons import log
-from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value, Terrestrial, \
-    Cable
+from .ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value,
+                       Terrestrial, Cable, TerTransponder, CableTransponder, T_SYSTEM, BANDWIDTH, GUARD_INTERVAL,
+                       TRANSMISSION_MODE, T_FEC, HIERARCHY, C_MODULATION, FEC_DEFAULT, Inversion, CONSTELLATION)
 
 _SAT_COMMENT = ("   File was created in DemonEditor\n\n"
                 "usable flags are\n"
@@ -60,17 +61,65 @@ _SAT_COMMENT = ("   File was created in DemonEditor\n\n"
 
 def get_satellites(path):
     """ Returns data [Satellite] list from *.xml. """
-    return [parse_sat(elem) for elem in parse(path).getElementsByTagName("sat") if elem.hasAttributes()]
+    return [Satellite(e.get("name", None),
+                      e.get("flags", None),
+                      e.get("position", None) or "0",
+                      get_sat_transponders(e)) for e in ETree.parse(path).iter("sat")]
+
+
+def get_sat_transponders(elem):
+    """ Returns satellite transponders list. """
+    return [Transponder(e.get("frequency", "0"),
+                        e.get("symbol_rate", "0"),
+                        POLARIZATION[e.get("polarization", "0")],
+                        FEC[e.get("fec_inner", "0")],
+                        SYSTEM[e.get("system", "0")],
+                        MODULATION[e.get("modulation", "0")],
+                        e.get("pls_mode", None),
+                        e.get("pls_code", None),
+                        e.get("is_id", None),
+                        e.get("t2mi_plp_id", None)) for e in elem.iter("transponder")]
 
 
 def get_terrestrial(path):
     """ Returns data [Terrestrial] list from *.xml. """
-    return [parse_terrestrial(elem) for elem in parse(path).getElementsByTagName("terrestrial") if elem.hasAttributes()]
+    return [Terrestrial(e.get("name", None),
+                        e.get("flags", None),
+                        e.get("countrycode", None),
+                        [get_ter_transponder(e) for e in e.iter("transponder")]
+                        ) for e in ETree.parse(path).iter("terrestrial")]
+
+
+def get_ter_transponder(elem):
+    """ Returns terrestrial transponder. """
+    return TerTransponder(elem.get("centre_frequency", "0"),
+                          T_SYSTEM.get(elem.get("system", None), None),
+                          BANDWIDTH.get(elem.get("bandwidth", None), None),
+                          CONSTELLATION.get(elem.get("constellation", None), None),
+                          T_FEC.get(elem.get("code_rate_hp", None), None),
+                          T_FEC.get(elem.get("code_rate_lp", None), None),
+                          GUARD_INTERVAL.get(elem.get("guard_interval", None), None),
+                          TRANSMISSION_MODE.get(elem.get("transmission_mode", None), None),
+                          HIERARCHY.get(elem.get("hierarchy_information", None), None),
+                          Inversion(elem.get("inversion")).name if "inversion" in elem.keys() else None,
+                          elem.get("plp_id", None))
 
 
 def get_cable(path):
     """ Returns data [Cable] list from *.xml. """
-    return [parse_cable(elem) for elem in parse(path).getElementsByTagName("cable") if elem.hasAttributes()]
+    return [Cable(e.get("name", None),
+                  e.get("flags", None),
+                  e.get("satfeed", None),
+                  e.get("countrycode", None),
+                  get_cable_transponders(e)) for e in ETree.parse(path).iter("cable")]
+
+
+def get_cable_transponders(elem):
+    """ Returns cable transponders list. """
+    return [CableTransponder(e.get("frequency", "0"),
+                             e.get("symbol_rate", "0"),
+                             FEC_DEFAULT[e.get("fec_inner", "0")],
+                             C_MODULATION[e.get("modulation", "0")]) for e in elem.iter("transponder")]
 
 
 def write_satellites(satellites, data_path):
@@ -112,50 +161,6 @@ def write_satellites(satellites, data_path):
                  newl='\n',
                  encoding="iso-8859-1")
     doc.unlink()
-
-
-def parse_transponders(elem, sat_name):
-    """ Parsing satellite transponders """
-    transponders = []
-    for el in elem.getElementsByTagName("transponder"):
-        if el.hasAttributes():
-            atr = el.attributes
-            try:
-                tr = Transponder(atr["frequency"].value,
-                                 atr["symbol_rate"].value,
-                                 POLARIZATION[atr["polarization"].value],
-                                 FEC[atr["fec_inner"].value],
-                                 SYSTEM[atr["system"].value],
-                                 MODULATION[atr["modulation"].value],
-                                 atr["pls_mode"].value if "pls_mode" in atr else None,
-                                 atr["pls_code"].value if "pls_code" in atr else None,
-                                 atr["is_id"].value if "is_id" in atr else None,
-                                 atr["t2mi_plp_id"].value if "t2mi_plp_id" in atr else None)
-            except Exception as e:
-                message = f"Error: can't parse transponder for '{sat_name}' satellite! {repr(e)}"
-                log(message)
-            else:
-                transponders.append(tr)
-    return transponders
-
-
-def parse_sat(elem):
-    """ Parsing satellite. """
-    sat_name = elem.attributes["name"].value
-    return Satellite(sat_name,
-                     elem.attributes["flags"].value,
-                     elem.attributes["position"].value,
-                     parse_transponders(elem, sat_name))
-
-
-def parse_terrestrial(elem):
-    atr = elem.attributes
-    return Terrestrial(atr["name"].value, None, None, [])
-
-
-def parse_cable(elem):
-    atr = elem.attributes
-    return Cable(atr["name"].value, None, None, None, [])
 
 
 if __name__ == "__main__":

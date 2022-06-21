@@ -225,8 +225,6 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
       <!-- column-name plp_id -->
       <column type="gchararray"/>
-      <!-- column-name comment -->
-      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkListStore" id="terrestrial_model">
@@ -259,7 +257,6 @@ Author: Dmitriy Yefremov
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
             <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
@@ -272,7 +269,7 @@ Author: Dmitriy Yefremov
                 <property name="margin_bottom">5</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkButton" id="satellite_add_button">
+                  <object class="GtkButton" id="add_header_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -343,7 +340,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Satellites</property>
                     <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="satellite_view_scrolled">
                         <property name="visible">True</property>
@@ -457,7 +453,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Terrestrial</property>
                     <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="terrestrial_view_scrolled">
                         <property name="visible">True</property>
@@ -472,9 +467,10 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
+                            <signal name="cursor-changed" handler="on_terrestrial_selection" swapped="no"/>
                             <signal name="realize" handler="on_terrestrial_view_realize" swapped="no"/>
                             <child internal-child="selection">
-                              <object class="GtkTreeSelection">
+                              <object class="GtkTreeSelection" id="terrrestrial_view_selection">
                                 <property name="mode">multiple</property>
                               </object>
                             </child>
@@ -484,7 +480,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.49000000953674316</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="sat_name_renderer1">
+                                  <object class="GtkCellRendererText" id="ter_name_renderer">
                                     <property name="ellipsize">end</property>
                                   </object>
                                   <attributes>
@@ -556,7 +552,6 @@ Author: Dmitriy Yefremov
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Cable</property>
                     <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="cable_view_scrolled">
                         <property name="visible">True</property>
@@ -571,19 +566,20 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
+                            <signal name="cursor-changed" handler="on_cable_selection" swapped="no"/>
                             <signal name="realize" handler="on_cable_view_realize" swapped="no"/>
                             <child internal-child="selection">
-                              <object class="GtkTreeSelection">
+                              <object class="GtkTreeSelection" id="cable_view_selection">
                                 <property name="mode">multiple</property>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="sat_name_column2">
+                              <object class="GtkTreeViewColumn" id="cable_name_column">
                                 <property name="title" translatable="yes">Name</property>
                                 <property name="expand">True</property>
                                 <property name="alignment">0.49000000953674316</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="sat_name_renderer2">
+                                  <object class="GtkCellRendererText" id="cable_name_renderer">
                                     <property name="ellipsize">end</property>
                                   </object>
                                   <attributes>
@@ -684,7 +680,6 @@ Author: Dmitriy Yefremov
             <property name="margin_left">5</property>
             <property name="margin_right">5</property>
             <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
@@ -736,7 +731,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="sat_tr_view_scrolled">
                         <property name="visible">True</property>
@@ -974,7 +968,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="ter_tr_view_scrolled">
                         <property name="visible">True</property>
@@ -1063,18 +1056,30 @@ Author: Dmitriy Yefremov
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="ter_rate_column">
+                              <object class="GtkTreeViewColumn" id="ter_rate_hp_column">
                                 <property name="resizable">True</property>
                                 <property name="min_width">20</property>
-                                <property name="title" translatable="yes">Rate</property>
+                                <property name="title" translatable="yes">SR (HP)</property>
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_rate_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_rate_hp_cellrenderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
+                                    <attribute name="single-paragraph-mode">1</attribute>
                                     <attribute name="text">4</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="ter_rate_lp_column">
+                                <property name="title" translatable="yes">SR (LP)</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="ter_rate_lp_cellrenderer"/>
+                                  <attributes>
+                                    <attribute name="text">5</attribute>
                                   </attributes>
                                 </child>
                               </object>
@@ -1091,33 +1096,18 @@ Author: Dmitriy Yefremov
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
-                                    <attribute name="text">5</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="ter_tr_mode_column">
-                                <property name="visible">False</property>
-                                <property name="resizable">True</property>
-                                <property name="title" translatable="yes">Transmission</property>
-                                <property name="expand">True</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="ter_tr_mode_cellrenderer"/>
-                                  <attributes>
                                     <attribute name="text">6</attribute>
                                   </attributes>
                                 </child>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkTreeViewColumn" id="ter_hierarchy_column">
-                                <property name="visible">False</property>
+                              <object class="GtkTreeViewColumn" id="ter_tr_mode_column">
                                 <property name="resizable">True</property>
-                                <property name="title" translatable="yes">Hierarchy</property>
+                                <property name="title" translatable="yes">Transmission</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_hierarchy_cellrenderer"/>
+                                  <object class="GtkCellRendererText" id="ter_tr_mode_cellrenderer"/>
                                   <attributes>
                                     <attribute name="text">7</attribute>
                                   </attributes>
@@ -1125,15 +1115,27 @@ Author: Dmitriy Yefremov
                               </object>
                             </child>
                             <child>
+                              <object class="GtkTreeViewColumn" id="ter_hierarchy_column">
+                                <property name="resizable">True</property>
+                                <property name="title" translatable="yes">Hierarchy</property>
+                                <property name="expand">True</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="ter_hierarchy_cellrenderer"/>
+                                  <attributes>
+                                    <attribute name="text">8</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
                               <object class="GtkTreeViewColumn" id="ter_inversion_column">
-                                <property name="visible">False</property>
                                 <property name="resizable">True</property>
                                 <property name="title" translatable="yes">Inversion</property>
                                 <property name="expand">True</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="ter_inversion_cellrenderer"/>
                                   <attributes>
-                                    <attribute name="text">8</attribute>
+                                    <attribute name="text">9</attribute>
                                   </attributes>
                                 </child>
                               </object>
@@ -1200,7 +1202,6 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="cable_tr_view_scrolled">
                         <property name="visible">True</property>
@@ -1228,7 +1229,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="frequency_cellrenderertext2">
+                                  <object class="GtkCellRendererText" id="cable_frequency_cellrenderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1245,7 +1246,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="sat_rate_cellrenderertext2">
+                                  <object class="GtkCellRendererText" id="cable_rate_cellrenderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1262,11 +1263,11 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="set_fec_cellrenderertext2">
+                                  <object class="GtkCellRendererText" id="cable_fec_cellrenderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
-                                    <attribute name="text">3</attribute>
+                                    <attribute name="text">2</attribute>
                                   </attributes>
                                 </child>
                               </object>
@@ -1279,11 +1280,11 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="mod_cellrenderertext2">
+                                  <object class="GtkCellRendererText" id="cable_mod_cellrenderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
-                                    <attribute name="text">5</attribute>
+                                    <attribute name="text">3</attribute>
                                   </attributes>
                                 </child>
                               </object>
