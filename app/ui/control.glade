@@ -34,6 +34,11 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor. -->
   <!-- interface-copyright 2018-2022 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkImage" id="network_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">network-transmit-receive-symbolic</property>
+  </object>
   <object class="GtkListStore" id="network_model">
     <columns>
       <!-- column-name name -->
@@ -70,13 +75,13 @@ Author: Dmitriy Yefremov
         <property name="spacing">15</property>
         <child>
           <object class="GtkToggleButton" id="control_network_button">
-            <property name="label">gtk-network</property>
+            <property name="label">Network</property>
             <property name="width_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="valign">center</property>
-            <property name="use_stock">True</property>
+            <property name="image">network_image</property>
             <property name="always_show_image">True</property>
             <signal name="toggled" handler="on_network_toggled" swapped="no"/>
           </object>

@@ -416,15 +416,14 @@ Author: Dmitriy Yefremov
                 <property name="margin_right">5</property>
                 <property name="margin_top">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">5</property>
                 <child>
                   <object class="GtkBox" id="ftp_button_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">10</property>
                     <property name="margin_right">10</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">10</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkButton" id="connect_button">
@@ -803,7 +802,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkBox" id="ftp_status_bar_box">
-                    <property name="height_request">24</property>
+                    <property name="height_request">26</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">10</property>
@@ -876,15 +875,14 @@ Author: Dmitriy Yefremov
                 <property name="margin_right">5</property>
                 <property name="margin_top">5</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">5</property>
                 <child>
                   <object class="GtkBox" id="pc_header_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">10</property>
                     <property name="margin_right">10</property>
-                    <property name="margin_top">5</property>
-                    <property name="margin_bottom">5</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">10</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkButton" id="pc_add_folder_button">
@@ -1057,7 +1055,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkBox" id="file_status_bar_box">
-                    <property name="height_request">24</property>
+                    <property name="height_request">26</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">10</property>

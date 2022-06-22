@@ -402,7 +402,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkBox" id="sat_status_box">
-                        <property name="height_request">24</property>
+                        <property name="height_request">26</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
@@ -500,7 +500,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkBox" id="ter_status_box">
-                        <property name="height_request">24</property>
+                        <property name="height_request">26</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
@@ -599,7 +599,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkBox" id="cable_status_box">
-                        <property name="height_request">24</property>
+                        <property name="height_request">26</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
@@ -918,7 +918,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkBox" id="sat_tr_status_box">
-                        <property name="height_request">24</property>
+                        <property name="height_request">26</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
@@ -1151,7 +1151,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkBox" id="ter_tr_status_box">
-                        <property name="height_request">24</property>
+                        <property name="height_request">26</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>
@@ -1300,7 +1300,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkBox" id="cable_tr_status_box">
-                        <property name="height_request">24</property>
+                        <property name="height_request">26</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">5</property>

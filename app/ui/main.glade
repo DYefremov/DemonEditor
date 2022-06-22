@@ -2956,7 +2956,7 @@ Author: Dmitriy Yefremov
                                             <property name="can_focus">False</property>
                                             <property name="margin_left">5</property>
                                             <property name="margin_right">5</property>
-                                            <property name="spacing">2</property>
+                                            <property name="spacing">5</property>
                                             <child>
                                               <object class="GtkImage" id="iptv_services_count_image">
                                                 <property name="visible">True</property>
@@ -3396,7 +3396,6 @@ Author: Dmitriy Yefremov
                                   <object class="GtkBox" id="fav_box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="margin_bottom">2</property>
                                     <property name="orientation">vertical</property>
                                     <property name="spacing">2</property>
                                     <child>
@@ -3781,12 +3780,12 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkBox" id="fav_bar_box">
-                                    <property name="height_request">24</property>
+                                    <property name="height_request">26</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
-                                    <property name="spacing">2</property>
+                                    <property name="spacing">5</property>
                                     <child>
                                       <object class="GtkImage" id="image2">
                                         <property name="visible">True</property>
@@ -4002,7 +4001,6 @@ Author: Dmitriy Yefremov
                                   <object class="GtkScrolledWindow" id="bouquets_scrolled_window">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="margin_bottom">2</property>
                                     <property name="shadow_type">in</property>
                                     <child>
                                       <object class="GtkTreeView" id="bouquets_tree_view">
@@ -4089,12 +4087,12 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkBox" id="bouquet_bar_box">
-                                    <property name="height_request">24</property>
+                                    <property name="height_request">26</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_left">5</property>
                                     <property name="margin_right">5</property>
-                                    <property name="spacing">2</property>
+                                    <property name="spacing">5</property>
                                     <child>
                                       <object class="GtkImage" id="bq_count_image">
                                         <property name="visible">True</property>
