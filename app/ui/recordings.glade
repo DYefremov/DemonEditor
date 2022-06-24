@@ -105,7 +105,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkToggleButton" id="recordings_filter_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="focus_on_click">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Filter</property>
@@ -127,7 +127,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkButton" id="recordings_remove_button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Remove</property>
                         <property name="always_show_image">True</property>
@@ -139,7 +139,6 @@ Author: Dmitriy Yefremov
                             <property name="icon_name">user-trash-symbolic</property>
                           </object>
                         </child>
-                        <accelerator key="Delete" signal="clicked"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -264,6 +263,7 @@ Author: Dmitriy Yefremov
                         <property name="model">recordings_sort_model</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="tooltip_column">5</property>
+                        <signal name="key-press-event" handler="on_recordings_key_press" swapped="no"/>
                         <signal name="row-activated" handler="on_recordings_activated" swapped="no"/>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="recordings_view_selection">

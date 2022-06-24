@@ -33,7 +33,7 @@ from urllib.parse import quote
 
 from .dialogs import get_builder, show_dialog, DialogType
 from .main_helper import get_base_paths, get_base_model
-from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Column
+from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Column, KeyboardKey
 from ..commons import run_task, run_idle, log
 from ..connections import UtfFTP, HttpAPI
 from ..settings import IS_DARWIN, PlayStreamsMode
@@ -62,7 +62,8 @@ class RecordingsTool(Gtk.Box):
                     "on_recording_remove": self.on_recording_remove,
                     "on_recordings_model_changed": self.on_recordings_model_changed,
                     "on_recordings_filter_changed": self.on_recordings_filter_changed,
-                    "on_recordings_filter_toggled": self.on_recordings_filter_toggled}
+                    "on_recordings_filter_toggled": self.on_recordings_filter_toggled,
+                    "on_recordings_key_press": self.on_recordings_key_press}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}recordings.glade", handlers)
 
@@ -181,12 +182,16 @@ class RecordingsTool(Gtk.Box):
         if url:
             self._app.emit("play-recording", url)
 
-    def on_recording_remove(self, action, value=None):
+    def on_recording_remove(self, action=None, value=None):
         """ Removes recordings via FTP. """
+        model, paths = self._rec_view.get_selection().get_selected_rows()
+        if not paths:
+            self._app.show_error_message("No selected item!")
+            return
+
         if show_dialog(DialogType.QUESTION, self._app.app_window) != Gtk.ResponseType.OK:
             return
 
-        model, paths = self._rec_view.get_selection().get_selected_rows()
         paths = get_base_paths(paths, model)
         model = get_base_model(model)
 
@@ -212,6 +217,15 @@ class RecordingsTool(Gtk.Box):
     def on_recordings_filter_toggled(self, button):
         if not button.get_active():
             self._filter_entry.set_text("")
+
+    def on_recordings_key_press(self, view, event):
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+
+        key = KeyboardKey(key_code)
+        if key is KeyboardKey.DELETE:
+            self.on_recording_remove()
 
     def on_playback(self, box, state):
         """ Updates state of the UI elements for playback mode. """
