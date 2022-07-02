@@ -354,7 +354,7 @@ Author: Dmitriy Yefremov
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
                             <signal name="cursor-changed" handler="on_satellite_selection" swapped="no"/>
-                            <signal name="key-release-event" handler="on_key_release" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <signal name="realize" handler="on_satellite_view_realize" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="satellite_view_selection">
@@ -745,7 +745,7 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <signal name="button-press-event" handler="on_button_press" object="transponder_popup_menu" swapped="no"/>
-                            <signal name="key-release-event" handler="on_key_release" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="sat_tr_view_selection">
                                 <property name="mode">multiple</property>
@@ -759,7 +759,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="frequency_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="frequency_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -776,7 +776,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="sat_rate_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="sat_rate_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -793,7 +793,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="sat_pol_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="sat_pol_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -810,7 +810,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="set_fec_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="sat_fec_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -827,7 +827,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="sys_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="sat_sys_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -844,7 +844,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="mod_cellrenderertext">
+                                  <object class="GtkCellRendererText" id="sat_mod_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -860,7 +860,7 @@ Author: Dmitriy Yefremov
                                 <property name="title" translatable="yes">Pls mode</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="pls_mode_cellrenderertext"/>
+                                  <object class="GtkCellRendererText" id="pls_mode_renderer"/>
                                   <attributes>
                                     <attribute name="text">6</attribute>
                                   </attributes>
@@ -874,7 +874,7 @@ Author: Dmitriy Yefremov
                                 <property name="title" translatable="yes">Pls code</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="pls_code_cellrenderertext"/>
+                                  <object class="GtkCellRendererText" id="pls_code_renderer"/>
                                   <attributes>
                                     <attribute name="text">7</attribute>
                                   </attributes>
@@ -888,7 +888,7 @@ Author: Dmitriy Yefremov
                                 <property name="title" translatable="yes">Is ID</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="is_id_cellrenderertext"/>
+                                  <object class="GtkCellRendererText" id="is_id_renderer"/>
                                   <attributes>
                                     <attribute name="text">8</attribute>
                                   </attributes>
@@ -900,7 +900,7 @@ Author: Dmitriy Yefremov
                                 <property name="visible">False</property>
                                 <property name="title" translatable="yes">T2-MI PLP ID</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="t2mi_plp_id_cellrenderertext"/>
+                                  <object class="GtkCellRendererText" id="t2mi_plp_id_renderer"/>
                                   <attributes>
                                     <attribute name="text">9</attribute>
                                   </attributes>
@@ -995,7 +995,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_freq_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_freq_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1012,7 +1012,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_system_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_system_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1029,7 +1029,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_bandwidth_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_bandwidth_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1046,7 +1046,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_constellation_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_constellation_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1063,7 +1063,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_rate_hp_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_rate_hp_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1077,7 +1077,9 @@ Author: Dmitriy Yefremov
                               <object class="GtkTreeViewColumn" id="ter_rate_lp_column">
                                 <property name="title" translatable="yes">SR (LP)</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_rate_lp_cellrenderer"/>
+                                  <object class="GtkCellRendererText" id="ter_rate_lp_renderer">
+                                    <property name="xalign">0.49000000953674316</property>
+                                  </object>
                                   <attributes>
                                     <attribute name="text">5</attribute>
                                   </attributes>
@@ -1092,7 +1094,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_guard_cellrenderer">
+                                  <object class="GtkCellRendererText" id="ter_guard_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1107,7 +1109,9 @@ Author: Dmitriy Yefremov
                                 <property name="title" translatable="yes">Transmission</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_tr_mode_cellrenderer"/>
+                                  <object class="GtkCellRendererText" id="ter_tr_mode_renderer">
+                                    <property name="xalign">0.49000000953674316</property>
+                                  </object>
                                   <attributes>
                                     <attribute name="text">7</attribute>
                                   </attributes>
@@ -1120,7 +1124,9 @@ Author: Dmitriy Yefremov
                                 <property name="title" translatable="yes">Hierarchy</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_hierarchy_cellrenderer"/>
+                                  <object class="GtkCellRendererText" id="ter_hierarchy_renderer">
+                                    <property name="xalign">0.49000000953674316</property>
+                                  </object>
                                   <attributes>
                                     <attribute name="text">8</attribute>
                                   </attributes>
@@ -1133,7 +1139,9 @@ Author: Dmitriy Yefremov
                                 <property name="title" translatable="yes">Inversion</property>
                                 <property name="expand">True</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="ter_inversion_cellrenderer"/>
+                                  <object class="GtkCellRendererText" id="ter_inversion_renderer">
+                                    <property name="xalign">0.49000000953674316</property>
+                                  </object>
                                   <attributes>
                                     <attribute name="text">9</attribute>
                                   </attributes>
@@ -1229,7 +1237,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cable_frequency_cellrenderer">
+                                  <object class="GtkCellRendererText" id="cable_frequency_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1246,7 +1254,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cable_rate_cellrenderer">
+                                  <object class="GtkCellRendererText" id="cable_rate_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1263,7 +1271,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cable_fec_cellrenderer">
+                                  <object class="GtkCellRendererText" id="cable_fec_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>
@@ -1280,7 +1288,7 @@ Author: Dmitriy Yefremov
                                 <property name="expand">True</property>
                                 <property name="alignment">0.5</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cable_mod_cellrenderer">
+                                  <object class="GtkCellRendererText" id="cable_mod_renderer">
                                     <property name="xalign">0.49000000953674316</property>
                                   </object>
                                   <attributes>

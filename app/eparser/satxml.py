@@ -33,9 +33,7 @@
 from xml.dom.minidom import Document
 import xml.etree.ElementTree as ETree
 
-from .ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value,
-                       Terrestrial, Cable, TerTransponder, CableTransponder, T_SYSTEM, BANDWIDTH, GUARD_INTERVAL,
-                       TRANSMISSION_MODE, T_FEC, HIERARCHY, C_MODULATION, FEC_DEFAULT, Inversion, CONSTELLATION)
+from .ecommons import Satellite, Terrestrial, Cable, Transponder, TerTransponder, CableTransponder
 
 _SAT_COMMENT = ("   File was created in DemonEditor\n\n"
                 "usable flags are\n"
@@ -71,10 +69,10 @@ def get_sat_transponders(elem):
     """ Returns satellite transponders list. """
     return [Transponder(e.get("frequency", "0"),
                         e.get("symbol_rate", "0"),
-                        POLARIZATION[e.get("polarization", "0")],
-                        FEC[e.get("fec_inner", "0")],
-                        SYSTEM[e.get("system", "0")],
-                        MODULATION[e.get("modulation", "0")],
+                        e.get("polarization", None),
+                        e.get("fec_inner", None),
+                        e.get("system", None),
+                        e.get("modulation", None),
                         e.get("pls_mode", None),
                         e.get("pls_code", None),
                         e.get("is_id", None),
@@ -93,15 +91,15 @@ def get_terrestrial(path):
 def get_ter_transponder(elem):
     """ Returns terrestrial transponder. """
     return TerTransponder(elem.get("centre_frequency", "0"),
-                          T_SYSTEM.get(elem.get("system", None), None),
-                          BANDWIDTH.get(elem.get("bandwidth", None), None),
-                          CONSTELLATION.get(elem.get("constellation", None), None),
-                          T_FEC.get(elem.get("code_rate_hp", None), None),
-                          T_FEC.get(elem.get("code_rate_lp", None), None),
-                          GUARD_INTERVAL.get(elem.get("guard_interval", None), None),
-                          TRANSMISSION_MODE.get(elem.get("transmission_mode", None), None),
-                          HIERARCHY.get(elem.get("hierarchy_information", None), None),
-                          Inversion(elem.get("inversion")).name if "inversion" in elem.keys() else None,
+                          elem.get("system", None),
+                          elem.get("bandwidth", None),
+                          elem.get("constellation", None),
+                          elem.get("code_rate_hp", None),
+                          elem.get("code_rate_lp", None),
+                          elem.get("guard_interval", None),
+                          elem.get("transmission_mode", None),
+                          elem.get("hierarchy_information", None),
+                          elem.get("inversion", None),
                           elem.get("plp_id", None))
 
 
@@ -118,8 +116,8 @@ def get_cable_transponders(elem):
     """ Returns cable transponders list. """
     return [CableTransponder(e.get("frequency", "0"),
                              e.get("symbol_rate", "0"),
-                             FEC_DEFAULT[e.get("fec_inner", "0")],
-                             C_MODULATION[e.get("modulation", "0")]) for e in elem.iter("transponder")]
+                             e.get("fec_inner", None),
+                             e.get("modulation", None)) for e in elem.iter("transponder")]
 
 
 def write_satellites(satellites, data_path):
@@ -141,10 +139,10 @@ def write_satellites(satellites, data_path):
             transponder_child = doc.createElement("transponder")
             transponder_child.setAttribute("frequency", tr.frequency)
             transponder_child.setAttribute("symbol_rate", tr.symbol_rate)
-            transponder_child.setAttribute("polarization", get_key_by_value(POLARIZATION, tr.polarization))
-            transponder_child.setAttribute("fec_inner", get_key_by_value(FEC, tr.fec_inner) or "0")
-            transponder_child.setAttribute("system", get_key_by_value(SYSTEM, tr.system) or "0")
-            transponder_child.setAttribute("modulation", get_key_by_value(MODULATION, tr.modulation) or "0")
+            transponder_child.setAttribute("polarization", tr.polarization)
+            transponder_child.setAttribute("fec_inner", tr.fec_inner or "0")
+            transponder_child.setAttribute("system", tr.system or "0")
+            transponder_child.setAttribute("modulation", tr.modulation or "0")
             if tr.pls_mode:
                 transponder_child.setAttribute("pls_mode", tr.pls_mode)
             if tr.pls_code:

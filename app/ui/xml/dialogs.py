@@ -36,7 +36,7 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task, log
 from app.eparser import Satellite, Transponder
-from app.eparser.ecommons import PLS_MODE, get_key_by_value
+from app.eparser.ecommons import PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
@@ -92,10 +92,10 @@ class TransponderDialog:
     def init_transponder(self, transponder):
         self._freq_entry.set_text(transponder.frequency)
         self._rate_entry.set_text(transponder.symbol_rate)
-        self._pol_box.set_active_id(transponder.polarization)
-        self._fec_box.set_active_id(transponder.fec_inner)
-        self._sys_box.set_active_id(transponder.system)
-        self._mod_box.set_active_id(transponder.modulation)
+        self._pol_box.set_active_id(POLARIZATION.get(transponder.polarization, None))
+        self._fec_box.set_active_id(FEC.get(transponder.fec_inner, None))
+        self._sys_box.set_active_id(SYSTEM.get(transponder.system, None))
+        self._mod_box.set_active_id(MODULATION.get(transponder.modulation, None))
         self._pls_mode_box.set_active_id(PLS_MODE.get(transponder.pls_mode, None))
         self._is_id_entry.set_text(transponder.is_id if transponder.is_id else "")
         self._pls_code_entry.set_text(transponder.pls_code if transponder.pls_code else "")
@@ -104,10 +104,10 @@ class TransponderDialog:
     def to_transponder(self):
         return Transponder(frequency=self._freq_entry.get_text(),
                            symbol_rate=self._rate_entry.get_text(),
-                           polarization=self._pol_box.get_active_id(),
-                           fec_inner=self._fec_box.get_active_id(),
-                           system=self._sys_box.get_active_id(),
-                           modulation=self._mod_box.get_active_id(),
+                           polarization=get_key_by_value(POLARIZATION, self._pol_box.get_active_id()),
+                           fec_inner=get_key_by_value(FEC, self._fec_box.get_active_id()),
+                           system=get_key_by_value(SYSTEM, self._sys_box.get_active_id()),
+                           modulation=get_key_by_value(MODULATION, self._mod_box.get_active_id()),
                            pls_mode=get_key_by_value(PLS_MODE, self._pls_mode_box.get_active_id()),
                            pls_code=self._pls_code_entry.get_text(),
                            is_id=self._is_id_entry.get_text(),
