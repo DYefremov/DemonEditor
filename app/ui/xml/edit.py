@@ -35,8 +35,9 @@ from app.commons import run_idle
 from app.connections import DownloadType
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC,
-                                  GUARD_INTERVAL, TRANSMISSION_MODE, HIERARCHY, Inversion, FEC_DEFAULT, C_MODULATION)
-from app.eparser.satxml import get_terrestrial, get_cable
+                                  GUARD_INTERVAL, TRANSMISSION_MODE, HIERARCHY, Inversion, FEC_DEFAULT, C_MODULATION,
+                                  Terrestrial, Cable)
+from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable
 from .dialogs import SatelliteDialog, TransponderDialog, SatellitesUpdateDialog
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import move_items, on_popup_menu
@@ -457,9 +458,13 @@ class SatellitesTool(Gtk.Box):
         if page is Page.SATELLITE and show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.OK:
             if self._dvb_type is self.DVB.SAT:
                 write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
-                                 self._settings.profile_data_path + "satellites.xml")
+                                 f"{self._settings.profile_data_path}satellites.xml")
+            elif self._dvb_type is self.DVB.TERRESTRIAL:
+                write_terrestrial((Terrestrial(*r) for r in self._terrestrial_view.get_model()),
+                                  f"{self._settings.profile_data_path}terrestrial.xml")
             else:
-                self._app.show_error_message("Not implemented yet!")
+                write_cable((Cable(*r) for r in self._cable_view.get_model()),
+                            f"{self._settings.profile_data_path}cables.xml")
 
     def on_save_as(self, app, page):
         show_dialog(DialogType.ERROR, transient=self._app.app_window, text="Not implemented yet!")
