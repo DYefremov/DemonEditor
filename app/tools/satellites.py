@@ -121,7 +121,12 @@ class SatellitesParser(HTMLParser):
         self._current_cell = []
         self._rows = []
         self._source = source
-        self.pls_modes = {v: k for k, v in PLS_MODE.items()}
+
+        self.PLS_MODES = {v: k for k, v in PLS_MODE.items()}
+        self.POLARIZATION = {v: k for k, v in POLARIZATION.items()}
+        self.FEC = {v: k for k, v in FEC.items()}
+        self.SYSTEM = {v: k for k, v in SYSTEM.items()}
+        self.MODULATION = {v: k for k, v in MODULATION.items()}
 
     def handle_starttag(self, tag, attrs):
         if tag == "td":
@@ -318,7 +323,7 @@ class SatellitesParser(HTMLParser):
                 pls_code = None
                 pls_mode = None
                 if pls:
-                    pls_mode = self.pls_modes.get(pls.group(1), None)
+                    pls_mode = self.PLS_MODES.get(pls.group(1), None)
                     pls_code = pls.group(2)
 
                 if is_ids:
@@ -328,7 +333,12 @@ class SatellitesParser(HTMLParser):
                         if is_transponder_valid(tr):
                             n_trs.append(tr)
 
-                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None, None)
+                tr = Transponder(f"{freq}000", f"{sr}000",
+                                 self.POLARIZATION.get(pol, None),
+                                 self.FEC.get(fec, None),
+                                 self.SYSTEM.get(sys, None),
+                                 self.MODULATION.get(mod, None),
+                                 pls_mode, pls_code, None, None)
                 if is_transponder_valid(tr):
                     trs.append(tr)
 
@@ -359,12 +369,17 @@ class SatellitesParser(HTMLParser):
             sys, mod, sr, fec = res.group(1), res.group(2), res.group(3), res.group(4)
             mod = mod.strip() if mod else "Auto"
             plp, pls_mode, pls_code, is_id = res.group(5), res.group(6), res.group(7), res.group(8)
-            pls_mode = self.pls_modes.get(pls_mode, None)
+            pls_mode = self.PLS_MODES.get(pls_mode, None)
 
             if plp is not None:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id, None)
+            tr = Transponder(f"{freq}000", f"{sr}000",
+                             self.POLARIZATION.get(pol, None),
+                             self.FEC.get(fec, None),
+                             self.SYSTEM.get(sys, None),
+                             self.MODULATION.get(mod, None),
+                             pls_mode, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -386,7 +401,7 @@ class SatellitesParser(HTMLParser):
             if not res:
                 continue
             sys, t2_mi, pls_id, pls_code = res.group(1), res.group(2), res.group(3), res.group(4)
-            pls_id = self.pls_modes.get(pls_id, None)
+            pls_id = self.PLS_MODES.get(pls_id, None)
 
             res = re.match(mod_pat, row[9])
             if not res:
@@ -401,7 +416,12 @@ class SatellitesParser(HTMLParser):
             if t2_mi:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id, None)
+            tr = Transponder(freq, f"{sr}000",
+                             self.POLARIZATION.get(pol, None),
+                             self.FEC.get(fec, None),
+                             self.SYSTEM.get(sys, None),
+                             self.MODULATION.get(mod, None),
+                             pls_id, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 

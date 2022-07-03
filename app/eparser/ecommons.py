@@ -260,13 +260,13 @@ def is_transponder_valid(tr: Transponder):
         log(f"Transponder validation error: {e}\n{tr}")
         return False
 
-    if tr.polarization not in POLARIZATION.values():
+    if tr.polarization not in POLARIZATION:
         return False
-    if tr.fec_inner not in FEC.values():
+    if tr.fec_inner not in FEC:
         return False
-    if tr.system not in SYSTEM.values():
+    if tr.system not in SYSTEM:
         return False
-    if tr.modulation not in MODULATION.values():
+    if tr.modulation not in MODULATION:
         return False
 
     return True
