@@ -46,6 +46,8 @@ Author: Dmitriy Yefremov
       <!-- column-name transponders -->
       <column type="PyObject"/>
     </columns>
+    <signal name="row-deleted" handler="on_cable_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_cable_model_changed" swapped="no"/>
   </object>
   <object class="GtkListStore" id="cable_tr_view_model">
     <columns>
@@ -58,6 +60,8 @@ Author: Dmitriy Yefremov
       <!-- column-name mod -->
       <column type="gchararray"/>
     </columns>
+    <signal name="row-deleted" handler="on_cable_tr_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_cable_tr_model_changed" swapped="no"/>
   </object>
   <object class="GtkImage" id="popup_menu_add_image">
     <property name="visible">True</property>
@@ -75,6 +79,7 @@ Author: Dmitriy Yefremov
         <property name="image">popup_menu_add_image</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_add" swapped="no"/>
+        <accelerator key="Insert" signal="activate"/>
       </object>
     </child>
     <child>
@@ -84,13 +89,13 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="edit_sat_popoup_menu_item">
+      <object class="GtkImageMenuItem" id="edit_sat_popup_menu_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" object="satellite_view" swapped="no"/>
+        <signal name="activate" handler="on_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="Primary"/>
       </object>
     </child>
@@ -107,7 +112,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_remove" object="satellite_view" swapped="no"/>
+        <signal name="activate" handler="on_remove" swapped="no"/>
         <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
@@ -128,6 +133,7 @@ Author: Dmitriy Yefremov
         <property name="image">popup_menu_add_image_2</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="on_transponder_add" swapped="no"/>
+        <accelerator key="Insert" signal="activate"/>
       </object>
     </child>
     <child>
@@ -143,7 +149,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" object="sat_tr_view" swapped="no"/>
+        <signal name="activate" handler="on_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="Primary"/>
       </object>
     </child>
@@ -160,7 +166,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_remove" object="sat_tr_view" swapped="no"/>
+        <signal name="activate" handler="on_remove" swapped="no"/>
         <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
@@ -188,6 +194,8 @@ Author: Dmitriy Yefremov
       <!-- column-name t2mi_plp_id -->
       <column type="gchararray"/>
     </columns>
+    <signal name="row-deleted" handler="on_sat_tr_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_sat_tr_model_changed" swapped="no"/>
   </object>
   <object class="GtkListStore" id="satellite_model">
     <columns>
@@ -200,6 +208,8 @@ Author: Dmitriy Yefremov
       <!-- column-name transponders -->
       <column type="PyObject"/>
     </columns>
+    <signal name="row-deleted" handler="on_sat_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_sat_model_changed" swapped="no"/>
   </object>
   <object class="GtkListStore" id="ter_tr_view_model">
     <columns>
@@ -226,6 +236,8 @@ Author: Dmitriy Yefremov
       <!-- column-name plp_id -->
       <column type="gchararray"/>
     </columns>
+    <signal name="row-deleted" handler="on_ter_tr_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_ter_tr_model_changed" swapped="no"/>
   </object>
   <object class="GtkListStore" id="terrestrial_model">
     <columns>
@@ -238,6 +250,8 @@ Author: Dmitriy Yefremov
       <!-- column-name transponders -->
       <column type="PyObject"/>
     </columns>
+    <signal name="row-deleted" handler="on_ter_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_ter_model_changed" swapped="no"/>
   </object>
   <object class="GtkPaned" id="main_paned">
     <property name="visible">True</property>
@@ -245,7 +259,7 @@ Author: Dmitriy Yefremov
     <property name="wide_handle">True</property>
     <child>
       <object class="GtkFrame" id="editor_sat_frame">
-        <property name="width_request">320</property>
+        <property name="width_request">360</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label_xalign">0.49000000953674316</property>
@@ -271,7 +285,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="add_header_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Add</property>
                     <signal name="clicked" handler="on_add" swapped="no"/>
@@ -292,7 +306,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="update_header_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Update</property>
                     <signal name="clicked" handler="on_update" swapped="no"/>
@@ -468,6 +482,7 @@ Author: Dmitriy Yefremov
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
                             <signal name="cursor-changed" handler="on_terrestrial_selection" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <signal name="realize" handler="on_terrestrial_view_realize" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="terrrestrial_view_selection">
@@ -567,6 +582,7 @@ Author: Dmitriy Yefremov
                             <property name="activate_on_single_click">True</property>
                             <signal name="button-press-event" handler="on_button_press" object="popup_menu" swapped="no"/>
                             <signal name="cursor-changed" handler="on_cable_selection" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <signal name="realize" handler="on_cable_view_realize" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="cable_view_selection">
@@ -694,7 +710,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="transponder_add_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Add</property>
                     <signal name="clicked" handler="on_transponder_add" swapped="no"/>
@@ -982,6 +998,7 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <signal name="button-press-event" handler="on_button_press" object="transponder_popup_menu" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="ter_tr_view_selection">
                                 <property name="mode">multiple</property>
@@ -1224,6 +1241,7 @@ Author: Dmitriy Yefremov
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <signal name="button-press-event" handler="on_button_press" object="transponder_popup_menu" swapped="no"/>
+                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="cable_tr_view_selection">
                                 <property name="mode">multiple</property>

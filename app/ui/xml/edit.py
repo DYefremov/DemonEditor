@@ -85,7 +85,13 @@ class SatellitesTool(Gtk.Box):
                     "on_visible_page": self.on_visible_page,
                     "on_satellite_selection": self.on_satellite_selection,
                     "on_terrestrial_selection": self.on_terrestrial_selection,
-                    "on_cable_selection": self.on_cable_selection}
+                    "on_cable_selection": self.on_cable_selection,
+                    "on_sat_model_changed": self.on_sat_model_changed,
+                    "on_sat_tr_model_changed": self.on_sat_tr_model_changed,
+                    "on_ter_model_changed": self.on_ter_model_changed,
+                    "on_ter_tr_model_changed": self.on_ter_tr_model_changed,
+                    "on_cable_model_changed": self.on_cable_model_changed,
+                    "on_cable_tr_model_changed": self.on_cable_tr_model_changed}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}xml/editor.glade", handlers)
 
@@ -95,6 +101,14 @@ class SatellitesTool(Gtk.Box):
         self._sat_tr_view = builder.get_object("sat_tr_view")
         self._ter_tr_view = builder.get_object("ter_tr_view")
         self._cable_tr_view = builder.get_object("cable_tr_view")
+
+        self._sat_count_label = builder.get_object("sat_count_label")
+        self._sat_tr_count_label = builder.get_object("sat_tr_count_label")
+        self._ter_count_label = builder.get_object("ter_count_label")
+        self._ter_tr_count_label = builder.get_object("ter_tr_count_label")
+        self._cable_count_label = builder.get_object("cable_count_label")
+        self._cable_tr_count_label = builder.get_object("cable_tr_count_label")
+
         self._transponders_stack = builder.get_object("transponders_stack")
         self._add_header_button = builder.get_object("add_header_button")
         self._update_header_button = builder.get_object("update_header_button")
@@ -219,12 +233,12 @@ class SatellitesTool(Gtk.Box):
         self._dvb_type = self.DVB(stack.get_visible_child_name())
         self._transponders_stack.set_visible_child_name(self._dvb_type)
         self._update_header_button.set_sensitive(self._dvb_type is self.DVB.SAT)
-        self._add_header_button.set_sensitive(self._dvb_type is self.DVB.SAT)
 
         if self._dvb_type is self.DVB.SAT:
             self._app.on_info_bar_close()
+
         else:
-            self._app.show_info_message("Read mode only!", Gtk.MessageType.WARNING)
+            self._app.show_info_message("EXPERIMENTAL!", Gtk.MessageType.WARNING)
 
     def on_satellite_selection(self, view):
         model = self._sat_tr_view.get_model()
@@ -253,6 +267,24 @@ class SatellitesTool(Gtk.Box):
             cable_model = view.get_model()
             list(map(model.append, cable_model[self._current_cable_path][-1]))
 
+    def on_sat_model_changed(self, model, path, itr=None):
+        self._sat_count_label.set_text(str(len(model)))
+
+    def on_sat_tr_model_changed(self, model, path, itr=None):
+        self._sat_tr_count_label.set_text(str(len(model)))
+
+    def on_ter_model_changed(self, model, path, itr=None):
+        self._ter_count_label.set_text(str(len(model)))
+
+    def on_ter_tr_model_changed(self, model, path, itr=None):
+        self._ter_tr_count_label.set_text(str(len(model)))
+
+    def on_cable_model_changed(self, model, path, itr=None):
+        self._cable_count_label.set_text(str(len(model)))
+
+    def on_cable_tr_model_changed(self, model, path, itr=None):
+        self._cable_tr_count_label.set_text(str(len(model)))
+
     def on_up(self, item):
         move_items(KeyboardKey.UP, self._satellite_view)
 
@@ -260,26 +292,26 @@ class SatellitesTool(Gtk.Box):
         move_items(KeyboardKey.DOWN, self._satellite_view)
 
     def on_button_press(self, menu, event):
-        if self._dvb_type is self.DVB.SAT:
-            if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-                self.on_edit(self._satellite_view if self._satellite_view.is_focus() else self._sat_tr_view)
-            else:
-                on_popup_menu(menu, event)
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            self.on_edit()
+        else:
+            on_popup_menu(menu, event)
 
     def on_key_press(self, view, event):
-        """  Handling  keystrokes  """
+        """  Handling  keystrokes.  """
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
+
         key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:
             self.on_remove(view)
         elif key is KeyboardKey.INSERT:
-            pass
+            self.on_edit(force=True)
         elif ctrl and key is KeyboardKey.E:
-            self.on_edit(view)
+            self.on_edit()
         elif ctrl and key is KeyboardKey.S:
             self.on_satellite()
         elif ctrl and key is KeyboardKey.T:
@@ -321,10 +353,7 @@ class SatellitesTool(Gtk.Box):
 
     def on_add(self, item):
         """ Common adding. """
-        if self._dvb_type is self.DVB.SAT:
-            self.on_edit(self._satellite_view, force=True)
-        else:
-            self._app.show_error_message("Not implemented yet!")
+        self.on_edit(item, force=True)
 
     def on_transponder_add(self, item):
         if self._dvb_type is self.DVB.SAT:
@@ -332,8 +361,12 @@ class SatellitesTool(Gtk.Box):
         else:
             self._app.show_error_message("Not implemented yet!")
 
-    def on_edit(self, view, force=False):
-        """ Common edit """
+    def on_edit(self, item=None, force=False):
+        """ Common edit. """
+        view = self.get_active_view()
+        if not view:
+            return
+
         paths = self.check_selection(view, "Please, select only one item!")
         if not paths:
             return
@@ -342,16 +375,15 @@ class SatellitesTool(Gtk.Box):
         row = model[paths][:]
         itr = model.get_iter(paths)
 
-        if self._dvb_type is self.DVB.SAT:
-            if view is self._satellite_view:
-                self.on_satellite(None if force else Satellite(*row), itr)
-            elif view is self._sat_tr_view:
-                self.on_transponder(None if force else Transponder(*row), itr)
+        if view is self._satellite_view:
+            self.on_satellite(None if force else Satellite(*row), itr)
+        elif view is self._sat_tr_view:
+            self.on_transponder(None if force else Transponder(*row), itr)
         else:
             self._app.show_error_message("Not implemented yet!")
 
     def on_satellite(self, satellite=None, edited_itr=None):
-        """ Create or edit satellite"""
+        """ Create or edit satellite. """
         sat_dialog = SatelliteDialog(self._app.get_active_window(), satellite)
         sat = sat_dialog.run()
         sat_dialog.destroy()
@@ -368,7 +400,7 @@ class SatellitesTool(Gtk.Box):
                     model.append(sat)
 
     def on_transponder(self, transponder=None, edited_itr=None):
-        """ Create or edit transponder """
+        """ Create or edit transponder. """
 
         paths = self.check_selection(self._satellite_view, "Please, select only one satellite!")
         if paths is None:
@@ -406,23 +438,38 @@ class SatellitesTool(Gtk.Box):
 
         return paths
 
-    def on_remove(self, view):
+    def on_remove(self, view=None):
         """ Removes selected satellites and transponders. """
+        view = self.get_active_view()
+        if not view:
+            return
+
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
 
-        if self._dvb_type is self.DVB.SAT:
-            if view is self._satellite_view:
-                list(map(model.remove, [model.get_iter(path) for path in paths]))
-            elif view is self._sat_tr_view:
+        if view in {self._satellite_view, self._terrestrial_view, self._cable_view}:
+            list(map(model.remove, [model.get_iter(path) for path in paths]))
+        else:
+            trs = None
+            if view is self._sat_tr_view:
                 if self._current_sat_path:
                     trs = self._satellite_view.get_model()[self._current_sat_path][-1]
-                    list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
-                    list(map(model.remove, [model.get_iter(path) for path in paths]))
                 else:
                     self._app.show_error_message("No satellite is selected!")
-        else:
-            self._app.show_error_message("Not implemented yet!")
+            elif view is self._ter_tr_view:
+                if self._current_ter_path:
+                    trs = self._terrestrial_view.get_model()[self._current_ter_path][-1]
+                else:
+                    self._app.show_error_message("No terrestrial is selected!")
+            elif view is self._cable_tr_view:
+                if self._current_cable_path:
+                    trs = self._cable_view.get_model()[self._current_cable_path][-1]
+                else:
+                    self._app.show_error_message("No cable is selected!")
+
+            if trs:
+                list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
+                list(map(model.remove, [model.get_iter(path) for path in paths]))
 
     @run_idle
     def on_open(self):
@@ -480,6 +527,21 @@ class SatellitesTool(Gtk.Box):
     @run_idle
     def on_update(self, item):
         SatellitesUpdateDialog(self._app.get_active_window(), self._settings, self._satellite_view.get_model()).show()
+
+    def get_active_view(self):
+        """ Returns current active view. """
+        if self._satellite_view.is_focus():
+            return self._satellite_view
+        elif self._terrestrial_view.is_focus():
+            return self._terrestrial_view
+        elif self._cable_view.is_focus():
+            return self._cable_view
+        elif self._sat_tr_view.is_focus():
+            return self._sat_tr_view
+        elif self._ter_tr_view.is_focus():
+            return self._ter_tr_view
+        elif self._cable_tr_view.is_focus():
+            return self._cable_tr_view
 
 
 if __name__ == "__main__":
