@@ -855,6 +855,62 @@ Author: Dmitriy Yefremov
       <placeholder/>
     </child>
   </object>
+  <object class="GtkImage" id="popup_menu_add_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-add</property>
+  </object>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="add_menu_item">
+        <property name="label" translatable="yes">Add</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">popup_menu_add_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_timer_add" swapped="no"/>
+        <accelerator key="Insert" signal="activate"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="edit_menu_item">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_timer_edit" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_separator_2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="remove_menu_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_timer_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="timer_model">
     <columns>
       <!-- column-name icon -->
@@ -1095,7 +1151,7 @@ Author: Dmitriy Yefremov
                 <property name="rubber_banding">True</property>
                 <property name="enable_grid_lines">both</property>
                 <property name="tooltip_column">3</property>
-                <signal name="button-press-event" handler="on_timers_press" swapped="no"/>
+                <signal name="button-press-event" handler="on_timers_press" object="popup_menu" swapped="no"/>
                 <signal name="cursor-changed" handler="on_timer_cursor_changed" swapped="no"/>
                 <signal name="drag-data-received" handler="on_timers_drag_data_received" swapped="no"/>
                 <signal name="key-press-event" handler="on_timers_key_press" swapped="no"/>
