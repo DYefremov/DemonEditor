@@ -27,7 +27,7 @@
 
 
 """ Module for working with timers. """
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from urllib.parse import quote
 
@@ -210,7 +210,7 @@ class TimerTool(Gtk.Box):
             self._timer_service_ref_entry.set_text(self._timer_data.get("e2servicereference", ""))
             date = datetime.now()
             self.set_begins_date(date)
-            self.set_ends_date(date)
+            self.set_ends_date(date + timedelta(hours=1))
             self._timer_event_id_entry.set_text("")
             self._timer_location_switch.set_active(False)
             TimerTool.set_repetition_flags(0, self._days_buttons)
@@ -243,8 +243,9 @@ class TimerTool(Gtk.Box):
 
         def set_time_data(self, start_time, end_time):
             """ Sets values for time widgets. """
-            ev_time_start = datetime.fromtimestamp(start_time) or datetime.now()
-            ev_time_end = datetime.fromtimestamp(end_time) or datetime.now()
+            now = datetime.now()
+            ev_time_start = datetime.fromtimestamp(start_time) or now
+            ev_time_end = datetime.fromtimestamp(end_time) or now + timedelta(hours=1)
             self._timer_begins_entry.set_text(ev_time_start.strftime(TimerTool.TIME_STR))
             self._timer_ends_entry.set_text(ev_time_end.strftime(TimerTool.TIME_STR))
             self._timer_begins_calendar.select_day(ev_time_start.day)

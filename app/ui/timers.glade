@@ -1106,7 +1106,9 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="timer_name_column">
-                    <property name="min_width">150</property>
+                    <property name="resizable">True</property>
+                    <property name="fixed_width">150</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Name</property>
                     <property name="alignment">0.5</property>
                     <child>
@@ -1129,7 +1131,9 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="timer_service_column">
-                    <property name="min_width">150</property>
+                    <property name="resizable">True</property>
+                    <property name="fixed_width">150</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Service</property>
                     <property name="alignment">0.5</property>
                     <child>
@@ -1145,7 +1149,9 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="timer_time_column">
-                    <property name="min_width">100</property>
+                    <property name="resizable">True</property>
+                    <property name="fixed_width">150</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Time</property>
                     <property name="alignment">0.5</property>
                     <child>
@@ -1160,6 +1166,8 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="timer_desc_column">
+                    <property name="resizable">True</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Description</property>
                     <property name="expand">True</property>
                     <property name="alignment">0.5</property>
