@@ -34,6 +34,21 @@ Author: Dmitriy Yefremov
   <!-- interface-description Enigma2 channel and satellites list editor. -->
   <!-- interface-copyright 2018-2022 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="remove_menu_item">
+        <property name="label">gtk-remove</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_recording_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="rec_paths_model">
     <columns>
       <!-- column-name icon -->
@@ -263,6 +278,7 @@ Author: Dmitriy Yefremov
                         <property name="model">recordings_sort_model</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="tooltip_column">5</property>
+                        <signal name="button-press-event" handler="on_popup_menu" object="popup_menu" swapped="no"/>
                         <signal name="key-press-event" handler="on_recordings_key_press" swapped="no"/>
                         <signal name="row-activated" handler="on_recordings_activated" swapped="no"/>
                         <child internal-child="selection">

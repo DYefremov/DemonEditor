@@ -32,7 +32,7 @@ from ftplib import all_errors
 from urllib.parse import quote
 
 from .dialogs import get_builder, show_dialog, DialogType
-from .main_helper import get_base_paths, get_base_model
+from .main_helper import get_base_paths, get_base_model, on_popup_menu
 from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Column, KeyboardKey
 from ..commons import run_task, run_idle, log
 from ..connections import UtfFTP, HttpAPI
@@ -63,7 +63,8 @@ class RecordingsTool(Gtk.Box):
                     "on_recordings_model_changed": self.on_recordings_model_changed,
                     "on_recordings_filter_changed": self.on_recordings_filter_changed,
                     "on_recordings_filter_toggled": self.on_recordings_filter_toggled,
-                    "on_recordings_key_press": self.on_recordings_key_press}
+                    "on_recordings_key_press": self.on_recordings_key_press,
+                    "on_popup_menu": on_popup_menu}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}recordings.glade", handlers)
 
