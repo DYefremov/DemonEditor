@@ -192,7 +192,7 @@ class TimerTool(Gtk.Box):
             self._timer_begins_min_button.set_value(minute)
             self._timer_begins_calendar.select_day(date.day)
             self._timer_begins_calendar.select_month(date.month - 1, date.year)
-            self._timer_begins_entry.set_text(f"{date.year}-{date.month}-{date.day} {hour}:{minute:02d}")
+            self._timer_begins_entry.set_text(f"{date.year}-{date.month:02d}-{date.day:02d} {hour:02d}:{minute:02d}")
 
         def get_ends_date(self):
             date = self._timer_ends_calendar.get_date()
@@ -207,7 +207,7 @@ class TimerTool(Gtk.Box):
             self._timer_ends_min_button.set_value(minute)
             self._timer_ends_calendar.select_day(date.day)
             self._timer_ends_calendar.select_month(date.month - 1, date.year)
-            self._timer_ends_entry.set_text(f"{date.year}-{date.month}-{date.day} {hour}:{minute:02d}")
+            self._timer_ends_entry.set_text(f"{date.year}-{date.month:02d}-{date.day:02d} {hour:02d}:{minute:02d}")
 
         def set_timer_for_add(self):
             self._timer_service_entry.set_text(self._timer_data.get("e2servicename", ""))
