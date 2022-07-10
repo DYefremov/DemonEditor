@@ -1206,7 +1206,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkTreeViewColumn" id="timer_time_column">
                     <property name="resizable">True</property>
-                    <property name="fixed_width">150</property>
+                    <property name="fixed_width">270</property>
                     <property name="min_width">50</property>
                     <property name="title" translatable="yes">Time</property>
                     <property name="alignment">0.5</property>

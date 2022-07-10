@@ -245,7 +245,9 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="epg_title_column">
-                    <property name="min_width">25</property>
+                    <property name="resizable">True</property>
+                    <property name="fixed_width">170</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Title</property>
                     <property name="alignment">0.49000000953674316</property>
                     <property name="sort_column_id">0</property>
@@ -261,7 +263,9 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="epg_time_column">
-                    <property name="min_width">25</property>
+                    <property name="resizable">True</property>
+                    <property name="fixed_width">270</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Time</property>
                     <property name="alignment">0.49000000953674316</property>
                     <property name="sort_column_id">1</property>
@@ -277,6 +281,8 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="epg_desc_column">
+                    <property name="fixed_width">100</property>
+                    <property name="min_width">50</property>
                     <property name="title" translatable="yes">Description</property>
                     <property name="expand">True</property>
                     <property name="alignment">0.49000000953674316</property>

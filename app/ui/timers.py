@@ -350,7 +350,7 @@ class TimerTool(Gtk.Box):
         service = timer.get("e2servicename", "") or ""
         start_time = datetime.fromtimestamp(int(timer.get("e2timebegin", "0")))
         end_time = datetime.fromtimestamp(int(timer.get("e2timeend", "0")))
-        time = f"{start_time.strftime('%A, %H:%M')} - {end_time.strftime('%H:%M')}"
+        time = f"{start_time.strftime('%A, %Y-%m-%d, %H:%M')} - {end_time.strftime('%H:%M')}"
 
         return disabled, name, service, time, description, timer
 
