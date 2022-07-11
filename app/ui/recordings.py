@@ -77,6 +77,8 @@ class RecordingsTool(Gtk.Box):
         self._filter_entry = builder.get_object("recordings_filter_entry")
         self._recordings_count_label = builder.get_object("recordings_count_label")
         self.pack_start(builder.get_object("recordings_box"), True, True, 0)
+        self._rec_view.get_model().set_sort_func(2, self.time_sort_func, 2)
+
         if settings.alternate_layout:
             self.on_layout_changed(app, True)
 
@@ -167,7 +169,7 @@ class RecordingsTool(Gtk.Box):
     def get_recordings_row(self, rec):
         service = rec.get("e2servicename")
         title = rec.get("e2title", "")
-        time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%A, %H:%M")
+        time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%A, %Y-%m-%d, %H:%M")
         length = rec.get("e2length", "0")
         file = rec.get("e2filename", "")
         desc = rec.get("e2description", "")
@@ -242,6 +244,13 @@ class RecordingsTool(Gtk.Box):
     def update_rec_columns_visibility(self, state):
         for c in (Column.REC_SERVICE, Column.REC_TIME, Column.REC_LEN, Column.REC_FILE, Column.REC_DESC):
             self._rec_view.get_column(c).set_visible(state)
+
+    def time_sort_func(self, model, iter1, iter2, column):
+        """ Custom sort function for time column. """
+        rec1 = model.get_value(iter1, 6)
+        rec2 = model.get_value(iter2, 6)
+
+        return int(rec1.get("e2time", "0")) - int(rec2.get("e2time", "0"))
 
 
 if __name__ == "__main__":
