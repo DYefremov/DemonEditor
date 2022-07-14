@@ -325,7 +325,7 @@ Author: Dmitriy Yefremov
                         <child>
                           <object class="GtkTreeViewColumn" id="rec_time_column">
                             <property name="resizable">True</property>
-                            <property name="fixed_width">200</property>
+                            <property name="fixed_width">180</property>
                             <property name="min_width">100</property>
                             <property name="title" translatable="yes">Time</property>
                             <property name="alignment">0.5</property>
@@ -333,6 +333,7 @@ Author: Dmitriy Yefremov
                             <child>
                               <object class="GtkCellRendererText" id="rec_time_renderer">
                                 <property name="xpad">5</property>
+                                <property name="xalign">0.49000000953674316</property>
                               </object>
                               <attributes>
                                 <attribute name="text">2</attribute>

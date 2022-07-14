@@ -140,6 +140,7 @@ Author: Dmitriy Yefremov
                 <property name="primary_icon_name">edit-find-replace-symbolic</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">False</property>
+                <property name="visible" bind-source="epg_filter_button" bind-property="active"/>
                 <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
               </object>
               <packing>
@@ -236,8 +237,9 @@ Author: Dmitriy Yefremov
                 <property name="rules_hint">True</property>
                 <property name="rubber_banding">True</property>
                 <property name="enable_grid_lines">both</property>
-                <property name="tooltip_column">2</property>
+                <property name="tooltip_column">3</property>
                 <signal name="button-press-event" handler="on_epg_press" swapped="no"/>
+                <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="epg_selection">
                     <property name="mode">multiple</property>
@@ -264,14 +266,15 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkTreeViewColumn" id="epg_time_column">
                     <property name="resizable">True</property>
-                    <property name="fixed_width">270</property>
+                    <property name="fixed_width">210</property>
                     <property name="min_width">50</property>
                     <property name="title" translatable="yes">Time</property>
                     <property name="alignment">0.49000000953674316</property>
                     <property name="sort_column_id">1</property>
                     <child>
                       <object class="GtkCellRendererText" id="epg_time_renderer">
-                        <property name="xpad">10</property>
+                        <property name="xpad">5</property>
+                        <property name="xalign">0.49000000953674316</property>
                       </object>
                       <attributes>
                         <attribute name="text">1</attribute>

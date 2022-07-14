@@ -191,7 +191,8 @@ class EpgTool(Gtk.Box):
         handlers = {"on_epg_press": self.on_epg_press,
                     "on_timer_add": self.on_timer_add,
                     "on_epg_filter_changed": self.on_epg_filter_changed,
-                    "on_epg_filter_toggled": self.on_epg_filter_toggled}
+                    "on_epg_filter_toggled": self.on_epg_filter_toggled,
+                    "on_view_query_tooltip": self.on_view_query_tooltip}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}tab.glade", handlers)
 
@@ -200,7 +201,6 @@ class EpgTool(Gtk.Box):
         self._filter_model = builder.get_object("epg_filter_model")
         self._filter_model.set_visible_func(self.epg_filter_function)
         self._filter_entry = builder.get_object("epg_filter_entry")
-        builder.get_object("epg_filter_button").bind_property("active", self._filter_entry, "visible")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         # Custom sort function.
         self._view.get_model().set_sort_func(1, self.time_sort_func, 1)
@@ -262,9 +262,10 @@ class EpgTool(Gtk.Box):
 
     @staticmethod
     def get_event(event, show_day=True):
-        t_str = f"{'%A, ' if show_day else ''}%Y-%m-%d, %H:%M"
+        t_str = f"{'%a, ' if show_day else ''}%x, %H:%M"
         title = event.get("e2eventtitle", "") or ""
         desc = event.get("e2eventdescription", "") or ""
+        desc = desc.strip()
 
         start = int(event.get("e2eventstart", "0"))
         start_time = datetime.fromtimestamp(start)
@@ -290,6 +291,22 @@ class EpgTool(Gtk.Box):
         event2 = model.get_value(iter2, 3)
 
         return int(event1.get("e2eventstart", "0")) - int(event2.get("e2eventstart", "0"))
+
+    def on_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        dst = view.get_dest_row_at_pos(x, y)
+        if not dst:
+            return False
+
+        path, pos = dst
+        model = view.get_model()
+        data = model[path][-1]
+        desc = data.get("e2eventdescription", "") or ""
+        ext_desc = data.get("e2eventdescriptionextended", "") or ""
+
+        tooltip.set_text(ext_desc if ext_desc else desc)
+        view.set_tooltip_row(tooltip, path)
+
+        return True
 
 
 class EpgDialog:

@@ -169,7 +169,7 @@ class RecordingsTool(Gtk.Box):
     def get_recordings_row(self, rec):
         service = rec.get("e2servicename")
         title = rec.get("e2title", "")
-        time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%A, %Y-%m-%d, %H:%M")
+        time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%a, %x, %H:%M")
         length = rec.get("e2length", "0")
         file = rec.get("e2filename", "")
         desc = rec.get("e2description", "")

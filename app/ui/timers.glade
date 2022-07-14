@@ -1206,13 +1206,14 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkTreeViewColumn" id="timer_time_column">
                     <property name="resizable">True</property>
-                    <property name="fixed_width">270</property>
+                    <property name="fixed_width">210</property>
                     <property name="min_width">50</property>
                     <property name="title" translatable="yes">Time</property>
                     <property name="alignment">0.5</property>
                     <child>
                       <object class="GtkCellRendererText" id="timer_time_renderer">
                         <property name="xpad">5</property>
+                        <property name="xalign">0.49000000953674316</property>
                       </object>
                       <attributes>
                         <attribute name="text">3</attribute>
