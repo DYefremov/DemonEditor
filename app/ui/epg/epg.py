@@ -47,7 +47,7 @@ from app.settings import SEP, EpgSource
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.timers import TimerTool
-from ..main_helper import on_popup_menu, update_entry_data
+from ..main_helper import on_popup_menu, update_entry_data, scroll_to
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
 
 
@@ -185,14 +185,17 @@ class EpgTool(Gtk.Box):
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._current_bq = None
         self._app = app
         self._app.connect("fav-changed", self.on_service_changed)
+        self._app.connect("bouquet-changed", self.on_bouquet_changed)
 
         handlers = {"on_epg_press": self.on_epg_press,
                     "on_timer_add": self.on_timer_add,
                     "on_epg_filter_changed": self.on_epg_filter_changed,
                     "on_epg_filter_toggled": self.on_epg_filter_toggled,
-                    "on_view_query_tooltip": self.on_view_query_tooltip}
+                    "on_view_query_tooltip": self.on_view_query_tooltip,
+                    "on_multi_epg_toggled": self.on_multi_epg_toggled}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}tab.glade", handlers)
 
@@ -201,9 +204,10 @@ class EpgTool(Gtk.Box):
         self._filter_model = builder.get_object("epg_filter_model")
         self._filter_model.set_visible_func(self.epg_filter_function)
         self._filter_entry = builder.get_object("epg_filter_entry")
+        self._multi_epg_button = builder.get_object("multi_epg_button")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         # Custom sort function.
-        self._view.get_model().set_sort_func(1, self.time_sort_func, 1)
+        self._view.get_model().set_sort_func(2, self.time_sort_func, 2)
 
         self.show()
 
@@ -229,7 +233,7 @@ class EpgTool(Gtk.Box):
 
     def add_timers_list(self, paths):
         ref_str = "timeraddbyeventid?sRef={}&eventid={}&justplay=0"
-        refs = [ref_str.format(ev.get("e2eventservicereference", ""), ev.get("e2eventid", "")) for ev in paths]
+        refs = [ref_str.format(quote(ev.get("e2eventservicereference", "")), ev.get("e2eventid", "")) for ev in paths]
 
         gen = self.write_timers_list(refs)
         GLib.idle_add(lambda: next(gen, False))
@@ -251,18 +255,26 @@ class EpgTool(Gtk.Box):
             self.on_timer_add()
 
     def on_service_changed(self, app, ref):
-        self._app.wait_dialog.show()
-        self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
+        if app.page is Page.EPG:
+            if self._multi_epg_button.get_active():
+                ref += ":"
+                path = next((r.path for r in self._model if r[-1].get("e2eventservicereference", None) == ref), None)
+                scroll_to(path, self._view) if path else None
+            else:
+                self._app.wait_dialog.show()
+                self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
 
     @run_idle
     def update_epg_data(self, epg):
         self._model.clear()
-        list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", []))))
+        list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", [])
+                                      if e.get("e2eventid", "").isdigit())))
         self._app.wait_dialog.hide()
 
     @staticmethod
     def get_event(event, show_day=True):
         t_str = f"{'%a, ' if show_day else ''}%x, %H:%M"
+        s_name = event.get("e2eventservicename", "")
         title = event.get("e2eventtitle", "") or ""
         desc = event.get("e2eventdescription", "") or ""
         desc = desc.strip()
@@ -272,7 +284,7 @@ class EpgTool(Gtk.Box):
         end_time = datetime.fromtimestamp(start + int(event.get("e2eventduration", "0")))
         ev_time = f"{start_time.strftime(t_str)} - {end_time.strftime('%H:%M')}"
 
-        return EpgEvent(title, ev_time, desc, event)
+        return EpgEvent(s_name, title, ev_time, desc, event)
 
     def on_epg_filter_changed(self, entry):
         self._filter_model.refilter()
@@ -283,12 +295,12 @@ class EpgTool(Gtk.Box):
 
     def epg_filter_function(self, model, itr, data):
         txt = self._filter_entry.get_text().upper()
-        return next((s for s in model.get(itr, 0, 1, 2) if txt in s.upper()), False)
+        return next((s for s in model.get(itr, 0, 1, 2, 3) if txt in s.upper()), False)
 
     def time_sort_func(self, model, iter1, iter2, column):
         """ Custom sort function for time column. """
-        event1 = model.get_value(iter1, 3)
-        event2 = model.get_value(iter2, 3)
+        event1 = model.get_value(iter1, 4)
+        event2 = model.get_value(iter2, 4)
 
         return int(event1.get("e2eventstart", "0")) - int(event2.get("e2eventstart", "0"))
 
@@ -307,6 +319,29 @@ class EpgTool(Gtk.Box):
         view.set_tooltip_row(tooltip, path)
 
         return True
+
+    def on_multi_epg_toggled(self, button):
+        self._model.clear()
+        if button.get_active():
+            self.get_multi_epg()
+
+    def on_bouquet_changed(self, app, bq):
+        self._current_bq = bq
+        if app.page is Page.EPG and self._multi_epg_button.get_active():
+            self.get_multi_epg()
+
+    def get_multi_epg(self):
+        if not self._current_bq:
+            return
+
+        self._app.wait_dialog.show()
+        bq = self._app.current_bouquet_files.get(self._current_bq, None)
+        api = self._app.http_api
+
+        if bq and api:
+            tm = datetime.now().timestamp()
+            req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"&time={tm}')
+            api.send(HttpAPI.Request.EPG_MULTI, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_epg_data, timeout=15)
 
 
 class EpgDialog:

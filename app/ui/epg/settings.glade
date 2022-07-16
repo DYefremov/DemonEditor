@@ -75,7 +75,7 @@ Author: Dmitriy Yefremov
             <property name="layout_style">expand</property>
             <child>
               <object class="GtkRadioButton" id="http_src_button">
-                <property name="label" translatable="yes">WebIf</property>
+                <property name="label" translatable="yes">Receiver</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>

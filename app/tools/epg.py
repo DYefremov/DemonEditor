@@ -54,8 +54,8 @@ except ModuleNotFoundError:
 else:
     DETECT_ENCODING = True
 
-EpgEvent = namedtuple("EpgEvent", ["title", "time", "desc", "event_data"])
-EpgEvent.__new__.__defaults__ = ("N/A", "N/A", "N/A", None)  # For Python3 < 3.7
+EpgEvent = namedtuple("EpgEvent", ["service_name", "title", "time", "desc", "event_data"])
+EpgEvent.__new__.__defaults__ = ("N/A", "N/A", "N/A", "N/A", None)  # For Python3 < 3.7
 
 
 class Reader(metaclass=abc.ABCMeta):
@@ -305,7 +305,7 @@ class XmlTvReader(Reader):
                 start = datetime.fromtimestamp(ev.start) + offset
                 end_time = datetime.fromtimestamp(ev.duration) + offset
                 tm = f"{start.strftime('%H:%M')} - {end_time.strftime('%H:%M')}"
-                events[srv.name] = EpgEvent(ev.title, tm, ev.desc, ev)
+                events[srv.name] = EpgEvent(srv.name, ev.title, tm, ev.desc, ev)
 
         return events
 

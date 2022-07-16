@@ -596,7 +596,8 @@ def telnet(host, port=23, user="", password="", timeout=5):
 # ***************** HTTP API ******************* #
 
 class HttpAPI:
-    __MAX_WORKERS = 4
+    _MAX_WORKERS = 4
+    _TIMEOUT = 10
 
     class Request(str, Enum):
         ZAP = "zap?sRef="
@@ -623,6 +624,7 @@ class HttpAPI:
         # EPG
         EPG = "epgservice?sRef="
         EPG_NOW = "epgnow?bRef="
+        EPG_MULTI = "epgmulti?bRef="
         # Timer
         TIMER = ""
         TIMER_LIST = "timerlist"
@@ -667,6 +669,7 @@ class HttpAPI:
                       Request.VOL,
                       Request.EPG,
                       Request.EPG_NOW,
+                      Request.EPG_MULTI,
                       Request.TIMER,
                       Request.RECORDINGS,
                       Request.N_ZAP}
@@ -678,7 +681,7 @@ class HttpAPI:
 
     def __init__(self, settings):
         from concurrent.futures import ThreadPoolExecutor as PoolExecutor
-        self._executor = PoolExecutor(max_workers=self.__MAX_WORKERS)
+        self._executor = PoolExecutor(max_workers=self._MAX_WORKERS)
 
         self._settings = settings
         self._shutdown = False
@@ -690,7 +693,7 @@ class HttpAPI:
         self._s_type = SettingsType.ENIGMA_2
         self.init()
 
-    def send(self, req_type, ref, callback=print, ref_prefix=""):
+    def send(self, req_type, ref, callback=print, ref_prefix="", timeout=_TIMEOUT):
         if self._shutdown:
             return
 
@@ -710,7 +713,7 @@ class HttpAPI:
         def done_callback(f):
             callback(f.result())
 
-        future = self._executor.submit(self.get_response, req_type, url, data, self._s_type)
+        future = self._executor.submit(self.get_response, req_type, url, data, self._s_type, timeout)
         future.add_done_callback(done_callback)
 
     @run_task
@@ -747,7 +750,7 @@ class HttpAPI:
         self._executor.shutdown()
 
     @staticmethod
-    def get_response(req_type, url, data=None, s_type=SettingsType.ENIGMA_2, timeout=10):
+    def get_response(req_type, url, data=None, s_type=SettingsType.ENIGMA_2, timeout=_TIMEOUT):
         try:
             with urlopen(Request(url, data=data), timeout=timeout) as f:
                 if s_type is SettingsType.ENIGMA_2:
@@ -780,7 +783,7 @@ class HttpAPI:
         elif req_type is HttpAPI.Request.PLAYER_LIST:
             return [{el.tag: el.text for el in el.iter()} for el in
                     ETree.fromstring(f.read().decode("utf-8")).iter("e2file")]
-        elif req_type is HttpAPI.Request.EPG or req_type is HttpAPI.Request.EPG_NOW:
+        elif req_type in (HttpAPI.Request.EPG, HttpAPI.Request.EPG_NOW, HttpAPI.Request.EPG_MULTI):
             return {"event_list": [{el.tag: el.text for el in el.iter()} for el in
                                    ETree.fromstring(f.read().decode("utf-8")).iter("e2event")]}
         elif req_type is HttpAPI.Request.TIMER_LIST:
