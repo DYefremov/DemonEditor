@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -86,8 +86,8 @@ if IS_LINUX:
     try:
         gi.require_version("Notify", "0.7")
         from gi.repository import Notify
-    except ImportError:
-        pass
+    except (ImportError, ValueError):
+        pass  # NOP
     else:
         NOTIFY_IS_INIT = Notify.init("DemonEditor")
 elif IS_DARWIN:
