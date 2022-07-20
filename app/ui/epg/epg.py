@@ -205,6 +205,7 @@ class EpgTool(Gtk.Box):
         self._filter_model.set_visible_func(self.epg_filter_function)
         self._filter_entry = builder.get_object("epg_filter_entry")
         self._multi_epg_button = builder.get_object("multi_epg_button")
+        self._event_count_label = builder.get_object("event_count_label")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         # Custom sort function.
         self._view.get_model().set_sort_func(2, self.time_sort_func, 2)
@@ -266,9 +267,11 @@ class EpgTool(Gtk.Box):
 
     @run_idle
     def update_epg_data(self, epg):
+        self._event_count_label.set_text("0")
         self._model.clear()
         list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", [])
                                       if e.get("e2eventid", "").isdigit())))
+        self._event_count_label.set_text(str(len(self._model)))
         self._app.wait_dialog.hide()
 
     @staticmethod
@@ -322,6 +325,8 @@ class EpgTool(Gtk.Box):
 
     def on_multi_epg_toggled(self, button):
         self._model.clear()
+        self._event_count_label.set_text("0")
+
         if button.get_active():
             self.get_multi_epg()
 
