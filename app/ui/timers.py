@@ -289,6 +289,7 @@ class TimerTool(Gtk.Box):
         handlers = {"on_timer_add": self.on_timer_add,
                     "on_timer_edit": self.on_timer_edit,
                     "on_timer_remove": self.on_timer_remove,
+                    "on_model_changed": self.on_model_changed,
                     "on_timers_press": self.on_timers_press,
                     "on_timers_key_press": self.on_timers_key_press,
                     "on_timer_cursor_changed": self.on_timer_cursor_changed,
@@ -305,6 +306,7 @@ class TimerTool(Gtk.Box):
         self._info_button = builder.get_object("timer_info_check_button")
         self._info_button.bind_property("active", builder.get_object("timer_info_frame"), "visible")
         self._info_enabled_switch = builder.get_object("timer_info_enabled_switch")
+        self._timers_count_label = builder.get_object("timers_count_label")
         self._ref_info_label = builder.get_object("timer_ref_value_label")
         self._event_id_info_label = builder.get_object("timer_event_id_value_label")
         self._begins_info_label = builder.get_object("timer_begins_value_label")
@@ -452,6 +454,9 @@ class TimerTool(Gtk.Box):
 
         self._app.send_http_request(HttpAPI.Request.TIMER, ref, callback)
         yield True
+
+    def on_model_changed(self, model, path, itr=None):
+        self._timers_count_label.set_text(str(len(model)))
 
     def on_timers_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(self._view.get_model()) > 0:
