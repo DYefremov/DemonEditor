@@ -81,10 +81,18 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">EPG source</property>
                 <property name="active">0</property>
+                <property name="has_entry">True</property>
                 <property name="active_id">0</property>
                 <items>
                   <item id="0" translatable="yes">Receiver</item>
                 </items>
+                <child internal-child="entry">
+                  <object class="GtkEntry">
+                    <property name="can_focus">False</property>
+                    <property name="editable">False</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>

@@ -1116,6 +1116,7 @@ Author: Dmitriy Yefremov
                             <property name="can_focus">True</property>
                             <property name="model">bouquet_list_store</property>
                             <property name="search_column">2</property>
+                            <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
                             <property name="tooltip_column">9</property>
                             <signal name="button-press-event" handler="on_bouquet_popup_menu" object="bouquet_popup_menu" swapped="no"/>
@@ -1123,7 +1124,7 @@ Author: Dmitriy Yefremov
                             <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
                             <signal name="key-release-event" handler="on_key_press" swapped="no"/>
                             <child internal-child="selection">
-                              <object class="GtkTreeSelection">
+                              <object class="GtkTreeSelection" id="bouquet_view_selection">
                                 <property name="mode">multiple</property>
                               </object>
                             </child>

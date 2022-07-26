@@ -29,7 +29,7 @@
 """ Helper module for the GUI. """
 
 __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "locate_in_services",
-           "scroll_to", "get_base_model", "copy_picon_reference", "assign_picons", "remove_picon",
+           "scroll_to", "get_base_model", "copy_reference", "assign_picons", "remove_picon",
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
            "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu")
@@ -523,27 +523,6 @@ def remove_picon(target, srv_view, fav_view, picons, settings):
     remove_picons(settings, picon_ids, picons)
 
 
-def copy_picon_reference(target, view, services, clipboard, transient):
-    """ Copying picon id to clipboard """
-    model, paths = view.get_selection().get_selected_rows()
-    if not is_only_one_item_selected(paths, transient):
-        return
-
-    if target is ViewTarget.SERVICES:
-        picon_id = model.get_value(model.get_iter(paths), Column.SRV_PICON_ID)
-        if picon_id:
-            clipboard.set_text(picon_id.rstrip(".png"), -1)
-        else:
-            show_dialog(DialogType.ERROR, transient, "No reference is present!")
-    elif target is ViewTarget.FAV:
-        fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
-        srv = services.get(fav_id, None)
-        if srv and srv.picon_id:
-            clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
-        else:
-            show_dialog(DialogType.ERROR, transient, "No reference is present!")
-
-
 def remove_all_unused_picons(settings, services):
     """ Removes picons from profile picons folder if there are no services for these picons. """
     ids = {s.picon_id for s in services}
@@ -637,7 +616,28 @@ def get_bouquets_names(model):
     return bouquets_names
 
 
-# ***************** Others *********************#
+# ***************** Others ********************* #
+
+def copy_reference(target, view, services, clipboard, transient):
+    """ Copying picon id to clipboard """
+    model, paths = view.get_selection().get_selected_rows()
+    if not is_only_one_item_selected(paths, transient):
+        return
+
+    if target is ViewTarget.SERVICES:
+        picon_id = model.get_value(model.get_iter(paths), Column.SRV_PICON_ID)
+        if picon_id:
+            clipboard.set_text(picon_id.rstrip(".png"), -1)
+        else:
+            show_dialog(DialogType.ERROR, transient, "No reference is present!")
+    elif target is ViewTarget.FAV:
+        fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
+        srv = services.get(fav_id, None)
+        if srv and srv.picon_id:
+            clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
+        else:
+            show_dialog(DialogType.ERROR, transient, "No reference is present!")
+
 
 def update_entry_data(entry, dialog, settings):
     """ Updates value in text entry from chooser dialog. """

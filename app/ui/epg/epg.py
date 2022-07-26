@@ -706,6 +706,10 @@ class EpgDialog:
                                                  get_message("Count of successfully configured services:"),
                                                  success_count), Gtk.MessageType.INFO)
 
+    def assign_refs(self, model, paths, data):
+        [self.assign_data(model[p], data) for p in paths]
+        self.update_epg_count()
+
     def assign_data(self, row, data, show_error=False):
         if row[Column.FAV_TYPE] != BqServiceType.IPTV.value:
             if not show_error:
@@ -750,8 +754,7 @@ class EpgDialog:
     def on_assign_ref(self, item=None):
         if self._current_ref:
             model, paths = self._bouquet_view.get_selection().get_selected_rows()
-            self.assign_data(model[paths], self._current_ref.pop())
-            self.update_epg_count()
+            self.assign_refs(model, paths, self._current_ref.pop())
 
     @run_idle
     def on_reset(self, item):
@@ -841,8 +844,8 @@ class EpgDialog:
         model = view.get_model()
         data = data.get_text()
         if data:
-            self.assign_data(model[path], data.split("::::"))
-            self.update_epg_count()
+            data = data.split("::::")
+            self.assign_refs(model, path, data)
         return False
 
     # ***************** Options *********************#

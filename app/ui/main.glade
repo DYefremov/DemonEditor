@@ -73,6 +73,11 @@ Author: Dmitriy Yefremov
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="assign_ref_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">insert-link</property>
+  </object>
   <object class="GtkTreeStore" id="bouquets_tree_store">
     <columns>
       <!-- column-name bouquet -->
@@ -1342,6 +1347,16 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkImageMenuItem" id="services_reference_popup_item">
+        <property name="label" translatable="yes">Copy reference</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">copy_image</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_reference_copy" object="services_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="services_edit_popup_item">
         <property name="label">gtk-edit</property>
         <property name="visible">True</property>
@@ -1441,22 +1456,6 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkImageMenuItem" id="services_reference_picon_popup_item">
-                <property name="label" translatable="yes">Copy reference</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">copy_image</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="services_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_5">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
               <object class="GtkImageMenuItem" id="services_remove_unused_picons_popup_item">
                 <property name="label" translatable="yes">Remove all unused</property>
                 <property name="visible">True</property>
@@ -1471,7 +1470,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_6">
+      <object class="GtkSeparatorMenuItem" id="services_separatormenuitem_5">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -4579,6 +4578,16 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkImageMenuItem" id="fav_reference_popup_item">
+        <property name="label" translatable="yes">Copy reference</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="image">copy_image_2</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="on_reference_copy" object="fav_tree_view" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="fav_paste_popup_item">
         <property name="label">gtk-paste</property>
         <property name="visible">True</property>
@@ -4673,7 +4682,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_3">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>
@@ -4747,7 +4756,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_5">
+              <object class="GtkSeparatorMenuItem" id="fav_popup_separator_5">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -4794,9 +4803,20 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_6">
+              <object class="GtkSeparatorMenuItem" id="fav_popup_separator_6">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="fav_assign_ref_popup_item">
+                <property name="label" translatable="yes">Assign reference</property>
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="image">assign_ref_image</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_reference_assign" object="fav_tree_view" swapped="no"/>
               </object>
             </child>
             <child>
@@ -4810,7 +4830,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_7">
+              <object class="GtkSeparatorMenuItem" id="fav_popup_separator_7">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -4826,7 +4846,7 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_8">
+              <object class="GtkSeparatorMenuItem" id="fav_popup_separator_8">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -4860,7 +4880,7 @@ Author: Dmitriy Yefremov
         <property name="image">insert_image</property>
         <property name="use_stock">False</property>
         <child type="submenu">
-          <object class="GtkMenu" id="fav_picon_popoup_menu">
+          <object class="GtkMenu" id="fav_picon_popup_menu">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -4900,22 +4920,6 @@ Author: Dmitriy Yefremov
               </object>
             </child>
             <child>
-              <object class="GtkImageMenuItem" id="fav_reference_picon_popup_item">
-                <property name="label" translatable="yes">Copy reference</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="image">copy_image_2</property>
-                <property name="use_stock">False</property>
-                <signal name="activate" handler="on_reference_picon" object="fav_tree_view" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkSeparatorMenuItem" id="fav_pupup_separator_11">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-            </child>
-            <child>
               <object class="GtkImageMenuItem" id="fav_remove_unused_picons_popup_item">
                 <property name="label" translatable="yes">Remove all unused</property>
                 <property name="visible">True</property>
@@ -4930,7 +4934,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
-      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_12">
+      <object class="GtkSeparatorMenuItem" id="fav_popup_separator_11">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
       </object>

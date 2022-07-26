@@ -27,6 +27,7 @@
 
 
 import os
+import re
 import sys
 from collections import Counter
 from contextlib import suppress
@@ -95,7 +96,7 @@ class Application(Gtk.Application):
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
                      "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item", "fav_add_alt_popup_item",
-                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item")
+                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item", "fav_reference_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
@@ -132,6 +133,8 @@ class Application(Gtk.Application):
                     "on_iptv_services_copy": self.on_iptv_services_copy,
                     "on_fav_copy": self.on_fav_copy,
                     "on_bouquets_copy": self.on_bouquets_copy,
+                    "on_reference_copy": self.on_reference_copy,
+                    "on_reference_assign": self.on_reference_assign,
                     "on_fav_paste": self.on_fav_paste,
                     "on_bouquets_paste": self.on_bouquets_paste,
                     "on_rename_for_bouquet": self.on_rename_for_bouquet,
@@ -184,7 +187,6 @@ class Application(Gtk.Application):
                     "on_assign_picon_file": self.on_assign_picon_file,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
-                    "on_reference_picon": self.on_reference_picon,
                     "on_remove_unused_picons": self.on_remove_unused_picons,
                     "on_iptv": self.on_iptv,
                     "on_epg_list_configuration": self.on_epg_list_configuration,
@@ -374,6 +376,9 @@ class Application(Gtk.Application):
         self._fav_view.connect("key-press-event", self.force_ctrl)
         # Clipboard
         self._clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        ref_item = builder.get_object("fav_assign_ref_popup_item")
+        self.bind_property("is_enigma", ref_item, "visible")
+        self._clipboard.connect("owner-change", lambda c, o: ref_item.set_sensitive(c.wait_is_text_available()))
         # Wait dialog
         self._wait_dialog = WaitDialog(self._main_window)
         # Filter
@@ -1128,6 +1133,10 @@ class Application(Gtk.Application):
             to_copy = list(map(model.get_iter, filter(lambda p: p.get_depth() == 2, paths)))
             if to_copy:
                 self._bouquets_buffer.extend([model[i][:] for i in to_copy])
+
+    def on_reference_copy(self, view):
+        """ Copying picon id to clipboard. """
+        copy_reference(self.get_target_view(view), view, self._services, self._clipboard, self._main_window)
 
     def on_fav_cut(self, view):
         self.on_cut(view, ViewTarget.FAV)
@@ -2926,6 +2935,35 @@ class Application(Gtk.Application):
             gen = self.remove_favs(response, self._fav_model)
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
+    def on_reference_assign(self, view):
+        """ Assigns DVB reference to the selected IPTV services. """
+        model, paths = view.get_selection().get_selected_rows()
+        iptv_paths = [p for p in paths if model[p][Column.FAV_TYPE] == BqServiceType.IPTV.value]
+        if not iptv_paths:
+            self.show_error_message("No IPTV services selected!")
+            return
+
+        ref = self._clipboard.wait_for_text()
+        if ref and re.match(r"\d+_\d+_\d+_\w+_\d+_\d+_\d+_0_0_0", ref):
+            [self.assign_reference(model, p, ref) for p in iptv_paths]
+            self._clipboard.clear()
+
+    def assign_reference(self, model, path, ref):
+        ref_data = ref.split("_")
+        row = model[path]
+        fav_id = row[Column.FAV_ID]
+        fav_id_data = fav_id.split(":")
+        fav_id_data[3:7] = ref_data[3:7]
+        new_fav_id = ":".join(fav_id_data)
+        new_data_id = ":".join(fav_id_data[:11]).strip()
+        old_srv = self._services.pop(fav_id, None)
+        if old_srv:
+            picon_id_data = old_srv.picon_id.split("_")
+            picon_id_data[3:7] = ref_data[3:7]
+            new_service = old_srv._replace(data_id=new_data_id, fav_id=new_fav_id, picon_id="_".join(picon_id_data))
+            self._services[new_fav_id] = new_service
+            self.emit("iptv-service-edited", (old_srv, new_service))
+
     # ****************** EPG  ********************** #
 
     def set_display_epg(self, action, value):
@@ -3924,10 +3962,6 @@ class Application(Gtk.Application):
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view), self._services_view, self._fav_view, self._picons, self._settings)
-
-    def on_reference_picon(self, view):
-        """ Copying picon id to clipboard """
-        copy_picon_reference(self.get_target_view(view), view, self._services, self._clipboard, self._main_window)
 
     def on_remove_unused_picons(self, item):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
