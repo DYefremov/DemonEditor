@@ -364,6 +364,27 @@ Author: Dmitriy Yefremov
                 <property name="margin_bottom">5</property>
                 <property name="orientation">vertical</property>
                 <child>
+                  <object class="GtkViewport" id="screenshot_view_port">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">2</property>
+                    <property name="margin_right">2</property>
+                    <property name="margin_top">2</property>
+                    <property name="margin_bottom">2</property>
+                    <child>
+                      <object class="GtkDrawingArea" id="screenshot_area">
+                        <property name="can_focus">False</property>
+                        <signal name="draw" handler="on_screenshot_draw" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkBox" id="remote_signal_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -509,27 +530,6 @@ Author: Dmitriy Yefremov
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="pack_type">end</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkViewport" id="screenshot_view_port">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_left">2</property>
-                    <property name="margin_right">2</property>
-                    <property name="margin_top">2</property>
-                    <property name="margin_bottom">2</property>
-                    <child>
-                      <object class="GtkDrawingArea" id="screenshot_area">
-                        <property name="can_focus">False</property>
-                        <signal name="draw" handler="on_screenshot_draw" swapped="no"/>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -559,8 +559,8 @@ Author: Dmitriy Yefremov
                 <property name="valign">center</property>
                 <property name="margin_left">25</property>
                 <property name="margin_right">25</property>
-                <property name="margin_top">20</property>
-                <property name="margin_bottom">20</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
@@ -722,6 +722,69 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">center</property>
+                    <property name="row_spacing">5</property>
+                    <property name="column_spacing">15</property>
+                    <child>
+                      <object class="GtkLabel" id="ch_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Ch</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="ch_up_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_ch_up</property>
+                        <child>
+                          <object class="GtkArrow" id="ch_up_arrow">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="arrow_type">up</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="ch_down_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_ch_down</property>
+                        <child>
+                          <object class="GtkArrow" id="ch_down_arrow">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="arrow_type">down</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -760,7 +823,7 @@ audio-volume-medium-symbolic</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -771,7 +834,7 @@ audio-volume-medium-symbolic</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -796,6 +859,26 @@ audio-volume-medium-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="prev_button">
+                        <property name="name">status-bar-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_prev_media</property>
+                        <child>
+                          <object class="GtkImage" id="prev_button_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="icon_name">media-skip-backward</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
@@ -811,6 +894,26 @@ audio-volume-medium-symbolic</property>
                         <style>
                           <class name="green-button"/>
                         </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="play_button">
+                        <property name="name">status-bar-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_play_media</property>
+                        <child>
+                          <object class="GtkImage" id="play_button_image">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="icon_name">media-playback-start</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -832,7 +935,7 @@ audio-volume-medium-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
-                        <property name="top_attach">1</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
                     <child>
@@ -850,30 +953,12 @@ audio-volume-medium-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="next_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="action_name">app.on_next_media</property>
-                        <child>
-                          <object class="GtkImage" id="next_button_imag">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">media-skip-forward</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
                         <property name="top_attach">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="stop_button">
+                        <property name="name">status-bar-button</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -888,52 +973,90 @@ audio-volume-medium-symbolic</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
-                        <property name="top_attach">0</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="play_button">
+                      <object class="GtkButton" id="next_button">
+                        <property name="name">status-bar-button</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">app.on_play_media</property>
+                        <property name="action_name">app.on_next_media</property>
                         <child>
-                          <object class="GtkImage" id="play_button_image">
+                          <object class="GtkImage" id="next_button_imag">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="icon_name">media-playback-start</property>
+                            <property name="icon_name">media-skip-forward</property>
                           </object>
                         </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="tv_button">
+                        <property name="label" translatable="yes">TV</property>
+                        <property name="name">status-bar-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_tv</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
+                        <property name="top_attach">2</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="prev_button">
+                      <object class="GtkButton" id="radio_button">
+                        <property name="label" translatable="yes">Radio</property>
+                        <property name="name">status-bar-button</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">app.on_prev_media</property>
-                        <child>
-                          <object class="GtkImage" id="prev_button_image">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">media-skip-backward</property>
-                          </object>
-                        </child>
+                        <property name="action_name">app.on_radio</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="audio_button">
+                        <property name="label" translatable="yes">Audio</property>
+                        <property name="name">status-bar-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_audio</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="fav_button">
+                        <property name="label" translatable="yes">FAV</property>
+                        <property name="name">status-bar-button</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="action_name">app.on_fav</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">2</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -945,12 +1068,12 @@ audio-volume-medium-symbolic</property>
                     <property name="halign">center</property>
                     <property name="margin_top">10</property>
                     <property name="margin_bottom">10</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="draw_indicator">False</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -958,7 +1081,6 @@ audio-volume-medium-symbolic</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="valign">center</property>
-                    <property name="margin_top">15</property>
                     <property name="label_xalign">0.5</property>
                     <property name="shadow_type">none</property>
                     <child>

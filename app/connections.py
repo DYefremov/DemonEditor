@@ -649,10 +649,16 @@ class HttpAPI:
         EXIT = "174"
         OK = "352"
         INFO = "358"
+        TV = "377"
+        RADIO = "385"
+        AUDIO = "392"
+        FAV = "393"
         RED = "398"
         GREEN = "399"
         YELLOW = "400"
         BLUE = "401"
+        CH_UP = "402"
+        CH_DOWN = "403"
         BACK = "412"
 
     class Power(str, Enum):
