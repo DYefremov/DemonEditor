@@ -377,7 +377,7 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="sat_name_column">
-                                <property name="title" translatable="yes">Name</property>
+                                <property name="title" translatable="yes">Satellite</property>
                                 <property name="expand">True</property>
                                 <property name="alignment">0.49000000953674316</property>
                                 <child>
@@ -491,7 +491,7 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="ter_name_column">
-                                <property name="title" translatable="yes">Name</property>
+                                <property name="title" translatable="yes">Region</property>
                                 <property name="expand">True</property>
                                 <property name="alignment">0.49000000953674316</property>
                                 <child>
@@ -591,7 +591,7 @@ Author: Dmitriy Yefremov
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="cable_name_column">
-                                <property name="title" translatable="yes">Name</property>
+                                <property name="title" translatable="yes">Provider</property>
                                 <property name="expand">True</property>
                                 <property name="alignment">0.49000000953674316</property>
                                 <child>

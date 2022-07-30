@@ -36,14 +36,100 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task, log
 from app.eparser import Satellite, Transponder
-from app.eparser.ecommons import PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION
+from app.eparser.ecommons import PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
-from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
+from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
 from ..search import SearchProvider
-from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH
+from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, IS_GNOME_SESSION
 
 _DIALOGS_UI_PATH = f"{UI_RESOURCES_PATH}xml{os.sep}dialogs.glade"
+
+
+class DVBDialog(Gtk.Dialog):
+    """ Base dialog class for editing DVB (-> *.xml) data. """
+
+    def __init__(self, parent, title, data=None, *args, **kwargs):
+        super().__init__(transient_for=parent,
+                         title=get_message(title),
+                         modal=True,
+                         resizable=False,
+                         default_width=320,
+                         use_header_bar=IS_GNOME_SESSION,
+                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK),
+                         *args, **kwargs)
+
+        self._data = data
+
+    @property
+    def data(self):
+        return self._data
+
+
+class TCDialog(DVBDialog):
+    def __init__(self, parent, title=None, data=None, *args, **kwargs):
+        super().__init__(parent, title, data, *args, **kwargs)
+
+        self.frame = Gtk.Frame(margin=5, label=get_message("Name:"), label_xalign=0.02)
+        self._entry = Gtk.Entry(margin=5)
+        self.frame.add(self._entry)
+        self.get_content_area().pack_start(self.frame, True, True, 0)
+        self.show_all()
+
+        if data:
+            self._entry.set_text(data.name)
+
+
+class SatelliteDialog(DVBDialog):
+    """ Dialog for adding or edit satellite. """
+
+    def __init__(self, transient, title, satellite=None, *args, **kwargs):
+        super().__init__(transient, title, *args, **kwargs)
+        builder = get_builder(_DIALOGS_UI_PATH, use_str=True,
+                              objects=("satellite_dialog_frame", "side_store", "pos_adjustment"))
+
+        self.get_content_area().pack_start(builder.get_object("satellite_dialog_frame"), True, True, 0)
+        self._sat_name = builder.get_object("sat_name_entry")
+        self._sat_position = builder.get_object("sat_position_button")
+        self._side = builder.get_object("side_box")
+        self._transponders = satellite.transponders if satellite else []
+
+        if satellite:
+            self._sat_name.set_text(satellite.name)
+            pos = satellite.position
+            pos = float(f"{pos[:-1]}.{pos[-1:]}")
+            self._sat_position.set_value(fabs(pos))
+            self._side.set_active(0 if pos >= 0 else 1)  # E or W
+
+    @property
+    def data(self):
+        return self.to_satellite()
+
+    def to_satellite(self):
+        name = self._sat_name.get_text()
+        pos = round(self._sat_position.get_value(), 1)
+        side = self._side.get_active()
+        pos = "{}{}{}".format("-" if side == 1 else "", *str(pos).split("."))
+
+        return Satellite(name=name, flags="0", position=pos, transponders=self._transponders)
+
+
+class TerrestrialDialog(TCDialog):
+    """ Dialog for adding or edit  terrestrial region. """
+
+    @property
+    def data(self):
+        name = self._entry.get_text()
+        return self._data._replace(name=name) if self._data else Terrestrial(name, "5", None, [])
+
+
+class CableDialog(TCDialog):
+    """ Dialog for adding or edit cable provider. """
+
+    @property
+    def data(self):
+        name = self._entry.get_text()
+        return self._data._replace(name=name) if self._data else Cable(name, "true", "9", None, [])
 
 
 class TransponderDialog:
@@ -129,47 +215,6 @@ class TransponderDialog:
             return False
 
         return True
-
-
-# ***************** Satellite dialog *******************#
-
-class SatelliteDialog:
-    """ Shows dialog for adding or edit satellite. """
-
-    def __init__(self, transient, satellite=None):
-        builder = get_builder(_DIALOGS_UI_PATH, use_str=True,
-                              objects=("satellite_dialog", "side_store", "pos_adjustment"))
-
-        self._dialog = builder.get_object("satellite_dialog")
-        self._dialog.set_transient_for(transient)
-        self._sat_name = builder.get_object("sat_name_entry")
-        self._sat_position = builder.get_object("sat_position_button")
-        self._side = builder.get_object("side_box")
-        self._transponders = satellite.transponders if satellite else []
-
-        if satellite:
-            self._sat_name.set_text(satellite.name)
-            pos = satellite.position
-            pos = float(f"{pos[:-1]}.{pos[-1:]}")
-            self._sat_position.set_value(fabs(pos))
-            self._side.set_active(0 if pos >= 0 else 1)  # E or W
-
-    def run(self):
-        if self._dialog.run() == Gtk.ResponseType.CANCEL:
-            return
-
-        return self.to_satellite()
-
-    def destroy(self):
-        self._dialog.destroy()
-
-    def to_satellite(self):
-        name = self._sat_name.get_text()
-        pos = round(self._sat_position.get_value(), 1)
-        side = self._side.get_active()
-        pos = "{}{}{}".format("-" if side == 1 else "", *str(pos).split("."))
-
-        return Satellite(name=name, flags="0", position=pos, transponders=self._transponders)
 
 
 # ********************** Update dialogs ************************ #

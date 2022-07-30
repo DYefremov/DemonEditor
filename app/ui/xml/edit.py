@@ -38,7 +38,7 @@ from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTE
                                   GUARD_INTERVAL, TRANSMISSION_MODE, HIERARCHY, Inversion, FEC_DEFAULT, C_MODULATION,
                                   Terrestrial, Cable)
 from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable
-from .dialogs import SatelliteDialog, TransponderDialog, SatellitesUpdateDialog
+from .dialogs import SatelliteDialog, TransponderDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import move_items, on_popup_menu
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
@@ -317,7 +317,7 @@ class SatellitesTool(Gtk.Box):
         elif ctrl and key is KeyboardKey.T:
             self.on_transponder()
         elif ctrl and key in MOVE_KEYS:
-            move_items(key, self._satellite_view)
+            move_items(key, view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
 
@@ -376,28 +376,32 @@ class SatellitesTool(Gtk.Box):
         itr = model.get_iter(paths)
 
         if view is self._satellite_view:
-            self.on_satellite(None if force else Satellite(*row), itr)
+            self.on_dvb_data_edit(SatelliteDialog, "Satellite", view, None if force else Satellite(*row), itr)
         elif view is self._sat_tr_view:
             self.on_transponder(None if force else Transponder(*row), itr)
+        elif view is self._terrestrial_view:
+            self.on_dvb_data_edit(TerrestrialDialog, "Region", view, None if force else Terrestrial(*row), itr)
+        elif view is self._cable_view:
+            self.on_dvb_data_edit(CableDialog, "Provider", view, None if force else Cable(*row), itr)
         else:
             self._app.show_error_message("Not implemented yet!")
 
-    def on_satellite(self, satellite=None, edited_itr=None):
+    def on_dvb_data_edit(self, dialog, title, view, data=None, edited_itr=None):
         """ Create or edit satellite. """
-        sat_dialog = SatelliteDialog(self._app.get_active_window(), satellite)
-        sat = sat_dialog.run()
-        sat_dialog.destroy()
-
-        if sat:
-            model, paths = self._satellite_view.get_selection().get_selected_rows()
-            if satellite and edited_itr:
-                model.set(edited_itr, {i: v for i, v in enumerate(sat)})
-            else:
-                if len(model):
-                    index = paths[0].get_indices()[0] + 1
-                    model.insert(index, sat)
+        dialog = dialog(self._app.get_active_window(), title, data)
+        if dialog.run() == Gtk.ResponseType.OK:
+            dvb_data = dialog.data
+            if dvb_data:
+                model, paths = view.get_selection().get_selected_rows()
+                if data and edited_itr:
+                    model.set(edited_itr, {i: v for i, v in enumerate(dvb_data)})
                 else:
-                    model.append(sat)
+                    if len(model):
+                        index = paths[0].get_indices()[0] + 1
+                        model.insert(index, dvb_data)
+                    else:
+                        model.append(dvb_data)
+        dialog.destroy()
 
     def on_transponder(self, transponder=None, edited_itr=None):
         """ Create or edit transponder. """
@@ -514,7 +518,7 @@ class SatellitesTool(Gtk.Box):
                             f"{self._settings.profile_data_path}cables.xml")
 
     def on_save_as(self, app, page):
-        show_dialog(DialogType.ERROR, transient=self._app.app_window, text="Not implemented yet!")
+        self._app.show_error_message("Not implemented yet!")
 
     def on_download(self, app, page):
         if page is Page.SATELLITE:
