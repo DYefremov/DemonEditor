@@ -36,9 +36,10 @@ from app.connections import DownloadType
 from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC,
                                   GUARD_INTERVAL, TRANSMISSION_MODE, HIERARCHY, Inversion, FEC_DEFAULT, C_MODULATION,
-                                  Terrestrial, Cable)
+                                  Terrestrial, Cable, CableTransponder, TerTransponder)
 from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable
-from .dialogs import SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog
+from .dialogs import SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog, \
+    CableTransponderDialog, TerTransponderDialog
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import move_items, on_popup_menu
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
@@ -357,7 +358,7 @@ class SatellitesTool(Gtk.Box):
 
     def on_transponder_add(self, item):
         if self._dvb_type is self.DVB.SAT:
-            self.on_transponder()
+            self.on_edit(force=True)
         else:
             self._app.show_error_message("Not implemented yet!")
 
@@ -384,6 +385,12 @@ class SatellitesTool(Gtk.Box):
         elif view is self._sat_tr_view:
             data = None if force else Transponder(*row)
             self.on_transponder_data_edit(SatTransponderDialog, "Transponder", view, self._satellite_view, data, itr)
+        elif view is self._ter_tr_view:
+            data = None if force else TerTransponder(*row)
+            self.on_transponder_data_edit(TerTransponderDialog, "Transponder", view, self._terrestrial_view, data, itr)
+        elif view is self._cable_tr_view:
+            data = None if force else CableTransponder(*row)
+            self.on_transponder_data_edit(CableTransponderDialog, "Transponder", view, self._cable_view, data, itr)
         else:
             self._app.show_error_message("Not implemented yet!")
 

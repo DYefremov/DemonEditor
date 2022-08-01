@@ -36,7 +36,9 @@ from gi.repository import GLib
 
 from app.commons import run_idle, run_task, log
 from app.eparser import Satellite, Transponder
-from app.eparser.ecommons import PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable
+from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable,
+                                  T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC, GUARD_INTERVAL, TRANSMISSION_MODE,
+                                  HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT)
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
@@ -71,6 +73,41 @@ class DVBDialog(Gtk.Dialog):
     @property
     def data(self):
         return self._data
+
+
+class TransponderDialog(DVBDialog):
+    """ Base transponder dialog class. """
+
+    def __init__(self, parent, title, data=None, *args, **kwargs):
+        super().__init__(parent, title, data, *args, **kwargs)
+        # Pattern for digits entries.
+        self.digit_pattern = re.compile(r"\D")
+        # Style
+        self.style_provider = Gtk.CssProvider()
+        self.style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+
+    def run(self):
+        resp = super().run()
+        while resp == Gtk.ResponseType.OK:
+            if self.is_accept():
+                return resp
+            show_dialog(DialogType.ERROR, self, "Please check your parameters and try again.")
+            resp = super().run()
+        return resp
+
+    def is_accept(self):
+        return True
+
+    def init_transponder_data(self, data):
+        self._data = data
+
+    def on_entry_changed(self, entry):
+        """ Digit entries handler. """
+        entry.set_name("digit-entry" if self.digit_pattern.search(entry.get_text()) else "GtkEntry")
+
+    def set_style_provider(self, widget):
+        context = widget.get_style_context()
+        context.add_provider_for_screen(Gdk.Screen.get_default(), self.style_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 
 class TCDialog(DVBDialog):
@@ -139,7 +176,7 @@ class CableDialog(TCDialog):
         return self._data._replace(name=name) if self._data else Cable(name, "true", "9", None, [])
 
 
-class SatTransponderDialog(DVBDialog):
+class SatTransponderDialog(TransponderDialog):
     """ Dialog for adding or edit satellite transponder. """
 
     def __init__(self, transient, title, data=None, *args, **kwargs):
@@ -160,43 +197,29 @@ class SatTransponderDialog(DVBDialog):
         self._pls_code_entry = builder.get_object("pls_code_entry")
         self._is_id_entry = builder.get_object("is_id_entry")
         self._t2mi_plp_id_entry = builder.get_object("t2mi_plp_id_entry")
-        # pattern for frequency and rate entries (only digits)
-        self._pattern = re.compile(r"\D")
-        # style
-        self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
-        self._freq_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
-                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self._rate_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
-                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        self.show_all()
-        if data:
-            self.init_transponder(data)
 
-    def run(self):
-        resp = super().run()
-        while resp == Gtk.ResponseType.OK:
-            if self.is_accept():
-                return resp
-            show_dialog(DialogType.ERROR, self, "Please check your parameters and try again.")
-            resp = super().run()
-        return resp
+        self.set_style_provider(self._freq_entry)
+        self.set_style_provider(self._rate_entry)
+        self.show_all()
+
+        self.init_transponder_data(data)
 
     @property
     def data(self):
         return self.to_transponder()
 
-    def init_transponder(self, transponder):
-        self._freq_entry.set_text(transponder.frequency)
-        self._rate_entry.set_text(transponder.symbol_rate)
-        self._pol_box.set_active_id(POLARIZATION.get(transponder.polarization, None))
-        self._fec_box.set_active_id(FEC.get(transponder.fec_inner, None))
-        self._sys_box.set_active_id(SYSTEM.get(transponder.system, None))
-        self._mod_box.set_active_id(MODULATION.get(transponder.modulation, None))
-        self._pls_mode_box.set_active_id(PLS_MODE.get(transponder.pls_mode, None))
-        self._is_id_entry.set_text(transponder.is_id if transponder.is_id else "")
-        self._pls_code_entry.set_text(transponder.pls_code if transponder.pls_code else "")
-        self._t2mi_plp_id_entry.set_text(transponder.t2mi_plp_id if transponder.t2mi_plp_id else "")
+    def init_transponder_data(self, transponder):
+        if transponder:
+            self._freq_entry.set_text(transponder.frequency)
+            self._rate_entry.set_text(transponder.symbol_rate)
+            self._pol_box.set_active_id(POLARIZATION.get(transponder.polarization, None))
+            self._fec_box.set_active_id(FEC.get(transponder.fec_inner, None))
+            self._sys_box.set_active_id(SYSTEM.get(transponder.system, None))
+            self._mod_box.set_active_id(MODULATION.get(transponder.modulation, None))
+            self._pls_mode_box.set_active_id(PLS_MODE.get(transponder.pls_mode, None))
+            self._is_id_entry.set_text(transponder.is_id if transponder.is_id else "")
+            self._pls_code_entry.set_text(transponder.pls_code if transponder.pls_code else "")
+            self._t2mi_plp_id_entry.set_text(transponder.t2mi_plp_id if transponder.t2mi_plp_id else "")
 
     def to_transponder(self):
         return Transponder(frequency=self._freq_entry.get_text(),
@@ -210,22 +233,110 @@ class SatTransponderDialog(DVBDialog):
                            is_id=self._is_id_entry.get_text(),
                            t2mi_plp_id=self._t2mi_plp_id_entry.get_text())
 
-    def on_entry_changed(self, entry):
-        entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
-
     def is_accept(self):
         tr = self.to_transponder()
-        if self._pattern.search(tr.frequency) or not tr.frequency:
+        if self.digit_pattern.search(tr.frequency) or not tr.frequency:
             return False
-        elif self._pattern.search(tr.symbol_rate) or not tr.symbol_rate:
+        elif self.digit_pattern.search(tr.symbol_rate) or not tr.symbol_rate:
             return False
         elif None in (tr.polarization, tr.fec_inner, tr.system, tr.modulation):
             return False
-        elif self._pattern.search(tr.pls_code) or self._pattern.search(tr.is_id):
+        elif self.digit_pattern.search(tr.pls_code) or self.digit_pattern.search(tr.is_id):
             return False
-        elif self._pattern.search(tr.t2mi_plp_id):
+        elif self.digit_pattern.search(tr.t2mi_plp_id):
             return False
 
+        return True
+
+
+class TerTransponderDialog(TransponderDialog):
+    """ Dialog for adding or edit terrestrial transponder. """
+
+    def __init__(self, transient, title, data=None, *args, **kwargs):
+        super().__init__(transient, title, data, *args, **kwargs)
+
+        handlers = {"on_entry_changed": self.on_entry_changed}
+        builder = get_builder(_DIALOGS_UI_PATH, handlers, use_str=True, objects=("ter_tr_box",))
+
+        self.frame.add(builder.get_object("ter_tr_box"))
+        self._freq_entry = builder.get_object("ter_freq_entry")
+        self._sys_box = builder.get_object("ter_sys_box")
+        self._bandwidth_box = builder.get_object("ter_bandwidth_box")
+        self._constellation_box = builder.get_object("ter_constellation_box")
+        self._sr_hp_box = builder.get_object("ter_sr_hp_box")
+        self._sr_lp_box = builder.get_object("ter_sr_lp_box")
+        self._guard_box = builder.get_object("ter_guard_box")
+        self._transmission_box = builder.get_object("ter_transmission_box")
+        self._hierarchy_box = builder.get_object("ter_hierarchy_box")
+        self._inversion_box = builder.get_object("ter_inversion_box")
+
+        self.set_style_provider(self._freq_entry)
+        self.show_all()
+
+        self.init_transponder_data(data)
+
+    def init_transponder_data(self, transponder):
+        if transponder:
+            self._freq_entry.set_text(transponder.centre_frequency)
+            [self._sys_box.append(k, v) for k, v in T_SYSTEM.items()]
+            self._sys_box.set_active_id(transponder.system)
+            [self._bandwidth_box.append(k, v) for k, v in BANDWIDTH.items()]
+            self._bandwidth_box.set_active_id(transponder.bandwidth)
+            [self._constellation_box.append(k, v) for k, v in CONSTELLATION.items()]
+            self._constellation_box.set_active_id(transponder.constellation)
+            [self._sr_hp_box.append(k, v) for k, v in T_FEC.items()]
+            self._sr_hp_box.set_active_id(transponder.code_rate_hp)
+            [self._sr_lp_box.append(k, v) for k, v in T_FEC.items()]
+            self._sr_lp_box.set_active_id(transponder.code_rate_lp)
+            [self._guard_box.append(k, v) for k, v in GUARD_INTERVAL.items()]
+            self._guard_box.set_active_id(transponder.guard_interval)
+            [self._transmission_box.append(k, v) for k, v in TRANSMISSION_MODE.items()]
+            self._transmission_box.set_active_id(transponder.transmission_mode)
+            [self._hierarchy_box.append(k, v) for k, v in HIERARCHY.items()]
+            self._hierarchy_box.set_active_id(transponder.hierarchy_information)
+            [self._inversion_box.append(k.value, k.name) for k in Inversion]
+            self._inversion_box.set_active_id(transponder.inversion)
+
+    def is_accept(self):
+        return not self.digit_pattern.search(self._freq_entry.get_text())
+
+
+class CableTransponderDialog(TransponderDialog):
+    """ Dialog for adding or edit cable transponder. """
+
+    def __init__(self, transient, title, data=None, *args, **kwargs):
+        super().__init__(transient, title, data, *args, **kwargs)
+
+        handlers = {"on_entry_changed": self.on_entry_changed}
+        builder = get_builder(_DIALOGS_UI_PATH, handlers, use_str=True, objects=("cable_tr_box",))
+
+        self.frame.add(builder.get_object("cable_tr_box"))
+
+        self._freq_entry = builder.get_object("cable_freq_entry")
+        self._rate_entry = builder.get_object("cable_rate_entry")
+        self._fec_box = builder.get_object("cable_fec_box")
+        self._mod_box = builder.get_object("cable_mod_box")
+
+        self.set_style_provider(self._freq_entry)
+        self.set_style_provider(self._rate_entry)
+        self.show_all()
+
+        self.init_transponder_data(data)
+
+    def init_transponder_data(self, transponder):
+        if transponder:
+            self._freq_entry.set_text(transponder.frequency)
+            self._rate_entry.set_text(transponder.symbol_rate)
+            [self._fec_box.append(k, v) for k, v in FEC_DEFAULT.items()]
+            self._fec_box.set_active_id(transponder.fec_inner)
+            [self._mod_box.append(k, v) for k, v in C_MODULATION.items()]
+            self._mod_box.set_active_id(transponder.modulation)
+
+    def is_accept(self):
+        if self.digit_pattern.search(self._freq_entry.get_text()):
+            return False
+        elif self.digit_pattern.search(self._rate_entry.get_text()):
+            return False
         return True
 
 
