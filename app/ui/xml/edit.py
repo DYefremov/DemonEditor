@@ -38,7 +38,7 @@ from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTE
                                   GUARD_INTERVAL, TRANSMISSION_MODE, HIERARCHY, Inversion, FEC_DEFAULT, C_MODULATION,
                                   Terrestrial, Cable)
 from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable
-from .dialogs import SatelliteDialog, TransponderDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog
+from .dialogs import SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import move_items, on_popup_menu
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
@@ -377,17 +377,18 @@ class SatellitesTool(Gtk.Box):
 
         if view is self._satellite_view:
             self.on_dvb_data_edit(SatelliteDialog, "Satellite", view, None if force else Satellite(*row), itr)
-        elif view is self._sat_tr_view:
-            self.on_transponder(None if force else Transponder(*row), itr)
         elif view is self._terrestrial_view:
             self.on_dvb_data_edit(TerrestrialDialog, "Region", view, None if force else Terrestrial(*row), itr)
         elif view is self._cable_view:
             self.on_dvb_data_edit(CableDialog, "Provider", view, None if force else Cable(*row), itr)
+        elif view is self._sat_tr_view:
+            data = None if force else Transponder(*row)
+            self.on_transponder_data_edit(SatTransponderDialog, "Transponder", view, self._satellite_view, data, itr)
         else:
             self._app.show_error_message("Not implemented yet!")
 
     def on_dvb_data_edit(self, dialog, title, view, data=None, edited_itr=None):
-        """ Create or edit satellite. """
+        """ Creates or edits DVB data. """
         dialog = dialog(self._app.get_active_window(), title, data)
         if dialog.run() == Gtk.ResponseType.OK:
             dvb_data = dialog.data
@@ -403,32 +404,31 @@ class SatellitesTool(Gtk.Box):
                         model.append(dvb_data)
         dialog.destroy()
 
-    def on_transponder(self, transponder=None, edited_itr=None):
-        """ Create or edit transponder. """
-
-        paths = self.check_selection(self._satellite_view, "Please, select only one satellite!")
+    def on_transponder_data_edit(self, dialog, title, view, src_view, data=None, edited_itr=None):
+        """ Creates or edits transponder data. """
+        paths = self.check_selection(src_view, "Please, select only one item!")
         if paths is None:
             return
         elif len(paths) == 0:
-            self._app.show_error_message("No satellite is selected!")
+            self._app.show_error_message("No source selected!")
             return
 
-        dialog = TransponderDialog(self._app.get_active_window(), transponder)
-        tr = dialog.run()
+        dialog = dialog(self._app.app_window, title, data)
+        if dialog.run() == Gtk.ResponseType.OK:
+            tr = dialog.data
+            if tr:
+                src_model = src_view.get_model()
+                transponders = src_model[paths][-1]
+                tr_model, tr_paths = view.get_selection().get_selected_rows()
+
+                if data and edited_itr:
+                    tr_model.set(edited_itr, {i: v for i, v in enumerate(tr)})
+                    transponders[tr_model.get_path(edited_itr).get_indices()[0]] = tr
+                else:
+                    index = paths[0].get_indices()[0] + 1
+                    tr_model.insert(index, tr)
+                    transponders.insert(index, tr)
         dialog.destroy()
-
-        if tr:
-            sat_model = self._satellite_view.get_model()
-            transponders = sat_model[paths][-1]
-            tr_model, tr_paths = self._sat_tr_view.get_selection().get_selected_rows()
-
-            if transponder and edited_itr:
-                tr_model.set(edited_itr, {i: v for i, v in enumerate(tr)})
-                transponders[tr_model.get_path(edited_itr).get_indices()[0]] = tr
-            else:
-                index = paths[0].get_indices()[0] + 1
-                tr_model.insert(index, tr)
-                transponders.insert(index, tr)
 
     def check_selection(self, view, message):
         """ Checks if any row is selected. Shows error dialog if selected more than one.

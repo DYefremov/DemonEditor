@@ -55,9 +55,16 @@ class DVBDialog(Gtk.Dialog):
                          modal=True,
                          resizable=False,
                          default_width=320,
+                         skip_taskbar_hint=True,
+                         skip_pager_hint=True,
+                         destroy_with_parent=True,
                          use_header_bar=IS_GNOME_SESSION,
+                         window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
                          buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK),
                          *args, **kwargs)
+
+        self.frame = Gtk.Frame(margin=5, label_xalign=0.02)
+        self.get_content_area().pack_start(self.frame, True, True, 0)
 
         self._data = data
 
@@ -70,10 +77,9 @@ class TCDialog(DVBDialog):
     def __init__(self, parent, title=None, data=None, *args, **kwargs):
         super().__init__(parent, title, data, *args, **kwargs)
 
-        self.frame = Gtk.Frame(margin=5, label=get_message("Name:"), label_xalign=0.02)
         self._entry = Gtk.Entry(margin=5)
         self.frame.add(self._entry)
-        self.get_content_area().pack_start(self.frame, True, True, 0)
+        self.frame.set_label(get_message("Name:"))
         self.show_all()
 
         if data:
@@ -86,13 +92,14 @@ class SatelliteDialog(DVBDialog):
     def __init__(self, transient, title, satellite=None, *args, **kwargs):
         super().__init__(transient, title, *args, **kwargs)
         builder = get_builder(_DIALOGS_UI_PATH, use_str=True,
-                              objects=("satellite_dialog_frame", "side_store", "pos_adjustment"))
+                              objects=("sat_dialog_box", "side_store", "pos_adjustment"))
 
-        self.get_content_area().pack_start(builder.get_object("satellite_dialog_frame"), True, True, 0)
+        self.frame.add(builder.get_object("sat_dialog_box"))
         self._sat_name = builder.get_object("sat_name_entry")
         self._sat_position = builder.get_object("sat_position_button")
         self._side = builder.get_object("side_box")
         self._transponders = satellite.transponders if satellite else []
+        self.show_all()
 
         if satellite:
             self._sat_name.set_text(satellite.name)
@@ -132,17 +139,17 @@ class CableDialog(TCDialog):
         return self._data._replace(name=name) if self._data else Cable(name, "true", "9", None, [])
 
 
-class TransponderDialog:
-    """ Shows dialog for adding or edit transponder """
+class SatTransponderDialog(DVBDialog):
+    """ Dialog for adding or edit satellite transponder. """
 
-    def __init__(self, transient, transponder: Transponder = None):
+    def __init__(self, transient, title, data=None, *args, **kwargs):
+        super().__init__(transient, title, data, *args, **kwargs)
 
         handlers = {"on_entry_changed": self.on_entry_changed}
-        objects = ("transponder_dialog", "pol_store", "fec_store", "mod_store", "system_store", "pls_mode_store")
+        objects = ("sat_tr_box", "pol_store", "fec_store", "mod_store", "system_store", "pls_mode_store")
         builder = get_builder(_DIALOGS_UI_PATH, handlers, use_str=True, objects=objects)
 
-        self._dialog = builder.get_object("transponder_dialog")
-        self._dialog.set_transient_for(transient)
+        self.frame.add(builder.get_object("sat_tr_box"))
         self._freq_entry = builder.get_object("freq_entry")
         self._rate_entry = builder.get_object("rate_entry")
         self._pol_box = builder.get_object("pol_box")
@@ -162,18 +169,22 @@ class TransponderDialog:
                                                                      Gtk.STYLE_PROVIDER_PRIORITY_USER)
         self._rate_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), self._style_provider,
                                                                      Gtk.STYLE_PROVIDER_PRIORITY_USER)
-        if transponder:
-            self.init_transponder(transponder)
+        self.show_all()
+        if data:
+            self.init_transponder(data)
 
     def run(self):
-        while self._dialog.run() != Gtk.ResponseType.CANCEL:
-            tr = self.to_transponder()
-            if self.is_accept(tr):
-                return tr
-            show_dialog(DialogType.ERROR, self._dialog, "Please check your parameters and try again.")
+        resp = super().run()
+        while resp == Gtk.ResponseType.OK:
+            if self.is_accept():
+                return resp
+            show_dialog(DialogType.ERROR, self, "Please check your parameters and try again.")
+            resp = super().run()
+        return resp
 
-    def destroy(self):
-        self._dialog.destroy()
+    @property
+    def data(self):
+        return self.to_transponder()
 
     def init_transponder(self, transponder):
         self._freq_entry.set_text(transponder.frequency)
@@ -202,7 +213,8 @@ class TransponderDialog:
     def on_entry_changed(self, entry):
         entry.set_name("digit-entry" if self._pattern.search(entry.get_text()) else "GtkEntry")
 
-    def is_accept(self, tr):
+    def is_accept(self):
+        tr = self.to_transponder()
         if self._pattern.search(tr.frequency) or not tr.frequency:
             return False
         elif self._pattern.search(tr.symbol_rate) or not tr.symbol_rate:
