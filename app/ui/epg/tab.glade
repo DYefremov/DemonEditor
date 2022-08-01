@@ -296,6 +296,7 @@ Author: Dmitriy Yefremov
                     <property name="title" translatable="yes">Service</property>
                     <property name="alignment">0.49000000953674316</property>
                     <property name="sort_column_id">0</property>
+                    <property name="visible" bind-source="multi_epg_button" bind-property="active"/>
                     <child>
                       <object class="GtkCellRendererText" id="epg_service_renderer">
                         <property name="xpad">5</property>
