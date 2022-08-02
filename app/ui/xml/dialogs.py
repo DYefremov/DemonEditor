@@ -38,7 +38,7 @@ from app.commons import run_idle, run_task, log
 from app.eparser import Satellite, Transponder
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable,
                                   T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC, GUARD_INTERVAL, TRANSMISSION_MODE,
-                                  HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT)
+                                  HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder)
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
@@ -100,6 +100,9 @@ class TransponderDialog(DVBDialog):
 
     def init_transponder_data(self, data):
         self._data = data
+
+    def to_transponder(self):
+        return self.data
 
     def on_entry_changed(self, entry):
         """ Digit entries handler. """
@@ -269,36 +272,62 @@ class TerTransponderDialog(TransponderDialog):
         self._transmission_box = builder.get_object("ter_transmission_box")
         self._hierarchy_box = builder.get_object("ter_hierarchy_box")
         self._inversion_box = builder.get_object("ter_inversion_box")
+        self._plp_id_entry = builder.get_object("ter_plp_id_entry")
 
         self.set_style_provider(self._freq_entry)
+        self.set_style_provider(self._plp_id_entry)
         self.show_all()
 
         self.init_transponder_data(data)
 
+    @property
+    def data(self):
+        return self.to_transponder()
+
     def init_transponder_data(self, transponder):
+        [self._sys_box.append(k, v) for k, v in T_SYSTEM.items()]
+        [self._bandwidth_box.append(k, v) for k, v in BANDWIDTH.items()]
+        [self._constellation_box.append(k, v) for k, v in CONSTELLATION.items()]
+        [self._sr_hp_box.append(k, v) for k, v in T_FEC.items()]
+        [self._sr_lp_box.append(k, v) for k, v in T_FEC.items()]
+        [self._guard_box.append(k, v) for k, v in GUARD_INTERVAL.items()]
+        [self._transmission_box.append(k, v) for k, v in TRANSMISSION_MODE.items()]
+        [self._hierarchy_box.append(k, v) for k, v in HIERARCHY.items()]
+        [self._inversion_box.append(k.value, k.name) for k in Inversion]
+
         if transponder:
             self._freq_entry.set_text(transponder.centre_frequency)
-            [self._sys_box.append(k, v) for k, v in T_SYSTEM.items()]
             self._sys_box.set_active_id(transponder.system)
-            [self._bandwidth_box.append(k, v) for k, v in BANDWIDTH.items()]
             self._bandwidth_box.set_active_id(transponder.bandwidth)
-            [self._constellation_box.append(k, v) for k, v in CONSTELLATION.items()]
             self._constellation_box.set_active_id(transponder.constellation)
-            [self._sr_hp_box.append(k, v) for k, v in T_FEC.items()]
             self._sr_hp_box.set_active_id(transponder.code_rate_hp)
-            [self._sr_lp_box.append(k, v) for k, v in T_FEC.items()]
             self._sr_lp_box.set_active_id(transponder.code_rate_lp)
-            [self._guard_box.append(k, v) for k, v in GUARD_INTERVAL.items()]
             self._guard_box.set_active_id(transponder.guard_interval)
-            [self._transmission_box.append(k, v) for k, v in TRANSMISSION_MODE.items()]
             self._transmission_box.set_active_id(transponder.transmission_mode)
-            [self._hierarchy_box.append(k, v) for k, v in HIERARCHY.items()]
             self._hierarchy_box.set_active_id(transponder.hierarchy_information)
-            [self._inversion_box.append(k.value, k.name) for k in Inversion]
             self._inversion_box.set_active_id(transponder.inversion)
+            self._plp_id_entry.set_text(transponder.plp_id or "")
 
     def is_accept(self):
-        return not self.digit_pattern.search(self._freq_entry.get_text())
+        tr = self.to_transponder()
+        if not tr.centre_frequency or self.digit_pattern.search(tr.centre_frequency):
+            return False
+        elif tr.plp_id and self.digit_pattern.search(tr.plp_id):
+            return False
+        return True
+
+    def to_transponder(self):
+        return TerTransponder(centre_frequency=self._freq_entry.get_text(),
+                              system=self._sys_box.get_active_id(),
+                              bandwidth=self._bandwidth_box.get_active_id(),
+                              constellation=self._constellation_box.get_active_id(),
+                              code_rate_hp=self._sr_hp_box.get_active_id(),
+                              code_rate_lp=self._sr_lp_box.get_active_id(),
+                              guard_interval=self._guard_box.get_active_id(),
+                              transmission_mode=self._transmission_box.get_active_id(),
+                              hierarchy_information=self._hierarchy_box.get_active_id(),
+                              inversion=self._inversion_box.get_active_id(),
+                              plp_id=self._plp_id_entry.get_text() or None)
 
 
 class CableTransponderDialog(TransponderDialog):
@@ -323,21 +352,33 @@ class CableTransponderDialog(TransponderDialog):
 
         self.init_transponder_data(data)
 
+    @property
+    def data(self):
+        return self.to_transponder()
+
     def init_transponder_data(self, transponder):
+        [self._fec_box.append(k, v) for k, v in FEC_DEFAULT.items()]
+        [self._mod_box.append(k, v) for k, v in C_MODULATION.items()]
+
         if transponder:
             self._freq_entry.set_text(transponder.frequency)
             self._rate_entry.set_text(transponder.symbol_rate)
-            [self._fec_box.append(k, v) for k, v in FEC_DEFAULT.items()]
             self._fec_box.set_active_id(transponder.fec_inner)
-            [self._mod_box.append(k, v) for k, v in C_MODULATION.items()]
             self._mod_box.set_active_id(transponder.modulation)
 
     def is_accept(self):
-        if self.digit_pattern.search(self._freq_entry.get_text()):
+        tr = self.to_transponder()
+        if not tr.frequency or self.digit_pattern.search(tr.frequency):
             return False
-        elif self.digit_pattern.search(self._rate_entry.get_text()):
+        elif not tr.symbol_rate or self.digit_pattern.search(tr.symbol_rate):
             return False
         return True
+
+    def to_transponder(self):
+        return CableTransponder(frequency=self._freq_entry.get_text(),
+                                symbol_rate=self._rate_entry.get_text(),
+                                fec_inner=self._fec_box.get_active_id(),
+                                modulation=self._mod_box.get_active_id())
 
 
 # ********************** Update dialogs ************************ #
