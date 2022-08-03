@@ -149,7 +149,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_edit" swapped="no"/>
+        <signal name="activate" handler="on_transponder_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="Primary"/>
       </object>
     </child>
@@ -166,7 +166,7 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
-        <signal name="activate" handler="on_remove" swapped="no"/>
+        <signal name="activate" handler="on_transponder_remove" swapped="no"/>
         <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
@@ -760,8 +760,8 @@ Author: Dmitriy Yefremov
                             <property name="search_column">0</property>
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
-                            <signal name="button-press-event" handler="on_button_press" object="transponder_popup_menu" swapped="no"/>
-                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
+                            <signal name="button-press-event" handler="on_tr_button_press" object="transponder_popup_menu" swapped="no"/>
+                            <signal name="key-press-event" handler="on_tr_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="sat_tr_view_selection">
                                 <property name="mode">multiple</property>
@@ -997,8 +997,8 @@ Author: Dmitriy Yefremov
                             <property name="search_column">0</property>
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
-                            <signal name="button-press-event" handler="on_button_press" object="transponder_popup_menu" swapped="no"/>
-                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
+                            <signal name="button-press-event" handler="on_tr_button_press" object="transponder_popup_menu" swapped="no"/>
+                            <signal name="key-press-event" handler="on_tr_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="ter_tr_view_selection">
                                 <property name="mode">multiple</property>
@@ -1240,8 +1240,8 @@ Author: Dmitriy Yefremov
                             <property name="search_column">0</property>
                             <property name="rubber_banding">True</property>
                             <property name="enable_grid_lines">both</property>
-                            <signal name="button-press-event" handler="on_button_press" object="transponder_popup_menu" swapped="no"/>
-                            <signal name="key-press-event" handler="on_key_press" swapped="no"/>
+                            <signal name="button-press-event" handler="on_tr_button_press" object="transponder_popup_menu" swapped="no"/>
+                            <signal name="key-press-event" handler="on_tr_key_press" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="cable_tr_view_selection">
                                 <property name="mode">multiple</property>

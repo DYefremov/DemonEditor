@@ -41,7 +41,7 @@ from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, wr
 from .dialogs import SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog, \
     CableTransponderDialog, TerTransponderDialog
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
-from ..main_helper import move_items, on_popup_menu
+from ..main_helper import move_items, on_popup_menu, scroll_to
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
 
 
@@ -74,15 +74,19 @@ class SatellitesTool(Gtk.Box):
         handlers = {"on_satellite_view_realize": self.on_satellite_view_realize,
                     "on_terrestrial_view_realize": self.on_terrestrial_view_realize,
                     "on_cable_view_realize": self.on_cable_view_realize,
-                    "on_remove": self.on_remove,
                     "on_update": self.on_update,
                     "on_up": self.on_up,
                     "on_down": self.on_down,
                     "on_button_press": self.on_button_press,
+                    "on_tr_button_press": self.on_tr_button_press,
                     "on_add": self.on_add,
-                    "on_transponder_add": self.on_transponder_add,
                     "on_edit": self.on_edit,
+                    "on_remove": self.on_remove,
+                    "on_transponder_add": self.on_transponder_add,
+                    "on_transponder_edit": self.on_transponder_edit,
+                    "on_transponder_remove": self.on_transponder_remove,
                     "on_key_press": self.on_key_press,
+                    "on_tr_key_press": self.on_tr_key_press,
                     "on_visible_page": self.on_visible_page,
                     "on_satellite_selection": self.on_satellite_selection,
                     "on_terrestrial_selection": self.on_terrestrial_selection,
@@ -298,8 +302,14 @@ class SatellitesTool(Gtk.Box):
         else:
             on_popup_menu(menu, event)
 
+    def on_tr_button_press(self, menu, event):
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            self.on_transponder_edit()
+        else:
+            on_popup_menu(menu, event)
+
     def on_key_press(self, view, event):
-        """  Handling  keystrokes.  """
+        """ Handling  keystrokes. """
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
@@ -313,10 +323,26 @@ class SatellitesTool(Gtk.Box):
             self.on_edit(force=True)
         elif ctrl and key is KeyboardKey.E:
             self.on_edit()
-        elif ctrl and key is KeyboardKey.S:
-            self.on_satellite()
-        elif ctrl and key is KeyboardKey.T:
-            self.on_transponder()
+        elif ctrl and key in MOVE_KEYS:
+            move_items(key, view)
+        elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
+            view.do_unselect_all(view)
+
+    def on_tr_key_press(self, view, event):
+        """ Handling  transponder view keystrokes. """
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+
+        key = KeyboardKey(key_code)
+        ctrl = event.state & MOD_MASK
+
+        if key is KeyboardKey.DELETE:
+            self.on_transponder_remove()
+        elif key is KeyboardKey.INSERT:
+            self.on_transponder_edit(force=True)
+        elif ctrl and key is KeyboardKey.E:
+            self.on_transponder_edit()
         elif ctrl and key in MOVE_KEYS:
             move_items(key, view)
         elif key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
@@ -357,24 +383,26 @@ class SatellitesTool(Gtk.Box):
         self.on_edit(item, force=True)
 
     def on_transponder_add(self, item):
-        if self._dvb_type is self.DVB.SAT:
-            self.on_edit(force=True)
-        else:
-            self._app.show_error_message("Not implemented yet!")
+        self.on_transponder_edit(force=True)
 
     def on_edit(self, item=None, force=False):
-        """ Common edit. """
-        view = self.get_active_view()
-        if not view:
-            return
+        self.on_data_edit(self.get_active_dvb_view(), force)
 
-        paths = self.check_selection(view, "Please, select only one item!")
-        if not paths:
-            return
+    def on_transponder_edit(self, item=None, force=False):
+        self.on_data_edit(self.get_active_transponder_view(), force)
+
+    def on_data_edit(self, view, force=False):
+        """ Common edit. """
+        if force:
+            model, paths = view.get_selection().get_selected_rows()
+        else:
+            paths = self.check_selection(view, "Please, select only one item!")
+            if not paths:
+                return
 
         model = view.get_model()
-        row = model[paths][:]
-        itr = model.get_iter(paths)
+        row = model[paths][:] if paths else None
+        itr = model.get_iter(paths) if paths else None
 
         if view is self._satellite_view:
             self.on_dvb_data_edit(SatelliteDialog, "Satellite", view, None if force else Satellite(*row), itr)
@@ -404,11 +432,12 @@ class SatellitesTool(Gtk.Box):
                 if data and edited_itr:
                     model.set(edited_itr, {i: v for i, v in enumerate(dvb_data)})
                 else:
-                    if len(model):
+                    if paths:
                         index = paths[0].get_indices()[0] + 1
                         model.insert(index, dvb_data)
                     else:
                         model.append(dvb_data)
+                        scroll_to(len(model) - 1, view)
         dialog.destroy()
 
     def on_transponder_data_edit(self, dialog, title, view, src_view, data=None, edited_itr=None):
@@ -451,36 +480,48 @@ class SatellitesTool(Gtk.Box):
 
     def on_remove(self, view=None):
         """ Removes selected satellites and transponders. """
-        view = self.get_active_view()
-        if not view:
-            return
-
+        view = self.get_active_dvb_view()
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
+        list(map(model.remove, [model.get_iter(path) for path in paths]))
 
-        if view in {self._satellite_view, self._terrestrial_view, self._cable_view}:
+    def on_transponder_remove(self, item=None):
+        view = self.get_active_transponder_view()
+        trs = None
+        if view is self._sat_tr_view:
+            if self._current_sat_path:
+                trs = self._satellite_view.get_model()[self._current_sat_path][-1]
+            else:
+                self._app.show_error_message("No satellite is selected!")
+        elif view is self._ter_tr_view:
+            if self._current_ter_path:
+                trs = self._terrestrial_view.get_model()[self._current_ter_path][-1]
+            else:
+                self._app.show_error_message("No terrestrial is selected!")
+        elif view is self._cable_tr_view:
+            if self._current_cable_path:
+                trs = self._cable_view.get_model()[self._current_cable_path][-1]
+            else:
+                self._app.show_error_message("No cable is selected!")
+
+        if trs:
+            model, paths = view.get_selection().get_selected_rows()
+            list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
             list(map(model.remove, [model.get_iter(path) for path in paths]))
-        else:
-            trs = None
-            if view is self._sat_tr_view:
-                if self._current_sat_path:
-                    trs = self._satellite_view.get_model()[self._current_sat_path][-1]
-                else:
-                    self._app.show_error_message("No satellite is selected!")
-            elif view is self._ter_tr_view:
-                if self._current_ter_path:
-                    trs = self._terrestrial_view.get_model()[self._current_ter_path][-1]
-                else:
-                    self._app.show_error_message("No terrestrial is selected!")
-            elif view is self._cable_tr_view:
-                if self._current_cable_path:
-                    trs = self._cable_view.get_model()[self._current_cable_path][-1]
-                else:
-                    self._app.show_error_message("No cable is selected!")
 
-            if trs:
-                list(map(trs.pop, sorted(map(lambda p: p.get_indices()[0], paths), reverse=True)))
-                list(map(model.remove, [model.get_iter(path) for path in paths]))
+    def get_active_dvb_view(self):
+        if self._dvb_type is self.DVB.SAT:
+            return self._satellite_view
+        elif self._dvb_type is self.DVB.TERRESTRIAL:
+            return self._terrestrial_view
+        return self._cable_view
+
+    def get_active_transponder_view(self):
+        if self._dvb_type is self.DVB.SAT:
+            return self._sat_tr_view
+        elif self._dvb_type is self.DVB.TERRESTRIAL:
+            return self._ter_tr_view
+        return self._cable_tr_view
 
     @run_idle
     def on_open(self):
@@ -538,21 +579,6 @@ class SatellitesTool(Gtk.Box):
     @run_idle
     def on_update(self, item):
         SatellitesUpdateDialog(self._app.get_active_window(), self._settings, self._satellite_view.get_model()).show()
-
-    def get_active_view(self):
-        """ Returns current active view. """
-        if self._satellite_view.is_focus():
-            return self._satellite_view
-        elif self._terrestrial_view.is_focus():
-            return self._terrestrial_view
-        elif self._cable_view.is_focus():
-            return self._cable_view
-        elif self._sat_tr_view.is_focus():
-            return self._sat_tr_view
-        elif self._ter_tr_view.is_focus():
-            return self._ter_tr_view
-        elif self._cable_tr_view.is_focus():
-            return self._cable_tr_view
 
 
 if __name__ == "__main__":

@@ -80,6 +80,7 @@ class TransponderDialog(DVBDialog):
 
     def __init__(self, parent, title, data=None, *args, **kwargs):
         super().__init__(parent, title, data, *args, **kwargs)
+        self.frame.set_label(get_message("Transponder properties:"))
         # Pattern for digits entries.
         self.digit_pattern = re.compile(r"\D")
         # Style
@@ -135,6 +136,7 @@ class SatelliteDialog(DVBDialog):
                               objects=("sat_dialog_box", "side_store", "pos_adjustment"))
 
         self.frame.add(builder.get_object("sat_dialog_box"))
+        self.frame.set_label(get_message("Satellite properties:"))
         self._sat_name = builder.get_object("sat_name_entry")
         self._sat_position = builder.get_object("sat_position_button")
         self._side = builder.get_object("side_box")
