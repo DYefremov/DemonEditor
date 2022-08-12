@@ -4328,6 +4328,37 @@ Author: Dmitriy Yefremov
                 <property name="position">0</property>
               </packing>
             </child>
+            <child type="center">
+              <object class="GtkBox" id="task_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="spacing">5</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkImage" id="http_status_image">
                 <property name="can_focus">False</property>

@@ -236,7 +236,6 @@ class XmlTvReader(Reader):
         self._url = url
         self._ids = {}
 
-    @run_task
     def download(self, clb=None):
         """ Downloads an XMLTV file. """
         res = urlparse(self._url)

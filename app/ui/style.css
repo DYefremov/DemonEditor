@@ -14,6 +14,10 @@
   margin: 1px;
 }
 
+#task-button {
+  padding: 0;
+}
+
 #stack-switch-button {
   padding-top: 0;
   padding-bottom: 0;

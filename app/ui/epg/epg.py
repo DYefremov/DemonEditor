@@ -46,6 +46,7 @@ from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP, EpgSource
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
+from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
 from ..main_helper import on_popup_menu, update_entry_data, scroll_to
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
@@ -61,11 +62,14 @@ class EpgCache(dict):
         super().__init__()
         self._current_bq = None
         self._reader = None
+        self._canceled = False
+
         self._settings = app.app_settings
         self._src = self._settings.epg_source
         self._app = app
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
+        self._app.connect("task-canceled", self.on_xml_load_cancel)
 
         self.init()
 
@@ -84,9 +88,15 @@ class EpgCache(dict):
                 # Difference calculation between the current time and file modification.
                 dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
                 # We will update daily. -> Temporarily!!!
-                self._reader.download(process_data) if dif.days > 0 else process_data()
+                if dif.days > 0 and not self._canceled:
+                    task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, process_data,)
+                    self._app.emit("add-background-task", task)
+                else:
+                    process_data()
             else:
-                self._reader.download(process_data)
+                if not self._canceled:
+                    task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, process_data, )
+                    self._app.emit("add-background-task", task)
         elif self._src is EpgSource.DAT:
             self._reader = EPG.DatReader(f"{self._settings.profile_data_path}epg{os.sep}epg.dat")
             self._reader.download()
@@ -98,6 +108,9 @@ class EpgCache(dict):
 
     def on_profile_changed(self, app, p):
         self.clear()
+
+    def on_xml_load_cancel(self, app, widget):
+        self._canceled = True
 
     def update_epg_data(self):
         if self._src is EpgSource.HTTP:

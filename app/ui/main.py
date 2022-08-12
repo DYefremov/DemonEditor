@@ -88,6 +88,8 @@ class Application(Gtk.Application):
 
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
+    BG_TASK_LIMIT = 5
+
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
                          "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
@@ -270,7 +272,7 @@ class Application(Gtk.Application):
         # Current page.
         self._page = Page.INFO
         self._fav_pages = {Page.SERVICES, Page.PICONS, Page.EPG, Page.TIMERS}
-        self._download_pages = {Page.INFO, Page.SERVICES, Page.SATELLITE, Page.PICONS}
+        self._download_pages = {Page.INFO, Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.RECORDINGS}
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -313,6 +315,14 @@ class Application(Gtk.Application):
         GObject.signal_new("data-save", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("data-save-as", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("add-background-task", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("task-done", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("task-cancel", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("task-canceled", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
@@ -365,6 +375,7 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
+        self._task_box = builder.get_object("task_box")
         # Alternatives
         self._alt_view = builder.get_object("alt_tree_view")
         self._alt_model = builder.get_object("alt_list_store")
@@ -472,6 +483,10 @@ class Application(Gtk.Application):
         # Data save.
         self.connect("data-save", self.on_data_save)
         self.connect("data-save-as", self.on_data_save_as)
+        # Background tasks.
+        self.connect("add-background-task", self.on_bg_task_add)
+        self.connect("task-done", self.on_task_done)
+        self.connect("task-cancel", self.on_task_cancel)
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
@@ -1964,6 +1979,21 @@ class Application(Gtk.Application):
     def on_upload(self, app, page):
         if page is Page.SERVICES or page is Page.INFO:
             self.on_upload_data()
+
+    def on_bg_task_add(self, app, task):
+        if len(self._task_box) <= self.BG_TASK_LIMIT:
+            self._task_box.add(task)
+        else:
+            self.show_error_message("Task limit (> 5) exceeded!")
+
+    def on_task_done(self, app, task):
+        self._task_box.remove(task)
+        task.destroy()
+
+    def on_task_cancel(self, app, task):
+        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.OK:
+            task.cancel()
+            self.on_task_done(app, task)
 
     @run_task
     def on_download_data(self, download_type=DownloadType.ALL):
