@@ -38,6 +38,22 @@ Author: Dmitriy Yefremov
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
+      <object class="GtkImageMenuItem" id="play_menu_item">
+        <property name="label">gtk-media-play</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_play" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="menu_separator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
       <object class="GtkImageMenuItem" id="remove_menu_item">
         <property name="label">gtk-remove</property>
         <property name="visible">True</property>
@@ -61,6 +77,8 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkListStore" id="recordings_model">
     <columns>
+      <!-- column-name logo -->
+      <column type="GdkPixbuf"/>
       <!-- column-name service -->
       <column type="gchararray"/>
       <!-- column-name title -->
@@ -76,14 +94,14 @@ Author: Dmitriy Yefremov
       <!-- column-name data -->
       <column type="PyObject"/>
     </columns>
-    <signal name="row-deleted" handler="on_recordings_model_changed" swapped="no"/>
-    <signal name="row-inserted" handler="on_recordings_model_changed" swapped="no"/>
   </object>
   <object class="GtkTreeModelFilter" id="recordings_filter_model">
     <property name="child_model">recordings_model</property>
   </object>
   <object class="GtkTreeModelSort" id="recordings_sort_model">
     <property name="model">recordings_filter_model</property>
+    <signal name="row-deleted" handler="on_recordings_model_changed" swapped="no"/>
+    <signal name="row-inserted" handler="on_recordings_model_changed" swapped="no"/>
   </object>
   <object class="GtkBox" id="recordings_box">
     <property name="visible">True</property>
@@ -276,8 +294,10 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">recordings_sort_model</property>
+                        <property name="fixed_height_mode">True</property>
+                        <property name="rubber_banding">True</property>
                         <property name="enable_grid_lines">both</property>
-                        <property name="tooltip_column">5</property>
+                        <property name="tooltip_column">6</property>
                         <signal name="button-press-event" handler="on_popup_menu" object="popup_menu" swapped="no"/>
                         <signal name="key-press-event" handler="on_recordings_key_press" swapped="no"/>
                         <signal name="row-activated" handler="on_recordings_activated" swapped="no"/>
@@ -289,32 +309,23 @@ Author: Dmitriy Yefremov
                         <child>
                           <object class="GtkTreeViewColumn" id="rec_service_column">
                             <property name="resizable">True</property>
-                            <property name="min_width">100</property>
-                            <property name="title" translatable="yes">Service</property>
-                            <property name="alignment">0.5</property>
-                            <property name="sort_column_id">0</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="rec_service_renderer">
-                                <property name="xalign">0.49000000953674316</property>
-                              </object>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="rec_title_column">
-                            <property name="resizable">True</property>
+                            <property name="sizing">fixed</property>
                             <property name="min_width">150</property>
-                            <property name="title" translatable="yes">Title</property>
-                            <property name="expand">True</property>
+                            <property name="title" translatable="yes">Service</property>
                             <property name="alignment">0.5</property>
                             <property name="sort_column_id">1</property>
                             <child>
-                              <object class="GtkCellRendererText" id="rec_title_renderer">
+                              <object class="GtkCellRendererPixbuf" id="rec_log_renderer">
                                 <property name="xpad">5</property>
-                                <property name="ellipsize">end</property>
+                                <property name="ypad">2</property>
+                              </object>
+                              <attributes>
+                                <attribute name="pixbuf">0</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererText" id="rec_service_renderer">
+                                <property name="xalign">0.49000000953674316</property>
                               </object>
                               <attributes>
                                 <attribute name="text">1</attribute>
@@ -323,17 +334,18 @@ Author: Dmitriy Yefremov
                           </object>
                         </child>
                         <child>
-                          <object class="GtkTreeViewColumn" id="rec_time_column">
+                          <object class="GtkTreeViewColumn" id="rec_title_column">
                             <property name="resizable">True</property>
-                            <property name="fixed_width">180</property>
-                            <property name="min_width">100</property>
-                            <property name="title" translatable="yes">Time</property>
+                            <property name="sizing">fixed</property>
+                            <property name="min_width">150</property>
+                            <property name="title" translatable="yes">Title</property>
+                            <property name="expand">True</property>
                             <property name="alignment">0.5</property>
                             <property name="sort_column_id">2</property>
                             <child>
-                              <object class="GtkCellRendererText" id="rec_time_renderer">
+                              <object class="GtkCellRendererText" id="rec_title_renderer">
                                 <property name="xpad">5</property>
-                                <property name="xalign">0.49000000953674316</property>
+                                <property name="ellipsize">end</property>
                               </object>
                               <attributes>
                                 <attribute name="text">2</attribute>
@@ -342,13 +354,17 @@ Author: Dmitriy Yefremov
                           </object>
                         </child>
                         <child>
-                          <object class="GtkTreeViewColumn" id="rec_len_column">
+                          <object class="GtkTreeViewColumn" id="rec_time_column">
+                            <property name="resizable">True</property>
+                            <property name="sizing">fixed</property>
+                            <property name="fixed_width">180</property>
                             <property name="min_width">100</property>
-                            <property name="title" translatable="yes">Length</property>
+                            <property name="title" translatable="yes">Time</property>
                             <property name="alignment">0.5</property>
                             <property name="sort_column_id">3</property>
                             <child>
-                              <object class="GtkCellRendererText" id="rec_len_renderer">
+                              <object class="GtkCellRendererText" id="rec_time_renderer">
+                                <property name="xpad">5</property>
                                 <property name="xalign">0.49000000953674316</property>
                               </object>
                               <attributes>
@@ -358,16 +374,15 @@ Author: Dmitriy Yefremov
                           </object>
                         </child>
                         <child>
-                          <object class="GtkTreeViewColumn" id="rec_file_column">
-                            <property name="resizable">True</property>
+                          <object class="GtkTreeViewColumn" id="rec_len_column">
                             <property name="min_width">100</property>
-                            <property name="title" translatable="yes">File</property>
-                            <property name="expand">True</property>
+                            <property name="sizing">fixed</property>
+                            <property name="title" translatable="yes">Length</property>
                             <property name="alignment">0.5</property>
                             <property name="sort_column_id">4</property>
                             <child>
-                              <object class="GtkCellRendererText" id="rec_file_renderer">
-                                <property name="ellipsize">end</property>
+                              <object class="GtkCellRendererText" id="rec_len_renderer">
+                                <property name="xalign">0.49000000953674316</property>
                               </object>
                               <attributes>
                                 <attribute name="text">4</attribute>
@@ -376,18 +391,38 @@ Author: Dmitriy Yefremov
                           </object>
                         </child>
                         <child>
-                          <object class="GtkTreeViewColumn" id="rec_desc_column">
+                          <object class="GtkTreeViewColumn" id="rec_file_column">
                             <property name="resizable">True</property>
-                            <property name="title" translatable="yes">Description</property>
+                            <property name="sizing">fixed</property>
+                            <property name="min_width">100</property>
+                            <property name="title" translatable="yes">File</property>
                             <property name="expand">True</property>
                             <property name="alignment">0.5</property>
                             <property name="sort_column_id">5</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="rec_file_renderer">
+                                <property name="ellipsize">end</property>
+                              </object>
+                              <attributes>
+                                <attribute name="text">5</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="rec_desc_column">
+                            <property name="resizable">True</property>
+                            <property name="sizing">fixed</property>
+                            <property name="title" translatable="yes">Description</property>
+                            <property name="expand">True</property>
+                            <property name="alignment">0.5</property>
+                            <property name="sort_column_id">6</property>
                             <child>
                               <object class="GtkCellRendererText" id="rec_desc_renderer">
                                 <property name="ellipsize">end</property>
                               </object>
                               <attributes>
-                                <attribute name="text">5</attribute>
+                                <attribute name="text">6</attribute>
                               </attributes>
                             </child>
                           </object>

@@ -27,13 +27,17 @@
 
 
 """ Module for working with recordings. """
+import os
 from datetime import datetime
 from ftplib import all_errors
+from io import BytesIO, TextIOWrapper
+from pathlib import Path
 from urllib.parse import quote
 
+from app.ui.tasks import BGTaskWidget
 from .dialogs import get_builder, show_dialog, DialogType
 from .main_helper import get_base_paths, get_base_model, on_popup_menu
-from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Column, KeyboardKey
+from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Column, KeyboardKey, Page
 from ..commons import run_task, run_idle, log
 from ..connections import UtfFTP, HttpAPI
 from ..settings import IS_DARWIN, PlayStreamsMode
@@ -48,9 +52,12 @@ class RecordingsTool(Gtk.Box):
 
         self._app = app
         self._app.connect("layout-changed", self.on_layout_changed)
+        self._app.connect("data-receive", self.on_data_receive)
         self._app.connect("profile-changed", self.init)
+
         self._settings = settings
         self._ftp = None
+        self._logos = {}
         # Icon.
         theme = Gtk.IconTheme.get_default()
         icon = "folder-symbolic" if IS_DARWIN else "folder"
@@ -59,6 +66,7 @@ class RecordingsTool(Gtk.Box):
         handlers = {"on_path_press": self.on_path_press,
                     "on_path_activated": self.on_path_activated,
                     "on_recordings_activated": self.on_recordings_activated,
+                    "on_play": self.on_play,
                     "on_recording_remove": self.on_recording_remove,
                     "on_recordings_model_changed": self.on_recordings_model_changed,
                     "on_recordings_filter_changed": self.on_recordings_filter_changed,
@@ -77,7 +85,13 @@ class RecordingsTool(Gtk.Box):
         self._filter_entry = builder.get_object("recordings_filter_entry")
         self._recordings_count_label = builder.get_object("recordings_count_label")
         self.pack_start(builder.get_object("recordings_box"), True, True, 0)
-        self._rec_view.get_model().set_sort_func(2, self.time_sort_func, 2)
+        self._rec_view.get_model().set_sort_func(3, self.time_sort_func, 3)
+
+        srv_column = builder.get_object("rec_service_column")
+        renderer = builder.get_object("rec_log_renderer")
+        size = self._app.app_settings.list_picon_size
+        renderer.set_fixed_size(size, size * 0.65)
+        srv_column.set_cell_data_func(renderer, self.logo_data_func)
 
         if settings.alternate_layout:
             self.on_layout_changed(app, True)
@@ -96,6 +110,26 @@ class RecordingsTool(Gtk.Box):
         self._paned.remove(ch2)
         self._paned.add1(ch2)
         self._paned.add(ch1)
+
+    @run_idle
+    def on_data_receive(self, app, page):
+        if page is Page.RECORDINGS:
+            model, paths = self._rec_view.get_selection().get_selected_rows()
+            if not paths:
+                self._app.show_error_message("No selected item!")
+                return
+
+            response = show_dialog(DialogType.CHOOSER, self._app.app_window, settings=self._settings,
+                                   title="Open folder", create_dir=True)
+            if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+                return
+
+            files = (Path(model[p][-1].get("e2filename", "")).name for p in paths)
+            bgw = BGTaskWidget(self._app, "Downloading recordings...", self.download_recordings, files, response)
+            self._app.emit("add-background-task", bgw)
+
+    def download_recordings(self, files, dst):
+        [self._ftp.download_file(f, dst) for f in files]
 
     @run_task
     def init(self, app=None, arg=None):
@@ -164,21 +198,52 @@ class RecordingsTool(Gtk.Box):
     @run_idle
     def update_recordings_data(self, recordings):
         self._model.clear()
-        list(map(self._model.append, (self.get_recordings_row(r) for r in recordings.get("recordings", []))))
+        recs = recordings.get("recordings", [])
+        list(map(self._model.append, (self.get_recordings_row(r) for r in recs)))
+        list(map(self.get_rec_service_logo, recs))
 
     def get_recordings_row(self, rec):
         service = rec.get("e2servicename")
         title = rec.get("e2title", "")
-        time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%a, %x, %H:%M")
+        r_time = datetime.fromtimestamp(int(rec.get("e2time", "0"))).strftime("%a, %x, %H:%M")
         length = rec.get("e2length", "0")
         file = rec.get("e2filename", "")
         desc = rec.get("e2description", "")
 
-        return service, title, time, length, file, desc, rec
+        return None, service, title, r_time, length, file, desc, rec
+
+    def get_rec_service_logo(self, rec_data):
+        if not rec_data.get("e2servicename", None):
+            return
+
+        ref = rec_data.get("e2servicereference", None)
+        logo = self._logos.get(rec_data.get("e2servicereference", None))
+
+        if not logo:
+            file = rec_data.get("e2filename", None)
+            if file:
+                meta = f"RETR {file}.meta"
+                io = BytesIO()
+                try:
+                    self._ftp.retrbinary(meta, io.write)
+                except all_errors:
+                    pass
+                else:
+                    io.seek(0)
+                    f_ref, sep, name = TextIOWrapper(io, errors="ignore").readline().partition("::")
+                    self._logos[ref] = self._app.picons.get(f"{f_ref.replace(':', '_')}.png")
 
     def on_recordings_activated(self, view, path, column):
         rec = view.get_model()[path][-1]
         self._app.send_http_request(HttpAPI.Request.STREAM_TS, rec.get("e2filename", ""), self.on_play_recording)
+
+    def on_play(self, item):
+        path, column = self._rec_view.get_cursor()
+        if not path:
+            self._app.show_error_message("No selected item!")
+            return
+
+        self.on_recordings_activated(self._rec_view, path, column)
 
     def on_play_recording(self, m3u):
         url = self._app.get_url_from_m3u(m3u)
@@ -197,15 +262,23 @@ class RecordingsTool(Gtk.Box):
 
         paths = get_base_paths(paths, model)
         model = get_base_model(model)
+        to_delete = []
 
         if paths and self._ftp:
             for file, itr in ((model[p][-1].get("e2filename", ""), model.get_iter(p)) for p in paths):
                 resp = self._ftp.delete_file(file)
                 if resp.startswith("2"):
-                    GLib.idle_add(model.remove, itr)
+                    to_delete.append((itr, file))
                 else:
                     self._app.show_error_message(resp)
                     break
+
+        [self.remove_meta_files(f) for i, f in to_delete if model.remove(i) or True]
+
+    @run_task
+    def remove_meta_files(self, file):
+        name, ex = os.path.splitext(file)
+        [self._ftp.delete_file(f"{name}{suf}") for suf in (f"{ex}.ap", f"{ex}.cuts", f"{ex}.meta", f"{ex}.sc", ".eit")]
 
     def on_recordings_model_changed(self, model, path, itr=None):
         self._recordings_count_label.set_text(str(len(model)))
@@ -215,7 +288,7 @@ class RecordingsTool(Gtk.Box):
 
     def recordings_filter_function(self, model, itr, data):
         txt = self._filter_entry.get_text().upper()
-        return next((s for s in model.get(itr, 0, 1, 2, 3, 4, 5) if s and txt in s.upper()), False)
+        return next((s for s in model.get(itr, 1, 2, 3, 5, 6) if s and txt in s.upper()), False)
 
     def on_recordings_filter_toggled(self, button):
         if not button.get_active():
@@ -242,13 +315,17 @@ class RecordingsTool(Gtk.Box):
         self.update_rec_columns_visibility(True)
 
     def update_rec_columns_visibility(self, state):
-        for c in (Column.REC_SERVICE, Column.REC_TIME, Column.REC_LEN, Column.REC_FILE, Column.REC_DESC):
+        for c in (Column.REC_TIME, Column.REC_LEN, Column.REC_FILE, Column.REC_DESC):
             self._rec_view.get_column(c).set_visible(state)
+
+    def logo_data_func(self, column, renderer, model, itr, data):
+        rec_data = model.get_value(itr, 7)
+        renderer.set_property("pixbuf", self._logos.get(rec_data.get("e2servicereference", None)))
 
     def time_sort_func(self, model, iter1, iter2, column):
         """ Custom sort function for time column. """
-        rec1 = model.get_value(iter1, 6)
-        rec2 = model.get_value(iter2, 6)
+        rec1 = model.get_value(iter1, 7)
+        rec2 = model.get_value(iter2, 7)
 
         return int(rec1.get("e2time", "0")) - int(rec2.get("e2time", "0"))
 
