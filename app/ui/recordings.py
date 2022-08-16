@@ -111,7 +111,6 @@ class RecordingsTool(Gtk.Box):
         self._paned.add1(ch2)
         self._paned.add(ch1)
 
-    @run_idle
     def on_data_receive(self, app, page):
         if page is Page.RECORDINGS:
             model, paths = self._rec_view.get_selection().get_selected_rows()
@@ -129,7 +128,8 @@ class RecordingsTool(Gtk.Box):
             self._app.emit("add-background-task", bgw)
 
     def download_recordings(self, files, dst):
-        [self._ftp.download_file(f, dst) for f in files]
+        for f in files:
+            self._ftp.download_file(f, dst)
 
     @run_task
     def init(self, app=None, arg=None):

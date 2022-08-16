@@ -81,15 +81,15 @@ class EpgCache(dict):
             self._reader = XmlTvReader(gz_file, url)
 
             def process_data():
-                gen = self._reader.parse()
-                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+                t = BGTaskWidget(self._app, "Processing XMLTV data...", self._reader.parse, )
+                self._app.emit("add-background-task", t)
 
             if os.path.isfile(gz_file):
                 # Difference calculation between the current time and file modification.
                 dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
                 # We will update daily. -> Temporarily!!!
                 if dif.days > 0 and not self._canceled:
-                    task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, process_data,)
+                    task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, process_data, )
                     self._app.emit("add-background-task", task)
                 else:
                     process_data()
@@ -129,6 +129,7 @@ class EpgCache(dict):
         for e in (EpgTool.get_event(e, False) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit()):
             self[e.event_data.get("e2eventservicename", "")] = e
 
+    @run_task
     def update_xml_data(self):
         services = self._app.current_services
         names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}

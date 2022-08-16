@@ -41,7 +41,7 @@ import xml.etree.ElementTree as ET
 
 import requests
 
-from app.commons import log, run_task
+from app.commons import log
 from app.eparser.ecommons import BqServiceType, BouquetService
 from app.settings import IS_WIN
 
@@ -315,8 +315,7 @@ class XmlTvReader(Reader):
 
             with gzip.open(self._path, "rb") as gzf:
                 log("Processing XMLTV data...")
-                for n in ET.iterparse(gzf):
-                    yield from self.process_node(n)
+                list(map(self.process_node, ET.iterparse(gzf)))
                 log("XMLTV data parsing is complete.")
         except OSError as e:
             log(f"{self.__class__.__name__} [parse] error: {e}")
@@ -353,8 +352,6 @@ class XmlTvReader(Reader):
 
                 if all((start, stop, title)):
                     events.append(self.Event(start, stop, title, desc))
-
-        yield node
 
     def to_epg_dat(self):
         """ Converts and saves imported data to 'epg.dat' file. """
