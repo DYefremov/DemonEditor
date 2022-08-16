@@ -18,6 +18,8 @@ excludes = ['app.tools.mpv',
 ui_files = [('app\\ui\\*.glade', 'ui'),
             ('app\\ui\\*.css', 'ui'),
             ('app\\ui\\*.ui', 'ui'),
+            ('app\\ui\\epg\\*.glade', 'ui\\epg'),
+            ('app\\ui\\xml\\*.glade', 'ui\\xml'),
             ('app\\ui\\lang*', 'share\\locale'),
             ('app\\ui\\icons*', 'share\\icons')
             ]
