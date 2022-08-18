@@ -796,10 +796,9 @@ class PiconManager(Gtk.Box):
 
         try:
             # We download it sequentially.
-            for p in providers:
-                self._picon_cz_downloader.download(p, path, p_ids)
+            [self._picon_cz_downloader.download(p, path, p_ids) for p in providers]
         except PiconsError as e:
-            self.append_output(f"Error: {str(e)}\n")
+            log(f"Error: {str(e)}\n")
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
@@ -820,7 +819,7 @@ class PiconManager(Gtk.Box):
         return {services.get(fav_id).picon_id for fav_id in fav_bouquet}
 
     def process_provider(self, prv, picons_path):
-        self.append_output(f"Getting links to picons for: {prv.name}.\n")
+        log(f"Getting links to picons for: {prv.name}.\n")
         return PiconsParser.parse(prv, picons_path, self._picon_ids, self.get_picons_format())
 
     @run_task
