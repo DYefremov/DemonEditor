@@ -1357,3 +1357,30 @@ msgstr "Воспроизведение из основного списка"
 
 msgid "Enables URL parsing using youtube-dl to get direct links to media."
 msgstr "Включает анализ URL-адресов с помощью youtube-dl для получения прямых ссылок на медиа."
+
+msgid "Permissions..."
+msgstr "Разрешения..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Отображать EPG в списке букета"
+
+msgid "EPG *.dat file:"
+msgstr "Файл EPG *.dat:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Использовать HTTP для перезагрузки данных в ресивере"
+
+msgid "Enable picons compression"
+msgstr "Включить сжатие пиконов"
+
+msgid "Update interval (sec):"
+msgstr "Интервал обновления (сек):"
+
+msgid "Update:"
+msgstr "Обновлять:"
+
+msgid "Daily"
+msgstr "Ежедневно"
+
+msgid "Assign reference"
+msgstr "Присвоить ссылку"

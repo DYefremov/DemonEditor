@@ -75,7 +75,7 @@ Author: Dmitriy Yefremov
         <property name="spacing">15</property>
         <child>
           <object class="GtkToggleButton" id="control_network_button">
-            <property name="label">Network</property>
+            <property name="label" translatable="yes">Network</property>
             <property name="width_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>

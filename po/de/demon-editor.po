@@ -1374,3 +1374,30 @@ msgstr "Wiedergabe aus der Hauptliste"
 
 msgid "Enables URL parsing using youtube-dl to get direct links to media."
 msgstr "Aktiviert URL-Parsing mit youtube-dl, um direkte Links zu Medien zu erhalten."
+
+msgid "Permissions..."
+msgstr "Berechtigungen..."
+
+msgid "Display EPG in bouquet list"
+msgstr "EPG in Bouquet-Liste anzeigen"
+
+msgid "EPG *.dat file:"
+msgstr "EPG *.dat Datei:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "HTTP verwenden, um Daten in den Receiver updaten"
+
+msgid "Enable picons compression"
+msgstr "Picon-Komprimierung aktivieren"
+
+msgid "Update interval (sec):"
+msgstr "Aktualisierungsintervall (sec):"
+
+msgid "Update:"
+msgstr "Aktualisieren:"
+
+msgid "Daily"
+msgstr "Täglich"
+
+msgid "Assign reference"
+msgstr "Referenz zuweisen"
