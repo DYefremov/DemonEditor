@@ -489,6 +489,8 @@ class Application(Gtk.Application):
         self.connect("add-background-task", self.on_bg_task_add)
         self.connect("task-done", self.on_task_done)
         self.connect("task-cancel", self.on_task_cancel)
+        # Font.
+        self.connect("list-font-changed", self.on_list_font_changed)
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
@@ -825,11 +827,8 @@ class Application(Gtk.Application):
             If update=False - first call on program start, else - after options changes!
         """
         if self._current_font != self._settings.list_font:
-            from gi.repository import Pango
-
-            font_desc = Pango.FontDescription.from_string(self._settings.list_font)
-            list(map(lambda v: v.modify_font(font_desc), (self._services_view, self._fav_view, self._bouquets_view)))
             self._current_font = self._settings.list_font
+            self.emit("list-font-changed", self._current_font)
 
         if self._picons_size != self._settings.list_picon_size:
             self._picons_size = self._settings.list_picon_size
@@ -925,6 +924,13 @@ class Application(Gtk.Application):
         self._NEW_COLOR = new_color
         self._EXTRA_COLOR = extra_color
         yield True
+
+    def on_list_font_changed(self, app, font):
+        """ Modifies the font of the main views when changed in the settings. """
+        from gi.repository import Pango
+        font_desc = Pango.FontDescription.from_string(font)
+        views = (self._services_view, self._iptv_services_view, self._fav_view, self._bouquets_view)
+        list(map(lambda v: v.modify_font(font_desc), views))
 
     @staticmethod
     def force_ctrl(view, event):
