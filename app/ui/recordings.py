@@ -31,7 +31,6 @@ import os
 from datetime import datetime
 from ftplib import all_errors
 from io import BytesIO, TextIOWrapper
-from pathlib import Path
 from urllib.parse import quote
 
 from app.ui.tasks import BGTaskWidget
@@ -123,13 +122,17 @@ class RecordingsTool(Gtk.Box):
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
 
-            files = (Path(model[p][-1].get("e2filename", "")).name for p in paths)
+            files = (model[p][5] for p in paths)
             bgw = BGTaskWidget(self._app, "Downloading recordings...", self.download_recordings, files, response)
             self._app.emit("add-background-task", bgw)
 
     def download_recordings(self, files, dst):
-        for f in files:
-            self._ftp.download_file(f, dst)
+        for file in files:
+            try:
+                with open(os.path.join(dst, os.path.basename(file)), "wb") as f:
+                    log(f"Downloading recording: {file}.   Status: {self._ftp.download_binary(file, f)}".rstrip())
+            except OSError as e:
+                log(str(e))
 
     @run_task
     def init(self, app=None, arg=None):

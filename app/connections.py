@@ -113,18 +113,20 @@ class UtfFTP(FTP):
     def download_file(self, name, save_path, callback=None):
         with open(save_path + name, "wb") as f:
             msg = "Downloading file: {}.   Status: {}"
-            try:
-                resp = str(self.retrbinary("RETR " + name, f.write))
-            except all_errors as e:
-                resp = str(e)
-                msg = msg.format(name, e)
-                log(msg.rstrip())
-            else:
-                msg = msg.format(name, resp)
-
+            resp = self.download_binary(name, f)
+            msg = msg.format(name, resp)
             callback(msg) if callback else log(msg.rstrip())
 
             return resp
+
+    def download_binary(self, src, fo):
+        try:
+            resp = str(self.retrbinary(f"RETR {src}", fo.write))
+        except all_errors as e:
+            resp = str(e)
+            log(f"Error. {e}")
+
+        return resp
 
     def download_dir(self, path, save_path, callback=None):
         """  Downloads directory from FTP with all contents.

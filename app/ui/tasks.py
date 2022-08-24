@@ -43,7 +43,7 @@ class BGTaskWidget(Gtk.Box):
         self._spinner = Gtk.Spinner(active=True)
         self.pack_start(self._spinner, False, False, 0)
 
-        close_button = Gtk.Button.new_from_icon_name("gtk-close", Gtk.IconSize.MENU)
+        close_button = Gtk.Button.new_from_icon_name("window-close", Gtk.IconSize.MENU)
         close_button.set_relief(Gtk.ReliefStyle.NONE)
         close_button.set_valign(Gtk.Align.CENTER)
         close_button.set_tooltip_text(get_message("Cancel"))
