@@ -323,6 +323,8 @@ class Application(Gtk.Application):
         GObject.signal_new("task-cancel", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("task-canceled", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,)),
+        GObject.signal_new("list-font-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
@@ -597,6 +599,11 @@ class Application(Gtk.Application):
                   self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
             iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
 
+    def do_activate(self):
+        self._main_window.set_application(self)
+        self._main_window.set_wmclass("DemonEditor", "DemonEditor")
+        self._main_window.present()
+
         self.init_actions()
         self.set_accels()
         self.init_layout()
@@ -608,6 +615,45 @@ class Application(Gtk.Application):
         self.init_profiles()
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def do_shutdown(self):
+        """  Performs shutdown tasks """
+        if self._settings.load_last_config:
+            self._settings.add("last_config", {"last_profile": self._settings.current_profile,
+                                               "last_bouquet": self._current_bq_name})
+        self._settings.save()  # storing current settings
+
+        if self._http_api:
+            self._http_api.close()
+
+        Gtk.Application.do_shutdown(self)
+
+    def do_command_line(self, command_line):
+        """ Processing command line parameters. """
+        options = command_line.get_options_dict()
+        options = options.end().unpack()
+
+        if "log" in options:
+            init_logger()
+
+        if "record" in options:
+            log("Starting record of current stream...")
+            log("Not implemented yet!")
+
+        if "debug" in options:
+            d_op = options.get("debug", "off")
+            if d_op == "on":
+                self._settings.debug_mode = True
+            elif d_op == "off":
+                self._settings.debug_mode = False
+            else:
+                log("No valid [on, off] arguments for -d found!")
+                return 1
+            log(f"Debug mode is {d_op}.")
+            self._settings.save()
+
+        self.activate()
+        return 0
 
     def init_actions(self):
         self.set_action("on_import_bouquet", self.on_import_bouquet)
@@ -712,50 +758,6 @@ class Application(Gtk.Application):
         self.set_accels_for_action("app.on_telnet_show", ["<primary>t"])
         self.set_accels_for_action("app.on_logs_show", ["<shift><primary>l"])
         self.set_accels_for_action("win.filter", ["<shift><primary>f"])
-
-    def do_activate(self):
-        self._main_window.set_application(self)
-        self._main_window.set_wmclass("DemonEditor", "DemonEditor")
-        self._main_window.present()
-
-    def do_shutdown(self):
-        """  Performs shutdown tasks """
-        if self._settings.load_last_config:
-            self._settings.add("last_config", {"last_profile": self._settings.current_profile,
-                                               "last_bouquet": self._current_bq_name})
-        self._settings.save()  # storing current settings
-
-        if self._http_api:
-            self._http_api.close()
-
-        Gtk.Application.do_shutdown(self)
-
-    def do_command_line(self, command_line):
-        """ Processing command line parameters. """
-        options = command_line.get_options_dict()
-        options = options.end().unpack()
-
-        if "log" in options:
-            init_logger()
-
-        if "record" in options:
-            log("Starting record of current stream...")
-            log("Not implemented yet!")
-
-        if "debug" in options:
-            d_op = options.get("debug", "off")
-            if d_op == "on":
-                self._settings.debug_mode = True
-            elif d_op == "off":
-                self._settings.debug_mode = False
-            else:
-                log("No valid [on, off] arguments for -d found!")
-                return 1
-            log(f"Debug mode is {d_op}.")
-            self._settings.save()
-
-        self.activate()
-        return 0
 
     def init_profiles(self):
         self.update_profiles()
