@@ -45,13 +45,14 @@ from app.connections import UtfFTP
 from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder, get_message
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION, Page
 
 File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
 
 
 class BaseDialog(Gtk.Dialog):
     """ Base class for additional FTP dialogs. """
+
     def __init__(self, title, use_header_bar=0, *args, **kwargs):
         super().__init__(title=title, use_header_bar=use_header_bar, *args, **kwargs)
 
@@ -231,6 +232,8 @@ class FtpClientBox(Gtk.HBox):
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
         self._app = app
+        self._app.connect("data-receive", self.on_receive)
+        self._app.connect("data-send", self.on_send)
         self._settings = settings
         self._ftp = None
         self._select_enabled = True
@@ -304,6 +307,14 @@ class FtpClientBox(Gtk.HBox):
         self.init_ftp()
         self.init_file_data()
         self.show()
+
+    def on_receive(self, app, page):
+        if page is Page.FTP:
+            self.on_ftp_copy()
+
+    def on_send(self, app, page):
+        if page is Page.FTP:
+            self.on_file_copy()
 
     @run_task
     def init_ftp(self):
