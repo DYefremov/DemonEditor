@@ -228,7 +228,7 @@ class XmlTvReader(Reader):
 
     TIME_FORMAT_STR = "%Y%m%d%H%M%S %z"
 
-    Service = namedtuple("Service", ["id", "name", "logo", "events"])
+    Service = namedtuple("Service", ["id", "names", "logo", "events"])
     Event = namedtuple("EpgEvent", ["start", "duration", "title", "desc"])
 
     def __init__(self, path, url):
@@ -297,14 +297,15 @@ class XmlTvReader(Reader):
         utc = dt.timestamp()
         offset = datetime.now() - dt
 
-        for srv in filter(lambda s: s.name in names, self._ids.values()):
+        for srv in filter(lambda s: any(name in names for name in s.names), self._ids.values()):
             ev = list(filter(lambda s: s.start < utc, srv.events))
             if ev:
                 ev = ev[-1]
                 start = datetime.fromtimestamp(ev.start) + offset
                 end_time = datetime.fromtimestamp(ev.duration) + offset
                 tm = f"{start.strftime('%H:%M')} - {end_time.strftime('%H:%M')}"
-                events[srv.name] = EpgEvent(srv.name, ev.title, tm, ev.desc, ev)
+                for n in srv.names:
+                    events[n] = EpgEvent(n, ev.title, tm, ev.desc, ev)
 
         return events
 
@@ -324,13 +325,9 @@ class XmlTvReader(Reader):
         event, element = node
         if element.tag == self.CH_TAG:
             ch_id = element.get("id", None)
-            name, logo = None, None
-            for c in element:
-                if c.tag == self.DSP_NAME_TAG:
-                    name = c.text
-                elif c.tag == self.ICON_TAG:
-                    logo = c.get("src", None)
-            self._ids[ch_id] = self.Service(ch_id, name, logo, [])
+            logo = None  # Currently not in use.
+            # Since a service can have several names, we will store a set of names in the "names" field!
+            self._ids[ch_id] = self.Service(ch_id, {c.text for c in element if c.tag == self.DSP_NAME_TAG}, logo, [])
         elif element.tag == self.PR_TAG:
             channel = self._ids.get(element.get(self.CH_TAG, None), None)
             if channel:
