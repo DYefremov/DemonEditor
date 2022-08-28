@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2022-08-13 22:53+0300\n"
+"PO-Revision-Date: 2022-08-27 23:17+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: \n"
 "Language: tr\n"
@@ -1389,3 +1389,30 @@ msgstr "Ana listeden oynatma"
 
 msgid "Enables URL parsing using youtube-dl to get direct links to media."
 msgstr "Medyaya doğrudan bağlantılar almak için youtube-dl kullanarak URL ayrıştırmayı etkinleştirir."
+
+msgid "Permissions..."
+msgstr "İzinler..."
+
+msgid "Display EPG in bouquet list"
+msgstr "EPG'yi buket listesinde göster"
+
+msgid "EPG *.dat file:"
+msgstr "EPG *.dat dosyası:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Alıcıdaki verileri yeniden yüklemek için HTTP kullanın"
+
+msgid "Enable picons compression"
+msgstr "Picon sıkıştırmayı etkinleştir"
+
+msgid "Update interval (sec):"
+msgstr "Güncelleme aralığı (sn):"
+
+msgid "Update:"
+msgstr "Güncelleme:"
+
+msgid "Daily"
+msgstr "Günlük"
+
+msgid "Assign reference"
+msgstr "Referans ata"
