@@ -250,7 +250,7 @@ def backup_data(path, backup_path, move=True):
         src, dst = os.path.join(path, file), backup_path + file
         shutil.move(src, dst) if move else shutil.copy(src, dst)
     # Compressing to zip and delete remaining files.
-    zip_file = shutil.make_archive(backup_path, "zip", backup_path)
+    zip_file = shutil.make_archive(backup_path.rstrip(SEP), "zip", backup_path)
     shutil.rmtree(backup_path)
 
     return zip_file
