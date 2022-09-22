@@ -6,16 +6,16 @@ from threading import Thread, Timer
 from gi.repository import GLib
 
 _LOG_FILE = "demon-editor.log"
-_DATE_FORMAT = "%d-%m-%y %H:%M:%S"
-
+LOG_DATE_FORMAT = "%d-%m-%y %H:%M:%S"
 LOGGER_NAME = "main_logger"
+LOG_FORMAT = "%(asctime)s %(message)s"
 
 
 def init_logger():
     logging.Logger(LOGGER_NAME)
     logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s %(message)s",
-                        datefmt=_DATE_FORMAT,
+                        format=LOG_FORMAT,
+                        datefmt=LOG_DATE_FORMAT,
                         handlers=[logging.FileHandler(_LOG_FILE), logging.StreamHandler()])
     log("Logging is enabled.", level=logging.INFO)
 

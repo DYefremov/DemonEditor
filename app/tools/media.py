@@ -32,7 +32,7 @@ from datetime import datetime
 
 from gi.repository import Gdk, Gtk, GObject
 
-from app.commons import run_task, log, _DATE_FORMAT, run_with_delay
+from app.commons import run_task, log, LOG_DATE_FORMAT, run_with_delay
 from app.settings import IS_DARWIN, IS_LINUX, IS_WIN
 
 
@@ -528,7 +528,7 @@ class Recorder:
 
         path = self._settings.records_path
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        d_now = datetime.now().strftime(_DATE_FORMAT)
+        d_now = datetime.now().strftime(LOG_DATE_FORMAT)
         d_now = d_now.replace(" ", "_").replace(":", "-") if IS_WIN else d_now.replace(" ", "_")
         path = f"{path}{name.replace(' ', '_')}_{d_now}"
         cmd = self.get_transcoding_cmd(path) if self._settings.activate_transcoding else self._CMD.format(path)

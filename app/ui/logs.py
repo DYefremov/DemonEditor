@@ -30,7 +30,7 @@ import logging
 
 from gi.repository import GLib
 
-from app.commons import LOGGER_NAME
+from app.commons import LOGGER_NAME, LOG_FORMAT, LOG_DATE_FORMAT
 from app.ui.dialogs import get_builder
 from app.ui.main_helper import append_text_to_tview
 from app.ui.uicommons import Gtk, UI_RESOURCES_PATH
@@ -43,9 +43,10 @@ class LogsClient(Gtk.Box):
         def __init__(self, view):
             logging.Handler.__init__(self)
             self._view = view
+            self.setFormatter(logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
 
-        def handle(self, rec):
-            GLib.idle_add(append_text_to_tview, f"{rec.msg}\n", self._view)
+        def handle(self, rec: logging.LogRecord):
+            GLib.idle_add(append_text_to_tview, f"{self.format(rec)}\n", self._view)
 
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,3 +68,7 @@ class LogsClient(Gtk.Box):
 
     def on_close(self, button):
         self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(False))
+
+
+if __name__ == "__main__":
+    pass
