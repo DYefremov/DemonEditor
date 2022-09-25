@@ -222,6 +222,8 @@ class Application(Gtk.Application):
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
         self._is_enigma = self._s_type is SettingsType.ENIGMA_2
+        self._is_send_data_enabled = True
+        self._is_receive_data_enabled = True
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -683,8 +685,10 @@ class Application(Gtk.Application):
         self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
         self.set_action("on_data_save", lambda a, v: self.emit("data-save", self._page))
         self.set_action("on_data_save_as", lambda a, v: self.emit("data-save-as", self._page))
-        self.set_action("on_receive", self.on_receive)
-        self.set_action("on_send", self.on_send)
+        sa = self.set_action("on_receive", self.on_receive)
+        self.bind_property("is-receive-data-enabled", sa, "enabled")
+        sa = self.set_action("on_send", self.on_send)
+        self.bind_property("is-send-data-enabled", sa, "enabled")
         self.set_action("on_data_open", self.on_data_open)
         self.set_action("on_archive_open", self.on_archive_open)
         # Edit.
@@ -715,7 +719,7 @@ class Application(Gtk.Application):
         # Display EPG.
         sa = self.set_state_action("display_epg", self.set_display_epg, self._settings.display_epg)
         self.change_action_state("display_epg", GLib.Variant.new_boolean(self._settings.display_epg))
-        self.bind_property("is_enigma", sa, "enabled")
+        self.bind_property("is-enigma", sa, "enabled")
         # Alternate layout.
         sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
         sa.connect("change-state", self.on_layout_change)
@@ -1034,6 +1038,8 @@ class Application(Gtk.Application):
         self._page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(self._page in self._fav_pages)
         self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
+        self.is_send_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.RECORDINGS, Page.CONTROL)
+        self.is_receive_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.CONTROL)
         self.emit("page-changed", self._page)
 
     def on_iptv_toggled(self, button):
@@ -4322,6 +4328,22 @@ class Application(Gtk.Application):
     @is_enigma.setter
     def is_enigma(self, value):
         self._is_enigma = value
+
+    @GObject.Property(type=bool, default=True)
+    def is_send_data_enabled(self):
+        return self._is_send_data_enabled
+
+    @is_send_data_enabled.setter
+    def is_send_data_enabled(self, value):
+        self._is_send_data_enabled = value
+
+    @GObject.Property(type=bool, default=True)
+    def is_receive_data_enabled(self):
+        return self._is_receive_data_enabled
+
+    @is_receive_data_enabled.setter
+    def is_receive_data_enabled(self, value):
+        self._is_receive_data_enabled = value
 
     @property
     def page(self):
