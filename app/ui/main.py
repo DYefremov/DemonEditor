@@ -689,7 +689,8 @@ class Application(Gtk.Application):
         self.bind_property("is-receive-data-enabled", sa, "enabled")
         sa = self.set_action("on_send", self.on_send)
         self.bind_property("is-send-data-enabled", sa, "enabled")
-        self.set_action("on_data_open", self.on_data_open)
+        sa = self.set_action("on_data_open", self.on_data_open)
+        self.bind_property("is-send-data-enabled", sa, "enabled")
         self.set_action("on_archive_open", self.on_archive_open)
         # Edit.
         self.set_action("on_edit", self.on_edit)
