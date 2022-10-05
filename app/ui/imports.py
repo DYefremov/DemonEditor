@@ -103,7 +103,9 @@ class ImportDialog:
     def __init__(self, transient, path, settings, service_ids, appender, bouquets=None):
         handlers = {"on_import": self.on_import,
                     "on_cursor_changed": self.on_cursor_changed,
-                    "on_selected_toggled": self.on_selected_toggled,
+                    "on_bq_selected_toggled": self.on_bq_selected_toggled,
+                    "on_service_selected_toggled": self.on_service_selected_toggled,
+                    "on_services_model_changed": self.on_services_model_changed,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
@@ -116,6 +118,7 @@ class ImportDialog:
         self._bq_services = {}
         self._services = {}
         self._service_ids = service_ids
+        self._skip_import = set()
         self._append = appender
         self._profile = settings.setting_type
         self._settings = settings
@@ -123,14 +126,15 @@ class ImportDialog:
 
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
-        self._main_model = builder.get_object("main_list_store")
-        self._main_view = builder.get_object("main_view")
+        self._bq_model = builder.get_object("bq_list_store")
+        self._bq_view = builder.get_object("bq_view")
         self._services_view = builder.get_object("services_view")
         self._services_model = builder.get_object("services_list_store")
-        self._info_check_button = builder.get_object("info_check_button")
-        self._info_check_button.bind_property("active", builder.get_object("services_box_frame"), "visible")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        self._bouquets_count_label = builder.get_object("bouquets_count_label")
+        self._services_count_label = builder.get_object("services_count_label")
+
         window_size = self._settings.get("import_dialog_window_size")
         if window_size:
             self._dialog_window.resize(*window_size)
@@ -142,7 +146,7 @@ class ImportDialog:
 
     @run_idle
     def init_data(self, path):
-        self._main_model.clear()
+        self._bq_model.clear()
         self._services_model.clear()
         try:
             if not self._bouquets:
@@ -150,8 +154,9 @@ class ImportDialog:
                 self._bouquets = get_bouquets(path, self._profile)
             for bqs in self._bouquets:
                 for bq in bqs.bouquets:
-                    self._main_model.append((bq.name, bq.type, True))
+                    self._bq_model.append((bq.name, bq.type, True))
                     self._bq_services[(bq.name, bq.type)] = bq.services
+                self._bouquets_count_label.set_text(str(len(self._bq_model)))
 
             if self._profile is SettingsType.ENIGMA_2:
                 services = get_services(path, self._profile, 5 if self._settings.v5_support else 4)
@@ -164,11 +169,11 @@ class ImportDialog:
             for srv in services:
                 self._services[srv.fav_id] = srv
         except FileNotFoundError as e:
-            log("Import error [init data]: {}".format(e))
+            log(f"Import error [init data]: {e}")
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_import(self, item):
-        if not any(r[-1] for r in self._main_model):
+        if not any(r[-1] for r in self._bq_model):
             self.show_info_message(get_message("No selected item!"), Gtk.MessageType.ERROR)
             return
 
@@ -186,7 +191,7 @@ class ImportDialog:
         log("Importing data...")
         services = set()
         to_delete = set()
-        for row in self._main_model:
+        for row in self._bq_model:
             bq = (row[0], row[1])
             if row[-1]:
                 for bq_srv in self._bq_services.get(bq, []):
@@ -205,14 +210,13 @@ class ImportDialog:
             for b in bqs_to_delete:
                 with suppress(ValueError):
                     bq.remove(b)
-        self._append(self._bouquets, list(filter(lambda s: s.fav_id not in self._service_ids, services)))
+
+        self._append(self._bouquets, list(
+            filter(lambda s: s.fav_id not in self._service_ids and s.fav_id not in self._skip_import, services)))
         self._dialog_window.destroy()
 
     @run_idle
     def on_cursor_changed(self, view):
-        if not self._info_check_button.get_active():
-            return
-
         self._services_model.clear()
         model, paths = view.get_selection().get_selected_rows()
         if not paths:
@@ -223,12 +227,28 @@ class ImportDialog:
             if bq_srv.type is BqServiceType.DEFAULT:
                 srv = self._services.get(bq_srv.data, None)
                 if srv:
-                    self._services_model.append((srv.service, srv.service_type))
+                    srv = (srv.service, srv.service_type, srv.fav_id not in self._skip_import, srv.fav_id)
+                    self._services_model.append(srv)
             else:
-                self._services_model.append((bq_srv.name, bq_srv.type.value))
+                srv = (bq_srv.name, bq_srv.type.value, bq_srv.data not in self._skip_import, bq_srv.data)
+                self._services_model.append(srv)
 
-    def on_selected_toggled(self, toggle, path):
-        self._main_model.set_value(self._main_model.get_iter(path), 2, not toggle.get_active())
+        self._services_count_label.set_text(str(len(self._services_model)))
+
+    def on_bq_selected_toggled(self, toggle, path):
+        self._bq_model.set_value(self._bq_model.get_iter(path), 2, not toggle.get_active())
+
+    def on_service_selected_toggled(self, toggle, path):
+        self._services_model.set_value(self._services_model.get_iter(path), 2, not toggle.get_active())
+
+    def on_services_model_changed(self, model, path, itr):
+        row = model[itr][:]
+        fav_id = row[-1]
+        if row[2]:
+            if fav_id in self._skip_import:
+                self._skip_import.remove(fav_id)
+        else:
+            self._skip_import.add(fav_id)
 
     @run_idle
     def show_info_message(self, text, message_type):
@@ -261,10 +281,11 @@ class ImportDialog:
         key = KeyboardKey(key_code)
 
         if key is KeyboardKey.SPACE:
+            model = view.get_model()
             path, column = view.get_cursor()
-            itr = self._main_model.get_iter(path)
-            selected = self._main_model.get_value(itr, 2)
-            self._main_model.set_value(itr, 2, not selected)
+            itr = model.get_iter(path)
+            selected = model.get_value(itr, 2)
+            model.set_value(itr, 2, not selected)
 
 
 if __name__ == "__main__":
