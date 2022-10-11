@@ -95,7 +95,7 @@ class Defaults(Enum):
     STREAM_LIB = "mpv" if IS_WIN else "vlc"
     MAIN_LIST_PLAYBACK = False
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = f"{DATA_PATH}records{SEP}"
+    RECORDS_PATH = f"{DATA_PATH}recordings{SEP}"
     ACTIVATE_TRANSCODING = False
     ACTIVE_TRANSCODING_PRESET = f"720p TV{SEP}device"
 
