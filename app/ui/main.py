@@ -3085,7 +3085,7 @@ class Application(Gtk.Application):
             return
 
         appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
-        import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender, file_path)
+        import_bouquet(self, model, paths[0], appender, file_path)
 
     def on_import_bouquets(self, action, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
@@ -3109,7 +3109,7 @@ class Application(Gtk.Application):
             gen = self.append_imported_data(b, s, callback)
             GLib.idle_add(lambda: next(gen, False))
 
-        dialog = ImportDialog(self._main_window, path, self._settings, self._services.keys(), append)
+        dialog = ImportDialog(self, path, append)
         dialog.import_data() if force else dialog.show()
 
     def append_imported_data(self, bouquets, services, callback=None):

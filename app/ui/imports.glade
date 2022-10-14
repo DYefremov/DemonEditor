@@ -43,6 +43,11 @@ Author: Dmitriy Yefremov
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkImage" id="details_image">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">emblem-important-symbolic</property>
+  </object>
   <object class="GtkImage" id="import_image">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -167,6 +172,24 @@ Author: Dmitriy Yefremov
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="details_button">
+                    <property name="label" translatable="yes">Details</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="image">details_image</property>
+                    <property name="always-show-image">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">1</property>
+                    <property name="secondary">True</property>
                   </packing>
                 </child>
               </object>
@@ -367,6 +390,7 @@ Author: Dmitriy Yefremov
                             <property name="headers-clickable">False</property>
                             <property name="search-column">0</property>
                             <signal name="button-press-event" handler="on_popup_menu" object="services_popup_menu" swapped="no"/>
+                            <signal name="cursor-changed" handler="on_service_changed" swapped="no"/>
                             <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                             <signal name="select-all" handler="on_select_all" swapped="no"/>
                             <child internal-child="selection">
@@ -426,6 +450,46 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkFrame" id="service_info_box_frame">
+                        <property name="visible" bind-source="details_button" bind-property="active">False</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-top">5</property>
+                        <property name="label-xalign">0</property>
+                        <property name="shadow-type">in</property>
+                        <child>
+                          <object class="GtkBox" id="service_info_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-top">5</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel" id="service_info_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
+                                <property name="ellipsize">end</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkBox" id="services_status_box">
                         <property name="height-request">26</property>
                         <property name="visible">True</property>
@@ -464,7 +528,7 @@ Author: Dmitriy Yefremov
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>

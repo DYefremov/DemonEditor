@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,15 +35,18 @@ from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.settings import SettingsType, IS_DARWIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
-from app.ui.main_helper import on_popup_menu
+from app.ui.main_helper import on_popup_menu, get_iptv_data
 from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
 
 
-def import_bouquet(transient, model, path, settings, services, appender, file_path=None):
+def import_bouquet(app, model, path, appender, file_path=None):
     """ Import of single bouquet """
     itr = model.get_iter(path)
     bq_type = BqType(model.get(itr, Column.BQ_TYPE)[0])
     pattern, f_pattern = None, None
+    settings = app.app_settings
+    transient = app.app_window
+    services = app.current_services
     profile = settings.setting_type
 
     if profile is SettingsType.ENIGMA_2:
@@ -88,7 +91,7 @@ def import_bouquet(transient, model, path, settings, services, appender, file_pa
         else:
             bqs = get_neutrino_bouquets(file_path, "", bq_type.value)
         file_path = f"{Path(file_path).parent}{SEP}"
-        ImportDialog(transient, file_path, settings, services.keys(), lambda b, s: appender(b), (bqs,)).show()
+        ImportDialog(app, file_path, lambda b, s: appender(b), (bqs,)).show()
 
 
 def get_enigma2_bouquet(path):
@@ -100,9 +103,10 @@ def get_enigma2_bouquet(path):
 
 
 class ImportDialog:
-    def __init__(self, transient, path, settings, service_ids, appender, bouquets=None):
+    def __init__(self, app, path, appender, bouquets=None):
         handlers = {"on_import": self.on_import,
                     "on_cursor_changed": self.on_cursor_changed,
+                    "on_service_changed": self.on_service_changed,
                     "on_bq_selected_toggled": self.on_bq_selected_toggled,
                     "on_service_selected_toggled": self.on_service_selected_toggled,
                     "on_services_model_changed": self.on_services_model_changed,
@@ -115,17 +119,17 @@ class ImportDialog:
 
         builder = get_builder(UI_RESOURCES_PATH + "imports.glade", handlers)
 
+        self._app = app
         self._bq_services = {}
         self._services = {}
-        self._service_ids = service_ids
         self._skip_import = set()
         self._append = appender
-        self._profile = settings.setting_type
-        self._settings = settings
+        self._profile = app.app_settings.setting_type
+        self._settings = app.app_settings
         self._bouquets = bouquets
 
         self._dialog_window = builder.get_object("dialog_window")
-        self._dialog_window.set_transient_for(transient)
+        self._dialog_window.set_transient_for(app.app_window)
         self._bq_model = builder.get_object("bq_list_store")
         self._bq_view = builder.get_object("bq_view")
         self._services_view = builder.get_object("services_view")
@@ -134,6 +138,7 @@ class ImportDialog:
         self._message_label = builder.get_object("message_label")
         self._bouquets_count_label = builder.get_object("bouquets_count_label")
         self._services_count_label = builder.get_object("services_count_label")
+        self._service_info_label = builder.get_object("service_info_label")
 
         window_size = self._settings.get("import_dialog_window_size")
         if window_size:
@@ -211,13 +216,15 @@ class ImportDialog:
                 with suppress(ValueError):
                     bq.remove(b)
 
-        self._append(self._bouquets, list(
-            filter(lambda s: s.fav_id not in self._service_ids and s.fav_id not in self._skip_import, services)))
+        ids = self._app.current_services.keys()
+        self._append(self._bouquets,
+                     list(filter(lambda s: s.fav_id not in ids and s.fav_id not in self._skip_import, services)))
         self._dialog_window.destroy()
 
     @run_idle
     def on_cursor_changed(self, view):
         self._services_model.clear()
+        self._service_info_label.set_text("")
         model, paths = view.get_selection().get_selected_rows()
         if not paths:
             return
@@ -234,6 +241,19 @@ class ImportDialog:
                 self._services_model.append(srv)
 
         self._services_count_label.set_text(str(len(self._services_model)))
+
+    def on_service_changed(self, view):
+        path, column = view.get_cursor()
+        if path:
+            row = self._services_model[path][:]
+            if row[1] == "IPTV":
+                ref, url = get_iptv_data(row[-1])
+                ref = f"{get_message('Service reference')}: {ref}"
+                info = f"{get_message('Name')}: {row[0]}\n{ref}\nURL: {url}"
+                self._service_info_label.set_text(info)
+            else:
+                srv = self._services.get(row[-1], None)
+                self._service_info_label.set_text(self._app.get_hint_for_fav_list(srv) if srv else "")
 
     def on_bq_selected_toggled(self, toggle, path):
         self._bq_model.set_value(self._bq_model.get_iter(path), 2, not toggle.get_active())
