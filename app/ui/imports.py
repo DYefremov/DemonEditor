@@ -36,7 +36,7 @@ from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neu
 from app.settings import SettingsType, IS_DARWIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from app.ui.main_helper import on_popup_menu, get_iptv_data
-from .uicommons import Gtk, UI_RESOURCES_PATH, KeyboardKey, Column
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column
 
 
 def import_bouquet(app, model, path, appender, file_path=None):
@@ -113,6 +113,7 @@ class ImportDialog:
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
+                    "on_services_view_realize": self.on_services_view_realize,
                     "on_popup_menu": on_popup_menu,
                     "on_resize": self.on_resize,
                     "on_key_press": self.on_key_press}
@@ -122,11 +123,13 @@ class ImportDialog:
         self._app = app
         self._bq_services = {}
         self._services = {}
+        self._ids = self._app.current_services.keys()
         self._skip_import = set()
         self._append = appender
         self._profile = app.app_settings.setting_type
         self._settings = app.app_settings
         self._bouquets = bouquets
+        self._existing_srv_background = None
 
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(app.app_window)
@@ -139,6 +142,7 @@ class ImportDialog:
         self._bouquets_count_label = builder.get_object("bouquets_count_label")
         self._services_count_label = builder.get_object("services_count_label")
         self._service_info_label = builder.get_object("service_info_label")
+        self._service_exists_frame = builder.get_object("service_exists_frame")
 
         window_size = self._settings.get("import_dialog_window_size")
         if window_size:
@@ -216,9 +220,8 @@ class ImportDialog:
                 with suppress(ValueError):
                     bq.remove(b)
 
-        ids = self._app.current_services.keys()
         self._append(self._bouquets,
-                     list(filter(lambda s: s.fav_id not in ids and s.fav_id not in self._skip_import, services)))
+                     list(filter(lambda s: s.fav_id not in self._ids and s.fav_id not in self._skip_import, services)))
         self._dialog_window.destroy()
 
     @run_idle
@@ -230,14 +233,17 @@ class ImportDialog:
             return
 
         bq_services = self._bq_services.get(model.get(model.get_iter(paths[0]), 0, 1))
+
         for bq_srv in bq_services:
             if bq_srv.type is BqServiceType.DEFAULT:
                 srv = self._services.get(bq_srv.data, None)
                 if srv:
-                    srv = (srv.service, srv.service_type, srv.fav_id not in self._skip_import, srv.fav_id)
+                    bg = self._existing_srv_background if srv.fav_id in self._ids else None
+                    srv = (srv.service, srv.service_type, srv.fav_id not in self._skip_import, bg, srv.fav_id)
                     self._services_model.append(srv)
             else:
-                srv = (bq_srv.name, bq_srv.type.value, bq_srv.data not in self._skip_import, bq_srv.data)
+                bg = self._existing_srv_background if bq_srv.data in self._ids else None
+                srv = (bq_srv.name, bq_srv.type.value, bq_srv.data not in self._skip_import, bg, bq_srv.data)
                 self._services_model.append(srv)
 
         self._services_count_label.set_text(str(len(self._services_model)))
@@ -288,6 +294,12 @@ class ImportDialog:
 
     def update_selection(self, view, select):
         view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 2, select))
+
+    def on_services_view_realize(self, view):
+        if self._settings.use_colors:
+            background = Gdk.RGBA()
+            self._existing_srv_background = background if background.parse(self._settings.new_color) else None
+            self._service_exists_frame.modify_bg(Gtk.StateType.NORMAL, background.to_color())
 
     def on_resize(self, window):
         if self._settings:
