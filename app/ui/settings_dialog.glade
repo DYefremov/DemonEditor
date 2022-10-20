@@ -599,8 +599,8 @@ Author: Dmitriy Yefremov
                       <object class="GtkBox" id="local_paths_box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
+                        <property name="margin_start">5</property>
+                        <property name="margin_end">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
@@ -649,6 +649,7 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
+                          <!-- n-columns=2 n-rows=3 -->
                           <object class="GtkGrid" id="local_paths_grid">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
@@ -693,16 +694,47 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="data_path_field">
+                              <object class="GtkBox" id="data_path_box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="hexpand">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkEntry" id="data_path_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="primary_icon_name">document-edit-symbolic</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="data_path_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Select</property>
+                                    <signal name="clicked" handler="on_field_button_press" object="data_path_field" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="data_path_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">folder-open-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <style>
+                                  <class name="group"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -710,16 +742,47 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="picons_path_field">
+                              <object class="GtkBox" id="picons_path_box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="hexpand">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkEntry" id="picons_path_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="primary_icon_name">document-edit-symbolic</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="picons_path_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Select</property>
+                                    <signal name="clicked" handler="on_field_button_press" object="picons_path_field" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="picons_path_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">folder-open-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <style>
+                                  <class name="group"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -727,16 +790,47 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="backup_path_field">
+                              <object class="GtkBox" id="backup_path_box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="hexpand">True</property>
-                                <property name="primary_icon_name">document-edit-symbolic</property>
-                                <property name="secondary_icon_name">folder-open-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                                <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                                <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkEntry" id="backup_path_field">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="primary_icon_name">document-edit-symbolic</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="backup_path_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives-default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Select</property>
+                                    <signal name="clicked" handler="on_field_button_press" object="backup_path_field" swapped="no"/>
+                                    <child>
+                                      <object class="GtkImage" id="backup_path_image">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon-name">folder-open-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <style>
+                                  <class name="group"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -767,23 +861,24 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="record_frame">
+                  <object class="GtkFrame" id="recordings_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label_xalign">0.019999999552965164</property>
                     <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkGrid" id="record_grid">
+                      <!-- n-columns=2 n-rows=1 -->
+                      <object class="GtkGrid" id="recordings_grid">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">5</property>
-                        <property name="margin_right">5</property>
+                        <property name="margin_start">5</property>
+                        <property name="margin_end">5</property>
                         <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="column_spacing">10</property>
                         <property name="column_homogeneous">True</property>
                         <child>
-                          <object class="GtkLabel" id="record_path_label">
+                          <object class="GtkLabel" id="recordings_path_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Streams record path:</property>
@@ -795,26 +890,57 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="record_data_path_field">
+                          <object class="GtkBox" id="recordings_path_box">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="hexpand">True</property>
-                            <property name="primary_icon_name">document-edit-symbolic</property>
-                            <property name="secondary_icon_name">folder-open-symbolic</property>
-                            <property name="primary_icon_activatable">False</property>
-                            <property name="secondary_icon_tooltip_text" translatable="yes">Select</property>
-                            <property name="secondary_icon_tooltip_markup" translatable="yes">Select</property>
-                            <signal name="icon-press" handler="on_field_icon_press" swapped="no"/>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkEntry" id="recordings_path_field">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="hexpand">True</property>
+                                <property name="primary_icon_name">document-edit-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="recordings_path_button">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="tooltip_text" translatable="yes">Select</property>
+                                <signal name="clicked" handler="on_field_button_press" object="recordings_path_field" swapped="no"/>
+                                <child>
+                                  <object class="GtkImage" id="recordings_path_image">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="icon_name">folder-open-symbolic</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <style>
+                              <class name="group"/>
+                            </style>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">0</property>
                           </packing>
                         </child>
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkLabel" id="record_label">
+                      <object class="GtkLabel" id="recordings_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Recordings:</property>

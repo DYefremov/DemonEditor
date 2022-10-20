@@ -42,7 +42,7 @@ class SettingsDialog:
     _DIGIT_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 
     def __init__(self, transient, settings: Settings):
-        handlers = {"on_field_icon_press": self.on_field_icon_press,
+        handlers = {"on_field_button_press": self.on_field_button_press,
                     "on_settings_type_changed": self.on_settings_type_changed,
                     "on_reset": self.on_reset,
                     "on_response": self.on_response,
@@ -119,10 +119,10 @@ class SettingsDialog:
         self._picons_path_field = builder.get_object("picons_path_field")
         self._data_path_field = builder.get_object("data_path_field")
         self._backup_path_field = builder.get_object("backup_path_field")
-        self._record_data_path_field = builder.get_object("record_data_path_field")
+        self._recordings_path_field = builder.get_object("recordings_path_field")
         self._default_data_paths_switch = builder.get_object("default_data_paths_switch")
-        self._default_data_paths_switch.bind_property("active", self._backup_path_field, "sensitive", 4)
-        self._default_data_paths_switch.bind_property("active", self._picons_path_field, "sensitive", 4)
+        self._default_data_paths_switch.bind_property("active", builder.get_object("picons_path_box"), "sensitive", 4)
+        self._default_data_paths_switch.bind_property("active", builder.get_object("backup_path_box"), "sensitive", 4)
         # Info bar.
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
@@ -278,7 +278,7 @@ class SettingsDialog:
             self._updated = self.on_save_settings()
         dialog.destroy()
 
-    def on_field_icon_press(self, entry, icon, event_button):
+    def on_field_button_press(self, entry):
         update_entry_data(entry, self._dialog, self._settings)
 
     def on_settings_type_changed(self, item):
@@ -311,7 +311,7 @@ class SettingsDialog:
         self._data_path_field.set_text(self._settings.default_data_path)
         self._picons_path_field.set_text(self._settings.default_picon_path)
         self._backup_path_field.set_text(self._settings.default_backup_path)
-        self._record_data_path_field.set_text(self._settings.records_path)
+        self._recordings_path_field.set_text(self._settings.recordings_path)
         self._before_save_switch.set_active(self._settings.backup_before_save)
         self._before_downloading_switch.set_active(self._settings.backup_before_downloading)
         self._play_streams_combo_box.set_active_id(str(self._settings.play_streams_mode.value))
@@ -393,7 +393,7 @@ class SettingsDialog:
         self._ext_settings.default_data_path = self._data_path_field.get_text()
         self._ext_settings.default_backup_path = self._backup_path_field.get_text()
         self._ext_settings.default_picon_path = self._picons_path_field.get_text()
-        self._ext_settings.records_path = self._record_data_path_field.get_text()
+        self._ext_settings.recordings_path = self._recordings_path_field.get_text()
         self._ext_settings.activate_transcoding = self._transcoding_switch.get_active()
         self._ext_settings.active_preset = self._presets_combo_box.get_active_id()
         self._ext_settings.list_picon_size = int(self._picons_size_button.get_active_id())

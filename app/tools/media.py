@@ -526,7 +526,7 @@ class Recorder:
         if self._recorder:
             self._recorder.stop()
 
-        path = self._settings.records_path
+        path = self._settings.recordings_path
         os.makedirs(os.path.dirname(path), exist_ok=True)
         d_now = datetime.now().strftime(LOG_DATE_FORMAT)
         d_now = d_now.replace(" ", "_").replace(":", "-") if IS_WIN else d_now.replace(" ", "_")

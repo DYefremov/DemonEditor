@@ -42,8 +42,7 @@ from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_t
                               PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, get_message, get_builder, get_chooser_dialog
-from .main_helper import (update_entry_data, append_text_to_tview, scroll_to, on_popup_menu, get_base_model, set_picon,
-                          get_picon_pixbuf, get_picon_dialog)
+from .main_helper import scroll_to, on_popup_menu, get_base_model, set_picon, get_picon_pixbuf, get_picon_dialog
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
 
 
@@ -87,7 +86,6 @@ class PiconManager(Gtk.Box):
                     "on_receive": self.on_receive,
                     "on_cancel": self.on_cancel,
                     "on_remove": self.on_remove,
-                    "on_picons_dir_open": self.on_picons_dir_open,
                     "on_selected_toggled": self.on_selected_toggled,
                     "on_url_changed": self.on_url_changed,
                     "on_picons_filter_changed": self.on_picons_filter_changed,
@@ -868,9 +866,6 @@ class PiconManager(Gtk.Box):
 
     def show_info_message(self, text, message_type):
         self._app.show_info_message(text, message_type)
-
-    def on_picons_dir_open(self, entry, icon, event_button):
-        update_entry_data(entry, self._app_window, settings=self._settings)
 
     @run_idle
     def on_selected_toggled(self, toggle, path):

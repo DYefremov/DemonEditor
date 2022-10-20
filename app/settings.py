@@ -95,7 +95,7 @@ class Defaults(Enum):
     STREAM_LIB = "mpv" if IS_WIN else "vlc"
     MAIN_LIST_PLAYBACK = False
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = f"{DATA_PATH}records{SEP}"
+    RECORDINGS_PATH = f"{DATA_PATH}recordings{SEP}"
     ACTIVATE_TRANSCODING = False
     ACTIVE_TRANSCODING_PRESET = f"720p TV{SEP}device"
 
@@ -462,12 +462,12 @@ class Settings:
         self._cp_settings["profile_backup_path"] = value
 
     @property
-    def records_path(self):
-        return self._settings.get("records_path", Defaults.RECORDS_PATH.value)
+    def recordings_path(self):
+        return self._settings.get("recordings_path", Defaults.RECORDINGS_PATH.value)
 
-    @records_path.setter
-    def records_path(self, value):
-        self._settings["records_path"] = value
+    @recordings_path.setter
+    def recordings_path(self, value):
+        self._settings["recordings_path"] = value
 
     # ******** Streaming ********* #
 
@@ -884,7 +884,7 @@ class Settings:
             "extra_color": Defaults.EXTRA_COLOR.value,
             "fav_click_mode": Defaults.FAV_CLICK_MODE.value,
             "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
-            "records_path": Defaults.RECORDS_PATH.value
+            "records_path": Defaults.RECORDINGS_PATH.value
         }
 
     @staticmethod
