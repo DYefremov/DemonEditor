@@ -26,6 +26,7 @@
 #
 
 
+from collections import defaultdict
 from contextlib import suppress
 from pathlib import Path
 
@@ -118,17 +119,18 @@ class ImportDialog:
                     "on_resize": self.on_resize,
                     "on_key_press": self.on_key_press}
 
-        builder = get_builder(UI_RESOURCES_PATH + "imports.glade", handlers)
+        builder = get_builder(f"{UI_RESOURCES_PATH}imports.glade", handlers)
 
         self._app = app
         self._bq_services = {}
         self._services = {}
         self._ids = self._app.current_services.keys()
-        self._skip_import = set()
+        self._skip_import = defaultdict(set)
         self._append = appender
         self._profile = app.app_settings.setting_type
         self._settings = app.app_settings
         self._bouquets = bouquets
+        self._current_bq = None
         self._existing_srv_background = None
 
         self._dialog_window = builder.get_object("dialog_window")
@@ -203,9 +205,10 @@ class ImportDialog:
         for row in self._bq_model:
             bq = (row[0], row[1])
             if row[-1]:
+                skip = self._skip_import[bq]
                 for bq_srv in self._bq_services.get(bq, []):
                     srv = self._services.get(bq_srv.data, None)
-                    if srv:
+                    if srv and srv.fav_id not in skip:
                         services.add(srv)
             else:
                 to_delete.add(bq)
@@ -214,14 +217,19 @@ class ImportDialog:
             for bq in bqs.bouquets:
                 if (bq.name, bq.type) in to_delete:
                     bqs_to_delete.append(bq)
+                else:
+                    skip = self._skip_import[(bq.name, bq.type)]
+                    bq_services = [srv for srv in bq.services if srv.data not in skip]
+                    bq.services.clear()
+                    bq.services.extend(bq_services)
         for bqs in self._bouquets:
             bq = bqs.bouquets
             for b in bqs_to_delete:
                 with suppress(ValueError):
                     bq.remove(b)
 
-        self._append(self._bouquets,
-                     list(filter(lambda s: s.fav_id not in self._ids and s.fav_id not in self._skip_import, services)))
+        services = list(filter(lambda s: s.fav_id not in self._ids, services))
+        self._append(self._bouquets, services)
         self._dialog_window.destroy()
 
     @run_idle
@@ -232,18 +240,20 @@ class ImportDialog:
         if not paths:
             return
 
-        bq_services = self._bq_services.get(model.get(model.get_iter(paths[0]), 0, 1))
+        self._current_bq = model.get(model.get_iter(paths[0]), 0, 1)
+        bq_services = self._bq_services.get(self._current_bq)
+        skip = self._skip_import[self._current_bq]
 
         for bq_srv in bq_services:
             if bq_srv.type is BqServiceType.DEFAULT:
                 srv = self._services.get(bq_srv.data, None)
                 if srv:
                     bg = self._existing_srv_background if srv.fav_id in self._ids else None
-                    srv = (srv.service, srv.service_type, srv.fav_id not in self._skip_import, bg, srv.fav_id)
+                    srv = (srv.service, srv.service_type, srv.fav_id not in skip, bg, srv.fav_id)
                     self._services_model.append(srv)
             else:
                 bg = self._existing_srv_background if bq_srv.data in self._ids else None
-                srv = (bq_srv.name, bq_srv.type.value, bq_srv.data not in self._skip_import, bg, bq_srv.data)
+                srv = (bq_srv.name, bq_srv.type.value, bq_srv.data not in skip, bg, bq_srv.data)
                 self._services_model.append(srv)
 
         self._services_count_label.set_text(str(len(self._services_model)))
@@ -270,11 +280,12 @@ class ImportDialog:
     def on_services_model_changed(self, model, path, itr):
         row = model[itr][:]
         fav_id = row[-1]
+        skip = self._skip_import[self._current_bq]
         if row[2]:
-            if fav_id in self._skip_import:
-                self._skip_import.remove(fav_id)
+            if fav_id in skip:
+                skip.remove(fav_id)
         else:
-            self._skip_import.add(fav_id)
+            skip.add(fav_id)
 
     @run_idle
     def show_info_message(self, text, message_type):
@@ -298,7 +309,7 @@ class ImportDialog:
     def on_services_view_realize(self, view):
         if self._settings.use_colors:
             background = Gdk.RGBA()
-            self._existing_srv_background = background if background.parse(self._settings.new_color) else None
+            self._existing_srv_background = background if background.parse(self._settings.extra_color) else None
             self._service_exists_frame.modify_bg(Gtk.StateType.NORMAL, background.to_color())
 
     def on_resize(self, window):
