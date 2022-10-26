@@ -328,6 +328,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,)),
         GObject.signal_new("list-font-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("clipboard-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -393,7 +395,9 @@ class Application(Gtk.Application):
         self._clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         ref_item = builder.get_object("fav_assign_ref_popup_item")
         self.bind_property("is_enigma", ref_item, "visible")
-        self._clipboard.connect("owner-change", lambda c, o: ref_item.set_sensitive(c.wait_is_text_available()))
+        # We use a custom event for observe clipboard state.
+        # "owner-change" -> https://gitlab.gnome.org/GNOME/gtk/-/issues/1757
+        self.connect("clipboard-changed", lambda a, o: ref_item.set_sensitive(o))
         # Wait dialog
         self._wait_dialog = WaitDialog(self._main_window)
         # Filter
@@ -1166,7 +1170,7 @@ class Application(Gtk.Application):
 
     def on_reference_copy(self, view):
         """ Copying picon id to clipboard. """
-        copy_reference(self.get_target_view(view), view, self._services, self._clipboard, self._main_window)
+        copy_reference(view, self)
 
     def on_fav_cut(self, view):
         self.on_cut(view, ViewTarget.FAV)
@@ -2992,6 +2996,8 @@ class Application(Gtk.Application):
         if ref and re.match(r"\d+_\d+_\d+_\w+_\d+_\d+_\d+_0_0_0", ref):
             [self.assign_reference(model, p, ref) for p in iptv_paths]
             self._clipboard.clear()
+
+        self.emit("clipboard-changed", self._clipboard.wait_is_text_available())
 
     def assign_reference(self, model, path, ref):
         ref_data = ref.split("_")

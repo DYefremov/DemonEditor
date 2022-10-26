@@ -618,25 +618,30 @@ def get_bouquets_names(model):
 
 # ***************** Others ********************* #
 
-def copy_reference(target, view, services, clipboard, transient):
-    """ Copying picon id to clipboard """
+def copy_reference(view, app):
+    """ Copying picon id to clipboard. """
     model, paths = view.get_selection().get_selected_rows()
-    if not is_only_one_item_selected(paths, transient):
+    if not is_only_one_item_selected(paths, app.app_window):
         return
+
+    target = app.get_target_view(view)
+    clipboard = app._clipboard
 
     if target is ViewTarget.SERVICES:
         picon_id = model.get_value(model.get_iter(paths), Column.SRV_PICON_ID)
         if picon_id:
             clipboard.set_text(picon_id.rstrip(".png"), -1)
         else:
-            show_dialog(DialogType.ERROR, transient, "No reference is present!")
+            app.show_error_message("No reference is present!")
     elif target is ViewTarget.FAV:
         fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
-        srv = services.get(fav_id, None)
+        srv = app.current_services.get(fav_id, None)
         if srv and srv.picon_id:
             clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
         else:
-            show_dialog(DialogType.ERROR, transient, "No reference is present!")
+            app.show_error_message("No reference is present!")
+
+    app.emit("clipboard-changed", clipboard.wait_is_text_available())
 
 
 def update_entry_data(entry, dialog, settings):
