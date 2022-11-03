@@ -282,6 +282,14 @@ class Settings:
         self._cp_settings["host"] = value
 
     @property
+    def hosts(self):
+        return self._cp_settings.get("hosts", [self.host,])
+
+    @hosts.setter
+    def hosts(self, value):
+        self._cp_settings["hosts"] = value
+
+    @property
     def port(self):
         return self._cp_settings.get("port", self.get_default("port"))
 
