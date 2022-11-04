@@ -373,7 +373,7 @@ class SettingsDialog:
 
         self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
         self._settings.setting_type = self._s_type
-        self._settings.host = self._hosts_box.get_active_id()
+        self._settings.host = self._host_field.get_text()
         self._settings.hosts = [h[1] for h in self._hosts_box.get_model()]
         self._settings.port = self._port_field.get_text()
         self._settings.user = self._login_field.get_text()

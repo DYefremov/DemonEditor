@@ -2045,15 +2045,23 @@ class Application(Gtk.Application):
 
     @run_task
     def upload_data(self, download_type):
-        try:
-            profile = self._s_type
-            opts = self._settings
-            use_http = profile is SettingsType.ENIGMA_2 and opts.use_http
-            upload_data(settings=opts, download_type=download_type, remove_unused=True, use_http=use_http)
-        except Exception as e:
-            msg = "Uploading data error: {}"
-            log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
-            self.show_error_message(str(e))
+        opts = self._settings
+        use_http = self._s_type is SettingsType.ENIGMA_2 and opts.use_http
+        multiple = len(self._settings.hosts) > 1
+        for host in self._settings.hosts:
+            if multiple:
+                log(f"##### Uploading data on [{host}] #####")
+            try:
+                upload_data(settings=opts,
+                            download_type=download_type,
+                            remove_unused=True,
+                            use_http=use_http,
+                            ext_host=host)
+            except Exception as e:
+                msg = "Uploading data error: {}"
+                log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
+                if host == self._settings.host:
+                    self.show_error_message(str(e))
 
     def on_data_open(self, action=None, value=None):
         """ Opening data via "File/Open". """

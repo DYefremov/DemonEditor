@@ -392,10 +392,10 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
 
 
 def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
-                callback=log, done_callback=None, use_http=False, files_filter=None):
+                callback=log, done_callback=None, use_http=False, files_filter=None, ext_host=None):
     s_type = settings.setting_type
     data_path = settings.profile_data_path
-    host, port, use_ssl = settings.host, settings.http_port, settings.http_use_ssl
+    host, port, use_ssl = ext_host or settings.host, settings.http_port, settings.http_use_ssl
     user, password = settings.user, settings.password
     base_url = f"http{'s' if use_ssl else ''}://{host}:{port}"
     base = "web" if s_type is SettingsType.ENIGMA_2 else "control"
