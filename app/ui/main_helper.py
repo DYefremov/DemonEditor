@@ -32,11 +32,14 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
            "scroll_to", "get_base_model", "copy_reference", "assign_picons", "remove_picon",
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
-           "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu")
+           "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name")
 
 import os
+import re
 import shutil
+import unicodedata
 from collections import defaultdict
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -557,8 +560,15 @@ def is_only_one_item_selected(paths, transient):
 def get_picon_pixbuf(path, size=32):
     try:
         return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width=size, height=size, preserve_aspect_ratio=True)
-    except GLib.GError as e:
-        pass
+    except GLib.GError:
+        pass  # NOP
+
+
+@lru_cache(50)
+def get_picon_file_name(service_name):
+    """ Returns picon file name by service name. """
+    name = unicodedata.normalize("NFKD", service_name).encode("ASCII", errors="ignore").decode(errors="ignore")
+    return f"{re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())}.png"
 
 
 # ***************** Bouquets ********************* #

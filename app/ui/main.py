@@ -1093,10 +1093,16 @@ class Application(Gtk.Application):
         renderer.set_property("text", f"{StreamType(f_data[0].strip() if f_data else '0').name}")
 
     def iptv_picon_data_func(self, column, renderer, model, itr, data):
-        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.IPTV_PICON_ID)))
+        picon = self._picons.get(model.get_value(itr, Column.IPTV_PICON_ID))
+        if not picon:
+            picon = self._picons.get(get_picon_file_name(model.get_value(itr, Column.IPTV_SERVICE)))
+        renderer.set_property("pixbuf", picon)
 
     def picon_data_func(self, column, renderer, model, itr, data):
-        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.SRV_PICON_ID)))
+        picon = self._picons.get(model.get_value(itr, Column.SRV_PICON_ID))
+        if not picon:
+            picon = self._picons.get(get_picon_file_name(model.get_value(itr, Column.SRV_SERVICE)))
+        renderer.set_property("pixbuf", picon)
 
     def fav_picon_data_func(self, column, renderer, model, itr, data):
         srv = self._services.get(model.get_value(itr, Column.FAV_ID), None)
@@ -1111,6 +1117,9 @@ class Application(Gtk.Application):
                 alt_srv = self._services.get(alt_servs[0].data, None)
                 if alt_srv:
                     picon = self._picons.get(alt_srv.picon_id, None) if srv else None
+
+        if not picon:
+            picon = self._picons.get(get_picon_file_name(model.get_value(itr, Column.FAV_SERVICE)))
 
         renderer.set_property("pixbuf", picon)
 
@@ -1628,8 +1637,7 @@ class Application(Gtk.Application):
         path, pos = result
         srv = self._services.get(view.get_model()[path][Column.IPTV_FAV_ID], None)
         if srv and srv.picon_id:
-            tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
-                                              size=self._settings.tooltip_logo_size))
+            tooltip.set_icon(self.get_tooltip_picon(srv))
             fav_id = srv.fav_id
             names = (b[:b.rindex(":")] for b, ids in self._bouquets.items() if fav_id in ids)
             text = f"{get_message('Name')}: {srv.service}\n{get_message('Bouquets')}: {', '.join(names)}"
@@ -1645,8 +1653,7 @@ class Application(Gtk.Application):
         target_column = Column.FAV_ID if target is ViewTarget.FAV else Column.SRV_FAV_ID
         srv = self._services.get(model[path][target_column], None)
         if srv and srv.picon_id:
-            tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
-                                              size=self._settings.tooltip_logo_size))
+            tooltip.set_icon(self.get_tooltip_picon(srv))
             txt = self.get_hint_for_fav_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv)
             tooltip.set_text(txt)
             view.set_tooltip_row(tooltip, path)
@@ -4007,6 +4014,13 @@ class Application(Gtk.Application):
 
     def get_picon(self, p_id):
         return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._picons_size)
+
+    def get_tooltip_picon(self, srv):
+        size, path = self._settings.tooltip_logo_size, self._settings.profile_picons_path
+        pix = get_picon_pixbuf(f"{path}{srv.picon_id}", size=size)
+        if not pix:
+            pix = get_picon_pixbuf(f"{path}{get_picon_file_name(srv.service)}", size=size)
+        return pix
 
     def on_assign_picon(self, view, src_path=None, dst_path=None):
         self._stack.set_visible_child_name(Page.PICONS.value)
