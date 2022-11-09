@@ -283,7 +283,7 @@ class Settings:
 
     @property
     def hosts(self):
-        return self._cp_settings.get("hosts", [self.host,])
+        return self._cp_settings.get("hosts", [self.host, ])
 
     @hosts.setter
     def hosts(self, value):
@@ -832,6 +832,14 @@ class Settings:
     @remove_unused_bouquets.setter
     def remove_unused_bouquets(self, value):
         self._settings["remove_unused_bouquets"] = value
+
+    @property
+    def keep_power_mode(self):
+        return self._settings.get("keep_power_mode", False)
+
+    @keep_power_mode.setter
+    def keep_power_mode(self, value):
+        self._settings["keep_power_mode"] = value
 
     @property
     def compress_picons(self):

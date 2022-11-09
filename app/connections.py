@@ -391,9 +391,10 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
         callback("*** Done. ***")
 
 
-def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False,
-                callback=log, done_callback=None, use_http=False, files_filter=None, ext_host=None):
+def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_callback=None,
+                files_filter=None, ext_host=None):
     s_type = settings.setting_type
+    use_http = s_type is SettingsType.ENIGMA_2 and settings.use_http
     data_path = settings.profile_data_path
     host, port, use_ssl = ext_host or settings.host, settings.http_port, settings.http_use_ssl
     user, password = settings.user, settings.password
@@ -412,15 +413,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
         if use_http:
             ht = http(user, password, base_url, callback, use_ssl, s_type)
             next(ht)
-            message = ""
-            if download_type is DownloadType.BOUQUETS:
-                message = "User bouquets will be updated!"
-            elif download_type is DownloadType.ALL:
-                message = "All user data will be reloaded!"
-            elif download_type is DownloadType.SATELLITES:
-                message = "Satellites.xml file will be updated!"
-            elif download_type is DownloadType.PICONS:
-                message = "Picons will be updated!"
+            message = get_upload_info_message(download_type)
 
             if s_type is SettingsType.ENIGMA_2:
                 params = urlencode({"text": message, "type": 2, "timeout": 5})
@@ -431,7 +424,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
             if s_type is SettingsType.ENIGMA_2 and download_type is DownloadType.ALL:
                 time.sleep(5)
-                ht.send((f"{url}powerstate?newstate=0", "Toggle Standby "))
+                if not settings.keep_power_mode:
+                    ht.send((f"{url}powerstate?newstate=0", "Toggle Standby "))
                 time.sleep(2)
         else:
             if download_type is not DownloadType.PICONS:
@@ -457,7 +451,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
 
             if download_type is DownloadType.BOUQUETS:
                 ftp.cwd(services_path)
-                ftp.upload_bouquets(data_path, remove_unused, callback)
+                ftp.upload_bouquets(data_path, settings.remove_unused_bouquets, callback)
 
             if download_type is DownloadType.ALL:
                 ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
@@ -465,7 +459,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                     ftp.upload_xml(data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
 
                 ftp.cwd(services_path)
-                ftp.upload_bouquets(data_path, remove_unused, callback)
+                ftp.upload_bouquets(data_path, settings.remove_unused_bouquets, callback)
                 ftp.upload_files(data_path, DATA_FILES_LIST, callback)
 
             if download_type is DownloadType.PICONS:
@@ -522,7 +516,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
                         ht.send((f"{url}servicelistreload?mode=2", "Reloading Userbouquets."))
                     elif download_type is DownloadType.ALL:
                         ht.send((f"{url}servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
-                        ht.send((f"{url}powerstate?newstate=4", "Wakeup from Standby."))
+                        if not settings.keep_power_mode:
+                            ht.send((f"{url}powerstate?newstate=4", "Wakeup from Standby."))
                 else:
                     ht.send((f"{url}reloadchannels", "Reloading channels..."))
 
@@ -533,6 +528,18 @@ def upload_data(*, settings, download_type=DownloadType.ALL, remove_unused=False
             tn.close()
         if ht:
             ht.close()
+
+
+def get_upload_info_message(download_type):
+    if download_type is DownloadType.BOUQUETS:
+        return "User bouquets will be updated!"
+    elif download_type is DownloadType.ALL:
+        return "All user data will be reloaded!"
+    elif download_type is DownloadType.SATELLITES:
+        return "Satellites.xml file will be updated!"
+    elif download_type is DownloadType.PICONS:
+        return "Picons will be updated!"
+    return ""
 
 
 # ***************** Picons *******************#

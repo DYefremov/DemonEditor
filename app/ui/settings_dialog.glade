@@ -2733,7 +2733,7 @@ Author: Dmitriy Yefremov
                     <property name="label-xalign">0.019999999552965164</property>
                     <property name="shadow-type">in</property>
                     <child>
-                      <!-- n-columns=2 n-rows=4 -->
+                      <!-- n-columns=2 n-rows=5 -->
                       <object class="GtkGrid" id="bq_naming_grid">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -2743,33 +2743,6 @@ Author: Dmitriy Yefremov
                         <property name="margin-bottom">5</property>
                         <property name="row-spacing">5</property>
                         <property name="column-spacing">5</property>
-                        <child>
-                          <object class="GtkLabel" id="bq_naming_label">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">Allows you to name bouquet files using their names.</property>
-                            <property name="halign">start</property>
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">Enable alternate bouquet file naming</property>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSwitch" id="force_bq_name_switch">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="tooltip-text" translatable="yes">Allows you to name bouquet files using their names.</property>
-                            <property name="halign">end</property>
-                            <signal name="state-set" handler="on_force_bq_name" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left-attach">1</property>
-                            <property name="top-attach">3</property>
-                          </packing>
-                        </child>
                         <child>
                           <object class="GtkSwitch" id="use_http_switch">
                             <property name="visible">True</property>
@@ -2819,6 +2792,33 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkLabel" id="bq_naming_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Allows you to name bouquet files using their names.</property>
+                            <property name="halign">start</property>
+                            <property name="hexpand">True</property>
+                            <property name="label" translatable="yes">Enable alternate bouquet file naming</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="force_bq_name_switch">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="tooltip-text" translatable="yes">Allows you to name bouquet files using their names.</property>
+                            <property name="halign">end</property>
+                            <signal name="state-set" handler="on_force_bq_name" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel" id="compress_picons_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -2829,7 +2829,7 @@ Author: Dmitriy Yefremov
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">2</property>
+                            <property name="top-attach">3</property>
                           </packing>
                         </child>
                         <child>
@@ -2838,6 +2838,33 @@ Author: Dmitriy Yefremov
                             <property name="can-focus">True</property>
                             <property name="tooltip-text" translatable="yes">Enables upload as an archive if a large number of picon (&gt; 1000) is selected.
                           Recommended only if you have external storage.</property>
+                            <property name="halign">end</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="keep_power_mode_label">
+                            <property name="visible">True</property>
+                            <property name="sensitive" bind-source="use_http_switch" bind-property="active">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Don't toggle standby mode when updating bouquets and services.</property>
+                            <property name="label" translatable="yes">Don't change power state</property>
+                            <property name="xalign">0</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="keep_power_mode_switch">
+                            <property name="visible">True</property>
+                            <property name="sensitive" bind-source="use_http_switch" bind-property="active">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="tooltip-text" translatable="yes">Don't toggle standby mode when updating bouquets and services.</property>
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
@@ -3207,7 +3234,7 @@ Author: Dmitriy Yefremov
       <action-widget response="-3">save_button</action-widget>
     </action-widgets>
   </object>
-   <!-- n-columns=2 n-rows=14 -->
+  <!-- n-columns=2 n-rows=14 -->
   <object class="GtkGrid" id="network_grid">
     <property name="visible">True</property>
     <property name="can-focus">False</property>

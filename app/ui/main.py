@@ -2052,16 +2052,13 @@ class Application(Gtk.Application):
             if multiple:
                 log(f"##### Uploading data on [{host}] #####")
             try:
-                upload_data(settings=opts,
-                            download_type=download_type,
-                            remove_unused=True,
-                            use_http=use_http,
-                            ext_host=host)
+                upload_data(settings=opts, download_type=download_type, ext_host=host)
             except Exception as e:
                 msg = "Uploading data error: {}"
                 log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
                 if host == self._settings.host:
                     self.show_error_message(str(e))
+        log(f"##### Done! #####")
 
     def on_data_open(self, action=None, value=None):
         """ Opening data via "File/Open". """
