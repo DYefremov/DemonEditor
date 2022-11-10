@@ -65,13 +65,13 @@ from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import *
 from .picons import PiconManager
-from .xml.dialogs import ServicesUpdateDialog
-from .xml.edit import SatellitesTool
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
                         FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION)
+from .xml.dialogs import ServicesUpdateDialog
+from .xml.edit import SatellitesTool
 
 
 class Application(Gtk.Application):
@@ -1664,7 +1664,7 @@ class Application(Gtk.Application):
         """ Returns detailed info about service as formatted string for using as hint. """
         header, ref = self.get_hint_header_info(srv)
 
-        if srv.service_type == "IPTV":
+        if srv.service_type == BqServiceType.IPTV.name:
             return f"{header}{ref}"
 
         pol = ", {}: {},".format(get_message("Pol"), srv.pol) if srv.pol else ","
@@ -1685,7 +1685,7 @@ class Application(Gtk.Application):
 
     def get_hint_header_info(self, srv):
         header = f"{get_message('Name')}: {srv.service}\n{get_message('Type')}: {srv.service_type}\n"
-        ref = f"{get_message('Service reference')}: {srv.picon_id.rstrip('.png')}"
+        ref = f"{get_message('Service reference')}: {get_service_reference(srv)}"
         return header, ref
 
     def get_ssid_info(self, srv):
@@ -2283,7 +2283,7 @@ class Application(Gtk.Application):
                     fav_id_data = fav_id.lstrip().split(":")
                     if len(fav_id_data) > 10:
                         data_id = ":".join(fav_id_data[:11])
-                        picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
+                        picon_id = "1_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[1:10])
                         locked = LOCKED_ICON if data_id in self._blacklist else None
                 srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
                               self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)

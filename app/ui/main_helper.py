@@ -30,7 +30,7 @@
 
 __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "locate_in_services",
            "scroll_to", "get_base_model", "copy_reference", "assign_picons", "remove_picon",
-           "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection",
+           "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection", "get_service_reference",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
            "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name")
 
@@ -647,11 +647,19 @@ def copy_reference(view, app):
         fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
         srv = app.current_services.get(fav_id, None)
         if srv and srv.picon_id:
-            clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
+            clipboard.set_text(get_service_reference(srv), -1)
         else:
             app.show_error_message("No reference is present!")
 
     app.emit("clipboard-changed", clipboard.wait_is_text_available())
+
+
+def get_service_reference(srv):
+    ref = srv.picon_id.rstrip(".png")
+    if srv.service_type == BqServiceType.IPTV.name:
+        p = re.compile(r"\d+")
+        return re.sub(p, re.search(p, srv.fav_id).group(), ref, 1)
+    return ref
 
 
 def update_entry_data(entry, dialog, settings):
