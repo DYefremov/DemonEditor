@@ -162,6 +162,8 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
       <!-- column-name service_id -->
       <column type="gchararray"/>
+      <!-- column-name picon_id -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkTreeModelFilter" id="services_filter_model">

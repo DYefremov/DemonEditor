@@ -478,6 +478,7 @@ class EpgDialog:
 
         self._bouquet.clear()
         list(map(self._bouquet.append, [r[Column.FAV_ID] for r in self._bouquet_model]))
+        p_ids = {r[Column.FAV_ID]: r[Column.FAV_POS] for r in self._bouquet_model}
         for index, row in enumerate(self._ex_fav_model):
             fav_id = self._bouquet[index]
             row[Column.FAV_ID] = fav_id
@@ -485,7 +486,8 @@ class EpgDialog:
                 old_fav_id = self._services[fav_id]
                 srv = self._ex_services.pop(old_fav_id, None)
                 if srv:
-                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id)
+                    picon_id = p_ids.get(fav_id) or srv.picon_id
+                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id, picon_id=picon_id)
         self._dialog.destroy()
 
     @run_idle
@@ -550,7 +552,7 @@ class EpgDialog:
 
         factor = self._app.DEL_FACTOR / 4
         for index, srv in enumerate(filtered):
-            self._services_model.append((srv.service, srv.pos, srv.fav_id))
+            self._services_model.append((srv.service, srv.pos, srv.fav_id, srv.picon_id))
             if index % factor == 0:
                 yield True
 
@@ -627,7 +629,7 @@ class EpgDialog:
 
             factor = self._app.DEL_FACTOR / 4
             for index, srv in enumerate(s_refs):
-                self._services_model.append((srv.name, " ", srv.data))
+                self._services_model.append((srv.name, " ", srv.data, ""))
                 if index % factor == 0:
                     yield True
 
@@ -732,13 +734,18 @@ class EpgDialog:
 
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
-        fav_id_data[3:7] = data[-1].split(":")
+        fav_id_data[3:7] = data[-2].split(":")
         new_fav_id = ":".join(fav_id_data)
         service = self._services.pop(fav_id, None)
         if service:
             self._services[new_fav_id] = service
             row[Column.FAV_ID] = new_fav_id
             row[Column.FAV_LOCKED] = EPG_ICON
+            if data[-1]:
+                row[Column.FAV_POS] = data[-1]
+                p_data = data[-1].split("_")
+                if p_data:
+                    fav_id_data[2] = p_data[2]
             pos = f"({data[1] if self._refs_source is RefsSource.SERVICES else 'XML'})"
             src = f"{get_message('EPG source')}: {(GLib.markup_escape_text(data[0] or ''))} {pos}"
             row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
@@ -848,7 +855,7 @@ class EpgDialog:
         model, paths = view.get_selection().get_selected_rows()
         if paths:
             s_data = model[paths][:]
-            if all(s_data):
+            if all(s_data[:-1]):
                 data.set_text("::::".join(s_data), -1)
             else:
                 self.show_info_message(get_message("Source error!"), Gtk.MessageType.ERROR)
