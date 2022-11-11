@@ -3005,7 +3005,7 @@ class Application(Gtk.Application):
             return
 
         ref = self._clipboard.wait_for_text()
-        if ref and re.match(r"\d+_\d+_\d+_\w+_\d+_\d+_\d+_0_0_0", ref):
+        if ref and re.match(r"\d+_\d+_\d+_\w+_\w+_\w+_\d+_0_0_0", ref):
             [self.assign_reference(model, p, ref) for p in iptv_paths]
             self._clipboard.clear()
 
@@ -3022,7 +3022,7 @@ class Application(Gtk.Application):
         old_srv = self._services.pop(fav_id, None)
         if old_srv:
             picon_id_data = old_srv.picon_id.split("_")
-            picon_id_data[3:7] = ref_data[3:7]
+            picon_id_data[2:7] = ref_data[2:7]
             new_service = old_srv._replace(data_id=new_data_id, fav_id=new_fav_id, picon_id="_".join(picon_id_data))
             self._services[new_fav_id] = new_service
             self.emit("iptv-service-edited", (old_srv, new_service))
