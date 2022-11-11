@@ -40,7 +40,7 @@ from app.ui.uicommons import IPTV_ICON
 NEUTRINO_FAV_ID_FORMAT = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}"
 ENIGMA2_FAV_ID_FORMAT = " {}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION: {}\n"
 MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
-PICON_FORMAT = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
+PICON_FORMAT = "1_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 
 
 class StreamType(Enum):
@@ -163,10 +163,9 @@ def get_fav_id(url, name, settings_type, params=None, st_type=None, s_id=0, srv_
         return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
 
 
-def get_picon_id(params=None, st_type=None, s_id=0, srv_type=1):
-    st_type = st_type or StreamType.NONE_TS.value
+def get_picon_id(params=None, s_id=0, srv_type=1):
     params = params or (0, 0, 0, 0)
-    return PICON_FORMAT.format(st_type, s_id, srv_type, *params)
+    return PICON_FORMAT.format(s_id, srv_type, *params)
 
 
 if __name__ == "__main__":

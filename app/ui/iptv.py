@@ -51,6 +51,7 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
+_PICON_FORMAT = "1_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 
 
 def is_data_correct(elems):
@@ -321,7 +322,7 @@ class IptvDialog:
         self._dialog.destroy()
 
     def update_bouquet_data(self, name, fav_id):
-        picon_id = f"{self._reference_entry.get_text().replace(':', '_')}.png"
+        picon_id = f"1_{'_'.join(self._reference_entry.get_text().split(':')[1:])}.png"
 
         if self._action is Action.EDIT:
             services = self._app.current_services
@@ -606,6 +607,7 @@ class IptvListConfigurationDialog(IptvListDialog):
             tid = "0" if tid_default else f"{int(self._list_tid_entry.get_text()):X}"
             nid = "0" if nid_default else f"{int(self._list_nid_entry.get_text()):X}"
             namespace = "0" if namespace_default else f"{int(self._list_namespace_entry.get_text()):X}"
+            params = [int(el.get_text()) for el in self._digit_elems[2:]]
 
             for index, row in enumerate(self._rows):
                 fav_id = row[Column.FAV_ID]
@@ -618,13 +620,16 @@ class IptvListConfigurationDialog(IptvListDialog):
                     data[0], data[1], data[2], data[4], data[5], data[6] = st_type, s_id, srv_type, tid, nid, namespace
 
                 data[3] = f"{index:X}" if sid_auto else sid
+                if sid_auto:
+                    params[0] = index
+                picon_id = _PICON_FORMAT.format(int(s_id), int(srv_type), *params)
                 data = ":".join(data)
                 new_fav_id = f"{data}{sep}{desc}"
                 row[Column.FAV_ID] = new_fav_id
                 srv = self._services.pop(fav_id, None)
 
                 if srv:
-                    self._services[new_fav_id] = srv._replace(fav_id=new_fav_id)
+                    self._services[new_fav_id] = srv._replace(fav_id=new_fav_id, picon_id=picon_id)
 
             self._bouquet.clear()
             list(map(lambda r: self._bouquet.append(r[Column.FAV_ID]), self._fav_model))
@@ -720,7 +725,7 @@ class M3uImportDialog(IptvListDialog):
                     continue
 
                 params[0] = i if sid_auto else sid
-                picon_id = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(st_type, s_id, s_type, *params)
+                picon_id = _PICON_FORMAT.format(s_id, s_type, *params)
                 fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, st_type, s_id, s_type)
                 if s.picon:
                     picons[s.picon] = picon_id
