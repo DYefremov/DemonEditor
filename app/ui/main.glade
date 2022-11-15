@@ -2179,7 +2179,7 @@ Author: Dmitriy Yefremov
                                                       <object class="GtkCellRendererText" id="service_renderer">
                                                         <property name="xpad">5</property>
                                                         <property name="ellipsize">end</property>
-                                                        <property name="width_chars">25</property>
+                                                        <property name="width_chars">50</property>
                                                       </object>
                                                       <attributes>
                                                         <attribute name="cell-background-rgba">21</attribute>
