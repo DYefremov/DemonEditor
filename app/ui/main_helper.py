@@ -29,7 +29,7 @@
 """ Helper module for the GUI. """
 
 __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "locate_in_services",
-           "scroll_to", "get_base_model", "copy_reference", "assign_picons", "remove_picon",
+           "scroll_to", "get_base_model", "get_base_paths", "copy_reference", "assign_picons", "remove_picon",
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection", "get_service_reference",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
            "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name")

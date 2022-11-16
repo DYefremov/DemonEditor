@@ -178,6 +178,7 @@ class Application(Gtk.Application):
                     "on_mark_duplicates": self.on_mark_duplicates,
                     "on_services_mark_not_in_bouquets": self.on_services_mark_not_in_bouquets,
                     "on_services_clear_marked": self.on_services_clear_marked,
+                    "on_services_clear_new_marked": self.on_services_clear_new_marked,
                     "on_filter_changed": self.on_filter_changed,
                     "on_iptv_filter_changed": self.on_iptv_filter_changed,
                     "on_filter_type_toggled": self.on_filter_type_toggled,
@@ -461,6 +462,8 @@ class Application(Gtk.Application):
         # Lock, Hide.
         self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[0]), "visible")
         self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[1]), "visible", 4)
+        # Clear "New" menu item
+        self.bind_property("is-enigma", builder.get_object("services_clear_new_flag_item"), "visible")
         # Sub-bouquets menu item.
         self.bind_property("is-enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
         # Export bouquet to m3u menu items.
@@ -3981,6 +3984,54 @@ class Application(Gtk.Application):
             if index % self.FAV_FACTOR == 0:
                 yield True
 
+        self._services_load_spinner.stop()
+        yield True
+
+    def on_services_clear_new_marked(self, item):
+        if self.is_data_loading():
+            self.show_error_message("Data loading in progress!")
+            return
+
+        model, paths = self._services_view.get_selection().get_selected_rows()
+        if not paths:
+            self.show_error_message("No selected item!")
+            return
+
+        gen = self.clear_new_marked(model, paths)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def clear_new_marked(self, model, paths):
+        self._services_load_spinner.start()
+
+        paths = get_base_paths(paths, model)
+        model = get_base_model(model)
+        for index, p in enumerate(paths):
+            flags = model[p][Column.SRV_CAS_FLAGS]
+            if flags:
+                flags_data = flags.split(",")
+                for i, f in enumerate(flags_data):
+                    if f.startswith("f:"):
+                        flag = Flag.parse(f)
+                        if Flag.is_new(flag):
+                            flag -= Flag.NEW.value
+                            if flag:
+                                flags_data[i] = f"f:{flag:02d}"
+                            else:
+                                flags_data.remove(f)
+
+                            flags = ",".join(flags_data)
+                            model[p][Column.SRV_BACKGROUND] = None
+                            model[p][Column.SRV_CAS_FLAGS] = flags
+                            fav_id = model[p][Column.SRV_FAV_ID]
+                            srv = self._services.get(fav_id, None)
+                            if srv:
+                                self._services[fav_id] = srv._replace(flags_cas=flags)
+                            break
+
+            if index % self.FAV_FACTOR == 0:
+                yield True
+
+        self.show_info_message("Done!", Gtk.MessageType.INFO)
         self._services_load_spinner.stop()
         yield True
 
