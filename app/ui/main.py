@@ -2958,6 +2958,7 @@ class Application(Gtk.Application):
             if r[Column.IPTV_FAV_ID] == fav_id:
                 ref, url = get_iptv_data(new_fav_id)
                 r[Column.IPTV_SERVICE] = name
+                r[Column.IPTV_PICON_ID] = new.picon_id
                 r[Column.IPTV_REF] = ref
                 r[Column.IPTV_URL] = url
                 r[Column.IPTV_FAV_ID] = new_fav_id

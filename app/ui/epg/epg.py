@@ -395,7 +395,6 @@ class EpgDialog:
                     "on_bq_cursor_changed": self.on_bq_cursor_changed}
 
         self._app = app
-        self._services = {}
         self._ex_services = self._app.current_services
         self._ex_fav_model = self._app.fav_view.get_model()
         self._settings = self._app.app_settings
@@ -473,21 +472,19 @@ class EpgDialog:
 
     @run_idle
     def on_apply(self, item):
-        if show_dialog(DialogType.QUESTION, self._dialog) == Gtk.ResponseType.CANCEL:
+        if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
             return
 
-        self._bouquet.clear()
-        list(map(self._bouquet.append, [r[Column.FAV_ID] for r in self._bouquet_model]))
-        p_ids = {r[Column.FAV_ID]: r[Column.FAV_POS] for r in self._bouquet_model}
-        for index, row in enumerate(self._ex_fav_model):
-            fav_id = self._bouquet[index]
-            row[Column.FAV_ID] = fav_id
-            if row[Column.FAV_TYPE] == BqServiceType.IPTV.name:
-                old_fav_id = self._services[fav_id]
-                srv = self._ex_services.pop(old_fav_id, None)
+        for i, row in enumerate(self._bouquet_model):
+            fav_id = row[Column.FAV_ID]
+            if row[Column.FAV_LOCKED]:
+                srv = self._ex_services.pop(self._ex_fav_model[row.path][Column.FAV_ID], None)
                 if srv:
-                    picon_id = p_ids.get(fav_id) or srv.picon_id
-                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id, picon_id=picon_id)
+                    picon_id = row[Column.FAV_POS] or srv.picon_id
+                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id, data_id=fav_id.strip(), picon_id=picon_id)
+                    self._ex_fav_model[row.path][Column.FAV_ID] = fav_id
+                    self._bouquet[i] = fav_id
+
         self._dialog.destroy()
 
     @run_idle
@@ -503,7 +500,6 @@ class EpgDialog:
     def clear_data(self):
         self._services_model.clear()
         self._bouquet_model.clear()
-        self._services.clear()
         self._source_info_label.set_text("")
         self._bouquet_epg_count_label.set_text("")
         self.on_info_bar_close()
@@ -538,8 +534,6 @@ class EpgDialog:
     def init_bouquet_data(self):
         for r in self._ex_fav_model:
             row = [*r[:]]
-            fav_id = r[Column.FAV_ID]
-            self._services[fav_id] = self._ex_services[fav_id].fav_id
             yield self._bouquet_model.append(row)
         self._bouquet_count_label.set_text(str(len(self._bouquet_model)))
         yield True
@@ -735,20 +729,20 @@ class EpgDialog:
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
         fav_id_data[3:7] = data[-2].split(":")
+
+        if data[-1]:
+            row[Column.FAV_POS] = data[-1]
+            p_data = data[-1].split("_")
+            if p_data:
+                fav_id_data[2] = p_data[2]
+
         new_fav_id = ":".join(fav_id_data)
-        service = self._services.pop(fav_id, None)
-        if service:
-            self._services[new_fav_id] = service
-            row[Column.FAV_ID] = new_fav_id
-            row[Column.FAV_LOCKED] = EPG_ICON
-            if data[-1]:
-                row[Column.FAV_POS] = data[-1]
-                p_data = data[-1].split("_")
-                if p_data:
-                    fav_id_data[2] = p_data[2]
-            pos = f"({data[1] if self._refs_source is RefsSource.SERVICES else 'XML'})"
-            src = f"{get_message('EPG source')}: {(GLib.markup_escape_text(data[0] or ''))} {pos}"
-            row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
+        row[Column.FAV_ID] = new_fav_id
+        row[Column.FAV_LOCKED] = EPG_ICON
+
+        pos = f"({data[1] if self._refs_source is RefsSource.SERVICES else 'XML'})"
+        src = f"{get_message('EPG source')}: {(GLib.markup_escape_text(data[0] or ''))} {pos}"
+        row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
 
     def on_filter_toggled(self, button):
         self._filter_bar.set_visible(button.get_active())
@@ -791,10 +785,7 @@ class EpgDialog:
         self.update_epg_count()
 
     def reset_row_data(self, row):
-        default_fav_id = self._services.pop(row[Column.FAV_ID], None)
-        if default_fav_id:
-            self._services[default_fav_id] = default_fav_id
-            row[Column.FAV_ID], row[Column.FAV_LOCKED], row[Column.FAV_TOOLTIP] = default_fav_id, None, None
+        row[Column.FAV_LOCKED], row[Column.FAV_TOOLTIP], row[Column.FAV_POS] = None, None, None
 
     @run_idle
     def show_info_message(self, text, message_type):
