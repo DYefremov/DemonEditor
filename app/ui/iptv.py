@@ -329,7 +329,7 @@ class IptvDialog:
             old_srv = services.pop(self._current_srv.fav_id)
             new_service = old_srv._replace(service=name, fav_id=fav_id, picon_id=picon_id)
             services[fav_id] = new_service
-            self._app.emit("iptv-service-edited", (old_srv, new_service))
+            self._app.emit("iptv-service-edited", {self._current_srv.fav_id: (old_srv, new_service)})
         else:
             aggr = [None] * 8
             s_type = BqServiceType.IPTV.name

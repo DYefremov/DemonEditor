@@ -2940,22 +2940,26 @@ class Application(Gtk.Application):
             log(f"Error. Service with id '{fav_id}' not found!")
 
     @run_idle
-    def on_iptv_service_edited(self, app, services):
-        old, new = services
-        fav_id = old.fav_id
-        name, new_fav_id = new.service, new.fav_id
+    def on_iptv_service_edited(self, app, services: dict):
         for srvs in self._bouquets.values():
             for i, s in enumerate(srvs):
-                if s == fav_id:
+                if s in services:
+                    old, new = services[s]
                     srvs[i] = new.fav_id
 
         for r in self._fav_model:
-            if r[Column.FAV_ID] == fav_id:
+            fav_id = r[Column.FAV_ID]
+            if fav_id in services:
+                old, new = services[fav_id]
+                name, new_fav_id = new.service, new.fav_id
                 r[Column.FAV_SERVICE] = name
                 r[Column.FAV_ID] = new_fav_id
 
         for r in self._iptv_model:
-            if r[Column.IPTV_FAV_ID] == fav_id:
+            fav_id = r[Column.IPTV_FAV_ID]
+            if fav_id in services:
+                old, new = services[fav_id]
+                name, new_fav_id = new.service, new.fav_id
                 ref, url = get_iptv_data(new_fav_id)
                 r[Column.IPTV_SERVICE] = name
                 r[Column.IPTV_PICON_ID] = new.picon_id
@@ -3029,7 +3033,7 @@ class Application(Gtk.Application):
             picon_id_data[2:7] = ref_data[2:7]
             new_service = old_srv._replace(data_id=new_data_id, fav_id=new_fav_id, picon_id="_".join(picon_id_data))
             self._services[new_fav_id] = new_service
-            self.emit("iptv-service-edited", (old_srv, new_service))
+            self.emit("iptv-service-edited", {fav_id: (old_srv, new_service)})
 
     # ****************** EPG  ********************** #
 
@@ -3050,8 +3054,7 @@ class Application(Gtk.Application):
             self.show_error_message("This list does not contains IPTV streams!")
             return
 
-        bq = self._bouquets.get(self._bq_selected)
-        EpgDialog(self, bq, self._current_bq_name).show()
+        EpgDialog(self, self._current_bq_name).show()
 
     # ***************** Import ******************** #
 

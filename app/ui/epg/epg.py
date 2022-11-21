@@ -365,7 +365,7 @@ class EpgTool(Gtk.Box):
 
 class EpgDialog:
 
-    def __init__(self, app, bouquet, bouquet_name):
+    def __init__(self, app, bouquet_name):
 
         handlers = {"on_close_dialog": self.on_close_dialog,
                     "on_apply": self.on_apply,
@@ -398,7 +398,6 @@ class EpgDialog:
         self._ex_services = self._app.current_services
         self._ex_fav_model = self._app.fav_view.get_model()
         self._settings = self._app.app_settings
-        self._bouquet = bouquet
         self._bouquet_name = bouquet_name
         self._current_ref = []
         self._enable_dat_filter = False
@@ -475,15 +474,20 @@ class EpgDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
             return
 
+        updated = {}
         for i, row in enumerate(self._bouquet_model):
-            fav_id = row[Column.FAV_ID]
             if row[Column.FAV_LOCKED]:
-                srv = self._ex_services.pop(self._ex_fav_model[row.path][Column.FAV_ID], None)
+                fav_id = self._ex_fav_model[row.path][Column.FAV_ID]
+                srv = self._ex_services.pop(fav_id, None)
                 if srv:
+                    new_fav_id = row[Column.FAV_ID]
                     picon_id = row[Column.FAV_POS] or srv.picon_id
-                    self._ex_services[fav_id] = srv._replace(fav_id=fav_id, data_id=fav_id.strip(), picon_id=picon_id)
-                    self._ex_fav_model[row.path][Column.FAV_ID] = fav_id
-                    self._bouquet[i] = fav_id
+                    new = srv._replace(fav_id=new_fav_id, data_id=new_fav_id.strip(), picon_id=picon_id)
+                    self._ex_services[new_fav_id] = new
+                    updated[fav_id] = (srv, new)
+
+        if updated:
+            self._app.emit("iptv-service-edited", updated)
 
         self._dialog.destroy()
 
