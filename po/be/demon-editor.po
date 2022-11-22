@@ -1387,3 +1387,24 @@ msgstr "Штодня"
 
 msgid "Assign reference"
 msgstr "Прысвоіць спасылку"
+
+msgid "Specify hostname or IP address"
+msgstr "Задайце імя хоста або IP-адрас"
+
+msgid "Default selection"
+msgstr "Выбар па змаўчанні"
+
+msgid "Don't change power state"
+msgstr "Не змяняць стан сілкавання"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Не перамыкаць у рэжым чакання пры абнаўленні букетаў і сэрвісаў."
+
+msgid "Region"
+msgstr "Рэгіён"
+
+msgid "Provider"
+msgstr "Правайдар"
+
+msgid "Clear \"New\" flag"
+msgstr "Здаліць сцяжок \"New\""

@@ -1384,3 +1384,24 @@ msgstr "Ежедневно"
 
 msgid "Assign reference"
 msgstr "Присвоить ссылку"
+
+msgid "Specify hostname or IP address"
+msgstr "Укажите имя хоста или IP-адрес"
+
+msgid "Default selection"
+msgstr "Выбор по умолчанию"
+
+msgid "Don't change power state"
+msgstr "Не изменять состояние питания"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Не переключать в режим ожидания при обновлении букетов и сервисов."
+
+msgid "Region"
+msgstr "Регион"
+
+msgid "Provider"
+msgstr "Провайдер"
+
+msgid "Clear \"New\" flag"
+msgstr "Очистить флаг \"New\""

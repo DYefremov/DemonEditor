@@ -1401,3 +1401,24 @@ msgstr "Täglich"
 
 msgid "Assign reference"
 msgstr "Referenz zuweisen"
+
+msgid "Specify hostname or IP address"
+msgstr "Hostname oder IP-Adresse angeben"
+
+msgid "Default selection"
+msgstr "Standardauswahl"
+
+msgid "Don't change power state"
+msgstr "Energiezustand nicht ändern"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Schalten beim Aktualisieren von Bouquets und Services nicht in den Standby-Modus um."
+
+msgid "Region"
+msgstr "Region"
+
+msgid "Provider"
+msgstr "Provider"
+
+msgid "Clear \"New\" flag"
+msgstr "Das \"Neu\"-Flag entfernen"
