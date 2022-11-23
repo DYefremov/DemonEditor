@@ -1406,5 +1406,10 @@ msgstr "Рэгіён"
 msgid "Provider"
 msgstr "Правайдар"
 
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Улучае загрузку ў выглядзе архіва, калі абрана вялікая колькасць пiконаў (> 1000).\n."
+"                    Рэкамендуецца, толькі калі ў вас ёсць вонкавае сховішча."
+
 msgid "Clear \"New\" flag"
 msgstr "Здаліць сцяжок \"New\""

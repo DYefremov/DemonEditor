@@ -1403,5 +1403,10 @@ msgstr "Регион"
 msgid "Provider"
 msgstr "Провайдер"
 
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Включает загрузку в виде архива, если выбрано большое количество пиконов (> 1000).\n."
+"                    Рекомендуется, только если у вас есть внешнее хранилище."
+
 msgid "Clear \"New\" flag"
 msgstr "Очистить флаг \"New\""
