@@ -243,10 +243,11 @@ class ControlTool(Gtk.Box):
 
     def update_signal(self, sig):
         snr = sig.get("e2snr", "0 %").strip() if sig else "0 %"
+        snr_db = sig.get("e2snrdb", "0 dB").strip() if sig else "0 dB"
         acg = sig.get("e2acg", "0 %").strip() if sig else "0 %"
         ber = (sig.get("e2ber", None) or "").strip() if sig else ""
         # Labels.
-        self._snr_value_label.set_text(snr)
+        self._snr_value_label.set_text(f"{snr_db}  ({snr})")
         self._agc_value_label.set_text(acg)
         self._ber_value_label.set_text(ber)
         # Level bars.
