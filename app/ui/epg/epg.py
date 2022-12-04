@@ -474,14 +474,19 @@ class EpgDialog:
         if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
             return
 
+        p = re.compile(r"\d+")
         updated = {}
+
         for i, row in enumerate(self._bouquet_model):
             if row[Column.FAV_LOCKED]:
                 fav_id = self._ex_fav_model[row.path][Column.FAV_ID]
                 srv = self._ex_services.pop(fav_id, None)
                 if srv:
-                    new_fav_id = row[Column.FAV_ID]
-                    picon_id = row[Column.FAV_POS] or srv.picon_id
+                    new_fav_id, picon_id = row[Column.FAV_ID], row[Column.FAV_POS]
+                    if picon_id:
+                        picon_id = re.sub(p, re.search(p, srv.picon_id).group(), picon_id, count=1)
+                    else:
+                        picon_id = srv.picon_id
                     new = srv._replace(fav_id=new_fav_id, data_id=new_fav_id.strip(), picon_id=picon_id)
                     self._ex_services[new_fav_id] = new
                     updated[fav_id] = (srv, new)

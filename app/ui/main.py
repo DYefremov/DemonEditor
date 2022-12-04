@@ -229,7 +229,6 @@ class Application(Gtk.Application):
         # Clearing only after the insertion!
         self._rows_buffer = []
         self._bouquets_buffer = []
-        self._picons_buffer = []
         self._services = {}
         self._bouquets = {}
         self._bq_file = {}
@@ -241,11 +240,13 @@ class Application(Gtk.Application):
         self._in_bouquets = set()
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
-        self._picons = DefaultDict(self.get_picon)
         self._blacklist = set()
         self._current_bq_name = None
         self._bq_selected = ""  # Current selected bouquet
         self._select_enabled = True  # Multiple selection
+        # Picons
+        self._picons_buffer = []
+        self._picons = DefaultDict(self.get_picon)
         # Current satellite positions in the services list
         self._sat_positions = set()
         self._service_types = set()
@@ -1096,10 +1097,8 @@ class Application(Gtk.Application):
         renderer.set_property("text", f"{StreamType(f_data[0].strip() if f_data else '0').name}")
 
     def iptv_picon_data_func(self, column, renderer, model, itr, data):
-        picon = self._picons.get(model.get_value(itr, Column.IPTV_PICON_ID))
-        if not picon:
-            picon = self._picons.get(get_picon_file_name(model.get_value(itr, Column.IPTV_SERVICE)))
-        renderer.set_property("pixbuf", picon)
+        picon_id, name = model.get_value(itr, Column.IPTV_PICON_ID), model.get_value(itr, Column.IPTV_SERVICE)
+        renderer.set_property("pixbuf", self.get_picon_pixbuf(picon_id, name))
 
     def picon_data_func(self, column, renderer, model, itr, data):
         picon = self._picons.get(model.get_value(itr, Column.SRV_PICON_ID))
@@ -1112,7 +1111,7 @@ class Application(Gtk.Application):
         if not srv:
             return True
 
-        picon = self._picons.get(srv.picon_id, None)
+        picon = self.get_picon_pixbuf(srv.picon_id, srv.service)
         # Alternatives.
         if srv.service_type == BqServiceType.ALT.name:
             alt_servs = srv.transponder
@@ -1121,10 +1120,22 @@ class Application(Gtk.Application):
                 if alt_srv:
                     picon = self._picons.get(alt_srv.picon_id, None) if srv else None
 
-        if not picon:
-            picon = self._picons.get(get_picon_file_name(model.get_value(itr, Column.FAV_SERVICE)))
-
         renderer.set_property("pixbuf", picon)
+
+    def get_picon_pixbuf(self, picon_id, srv_name):
+        """ Returns a picon pixbuf by id or service name.
+
+            Used for models with IPTV services.
+        """
+        picon = self._picons.get(picon_id)
+        # Trying to get a satellite service piсon.
+        if not picon and picon_id:
+            picon = self._picons.get(picon_id.replace(picon_id[:picon_id.find("_")], "1", 1))
+        # Getting picon by service name.
+        if not picon:
+            picon = self._picons.get(get_picon_file_name(srv_name))
+
+        return picon
 
     def fav_service_data_func(self, column, renderer, model, itr, data):
         if self._display_epg and self._s_type is SettingsType.ENIGMA_2:
@@ -2286,7 +2297,7 @@ class Application(Gtk.Application):
                     fav_id_data = fav_id.lstrip().split(":")
                     if len(fav_id_data) > 10:
                         data_id = ":".join(fav_id_data[:11])
-                        picon_id = "1_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[1:10])
+                        picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
                         locked = LOCKED_ICON if data_id in self._blacklist else None
                 srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
                               self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)

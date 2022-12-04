@@ -655,11 +655,7 @@ def copy_reference(view, app):
 
 
 def get_service_reference(srv):
-    ref = srv.picon_id.rstrip(".png")
-    if srv.service_type == BqServiceType.IPTV.name:
-        p = re.compile(r"\d+")
-        return re.sub(p, re.search(p, srv.fav_id).group(), ref, 1)
-    return ref
+    return srv.picon_id.rstrip(".png")
 
 
 def update_entry_data(entry, dialog, settings):

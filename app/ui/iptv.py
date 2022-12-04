@@ -40,7 +40,7 @@ from gi.repository import GLib, Gio, GdkPixbuf
 from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
-                              parse_m3u)
+                              parse_m3u, PICON_FORMAT)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
@@ -51,7 +51,6 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
-_PICON_FORMAT = "1_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 
 
 def is_data_correct(elems):
@@ -322,7 +321,7 @@ class IptvDialog:
         self._dialog.destroy()
 
     def update_bouquet_data(self, name, fav_id):
-        picon_id = f"1_{'_'.join(self._reference_entry.get_text().split(':')[1:])}.png"
+        picon_id = f"{self._reference_entry.get_text().replace(':', '_')}.png"
 
         if self._action is Action.EDIT:
             services = self._app.current_services
@@ -622,7 +621,7 @@ class IptvListConfigurationDialog(IptvListDialog):
                 data[3] = f"{index:X}" if sid_auto else sid
                 if sid_auto:
                     params[0] = index
-                picon_id = _PICON_FORMAT.format(int(s_id), int(srv_type), *params)
+                picon_id = PICON_FORMAT.format(st_type, int(s_id), int(srv_type), *params)
                 data = ":".join(data)
                 new_fav_id = f"{data}{sep}{desc}"
                 row[Column.FAV_ID] = new_fav_id
@@ -725,7 +724,7 @@ class M3uImportDialog(IptvListDialog):
                     continue
 
                 params[0] = i if sid_auto else sid
-                picon_id = _PICON_FORMAT.format(s_id, s_type, *params)
+                picon_id = PICON_FORMAT.format(st_type, s_id, s_type, *params)
                 fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, st_type, s_id, s_type)
                 if s.picon:
                     picons[s.picon] = picon_id
