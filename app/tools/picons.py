@@ -59,7 +59,7 @@ class PiconsCzDownloader:
     _BASE_LOGO_URL = "https://picon.cz/picon/0/"
     _HEADER = {"User-Agent": "DemonEditor/3.0.0", "Referer": ""}
     _LINK_PATTERN = re.compile(r"((.*)-\d+x\d+)-(.*)_by_chocholousek.7z$")
-    _FILE_PATTERN = re.compile(b"\\s+(1_.*\\.png).*")
+    _FILE_PATTERN = re.compile(b"\\s+(\\w+\\.png).*")
 
     def __init__(self, picon_ids=set(), appender=log):
         self._perm_links = {}
@@ -220,7 +220,8 @@ class PiconsCzDownloader:
                 "piconoled": "o96",
                 "piconblack80": "b50",
                 "piconblack3d": "b50",
-                "piconwin11": "win11220"
+                "piconwin11": "win11220",
+                "piconSNPtransparent": "t50"
                 }
 
     def get_name_map(self):
