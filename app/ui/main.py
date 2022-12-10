@@ -3146,7 +3146,7 @@ class Application(Gtk.Application):
             GLib.idle_add(lambda: next(gen, False))
 
         dialog = ImportDialog(self, path, append)
-        dialog.import_data() if force else dialog.show()
+        dialog.import_bouquets_data() if force else dialog.show()
 
     def append_imported_data(self, bouquets, services, callback=None):
         try:

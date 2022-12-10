@@ -37,7 +37,7 @@ from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neu
 from app.settings import SettingsType, IS_DARWIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from app.ui.main_helper import on_popup_menu, get_iptv_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, IS_GNOME_SESSION, Page
 
 
 def import_bouquet(app, model, path, appender, file_path=None):
@@ -109,21 +109,26 @@ class ImportDialog:
                     "on_cursor_changed": self.on_cursor_changed,
                     "on_service_changed": self.on_service_changed,
                     "on_bq_selected_toggled": self.on_bq_selected_toggled,
+                    "on_sat_selected_toggled": self.on_sat_selected_toggled,
                     "on_service_selected_toggled": self.on_service_selected_toggled,
                     "on_services_model_changed": self.on_services_model_changed,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
+                    "on_sat_view_realize": self.on_sat_view_realize,
                     "on_services_view_realize": self.on_services_view_realize,
                     "on_popup_menu": on_popup_menu,
                     "on_resize": self.on_resize,
+                    "on_main_paned_realize": self.on_main_paned_realize,
+                    "on_visible_page": self.on_visible_page,
                     "on_key_press": self.on_key_press}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}imports.glade", handlers)
 
         self._app = app
-        self._bq_services = {}
         self._services = {}
+        self._bq_services = {}
+        self._sat_services = defaultdict(list)
         self._ids = self._app.current_services.keys()
         self._skip_import = defaultdict(set)
         self._append = appender
@@ -131,20 +136,42 @@ class ImportDialog:
         self._settings = app.app_settings
         self._bouquets = bouquets
         self._current_bq = None
+        self._current_sat = None
         self._existing_srv_background = None
+        self._page = Page.SERVICES
 
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(app.app_window)
+        self._info_bar = builder.get_object("info_bar")
+        self._message_label = builder.get_object("message_label")
+        # Bouquets page.
         self._bq_model = builder.get_object("bq_list_store")
         self._bq_view = builder.get_object("bq_view")
         self._services_view = builder.get_object("services_view")
         self._services_model = builder.get_object("services_list_store")
-        self._info_bar = builder.get_object("info_bar")
-        self._message_label = builder.get_object("message_label")
         self._bouquets_count_label = builder.get_object("bouquets_count_label")
         self._services_count_label = builder.get_object("services_count_label")
         self._service_info_label = builder.get_object("service_info_label")
         self._service_exists_frame = builder.get_object("service_exists_frame")
+        # Satellites page.
+        self._sat_view = builder.get_object("sat_view")
+        self._sat_model = builder.get_object("sat_list_store")
+        self._sat_count_label = builder.get_object("sat_count_label")
+
+        if IS_GNOME_SESSION:
+            actions_box = builder.get_object("actions_box")
+            builder.get_object("toolbar_box").set_visible(False)
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            stack_switcher = builder.get_object("stack_switcher")
+            actions_box.remove(stack_switcher)
+            header_bar.set_custom_title(stack_switcher)
+            button = builder.get_object("import_button")
+            actions_box.remove(button)
+            header_bar.pack_start(button)
+            button = builder.get_object("details_button")
+            actions_box.remove(button)
+            header_bar.pack_end(button)
+            self._dialog_window.set_titlebar(header_bar)
 
         window_size = self._settings.get("import_dialog_window_size")
         if window_size:
@@ -184,17 +211,20 @@ class ImportDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
 
     def on_import(self, item):
-        if not any(r[-1] for r in self._bq_model):
-            self.show_info_message(get_message("No selected item!"), Gtk.MessageType.ERROR)
-            return
+        if self._page is Page.SERVICES:
+            if not any(r[-1] for r in self._bq_model):
+                self.show_info_message(get_message("No selected item!"), Gtk.MessageType.ERROR)
+                return
 
-        if not self._bouquets or show_dialog(DialogType.QUESTION, self._dialog_window) == Gtk.ResponseType.CANCEL:
-            return
+            if not self._bouquets or show_dialog(DialogType.QUESTION, self._dialog_window) != Gtk.ResponseType.OK:
+                return
 
-        self.import_data()
+            self.import_bouquets_data()
+        else:
+            self.import_satellites_data()
 
     @run_idle
-    def import_data(self):
+    def import_bouquets_data(self):
         """ Importing data into models. """
         if not self._bouquets:
             return
@@ -232,6 +262,27 @@ class ImportDialog:
         self._append(self._bouquets, services)
         self._dialog_window.destroy()
 
+    def import_satellites_data(self):
+        if show_dialog(DialogType.QUESTION, self._dialog_window) != Gtk.ResponseType.OK:
+            return
+
+        replace_existing = False
+        services = []
+        current_services = self._app.current_services
+
+        for row in self._sat_model:
+            if row[-1]:
+                sat = (row[0], row[1])
+                skip = self._skip_import[sat]
+                for s in filter(lambda srv: srv.fav_id not in skip, self._sat_services.get(sat[0], ())):
+                    if replace_existing and s.fav_id in self._ids:
+                        current_services[s.fav_id] = s
+                    else:
+                        services.append(s)
+
+        self._append((), services)
+        self._dialog_window.destroy()
+
     @run_idle
     def on_cursor_changed(self, view):
         self._services_model.clear()
@@ -240,7 +291,16 @@ class ImportDialog:
         if not paths:
             return
 
-        self._current_bq = model.get(model.get_iter(paths[0]), 0, 1)
+        if self._page is Page.SERVICES:
+            self._current_bq = model.get(model.get_iter(paths[0]), 0, 1)
+            self.update_bq_services()
+        else:
+            self._current_sat = model.get(model.get_iter(paths[0]), 0, 1)
+            self.update_sat_services()
+
+        self._services_count_label.set_text(str(len(self._services_model)))
+
+    def update_bq_services(self):
         bq_services = self._bq_services.get(self._current_bq)
         skip = self._skip_import[self._current_bq]
 
@@ -249,14 +309,17 @@ class ImportDialog:
                 srv = self._services.get(bq_srv.data, None)
                 if srv:
                     bg = self._existing_srv_background if srv.fav_id in self._ids else None
-                    srv = (srv.service, srv.service_type, srv.fav_id not in skip, bg, srv.fav_id)
-                    self._services_model.append(srv)
+                    self._services_model.append((srv.service, srv.service_type, srv.fav_id not in skip, bg, srv.fav_id))
             else:
                 bg = self._existing_srv_background if bq_srv.data in self._ids else None
-                srv = (bq_srv.name, bq_srv.type.value, bq_srv.data not in skip, bg, bq_srv.data)
-                self._services_model.append(srv)
+                self._services_model.append((bq_srv.name, bq_srv.type.value, bq_srv.data not in skip, bg, bq_srv.data))
 
-        self._services_count_label.set_text(str(len(self._services_model)))
+    def update_sat_services(self):
+        sat_services = self._sat_services.get(self._current_sat[0])
+        skip = self._skip_import[self._current_sat]
+        for srv in sat_services:
+            bg = self._existing_srv_background if srv.fav_id in self._ids else None
+            self._services_model.append((srv.service, srv.service_type, srv.fav_id not in skip, bg, srv.fav_id))
 
     def on_service_changed(self, view):
         path, column = view.get_cursor()
@@ -274,13 +337,16 @@ class ImportDialog:
     def on_bq_selected_toggled(self, toggle, path):
         self._bq_model.set_value(self._bq_model.get_iter(path), 2, not toggle.get_active())
 
+    def on_sat_selected_toggled(self, toggle, path):
+        self._sat_model.set_value(self._sat_model.get_iter(path), 2, not toggle.get_active())
+
     def on_service_selected_toggled(self, toggle, path):
         self._services_model.set_value(self._services_model.get_iter(path), 2, not toggle.get_active())
 
     def on_services_model_changed(self, model, path, itr):
         row = model[itr][:]
         fav_id = row[-1]
-        skip = self._skip_import[self._current_bq]
+        skip = self._skip_import[self._current_bq if self._page is Page.SERVICES else self._current_sat]
         if row[2]:
             if fav_id in skip:
                 skip.remove(fav_id)
@@ -306,6 +372,16 @@ class ImportDialog:
     def update_selection(self, view, select):
         view.get_model().foreach(lambda mod, path, itr: mod.set_value(itr, 2, select))
 
+    def on_sat_view_realize(self, view):
+        if not self._services:
+            return True
+
+        for srv in self._services.values():
+            self._sat_services[srv.pos].append(srv)
+
+        list(map(lambda s: self._sat_model.append((s, None, True)), self._sat_services))
+        self._sat_count_label.set_text(str(len(self._sat_model)))
+
     def on_services_view_realize(self, view):
         if self._settings.use_colors:
             background = Gdk.RGBA()
@@ -315,6 +391,13 @@ class ImportDialog:
     def on_resize(self, window):
         if self._settings:
             self._settings.add("import_dialog_window_size", window.get_size())
+
+    def on_main_paned_realize(self, paned):
+        width = paned.get_allocated_width()
+        paned.set_position(width * 0.35)
+
+    def on_visible_page(self, stack, param):
+        self._page = Page(stack.get_visible_child_name())
 
     def on_key_press(self, view, event):
         """  Handling  keystrokes  """
