@@ -1422,8 +1422,11 @@ msgstr "Provider"
 
 msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
 "                          Recommended only if you have external storage."
-msgstr "Ermöglicht das Hochladen als Archiv, wenn eine große Anzahl von Picons (> 1000) ausgewählt ist.\n."
-"                           Empfohlen nur, wenn einen externen Speicher verfügt wird."
+msgstr "Ermöglicht das Hochladen als Archiv, wenn eine große Anzahl von Picons (> 1000)"
+" ausgewählt ist. Empfohlen nur, wenn einen externen Speicher verfügt wird."
 
 msgid "Clear \"New\" flag"
 msgstr "Das \"Neu\"-Flag entfernen"
+
+msgid "Group by"
+msgstr "Gruppieren nach"
