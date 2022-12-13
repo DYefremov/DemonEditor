@@ -4082,8 +4082,11 @@ class Application(Gtk.Application):
         return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._picons_size)
 
     def get_tooltip_picon(self, srv):
-        size, path = self._settings.tooltip_logo_size, self._settings.profile_picons_path
-        pix = get_picon_pixbuf(f"{path}{srv.picon_id}", size=size)
+        size, path, picon_id = self._settings.tooltip_logo_size, self._settings.profile_picons_path, srv.picon_id
+        pix = get_picon_pixbuf(f"{path}{picon_id}", size=size)
+        if not pix:
+            picon_id = picon_id.replace(picon_id[:picon_id.find("_")], "1", 1)
+            pix = get_picon_pixbuf(f"{path}{picon_id}", size=size)
         if not pix:
             pix = get_picon_pixbuf(f"{path}{get_picon_file_name(srv.service)}", size=size)
         return pix
