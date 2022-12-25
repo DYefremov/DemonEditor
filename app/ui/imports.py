@@ -277,7 +277,7 @@ class ImportDialog:
                 for s in filter(lambda srv: srv.fav_id not in skip, self._sat_services.get(sat[0], ())):
                     if replace_existing and s.fav_id in self._ids:
                         current_services[s.fav_id] = s
-                    else:
+                    elif s.fav_id not in self._ids:
                         services.append(s)
 
         self._append((), services)
