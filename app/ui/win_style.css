@@ -18,3 +18,7 @@ grid > button {
   padding-left: 15px;
   padding-right: 15px;
 }
+
+popover .view {
+  background-color: transparent;
+}

@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2022 Dmitriy Yefremov
+Copyright (c) 2018-2023 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,12 @@ Author: Dmitriy Yefremov
 
 -->
 <interface domain="demon-editor">
-  <requires lib="gtk+" version="3.18"/>
+  <requires lib="gtk+" version="3.22"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellite list editor. -->
-  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkImage" id="alt_image">
     <property name="visible">True</property>
@@ -109,7 +109,7 @@ Author: Dmitriy Yefremov
   <object class="GtkImage" id="clear_new_flag_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon-name">edit-undo</property>
+    <property name="icon_name">edit-undo</property>
   </object>
   <object class="GtkImage" id="copy_image">
     <property name="visible">True</property>
@@ -260,10 +260,7 @@ Author: Dmitriy Yefremov
         <property name="width_request">170</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
+        <property name="border_width">5</property>
         <property name="hscrollbar_policy">never</property>
         <property name="max_content_height">350</property>
         <property name="propagate_natural_height">True</property>
@@ -328,10 +325,7 @@ Author: Dmitriy Yefremov
         <property name="width_request">135</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
+        <property name="border_width">5</property>
         <property name="hscrollbar_policy">never</property>
         <property name="max_content_height">350</property>
         <property name="propagate_natural_height">True</property>
@@ -411,39 +405,49 @@ Author: Dmitriy Yefremov
   <object class="GtkPopover" id="filter_type_popover">
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkTreeView" id="filter_type_view">
-        <property name="width_request">135</property>
+      <object class="GtkBox" id="filter_type_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
-        <property name="model">filter_types_list_store</property>
-        <property name="headers_visible">False</property>
-        <property name="enable_search">False</property>
-        <child internal-child="selection">
-          <object class="GtkTreeSelection"/>
-        </child>
+        <property name="border_width">5</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkTreeViewColumn" id="fiter_type_column">
-            <property name="title" translatable="yes">Type</property>
-            <child>
-              <object class="GtkCellRendererText" id="filter_type_renderer_text"/>
-              <attributes>
-                <attribute name="text">0</attribute>
-              </attributes>
+          <object class="GtkTreeView" id="filter_type_view">
+            <property name="width_request">135</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="border_width">5</property>
+            <property name="model">filter_types_list_store</property>
+            <property name="headers_visible">False</property>
+            <property name="enable_search">False</property>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection"/>
             </child>
             <child>
-              <object class="GtkCellRendererToggle" id="filter_type_renderer_toggle">
-                <property name="xalign">0.98000001907348633</property>
-                <signal name="toggled" handler="on_filter_type_toggled" swapped="no"/>
+              <object class="GtkTreeViewColumn" id="fiter_type_column">
+                <property name="title" translatable="yes">Type</property>
+                <child>
+                  <object class="GtkCellRendererText" id="filter_type_renderer_text"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+                <child>
+                  <object class="GtkCellRendererToggle" id="filter_type_renderer_toggle">
+                    <property name="xalign">0.98000001907348633</property>
+                    <signal name="toggled" handler="on_filter_type_toggled" swapped="no"/>
+                  </object>
+                  <attributes>
+                    <attribute name="active">1</attribute>
+                  </attributes>
+                </child>
               </object>
-              <attributes>
-                <attribute name="active">1</attribute>
-              </attributes>
             </child>
           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
       </object>
     </child>
