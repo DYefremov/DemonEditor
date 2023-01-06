@@ -245,8 +245,8 @@ def backup_data(path, backup_path, move=True):
     backup_path = f"{backup_path}{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}{SEP}"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    # Backup files in data dir(skipping dirs and satellites.xml).
-    for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+    # Backup files in data dir(skipping dirs and *.xml).
+    for file in filter(lambda f: not f.endswith(".xml") and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         src, dst = os.path.join(path, file), backup_path + file
         shutil.move(src, dst) if move else shutil.copy(src, dst)
     # Compressing to zip and delete remaining files.
@@ -263,8 +263,8 @@ def restore_data(src, dst):
 
 
 def clear_data_path(path):
-    """ Clearing data at the specified path excluding satellites.xml file """
-    for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+    """ Clearing data at the specified path excluding *.xml file. """
+    for file in filter(lambda f: not f.endswith(".xml") and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         os.remove(os.path.join(path, file))
 
 
