@@ -35,6 +35,7 @@ import xml.etree.ElementTree as ETree
 from enum import Enum
 from ftplib import FTP, CRLF, Error, all_errors
 from http.client import RemoteDisconnected
+from pathlib import Path
 from telnetlib import Telnet
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, quote
@@ -89,11 +90,11 @@ class UtfFTP(FTP):
             while 1:
                 line = fp.readline(self.maxline + 1)
                 if len(line) > self.maxline:
-                    msg = "UtfFTP [retrlines] error: got more than {} bytes".format(self.maxline)
+                    msg = f"UtfFTP [retrlines] error: got more than {self.maxline} bytes"
                     log(msg)
                     raise Error(msg)
                 if self.debugging > 2:
-                    log('UtfFTP [retrlines] *retr* {}'.format(repr(line)))
+                    log(f"UtfFTP [retrlines] *retr* {repr(line)}")
                 if not line:
                     break
                 if line[-2:] == CRLF:
@@ -112,9 +113,8 @@ class UtfFTP(FTP):
 
     def download_file(self, name, save_path, callback=None):
         with open(save_path + name, "wb") as f:
-            msg = "Downloading file: {}.   Status: {}"
             resp = self.download_binary(name, f)
-            msg = msg.format(name, resp)
+            msg = f"Downloading file: {name}.   Status: {resp}"
             callback(msg) if callback else log(msg.rstrip())
 
             return resp
@@ -470,7 +470,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
 
                     z_name = "picons.zip"
                     zip_file = f"{p_src}{z_name}"
-                    p_dst = os.path.abspath(os.path.join(p_dst, os.pardir))
+                    p_dst = Path(p_dst).parent.as_posix()
 
                     if files_filter and z_name in files_filter:
                         files_filter.remove(z_name)
