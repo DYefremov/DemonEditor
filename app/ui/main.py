@@ -3035,7 +3035,7 @@ class Application(Gtk.Application):
         row = model[path]
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
-        fav_id_data[3:7] = ref_data[3:7]
+        fav_id_data[2:7] = ref_data[2:7]
         new_fav_id = ":".join(fav_id_data)
         new_data_id = ":".join(fav_id_data[:11]).strip()
         old_srv = self._services.pop(fav_id, None)
