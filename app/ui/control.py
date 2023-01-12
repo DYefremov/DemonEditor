@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -70,6 +70,7 @@ class ControlTool(Gtk.Box):
         self._agc_level_bar = builder.get_object("agc_level_bar")
         self._volume_button = builder.get_object("volume_button")
         self._header_box = builder.get_object("control_header_box")
+        self._screenshot_button_box = builder.get_object("screenshot_button_box")
         # Network.
         self._network_button = builder.get_object("control_network_button")
         self._network_model = builder.get_object("network_model")
@@ -83,15 +84,27 @@ class ControlTool(Gtk.Box):
 
     def init_actions(self, app):
         # Remote controller actions.
+        app.set_action("on_one", lambda a, v: self.on_remote_action(HttpAPI.Remote.ONE))
+        app.set_action("on_two", lambda a, v: self.on_remote_action(HttpAPI.Remote.TWO))
+        app.set_action("on_three", lambda a, v: self.on_remote_action(HttpAPI.Remote.THREE))
+        app.set_action("on_four", lambda a, v: self.on_remote_action(HttpAPI.Remote.FOUR))
+        app.set_action("on_five", lambda a, v: self.on_remote_action(HttpAPI.Remote.FIVE))
+        app.set_action("on_six", lambda a, v: self.on_remote_action(HttpAPI.Remote.SIX))
+        app.set_action("on_seven", lambda a, v: self.on_remote_action(HttpAPI.Remote.SEVEN))
+        app.set_action("on_eight", lambda a, v: self.on_remote_action(HttpAPI.Remote.EIGHT))
+        app.set_action("on_nine", lambda a, v: self.on_remote_action(HttpAPI.Remote.NINE))
+        app.set_action("on_zero", lambda a, v: self.on_remote_action(HttpAPI.Remote.ZERO))
         app.set_action("on_up", lambda a, v: self.on_remote_action(HttpAPI.Remote.UP))
         app.set_action("on_down", lambda a, v: self.on_remote_action(HttpAPI.Remote.DOWN))
         app.set_action("on_left", lambda a, v: self.on_remote_action(HttpAPI.Remote.LEFT))
         app.set_action("on_right", lambda a, v: self.on_remote_action(HttpAPI.Remote.RIGHT))
+        app.set_action("on_next", lambda a, v: self.on_remote_action(HttpAPI.Remote.NEXT))
         app.set_action("on_back", lambda a, v: self.on_remote_action(HttpAPI.Remote.BACK))
         app.set_action("on_info", lambda a, v: self.on_remote_action(HttpAPI.Remote.INFO))
         app.set_action("on_ok", lambda a, v: self.on_remote_action(HttpAPI.Remote.OK))
         app.set_action("on_menu", lambda a, v: self.on_remote_action(HttpAPI.Remote.MENU))
         app.set_action("on_exit", lambda a, v: self.on_remote_action(HttpAPI.Remote.EXIT))
+        app.set_action("on_epg", lambda a, v: self.on_remote_action(HttpAPI.Remote.EPG))
         app.set_action("on_ch_up", lambda a, v: self.on_remote_action(HttpAPI.Remote.CH_UP))
         app.set_action("on_ch_down", lambda a, v: self.on_remote_action(HttpAPI.Remote.CH_DOWN))
         app.set_action("on_red", lambda a, v: self.on_remote_action(HttpAPI.Remote.RED))
@@ -124,6 +137,8 @@ class ControlTool(Gtk.Box):
         self._remote_box.reorder_child(children[-1], 0)
         pack_type = Gtk.PackType.END if alt_layout else Gtk.PackType.START
         self._header_box.set_child_packing(self._network_button, False, False, 0, pack_type)
+        pack_type = Gtk.PackType.START if alt_layout else Gtk.PackType.END
+        self._header_box.set_child_packing(self._screenshot_button_box, False, False, 0, pack_type)
 
     # ***************** Remote controller ********************* #
 

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -650,6 +650,16 @@ class HttpAPI:
 
     class Remote(str, Enum):
         """ Args for HttpRequestType [REMOTE] class. """
+        ONE = "2"
+        TWO = "3"
+        THREE = "4"
+        FOUR = "5"
+        FIVE = "6"
+        SIX = "7"
+        SEVEN = "8"
+        EIGHT = "9"
+        NINE = "10"
+        ZERO = "11"
         UP = "103"
         LEFT = "105"
         RIGHT = "106"
@@ -658,6 +668,7 @@ class HttpAPI:
         EXIT = "174"
         OK = "352"
         INFO = "358"
+        EPG = "365"
         TV = "377"
         RADIO = "385"
         AUDIO = "392"
@@ -668,6 +679,7 @@ class HttpAPI:
         BLUE = "401"
         CH_UP = "402"
         CH_DOWN = "403"
+        NEXT = "407"
         BACK = "412"
 
     class Power(str, Enum):
