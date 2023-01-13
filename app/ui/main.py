@@ -418,7 +418,6 @@ class Application(Gtk.Application):
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         self._filter_not_in_bq_button = builder.get_object("filter_not_in_bq_button")
         self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
-        self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
         self._filter_iptv_services_button = builder.get_object("filter_iptv_services_button")
         # Search.
         services_search_provider = SearchProvider(self._services_view,
@@ -3720,7 +3719,6 @@ class Application(Gtk.Application):
 
     @run_with_delay(2)
     def on_iptv_filter_changed(self, item=None):
-        self._iptv_filter_box.set_sensitive(False)
         self.update_iptv_filter_cache()
         self.update_iptv_filter_state()
 
@@ -3732,7 +3730,6 @@ class Application(Gtk.Application):
     @run_idle
     def update_iptv_filter_state(self):
         self._iptv_services_model_filter.refilter()
-        GLib.idle_add(self._iptv_filter_box.set_sensitive, True)
 
     def update_filter_cache(self):
         self._filter_cache.clear()
