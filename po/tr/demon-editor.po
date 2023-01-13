@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2022-08-27 23:17+0300\n"
+"PO-Revision-Date: 2023-01-13 21:54+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: \n"
 "Language: tr\n"
@@ -1416,3 +1416,34 @@ msgstr "Günlük"
 
 msgid "Assign reference"
 msgstr "Referans ata"
+
+msgid "Specify hostname or IP address"
+msgstr "Ana bilgisayar adını veya IP adresini belirtin"
+
+msgid "Default selection"
+msgstr "Varsayılan seçim"
+
+msgid "Don't change power state"
+msgstr "Güç durumunu değiştirme"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Buketleri ve servisleri güncellerken bekleme moduna geçmeyin."
+
+msgid "Region"
+msgstr "Bölge"
+
+msgid "Provider"
+msgstr "Sağlayıcı"
+
+msgid ""
+"Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr ""
+"Çok sayıda picon (> 1000) seçilirse arşiv olarak yüklemeyi etkinleştirir.\n"
+"                          Yalnızca harici depolamanız varsa önerilir."
+
+msgid "Clear \"New\" flag"
+msgstr "\"Yeni\" bayrağını temizleyin"
+
+msgid "Group by"
+msgstr ""
