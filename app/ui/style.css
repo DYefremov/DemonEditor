@@ -23,6 +23,10 @@
   padding-bottom: 0;
 }
 
+buttonbox {
+  padding: 0;
+}
+
 paned > separator {
   background-repeat: no-repeat;
   background-position: center;
