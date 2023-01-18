@@ -1777,12 +1777,12 @@ Author: Dmitriy Yefremov
                                     <child type="center">
                                       <object class="GtkButtonBox" id="services_button_box">
                                         <property name="visible">True</property>
+                                        <property name="name">header-stack-switcher</property>
                                         <property name="can_focus">False</property>
                                         <property name="layout_style">expand</property>
                                         <child>
                                           <object class="GtkRadioButton" id="dvb_button">
                                             <property name="label" translatable="yes">DVB</property>
-                                            <property name="name">stack-switch-button</property>
                                             <property name="width_request">80</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -1800,7 +1800,6 @@ Author: Dmitriy Yefremov
                                         <child>
                                           <object class="GtkRadioButton" id="iptv_button">
                                             <property name="label" translatable="yes">IPTV</property>
-                                            <property name="name">stack-switch-button</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="receives_default">False</property>
@@ -3427,7 +3426,6 @@ Author: Dmitriy Yefremov
                                             <property name="model">fav_list_store</property>
                                             <property name="enable_search">False</property>
                                             <property name="search_column">2</property>
-                                            <property name="fixed_height_mode">True</property>
                                             <property name="rubber_banding">True</property>
                                             <property name="enable_grid_lines">both</property>
                                             <property name="tooltip_column">9</property>

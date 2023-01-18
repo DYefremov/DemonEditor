@@ -18,7 +18,7 @@
   padding: 0;
 }
 
-#stack-switch-button {
+#header-stack-switcher > button {
   padding-top: 0;
   padding-bottom: 0;
 }

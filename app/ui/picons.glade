@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2022 Dmitriy Yefremov
+Copyright (c) 2018-2023 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ Author: Dmitriy Yefremov
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkMenu" id="add_menu">
     <property name="visible">True</property>
@@ -379,6 +379,7 @@ Author: Dmitriy Yefremov
             <child type="center">
               <object class="GtkButtonBox" id="header_button_box">
                 <property name="visible">True</property>
+                <property name="name">header-stack-switcher</property>
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
                 <property name="layout_style">expand</property>
