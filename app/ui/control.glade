@@ -882,6 +882,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="margin-bottom">5</property>
                         <property name="action-name">app.on_zero</property>
                       </object>
                       <packing>
@@ -896,6 +897,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="margin-bottom">5</property>
                         <property name="action-name">app.on_back</property>
                       </object>
                       <packing>
@@ -910,6 +912,7 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="margin-bottom">5</property>
                         <property name="action-name">app.on_next</property>
                       </object>
                       <packing>
