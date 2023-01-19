@@ -18,6 +18,15 @@
   padding: 0;
 }
 
+#header-button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#header-entry {
+  min-height: 0;
+}
+
 #header-stack-switcher > button {
   padding-top: 0;
   padding-bottom: 0;
