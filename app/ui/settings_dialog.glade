@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.38.2 
 
-Copyright (C)  2018-2022 Dmitriy Yefremov
+Copyright (C)  2018-2023 Dmitriy Yefremov
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
@@ -12,12 +12,12 @@ Author: Dmitriy Yefremov
 
 -->
 <interface domain="demon-editor">
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.22"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type all_permissive -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor. -->
-  <!-- interface-copyright  2018-2022 Dmitriy Yefremov -->
+  <!-- interface-copyright  2018-2023 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAdjustment" id="font_size_adjustment">
     <property name="lower">8</property>
@@ -3729,7 +3729,7 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkLabel" id="epg_dat_label">
         <property name="visible">True</property>
-        <property name="sensitive" bind-source="enigma_radio_button" bind-property="active">False</property>
+        <property name="sensitive" bind-source="enigma_radio_button" bind-property="active">True</property>
         <property name="can-focus">False</property>
         <property name="label" translatable="yes">EPG *.dat file:</property>
         <property name="xalign">0.019999999552965164</property>
@@ -3742,7 +3742,7 @@ Author: Dmitriy Yefremov
     <child>
       <object class="GtkComboBoxText" id="epg_dat_box">
         <property name="visible">True</property>
-        <property name="sensitive" bind-source="enigma_radio_button" bind-property="active">False</property>
+        <property name="sensitive" bind-source="enigma_radio_button" bind-property="active">True</property>
         <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="active">0</property>
