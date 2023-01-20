@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -3023,9 +3023,11 @@ class Application(Gtk.Application):
             return
 
         ref = self._clipboard.wait_for_text()
-        if ref and re.match(r"\d+_\d+_\d+_\w+_\w+_\w+_\d+_0_0_0", ref):
+        if ref and re.match(r"\d+_\d+_\w+_\w+_\w+_\w+_\w+_0_0_0", ref):
             [self.assign_reference(model, p, ref) for p in iptv_paths]
             self._clipboard.clear()
+        else:
+            log(f"Error parsing reference [{ref}].")
 
         self.emit("clipboard-changed", self._clipboard.wait_is_text_available())
 
