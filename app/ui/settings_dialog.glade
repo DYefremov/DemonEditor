@@ -79,7 +79,7 @@ Author: Dmitriy Yefremov
         <property name="image">set_default_image</property>
         <property name="use-stock">False</property>
         <signal name="activate" handler="on_profile_set_default" swapped="no"/>
-        <accelerator key="d" signal="activate"/>
+        <accelerator key="d" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
@@ -291,7 +291,7 @@ Author: Dmitriy Yefremov
                 <property name="receives-default">True</property>
                 <property name="tooltip-text" translatable="yes">Save</property>
                 <property name="valign">center</property>
-                <accelerator key="s" signal="clicked"/>
+                <accelerator key="s" signal="clicked" modifiers="Primary"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -508,7 +508,7 @@ Author: Dmitriy Yefremov
                                     <property name="icon-name">emblem-default</property>
                                   </object>
                                 </child>
-                                <accelerator key="d" signal="clicked"/>
+                                <accelerator key="d" signal="clicked" modifiers="Primary"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
