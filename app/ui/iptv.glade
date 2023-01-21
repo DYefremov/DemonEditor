@@ -1435,7 +1435,7 @@ Author: Dmitriy Yefremov
                     <property name="image">yt_receive_image</property>
                     <property name="always_show_image">True</property>
                     <signal name="clicked" handler="on_receive" swapped="no"/>
-                    <accelerator key="d" signal="clicked"/>
+                    <accelerator key="d" signal="clicked" modifiers="Primary"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
