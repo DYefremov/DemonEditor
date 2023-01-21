@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,8 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
            "scroll_to", "get_base_model", "get_base_paths", "copy_reference", "assign_picons", "remove_picon",
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection", "get_service_reference",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
-           "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name")
+           "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name",
+           "update_toggle_model", "update_filter_sat_positions", "get_pos_num")
 
 import os
 import re
@@ -695,6 +696,40 @@ def get_model_data(view):
     model = get_base_model(view.get_model())
     model_name = model.get_name() if model else ""
     return model_name, model
+
+
+def update_toggle_model(model, path, toggle):
+    """ Updates the toggle state for the model. """
+    active = not toggle.get_active()
+    if path == "0":
+        model.foreach(lambda m, p, i: m.set_value(i, 1, active))
+    else:
+        model.set_value(model.get_iter(path), 1, active)
+        if active:
+            model.set_value(model.get_iter_first(), 1, len({r[0] for r in model if r[1]}) == len(model) - 1)
+        else:
+            model.set_value(model.get_iter_first(), 1, False)
+
+
+def update_filter_sat_positions(model, sat_positions):
+    """ Updates the values for the satellite positions button model. """
+    first = model[model.get_iter_first()][:]
+    model.clear()
+    model.append((first[0], True))
+    sat_positions.discard(first[0])
+    list(map(lambda pos: model.append((pos, True)), sorted(sat_positions, key=get_pos_num, reverse=True)))
+
+
+def get_pos_num(pos):
+    """ Returns num [float] representation of satellite position. """
+    if not pos:
+        return -183.0
+
+    if len(pos) > 1:
+        m = -1 if pos[-1] == "W" else 1
+        return float(pos[:-1]) * m
+
+    return -181.0 if pos == "T" else -182.0
 
 
 def append_text_to_tview(char, view):

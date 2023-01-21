@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
-from ..main_helper import on_popup_menu, update_entry_data, scroll_to
+from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
 
 
@@ -373,6 +373,7 @@ class EpgDialog:
                     "on_save_to_xml": self.on_save_to_xml,
                     "on_auto_configuration": self.on_auto_configuration,
                     "on_filter_toggled": self.on_filter_toggled,
+                    "on_filter_satellite_toggled": self.on_filter_satellite_toggled,
                     "on_filter_changed": self.on_filter_changed,
                     "on_info_bar_close": self.on_info_bar_close,
                     "on_popup_menu": on_popup_menu,
@@ -405,6 +406,7 @@ class EpgDialog:
         self._update_epg_data_on_start = False
         self._refs_source = RefsSource.SERVICES
         self._download_xml_is_active = False
+        self._sat_positions = None
 
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}dialog.glade", handlers)
 
@@ -419,12 +421,14 @@ class EpgDialog:
         self._assign_ref_popup_item = builder.get_object("bouquet_assign_ref_popup_item")
         self._left_action_box = builder.get_object("left_action_box")
         self._xml_download_progress_bar = builder.get_object("xml_download_progress_bar")
+        self._src_load_spinner = builder.get_object("src_load_spinner")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_entry = builder.get_object("filter_entry")
         self._filter_auto_switch = builder.get_object("filter_auto_switch")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
+        self._sat_pos_filter_model = builder.get_object("sat_pos_filter_model")
         # Info
         self._source_count_label = builder.get_object("source_count_label")
         self._source_info_label = builder.get_object("source_info_label")
@@ -528,6 +532,8 @@ class EpgDialog:
                 return
             yield True
 
+        self._src_load_spinner.start()
+
         if self._refs_source is RefsSource.SERVICES:
             yield from self.init_lamedb_source(refs)
         elif self._refs_source is RefsSource.XML:
@@ -538,6 +544,8 @@ class EpgDialog:
                 self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             self.show_info_message("Unknown names source!", Gtk.MessageType.ERROR)
+
+        self._src_load_spinner.stop()
         yield True
 
     def init_bouquet_data(self):
@@ -755,16 +763,28 @@ class EpgDialog:
 
     def on_filter_toggled(self, button):
         self._filter_bar.set_visible(button.get_active())
-        if not button.get_active():
-            self._filter_entry.set_text("")
+        if button.get_active():
+            self._sat_positions = {r[1] for r in self._services_model}
+            update_filter_sat_positions(self._sat_pos_filter_model, self._sat_positions)
+        else:
+            self._sat_positions = None
+            self._filter_entry.set_text("") if self._filter_entry.get_text() else self.on_filter_changed()
 
-    @run_with_delay(1)
-    def on_filter_changed(self, entry):
+    def on_filter_satellite_toggled(self, toggle, path):
+        update_toggle_model(self._sat_pos_filter_model, path, toggle)
+        self._sat_positions.clear()
+        self._sat_positions.update({r[0] for r in self._sat_pos_filter_model if r[1]})
+        self.on_filter_changed()
+
+    @run_with_delay(2)
+    def on_filter_changed(self, entry=None):
         self._services_filter_model.refilter()
 
     def services_filter_function(self, model, itr, data):
         txt = self._filter_entry.get_text().upper()
-        return model is None or model == "None" or txt in model.get_value(itr, 0).upper()
+        pos = model.get_value(itr, 1)
+        pos = self._sat_positions is None or self._xml_radiobutton.get_active() or pos in self._sat_positions
+        return model is None or model == "None" or (txt in model.get_value(itr, 0).upper() and pos)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

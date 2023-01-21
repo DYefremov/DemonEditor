@@ -1559,7 +1559,7 @@ class Application(Gtk.Application):
 
         for s_row, row in zip(sorted(map(
                 lambda r: r[:], rows),
-                key=lambda r: r[c_num] or nv if c_num != Column.FAV_POS else self.get_pos_num(r[c_num]),
+                key=lambda r: r[c_num] or nv if c_num != Column.FAV_POS else get_pos_num(r[c_num]),
                 reverse=rev), rows):
             self._fav_model.set(row.iter, columns, s_row)
             bq[index] = s_row[Column.FAV_ID]
@@ -1575,18 +1575,7 @@ class Application(Gtk.Application):
 
     def position_sort_func(self, model, iter1, iter2, column):
         """ Custom sort function for position column. """
-        return self.get_pos_num(model.get_value(iter1, column)) - self.get_pos_num(model.get_value(iter2, column))
-
-    def get_pos_num(self, pos):
-        """ Returns num [float] representation of satellite position. """
-        if not pos:
-            return -183.0
-
-        if len(pos) > 1:
-            m = -1 if pos[-1] == "W" else 1
-            return float(pos[:-1]) * m
-
-        return -181.0 if pos == "T" else -182.0
+        return get_pos_num(model.get_value(iter1, column)) - get_pos_num(model.get_value(iter2, column))
 
     # ********************* Hints ************************* #
 
@@ -3500,7 +3489,7 @@ class Application(Gtk.Application):
         elif self._s_type is SettingsType.NEUTRINO_MP:
             # It may require some correction for cable and terrestrial channels!
             try:
-                pos, freq = int(self.get_pos_num(srv.pos)) * 10, int(srv.freq)
+                pos, freq = int(get_pos_num(srv.pos)) * 10, int(srv.freq)
                 tid, nid, sid = int(ref[: -8], 16), int(ref[-8: -4], 16), int(srv.ssid, 16)
             except ValueError:
                 log(f"Error getting reference for: {srv}")
@@ -3702,16 +3691,7 @@ class Application(Gtk.Application):
         elif self._s_type is SettingsType.NEUTRINO_MP:
             list(map(lambda s: self._sat_positions.add(s.pos), filter(lambda s: s.pos, self._services.values())))
 
-        self.update_filter_sat_positions()
-
-    def update_filter_sat_positions(self):
-        """ Updates the values for the satellite positions button model. """
-        first = self._filter_sat_pos_model[self._filter_sat_pos_model.get_iter_first()][:]
-        self._filter_sat_pos_model.clear()
-        self._filter_sat_pos_model.append((first[0], True))
-        self._sat_positions.discard(first[0])
-        list(map(lambda pos: self._filter_sat_pos_model.append((pos, True)),
-                 sorted(self._sat_positions, key=self.get_pos_num, reverse=True)))
+        update_filter_sat_positions(self._filter_sat_pos_model, self._sat_positions)
 
     @run_with_delay(2)
     def on_filter_changed(self, item=None):
@@ -3794,16 +3774,7 @@ class Application(Gtk.Application):
             self.on_filter_changed()
 
     def update_filter_toggle_model(self, model, toggle, path, values_set):
-        active = not toggle.get_active()
-        if path == "0":
-            model.foreach(lambda m, p, i: m.set_value(i, 1, active))
-        else:
-            model.set_value(model.get_iter(path), 1, active)
-            if active:
-                model.set_value(model.get_iter_first(), 1, len({r[0] for r in model if r[1]}) == len(model) - 1)
-            else:
-                model.set_value(model.get_iter_first(), 1, False)
-
+        update_toggle_model(model, path, toggle)
         values_set.clear()
         values_set.update({r[0] for r in model if r[1]})
         self.on_iptv_filter_changed() if self._iptv_button.get_active() else self.on_filter_changed()
