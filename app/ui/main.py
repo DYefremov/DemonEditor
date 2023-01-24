@@ -4283,11 +4283,15 @@ class Application(Gtk.Application):
         return True
 
     def on_alt_selection(self, model, path, column):
-        if self._control_tool and self._control_tool.update_epg:
+        if self._page is Page.EPG:
             row = model[path][:]
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
-                self._control_tool.on_services_update(srv.picon_id.rstrip(".png").replace("_", ":"))
+                ref = self.get_service_ref_data(srv)
+                if not ref:
+                    return
+
+                self.emit("fav-changed", ref)
 
     # ***************** Profile label ********************* #
 
