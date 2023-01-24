@@ -259,8 +259,11 @@ class ImportDialog:
                 with suppress(ValueError):
                     bq.remove(b)
 
-        services = list(filter(lambda s: s.fav_id not in self._ids, services))
-        self._append(self._bouquets, services)
+        self._append(self._bouquets, list(filter(lambda s: s.fav_id not in self._ids, services)))
+
+        if self._replace_existing_switch.get_active():
+            self._app.emit("services_update", {s.fav_id: s for s in filter(lambda s: s.fav_id in self._ids, services)})
+
         self._dialog_window.destroy()
 
     def import_satellites_data(self):
