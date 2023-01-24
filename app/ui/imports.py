@@ -144,6 +144,7 @@ class ImportDialog:
         self._dialog_window.set_transient_for(app.app_window)
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        self._replace_existing_switch = builder.get_object("replace_existing_switch")
         # Bouquets page.
         self._bq_model = builder.get_object("bq_list_store")
         self._bq_view = builder.get_object("bq_view")
@@ -168,9 +169,9 @@ class ImportDialog:
             button = builder.get_object("import_button")
             actions_box.remove(button)
             header_bar.pack_start(button)
-            button = builder.get_object("details_button")
-            actions_box.remove(button)
-            header_bar.pack_end(button)
+            extra_box = builder.get_object("extra_header_box")
+            actions_box.remove(extra_box)
+            header_bar.pack_end(extra_box)
             self._dialog_window.set_titlebar(header_bar)
 
         window_size = self._settings.get("import_dialog_window_size")
@@ -266,9 +267,10 @@ class ImportDialog:
         if show_dialog(DialogType.QUESTION, self._dialog_window) != Gtk.ResponseType.OK:
             return
 
-        replace_existing = False
+        replace_existing = self._replace_existing_switch.get_active()
         services = []
         current_services = self._app.current_services
+        to_replace = {}
 
         for row in self._sat_model:
             if row[-1]:
@@ -277,10 +279,14 @@ class ImportDialog:
                 for s in filter(lambda srv: srv.fav_id not in skip, self._sat_services.get(sat[0], ())):
                     if replace_existing and s.fav_id in self._ids:
                         current_services[s.fav_id] = s
+                        to_replace[s.fav_id] = s
                     elif s.fav_id not in self._ids:
                         services.append(s)
 
         self._append((), services)
+        if to_replace:
+            self._app.emit("services_update", to_replace)
+
         self._dialog_window.destroy()
 
     @run_idle

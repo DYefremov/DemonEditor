@@ -308,6 +308,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("epg-dat-downloaded", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("services-update", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("iptv-service-edited", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("iptv-service-added", self, GObject.SIGNAL_RUN_LAST,
@@ -488,6 +490,7 @@ class Application(Gtk.Application):
         self._logs_box = builder.get_object("logs_box")
         self._logs_box.pack_start(LogsClient(self), True, True, 0)
         self._bottom_paned = builder.get_object("bottom_paned")
+        self.connect("services-update", self.on_services_update)
         # Send/Receive.
         self.connect("data-receive", self.on_download)
         self.connect("data-send", self.on_upload)
@@ -1267,6 +1270,20 @@ class Application(Gtk.Application):
                 model.insert(p_iter, dest_index + index, row)
         self._bouquets_buffer.clear()
         self.update_bouquets_type()
+
+    def on_services_update(self, app, services):
+        """ Updates services in the main model. """
+        for r in self._fav_model:
+            fav_id = r[Column.FAV_ID]
+            if fav_id in services:
+                service = services[fav_id]
+                r[Column.FAV_SERVICE] = service.service
+
+        for r in self._services_model:
+            fav_id = r[Column.SRV_FAV_ID]
+            if fav_id in services:
+                service = services[fav_id]
+                r[Column.SRV_SERVICE] = service.service
 
     # ***************** Deletion ********************* #
 
@@ -4270,7 +4287,7 @@ class Application(Gtk.Application):
             row = model[path][:]
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
-                self._control_tool.on_service_changed(srv.picon_id.rstrip(".png").replace("_", ":"))
+                self._control_tool.on_services_update(srv.picon_id.rstrip(".png").replace("_", ":"))
 
     # ***************** Profile label ********************* #
 
