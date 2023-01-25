@@ -334,6 +334,7 @@ Author: Dmitriy Yefremov
                     <property name="sizing">fixed</property>
                     <property name="min-width">50</property>
                     <property name="title" translatable="yes">Start time</property>
+                    <property name="expand">True</property>
                     <property name="alignment">0.49</property>
                     <property name="sort-column-id">2</property>
                     <child>
@@ -354,6 +355,7 @@ Author: Dmitriy Yefremov
                     <property name="sizing">fixed</property>
                     <property name="min-width">50</property>
                     <property name="title" translatable="yes">End time</property>
+                    <property name="expand">True</property>
                     <property name="alignment">0.49</property>
                     <property name="sort-column-id">3</property>
                     <child>
