@@ -570,6 +570,8 @@ class Application(Gtk.Application):
         self._epg_menu_button = builder.get_object("epg_menu_button")
         self._epg_menu_button.connect("realize", lambda b: b.set_popover(EpgSettingsPopover(self)))
         self.bind_property("is_enigma", self._epg_menu_button, "sensitive")
+        self._epg_start_time_fmt = "%a, %H:%M"
+        self._epg_end_time_fmt = "%H:%M"
         # Hiding for Neutrino.
         self.bind_property("is_enigma", builder.get_object("services_button_box"), "visible")
         # Setting the last size of the window if it was saved.
@@ -1147,10 +1149,16 @@ class Application(Gtk.Application):
 
             event = self._epg_cache.get_current_event(srv_name)
             if event:
+                if event.start:
+                    start = datetime.fromtimestamp(event.start).strftime(self._epg_start_time_fmt)
+                    end = datetime.fromtimestamp(event.end).strftime(self._epg_end_time_fmt)
+                    sep = "-"
+                else:
+                    start, end, sep = "", "", ""
                 # https://docs.gtk.org/Pango/pango_markup.html
                 renderer.set_property("markup", (f'{escape(srv_name)}\n\n'
                                                  f'<span size="small" weight="bold">{escape(event.title)}</span>\n'
-                                                 f'<span size="small" style="italic">{event.time}</span>'))
+                                                 f'<span size="small" style="italic">{start} {sep} {end}</span>'))
                 return False
         return True
 

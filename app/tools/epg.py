@@ -54,8 +54,8 @@ except ModuleNotFoundError:
 else:
     DETECT_ENCODING = True
 
-EpgEvent = namedtuple("EpgEvent", ["service_name", "title", "time", "desc", "event_data"])
-EpgEvent.__new__.__defaults__ = ("N/A", "N/A", "N/A", "N/A", None)  # For Python3 < 3.7
+EpgEvent = namedtuple("EpgEvent", ["service_name", "title", "start", "end", "length", "desc", "event_data"])
+EpgEvent.__new__.__defaults__ = ("N/A", "N/A", 0, 0, 0, "N/A", None)  # For Python3 < 3.7
 
 
 class Reader(metaclass=abc.ABCMeta):

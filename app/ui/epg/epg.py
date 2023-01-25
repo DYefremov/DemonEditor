@@ -203,6 +203,7 @@ class EpgTool(Gtk.Box):
         self._app = app
         self._app.connect("fav-changed", self.on_service_changed)
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
+        self._app.connect("filter-toggled", self.on_filter_toggled)
 
         handlers = {"on_epg_press": self.on_epg_press,
                     "on_timer_add": self.on_timer_add,
@@ -217,12 +218,24 @@ class EpgTool(Gtk.Box):
         self._model = builder.get_object("epg_model")
         self._filter_model = builder.get_object("epg_filter_model")
         self._filter_model.set_visible_func(self.epg_filter_function)
+        self._filter_button = builder.get_object("epg_filter_button")
         self._filter_entry = builder.get_object("epg_filter_entry")
         self._multi_epg_button = builder.get_object("multi_epg_button")
         self._event_count_label = builder.get_object("event_count_label")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
-        # Custom sort function.
-        self._view.get_model().set_sort_func(2, self.time_sort_func, 2)
+        # Custom data functions.
+        renderer = builder.get_object("epg_start_renderer")
+        column = builder.get_object("epg_start_column")
+        column.set_cell_data_func(renderer, self.start_data_func)
+        renderer = builder.get_object("epg_end_renderer")
+        column = builder.get_object("epg_end_column")
+        column.set_cell_data_func(renderer, self.end_data_func)
+        renderer = builder.get_object("epg_length_renderer")
+        column = builder.get_object("epg_length_column")
+        column.set_cell_data_func(renderer, self.duration_data_func)
+        # Time formats.
+        self._time_fmt = "%a %x - %H:%M"
+        self._duration_fmt = f"%-Hh %Mm"
 
         self.show()
 
@@ -290,18 +303,25 @@ class EpgTool(Gtk.Box):
 
     @staticmethod
     def get_event(event, show_day=True):
-        t_str = f"{'%a, ' if show_day else ''}%x, %H:%M"
         s_name = event.get("e2eventservicename", "")
         title = event.get("e2eventtitle", "") or ""
         desc = event.get("e2eventdescription", "") or ""
         desc = desc.strip()
+        start, duration = int(event.get("e2eventstart", "0")), int(event.get("e2eventduration", "0"))
 
-        start = int(event.get("e2eventstart", "0"))
-        start_time = datetime.fromtimestamp(start)
-        end_time = datetime.fromtimestamp(start + int(event.get("e2eventduration", "0")))
-        ev_time = f"{start_time.strftime(t_str)} - {end_time.strftime('%H:%M')}"
+        return EpgEvent(s_name, title, start, start + duration, duration, desc, event)
 
-        return EpgEvent(s_name, title, ev_time, desc, event)
+    def start_data_func(self, column, renderer, model, itr, data):
+        value = datetime.fromtimestamp(model.get_value(itr, Column.EPG_START))
+        renderer.set_property("text", value.strftime(self._time_fmt))
+
+    def end_data_func(self, column, renderer, model, itr, data):
+        value = datetime.fromtimestamp(model.get_value(itr, Column.EPG_END))
+        renderer.set_property("text", value.strftime(self._time_fmt))
+
+    def duration_data_func(self, column, renderer, model, itr, data):
+        value = datetime.utcfromtimestamp(model.get_value(itr, Column.EPG_LENGTH))
+        renderer.set_property("text", value.strftime(self._duration_fmt))
 
     def on_epg_filter_changed(self, entry):
         self._filter_model.refilter()
@@ -312,15 +332,18 @@ class EpgTool(Gtk.Box):
 
     def epg_filter_function(self, model, itr, data):
         txt = self._filter_entry.get_text().upper()
-        return next((s for s in model.get(itr, 0, 1, 2, 3) if txt in s.upper()), False)
+        return next((s for s in model.get(itr,
+                                          Column.EPG_SERVICE,
+                                          Column.EPG_TITLE,
+                                          Column.EPG_DESC) if txt in s.upper()), False)
 
-    def time_sort_func(self, model, iter1, iter2, column):
-        """ Custom sort function for time column. """
-        event1 = model.get_value(iter1, 4)
-        event2 = model.get_value(iter2, 4)
-
-        return int(event1.get("e2eventstart", "0")) - int(event2.get("e2eventstart", "0"))
-
+    def on_filter_toggled(self, app, value):
+        if self._app.page is Page.EPG:
+            active = not self._filter_button.get_active()
+            self._filter_button.set_active(active)
+            if active:
+                self._filter_entry.grab_focus()
+            
     def on_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         dst = view.get_dest_row_at_pos(x, y)
         if not dst:

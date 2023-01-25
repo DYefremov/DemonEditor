@@ -269,6 +269,14 @@ class Column(IntEnum):
     IPTV_FAV_ID = 5
     IPTV_PICON_ID = 6
     IPTV_TOOLTIP = 7
+    # EPG view
+    EPG_SERVICE = 0
+    EPG_TITLE = 1
+    EPG_START = 2
+    EPG_END = 3
+    EPG_LENGTH = 4
+    EPG_DESC = 5
+    EPG_DATA = 6
 
     def __index__(self):
         """ Overridden to get the index in slices directly """
