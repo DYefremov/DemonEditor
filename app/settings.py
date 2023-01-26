@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -81,6 +81,7 @@ class Defaults(Enum):
     BACKUP_BEFORE_DOWNLOADING = True
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
+    UNLIMITED_COPY_BUFFER = False
     FORCE_BQ_NAMES = False
     HTTP_API_SUPPORT = True
     ENABLE_YT_DL = False
@@ -605,6 +606,14 @@ class Settings:
     @v5_support.setter
     def v5_support(self, value):
         self._settings["v5_support"] = value
+
+    @property
+    def unlimited_copy_buffer(self):
+        return self._settings.get("unlimited_copy_buffer", Defaults.UNLIMITED_COPY_BUFFER.value)
+
+    @unlimited_copy_buffer.setter
+    def unlimited_copy_buffer(self, value):
+        self._settings["unlimited_copy_buffer"] = value
 
     @property
     def force_bq_names(self):

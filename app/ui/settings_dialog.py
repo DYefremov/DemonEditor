@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -180,16 +180,12 @@ class SettingsDialog:
         self._compress_picons_switch = builder.get_object("compress_picons_switch")
         self._force_bq_name_switch = builder.get_object("force_bq_name_switch")
         self._support_ver5_switch = builder.get_object("support_ver5_switch")
+        self._unlimited_buffer_switch = builder.get_object("unlimited_buffer_switch")
         self._support_http_api_switch = builder.get_object("support_http_api_switch")
         self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
         self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
         self._enable_send_to_switch = builder.get_object("enable_send_to_switch")
-        # EXPERIMENTAL.
         self._enable_exp_switch = builder.get_object("enable_experimental_switch")
-        self._enable_exp_switch.bind_property("active", builder.get_object("yt_dl_box"), "sensitive")
-        self._enable_yt_dl_switch.bind_property("active", builder.get_object("yt_dl_update_box"), "sensitive")
-        self._enable_exp_switch.bind_property("active", builder.get_object("v5_support_box"), "sensitive")
-        self._enable_exp_switch.bind_property("active", builder.get_object("enable_direct_playback_box"), "sensitive")
         # Enigma2 only.
         self._enigma_radio_button.bind_property("active", builder.get_object("bq_naming_grid"), "sensitive")
         self._enigma_radio_button.bind_property("active", builder.get_object("program_frame"), "sensitive")
@@ -347,6 +343,7 @@ class SettingsDialog:
         if self._s_type is SettingsType.ENIGMA_2:
             self._enable_exp_switch.set_active(self._settings.is_enable_experimental)
             self._support_ver5_switch.set_active(self._settings.v5_support)
+            self._unlimited_buffer_switch.set_active(self._settings.unlimited_copy_buffer)
             self._use_http_switch.set_active(self._settings.use_http)
             self._remove_unused_bq_switch.set_active(self._settings.remove_unused_bouquets)
             self._keep_power_mode_switch.set_active(self._settings.keep_power_mode)
@@ -430,6 +427,7 @@ class SettingsDialog:
             self._ext_settings.new_color = self._new_color_button.get_rgba().to_string()
             self._ext_settings.extra_color = self._extra_color_button.get_rgba().to_string()
             self._ext_settings.v5_support = self._support_ver5_switch.get_active()
+            self._ext_settings.unlimited_copy_buffer = self._unlimited_buffer_switch.get_active()
             self._ext_settings.use_http = self._use_http_switch.get_active()
             self._ext_settings.remove_unused_bouquets = self._remove_unused_bq_switch.get_active()
             self._ext_settings.keep_power_mode = self._keep_power_mode_switch.get_active()
@@ -516,6 +514,7 @@ class SettingsDialog:
     def on_experimental_switch(self, switch, state):
         if not state:
             self._support_ver5_switch.set_active(state)
+            self._unlimited_buffer_switch.set_active(state)
             self._enable_send_to_switch.set_active(state)
             self._enable_yt_dl_switch.set_active(state)
 

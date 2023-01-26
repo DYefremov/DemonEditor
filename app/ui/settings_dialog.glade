@@ -2737,10 +2737,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkGrid" id="bq_naming_grid">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="margin-bottom">5</property>
+                        <property name="border-width">5</property>
                         <property name="row-spacing">5</property>
                         <property name="column-spacing">5</property>
                         <child>
@@ -2950,16 +2947,13 @@ Author: Dmitriy Yefremov
                       <object class="GtkBox" id="experimental_box">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="margin-bottom">5</property>
+                        <property name="border-width">5</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkBox" id="v5_support_box">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
+                            <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
                             <property name="can-focus">False</property>
                             <child>
                               <object class="GtkLabel">
@@ -2992,13 +2986,53 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="unlimited_buffer_box">
+                            <property name="visible">True</property>
+                            <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Enables unlimited copy buffer for the services tab.</property>
+                            <child>
+                              <object class="GtkLabel" id="unlimited_buffer_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="label" translatable="yes">Enable unlimited copy buffer</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="unlimited_buffer_switch">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="halign">end</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">end</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkBox" id="yt_dl_box">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
+                            <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
                             <property name="can-focus">False</property>
                             <property name="margin-top">10</property>
                             <property name="margin-bottom">10</property>
@@ -3064,7 +3098,7 @@ Author: Dmitriy Yefremov
                             <child>
                               <object class="GtkBox" id="yt_dl_update_box">
                                 <property name="visible">True</property>
-                                <property name="sensitive">False</property>
+                                <property name="sensitive" bind-source="enable_yt_dl_switch" bind-property="active">False</property>
                                 <property name="can-focus">False</property>
                                 <child>
                                   <object class="GtkLabel" id="auto_update_yt_dl_label">
@@ -3110,7 +3144,7 @@ Author: Dmitriy Yefremov
                         <child>
                           <object class="GtkBox" id="enable_direct_playback_box">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
+                            <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
                             <property name="can-focus">False</property>
                             <property name="tooltip-text" translatable="yes">Enables direct sending and playback of media links on the receiver</property>
                             <child>

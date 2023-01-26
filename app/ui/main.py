@@ -1184,6 +1184,9 @@ class Application(Gtk.Application):
         self.on_copy(view, target=ViewTarget.BOUQUET)
 
     def on_copy(self, view, target):
+        if not self._settings.unlimited_copy_buffer:
+            self._bouquets_buffer.clear() if target is ViewTarget.BOUQUET else self._rows_buffer.clear()
+
         model, paths = view.get_selection().get_selected_rows()
 
         if target is ViewTarget.FAV:
@@ -1212,6 +1215,9 @@ class Application(Gtk.Application):
         self.on_cut(view, ViewTarget.BOUQUET)
 
     def on_cut(self, view, target=None):
+        if not self._settings.unlimited_copy_buffer:
+            self._bouquets_buffer.clear() if target is ViewTarget.BOUQUET else self._rows_buffer.clear()
+
         if target is ViewTarget.FAV:
             for row in tuple(self.on_delete(view)):
                 self._rows_buffer.append(row)
