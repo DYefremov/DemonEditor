@@ -641,7 +641,6 @@ Author: Dmitriy Yefremov
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services.</property>
                                     <property name="model">picons_src_sort_model</property>
-                                    <property name="fixed_height_mode">True</property>
                                     <property name="rubber_banding">True</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>
@@ -666,7 +665,6 @@ Author: Dmitriy Yefremov
                                         <property name="alignment">0.49000000953674316</property>
                                         <child>
                                           <object class="GtkCellRendererPixbuf" id="picons_src_renderer">
-                                            <property name="height">50</property>
                                             <property name="ypad">5</property>
                                           </object>
                                           <attributes>
@@ -779,7 +777,6 @@ Author: Dmitriy Yefremov
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services.</property>
                                     <property name="model">picons_dst_sort_model</property>
-                                    <property name="fixed_height_mode">True</property>
                                     <property name="rubber_banding">True</property>
                                     <property name="enable_grid_lines">horizontal</property>
                                     <property name="tooltip_column">0</property>
@@ -805,7 +802,6 @@ Author: Dmitriy Yefremov
                                         <property name="alignment">0.49000000953674316</property>
                                         <child>
                                           <object class="GtkCellRendererPixbuf" id="picons_dest_renderer">
-                                            <property name="height">50</property>
                                             <property name="ypad">5</property>
                                           </object>
                                           <attributes>
