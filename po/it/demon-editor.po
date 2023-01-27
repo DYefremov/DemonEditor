@@ -2,11 +2,11 @@
 # This file is distributed under the MIT license.
 #
 #
-# Massimo Pissarello <mapi68@gmail.com>, 2022.
+# Massimo Pissarello <mapi68@gmail.com>, 2022, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2022-12-14 06:37+0100\n"
+"PO-Revision-Date: 2023-01-27 19:45+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 22.12.0\n"
+"X-Generator: Lokalize 22.12.1\n"
 
 msgid "translator-credits"
 msgstr "Massimo Pissarello"
@@ -1471,4 +1471,22 @@ msgstr "Rimuovi il flag \"Nuovo\""
 
 msgid "Group by"
 msgstr "Raggruppa per"
+
+msgid "Replace existing"
+msgstr "Sostituisci esistente"
+
+msgid "Already exists"
+msgstr "Esiste già"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Abilita buffer di copia illimitato"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Abilita buffer di copia illimitato per la scheda bouquet."
+
+msgid "Start time"
+msgstr "Ora di inizio"
+
+msgid "End time"
+msgstr "Ora di fine"
 
