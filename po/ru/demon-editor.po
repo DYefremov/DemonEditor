@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Dmitriy Yefremov
+# Copyright (C) 2018-2023 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1413,3 +1413,21 @@ msgstr "Очистить флаг \"New\""
 
 msgid "Group by"
 msgstr "Группировать по"
+
+msgid "Replace existing"
+msgstr "Заменить существующие"
+
+msgid "Already exists"
+msgstr "Уже существует"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Включить неограниченный буфер копирования"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Включает неограниченный буфер копирования для вкладки букетов."
+
+msgid "Start time"
+msgstr "Начало"
+
+msgid "End time"
+msgstr "Окончание"

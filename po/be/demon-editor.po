@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Dmitriy Yefremov
+# Copyright (C) 2018-2023 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1416,3 +1416,21 @@ msgstr "Здаліць сцяжок \"New\""
 
 msgid "Group by"
 msgstr "Групаваць па"
+
+msgid "Replace existing"
+msgstr "Замяніць існуючыя"
+
+msgid "Already exists"
+msgstr "Ужо існуе"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Уключыць неабмежаваны буфер капіявання"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Улучае неабмежаваны буфер капіявання для ўкладкі букетаў."
+
+msgid "Start time"
+msgstr "Пачатак"
+
+msgid "End time"
+msgstr "Сканчэнне"

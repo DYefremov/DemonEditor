@@ -2,8 +2,8 @@
 # This file is distributed under the MIT license.
 #
 # Charly, 2019.
-# Dmitriy Yefremov, 2020-2021.
-# Thomas Schmidt, 2021
+# Dmitriy Yefremov, 2020-2023.
+# Thomas Schmidt, 2021.
 msgid ""
 msgstr ""
 "Last-Translator: Dmitriy Yefremov\n"
@@ -1430,3 +1430,21 @@ msgstr "Das \"Neu\"-Flag entfernen"
 
 msgid "Group by"
 msgstr "Gruppieren nach"
+
+msgid "Replace existing"
+msgstr "Vorhandene ersetzen"
+
+msgid "Already exists"
+msgstr "Bereits vorhanden"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Unbegrenzte Zwischenablage aktivieren"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Aktiviert unbegrenzte Zwischenablage für die Bouquets-Tab."
+
+msgid "Start time"
+msgstr "Anfangszeit"
+
+msgid "End time"
+msgstr "Endzeit"
