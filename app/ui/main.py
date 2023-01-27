@@ -874,12 +874,12 @@ class Application(Gtk.Application):
     def init_layout(self):
         """ Initializes an alternate layout, if enabled. """
         if self._settings.alternate_layout:
-            self._main_paned.pack2(self._player_box, True, False)
+            self._main_paned.pack2(self._player_box, True, True)
             self.reverse_main_elements(True)
         else:
             self._main_paned.remove(self._data_paned)
-            self._main_paned.pack1(self._player_box, True, False)
-            self._main_paned.pack2(self._data_paned, True, False)
+            self._main_paned.pack1(self._player_box, True, True)
+            self._main_paned.pack2(self._data_paned, True, True)
 
     def init_bq_position(self):
         self._fav_paned.remove(self._fav_frame)
