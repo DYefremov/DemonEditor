@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +32,12 @@ import os
 import shutil
 import struct
 import sys
+import xml.etree.ElementTree as ET
 from collections import namedtuple
 from datetime import datetime, timezone
 from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 from xml.dom.minidom import parse, Node, Document
-import xml.etree.ElementTree as ET
 
 import requests
 
@@ -298,14 +298,15 @@ class XmlTvReader(Reader):
         offset = datetime.now() - dt
 
         for srv in filter(lambda s: any(name in names for name in s.names), self._ids.values()):
-            ev = list(filter(lambda s: s.start < utc, srv.events))
+            ev = max(filter(lambda s: s.start < utc, srv.events), key=lambda x: x.start, default=None)
             if ev:
-                ev = ev[-1]
                 start = datetime.fromtimestamp(ev.start) + offset
                 end_time = datetime.fromtimestamp(ev.duration) + offset
-                tm = f"{start.strftime('%H:%M')} - {end_time.strftime('%H:%M')}"
+                start = start.timestamp()
+                end_time = end_time.timestamp()
+
                 for n in srv.names:
-                    events[n] = EpgEvent(n, ev.title, tm, ev.desc, ev)
+                    events[n] = EpgEvent(n, ev.title, start, end_time, int(ev.duration), ev.desc, ev)
 
         return events
 
