@@ -43,7 +43,7 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
-from app.settings import SEP, EpgSource
+from app.settings import SEP, EpgSource, IS_DARWIN
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.tasks import BGTaskWidget
@@ -475,7 +475,7 @@ class EpgDialog:
         self._update_on_start_switch = builder.get_object("update_on_start_switch")
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
 
-        if IS_GNOME_SESSION:
+        if IS_GNOME_SESSION or IS_DARWIN:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True, title="EPG",
                                        subtitle=get_message("List configuration"))
             self._dialog.set_titlebar(header_bar)
