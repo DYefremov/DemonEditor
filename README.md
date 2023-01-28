@@ -30,8 +30,7 @@ Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
   
 #### Keyboard shortcuts
 * **Ctrl + X** - only in bouquet list.
-* **Ctrl + C** - only in services list.                                                              
-Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                                                                                     
+* **Ctrl + C** - only in services list.                                                               
 * **Ctrl + Insert** - copies the selected channels from the main list to the bouquet  
   beginning or inserts (creates) a new bouquet.  
 * **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.
