@@ -202,6 +202,7 @@ class EpgTool(Gtk.Box):
         self._current_bq = None
         self._app = app
         self._app.connect("fav-changed", self.on_service_changed)
+        self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
         self._app.connect("filter-toggled", self.on_filter_toggled)
 
@@ -292,12 +293,16 @@ class EpgTool(Gtk.Box):
                 self._app.wait_dialog.show()
                 self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
 
+    def on_profile_changed(self, app, prf):
+        self.update_epg_data()
+
     @run_idle
-    def update_epg_data(self, epg):
+    def update_epg_data(self, epg=None):
         self._event_count_label.set_text("0")
         self._model.clear()
-        list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", [])
-                                      if e.get("e2eventid", "").isdigit())))
+        if epg:
+            list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", [])
+                                          if e.get("e2eventid", "").isdigit())))
         self._event_count_label.set_text(str(len(self._model)))
         self._app.wait_dialog.hide()
 
@@ -343,7 +348,7 @@ class EpgTool(Gtk.Box):
             self._filter_button.set_active(active)
             if active:
                 self._filter_entry.grab_focus()
-            
+
     def on_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
         dst = view.get_dest_row_at_pos(x, y)
         if not dst:

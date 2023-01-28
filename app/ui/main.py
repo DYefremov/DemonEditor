@@ -2737,6 +2737,8 @@ class Application(Gtk.Application):
 
         if changed:
             self.open_data()
+            if self._settings.display_epg:
+                self.change_action_state("display_epg", GLib.Variant.new_boolean(self._settings.display_epg))
             self.emit("profile-changed", None)
 
     def set_profile(self, active):
