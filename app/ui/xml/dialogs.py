@@ -39,6 +39,7 @@ from app.eparser import Satellite, Transponder
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable,
                                   T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC, GUARD_INTERVAL, TRANSMISSION_MODE,
                                   HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder)
+from app.settings import IS_DARWIN
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
@@ -432,7 +433,6 @@ class UpdateDialog:
         update_button = builder.get_object("sat_update_button")
         self._sat_view.bind_property("sensitive", update_button, "sensitive")
         self._sat_view.bind_property("sensitive", self._source_box, "sensitive")
-        self._sat_view.bind_property("sensitive", self._source_box, "sensitive")
         self._sat_view.bind_property("sensitive", self._receive_button, "sensitive")
         self._receive_button.bind_property("visible", update_button, "visible")
         # Filter
@@ -456,6 +456,23 @@ class UpdateDialog:
                                          builder.get_object("sat_update_search_down_button"),
                                          builder.get_object("sat_update_search_up_button"))
         builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
+
+        if IS_GNOME_SESSION or IS_DARWIN:
+            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            if IS_DARWIN:
+                header_bar.set_decoration_layout("close,minimize,maximize")
+
+            builder.get_object("sat_update_header").set_visible(False)
+            header_box = builder.get_object("satellites_update_header_box")
+            header_box.remove(self._source_box)
+            header_bar.pack_start(self._source_box)
+            action_box = builder.get_object("sat_update_left_action_box")
+            header_box.remove(action_box)
+            header_bar.pack_start(action_box)
+            action_box = builder.get_object("sat_update_right_action_box")
+            header_box.remove(action_box)
+            header_bar.pack_end(action_box)
+            self._window.set_titlebar(header_bar)
 
         window_size = self._settings.get(self._size_name)
         if window_size:

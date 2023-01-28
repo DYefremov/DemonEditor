@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2022 Dmitriy Yefremov
+Copyright (c) 2018-2023 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@ Author: Dmitriy Yefremov
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.22"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-copyright 2018-2022 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAdjustment" id="pos_adjustment">
     <property name="upper">180</property>
@@ -199,7 +199,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButtonBox" id="sat_update_right_action_box">
+                  <object class="GtkButtonBox" id="sat_update_left_action_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="layout_style">expand</property>
@@ -262,7 +262,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButtonBox" id="sat_update_left_action_box">
+                  <object class="GtkButtonBox" id="sat_update_right_action_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="layout_style">expand</property>
