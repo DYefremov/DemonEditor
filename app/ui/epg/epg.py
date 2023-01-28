@@ -728,7 +728,7 @@ class EpgDialog:
             tr = {ord(k): ord(v) for k, v in zip(*symbols)}
 
         source = {}
-        for row in self._services_model:
+        for row in self._source_view.get_model():
             name = re.sub("\\W+", "", str(row[0])).upper()
             name = name.translate(tr) if use_cyrillic else name
             source[name] = row
