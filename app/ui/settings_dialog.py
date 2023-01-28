@@ -32,7 +32,7 @@ from collections import Counter
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP, IS_WIN
+from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP, IS_WIN, IS_DARWIN
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT, IS_GNOME_SESSION
@@ -207,13 +207,16 @@ class SettingsDialog:
         [self.init_element_style(el, screen, style_provider) for el in self._digit_elems]
         self.init_element_style(self._host_field, screen, style_provider)
 
-        if IS_GNOME_SESSION:
+        if IS_GNOME_SESSION or IS_DARWIN:
             switcher = builder.get_object("main_stack_switcher")
             switcher.set_margin_top(0)
             switcher.set_margin_bottom(0)
             builder.get_object("main_box").remove(switcher)
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
             header_bar.set_custom_title(switcher)
+            if IS_DARWIN:
+                header_bar.set_decoration_layout("close,minimize,maximize")
+
             self._dialog.set_titlebar(header_bar)
 
         self.init_ui_elements()

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -159,7 +159,7 @@ class ImportDialog:
         self._sat_model = builder.get_object("sat_list_store")
         self._sat_count_label = builder.get_object("sat_count_label")
 
-        if IS_GNOME_SESSION:
+        if IS_GNOME_SESSION or IS_DARWIN:
             actions_box = builder.get_object("actions_box")
             builder.get_object("toolbar_box").set_visible(False)
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
@@ -172,6 +172,8 @@ class ImportDialog:
             extra_box = builder.get_object("extra_header_box")
             actions_box.remove(extra_box)
             header_bar.pack_end(extra_box)
+            if IS_DARWIN:
+                header_bar.set_decoration_layout("close,minimize,maximize")
             self._dialog_window.set_titlebar(header_bar)
 
         window_size = self._settings.get("import_dialog_window_size")

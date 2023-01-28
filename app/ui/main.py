@@ -506,9 +506,12 @@ class Application(Gtk.Application):
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
-        if IS_GNOME_SESSION:
+        if IS_GNOME_SESSION or IS_DARWIN:
             header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
-            header_bar.pack_start(builder.get_object("file_header_button"))
+            if IS_DARWIN:
+                header_bar.set_decoration_layout("close,minimize,maximize")
+            else:
+                header_bar.pack_start(builder.get_object("file_header_button"))
             header_bar.pack_start(profile_box)
             header_bar.pack_start(toolbar_box)
             header_bar.set_custom_title(builder.get_object("stack_switcher"))
