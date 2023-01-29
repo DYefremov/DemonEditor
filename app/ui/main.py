@@ -69,7 +69,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION)
+                        FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION, HeaderBar)
 from .xml.dialogs import ServicesUpdateDialog
 from .xml.edit import SatellitesTool
 
@@ -507,11 +507,10 @@ class Application(Gtk.Application):
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
         if IS_GNOME_SESSION or IS_DARWIN:
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
-            if IS_DARWIN:
-                header_bar.set_decoration_layout("close,minimize,maximize")
-            else:
+            header_bar = HeaderBar()
+            if not IS_DARWIN:
                 header_bar.pack_start(builder.get_object("file_header_button"))
+
             header_bar.pack_start(profile_box)
             header_bar.pack_start(toolbar_box)
             header_bar.set_custom_title(builder.get_object("stack_switcher"))

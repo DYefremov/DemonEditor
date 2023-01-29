@@ -37,7 +37,7 @@ from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neu
 from app.settings import SettingsType, IS_DARWIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from app.ui.main_helper import on_popup_menu, get_iptv_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, IS_GNOME_SESSION, Page
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, IS_GNOME_SESSION, Page, HeaderBar
 
 
 def import_bouquet(app, model, path, appender, file_path=None):
@@ -162,7 +162,7 @@ class ImportDialog:
         if IS_GNOME_SESSION or IS_DARWIN:
             actions_box = builder.get_object("actions_box")
             builder.get_object("toolbar_box").set_visible(False)
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            header_bar = HeaderBar()
             stack_switcher = builder.get_object("stack_switcher")
             actions_box.remove(stack_switcher)
             header_bar.set_custom_title(stack_switcher)
@@ -172,8 +172,7 @@ class ImportDialog:
             extra_box = builder.get_object("extra_header_box")
             actions_box.remove(extra_box)
             header_bar.pack_end(extra_box)
-            if IS_DARWIN:
-                header_bar.set_decoration_layout("close,minimize,maximize")
+
             self._dialog_window.set_titlebar(header_bar)
 
         window_size = self._settings.get("import_dialog_window_size")

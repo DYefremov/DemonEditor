@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesPars
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
 from ..search import SearchProvider
-from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, IS_GNOME_SESSION
+from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, IS_GNOME_SESSION, HeaderBar
 
 _DIALOGS_UI_PATH = f"{UI_RESOURCES_PATH}xml{os.sep}dialogs.glade"
 
@@ -458,10 +458,7 @@ class UpdateDialog:
         builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
 
         if IS_GNOME_SESSION or IS_DARWIN:
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
-            if IS_DARWIN:
-                header_bar.set_decoration_layout("close,minimize,maximize")
-
+            header_bar = HeaderBar()
             builder.get_object("sat_update_header").set_visible(False)
             header_box = builder.get_object("satellites_update_header_box")
             header_box.remove(self._source_box)

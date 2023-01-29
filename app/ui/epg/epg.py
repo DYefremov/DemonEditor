@@ -49,7 +49,7 @@ from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
 from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions
-from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page
+from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page, HeaderBar
 
 
 class RefsSource(Enum):
@@ -476,8 +476,7 @@ class EpgDialog:
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
 
         if IS_GNOME_SESSION or IS_DARWIN:
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True, title="EPG",
-                                       subtitle=get_message("List configuration"))
+            header_bar = HeaderBar(title="EPG", subtitle=get_message("List configuration"))
             self._dialog.set_titlebar(header_bar)
             builder.get_object("left_action_box").reparent(header_bar)
             right_box = builder.get_object("right_action_box")

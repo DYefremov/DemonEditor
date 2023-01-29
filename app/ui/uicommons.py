@@ -162,6 +162,17 @@ def show_notification(message, timeout=10000, urgency=1):
         notify.show()
 
 
+class HeaderBar(Gtk.HeaderBar):
+    """ Custom header bar widget. """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.set_visible(True)
+        self.set_show_close_button(True)
+
+        if IS_DARWIN:
+            self.set_decoration_layout("close,minimize,maximize")
+
+
 class Page(Enum):
     """ Main stack widget page. """
     INFO = "info"

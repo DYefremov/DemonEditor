@@ -39,7 +39,7 @@ from app.commons import run_idle, get_size_from_bytes
 from app.settings import SettingsType, SEP, IS_DARWIN
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION, HeaderBar
 
 
 class RestoreType(Enum):
@@ -78,7 +78,7 @@ class BackupDialog:
         self._file_count_label = builder.get_object("file_count_label")
 
         if IS_GNOME_SESSION or IS_DARWIN:
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+            header_bar = HeaderBar()
             self._dialog_window.set_titlebar(header_bar)
 
             button_box = builder.get_object("main_button_box")
@@ -93,8 +93,6 @@ class BackupDialog:
             h_bar.remove(ch_button)
             h_bar.set_visible(False)
             header_bar.pack_end(ch_button)
-            if IS_DARWIN:
-                header_bar.set_decoration_layout("close,minimize,maximize")
 
         # Setting the last size of the dialog window if it was saved
         window_size = self._settings.get("backup_tool_window_size")
