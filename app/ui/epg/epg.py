@@ -73,13 +73,14 @@ class EpgCache(dict):
 
         self.init()
 
-    @run_idle
+    @run_with_delay(5)
     def init(self):
         if self._src is EpgSource.XML:
             url = self._settings.epg_xml_source
             gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
             self._reader = XmlTvReader(gz_file, url)
 
+            @run_with_delay(2)
             def process_data():
                 t = BGTaskWidget(self._app, "Processing XMLTV data...", self._reader.parse, )
                 self._app.emit("add-background-task", t)
