@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -41,11 +41,12 @@ from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
                               parse_m3u, PICON_FORMAT)
-from app.settings import SettingsType
+from app.settings import SettingsType, IS_DARWIN
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
 from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf
-from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon)
+from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon,
+                              IS_GNOME_SESSION, HeaderBar)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -859,7 +860,6 @@ class YtListImportDialog:
                     "on_key_press": self.on_key_press,
                     "on_close": self.on_close}
 
-        # self._main_window, self._settings, self.append_imported_services
         self.appender = app.append_imported_services
         self._settings = app.app_settings
         self._s_type = self._settings.setting_type
@@ -890,6 +890,17 @@ class YtListImportDialog:
         self._import_button.bind_property("visible", self._quality_box, "visible")
         self._import_button.bind_property("sensitive", self._quality_box, "sensitive")
         self._receive_button.bind_property("sensitive", self._import_button, "sensitive")
+
+        if IS_GNOME_SESSION or IS_DARWIN:
+            header_bar = HeaderBar(title="YouTube", subtitle=get_message("Playlist import"))
+            self._dialog.set_titlebar(header_bar)
+            actions_box = builder.get_object("yt_actions_box")
+            import_box = builder.get_object("yt_import_box")
+            actions_box.remove(import_box)
+            header_bar.pack_end(import_box)
+            actions_box.remove(self._receive_button)
+            header_bar.pack_start(self._receive_button)
+            actions_box.set_visible(False)
 
         window_size = self._settings.get("yt_import_dialog_size")
         if window_size:

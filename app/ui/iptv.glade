@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2022 Dmitriy Yefremov
+Copyright (c) 2018-2023 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@ Author: Dmitriy Yefremov
 
 -->
 <interface>
-  <requires lib="gtk+" version="3.16"/>
+  <requires lib="gtk+" version="3.22"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2022 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkImage" id="remove_selection_image">
     <property name="visible">True</property>
@@ -1456,7 +1456,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButtonBox" id="yt_impotr_box">
+                  <object class="GtkButtonBox" id="yt_import_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="layout_style">expand</property>
