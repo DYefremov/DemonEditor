@@ -580,6 +580,8 @@ class Application(Gtk.Application):
         main_window_size = self._settings.get("window_size")
         if main_window_size:
             self._main_window.resize(*main_window_size)
+        # Layout.
+        self.init_layout()
         # Style.
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -624,7 +626,6 @@ class Application(Gtk.Application):
 
         self.init_actions()
         self.set_accels()
-        self.init_layout()
 
         self.init_drag_and_drop()
         self.init_appearance()
@@ -898,7 +899,7 @@ class Application(Gtk.Application):
         """ Initializes starting positions of main paned widgets. """
         width = paned.get_allocated_width()
         main_position = self._settings.get("data_paned_position", width * 0.5)
-        fav_position = self._settings.get("fav_paned_position", width * 0.27)
+        fav_position = self._settings.get("fav_paned_position", width * 0.25)
         paned.set_position(main_position)
         self._fav_paned.set_position(fav_position)
 
