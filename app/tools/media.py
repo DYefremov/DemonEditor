@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -63,6 +63,7 @@ class Player(Gtk.DrawingArea):
         parent = widget.get_parent()
         parent.connect("play", self.on_play)
         parent.connect("stop", self.on_stop)
+        parent.connect("pause", self.on_pause)
         self.show()
 
     def get_play_mode(self):
@@ -106,6 +107,9 @@ class Player(Gtk.DrawingArea):
 
     def on_stop(self, widget, state):
         self.stop()
+
+    def on_pause(self, widget, state):
+        self.pause()
 
     def on_release(self, widget, state):
         self.release()
@@ -241,7 +245,7 @@ class MpvPlayer(Player):
         self._is_playing = True
 
     def pause(self):
-        pass
+        self._player.pause = not self._player.pause
 
     def set_time(self, time):
         pass
@@ -330,7 +334,11 @@ class GstPlayer(Player):
         self._is_playing = False
 
     def pause(self):
-        self._player.set_state(self.STATE.PAUSED)
+        state = self._player.get_state(self.STATE.NULL).state
+        if state == self.STATE.PLAYING:
+            self._player.set_state(self.STATE.PAUSED)
+        elif state == self.STATE.PAUSED:
+            self._player.set_state(self.STATE.PLAYING)
 
     def set_time(self, time):
         pass

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,8 @@ class PlayerBox(Gtk.Box):
         GObject.signal_new("play", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("stop", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("pause", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         self._app = app
@@ -284,7 +286,9 @@ class PlayerBox(Gtk.Box):
 
     def on_press(self, area, event):
         if event.button == Gdk.BUTTON_PRIMARY:
-            if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            if event.type == Gdk.EventType.BUTTON_PRESS:
+                self.emit("pause", None)
+            elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
                 self.on_full_screen()
 
     def on_key_press(self, widget, event):
