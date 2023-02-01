@@ -43,7 +43,7 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
-from app.settings import SEP, EpgSource, IS_DARWIN
+from app.settings import SEP, EpgSource, IS_DARWIN, IS_WIN
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.tasks import BGTaskWidget
@@ -237,7 +237,7 @@ class EpgTool(Gtk.Box):
         column.set_cell_data_func(renderer, self.duration_data_func)
         # Time formats.
         self._time_fmt = "%a %x - %H:%M"
-        self._duration_fmt = f"%-Hh %Mm"
+        self._duration_fmt = f"%{'' if IS_WIN else '-'}Hh %Mm"
 
         self.show()
 
