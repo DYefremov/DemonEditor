@@ -61,7 +61,7 @@ Author: Dmitriy Yefremov
   <object class="GtkFrame" id="epg_frame">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="label-xalign">0.49000000953674316</property>
+    <property name="label-xalign">0.49</property>
     <property name="shadow-type">in</property>
     <child>
       <object class="GtkBox" id="epg_box">
@@ -313,8 +313,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkTreeViewColumn" id="epg_title_column">
                     <property name="resizable">True</property>
                     <property name="sizing">fixed</property>
-                    <property name="fixed-width">185</property>
-                    <property name="min-width">50</property>
+                    <property name="min-width">150</property>
                     <property name="title" translatable="yes">Title</property>
                     <property name="alignment">0.49</property>
                     <property name="sort-column-id">1</property>
@@ -334,7 +333,6 @@ Author: Dmitriy Yefremov
                     <property name="sizing">fixed</property>
                     <property name="min-width">50</property>
                     <property name="title" translatable="yes">Start time</property>
-                    <property name="expand">True</property>
                     <property name="alignment">0.49</property>
                     <property name="sort-column-id">2</property>
                     <child>
@@ -355,7 +353,6 @@ Author: Dmitriy Yefremov
                     <property name="sizing">fixed</property>
                     <property name="min-width">50</property>
                     <property name="title" translatable="yes">End time</property>
-                    <property name="expand">True</property>
                     <property name="alignment">0.49</property>
                     <property name="sort-column-id">3</property>
                     <child>
@@ -393,8 +390,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkTreeViewColumn" id="epg_desc_column">
                     <property name="sizing">fixed</property>
-                    <property name="fixed-width">100</property>
-                    <property name="min-width">50</property>
+                    <property name="min-width">100</property>
                     <property name="title" translatable="yes">Description</property>
                     <property name="expand">True</property>
                     <property name="alignment">0.49</property>
