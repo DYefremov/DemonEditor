@@ -176,6 +176,8 @@
           <attribute name="action">app.on_logs_show</attribute>
         </item>
       </section>
+      <section id="extension_section">
+      </section>
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">FTP client</attribute>
@@ -389,6 +391,8 @@
           <attribute name="label" translatable="yes">Logs</attribute>
           <attribute name="action">app.on_logs_show</attribute>
         </item>
+      </section>
+      <section id="mac_extension_section">
       </section>
     </submenu>
     <submenu>

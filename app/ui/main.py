@@ -590,46 +590,18 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        # App menu.
-        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
-        if not IS_GNOME_SESSION:
-            if IS_DARWIN:
-                self.set_app_menu(builder.get_object("mac_app_menu"))
-                self.set_menubar(builder.get_object("mac_menu_bar"))
-            else:
-                self.set_menubar(builder.get_object("menu_bar"))
-        else:
-            tools_menu = builder.get_object("tools_menu")
-            tools_button = Gtk.MenuButton(visible=True, menu_model=tools_menu, direction=Gtk.ArrowType.NONE)
-            tools_button.set_tooltip_text(get_message("Tools"))
-            tools_button.set_image(Gtk.Image.new_from_icon_name("applications-utilities-symbolic", Gtk.IconSize.BUTTON))
-
-            view_menu = builder.get_object("view_menu")
-            view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
-            view_button.set_tooltip_text(get_message("View"))
-
-            box = Gtk.ButtonBox(visible=True, layout_style="expand")
-            box.add(tools_button)
-            box.add(view_button)
-            self._main_window.get_titlebar().pack_end(box)
-        # IPTV menu.
-        self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
-        iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
-        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_iptv_to_m3u,
-                  self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
-            iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
-
-    def do_activate(self):
-        self._main_window.set_application(self)
-        self._main_window.set_wmclass("DemonEditor", "DemonEditor")
-        self._main_window.present()
-
+        self.init_app_menu()
         self.init_actions()
         self.set_accels()
 
         self.init_drag_and_drop()
         self.init_appearance()
         self.filter_set_default()
+
+    def do_activate(self):
+        self._main_window.set_application(self)
+        self._main_window.set_wmclass("DemonEditor", "DemonEditor")
+        self._main_window.present()
 
         self.init_profiles()
         gen = self.init_http_api()
@@ -673,6 +645,64 @@ class Application(Gtk.Application):
 
         self.activate()
         return 0
+
+    def init_app_menu(self):
+        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
+        if not IS_GNOME_SESSION:
+            if IS_DARWIN:
+                self.set_app_menu(builder.get_object("mac_app_menu"))
+                self.set_menubar(builder.get_object("mac_menu_bar"))
+            else:
+                self.set_menubar(builder.get_object("menu_bar"))
+        else:
+            tools_menu = builder.get_object("tools_menu")
+            tools_button = Gtk.MenuButton(visible=True, menu_model=tools_menu, direction=Gtk.ArrowType.NONE)
+            tools_button.set_tooltip_text(get_message("Tools"))
+            tools_button.set_image(Gtk.Image.new_from_icon_name("applications-utilities-symbolic", Gtk.IconSize.BUTTON))
+
+            view_menu = builder.get_object("view_menu")
+            view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
+            view_button.set_tooltip_text(get_message("View"))
+
+            box = Gtk.ButtonBox(visible=True, layout_style="expand")
+            box.add(tools_button)
+            box.add(view_button)
+            self._main_window.get_titlebar().pack_end(box)
+        # IPTV menu.
+        self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
+        iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
+        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_iptv_to_m3u,
+                  self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
+            iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
+
+        if self._settings.is_enable_experimental:
+            self.init_extensions(builder)
+
+    def init_extensions(self, builder):
+        import pkgutil
+        # Extensions (Plugins) section.
+        ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
+        ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
+        ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path]
+        extensions = {}
+
+        for importer, name, is_package in pkgutil.iter_modules(ext_paths):
+            if is_package:
+                m = importer.find_module(name).load_module()
+                cls_name = name.capitalize()
+                if hasattr(m, cls_name):
+                    cls = getattr(m, cls_name)
+                    action_name = f"on_{name}_extension"
+                    item = Gio.MenuItem.new(cls.LABEL, f"app.{action_name}")
+                    ext_section.append_item(item)
+                    extensions[action_name] = cls
+
+                    def ac(a, v):
+                        c = extensions[a.get_name()]
+                        e = c(self)
+                        e.exec()
+
+                    self.set_action(action_name, ac)
 
     def init_actions(self):
         self.set_action("on_import_bouquet", self.on_import_bouquet)
@@ -4335,7 +4365,7 @@ class Application(Gtk.Application):
         self.show_info_message(message, Gtk.MessageType.ERROR)
 
     @run_idle
-    def show_info_message(self, text, message_type):
+    def show_info_message(self, text, message_type=Gtk.MessageType.INFO):
         self._info_bar.set_visible(False)
         self._info_label.set_text(get_message(text))
         self._info_bar.set_message_type(message_type)
