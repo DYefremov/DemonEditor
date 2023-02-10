@@ -24,7 +24,8 @@ ui_files = [('app/ui/*.glade', 'ui'),
             ('app/ui/epg/*.glade', 'ui/epg'),
             ('app/ui/xml/*.glade', 'ui/xml'),
             ('app/ui/lang*', 'share/locale'),
-            ('app/ui/icons*', 'share/icons')
+            ('app/ui/icons*', 'share/icons'),
+            ('extensions/*', 'extensions')
             ]
 
 a = Analysis([EXE_NAME],
