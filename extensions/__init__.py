@@ -43,14 +43,14 @@ class BaseExtension(metaclass=Singleton):
     def __init__(self, app):
         # Current application instance.
         # It can be used all public methods, properties or signals.
-        self._app = app
+        self.app = app
 
     def exec(self):
         """ Triggers an action for the given extension.
 
             E.g. shows a dialog or runs an external script.
         """
-        self._app.show_info_message(f"Hello from {self.__class__.__name__} class!")
+        self.app.show_info_message(f"Hello from {self.__class__.__name__} class!")
 
 
 if __name__ == "__main__":
