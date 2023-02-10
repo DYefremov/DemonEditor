@@ -26,7 +26,16 @@
 #
 
 
-class BaseExtension:
+class Singleton(type):
+    _INSTANCE = None
+
+    def __call__(cls, *args, **kwargs):
+        if not cls._INSTANCE:
+            cls._INSTANCE = type.__call__(cls, *args, **kwargs)
+        return cls._INSTANCE
+
+
+class BaseExtension(metaclass=Singleton):
     """ Base extension (plugin) class. """
     # The label that will be displayed in the "Tools" menu.
     LABEL = "Base extension"
