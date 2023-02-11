@@ -26,6 +26,9 @@
 #
 
 
+import logging
+
+
 class Singleton(type):
     _INSTANCE = None
 
@@ -40,10 +43,14 @@ class BaseExtension(metaclass=Singleton):
     # The label that will be displayed in the "Tools" menu.
     LABEL = "Base extension"
 
+    _LOGGER_NAME = "main_logger"
+
     def __init__(self, app):
         # Current application instance.
         # It can be used all public methods, properties or signals.
         self.app = app
+
+        self.log(f"Extension initialized...")
 
     def exec(self):
         """ Triggers an action for the given extension.
@@ -51,6 +58,10 @@ class BaseExtension(metaclass=Singleton):
             E.g. shows a dialog or runs an external script.
         """
         self.app.show_info_message(f"Hello from {self.__class__.__name__} class!")
+
+    def log(self, message, level=logging.ERROR):
+        """ Shows log messages. """
+        logging.getLogger(self._LOGGER_NAME).log(level, f"[{self.__class__.__name__}] {message}")
 
 
 if __name__ == "__main__":
