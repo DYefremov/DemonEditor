@@ -82,6 +82,7 @@ class Defaults(Enum):
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
     UNLIMITED_COPY_BUFFER = False
+    EXTENSIONS_SUPPORT = False
     FORCE_BQ_NAMES = False
     HTTP_API_SUPPORT = True
     ENABLE_YT_DL = False
@@ -614,6 +615,14 @@ class Settings:
     @unlimited_copy_buffer.setter
     def unlimited_copy_buffer(self, value):
         self._settings["unlimited_copy_buffer"] = value
+
+    @property
+    def extensions_support(self):
+        return self._settings.get("extensions_support", Defaults.EXTENSIONS_SUPPORT.value)
+
+    @extensions_support.setter
+    def extensions_support(self, value):
+        self._settings["extensions_support"] = value
 
     @property
     def force_bq_names(self):

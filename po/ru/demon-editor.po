@@ -1431,3 +1431,6 @@ msgstr "Начало"
 
 msgid "End time"
 msgstr "Окончание"
+
+msgid "Enable extensions support"
+msgstr "Включить поддержку расширений"

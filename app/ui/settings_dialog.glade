@@ -3030,6 +3030,45 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkBox" id="enable_extensions_box">
+                            <property name="visible">True</property>
+                            <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
+                            <property name="can-focus">False</property>
+                            <child>
+                              <object class="GtkLabel" id="enable_extensions_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="label" translatable="yes">Enable extensions support</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="enable_extensions_switch">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="halign">end</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">end</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkBox" id="yt_dl_box">
                             <property name="visible">True</property>
                             <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
@@ -3138,7 +3177,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -3178,7 +3217,7 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                       </object>

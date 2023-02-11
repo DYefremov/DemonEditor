@@ -675,7 +675,7 @@ class Application(Gtk.Application):
                   self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
             iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
 
-        if self._settings.is_enable_experimental:
+        if self._settings.extensions_support:
             self.init_extensions(builder)
 
     def init_extensions(self, builder):

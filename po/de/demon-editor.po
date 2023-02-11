@@ -1448,3 +1448,6 @@ msgstr "Anfangszeit"
 
 msgid "End time"
 msgstr "Endzeit"
+
+msgid "Enable extensions support"
+msgstr "Erweiterungen Unterstützung aktivieren"
