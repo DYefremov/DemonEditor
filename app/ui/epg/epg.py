@@ -663,12 +663,20 @@ class EpgDialog:
         except Exception as e:
             raise ValueError(f"{get_message('XML parsing error:')} {e}")
         else:
-            if refs:
-                s_refs = filter(lambda x: x.num in refs, s_refs)
-
+            refs = refs or {}
             factor = self._app.DEL_FACTOR / 4
+
             for index, srv in enumerate(s_refs):
-                self._services_model.append((srv.name, " ", srv.data, ""))
+                ref_data = srv.data.split(":")
+                ref = ":".join(ref_data[3:6])
+                if ref in refs:
+                    continue
+
+                data = ":".join(ref_data[3:7])
+                pos, ch_id = srv.num
+                pos = pos or " "
+                self._services_model.append((srv.name, pos, data, "_".join(ref_data)))
+
                 if index % factor == 0:
                     yield True
 
@@ -811,7 +819,7 @@ class EpgDialog:
     def services_filter_function(self, model, itr, data):
         txt = self._filter_entry.get_text().upper()
         pos = model.get_value(itr, 1)
-        pos = self._sat_positions is None or self._xml_radiobutton.get_active() or pos in self._sat_positions
+        pos = self._sat_positions is None or pos in self._sat_positions
         return model is None or model == "None" or (txt in model.get_value(itr, 0).upper() and pos)
 
     def on_info_bar_close(self, bar=None, resp=None):

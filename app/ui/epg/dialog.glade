@@ -907,7 +907,6 @@ Author: Dmitriy Yefremov
                   <object class="GtkMenuButton" id="filter_satellite_button">
                     <property name="width-request">50</property>
                     <property name="visible">True</property>
-                    <property name="sensitive" bind-source="lamedb_radiobutton" bind-property="active">True</property>
                     <property name="can-focus">True</property>
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>

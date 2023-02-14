@@ -29,6 +29,7 @@
 """  Module for working with epg.dat file. """
 import abc
 import os
+import re
 import shutil
 import struct
 import sys
@@ -374,32 +375,39 @@ class ChannelsParser:
         refs = []
         dom = parse(path)
         description = "".join(n.data + "\n" for n in dom.childNodes if n.nodeType == Node.COMMENT_NODE)
+        pos_pat = re.compile(r"^\d+\.\d+[EW]$")
 
         for elem in dom.getElementsByTagName("channels"):
             c_count = 0
             comment_count = 0
-            current_data = ""
+            data = ""
+            ch_id = None
+            pos = None
+            ch_type = BqServiceType.DEFAULT
 
             if elem.hasChildNodes():
                 for n in elem.childNodes:
+                    if n.nodeType == Node.ELEMENT_NODE:
+                        ch_id = n.getAttribute("id")
+
                     if n.nodeType == Node.COMMENT_NODE:
                         c_count += 1
                         comment_count += 1
                         txt = n.data.strip()
+
+                        if re.match(pos_pat, txt):
+                            pos = txt
+
                         if comment_count:
                             comment_count -= 1
                         else:
-                            ref_data = current_data.split(":")
-                            refs.append(BouquetService(name=txt,
-                                                       type=BqServiceType.DEFAULT,
-                                                       data="{}:{}:{}:{}".format(*ref_data[3:7]).upper(),
-                                                       num="{}:{}:{}".format(*ref_data[3:6]).upper()))
+                            refs.append(BouquetService(name=txt, type=ch_type, data=data.upper(), num=(pos, ch_id)))
 
                     if n.hasChildNodes():
                         for s_node in n.childNodes:
                             if s_node.nodeType == Node.TEXT_NODE:
                                 comment_count -= 1
-                                current_data = s_node.data
+                                data = s_node.data
         return refs, description
 
     @staticmethod
