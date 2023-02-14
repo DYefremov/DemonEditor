@@ -1607,6 +1607,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkStack" id="stack">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="hhomogeneous">False</property>
                         <property name="transition_type">crossfade</property>
                         <signal name="notify::visible-child-name" handler="on_visible_page" swapped="no"/>
                         <child>
