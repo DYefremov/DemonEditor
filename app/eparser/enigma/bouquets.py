@@ -50,7 +50,7 @@ class BouquetsWriter:
     _SERVICE = '#SERVICE 1:{}:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     _MARKER = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
     _SPACE = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
-    _LOCKED = '1:{}:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
+    _LOCKED = '1:{}:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet'
     _ALT = '#SERVICE 1:134:1:0:0:0:0:0:0:0:FROM BOUQUET "{}" ORDER BY bouquet\n'
     _ALT_PAT = r"[<>:\"/\\|?*\-\s]"
 
@@ -98,12 +98,12 @@ class BouquetsWriter:
                         self.write_sub_bouquet(self._path, bq_name, bq, bqs.type)
                     else:
                         self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bqs.type}", bq.name, bq.services)
+                    bq_type = 2 if bqs.type == BqType.RADIO.value else 1
                     # Parental lock.
-                    locked = self._LOCKED.format(ServiceType.HIDDEN, bq_type, bq_name, bqs.type)
-                    self._black_list.discard(locked) if bq.locked else self._black_list.add(locked)
+                    locked = self._LOCKED.format(ServiceType.SERVICE, bq_type, bq_name, bqs.type)
+                    self._black_list.add(locked) if bq.locked else self._black_list.discard(locked)
                     # Hiding.
                     s_type = 519 if bq.hidden else 7
-                    bq_type = 2 if bqs.type == BqType.RADIO.value else 1
                     line.append(self._SERVICE.format(s_type, bq_type, bq_name, bqs.type))
 
             with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8", newline="\n") as file:

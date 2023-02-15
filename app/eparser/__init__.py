@@ -68,7 +68,6 @@ def write_bouquet(path, bq, s_type):
         write_bouquet(path, bq)
 
 
-@run_task
 def write_bouquets(path, bouquets, s_type, force_bq_names=False, blacklist=None):
     if s_type is SettingsType.ENIGMA_2:
         BouquetsWriter(path, bouquets, force_bq_names, blacklist).write()
