@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ import os
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
 from app.eparser.neutrino import KSP, SP, get_xml_attributes, get_attributes, API_VER
 from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
-from app.ui.uicommons import LOCKED_ICON, HIDE_ICON
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER, BqType
 
 _FILE = "bouquets.xml"
@@ -72,8 +71,8 @@ def parse_bouquets(file, name, bq_type):
             bouquets[2].append(Bouquet(name=bq_name,
                                        type=bq_type,
                                        services=services,
-                                       locked=LOCKED_ICON if locked == "1" else None,
-                                       hidden=HIDE_ICON if hidden == "1" else None,
+                                       locked=locked == "1",
+                                       hidden=hidden == "1",
                                        file=SP.join("{}{}{}".format(k, KSP, v) for k, v in bq_attrs.items())))
 
     if BqType(bq_type) is BqType.BOUQUET:

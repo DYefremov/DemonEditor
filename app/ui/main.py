@@ -2329,6 +2329,12 @@ class Application(Gtk.Application):
 
     def append_bouquet(self, bq, parent):
         name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, HIDE_ICON if bq.hidden else None
+        # Parental control state.
+        if self._s_type is SettingsType.ENIGMA_2:
+            locked = LOCKED_ICON if bq.locked in self._blacklist else None
+        else:
+            locked = LOCKED_ICON if bq.locked else None
+
         bouquet = self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
         bq_id = f"{name}:{bq_type}"
         services = []

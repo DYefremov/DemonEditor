@@ -217,9 +217,12 @@ class BouquetsReader:
                             rb_name = f"{rb_name} {real_b_names[rb_name]}"
                         else:
                             real_b_names[rb_name] = 0
-
+                        # Locked, hidden.
+                        s_data[:2] = "10"
+                        locked = ":".join(s_data).rstrip()
                         hidden = s_type is ServiceType.HIDDEN
-                        bouquets[2].append(Bouquet(rb_name, bq_type, services, None, hidden, b_name))
+
+                        bouquets[2].append(Bouquet(rb_name, bq_type, services, locked, hidden, b_name))
                     else:
                         if len(s_data) == 12 and s_type is ServiceType.MARKER:
                             b_name = f"{_MARKER_PREFIX}{s_data[-1].strip()}"
