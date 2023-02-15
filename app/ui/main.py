@@ -2527,7 +2527,7 @@ class Application(Gtk.Application):
 
         # Getting bouquets
         self._bouquets_view.get_model().foreach(parse_bouquets)
-        write_bouquets(path, bouquets, profile, self._settings.force_bq_names)
+        write_bouquets(path, bouquets, profile, self._settings.force_bq_names, self._blacklist)
         yield True
         # Getting services
         services_model = get_base_model(self._services_view.get_model())

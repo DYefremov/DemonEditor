@@ -50,12 +50,14 @@ class BouquetsWriter:
     _SERVICE = '#SERVICE 1:{}:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     _MARKER = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
     _SPACE = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
+    _LOCKED = '1:{}:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     _ALT = '#SERVICE 1:134:1:0:0:0:0:0:0:0:FROM BOUQUET "{}" ORDER BY bouquet\n'
     _ALT_PAT = r"[<>:\"/\\|?*\-\s]"
 
-    def __init__(self, path, bouquets, force_bq_names=False):
+    def __init__(self, path, bouquets, force_bq_names=False, blacklist=None):
         self._path = path
         self._bouquets = bouquets
+        self._black_list = blacklist or set()
         self._force_bq_names = force_bq_names
         self._marker_index = 1
         self._space_index = 0
@@ -96,9 +98,12 @@ class BouquetsWriter:
                         self.write_sub_bouquet(self._path, bq_name, bq, bqs.type)
                     else:
                         self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bqs.type}", bq.name, bq.services)
-
+                    # Parental lock.
+                    locked = self._LOCKED.format(ServiceType.HIDDEN, bq_type, bq_name, bqs.type)
+                    self._black_list.discard(locked) if bq.locked else self._black_list.add(locked)
+                    # Hiding.
+                    s_type = 519 if bq.hidden else 7
                     bq_type = 2 if bqs.type == BqType.RADIO.value else 1
-                    s_type = 519 if bq.hidden else 7  # Setting the hide marker.
                     line.append(self._SERVICE.format(s_type, bq_type, bq_name, bqs.type))
 
             with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8", newline="\n") as file:
@@ -168,6 +173,9 @@ class ServiceType(Enum):
     def _missing_(cls, value):
         log("Error. No matching service type [{} {}] was found.".format(cls.__name__, value))
         return cls.SERVICE
+
+    def __str__(self):
+        return self.value
 
 
 class BouquetsReader:
