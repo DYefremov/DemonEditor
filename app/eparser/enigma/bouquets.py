@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ class BouquetsWriter:
         If "force_bq_names" then naming the files using the name of the bouquet.
         Some images may have problems displaying the favorites list!
      """
-    _SERVICE = '#SERVICE 1:7:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
+    _SERVICE = '#SERVICE 1:{}:{}:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.{}.{}" ORDER BY bouquet\n'
     _MARKER = "#SERVICE 1:64:{:X}:0:0:0:0:0:0:0::{}\n"
     _SPACE = "#SERVICE 1:832:D:{}:0:0:0:0:0:0:\n"
     _ALT = '#SERVICE 1:134:1:0:0:0:0:0:0:0:FROM BOUQUET "{}" ORDER BY bouquet\n'
@@ -96,7 +96,10 @@ class BouquetsWriter:
                         self.write_sub_bouquet(self._path, bq_name, bq, bqs.type)
                     else:
                         self.write_bouquet(f"{self._path}userbouquet.{bq_name}.{bqs.type}", bq.name, bq.services)
-                    line.append(self._SERVICE.format(2 if bqs.type == BqType.RADIO.value else 1, bq_name, bqs.type))
+
+                    bq_type = 2 if bqs.type == BqType.RADIO.value else 1
+                    s_type = 519 if bq.hidden else 7  # Setting the hide marker.
+                    line.append(self._SERVICE.format(s_type, bq_type, bq_name, bqs.type))
 
             with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8", newline="\n") as file:
                 file.writelines(line)
@@ -156,9 +159,10 @@ class ServiceType(Enum):
     SERVICE = "0"
     BOUQUET = "7"  # Sub bouquet.
     MARKER = "64"
-    SPACE = "832"  # Hidden marker.
+    SPACE = "832"
     ALT = "134"  # Alternatives.
     UDP = "256"
+    HIDDEN = "519"  # Skip, hide.
 
     @classmethod
     def _missing_(cls, value):
@@ -197,6 +201,8 @@ class BouquetsReader:
             for line in file.readlines():
                 if "#SERVICE" in line:
                     name = re.match(self._BQ_PAT, line)
+                    s_data = line.split(":")
+                    s_type = ServiceType(s_data[1])
                     if name:
                         prefix, b_name = name.group(1), name.group(2)
                         if b_name in b_names:
@@ -212,10 +218,10 @@ class BouquetsReader:
                         else:
                             real_b_names[rb_name] = 0
 
-                        bouquets[2].append(Bouquet(rb_name, bq_type, services, None, None, b_name))
+                        hidden = s_type is ServiceType.HIDDEN
+                        bouquets[2].append(Bouquet(rb_name, bq_type, services, None, hidden, b_name))
                     else:
-                        s_data = line.split(":")
-                        if len(s_data) == 12 and s_data[1] == ServiceType.MARKER.value:
+                        if len(s_data) == 12 and s_type is ServiceType.MARKER:
                             b_name = f"{_MARKER_PREFIX}{s_data[-1].strip()}"
                             bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line.strip()))
                         else:

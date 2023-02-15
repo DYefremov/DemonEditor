@@ -2328,7 +2328,7 @@ class Application(Gtk.Application):
                         self.append_bouquet(bq, row.iter)
 
     def append_bouquet(self, bq, parent):
-        name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
+        name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, HIDE_ICON if bq.hidden else None
         bouquet = self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
         bq_id = f"{name}:{bq_type}"
         services = []
