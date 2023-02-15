@@ -1846,7 +1846,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkBox" id="enigma_lock_hide_box">
-                                        <property name="sensitive">False</property>
+                                        <property name="sensitive" bind-source="bouquet_lock_hide_box" bind-property="sensitive" bind-flags="invert-boolean">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">5</property>
                                         <child>
@@ -3933,6 +3933,7 @@ Author: Dmitriy Yefremov
                                     </child>
                                     <child>
                                       <object class="GtkBox" id="bouquet_lock_hide_box">
+                                        <property name="visible">True</property>
                                         <property name="sensitive">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">5</property>

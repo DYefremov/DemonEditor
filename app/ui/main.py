@@ -111,8 +111,6 @@ class Application(Gtk.Application):
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_menu_button",
                           "iptv_menu_button")
 
-    _LOCK_HIDE_ELEMENTS = ("enigma_lock_hide_box", "bouquet_lock_hide_box")
-
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
         # Adding command line options
@@ -459,11 +457,12 @@ class Application(Gtk.Application):
         self._record_image = builder.get_object("record_button_image")
         # Dynamically active elements depending on the selected view.
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
-                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
+                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
         # Lock, Hide.
-        self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[0]), "visible")
-        self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[1]), "visible", 4)
+        self._bouquet_lock_hide_box = builder.get_object("bouquet_lock_hide_box")
+        self._bouquets_view.bind_property("is-focus", self._bouquet_lock_hide_box, "sensitive")
+        self.bind_property("is-enigma", builder.get_object("enigma_lock_hide_box"), "visible")
         # Clear "New" menu item
         self.bind_property("is-enigma", builder.get_object("services_clear_new_flag_item"), "visible")
         # Sub-bouquets menu item.
@@ -2893,9 +2892,6 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty)
                 if elem == "bouquets_paste_popup_item":
                     self._tool_elements[elem].set_sensitive(not_empty and self._bouquets_buffer)
-            if self._s_type is SettingsType.NEUTRINO_MP:
-                for elem in self._LOCK_HIDE_ELEMENTS:
-                    self._tool_elements[elem].set_sensitive(not_empty)
         else:
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "fav_paste_popup_item"):
@@ -2908,8 +2904,6 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty and is_service)
             for elem in self._BOUQUET_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
-            for elem in self._LOCK_HIDE_ELEMENTS:
-                self._tool_elements[elem].set_sensitive(not_empty and self._s_type is SettingsType.ENIGMA_2)
 
         for elem in self._FAV_IPTV_ELEMENTS:
             is_iptv = self._bq_selected and not is_service
@@ -2930,14 +2924,20 @@ class Application(Gtk.Application):
         self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
-        if self._s_type is SettingsType.ENIGMA_2:
-            set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
-        elif self._s_type is SettingsType.NEUTRINO_MP and self._bq_selected:
+        if self._bouquets_view.is_focus() and self._bq_selected:
             model, paths = self._bouquets_view.get_selection().get_selected_rows()
-            itr = model.get_iter(paths[0])
-            value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
-            value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
-            model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
+            for p in paths:
+                itr = model.get_iter(p)
+                if not model.iter_has_child(itr):
+                    value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
+                    value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
+                    model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
+        else:
+            if self._s_type is SettingsType.ENIGMA_2:
+                set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
+
+        self.show_info_message("After uploading the changes you may need to completely reboot the receiver!",
+                               Gtk.MessageType.WARNING)
 
     def on_model_changed(self, model, path=None, itr=None):
         model_name = model.get_name()
