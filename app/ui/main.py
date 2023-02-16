@@ -2934,7 +2934,7 @@ class Application(Gtk.Application):
                     model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
 
             if self._s_type is SettingsType.ENIGMA_2:
-                msg = "After uploading the changes you may need to completely reboot the receiver!"
+                msg = get_message("After uploading the changes you may need to completely reboot the receiver!")
                 self.show_info_message(f"{get_message('EXPERIMENTAL!')} {msg}", Gtk.MessageType.WARNING)
         else:
             if self._s_type is SettingsType.ENIGMA_2:

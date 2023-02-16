@@ -1437,3 +1437,6 @@ msgstr "Сканчэнне"
 
 msgid "Enable extensions support"
 msgstr "Уключыць падтрымку пашырэнняў"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Пасля загрузкі змен можа запатрабавацца перазапуск рэсівера!"

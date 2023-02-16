@@ -1451,3 +1451,6 @@ msgstr "Endzeit"
 
 msgid "Enable extensions support"
 msgstr "Erweiterungen Unterstützung aktivieren"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Nach dem Hochladen der Änderungen muss den Receiver eventuell komplett neu starten!"
