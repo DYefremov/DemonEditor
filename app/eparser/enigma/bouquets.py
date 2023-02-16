@@ -57,8 +57,9 @@ class BouquetsWriter:
     def __init__(self, path, bouquets, force_bq_names=False, blacklist=None):
         self._path = path
         self._bouquets = bouquets
-        self._black_list = blacklist or set()
         self._force_bq_names = force_bq_names
+        self._black_list = set() if blacklist is None else blacklist
+
         self._marker_index = 1
         self._space_index = 0
         self._alt_names = set()
@@ -103,7 +104,7 @@ class BouquetsWriter:
                     locked = self._LOCKED.format(ServiceType.SERVICE, bq_type, bq_name, bqs.type)
                     self._black_list.add(locked) if bq.locked else self._black_list.discard(locked)
                     # Hiding.
-                    s_type = 519 if bq.hidden else 7
+                    s_type = ServiceType.HIDDEN if bq.hidden else ServiceType.BOUQUET
                     line.append(self._SERVICE.format(s_type, bq_type, bq_name, bqs.type))
 
             with open(f"{self._path}bouquets.{bqs.type}", "w", encoding="utf-8", newline="\n") as file:

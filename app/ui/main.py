@@ -2932,12 +2932,13 @@ class Application(Gtk.Application):
                     value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
                     value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
                     model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
+
+            if self._s_type is SettingsType.ENIGMA_2:
+                msg = "After uploading the changes you may need to completely reboot the receiver!"
+                self.show_info_message(f"{get_message('EXPERIMENTAL!')} {msg}", Gtk.MessageType.WARNING)
         else:
             if self._s_type is SettingsType.ENIGMA_2:
                 set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
-
-        self.show_info_message("After uploading the changes you may need to completely reboot the receiver!",
-                               Gtk.MessageType.WARNING)
 
     def on_model_changed(self, model, path=None, itr=None):
         model_name = model.get_name()
