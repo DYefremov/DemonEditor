@@ -25,8 +25,12 @@
 # Author: Dmitriy Yefremov
 #
 
-
+import json
 import logging
+import os
+from pathlib import Path
+
+CONFIG_PATH = f"{Path.home()}{os.sep}.config{os.sep}demon-editor{os.sep}extensions{os.sep}"
 
 
 class Singleton(type):
@@ -49,6 +53,7 @@ class BaseExtension(metaclass=Singleton):
         # Current application instance.
         # It can be used all public methods, properties or signals.
         self.app = app
+        self._config_path = f"{CONFIG_PATH}{self.__class__.__name__}{os.sep}config"
 
         self.log(f"Extension initialized...")
 
@@ -62,6 +67,29 @@ class BaseExtension(metaclass=Singleton):
     def log(self, message, level=logging.ERROR):
         """ Shows log messages. """
         logging.getLogger(self._LOGGER_NAME).log(level, f"[{self.__class__.__name__}] {message}")
+
+    def reset_config(self):
+        path = Path(self._config_path)
+        if path.is_file():
+            path.unlink()
+
+    @property
+    def config(self) -> dict:
+        if not Path(self._config_path).is_file():
+            return {}
+
+        with open(self._config_path, "r", encoding="utf-8") as config_file:
+            try:
+                return json.load(config_file)
+            except ValueError as e:
+                self.log(f"Configuration load error: {e}")
+        return {}
+
+    @config.setter
+    def config(self, value: dict):
+        Path(self._config_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(self._config_path, "w", encoding="utf-8") as config_file:
+            json.dump(value, config_file, indent="    ")
 
 
 if __name__ == "__main__":
