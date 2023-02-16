@@ -422,7 +422,8 @@ class EpgDialog:
                     "on_update_on_start_switch": self.on_update_on_start_switch,
                     "on_field_icon_press": self.on_field_icon_press,
                     "on_key_press": self.on_key_press,
-                    "on_bq_cursor_changed": self.on_bq_cursor_changed}
+                    "on_bq_cursor_changed": self.on_bq_cursor_changed,
+                    "on_source_view_query_tooltip": self.on_source_view_query_tooltip}
 
         self._app = app
         self._ex_services = self._app.current_services
@@ -591,7 +592,7 @@ class EpgDialog:
 
         factor = self._app.DEL_FACTOR / 4
         for index, srv in enumerate(filtered):
-            self._services_model.append((srv.service, srv.pos, srv.fav_id, srv.picon_id))
+            self._services_model.append((srv.service, srv.pos, srv.fav_id, srv.picon_id, srv.picon_id))
             if index % factor == 0:
                 yield True
 
@@ -675,7 +676,7 @@ class EpgDialog:
                 data = ":".join(ref_data[3:7])
                 pos, ch_id = srv.num
                 pos = pos or " "
-                self._services_model.append((srv.name, pos, data, "_".join(ref_data)))
+                self._services_model.append((srv.name, pos, data, "_".join(ref_data), ch_id))
 
                 if index % factor == 0:
                     yield True
@@ -703,6 +704,25 @@ class EpgDialog:
             model = view.get_model()
             if path:
                 self._filter_entry.set_text(model[path][Column.FAV_SERVICE] or "")
+
+    def on_source_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
+        result = view.get_dest_row_at_pos(x, y)
+        if not result:
+            return False
+
+        path, pos = result
+        ch_id = view.get_model()[path][-1]
+        if not ch_id:
+            return False
+
+        if self._refs_source is RefsSource.XML:
+            text = f"ID = {ch_id}"
+        else:
+            text = f"{get_message('Service reference')}: {ch_id.rstrip('.png')}"
+
+        tooltip.set_text(text)
+        view.set_tooltip_row(tooltip, path)
+        return True
 
     @run_idle
     def on_save_to_xml(self, item):
@@ -781,11 +801,11 @@ class EpgDialog:
 
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
-        fav_id_data[3:7] = data[-2].split(":")
+        fav_id_data[3:7] = data[-3].split(":")
 
-        if data[-1]:
+        if data[-2]:
             row[Column.FAV_POS] = data[-1]
-            p_data = data[-1].split("_")
+            p_data = data[-2].split("_")
             if p_data:
                 fav_id_data[2] = p_data[2]
 
@@ -862,7 +882,6 @@ class EpgDialog:
     def update_source_info(self, info):
         lines = info.split("\n")
         self._source_info_label.set_text(lines[0] if lines else "")
-        self._source_view.set_tooltip_text(info)
 
     @run_idle
     def update_source_count_info(self):
