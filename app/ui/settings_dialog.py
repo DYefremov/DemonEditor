@@ -649,11 +649,13 @@ class SettingsDialog:
         if response is Gtk.ResponseType.CANCEL:
             return
 
-        if response in self._settings.picons_paths:
+        sep = "/"
+        path = response if response.endswith(sep) else response + sep
+
+        if path in self._settings.picons_paths:
             self.show_info_message("This path already exists!", Gtk.MessageType.ERROR)
             return
 
-        path = response if response.endswith(SEP) else response + SEP
         model = self._picons_paths_box.get_model()
         model.append((path, path))
         self._picons_paths_box.set_active_id(path)

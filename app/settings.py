@@ -67,7 +67,9 @@ class Defaults(Enum):
                        "/media/hdd/picon/",
                        "/media/usb/picon/",
                        "/media/mmc/picon/",
-                       "/media/cf/picon/")
+                       "/media/cf/picon/",
+                       "/hdd/picon/",
+                       "/usb/picon/")
     # Neutrino.
     NEUTRINO_BOX_SERVICES_PATH = "/var/tuxbox/config/zapit/"
     NEUTRINO_BOX_SATELLITE_PATH = "/var/tuxbox/config/"
