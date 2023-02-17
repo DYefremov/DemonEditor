@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ from app.ui.uicommons import IPTV_ICON
 
 # url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group
 NEUTRINO_FAV_ID_FORMAT = "{}::{}::{}::{}::{}::{}::{}::{}::{}::{}"
-ENIGMA2_FAV_ID_FORMAT = " {}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION {}\n"
+ENIGMA2_FAV_ID_FORMAT = " {}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTION {}\n"
 MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
 PICON_FORMAT = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 

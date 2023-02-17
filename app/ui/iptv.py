@@ -49,7 +49,7 @@ from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, Ke
                               IS_GNOME_SESSION, HeaderBar)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
-_ENIGMA2_REFERENCE = "{}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
+_ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
 
@@ -198,7 +198,7 @@ class IptvDialog:
             self.show_info_message("Unknown stream type {}".format(s_type), Gtk.MessageType.ERROR)
 
         self._srv_id_entry.set_text(data[1])
-        self._srv_type_entry.set_text(data[2])
+        self._srv_type_entry.set_text(str(int(data[2], 16)))
         self._sid_entry.set_text(str(int(data[3], 16)))
         self._tr_id_entry.set_text(str(int(data[4], 16)))
         self._net_id_entry.set_text(str(int(data[5], 16)))
@@ -216,7 +216,7 @@ class IptvDialog:
             self.on_url_changed(self._url_entry)
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_id_entry.get_text(),
-                                                                     self._srv_type_entry.get_text(),
+                                                                     int(self._srv_type_entry.get_text()),
                                                                      int(self._sid_entry.get_text()),
                                                                      int(self._tr_id_entry.get_text()),
                                                                      int(self._net_id_entry.get_text()),
@@ -301,7 +301,7 @@ class IptvDialog:
         name = self._name_entry.get_text().strip()
         fav_id = ENIGMA2_FAV_ID_FORMAT.format(self.get_type(),
                                               self._srv_id_entry.get_text(),
-                                              self._srv_type_entry.get_text(),
+                                              int(self._srv_type_entry.get_text()),
                                               int(self._sid_entry.get_text()),
                                               int(self._tr_id_entry.get_text()),
                                               int(self._net_id_entry.get_text()),
@@ -602,7 +602,7 @@ class IptvListConfigurationDialog(IptvListDialog):
 
             st_type = get_stream_type(self._stream_type_combobox)
             s_id = "0" if id_default else self._list_srv_id_entry.get_text()
-            srv_type = "1" if type_default else self._list_srv_type_entry.get_text()
+            srv_type = int("1" if type_default else self._list_srv_type_entry.get_text())
             sid = "0" if sid_auto else self._list_sid_entry.get_text()
             tid = "0" if tid_default else f"{int(self._list_tid_entry.get_text()):X}"
             nid = "0" if nid_default else f"{int(self._list_nid_entry.get_text()):X}"
@@ -617,12 +617,13 @@ class IptvListConfigurationDialog(IptvListDialog):
                 if all_default:
                     data[1], data[2], data[3], data[4], data[5], data[6] = "010000"
                 else:
-                    data[0], data[1], data[2], data[4], data[5], data[6] = st_type, s_id, srv_type, tid, nid, namespace
+                    data[0], data[1], data[4], data[5], data[6] = st_type, s_id, tid, nid, namespace
+                    data[2] = f"{srv_type:X}"
 
                 data[3] = f"{index:X}" if sid_auto else sid
                 if sid_auto:
                     params[0] = index
-                picon_id = PICON_FORMAT.format(st_type, int(s_id), int(srv_type), *params)
+                picon_id = PICON_FORMAT.format(st_type, int(s_id), srv_type, *params)
                 data = ":".join(data)
                 new_fav_id = f"{data}{sep}{desc}"
                 row[Column.FAV_ID] = new_fav_id
