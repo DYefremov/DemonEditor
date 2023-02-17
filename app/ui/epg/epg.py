@@ -676,7 +676,7 @@ class EpgDialog:
                 data = ":".join(ref_data[3:7])
                 pos, ch_id = srv.num
                 pos = pos or " "
-                self._services_model.append((srv.name, pos, data, "_".join(ref_data), ch_id))
+                self._services_model.append((srv.name, pos, data, "_".join(ref_data).rstrip("_"), ch_id))
 
                 if index % factor == 0:
                     yield True
@@ -804,7 +804,7 @@ class EpgDialog:
         fav_id_data[3:7] = data[-3].split(":")
 
         if data[-2]:
-            row[Column.FAV_POS] = data[-1]
+            row[Column.FAV_POS] = data[-2]
             p_data = data[-2].split("_")
             if p_data:
                 fav_id_data[2] = p_data[2]
