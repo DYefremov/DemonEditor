@@ -682,7 +682,7 @@ class Application(Gtk.Application):
         # Extensions (Plugins) section.
         ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
         ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
-        ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path]
+        ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path, "extensions"]
         extensions = {}
 
         for importer, name, is_package in pkgutil.iter_modules(ext_paths):
