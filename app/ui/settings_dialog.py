@@ -519,7 +519,6 @@ class SettingsDialog:
         if not state:
             self._support_ver5_switch.set_active(state)
             self._unlimited_buffer_switch.set_active(state)
-            self._enable_extensions_switch.set_active(state)
             self._enable_send_to_switch.set_active(state)
             self._enable_yt_dl_switch.set_active(state)
 
