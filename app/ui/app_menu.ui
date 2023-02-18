@@ -75,13 +75,13 @@
       <section>
         <item>
           <attribute name="label" translatable="yes">Settings</attribute>
-          <attribute name="action">app.on_settings</attribute>
+          <attribute name="action">app.preferences</attribute>
         </item>
       </section>
       <section>
         <item>
           <attribute name="label" translatable="yes">Exit</attribute>
-          <attribute name="action">app.on_close_app</attribute>
+          <attribute name="action">app.quit</attribute>
         </item>
       </section>
     </submenu>
@@ -156,6 +156,11 @@
           <attribute name="label" translatable="yes">Alternate layout</attribute>
           <attribute name="action">app.set_alternate_layout</attribute>
         </item>
+        <item>
+          <attribute name="label" translatable="yes">Alternate window title</attribute>
+          <attribute name="action">app.set_alternate_title</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
       </section>
     </submenu>
     <submenu id="tools_menu">
@@ -193,7 +198,7 @@
       <section>
         <item>
           <attribute name="label" translatable="yes">About</attribute>
-          <attribute name="action">app.on_about_app</attribute>
+          <attribute name="action">app.about</attribute>
         </item>
       </section>
     </submenu>
@@ -202,19 +207,19 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">About</attribute>
-        <attribute name="action">app.on_about_app</attribute>
+        <attribute name="action">app.about</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Settings</attribute>
-        <attribute name="action">app.on_settings</attribute>
+        <attribute name="action">app.preferences</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Exit</attribute>
-        <attribute name="action">app.on_close_app</attribute>
+        <attribute name="action">app.quit</attribute>
       </item>
     </section>
   </menu>
@@ -371,6 +376,11 @@
         <item>
           <attribute name="label" translatable="yes">Alternate layout</attribute>
           <attribute name="action">app.set_alternate_layout</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Alternate window title</attribute>
+          <attribute name="action">app.set_alternate_title</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
       </section>
     </submenu>

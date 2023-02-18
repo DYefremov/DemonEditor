@@ -898,7 +898,7 @@ Author: Dmitriy Yefremov
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="margin_bottom">2</property>
-                <property name="action_name">app.on_settings</property>
+                <property name="action_name">app.preferences</property>
                 <property name="text" translatable="yes">Settings</property>
               </object>
               <packing>
@@ -949,7 +949,7 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="action_name">app.on_about_app</property>
+                <property name="action_name">app.about</property>
                 <property name="text" translatable="yes">About</property>
               </object>
               <packing>
@@ -963,8 +963,8 @@ Author: Dmitriy Yefremov
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="action_name">app.quit</property>
                 <property name="text" translatable="yes">Exit</property>
-                <signal name="clicked" handler="on_close_app" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

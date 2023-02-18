@@ -649,7 +649,8 @@ class Application(Gtk.Application):
         builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
         if not USE_HEADER_BAR:
             if IS_DARWIN:
-                self.set_app_menu(builder.get_object("mac_app_menu"))
+                if not self.get_app_menu():
+                    self.set_app_menu(builder.get_object("mac_app_menu"))
                 self.set_menubar(builder.get_object("mac_menu_bar"))
             else:
                 self.set_menubar(builder.get_object("menu_bar"))
@@ -704,14 +705,17 @@ class Application(Gtk.Application):
                     self.set_action(action_name, ac)
 
     def init_actions(self):
+        # Main actions.
+        self.set_action("preferences", self.on_settings)
+        self.set_action("about", self.on_about_app)
+        self.set_action("quit", self.on_close_app)
+        # Import.
         self.set_action("on_import_bouquet", self.on_import_bouquet)
         self.set_action("on_import_bouquets", self.on_import_bouquets)
         self.set_action("on_new_configuration", self.on_new_configuration)
         self.set_action("on_import_from_web", self.on_import_from_web)
-        self.set_action("on_settings", self.on_settings)
+        # Tools.
         self.set_action("on_backup_tool_show", self.on_backup_tool_show)
-        self.set_action("on_about_app", self.on_about_app)
-        self.set_action("on_close_app", self.on_close_app)
         self.set_state_action("on_telnet_show", self.on_telnet_show, False)
         self.set_state_action("on_logs_show", self.on_logs_show, False)
         # Filter.
@@ -768,6 +772,9 @@ class Application(Gtk.Application):
         # Alternate layout.
         sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
         sa.connect("change-state", self.on_layout_change)
+        # Header bar for macOS.
+        sa = self.set_state_action("set_alternate_title", self.set_use_alt_title, self._settings.use_header_bar)
+        sa.set_enabled(IS_DARWIN)
         # Menu bar and playback.
         self.set_action("on_playback_close", self._player_box.on_close)
         if not USE_HEADER_BAR:
@@ -804,7 +811,7 @@ class Application(Gtk.Application):
         self.set_accels_for_action("app.open_data", ["<primary>o"])
         self.set_accels_for_action("app.on_hide", ["<primary>h"])
         self.set_accels_for_action("app.on_locked", ["<primary>l"])
-        self.set_accels_for_action("app.on_close_app", ["<primary>q"])
+        self.set_accels_for_action("app.quit", ["<primary>q"])
         self.set_accels_for_action("app.on_edit", ["<primary>e"])
         self.set_accels_for_action("app.on_telnet_show", ["<primary>t"])
         self.set_accels_for_action("app.on_logs_show", ["<shift><primary>l"])
@@ -1105,6 +1112,17 @@ class Application(Gtk.Application):
     def set_use_alt_layout(self, action, value):
         action.set_state(value)
         self._settings.alternate_layout = bool(value)
+
+    def set_use_alt_title(self, action, value):
+        action.set_state(value)
+        value = bool(value)
+        self._settings.use_header_bar = bool(value)
+
+        msg = get_message("Restart the program to apply all changes.")
+        if value:
+            warn = "It can cause some problems."
+            msg = f"{get_message('EXPERIMENTAL!')} {warn} {msg}"
+        self.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_idle
     def on_layout_change(self, action, value):
