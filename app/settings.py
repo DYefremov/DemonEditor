@@ -48,6 +48,8 @@ IS_DARWIN = sys.platform == "darwin"
 IS_WIN = sys.platform == "win32"
 IS_LINUX = sys.platform == "linux"
 
+USE_HEADER_BAR = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
+
 
 class Defaults(Enum):
     """ Default program settings """
@@ -701,6 +703,14 @@ class Settings:
         self._settings["show_bq_hints"] = value
 
     # *********** Appearance *********** #
+
+    @property
+    def use_header_bar(self):
+        return self._settings.get("use_header_bar", USE_HEADER_BAR)
+
+    @use_header_bar.setter
+    def use_header_bar(self, value):
+        self._settings["use_header_bar"] = value
 
     @property
     def list_font(self):

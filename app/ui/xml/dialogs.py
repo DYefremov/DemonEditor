@@ -39,12 +39,12 @@ from app.eparser import Satellite, Transponder
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable,
                                   T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC, GUARD_INTERVAL, TRANSMISSION_MODE,
                                   HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder)
-from app.settings import IS_DARWIN
+from app.settings import USE_HEADER_BAR
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
 from ..search import SearchProvider
-from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, IS_GNOME_SESSION, HeaderBar
+from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HeaderBar
 
 _DIALOGS_UI_PATH = f"{UI_RESOURCES_PATH}xml{os.sep}dialogs.glade"
 
@@ -61,7 +61,7 @@ class DVBDialog(Gtk.Dialog):
                          skip_taskbar_hint=True,
                          skip_pager_hint=True,
                          destroy_with_parent=True,
-                         use_header_bar=IS_GNOME_SESSION,
+                         use_header_bar=USE_HEADER_BAR,
                          window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
                          buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK),
                          *args, **kwargs)
@@ -457,7 +457,7 @@ class UpdateDialog:
                                          builder.get_object("sat_update_search_up_button"))
         builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
 
-        if IS_GNOME_SESSION or IS_DARWIN:
+        if self._settings.use_header_bar:
             header_bar = HeaderBar()
             builder.get_object("sat_update_header").set_visible(False)
             header_box = builder.get_object("satellites_update_header_box")

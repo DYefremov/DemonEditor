@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -42,10 +42,10 @@ from gi.repository import GLib
 
 from app.commons import log, run_task, run_idle, get_size_from_bytes
 from app.connections import UtfFTP
-from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP
+from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP, USE_HEADER_BAR
 from app.ui.dialogs import show_dialog, DialogType, get_builder, get_message
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION, Page
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, Page
 
 File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
 
@@ -529,7 +529,7 @@ class FtpClientBox(Gtk.HBox):
 
     @run_idle
     def show_edit_dialog(self, f_path, data):
-        dialog = TextEditDialog(f_path, IS_GNOME_SESSION)
+        dialog = TextEditDialog(f_path, USE_HEADER_BAR)
         dialog.text = data
         ok = Gtk.ResponseType.OK
         if dialog.run() == ok and show_dialog(DialogType.QUESTION, self._app.app_window) == ok:
@@ -578,7 +578,7 @@ class FtpClientBox(Gtk.HBox):
                 log(f"Init attributes error [{attrs}]. Invalid length!")
                 return
 
-            dialog = AttributesDialog(attrs, IS_GNOME_SESSION)
+            dialog = AttributesDialog(attrs, USE_HEADER_BAR)
             ok = Gtk.ResponseType.OK
             if dialog.run() == ok and show_dialog(DialogType.QUESTION, self._app.app_window) == ok:
                 log(self._ftp.sendcmd(f"SITE CHMOD {dialog.permissions} {file}"))

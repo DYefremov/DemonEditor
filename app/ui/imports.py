@@ -37,7 +37,7 @@ from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neu
 from app.settings import SettingsType, IS_DARWIN, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from app.ui.main_helper import on_popup_menu, get_iptv_data
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, IS_GNOME_SESSION, Page, HeaderBar
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, Page, HeaderBar
 
 
 def import_bouquet(app, model, path, appender, file_path=None):
@@ -159,7 +159,7 @@ class ImportDialog:
         self._sat_model = builder.get_object("sat_list_store")
         self._sat_count_label = builder.get_object("sat_count_label")
 
-        if IS_GNOME_SESSION or IS_DARWIN:
+        if self._settings.use_header_bar:
             actions_box = builder.get_object("actions_box")
             builder.get_object("toolbar_box").set_visible(False)
             header_bar = HeaderBar()

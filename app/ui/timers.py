@@ -31,9 +31,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from urllib.parse import quote
 
+from app.settings import USE_HEADER_BAR
 from app.ui.main_helper import on_popup_menu
 from .dialogs import get_builder, get_message, show_dialog, DialogType
-from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Page, Column, KeyboardKey, IS_GNOME_SESSION, MOD_MASK
+from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Page, Column, KeyboardKey, MOD_MASK
 from ..commons import run_idle, log
 from ..connections import HttpAPI
 from ..eparser.ecommons import BqServiceType
@@ -56,7 +57,7 @@ class TimerTool(Gtk.Box):
 
     class TimerDialog(Gtk.Dialog):
         def __init__(self, parent, action=None, timer_data=None, *args, **kwargs):
-            super().__init__(use_header_bar=IS_GNOME_SESSION, *args, **kwargs)
+            super().__init__(use_header_bar=USE_HEADER_BAR, *args, **kwargs)
 
             self._action = action or TimerTool.TimerAction.ADD
             self._timer_data = timer_data or {}

@@ -43,13 +43,13 @@ from gi.repository import GLib
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
-from app.settings import SEP, EpgSource, IS_DARWIN, IS_WIN
+from app.settings import SEP, EpgSource, IS_WIN
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
 from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions
-from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, IS_GNOME_SESSION, Page, HeaderBar
+from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, Page, HeaderBar
 
 
 class RefsSource(Enum):
@@ -197,8 +197,8 @@ class EpgSettingsPopover(Gtk.Popover):
 
 
 class EpgTool(Gtk.Box):
-    def __init__(self, app, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app, **kwargs):
+        super().__init__(**kwargs)
 
         self._current_bq = None
         self._app = app
@@ -477,7 +477,7 @@ class EpgDialog:
         self._update_on_start_switch = builder.get_object("update_on_start_switch")
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
 
-        if IS_GNOME_SESSION or IS_DARWIN:
+        if self._settings.use_header_bar:
             header_bar = HeaderBar(title="EPG", subtitle=get_message("List configuration"))
             self._dialog.set_titlebar(header_bar)
             builder.get_object("left_action_box").reparent(header_bar)

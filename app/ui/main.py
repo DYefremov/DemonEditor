@@ -48,7 +48,7 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u, StreamType
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
-                          IS_DARWIN, PlayStreamsMode, IS_LINUX)
+                          IS_DARWIN, PlayStreamsMode, IS_LINUX, USE_HEADER_BAR)
 from app.tools.media import Recorder
 from app.ui.control import ControlTool
 from app.ui.epg.epg import EpgCache, EpgSettingsPopover, EpgDialog, EpgTool
@@ -69,7 +69,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION, HeaderBar)
+                        FavClickMode, MOD_MASK, APP_FONT, Page, HeaderBar)
 from .xml.dialogs import ServicesUpdateDialog
 from .xml.edit import SatellitesTool
 
@@ -505,7 +505,7 @@ class Application(Gtk.Application):
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
-        if IS_GNOME_SESSION or IS_DARWIN:
+        if self._settings.use_header_bar:
             header_bar = HeaderBar()
             if not IS_DARWIN:
                 header_bar.pack_start(builder.get_object("file_header_button"))
@@ -647,7 +647,7 @@ class Application(Gtk.Application):
 
     def init_app_menu(self):
         builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
-        if not IS_GNOME_SESSION:
+        if not USE_HEADER_BAR:
             if IS_DARWIN:
                 self.set_app_menu(builder.get_object("mac_app_menu"))
                 self.set_menubar(builder.get_object("mac_menu_bar"))
@@ -770,7 +770,7 @@ class Application(Gtk.Application):
         sa.connect("change-state", self.on_layout_change)
         # Menu bar and playback.
         self.set_action("on_playback_close", self._player_box.on_close)
-        if not IS_GNOME_SESSION:
+        if not USE_HEADER_BAR:
             # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
             hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
             self._player_box.bind_property("visible", hide_bar_action, "enabled", 4)
@@ -3369,7 +3369,7 @@ class Application(Gtk.Application):
     def on_playback_full_screen(self, box, state):
         self._data_paned.set_visible(state)
         self._main_window.unfullscreen() if state else self._main_window.fullscreen()
-        if not IS_GNOME_SESSION:
+        if not USE_HEADER_BAR:
             self._main_window.set_show_menubar(state)
 
     def on_playback_show(self, box):

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,6 @@ TEXT_DOMAIN = "demon-editor"
 
 NOTIFY_IS_INIT = False
 APP_FONT = None
-IS_GNOME_SESSION = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 
 try:
     settings = Settings.get_instance()
@@ -164,6 +163,7 @@ def show_notification(message, timeout=10000, urgency=1):
 
 class HeaderBar(Gtk.HeaderBar):
     """ Custom header bar widget. """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.set_visible(True)

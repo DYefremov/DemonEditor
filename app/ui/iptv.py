@@ -41,12 +41,11 @@ from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
                               parse_m3u, PICON_FORMAT)
-from app.settings import SettingsType, IS_DARWIN
+from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
 from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf
-from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon,
-                              IS_GNOME_SESSION, HeaderBar)
+from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon, HeaderBar)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
@@ -892,7 +891,7 @@ class YtListImportDialog:
         self._import_button.bind_property("sensitive", self._quality_box, "sensitive")
         self._receive_button.bind_property("sensitive", self._import_button, "sensitive")
 
-        if IS_GNOME_SESSION or IS_DARWIN:
+        if self._settings.use_header_bar:
             header_bar = HeaderBar(title="YouTube", subtitle=get_message("Playlist import"))
             self._dialog.set_titlebar(header_bar)
             actions_box = builder.get_object("yt_actions_box")

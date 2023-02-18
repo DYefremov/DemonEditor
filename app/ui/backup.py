@@ -36,10 +36,10 @@ from enum import Enum
 from pathlib import Path
 
 from app.commons import run_idle, get_size_from_bytes
-from app.settings import SettingsType, SEP, IS_DARWIN
+from app.settings import SettingsType, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION, HeaderBar
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, HeaderBar
 
 
 class RestoreType(Enum):
@@ -77,7 +77,7 @@ class BackupDialog:
         self._message_label = builder.get_object("message_label")
         self._file_count_label = builder.get_object("file_count_label")
 
-        if IS_GNOME_SESSION or IS_DARWIN:
+        if self._settings.use_header_bar:
             header_bar = HeaderBar()
             self._dialog_window.set_titlebar(header_bar)
 

@@ -34,17 +34,17 @@ from gi.repository import GLib, GObject, Gio
 from app.commons import run_idle, run_with_delay
 from app.connections import HttpAPI
 from app.eparser.ecommons import BqServiceType
-from app.settings import PlayStreamsMode, IS_DARWIN, SettingsType
+from app.settings import PlayStreamsMode, IS_DARWIN, SettingsType, USE_HEADER_BAR
 from app.tools.media import Player
 from app.ui.dialogs import get_builder, get_message
 from app.ui.main_helper import get_iptv_url
-from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, IS_GNOME_SESSION, Page
+from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, Page
 
 
 class PlayerBox(Gtk.Box):
 
-    def __init__(self, app, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app, **kwargs):
+        super().__init__(**kwargs)
         # Signals.
         GObject.signal_new("playback-full-screen", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -191,7 +191,7 @@ class PlayerBox(Gtk.Box):
         video_menu = builder.get_object("video_menu")
         subtitle_menu = builder.get_object("subtitle_menu")
 
-        if not IS_GNOME_SESSION:
+        if not USE_HEADER_BAR:
             menu_bar = self._app.get_menubar()
             menu_bar.insert_section(1, None, audio_menu)
             menu_bar.insert_section(2, None, video_menu)
