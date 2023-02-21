@@ -33,7 +33,7 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection", "get_service_reference",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
            "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name",
-           "update_toggle_model", "update_filter_sat_positions", "get_pos_num")
+           "update_toggle_model", "update_popup_filter_model", "update_filter_sat_positions", "get_pos_num")
 
 import os
 import re
@@ -711,12 +711,16 @@ def update_toggle_model(model, path, toggle):
             model.set_value(model.get_iter_first(), 1, False)
 
 
-def update_filter_sat_positions(model, sat_positions):
-    """ Updates the values for the satellite positions button model. """
+def update_popup_filter_model(model, elements: set):
     first = model[model.get_iter_first()][:]
     model.clear()
     model.append((first[0], True))
-    sat_positions.discard(first[0])
+    elements.discard(first[0])
+
+
+def update_filter_sat_positions(model, sat_positions):
+    """ Updates the values for the satellite positions button model. """
+    update_popup_filter_model(model, sat_positions)
     list(map(lambda pos: model.append((pos, True)), sorted(sat_positions, key=get_pos_num, reverse=True)))
 
 
