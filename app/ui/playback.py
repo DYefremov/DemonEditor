@@ -108,6 +108,9 @@ class PlayerBox(Gtk.Box):
         if mode is not FavClickMode.STREAM and not self._app.http_api:
             return
 
+        if len(self._fav_view.get_model()) == 0:
+            return
+
         self._fav_view.set_sensitive(False)
         if mode is FavClickMode.STREAM:
             self.on_play_stream()
