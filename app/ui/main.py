@@ -98,7 +98,8 @@ class Application(Gtk.Application):
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
                      "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item", "fav_add_alt_popup_item",
-                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item", "fav_reference_popup_item")
+                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item", "fav_remove_dup_popup_item",
+                     "fav_reference_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
@@ -174,6 +175,7 @@ class Application(Gtk.Application):
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_mark_duplicates": self.on_mark_duplicates,
+                    "on_remove_duplicates": self.on_remove_duplicates,
                     "on_services_mark_not_in_bouquets": self.on_services_mark_not_in_bouquets,
                     "on_services_clear_marked": self.on_services_clear_marked,
                     "on_services_clear_new_marked": self.on_services_clear_new_marked,
@@ -4021,6 +4023,26 @@ class Application(Gtk.Application):
         for r in self._fav_model:
             if r[Column.FAV_SERVICE] in dup:
                 r[Column.FAV_BACKGROUND] = self._NEW_COLOR
+
+    def on_remove_duplicates(self, item):
+        exist = set()
+        to_remove = []
+        for r in self._fav_model:
+            fav_id = r[Column.FAV_ID]
+            if fav_id in exist:
+                to_remove.append(r.iter)
+            else:
+                exist.add(fav_id)
+
+        count = len(to_remove)
+        if count:
+            if show_dialog(DialogType.QUESTION, self._main_window) != Gtk.ResponseType.OK:
+                return
+            gen = self.remove_favs(to_remove, self._fav_model)
+            GLib.idle_add(lambda: next(gen, False))
+            self.show_info_message(f"{get_message('Done!')} {get_message('Removed')}: {count}")
+        else:
+            self.show_info_message(f"{get_message('Done!')} {get_message('Found')}: {count}")
 
     def on_services_mark_not_in_bouquets(self, item):
         if self.is_data_loading():

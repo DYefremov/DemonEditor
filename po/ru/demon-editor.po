@@ -1437,3 +1437,9 @@ msgstr "Включить поддержку расширений"
 
 msgid "After uploading the changes you may need to completely reboot the receiver!"
 msgstr "После загрузки изменений может потребоваться перезапуск ресивера!"
+
+msgid "Remove duplicates"
+msgstr "Удалить дубликаты"
+
+msgid "Removed"
+msgstr "Удалено"
