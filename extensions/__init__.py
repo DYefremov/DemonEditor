@@ -46,6 +46,7 @@ class BaseExtension(metaclass=Singleton):
     """ Base extension (plugin) class. """
     # The label that will be displayed in the "Tools" menu.
     LABEL = "Base extension"
+    VERSION = "1.0"
 
     _LOGGER_NAME = "main_logger"
 
