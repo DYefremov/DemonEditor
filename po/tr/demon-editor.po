@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2023-02-18 00:56+0300\n"
+"PO-Revision-Date: 2023-02-23 14:22+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: \n"
 "Language: tr\n"
@@ -1471,3 +1471,9 @@ msgstr "Uzantı desteğini etkinleştir"
 
 msgid "After uploading the changes you may need to completely reboot the receiver!"
 msgstr "Değişiklikleri yükledikten sonra, alıcıyı tamamen yeniden başlatmanız gerekebilir!"
+
+msgid "Remove duplicates"
+msgstr "Kopyaları kaldır"
+
+msgid "Removed"
+msgstr "Kaldırıldı"
