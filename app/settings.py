@@ -429,7 +429,7 @@ class Settings:
 
     @default_data_path.setter
     def default_data_path(self, value):
-        self._settings["default_data_path"] = value
+        self._settings["default_data_path"] = Settings.normalize_path(value)
 
     @property
     def default_backup_path(self):
@@ -437,7 +437,7 @@ class Settings:
 
     @default_backup_path.setter
     def default_backup_path(self, value):
-        self._settings["default_backup_path"] = value
+        self._settings["default_backup_path"] = Settings.normalize_path(value)
 
     @property
     def default_picon_path(self):
@@ -445,7 +445,7 @@ class Settings:
 
     @default_picon_path.setter
     def default_picon_path(self, value):
-        self._settings["default_picon_path"] = value
+        self._settings["default_picon_path"] = Settings.normalize_path(value)
 
     @property
     def profile_data_path(self):
@@ -481,7 +481,7 @@ class Settings:
 
     @recordings_path.setter
     def recordings_path(self, value):
-        self._settings["recordings_path"] = value
+        self._settings["recordings_path"] = Settings.normalize_path(value)
 
     # ******** Streaming ********* #
 
@@ -945,6 +945,10 @@ class Settings:
         os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
         with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
             json.dump(config, config_file, indent="    ")
+
+    @staticmethod
+    def normalize_path(path):
+        return f"{os.path.normpath(path)}{SEP}"
 
 
 if __name__ == "__main__":
