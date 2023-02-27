@@ -759,7 +759,7 @@ def get_iptv_data(fav_id):
     data, sep, desc = fav_id.partition("#DESCRIPTION")
     data = data.split(":")
     if len(data) < 11:
-        return None, None, desc
+        return None, desc
     return ":".join(data[:10]), unquote(data[10].strip())
 
 
