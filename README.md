@@ -110,7 +110,7 @@ just load your data via *"File/Open"* and press *"Save"*. When importing separat
 
 **The built-in Telnet client does not support ANSI escape sequences!**
 
-For streams playback, this app supports [VLC](https://www.videolan.org/vlc/), [MPV](https://mpv.io/) and [GStreamer](https://gstreamer.freedesktop.org/). Depending on your distro, you may need to install additional packages and libraries.z 
+For streams playback, this app supports [VLC](https://www.videolan.org/vlc/), [MPV](https://mpv.io/) and [GStreamer](https://gstreamer.freedesktop.org/). Depending on your distro, you may need to install additional packages and libraries.   
 #### Command line arguments:
 * **-l** - write logs to file.
 * **-d on/off** - turn on/off debug mode. Allows to display more information in the logs.
