@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-02-12 07:10+0100\n"
+"PO-Revision-Date: 2023-02-27 20:29+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -1230,6 +1230,9 @@ msgstr "Dimensione"
 msgid "Date"
 msgstr "Data"
 
+msgid "Attr."
+msgstr "Attr"
+
 msgid "Toggle display position"
 msgstr "Commuta posizione visualizzazione"
 
@@ -1492,3 +1495,16 @@ msgstr "Ora di fine"
 
 msgid "Enable extensions support"
 msgstr "Abilita supporto estensioni"
+
+msgid ""
+"After uploading the changes you may need to completely reboot the receiver!"
+msgstr ""
+"Dopo aver caricato le modifiche potrebbe essere necessario riavviare"
+" completamente il ricevitore!"
+
+msgid "Remove duplicates"
+msgstr "Rimuovi duplicati"
+
+msgid "Removed"
+msgstr "Rimosso"
+
