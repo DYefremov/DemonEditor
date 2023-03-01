@@ -121,6 +121,7 @@ class ImportDialog:
                     "on_resize": self.on_resize,
                     "on_main_paned_realize": self.on_main_paned_realize,
                     "on_visible_page": self.on_visible_page,
+                    "on_bouquets_only_switch": self.on_bouquets_only_switch,
                     "on_key_press": self.on_key_press}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}imports.glade", handlers)
@@ -144,7 +145,10 @@ class ImportDialog:
         self._dialog_window.set_transient_for(app.app_window)
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        # Options.
         self._replace_existing_switch = builder.get_object("replace_existing_switch")
+        self._bouquets_only_switch = builder.get_object("bouquets_only_switch")
+        self._bouquets_settings_box = builder.get_object("bouquets_settings_box")
         # Bouquets page.
         self._bq_model = builder.get_object("bq_list_store")
         self._bq_view = builder.get_object("bq_view")
@@ -260,7 +264,12 @@ class ImportDialog:
                 with suppress(ValueError):
                     bq.remove(b)
 
-        self._append(self._bouquets, list(filter(lambda s: s.fav_id not in self._ids, services)))
+        if self._bouquets_only_switch.get_active():
+            services = ()
+        else:
+            services = list(filter(lambda s: s.fav_id not in self._ids, services))
+
+        self._append(self._bouquets, services)
 
         if self._replace_existing_switch.get_active():
             self._app.emit("services_update", {s.fav_id: s for s in filter(lambda s: s.fav_id in self._ids, services)})
@@ -408,6 +417,11 @@ class ImportDialog:
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
+        self._bouquets_settings_box.set_sensitive(self._page is Page.SERVICES)
+
+    def on_bouquets_only_switch(self, switch, state):
+        if state:
+            self._replace_existing_switch.set_active(False)
 
     def on_key_press(self, view, event):
         """  Handling  keystrokes  """
