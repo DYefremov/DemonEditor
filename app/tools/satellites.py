@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -429,7 +429,7 @@ class SatellitesParser(HTMLParser):
 class ServicesParser(HTMLParser):
     """ Services parser for LYNGSAT source. """
 
-    def __init__(self, source=SatelliteSource.LYNGSAT, entities=False, separator=' '):
+    def __init__(self, source=SatelliteSource.LYNGSAT, entities=False, separator=' ', lang=None):
 
         HTMLParser.__init__(self)
 
@@ -452,6 +452,12 @@ class ServicesParser(HTMLParser):
         self._KING_TR_PAT = re.compile((r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*"
                                         r"?(?:PLS:\s+(Root|Gold|Combo)\+(\d+))?"
                                         r"\s+(.*PSK).*?(?:.*Stream\s+(\d+))?.*"))
+        self._lang = "en"
+        if lang:
+            langs = {"en", "fr", "nl", "de", "se", "no", "pt", "es", "it", "pl",
+                     "cz", "gr", "fi", "ar", "tr", "ru", "sc", "ro", "hu", "sq"}
+            lang, _, _ = lang.partition("_")
+            self._lang = lang if lang in langs else self._lang
 
         self._parse_html_entities = entities
         self._separator = separator
@@ -580,7 +586,7 @@ class ServicesParser(HTMLParser):
                     if len(r) == 13 and SatellitesParser.POS_PAT.match(r[0].text):
                         t_cell = r[4]
                         if t_cell.url and t_cell.url.startswith("tp.php?tp="):
-                            t_cell.url = f"https://en.kingofsat.net/{t_cell.url}"
+                            t_cell.url = f"https://{self._lang}.kingofsat.net/{t_cell.url}"
                             t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
                             trs.append(t_cell)
                 return trs
@@ -730,11 +736,12 @@ class ServicesParser(HTMLParser):
 
                 s_type = self._S_TYPES.get(s_type, "3")
                 _s_type = SERVICE_TYPE.get(s_type, SERVICE_TYPE.get("3"))
+                reg, grp = r[3].text, r[4].text
 
                 name, pkg, cas, sid, v_pid, a_pid = r[2].text, r[5].text, r[6].text, r[7].text, None, None
                 flags, sid, fav_id, picon_id, data_id = self.get_service_data(s_type, pkg, sid, tid, nid, nsp,
                                                                               v_pid, a_pid, cas, use_pids)
-                services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, None, picon_id,
+                services.append(Service(flags, "s", None, name, reg, grp, pkg, _s_type, None, picon_id,
                                         sid, str(freq), sr, pol, fec, sys, pos, data_id, fav_id, multi_tr or tr))
 
         return services
