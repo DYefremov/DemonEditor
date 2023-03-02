@@ -30,6 +30,7 @@ import concurrent.futures
 import os
 import re
 import time
+from itertools import groupby
 from math import fabs
 
 from gi.repository import GLib
@@ -38,7 +39,8 @@ from app.commons import run_idle, run_task, log
 from app.eparser import Satellite, Transponder
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC, SYSTEM, MODULATION, Terrestrial, Cable,
                                   T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC, GUARD_INTERVAL, TRANSMISSION_MODE,
-                                  HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder)
+                                  HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder,
+                                  Bouquet, BouquetService, BqServiceType, Bouquets, BqType)
 from app.settings import USE_HEADER_BAR
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
@@ -435,6 +437,8 @@ class UpdateDialog:
         self._sat_view.bind_property("sensitive", self._source_box, "sensitive")
         self._sat_view.bind_property("sensitive", self._receive_button, "sensitive")
         self._receive_button.bind_property("visible", update_button, "visible")
+        self._left_action_box = builder.get_object("sat_update_left_action_box")
+        self._right_action_box = builder.get_object("sat_update_right_action_box")
         # Filter
         self._filter_bar = builder.get_object("sat_update_filter_bar")
         self._from_pos_button = builder.get_object("from_pos_button")
@@ -463,12 +467,10 @@ class UpdateDialog:
             header_box = builder.get_object("satellites_update_header_box")
             header_box.remove(self._source_box)
             header_bar.pack_start(self._source_box)
-            action_box = builder.get_object("sat_update_left_action_box")
-            header_box.remove(action_box)
-            header_bar.pack_start(action_box)
-            action_box = builder.get_object("sat_update_right_action_box")
-            header_box.remove(action_box)
-            header_bar.pack_end(action_box)
+            header_box.remove(self._left_action_box)
+            header_bar.pack_start(self._left_action_box)
+            header_box.remove(self._right_action_box)
+            header_bar.pack_end(self._right_action_box)
             self._window.set_titlebar(header_bar)
 
         window_size = self._settings.get(self._size_name)
@@ -497,11 +499,11 @@ class UpdateDialog:
 
         self.is_download = True
         self._sat_view.set_sensitive(False)
-        src = self._source_box.get_active()
+
         if not self._parser:
             self._parser = SatellitesParser()
 
-        self.get_sat_list(src, self.append_satellites)
+        self.get_sat_list(self._source_box.get_active(), self.append_satellites)
 
     def clear_data(self):
         get_base_model(self._sat_view.get_model()).clear()
@@ -531,6 +533,7 @@ class UpdateDialog:
 
         self._sat_view.set_sensitive(True)
         self._satellites_count_label.set_text(str(len(model)))
+        self.update_receive_button_state(self._filter_model)
 
     @run_idle
     def on_receive_data(self, item):
@@ -710,7 +713,7 @@ class ServicesUpdateDialog(UpdateDialog):
         self._services = {}
         self._selected_transponders = set()
         self._services_parser = ServicesParser(source=SatelliteSource.LYNGSAT)
-        # Transponder view popup menu
+        # Transponder view popup menu.
         tr_popup_menu = Gtk.Menu()
         select_all_item = Gtk.ImageMenuItem.new_from_stock("gtk-select-all")
         select_all_item.connect("activate", lambda w: self.update_transponder_selection(True))
@@ -728,6 +731,32 @@ class ServicesUpdateDialog(UpdateDialog):
 
         self._transponder_paned.set_visible(True)
         self._source_box.connect("changed", self.on_update_satellites_list)
+        self._source_box.connect("changed", self.on_source_changed)
+        # Options for KingOfSat source.
+        popover = Gtk.Popover()
+        self._kos_bq_groups_switch = Gtk.Switch()
+        self._kos_bq_lang_switch = Gtk.Switch()
+        self._kos_options_box = Gtk.Box(spacing=5, margin_left=10, margin_right=10,
+                                        orientation=Gtk.Orientation.VERTICAL)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
+        box.pack_start(Gtk.Label(get_message("Create Category bouquets")), False, True, 0)
+        box.pack_end(self._kos_bq_groups_switch, False, True, 0)
+        self._kos_options_box.add(box)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_bottom=5)
+        box.pack_start(Gtk.Label(get_message("Create Language bouquets")), False, True, 0)
+        box.pack_end(self._kos_bq_lang_switch, False, True, 0)
+        self._kos_options_box.add(box)
+        self._kos_options_box.add(Gtk.ModelButton(get_message("Close"), margin_bottom=5))
+        self._kos_options_box.show_all()
+        popover.add(self._kos_options_box)
+        # Options button.
+        option_button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        option_button_box.add(Gtk.Image.new_from_icon_name("applications-system-symbolic", Gtk.IconSize.BUTTON))
+        option_button_box.add(Gtk.Label(get_message("Options")))
+        menu_button = Gtk.MenuButton(popover=popover)
+        menu_button.add(option_button_box)
+        menu_button.show_all()
+        self._right_action_box.pack_end(menu_button, False, False, 0)
 
     @run_idle
     def on_receive_data(self, item):
@@ -736,6 +765,13 @@ class ServicesUpdateDialog(UpdateDialog):
             return
 
         self.receive_services()
+
+    def on_source_changed(self, itme):
+        is_kos = itme.get_active_id() == SatelliteSource.KINGOFSAT.name
+        self._kos_options_box.set_sensitive(is_kos)
+        if not is_kos:
+            self._kos_bq_groups_switch.set_active(False)
+            self._kos_bq_lang_switch.set_active(False)
 
     @run_task
     def receive_services(self):
@@ -815,9 +851,31 @@ class ServicesUpdateDialog(UpdateDialog):
         except ValueError as e:
             log(f"ServicesUpdateDialog [on receive data] error: {e}")
         else:
-            self._callback(srvs)
+            bouquets = None
+            if self._source_box.get_active_id() == SatelliteSource.KINGOFSAT.name:
+                bouquets = self.get_bouquets(srvs, services)
+
+            self._callback(srvs, bouquets)
 
         self.is_download = False
+
+    def get_bouquets(self, prepared, services):
+        bouquets = []
+        services = [srv._replace(fav_id=prepared[i].fav_id) for i, srv in enumerate(services)]
+
+        if self._kos_bq_groups_switch.get_active():
+            self.gen_bouquet_group(services, bouquets, lambda s: s[4] or "")
+        if self._kos_bq_lang_switch.get_active():
+            self.gen_bouquet_group(services, bouquets, lambda s: s[5] or "")
+
+        return Bouquets("", BqType.TV.value, bouquets),
+
+    def gen_bouquet_group(self, services, bouquets, grouper):
+        """ Generates bouquets depending on <grouper>. """
+        s_type = BqServiceType.DEFAULT
+        [bouquets.append(Bouquet(name=g[0], type=BqType.TV.name,
+                                 services=[BouquetService(None, s_type, s.fav_id, 0) for s in g[1]])) for g in
+         groupby(sorted(services, key=grouper), key=grouper) if g[0]]
 
     @run_task
     def get_sat_list(self, src, callback):

@@ -3248,23 +3248,23 @@ class Application(Gtk.Application):
         ServicesUpdateDialog(self._main_window, self._settings, self.on_import_data_from_web).show()
 
     @run_idle
-    def on_import_data_from_web(self, services):
+    def on_import_data_from_web(self, services, bouquets=None):
         msg = "Combine with the current data?"
+
+        def clb():
+            self.show_info_message("Done!")
+
         if len(self._services_model) > 0 and show_dialog(DialogType.QUESTION, self._main_window,
                                                          msg) == Gtk.ResponseType.OK:
-            gen = self.append_imported_data([], services)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            gen = self.append_imported_data(bouquets or [], services, clb)
         else:
-            gen = self.import_data_from_web(services)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            gen = self.import_data_from_web(services, bouquets, clb)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def import_data_from_web(self, services):
+    def import_data_from_web(self, services, bouquets, callback=None):
         self._wait_dialog.show()
-        if self._app_info_box.get_visible():
-            yield from self.create_new_configuration(self._s_type)
-        yield from self.append_services(services)
-        self.update_sat_positions()
-        yield True
+        yield from self.create_new_configuration(self._s_type)
+        yield from self.append_imported_data(bouquets or [], services, callback)
         self._wait_dialog.hide()
 
     # ***************** Export  ******************** #
