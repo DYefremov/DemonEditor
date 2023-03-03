@@ -2414,7 +2414,10 @@ class Application(Gtk.Application):
                     break
 
     def append_services(self, services):
+        to_add = []
         for srv in services:
+            if srv.fav_id not in self._services:
+                to_add.append(srv)
             #  Adding channels to dict with fav_id as keys.
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
@@ -2422,7 +2425,7 @@ class Application(Gtk.Application):
         self._services_load_spinner.start()
         factor = self.DEL_FACTOR / 4
 
-        for index, srv in enumerate(services):
+        for index, srv in enumerate(to_add):
             background = self.get_new_background(srv.flags_cas)
             s = srv + (None, background)
             self._services_model.append(s)
