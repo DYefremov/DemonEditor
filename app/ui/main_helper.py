@@ -610,8 +610,11 @@ def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
             callback(Bouquet(cond, bq_type, s_data.get(cond)), bq_root_iter)
     else:
         # We add a bouquet only if the given name is missing [keys - names]!
-        for name in sorted(s_data.keys() - bq_names):
-            callback(Bouquet(name, BqType.TV.value, s_data.get(name)), bq_root_iter)
+        if gen_type is BqGenType.EACH_SAT:
+            bq_names = sorted(s_data.keys() - bq_names, key=get_pos_num, reverse=True)
+        else:
+            bq_names = sorted(s_data.keys() - bq_names)
+        [callback(Bouquet(name, BqType.TV.value, s_data.get(name)), bq_root_iter) for name in bq_names]
 
 
 def get_bouquets_names(model):
