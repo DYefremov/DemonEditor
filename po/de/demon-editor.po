@@ -1460,3 +1460,18 @@ msgstr "Duplikate entfernen"
 
 msgid "Removed"
 msgstr "Entfernt"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Ermöglicht das Überschreiben vorhandener Hauptlistendienste."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Ermöglicht das Überspringen von Dienstimporten aus lamedb."
+
+msgid "Bouquets data only"
+msgstr "Nur Bouquets-Daten"
+
+msgid "Create Category bouquets"
+msgstr "Erstellen Kategories-Bouquets"
+
+msgid "Create Language bouquets"
+msgstr "Erstellen Sprachen-Bouquets"

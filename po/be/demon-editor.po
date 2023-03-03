@@ -1446,3 +1446,18 @@ msgstr "Выдаліць дублікаты"
 
 msgid "Removed"
 msgstr "Выдалена"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Улучае перазапіс існых сэрвісаў асноўнага спіса."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Улучае пропуск імпарту сэрвісаў з lamedb."
+
+msgid "Bouquets data only"
+msgstr "Толькі дадзеныя букетаў"
+
+msgid "Create Category bouquets"
+msgstr "Стварыць букеты па катэгорыях"
+
+msgid "Create Language bouquets"
+msgstr "Стварыць букеты па мовах"
