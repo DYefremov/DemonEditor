@@ -30,6 +30,7 @@ import concurrent.futures
 import os
 import re
 import time
+from collections import OrderedDict
 from itertools import groupby
 from math import fabs
 
@@ -841,6 +842,7 @@ class ServicesUpdateDialog(UpdateDialog):
                         log(f"Getting services error: {e} [{t_names.get(futures[future])}]")
 
         appender.send("-" * 75 + "\n")
+        services = OrderedDict({s.fav_id: s for s in services}).values()
         appender.send(f"Consumed: {time.time() - start:0.0f}s, {len(services)} services received.")
 
         try:
