@@ -461,6 +461,8 @@ class UpdateDialog:
                                          builder.get_object("sat_update_search_down_button"),
                                          builder.get_object("sat_update_search_up_button"))
         builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
+        # Satellite lists init on dialog start.
+        self._sat_view.connect("realize", self.on_update_satellites_list)
 
         if self._settings.use_header_bar:
             header_bar = HeaderBar()
