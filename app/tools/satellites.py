@@ -752,7 +752,7 @@ class ServicesParser(HTMLParser):
         mod = get_key_by_value(MODULATION, mod)
         fec = get_key_by_value(FEC, fec) or "0"
         # For negative (West) positions: 3600 - numeric position value!!!
-        namespace = f"{3600 - pos if pos < 0 else pos:04x}0000"
+        namespace = f"{3600 - abs(pos) if pos < 0 else pos:04x}0000"
         tr_flag = 1
         roll_off = 0  # 35% DVB-S2/DVB-S (default)
         pilot = 2  # Auto
