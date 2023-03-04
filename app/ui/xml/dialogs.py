@@ -737,10 +737,10 @@ class ServicesUpdateDialog(UpdateDialog):
         self._source_box.connect("changed", self.on_source_changed)
         # Options for KingOfSat source.
         popover = Gtk.Popover()
+        main_options_box = Gtk.Box(spacing=5, margin_left=10, margin_right=10, orientation=Gtk.Orientation.VERTICAL)
         self._kos_bq_groups_switch = Gtk.Switch()
         self._kos_bq_lang_switch = Gtk.Switch()
-        self._kos_options_box = Gtk.Box(spacing=5, margin_left=10, margin_right=10,
-                                        orientation=Gtk.Orientation.VERTICAL)
+        self._kos_options_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
         box.pack_start(Gtk.Label(get_message("Create Category bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_groups_switch, False, True, 0)
@@ -749,9 +749,18 @@ class ServicesUpdateDialog(UpdateDialog):
         box.pack_start(Gtk.Label(get_message("Create Language bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_lang_switch, False, True, 0)
         self._kos_options_box.add(box)
-        self._kos_options_box.add(Gtk.ModelButton(get_message("Close"), margin_bottom=5))
-        self._kos_options_box.show_all()
-        popover.add(self._kos_options_box)
+        main_options_box.add(self._kos_options_box)
+        # General options.
+        self._general_options_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self._skip_c_band_switch = Gtk.Switch()
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
+        box.pack_start(Gtk.Label(get_message("Skip C-band")), False, True, 0)
+        box.pack_end(self._skip_c_band_switch, False, True, 0)
+        self._general_options_box.add(box)
+        main_options_box.add(self._general_options_box)
+        main_options_box.add(Gtk.ModelButton(get_message("Close"), margin_bottom=5))
+        main_options_box.show_all()
+        popover.add(main_options_box)
         # Options button.
         option_button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         option_button_box.add(Gtk.Image.new_from_icon_name("applications-system-symbolic", Gtk.IconSize.BUTTON))
@@ -775,6 +784,7 @@ class ServicesUpdateDialog(UpdateDialog):
         if not is_kos:
             self._kos_bq_groups_switch.set_active(False)
             self._kos_bq_lang_switch.set_active(False)
+        self._kos_options_box.set_tooltip_text(None if is_kos else get_message("KingOfSat only!"))
 
     @run_task
     def receive_services(self):
@@ -859,7 +869,13 @@ class ServicesUpdateDialog(UpdateDialog):
             if self._source_box.get_active_id() == SatelliteSource.KINGOFSAT.name:
                 bouquets = self.get_bouquets(srvs, services)
 
-            self._callback(srvs, bouquets)
+            def c_filter(s):
+                try:
+                    return int(s.freq) > 10000
+                except ValueError:
+                    return False
+
+            self._callback(filter(c_filter, srvs) if self._skip_c_band_switch.get_active() else srvs, bouquets)
 
         self.is_download = False
 
