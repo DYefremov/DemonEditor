@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-02-27 20:29+0100\n"
+"PO-Revision-Date: 2023-03-04 03:07+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 22.12.2\n"
+"X-Generator: Lokalize 22.12.3\n"
 
 msgid "translator-credits"
 msgstr "Massimo Pissarello"
@@ -1508,3 +1508,17 @@ msgstr "Rimuovi duplicati"
 msgid "Removed"
 msgstr "Rimosso"
 
+msgid "Enables overwriting existing main list services."
+msgstr "Consente di sovrascrivere i servizi esistenti dell'elenco principale."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Consente di saltare l'importazione dei servizi da lamedb."
+
+msgid "Bouquets data only"
+msgstr "Bouquet solo dati"
+
+msgid "Create Category bouquets"
+msgstr "Crea bouquet categorie"
+
+msgid "Create Language bouquets"
+msgstr "Crea bouquet lingue"
