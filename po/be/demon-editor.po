@@ -1459,5 +1459,11 @@ msgstr "Толькі дадзеныя букетаў"
 msgid "Create Category bouquets"
 msgstr "Стварыць букеты па катэгорыях"
 
-msgid "Create Language bouquets"
-msgstr "Стварыць букеты па мовах"
+msgid "Create Regional bouquets"
+msgstr "Стварыць букеты па рэгіёнах"
+
+msgid "Skip C-band"
+msgstr "Прапусціць C-дыяпазон"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Аўтаматычная ўсталёўка імя, абранага ў спісе букетаў."

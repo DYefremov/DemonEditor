@@ -1473,5 +1473,11 @@ msgstr "Nur Bouquets-Daten"
 msgid "Create Category bouquets"
 msgstr "Erstellen Kategories-Bouquets"
 
-msgid "Create Language bouquets"
-msgstr "Erstellen Sprachen-Bouquets"
+msgid "Create Regional bouquets"
+msgstr "Erstellen Regionale-Bouquets"
+
+msgid "Skip C-band"
+msgstr "C-Band überspringen"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Stellen in der Bouquet-Liste ausgewählten Namen automatisch ein."

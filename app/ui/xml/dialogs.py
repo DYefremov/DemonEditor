@@ -746,7 +746,7 @@ class ServicesUpdateDialog(UpdateDialog):
         box.pack_end(self._kos_bq_groups_switch, False, True, 0)
         self._kos_options_box.add(box)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_bottom=5)
-        box.pack_start(Gtk.Label(get_message("Create Language bouquets")), False, True, 0)
+        box.pack_start(Gtk.Label(get_message("Create Regional bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_lang_switch, False, True, 0)
         self._kos_options_box.add(box)
         main_options_box.add(self._kos_options_box)
