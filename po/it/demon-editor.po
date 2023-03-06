@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-03-04 03:07+0100\n"
+"PO-Revision-Date: 2023-03-06 13:22+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -1520,5 +1520,11 @@ msgstr "Bouquet solo dati"
 msgid "Create Category bouquets"
 msgstr "Crea bouquet categorie"
 
-msgid "Create Language bouquets"
-msgstr "Crea bouquet lingue"
+msgid "Create Regional bouquets"
+msgstr "Crea bouquet regionali"
+
+msgid "Skip C-band"
+msgstr "Salta banda C"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Imposta automaticamente il nome selezionato nell'elenco dei bouquet."
