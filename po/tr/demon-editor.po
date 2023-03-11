@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2023-02-23 14:22+0300\n"
+"PO-Revision-Date: 2023-03-11 23:39+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: \n"
 "Language: tr\n"
@@ -1477,3 +1477,24 @@ msgstr "Kopyaları kaldır"
 
 msgid "Removed"
 msgstr "Kaldırıldı"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Mevcut ana liste hizmetlerinin üzerine yazılmasını sağlar."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Lamedb'den içe aktarılan hizmetlerin atlanmasını sağlar."
+
+msgid "Bouquets data only"
+msgstr "Yalnızca buket verileri"
+
+msgid "Create Category bouquets"
+msgstr "Kategori buketleri oluştur"
+
+msgid "Create Regional bouquets"
+msgstr "Bölgesel buketler oluşturun"
+
+msgid "Skip C-band"
+msgstr "C-band atla"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Buket listesinde seçilen isimleri otomatik olarak ayarlayın."
