@@ -1082,6 +1082,7 @@ Author: Dmitriy Yefremov
                             <property name="primary_icon_name">document-edit-symbolic</property>
                             <property name="secondary_icon_tooltip_text" translatable="yes">Link to YouTube resource.</property>
                             <signal name="changed" handler="on_url_changed" swapped="no"/>
+                            <signal name="paste_clipboard" handler="on_url_paste" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">True</property>

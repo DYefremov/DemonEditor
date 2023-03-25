@@ -81,6 +81,7 @@ class IptvDialog:
         handlers = {"on_response": self.on_response,
                     "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
+                    "on_url_paste": self.on_url_paste,
                     "on_save": self.on_save,
                     "on_stream_type_changed": self.on_stream_type_changed,
                     "on_yt_quality_changed": self.on_yt_quality_changed,
@@ -93,6 +94,7 @@ class IptvDialog:
         self._bouquet = bouquet
         self._yt_links = None
         self._yt_dl = None
+        self._inserted_url = False
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
                               objects=("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
@@ -117,7 +119,7 @@ class IptvDialog:
         self._message_label = builder.get_object("info_bar_message_label")
         self._yt_quality_box = builder.get_object("yt_iptv_quality_combobox")
         self._model, self._paths = view.get_selection().get_selected_rows()
-        # style
+        # Style.
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._digit_elems = (self._srv_id_entry, self._srv_type_entry, self._sid_entry, self._tr_id_entry,
@@ -194,7 +196,7 @@ class IptvDialog:
             elif stream_type is StreamType.E_SERVICE_HLS:
                 self._stream_type_combobox.set_active(5)
         except ValueError:
-            self.show_info_message("Unknown stream type {}".format(s_type), Gtk.MessageType.ERROR)
+            self.show_info_message(f"Unknown stream type {s_type}", Gtk.MessageType.ERROR)
 
         self._srv_id_entry.set_text(data[1])
         self._srv_type_entry.set_text(str(int(data[2], 16)))
@@ -212,7 +214,6 @@ class IptvDialog:
 
     def update_reference_entry(self):
         if self._s_type is SettingsType.ENIGMA_2 and is_data_correct(self._digit_elems):
-            self.on_url_changed(self._url_entry)
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_id_entry.get_text(),
                                                                      int(self._srv_type_entry.get_text()),
@@ -242,15 +243,19 @@ class IptvDialog:
         if yt_id:
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
             text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-            if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
+            if self._inserted_url and show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
                 entry.set_sensitive(False)
                 gen = self.set_yt_url(entry, yt_id)
                 GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            self._inserted_url = False
         elif YouTube.is_yt_video_link(url_str):
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
             self._yt_quality_box.set_visible(False)
+
+    def on_url_paste(self, entry):
+        self._inserted_url = True
 
     def set_yt_url(self, entry, video_id):
         try:
