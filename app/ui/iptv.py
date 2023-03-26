@@ -76,6 +76,9 @@ def get_stream_type(box):
 
 
 class IptvDialog:
+    _URL_PREFIXES = {"YT-DLP": "YT-DLP://",
+                     "YT-DL": "YT-DL://",
+                     "STREAMLINK": "STREAMLINK://"}
 
     def __init__(self, app, view, bouquet=None, service=None, action=Action.ADD):
         handlers = {"on_response": self.on_response,
@@ -118,6 +121,8 @@ class IptvDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._yt_quality_box = builder.get_object("yt_iptv_quality_combobox")
+        self._url_prefix_box = builder.get_object("iptv_url_prefix_box")
+        self._url_prefix_combobox = builder.get_object("iptv_url_prefix_combobox")
         self._model, self._paths = view.get_selection().get_selected_rows()
         # Style.
         self._style_provider = Gtk.CssProvider()
@@ -136,6 +141,8 @@ class IptvDialog:
         else:
             self._description_entry.set_visible(False)
             builder.get_object("iptv_description_label").set_visible(False)
+            [self._url_prefix_combobox.append(v, k) for k, v in self._URL_PREFIXES.items()]
+            self._url_prefix_combobox.set_active(0)
 
         if self._action is Action.ADD:
             self._save_button.set_visible(False)
@@ -204,7 +211,14 @@ class IptvDialog:
         self._tr_id_entry.set_text(str(int(data[4], 16)))
         self._net_id_entry.set_text(str(int(data[5], 16)))
         self._namespace_entry.set_text(str(int(data[6], 16)))
-        self._url_entry.set_text(unquote(data[10].strip()))
+        # URL.
+        url = unquote(data[10].strip())
+        sch = urlparse(url).scheme.upper()
+        if sch in self._URL_PREFIXES:
+            active_prefix = self._URL_PREFIXES.get(sch)
+            url = url.lstrip(active_prefix)
+            self._url_prefix_combobox.set_active_id(active_prefix)
+        self._url_entry.set_text(url)
         self.update_reference_entry()
 
     def init_neutrino_data(self, fav_id):
@@ -247,11 +261,14 @@ class IptvDialog:
                 entry.set_sensitive(False)
                 gen = self.set_yt_url(entry, yt_id)
                 GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            else:
+                self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
             self._inserted_url = False
         elif YouTube.is_yt_video_link(url_str):
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
+            self._url_prefix_box.set_visible(False)
 
     def on_url_paste(self, entry):
         self._inserted_url = True
@@ -308,6 +325,12 @@ class IptvDialog:
 
     def save_enigma2_data(self):
         name = self._name_entry.get_text().strip()
+        if self._url_prefix_box.get_visible():
+            url = self._url_entry.get_text().replace(':', '%3A', 1)
+            url = f"{quote(self._url_prefix_combobox.get_active_id())}{url}"
+        else:
+            url = quote(self._url_entry.get_text())
+
         fav_id = ENIGMA2_FAV_ID_FORMAT.format(self.get_type(),
                                               self._srv_id_entry.get_text(),
                                               int(self._srv_type_entry.get_text()),
@@ -315,8 +338,7 @@ class IptvDialog:
                                               int(self._tr_id_entry.get_text()),
                                               int(self._net_id_entry.get_text()),
                                               int(self._namespace_entry.get_text()),
-                                              quote(self._url_entry.get_text()),
-                                              name, name)
+                                              url, name, name)
 
         self.update_bouquet_data(name, fav_id)
 

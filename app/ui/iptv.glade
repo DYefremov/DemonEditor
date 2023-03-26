@@ -1049,7 +1049,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -1066,42 +1066,89 @@ Author: Dmitriy Yefremov
                     <property name="label-xalign">0.019999999552965164</property>
                     <property name="shadow-type">in</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="iptv_url_box">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-bottom">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkEntry" id="url_entry">
+                          <object class="GtkBox" id="iptv_url_entry_box">
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="margin-left">5</property>
-                            <property name="margin-right">5</property>
-                            <property name="margin-bottom">5</property>
-                            <property name="primary-icon-name">document-edit-symbolic</property>
-                            <property name="secondary-icon-tooltip-text" translatable="yes">Link to YouTube resource.</property>
-                            <signal name="changed" handler="on_url_changed" swapped="no"/>
-                            <signal name="paste-clipboard" handler="on_url_paste" swapped="no"/>
+                            <property name="can-focus">False</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkEntry" id="url_entry">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="primary-icon-name">document-edit-symbolic</property>
+                                <property name="secondary-icon-tooltip-text" translatable="yes">Link to YouTube resource.</property>
+                                <signal name="changed" handler="on_url_changed" swapped="no"/>
+                                <signal name="paste-clipboard" handler="on_url_paste" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBox" id="yt_iptv_quality_combobox">
+                                <property name="can-focus">False</property>
+                                <property name="tooltip-text" translatable="yes">Desired video quality</property>
+                                <property name="model">yt_quality_liststore</property>
+                                <property name="active">0</property>
+                                <property name="id-column">0</property>
+                                <signal name="changed" handler="on_yt_quality_changed" swapped="no"/>
+                                <child>
+                                  <object class="GtkCellRendererText" id="yt_quality_renderer"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBox" id="yt_iptv_quality_combobox">
+                          <object class="GtkBox" id="iptv_url_prefix_box">
                             <property name="can-focus">False</property>
-                            <property name="tooltip-text" translatable="yes">Desired video quality</property>
-                            <property name="margin-right">5</property>
-                            <property name="margin-bottom">5</property>
-                            <property name="model">yt_quality_liststore</property>
-                            <property name="active">0</property>
-                            <property name="id-column">0</property>
-                            <signal name="changed" handler="on_yt_quality_changed" swapped="no"/>
+                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkCellRendererText" id="yt_quality_renderer"/>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
+                              <object class="GtkLabel" id="iptv_url_prefix_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Use URL prefix:</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="iptv_url_prefix_combobox">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">end</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>
@@ -1318,7 +1365,7 @@ Author: Dmitriy Yefremov
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
