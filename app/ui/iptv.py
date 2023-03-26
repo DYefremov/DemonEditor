@@ -252,10 +252,10 @@ class IptvDialog:
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
-            self._yt_quality_box.set_visible(False)
 
     def on_url_paste(self, entry):
         self._inserted_url = True
+        self._yt_quality_box.set_visible(False)
 
     def set_yt_url(self, entry, video_id):
         try:
@@ -269,7 +269,7 @@ class IptvDialog:
             links, title = self._yt_dl.get_yt_link(video_id, entry.get_text())
             yield True
         except urllib.error.URLError as e:
-            self.show_info_message(get_message("Getting link error:") + (str(e)), Gtk.MessageType.ERROR)
+            self.show_info_message(f"{get_message('Getting link error:')} {e}", Gtk.MessageType.ERROR)
             return
         except YouTubeException as e:
             self.show_info_message((str(e)), Gtk.MessageType.ERROR)
@@ -284,7 +284,7 @@ class IptvDialog:
                 entry.set_text(links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
                 self._yt_links = links
             else:
-                msg = get_message("Getting link error:") + " No link received for id: {}".format(video_id)
+                msg = f"{get_message('Getting link error:')} No link received for id: {video_id}"
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
         finally:
             entry.set_sensitive(True)
@@ -296,10 +296,15 @@ class IptvDialog:
         self.update_reference_entry()
 
     def on_yt_quality_changed(self, box):
+        if not self._yt_links:
+            return
+
         model = box.get_model()
         active = model.get_value(box.get_active_iter(), 0)
-        if self._yt_links and active in self._yt_links:
+        if active in self._yt_links:
             self._url_entry.set_text(self._yt_links[active])
+        else:
+            self._url_entry.set_text(self._yt_links.get(max(self._yt_links, default=None), ""))
 
     def save_enigma2_data(self):
         name = self._name_entry.get_text().strip()
