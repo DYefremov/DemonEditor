@@ -51,6 +51,7 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
+_URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "STREAMLINK://"}
 
 
 def is_data_correct(elems):
@@ -76,9 +77,6 @@ def get_stream_type(box):
 
 
 class IptvDialog:
-    _URL_PREFIXES = {"YT-DLP": "YT-DLP://",
-                     "YT-DL": "YT-DL://",
-                     "STREAMLINK": "STREAMLINK://"}
 
     def __init__(self, app, view, bouquet=None, service=None, action=Action.ADD):
         handlers = {"on_response": self.on_response,
@@ -141,7 +139,7 @@ class IptvDialog:
         else:
             self._description_entry.set_visible(False)
             builder.get_object("iptv_description_label").set_visible(False)
-            [self._url_prefix_combobox.append(v, k) for k, v in self._URL_PREFIXES.items()]
+            [self._url_prefix_combobox.append(v, k) for k, v in _URL_PREFIXES.items()]
             self._url_prefix_combobox.set_active(0)
 
         if self._action is Action.ADD:
@@ -214,8 +212,8 @@ class IptvDialog:
         # URL.
         url = unquote(data[10].strip())
         sch = urlparse(url).scheme.upper()
-        if sch in self._URL_PREFIXES:
-            active_prefix = self._URL_PREFIXES.get(sch)
+        if sch in _URL_PREFIXES:
+            active_prefix = _URL_PREFIXES.get(sch)
             url = url.lstrip(active_prefix)
             self._url_prefix_combobox.set_active_id(active_prefix)
         self._url_entry.set_text(url)
@@ -919,9 +917,10 @@ class YtListImportDialog:
         self._import_button = builder.get_object("yt_import_button")
         self._quality_box = builder.get_object("yt_quality_combobox")
         self._quality_model = builder.get_object("yt_quality_liststore")
-        self._import_button.bind_property("visible", self._quality_box, "visible")
-        self._import_button.bind_property("sensitive", self._quality_box, "sensitive")
-        self._receive_button.bind_property("sensitive", self._import_button, "sensitive")
+        self._extract_switch = builder.get_object("yt_extract_links_switch")
+        self._url_prefix_combobox = builder.get_object("yt_url_prefix_combobox")
+        [self._url_prefix_combobox.append(v, k) for k, v in _URL_PREFIXES.items()]
+        self._url_prefix_combobox.set_active(0)
 
         if self._settings.use_header_bar:
             header_bar = HeaderBar(title="YouTube", subtitle=get_message("Playlist import"))
@@ -948,6 +947,10 @@ class YtListImportDialog:
 
     @run_task
     def on_import(self, item):
+        if not self._extract_switch.get_active():
+            self.show_info_message(f"[URL prefix] {get_message('Not implemented yet!')}", Gtk.MessageType.ERROR)
+            return
+
         self.on_info_bar_close()
         self.update_active_elements(False)
         self._download_task = True

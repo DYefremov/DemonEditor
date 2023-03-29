@@ -1130,7 +1130,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="iptv_url_prefix_label">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Use URL prefix:</property>
+                                <property name="label" translatable="yes">URL prefix:</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1491,7 +1491,7 @@ Author: Dmitriy Yefremov
                     <property name="image">yt_receive_image</property>
                     <property name="always-show-image">True</property>
                     <signal name="clicked" handler="on_receive" swapped="no"/>
-                    <accelerator key="d" signal="clicked"/>
+                    <accelerator key="d" signal="clicked" modifiers="Primary"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1508,12 +1508,13 @@ Author: Dmitriy Yefremov
                       <object class="GtkButton" id="yt_import_button">
                         <property name="label" translatable="yes">Import</property>
                         <property name="can-focus">False</property>
+                        <property name="sensitive" bind-source="yt_receive_button" bind-property="sensitive">False</property>
                         <property name="receives-default">True</property>
                         <property name="tooltip-text" translatable="yes">Import</property>
                         <property name="image">yt_import_image</property>
                         <property name="always-show-image">True</property>
                         <signal name="clicked" handler="on_import" swapped="no"/>
-                        <accelerator key="i" signal="clicked"/>
+                        <accelerator key="i" signal="clicked" modifiers="Primary"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1523,6 +1524,8 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkComboBox" id="yt_quality_combobox">
+                        <property name="visible" bind-source="yt_import_button" bind-property="visible">False</property>
+                        <property name="sensitive" bind-source="yt_import_button" bind-property="sensitive">True</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Desired video quality</property>
                         <property name="model">yt_quality_liststore</property>
@@ -1567,17 +1570,108 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="yt_url_entry">
+          <object class="GtkBox" id="yt_url_box">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="can-focus">False</property>
             <property name="margin-start">5</property>
             <property name="margin-end">5</property>
             <property name="margin-top">5</property>
             <property name="margin-bottom">5</property>
-            <property name="primary-icon-name">document-edit-symbolic</property>
-            <property name="secondary-icon-tooltip-text" translatable="yes">Link to YouTube resource.</property>
-            <property name="placeholder-text" translatable="yes">YouTube playlist URL:</property>
-            <signal name="changed" handler="on_yt_url_entry_changed" swapped="no"/>
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkEntry" id="yt_url_entry">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="primary-icon-name">document-edit-symbolic</property>
+                <property name="secondary-icon-tooltip-text" translatable="yes">Link to YouTube resource.</property>
+                <property name="placeholder-text" translatable="yes">YouTube playlist URL:</property>
+                <signal name="changed" handler="on_yt_url_entry_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="yt_extract_links_box">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel" id="yt_extract_links_label">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Extract direct links</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSwitch" id="yt_extract_links_switch">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="active">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="yt_url_prefix_box">
+                <property name="visible">True</property>
+                <property name="sensitive" bind-source="yt_extract_links_switch" bind-property="active" bind-flags="invert-boolean">False</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel" id="yt_url_prefix_label">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">URL prefix:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="yt_url_prefix_combobox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1620,6 +1714,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkCellRendererText" id="yt_title_renderer">
                         <property name="xpad">5</property>
+                        <property name="ellipsize">end</property>
                       </object>
                       <attributes>
                         <attribute name="text">0</attribute>
