@@ -918,9 +918,13 @@ class YtListImportDialog:
         self._quality_box = builder.get_object("yt_quality_combobox")
         self._quality_model = builder.get_object("yt_quality_liststore")
         self._extract_switch = builder.get_object("yt_extract_links_switch")
+
         self._url_prefix_combobox = builder.get_object("yt_url_prefix_combobox")
         [self._url_prefix_combobox.append(v, k) for k, v in _URL_PREFIXES.items()]
         self._url_prefix_combobox.set_active(0)
+
+        builder.get_object("yt_extract_links_box").set_visible(self._s_type is SettingsType.ENIGMA_2)
+        builder.get_object("yt_url_prefix_box").set_visible(self._s_type is SettingsType.ENIGMA_2)
 
         if self._settings.use_header_bar:
             header_bar = HeaderBar(title="YouTube", subtitle=get_message("Playlist import"))
@@ -936,23 +940,30 @@ class YtListImportDialog:
         window_size = self._settings.get("yt_import_dialog_size")
         if window_size:
             self._dialog.resize(*window_size)
-        # Style
+        # Style.
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        style_provider.load_from_path(f"{UI_RESOURCES_PATH}style.css")
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def show(self):
         self._dialog.show()
 
-    @run_task
     def on_import(self, item):
-        if not self._extract_switch.get_active():
-            self.show_info_message(f"[URL prefix] {get_message('Not implemented yet!')}", Gtk.MessageType.ERROR)
-            return
-
         self.on_info_bar_close()
         self.update_active_elements(False)
+
+        if self._extract_switch.get_active():
+            self.extract_direct_links()
+        else:
+            prefix = self._url_prefix_combobox.get_active_id()
+            selected = filter(lambda r: r[2], self._model)
+            links = [(f"{quote(prefix)}https{quote(':')}//www.youtube.com/watch?v={r[1]}", r[0]) for r in selected]
+            self.append_services(links)
+            self.update_active_elements(True)
+
+    @run_task
+    def extract_direct_links(self):
         self._download_task = True
 
         try:
@@ -981,7 +992,6 @@ class YtListImportDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             if self._download_task:
-                self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
                 self.append_services([done_links[r] for r in rows])
         finally:
             self._download_task = False
@@ -1024,22 +1034,31 @@ class YtListImportDialog:
         aggr = [None] * 9
         srvs = []
 
-        if self._yt_list_title:
+        if self._yt_list_title and self._s_type is SettingsType.ENIGMA_2:
             title = self._yt_list_title
             fav_id = MARKER_FORMAT.format(0, title, title)
             mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, 0, fav_id, None)
             srvs.append(mk)
 
-        act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)
+        extract = self._extract_switch.get_active()
+
+        act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0) if extract else None
         for link in links:
             lnk, title = link or (None, None)
             if not lnk:
                 continue
-            ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
-            fav_id = get_fav_id(ln, title, self._s_type)
+
+            if extract:
+                ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
+            else:
+                ln = lnk
+
+            fav_id = get_fav_id(ln, title, self._s_type, force_quote=extract)
             srv = Service(None, None, IPTV_ICON, title, *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
             srvs.append(srv)
+
         self.appender(srvs)
+        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     @run_idle
     def update_active_elements(self, sensitive):

@@ -153,12 +153,13 @@ def export_to_m3u(path, bouquet, s_type, url=None):
         file.writelines(lines)
 
 
-def get_fav_id(url, name, settings_type, params=None, st_type=None, s_id=0, srv_type=1):
-    """ Returns fav id depending on the profile. """
+def get_fav_id(url, name, settings_type, params=None, st_type=None, s_id=0, srv_type=1, force_quote=True):
+    """ Returns fav id depending on the settings type. """
     if settings_type is SettingsType.ENIGMA_2:
         st_type = st_type or StreamType.NONE_TS.value
         params = params or (0, 0, 0, 0)
-        return ENIGMA2_FAV_ID_FORMAT.format(st_type, s_id, srv_type, *params, quote(url), name, name, None)
+        url = quote(url) if force_quote else url
+        return ENIGMA2_FAV_ID_FORMAT.format(st_type, s_id, srv_type, *params, url, name, name, None)
     elif settings_type is SettingsType.NEUTRINO_MP:
         return NEUTRINO_FAV_ID_FORMAT.format(url, "", 0, None, None, None, None, "", "", 1)
 

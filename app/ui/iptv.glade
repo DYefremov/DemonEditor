@@ -1502,6 +1502,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButtonBox" id="yt_import_box">
                     <property name="visible">True</property>
+                    <property name="sensitive" bind-source="yt_import_button" bind-property="sensitive">True</property>
                     <property name="can-focus">False</property>
                     <property name="layout-style">expand</property>
                     <child>
@@ -1525,7 +1526,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkComboBox" id="yt_quality_combobox">
                         <property name="visible" bind-source="yt_import_button" bind-property="visible">False</property>
-                        <property name="sensitive" bind-source="yt_import_button" bind-property="sensitive">True</property>
+                        <property name="sensitive" bind-source="yt_extract_links_switch" bind-property="active">True</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Desired video quality</property>
                         <property name="model">yt_quality_liststore</property>
