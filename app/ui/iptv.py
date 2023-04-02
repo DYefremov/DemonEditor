@@ -269,8 +269,10 @@ class IptvDialog:
                     entry.set_sensitive(False)
                     gen = self.set_yt_url(entry, yt_id)
                     GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-            self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
+                else:
+                    self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
+            else:
+                self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
             self._inserted_url = False
         elif YouTube.is_yt_video_link(url_str):
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
