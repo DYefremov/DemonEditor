@@ -51,7 +51,7 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
-_URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "STREAMLINK://"}
+_URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "STREAMLINK://", "No": None}
 
 
 def is_data_correct(elems):
@@ -167,6 +167,12 @@ class IptvDialog:
             self.show_info_message(get_message("Error. Verify the data!"), Gtk.MessageType.ERROR)
             return
 
+        if all((self._url_prefix_box.get_visible(),
+                self._url_prefix_combobox.get_active_id(),
+                self._url_entry.get_text().count("http") > 1)):
+            self.show_info_message(get_message("Invalid prefix for the given URL!"), Gtk.MessageType.ERROR)
+            return
+
         if show_dialog(DialogType.QUESTION, self._dialog) in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -216,6 +222,9 @@ class IptvDialog:
             active_prefix = _URL_PREFIXES.get(sch)
             url = url.lstrip(active_prefix)
             self._url_prefix_combobox.set_active_id(active_prefix)
+        else:
+            self._url_prefix_combobox.set_active(len(_URL_PREFIXES) - 1)
+
         self._url_entry.set_text(url)
         self.update_reference_entry()
 
@@ -255,12 +264,13 @@ class IptvDialog:
         if yt_id:
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
             text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-            if self._inserted_url and show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
-                entry.set_sensitive(False)
-                gen = self.set_yt_url(entry, yt_id)
-                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-            else:
-                self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
+            if self._inserted_url and url_str.count("http") == 1:
+                if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
+                    entry.set_sensitive(False)
+                    gen = self.set_yt_url(entry, yt_id)
+                    GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+            self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
             self._inserted_url = False
         elif YouTube.is_yt_video_link(url_str):
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
@@ -324,8 +334,9 @@ class IptvDialog:
     def save_enigma2_data(self):
         name = self._name_entry.get_text().strip()
         if self._url_prefix_box.get_visible():
-            url = self._url_entry.get_text().replace(':', '%3A', 1)
-            url = f"{quote(self._url_prefix_combobox.get_active_id())}{url}"
+            prefix = self._url_prefix_combobox.get_active_id()
+            url = self._url_entry.get_text().replace(':', '%3A', 1 if prefix else -1)
+            url = f"{quote(prefix) if prefix else ''}{url}"
         else:
             url = quote(self._url_entry.get_text())
 
@@ -958,7 +969,8 @@ class YtListImportDialog:
         else:
             prefix = self._url_prefix_combobox.get_active_id()
             selected = filter(lambda r: r[2], self._model)
-            links = [(f"{quote(prefix)}https{quote(':')}//www.youtube.com/watch?v={r[1]}", r[0]) for r in selected]
+            prefix = quote(prefix) if prefix else ''
+            links = [(f"{prefix}https{quote(':')}//www.youtube.com/watch?v={r[1]}", r[0]) for r in selected]
             self.append_services(links)
             self.update_active_elements(True)
 
