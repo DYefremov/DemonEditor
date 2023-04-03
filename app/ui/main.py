@@ -3915,7 +3915,7 @@ class Application(Gtk.Application):
 
     def on_bouquets_edit(self, view):
         """ Renaming bouquets. """
-        if not self._bq_selected:
+        if not self._bq_selected and self._s_type is SettingsType.NEUTRINO_MP:
             self.show_error_message("This item is not allowed to edit!")
             return
 
@@ -3923,7 +3923,7 @@ class Application(Gtk.Application):
 
         if paths:
             itr = model.get_iter(paths[0])
-            bq_name, bq_type = model.get(itr, 0, 3)
+            bq_name, bq_type = model.get(itr, Column.BQ_NAME, Column.BQ_TYPE)
             response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
             if response == Gtk.ResponseType.CANCEL:
                 return
@@ -3933,7 +3933,10 @@ class Application(Gtk.Application):
                 self.show_error_message(get_message("A bouquet with that name exists!"))
                 return
 
-            model.set_value(itr, 0, response)
+            model.set_value(itr, Column.BQ_NAME, response)
+            if not model.iter_has_child(itr):
+                return
+
             old_bq_name = f"{bq_name}:{bq_type}"
             self._bouquets[bq] = self._bouquets.pop(old_bq_name)
             self._bq_file[bq] = self._bq_file.pop(old_bq_name, None)
