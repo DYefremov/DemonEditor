@@ -51,7 +51,7 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
-_URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "STREAMLINK://", "No": None}
+_URL_PREFIXES = {"YT-DLP": "yt-dlp://", "YT-DL": "yt-dl://", "STREAMLINK": "streamlink://", "No": None}
 
 
 def is_data_correct(elems):
@@ -167,9 +167,10 @@ class IptvDialog:
             self.show_info_message(get_message("Error. Verify the data!"), Gtk.MessageType.ERROR)
             return
 
+        url = self._url_entry.get_text()
         if all((self._url_prefix_box.get_visible(),
                 self._url_prefix_combobox.get_active_id(),
-                self._url_entry.get_text().count("http") > 1)):
+                url.count("http") > 1 or urlparse(url).scheme.upper() in _URL_PREFIXES)):
             self.show_info_message(get_message("Invalid prefix for the given URL!"), Gtk.MessageType.ERROR)
             return
 
@@ -220,7 +221,7 @@ class IptvDialog:
         sch = urlparse(url).scheme.upper()
         if sch in _URL_PREFIXES:
             active_prefix = _URL_PREFIXES.get(sch)
-            url = url.lstrip(active_prefix)
+            url = re.sub(active_prefix, "", url, 1, re.IGNORECASE)
             self._url_prefix_combobox.set_active_id(active_prefix)
         else:
             self._url_prefix_combobox.set_active(len(_URL_PREFIXES) - 1)
