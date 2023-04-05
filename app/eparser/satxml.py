@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -190,6 +190,11 @@ def indent(elem, parent=None, index=-1, level=0, space="    "):
 
         if index == len(parent) - 1:
             elem.tail = f"\n{space * (level - 1)}"
+
+
+def get_pos_str(pos: int) -> str:
+    """ Converts satellite position int value to readable string. """
+    return f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}"
 
 
 if __name__ == "__main__":

@@ -42,6 +42,7 @@ from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC,
                                   T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC, GUARD_INTERVAL, TRANSMISSION_MODE,
                                   HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder,
                                   Bouquet, BouquetService, BqServiceType, Bouquets, BqType)
+from app.eparser.satxml import get_pos_str
 from app.settings import USE_HEADER_BAR
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
@@ -463,6 +464,9 @@ class UpdateDialog:
         builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
         # Satellite lists init on dialog start.
         self._sat_view.connect("realize", self.on_update_satellites_list)
+        # Options.
+        self._general_options_box = builder.get_object("general_options_box")
+        self._skip_c_band_switch = builder.get_object("skip_c_band_switch")
 
         if self._settings.use_header_bar:
             header_bar = HeaderBar()
@@ -644,6 +648,15 @@ class SatellitesUpdateDialog(UpdateDialog):
 
         self._main_model = main_model
         self._source_box.connect("changed", self.on_update_satellites_list)
+        # Options.
+        self._merge_sat_switch = Gtk.Switch()
+        box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL)
+        box.pack_start(Gtk.Label(get_message("Merge satellites by positions")), False, True, 0)
+        box.pack_end(self._merge_sat_switch, False, True, 0)
+        self._general_options_box.pack_start(box, True, True, 0)
+        self._general_options_box.show_all()
+
+        self._skip_c_band_switch.get_parent().set_visible(False)
 
     @run_idle
     def on_receive_data(self, item):
@@ -659,6 +672,7 @@ class SatellitesUpdateDialog(UpdateDialog):
         self.update_log_visibility()
         model = self._sat_view.get_model()
         start = time.time()
+        _len = 75
 
         with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
             text = "Processing: {}\n"
@@ -678,10 +692,39 @@ class SatellitesUpdateDialog(UpdateDialog):
                 appender.send(text.format(data[0]))
                 sats.append(data)
 
-            appender.send("-" * 75 + "\n")
+            appender.send("-" * _len + "\n")
             sat_count = len(sats)
 
-            sats = {s[0]: s for s in sats}  # key = name, v = satellite
+            if self._merge_sat_switch.get_active():
+                def grouper(sat):
+                    try:
+                        return int(sat.position)
+                    except ValueError:
+                        pass
+                    return 0
+
+                sat_groups = groupby(sorted(sats, key=grouper, reverse=True), key=grouper)
+                sats = {}
+                for pos, satellites in sat_groups:
+                    satellites = list(satellites)
+                    if len(satellites) > 1:
+                        position = get_pos_str(pos)
+                        appender.send(f"Merging satellites for position: {position}\n")
+                        names = []
+                        transponders = []
+                        for s in satellites:
+                            names.append(s.name.lstrip(position).strip().split())
+                            transponders.extend(s.transponders)
+
+                        transponders.sort(key=lambda t: int(t.frequency))
+                        sat = Satellite(self.get_grouped_satellite_name(names, pos), "0", str(pos), transponders)
+                        sats[sat.name] = sat
+                    else:
+                        sat = satellites.pop()
+                        sats[sat.name] = sat
+                appender.send("-" * _len + "\n")
+            else:
+                sats = {s.name: s for s in sats}  # key = name, v = satellite
 
             for row in self._main_model:
                 pos = row[0]
@@ -694,10 +737,38 @@ class SatellitesUpdateDialog(UpdateDialog):
                 appender.send(f"Adding satellite: {s.name}\n")
                 self.append_satellite(s)
 
-            appender.send("-" * 75 + "\n")
+            appender.send("-" * _len + "\n")
             appender.send(f"Consumed: {time.time() - start:0.0f}s, {sat_count} satellites received.\n")
             appender.close()
             self.is_download = False
+
+    def get_grouped_satellite_name(self, sat_names, pos):
+        """ Forms name for merged satellites. """
+
+        def name_grouper(nd):
+            if nd:
+                return nd[0]
+            return ""
+
+        name_groups = groupby(sorted(sat_names, key=name_grouper), key=name_grouper)
+        names = []
+        for s, s_names in name_groups:
+            tk = set()
+            name = s
+            for i, n_data in enumerate(s_names):
+                if i == 0:
+                    name = " ".join(n_data)
+                    tk.update(n_data)
+                else:
+                    for n in n_data:
+                        if n in tk:
+                            continue
+                        name = f"{name}/{n}"
+                        tk.add(n)
+
+            names.append(name)
+
+        return f"{pos} {' & '.join(names)}"
 
     @run_idle
     def append_satellite(self, sat):
@@ -736,8 +807,6 @@ class ServicesUpdateDialog(UpdateDialog):
         self._source_box.connect("changed", self.on_update_satellites_list)
         self._source_box.connect("changed", self.on_source_changed)
         # Options for KingOfSat source.
-        popover = Gtk.Popover()
-        main_options_box = Gtk.Box(spacing=5, margin_left=10, margin_right=10, orientation=Gtk.Orientation.VERTICAL)
         self._kos_bq_groups_switch = Gtk.Switch()
         self._kos_bq_lang_switch = Gtk.Switch()
         self._kos_options_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
@@ -749,26 +818,8 @@ class ServicesUpdateDialog(UpdateDialog):
         box.pack_start(Gtk.Label(get_message("Create Regional bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_lang_switch, False, True, 0)
         self._kos_options_box.add(box)
-        main_options_box.add(self._kos_options_box)
-        # General options.
-        self._general_options_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self._skip_c_band_switch = Gtk.Switch()
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
-        box.pack_start(Gtk.Label(get_message("Skip C-band")), False, True, 0)
-        box.pack_end(self._skip_c_band_switch, False, True, 0)
-        self._general_options_box.add(box)
-        main_options_box.add(self._general_options_box)
-        main_options_box.add(Gtk.ModelButton(get_message("Close"), margin_bottom=5))
-        main_options_box.show_all()
-        popover.add(main_options_box)
-        # Options button.
-        option_button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        option_button_box.add(Gtk.Image.new_from_icon_name("applications-system-symbolic", Gtk.IconSize.BUTTON))
-        option_button_box.add(Gtk.Label(get_message("Options")))
-        menu_button = Gtk.MenuButton(popover=popover)
-        menu_button.add(option_button_box)
-        menu_button.show_all()
-        self._right_action_box.pack_end(menu_button, False, False, 0)
+        self._general_options_box.pack_start(self._kos_options_box, True, True, 0)
+        self._general_options_box.show_all()
 
     @run_idle
     def on_receive_data(self, item):

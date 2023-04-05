@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,9 @@ from app.eparser import get_satellites, write_satellites, Satellite, Transponder
 from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTEM, BANDWIDTH, CONSTELLATION, T_FEC,
                                   GUARD_INTERVAL, TRANSMISSION_MODE, HIERARCHY, Inversion, FEC_DEFAULT, C_MODULATION,
                                   Terrestrial, Cable, CableTransponder, TerTransponder)
-from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable
-from .dialogs import SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog, \
-    CableTransponderDialog, TerTransponderDialog
+from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable, get_pos_str
+from .dialogs import (SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog,
+                      CableTransponderDialog, TerTransponderDialog)
 from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
 from ..main_helper import move_items, on_popup_menu, scroll_to
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
@@ -56,8 +56,8 @@ class SatellitesTool(Gtk.Box):
         def __str__(self):
             return self.value
 
-    def __init__(self, app, settings, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app, settings, **kwargs):
+        super().__init__(**kwargs)
 
         self._app = app
         self._app.connect("data-save", self.on_save)
@@ -162,8 +162,7 @@ class SatellitesTool(Gtk.Box):
 
     def sat_pos_func(self, column, renderer, model, itr, data):
         """ Converts and sets the satellite position value to a readable format. """
-        pos = int(model.get_value(itr, 2))
-        renderer.set_property("text", f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}")
+        renderer.set_property("text", get_pos_str(int(model.get_value(itr, 2))))
 
     def sat_pol_func(self, column, renderer, model, itr, data):
         renderer.set_property("text", POLARIZATION.get(model.get_value(itr, 2), None))

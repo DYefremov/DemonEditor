@@ -30,6 +30,7 @@
 import re
 
 from app.commons import log
+from app.eparser.satxml import get_pos_str
 from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
 from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType, FEC_DEFAULT, T_SYSTEM
@@ -220,8 +221,7 @@ class LameDbReader:
                     freq = f"{int(freq) // 1000}"
                     rate = f"{int(rate) // 1000}"
                     if tr_type is TrType.Satellite:
-                        pos = int(pos)
-                        pos = f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}"
+                        pos = get_pos_str(int(pos))
                 except ValueError as e:
                     log(f"Parse error [parse_services]: {e}")
 
