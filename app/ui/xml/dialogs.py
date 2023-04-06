@@ -412,14 +412,12 @@ class UpdateDialog:
         self._settings = settings
         self._download_task = False
         self._parser = None
-        self._size_name = f"{'_'.join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__))}_window_size".lower()
 
         builder = get_builder(f"{UI_RESOURCES_PATH}xml{os.sep}update.glade", handlers)
 
         self._window = builder.get_object("satellites_update_window")
         self._window.set_transient_for(transient)
-        if title:
-            self._window.set_title(title)
+        self._window.set_title(title if title else "")
 
         self._transponder_paned = builder.get_object("sat_update_tr_paned")
         self._sat_view = builder.get_object("sat_update_tree_view")
@@ -480,7 +478,11 @@ class UpdateDialog:
             header_bar.pack_end(self._right_action_box)
             self._window.set_titlebar(header_bar)
 
-        window_size = self._settings.get(self._size_name)
+        # Dialog settings.
+        self._dialog_name = f"{'_'.join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__))}".lower()
+        self._dialog_settings = self._settings.get(self._dialog_name, {})
+        self._skip_c_band_switch.set_active(self._dialog_settings.get("skip_c_band", False))
+        window_size = self._dialog_settings.get("window_size", None)
         if window_size:
             self._window.resize(*window_size)
 
@@ -636,8 +638,13 @@ class UpdateDialog:
         self._filter_model.get_model().set_value(itr, 4, select)
 
     def on_quit(self, window, event):
-        self._settings.add(self._size_name, window.get_size())
+        self.save_settings()
         self.is_download = False
+
+    def save_settings(self):
+        self._dialog_settings["window_size"] = self._window.get_size()
+        self._dialog_settings["skip_c_band"] = self._skip_c_band_switch.get_active()
+        self._settings.add(self._dialog_name, self._dialog_settings)
 
 
 class SatellitesUpdateDialog(UpdateDialog):
@@ -649,7 +656,8 @@ class SatellitesUpdateDialog(UpdateDialog):
         self._main_model = main_model
         self._source_box.connect("changed", self.on_update_satellites_list)
         # Options.
-        self._merge_sat_switch = Gtk.Switch()
+        self._merge_sat_switch = Gtk.Switch(active=self._dialog_settings.get("merge_satellites", False))
+        self._merge_sat_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"merge_satellites": s}))
         box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL)
         box.pack_start(Gtk.Label(get_message("Merge satellites by positions")), False, True, 0)
         box.pack_end(self._merge_sat_switch, False, True, 0)
@@ -807,8 +815,10 @@ class ServicesUpdateDialog(UpdateDialog):
         self._source_box.connect("changed", self.on_update_satellites_list)
         self._source_box.connect("changed", self.on_source_changed)
         # Options for KingOfSat source.
-        self._kos_bq_groups_switch = Gtk.Switch()
-        self._kos_bq_lang_switch = Gtk.Switch()
+        self._kos_bq_groups_switch = Gtk.Switch(active=self._dialog_settings.get("kos_bq_groups", False))
+        self._kos_bq_groups_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"kos_bq_groups": s}))
+        self._kos_bq_lang_switch = Gtk.Switch(active=self._dialog_settings.get("kos_bq_lang", False))
+        self._kos_bq_lang_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"kos_bq_lang": s}))
         self._kos_options_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
         box.pack_start(Gtk.Label(get_message("Create Category bouquets")), False, True, 0)
