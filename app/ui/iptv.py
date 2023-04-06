@@ -219,7 +219,7 @@ class IptvDialog:
         # URL.
         url = unquote(data[10].strip())
         sch = urlparse(url).scheme.upper()
-        if sch in _URL_PREFIXES:
+        if YouTube.get_yt_id(url) and sch in _URL_PREFIXES:
             active_prefix = _URL_PREFIXES.get(sch)
             url = re.sub(active_prefix, "", url, 1, re.IGNORECASE)
             self._url_prefix_combobox.set_active_id(active_prefix)
