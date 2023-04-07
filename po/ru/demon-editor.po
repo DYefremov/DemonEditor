@@ -1464,3 +1464,21 @@ msgstr "Пропустить C-диапазон"
 
 msgid "Automatically set the name selected in the bouquet list."
 msgstr "Автоматическая установка имени, выбранного в списке букетов."
+
+msgid "Merge satellites by positions"
+msgstr "Объединять спутники по позициям"
+
+msgid "Save satellite selection"
+msgstr "Сохранять выбор спутников"
+
+msgid "Extract direct links"
+msgstr "Извлечь прямые ссылки"
+
+msgid "URL prefix:"
+msgstr "Префикс URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Недопустимый префикс для данного URL!"
+
+msgid "Alternate window title"
+msgstr "Альтернативный заголовок окна"

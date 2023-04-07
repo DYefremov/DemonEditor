@@ -1481,3 +1481,21 @@ msgstr "C-Band überspringen"
 
 msgid "Automatically set the name selected in the bouquet list."
 msgstr "Stellen in der Bouquet-Liste ausgewählten Namen automatisch ein."
+
+msgid "Merge satellites by positions"
+msgstr "Satelliten nach Pos. zusammenführen"
+
+msgid "Save satellite selection"
+msgstr "Satellitenauswahl speichern"
+
+msgid "Extract direct links"
+msgstr "Direktlinks extrahieren"
+
+msgid "URL prefix:"
+msgstr "URL-Präfix:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Ungültiges Präfix für die angegebene URL!"
+
+msgid "Alternate window title"
+msgstr "Alternativer Fenstertitel"
