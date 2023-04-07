@@ -727,7 +727,7 @@ class SatellitesUpdateDialog(UpdateDialog):
                             transponders.extend(s.transponders)
 
                         transponders.sort(key=lambda t: int(t.frequency))
-                        sat = Satellite(self.get_grouped_satellite_name(names, pos), "0", str(pos), transponders)
+                        sat = Satellite(self.get_grouped_satellite_name(names, position), "0", str(pos), transponders)
                         sats[sat.name] = sat
                     else:
                         sat = satellites.pop()
