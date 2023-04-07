@@ -43,7 +43,7 @@ from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC,
                                   HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder,
                                   Bouquet, BouquetService, BqServiceType, Bouquets, BqType)
 from app.eparser.satxml import get_pos_str
-from app.settings import USE_HEADER_BAR
+from app.settings import USE_HEADER_BAR, Settings, CONFIG_PATH
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
@@ -412,6 +412,7 @@ class UpdateDialog:
         self._settings = settings
         self._download_task = False
         self._parser = None
+        self._selected_satellites = set()
 
         builder = get_builder(f"{UI_RESOURCES_PATH}xml{os.sep}update.glade", handlers)
 
@@ -464,6 +465,7 @@ class UpdateDialog:
         self._sat_view.connect("realize", self.on_update_satellites_list)
         # Options.
         self._general_options_box = builder.get_object("general_options_box")
+        self._save_sat_selection_switch = builder.get_object("save_sat_selection_switch")
         self._skip_c_band_switch = builder.get_object("skip_c_band_switch")
 
         if self._settings.use_header_bar:
@@ -482,7 +484,12 @@ class UpdateDialog:
         self._dialog_name = f"{'_'.join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__))}".lower()
         self._dialog_settings = self._settings.get(self._dialog_name, {})
         self._source_box.set_active(self._dialog_settings.get("source", 1))
+        self._save_sat_selection_switch.set_active(self._dialog_settings.get("save_sat_selection", False))
         self._skip_c_band_switch.set_active(self._dialog_settings.get("skip_c_band", False))
+
+        if self._save_sat_selection_switch.get_active():
+            self._selected_satellites.update(self.get_selected_satellites())
+
         window_size = self._dialog_settings.get("window_size", None)
         if window_size:
             self._window.resize(*window_size)
@@ -538,8 +545,10 @@ class UpdateDialog:
     @run_idle
     def append_satellites(self, sats):
         model = get_base_model(self._sat_view.get_model())
+
         for sat in sats:
-            model.append(sat)
+            itr = model.append(sat)
+            model[itr][-1] = sat[-2] in self._selected_satellites
 
         self._sat_view.set_sensitive(True)
         self._satellites_count_label.set_text(str(len(model)))
@@ -638,6 +647,10 @@ class UpdateDialog:
         itr = self._filter_model.convert_iter_to_child_iter(model.convert_iter_to_child_iter(model.get_iter(path)))
         self._filter_model.get_model().set_value(itr, 4, select)
 
+        if self._save_sat_selection_switch.get_active():
+            sat = model[path][-2]
+            self._selected_satellites.add(sat) if select else self._selected_satellites.discard(sat)
+
     def on_quit(self, window, event):
         self.save_settings()
         self.is_download = False
@@ -645,8 +658,21 @@ class UpdateDialog:
     def save_settings(self):
         self._dialog_settings["window_size"] = self._window.get_size()
         self._dialog_settings["source"] = self._source_box.get_active()
+        self._dialog_settings["save_sat_selection"] = self._save_sat_selection_switch.get_active()
         self._dialog_settings["skip_c_band"] = self._skip_c_band_switch.get_active()
         self._settings.add(self._dialog_name, self._dialog_settings)
+        self.save_selected_satellites()
+
+    def get_selected_satellites(self):
+        """ Returns selected satellites set from the last session. """
+        c_file = f"{CONFIG_PATH}{self._dialog_name}_satellites"
+        return Settings.get_settings(c_file, default_settings=[])
+
+    def save_selected_satellites(self):
+        """ Saves current selected satellites to a file. """
+        if self._save_sat_selection_switch.get_active():
+            c_file = f"{CONFIG_PATH}{self._dialog_name}_satellites"
+            Settings.write_settings(list(self._selected_satellites), config_file=c_file)
 
 
 class SatellitesUpdateDialog(UpdateDialog):
@@ -972,10 +998,9 @@ class ServicesUpdateDialog(UpdateDialog):
         self.is_download = False
 
     def on_satellite_toggled(self, toggle, path):
-        model = self._sat_view.get_model()
-        self.update_state(model, path, not toggle.get_active())
-        self.update_receive_button_state(self._filter_model)
+        super().on_satellite_toggled(toggle, path)
 
+        model = self._sat_view.get_model()
         url = model.get_value(model.get_iter(path), 3)
         selected = toggle.get_active()
         transponders = self._transponders.get(url, None)
