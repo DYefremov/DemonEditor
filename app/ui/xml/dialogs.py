@@ -481,6 +481,7 @@ class UpdateDialog:
         # Dialog settings.
         self._dialog_name = f"{'_'.join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__))}".lower()
         self._dialog_settings = self._settings.get(self._dialog_name, {})
+        self._source_box.set_active(self._dialog_settings.get("source", 1))
         self._skip_c_band_switch.set_active(self._dialog_settings.get("skip_c_band", False))
         window_size = self._dialog_settings.get("window_size", None)
         if window_size:
@@ -643,6 +644,7 @@ class UpdateDialog:
 
     def save_settings(self):
         self._dialog_settings["window_size"] = self._window.get_size()
+        self._dialog_settings["source"] = self._source_box.get_active()
         self._dialog_settings["skip_c_band"] = self._skip_c_band_switch.get_active()
         self._settings.add(self._dialog_name, self._dialog_settings)
 
