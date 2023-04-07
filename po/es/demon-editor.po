@@ -1,7 +1,7 @@
-# Copyright (C) 2018-2022 Víctor Pont
+# Copyright (C) 2018-2023 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-# Frank Neirynck <frank@insink.be>, 2018-2020.
+# Frank Neirynck <frank@insink.be>, 2018-2023.
 # Víctor Pont <victor@pont.cat>, 2021-2022.
 msgid ""
 msgstr ""
@@ -1441,3 +1441,57 @@ msgstr "Habilita la carga como un archivo si se selecciona una gran cantidad de 
 
 msgid "Clear \"New\" flag"
 msgstr "Limpiar \"Nuevo\" flag"
+
+msgid "Group by"
+msgstr "Agrupar por"
+
+msgid "Replace existing"
+msgstr "Sustituir los existentes"
+
+msgid "Already exists"
+msgstr "Ya existe"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Activar búfer de copia ilimitado"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Activa el búfer de copia ilimitado para la pestaña de bouquets."
+
+msgid "Start time"
+msgstr "Hora de inicio"
+
+msgid "End time"
+msgstr "Hora final"
+
+msgid "Enable extensions support"
+msgstr "Activar el soporte de extensiones"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Después de cargar los cambios, es posible que tenga que reiniciar completamente el receptor."
+
+msgid "Remove duplicates"
+msgstr "Eliminar duplicados"
+
+msgid "Removed"
+msgstr "Eliminado"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Permite sobrescribir los servicios existentes de la lista principal."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Permite omitir la importación de servicios desde lamedb."
+
+msgid "Bouquets data only"
+msgstr "Sólo datos de bouquets"
+
+msgid "Create Category bouquets"
+msgstr "Crear categoría de bouquets"
+
+msgid "Create Regional bouquets"
+msgstr "Crear bouquets regionales"
+
+msgid "Skip C-band"
+msgstr "Omitir banda C"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Establece automáticamente el nombre seleccionado en la lista de bouquets."

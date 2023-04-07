@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2020 Frank Neirynck
+# Copyright (C) 2018-2023 Frank Neirynck
 # This file is distributed under the MIT license.
 #
 # Frank Neirynck <frank@insink.be>, 2018-2022.
@@ -1401,3 +1401,57 @@ msgstr "Maakt uploaden als archief mogelijk als een groot aantal pictogrammen (>
 
 msgid "Clear \"New\" flag"
 msgstr "Opruimen \"Niew\" flag"
+
+msgid "Group by"
+msgstr "Groeperen per"
+
+msgid "Replace existing"
+msgstr "Vervang bestaande"
+
+msgid "Already exists"
+msgstr "Bestaat reeds"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Onbeperkte kopieerbuffer inschakelen"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Schakelt een onbeperkte kopieerbuffer in voor het boeketten tabblad."
+
+msgid "Start time"
+msgstr "Starttijd"
+
+msgid "End time"
+msgstr "Eindtijd"
+
+msgid "Enable extensions support"
+msgstr "Ondersteuning voor extensies inschakelen"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Na het uploaden van de wijzigingen kan het nodig zijn de ontvanger volledig opnieuw op te starten!"
+
+msgid "Remove duplicates"
+msgstr "Duplicaten verwijderen"
+
+msgid "Removed"
+msgstr "Verwijderd"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Maakt het overschrijven van bestaande hoofdlijst diensten mogelijk."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Maakt het overslaan van dienstenimport uit lamedb mogelijk."
+
+msgid "Bouquets data only"
+msgstr "Alleen gegevens over boeketten"
+
+msgid "Create Category bouquets"
+msgstr "Maak categorie boeketten"
+
+msgid "Create Regional bouquets"
+msgstr "Maak regionale boeketten"
+
+msgid "Skip C-band"
+msgstr "C-band overslaan"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Stel automatisch de naam in die is geselecteerd in de boeketlijst."
