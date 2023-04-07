@@ -903,13 +903,14 @@ class Settings:
     # **************** Get-Set settings **************** #
 
     @staticmethod
-    def get_settings():
-        if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
-            Settings.write_settings(Settings.get_default_settings())
+    def get_settings(config_file=CONFIG_FILE, default_settings=None):
+        if not os.path.isfile(config_file) or os.stat(config_file).st_size == 0:
+            df = Settings.get_default_settings() if default_settings is None else default_settings
+            Settings.write_settings(df, config_file=config_file)
 
-        with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
+        with open(config_file, "r", encoding="utf-8") as cf:
             try:
-                return json.load(config_file)
+                return json.load(cf)
             except ValueError as e:
                 raise SettingsReadException(e)
 
@@ -941,10 +942,10 @@ class Settings:
                                     "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"}}
 
     @staticmethod
-    def write_settings(config):
-        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-            json.dump(config, config_file, indent="    ")
+    def write_settings(config, config_path=CONFIG_PATH, config_file=CONFIG_FILE):
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_file, "w", encoding="utf-8") as cf:
+            json.dump(config, cf, indent="    ")
 
     @staticmethod
     def normalize_path(path):
