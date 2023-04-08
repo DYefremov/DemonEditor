@@ -3934,7 +3934,7 @@ class Application(Gtk.Application):
                 return
 
             model.set_value(itr, Column.BQ_NAME, response)
-            if not model.iter_has_child(itr):
+            if not model.iter_parent(itr):
                 return
 
             old_bq_name = f"{bq_name}:{bq_type}"
@@ -3943,7 +3943,7 @@ class Application(Gtk.Application):
             self._current_bq_name = response
             self._bq_name_label.set_text(self._current_bq_name)
             self._bq_selected = bq
-            # services with extra names for the bouquet
+            # Services with extra names for the bouquet.
             ext_bq = self._extra_bouquets.get(old_bq_name, None)
             if ext_bq:
                 self._extra_bouquets[bq] = ext_bq
