@@ -3,9 +3,9 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2023-03-11 23:39+0300\n"
+"PO-Revision-Date: 2023-04-09 01:44+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
-"Language-Team: \n"
+"Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1498,3 +1498,21 @@ msgstr "C-band atla"
 
 msgid "Automatically set the name selected in the bouquet list."
 msgstr "Buket listesinde seçilen isimleri otomatik olarak ayarlayın."
+
+msgid "Merge satellites by positions"
+msgstr "Uyduları konumlara göre birleştir"
+
+msgid "Save satellite selection"
+msgstr "Uydu seçimini kaydet"
+
+msgid "Extract direct links"
+msgstr "Doğrudan bağlantıları ayıklayın"
+
+msgid "URL prefix:"
+msgstr "URL öneki:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Belirtilen URL için geçersiz önek!"
+
+msgid "Alternate window title"
+msgstr "Alternatif pencere başlığı"
