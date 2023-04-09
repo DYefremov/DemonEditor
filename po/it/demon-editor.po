@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-03-06 13:22+0100\n"
+"PO-Revision-Date: 2023-04-09 06:23+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -1528,3 +1528,22 @@ msgstr "Salta banda C"
 
 msgid "Automatically set the name selected in the bouquet list."
 msgstr "Imposta automaticamente il nome selezionato nell'elenco dei bouquet."
+
+msgid "Merge satellites by positions"
+msgstr "Unisci i satelliti per posizione"
+
+msgid "Save satellite selection"
+msgstr "Salva la selezione dei satelliti"
+
+msgid "Extract direct links"
+msgstr "Estrai link diretti"
+
+msgid "URL prefix:"
+msgstr "Prefisso URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Prefisso non valido per l'URL specificata!"
+
+msgid "Alternate window title"
+msgstr "Titolo alternativo della finestra"
+
