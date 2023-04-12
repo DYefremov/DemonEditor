@@ -51,7 +51,7 @@ _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
-_URL_PREFIXES = {"YT-DLP": "yt-dlp://", "YT-DL": "yt-dl://", "STREAMLINK": "streamlink://", "No": None}
+_URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "streamlink://", "No": None}
 
 
 def is_data_correct(elems):
