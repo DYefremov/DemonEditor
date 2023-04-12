@@ -3248,7 +3248,7 @@ class Application(Gtk.Application):
         if self._s_type is not SettingsType.ENIGMA_2:
             self.show_error_message("Not allowed in this context!")
             return
-        ServicesUpdateDialog(self._main_window, self._settings, self.on_import_data_from_web).show()
+        ServicesUpdateDialog(self).show()
 
     @run_idle
     def on_import_data_from_web(self, services, bouquets=None):
@@ -3890,7 +3890,7 @@ class Application(Gtk.Application):
             return self.show_error_message("Data loading in progress!")
 
         model, paths = view.get_selection().get_selected_rows()
-        if is_only_one_item_selected(paths, self._main_window):
+        if is_only_one_item_selected(paths, self):
             model_name = get_base_model(model).get_name()
             if model_name == self.FAV_MODEL:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
@@ -4229,8 +4229,7 @@ class Application(Gtk.Application):
             self.show_error_message("No bouquets config is loaded. Load or create a new config!")
             return
 
-        gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._s_type,
-                     self.append_bouquet)
+        gen_bouquets(self, g_type)
 
     # ***************** Alternatives ********************* #
 

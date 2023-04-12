@@ -39,8 +39,8 @@ import os
 import re
 import shutil
 import unicodedata
-from collections import defaultdict
 from functools import lru_cache
+from itertools import groupby
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -546,13 +546,13 @@ def remove_picons(settings, picon_ids, picons):
             shutil.move(src, backup_path + p_id)
 
 
-def is_only_one_item_selected(paths, transient):
+def is_only_one_item_selected(paths, app):
     if len(paths) > 1:
-        show_dialog(DialogType.ERROR, transient, "Please, select only one item!")
+        app.show_error_message("Please, select only one item!")
         return False
 
     if not paths:
-        show_dialog(DialogType.ERROR, transient, "No selected item!")
+        app.show_error_message("No selected item!")
         return False
 
     return True
@@ -574,47 +574,89 @@ def get_picon_file_name(service_name):
 
 # ***************** Bouquets ********************* #
 
-def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
+def gen_bouquets(app, gen_type):
     """ Auto-generate and append list of bouquets. """
-    model, paths = view.get_selection().get_selected_rows()
-    single_types = (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE)
-    if gen_type in single_types:
-        if not is_only_one_item_selected(paths, transient):
-            return
+    model, paths = app.services_view.get_selection().get_selected_rows()
+    single_types = {BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE}
+    if gen_type in single_types and not is_only_one_item_selected(paths, app):
+        return
 
-    fav_id_index = Column.SRV_FAV_ID
     index = Column.SRV_TYPE
     if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE):
         index = Column.SRV_PACKAGE
     elif gen_type in (BqGenType.SAT, BqGenType.EACH_SAT):
         index = Column.SRV_POS
 
-    # Splitting services [caching] by column value.
-    s_data = defaultdict(list)
-    for row in model:
-        s_data[row[index]].append(BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0))
+    ids = {row[Column.SRV_FAV_ID] for row in model}
+    services = [v for k, v in app.current_services.items() if k in ids]
 
-    bq_type = BqType.BOUQUET.value if s_type is SettingsType.NEUTRINO_MP else BqType.TV.value
-    bq_index = 0 if s_type is SettingsType.ENIGMA_2 else 1
-    bq_root_iter = bq_view.get_model().get_iter(bq_index)
     srv = Service(*model[paths][:Column.SRV_TOOLTIP])
     cond = srv.package if gen_type is BqGenType.PACKAGE else srv.pos if gen_type is BqGenType.SAT else srv.service_type
-    bq_view.expand_row(Gtk.TreePath(bq_index), 0)
+
+    if gen_type is BqGenType.TYPE and cond == "Data":
+        msg = f"{get_message('Selected type:')} '{cond}'\n\n{get_message('Are you sure?')}"
+        if show_dialog(DialogType.QUESTION, app.app_window, msg) != Gtk.ResponseType.OK:
+            return
+
+    def grouper(s):
+        data = s[index]
+        return data if data else "None"
+
+    services = {k: list(v) for k, v in groupby(sorted(services, key=grouper), key=grouper)}
+
+    bq_view = app.bouquets_view
+    bq_type = BqType.TV.value if app.is_enigma else BqType.BOUQUET.value
+    bq_index = 0 if app.is_enigma else 1
+    bq_root_iter = bq_view.get_model().get_iter(bq_index)
 
     bq_names = get_bouquets_names(bq_view.get_model())
 
     if gen_type in single_types:
         if cond in bq_names:
-            show_dialog(DialogType.ERROR, transient, "A bouquet with that name exists!")
-        else:
-            callback(Bouquet(cond, bq_type, s_data.get(cond)), bq_root_iter)
+            app.show_error_message("A bouquet with that name exists!")
+            return
+
+        bq_services = get_services_type_groups(services.get(cond, []))
+        if app.is_enigma:
+            if srv.service_type == "Radio":
+                bq_index = 1
+                bq_type = BqType.RADIO.value
+                bq_root_iter = bq_view.get_model().get_iter(bq_index)
+                bq_view.expand_row(Gtk.TreePath(bq_index), 1)
+                bq_services = bq_services.get("Radio", [])
+            else:
+                bq_view.expand_row(Gtk.TreePath(bq_index), 0)
+                bq_services = bq_services.get("Data" if srv.service_type == "Data" else "TV", [])
+        app.append_bouquet(Bouquet(cond, bq_type, get_bouquet_services(bq_services)), bq_root_iter)
     else:
+        bq_view.expand_row(Gtk.TreePath(bq_index), 0)
         # We add a bouquet only if the given name is missing [keys - names]!
         if gen_type is BqGenType.EACH_SAT:
-            bq_names = sorted(s_data.keys() - bq_names, key=get_pos_num, reverse=True)
+            bq_names = sorted(services.keys() - bq_names, key=get_pos_num, reverse=True)
         else:
-            bq_names = sorted(s_data.keys() - bq_names)
-        [callback(Bouquet(name, BqType.TV.value, s_data.get(name)), bq_root_iter) for name in bq_names]
+            bq_names = sorted(services.keys() - bq_names)
+
+        tv_bqs = []
+        radio_bqs = []
+        for n in bq_names:
+            bqs = services.get(n, [])
+            # TV and Radio separation.
+            bq_grp = get_services_type_groups(bqs)
+            tv_bq = bq_grp.get("TV", [])
+            tv_bqs.append(Bouquet(n, BqType.TV.value, get_bouquet_services(tv_bq))) if tv_bq else None
+            radio_bq = bq_grp.get("Radio", [])
+            radio_bqs.append(Bouquet(n, BqType.RADIO.value, get_bouquet_services(radio_bq))) if radio_bq else None
+
+        [app.append_bouquet(b, bq_root_iter) for b in tv_bqs]
+        if app.is_enigma:
+            bq_root_iter = bq_view.get_model().get_iter(bq_index + 1)
+            bq_view.expand_row(Gtk.TreePath(bq_index + 1), 0)
+            [app.append_bouquet(b, bq_root_iter) for b in radio_bqs]
+
+
+def get_bouquet_services(services):
+    services.sort(key=lambda s: s.service)
+    return [BouquetService(None, BqServiceType.DEFAULT, s.fav_id, 0) for s in services]
 
 
 def get_bouquets_names(model):
@@ -630,12 +672,28 @@ def get_bouquets_names(model):
     return bouquets_names
 
 
+def get_services_type_groups(services):
+    """ Returns services grouped by main types [TV, Radio, Data]. -> dict """
+
+    def type_grouper(s):
+        s_type = s.service_type
+
+        if s_type == "Data":
+            return s_type
+        elif s_type == "Radio":
+            return s_type
+        else:
+            return "TV"
+
+    return {k: list(v) for k, v in groupby(sorted(services, key=type_grouper), key=type_grouper)}
+
+
 # ***************** Others ********************* #
 
 def copy_reference(view, app):
     """ Copying picon id to clipboard. """
     model, paths = view.get_selection().get_selected_rows()
-    if not is_only_one_item_selected(paths, app.app_window):
+    if not is_only_one_item_selected(paths, app):
         return
 
     target = app.get_target_view(view)

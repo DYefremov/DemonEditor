@@ -46,7 +46,7 @@ from app.eparser.satxml import get_pos_str
 from app.settings import USE_HEADER_BAR, Settings, CONFIG_PATH
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, DialogType, get_message, get_builder
-from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu
+from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu, get_services_type_groups
 from ..search import SearchProvider
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HeaderBar
 
@@ -814,10 +814,10 @@ class SatellitesUpdateDialog(UpdateDialog):
 class ServicesUpdateDialog(UpdateDialog):
     """ Dialog for updating services from the Web. """
 
-    def __init__(self, transient, settings, callback):
-        super().__init__(transient=transient, settings=settings, title="Services update")
+    def __init__(self, app):
+        super().__init__(transient=app.app_window, settings=app.app_settings, title="Services update")
 
-        self._callback = callback
+        self._callback = app.on_import_data_from_web
         self._satellite_paths = {}
         self._transponders = {}
         self._services = {}
@@ -956,7 +956,7 @@ class ServicesUpdateDialog(UpdateDialog):
         else:
             bouquets = None
             if self._source_box.get_active_id() == SatelliteSource.KINGOFSAT.name:
-                bouquets = self.get_bouquets(srvs, services)
+                bouquets = self.get_bouquets([srv._replace(fav_id=srvs[i].fav_id) for i, srv in enumerate(services)])
 
             def c_filter(s):
                 try:
@@ -968,21 +968,30 @@ class ServicesUpdateDialog(UpdateDialog):
 
         self.is_download = False
 
-    def get_bouquets(self, prepared, services):
-        bouquets = []
-        services = [srv._replace(fav_id=prepared[i].fav_id) for i, srv in enumerate(services)]
+    def get_bouquets(self, services):
+        type_groups = get_services_type_groups(services)
+        tv_bouquets, radio_bouquets = [], []
+
+        tv_services = sorted(type_groups.get("TV", []), key=lambda s: s.service)
+        rd_services = sorted(type_groups.get("Radio", []), key=lambda s: s.service)
+        no_lb = "No Category"
 
         if self._kos_bq_groups_switch.get_active():
-            self.gen_bouquet_group(services, bouquets, lambda s: s[4] or "")
+            self.gen_bouquet_group(tv_services, tv_bouquets, lambda s: s[4] or no_lb)
+            self.gen_bouquet_group(rd_services, radio_bouquets, lambda s: s[4] or no_lb, bq_type=BqType.RADIO.value)
+
         if self._kos_bq_lang_switch.get_active():
-            self.gen_bouquet_group(services, bouquets, lambda s: s[5] or "")
+            lb = "" if no_lb in {b.name for b in tv_bouquets} else "No Region"
+            self.gen_bouquet_group(tv_services, tv_bouquets, lambda s: s[5] or lb)
+            lb = "" if no_lb in {b.name for b in radio_bouquets} else "No Region"
+            self.gen_bouquet_group(rd_services, radio_bouquets, lambda s: s[5] or lb, bq_type=BqType.RADIO.value)
 
-        return Bouquets("", BqType.TV.value, bouquets),
+        return Bouquets("", BqType.TV.value, tv_bouquets), Bouquets("", BqType.RADIO.value, radio_bouquets)
 
-    def gen_bouquet_group(self, services, bouquets, grouper):
+    def gen_bouquet_group(self, services, bouquets, grouper, bq_type=BqType.TV.value):
         """ Generates bouquets depending on <grouper>. """
         s_type = BqServiceType.DEFAULT
-        [bouquets.append(Bouquet(name=g[0], type=BqType.TV.name,
+        [bouquets.append(Bouquet(name=g[0], type=bq_type,
                                  services=[BouquetService(None, s_type, s.fav_id, 0) for s in g[1]])) for g in
          groupby(sorted(services, key=grouper), key=grouper) if g[0]]
 
