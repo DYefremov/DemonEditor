@@ -1482,3 +1482,6 @@ msgstr "Недопустимый префикс для данного URL!"
 
 msgid "Alternate window title"
 msgstr "Альтернативный заголовок окна"
+
+msgid "Selected type:"
+msgstr "Выбран тип:"

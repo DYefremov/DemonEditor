@@ -1499,3 +1499,6 @@ msgstr "Ungültiges Präfix für die angegebene URL!"
 
 msgid "Alternate window title"
 msgstr "Alternativer Fenstertitel"
+
+msgid "Selected type:"
+msgstr "Ausgewählt Typ:"
