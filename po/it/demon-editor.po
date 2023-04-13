@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-04-09 06:23+0200\n"
+"PO-Revision-Date: 2023-04-13 02:15+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -1546,4 +1546,7 @@ msgstr "Prefisso non valido per l'URL specificata!"
 
 msgid "Alternate window title"
 msgstr "Titolo alternativo della finestra"
+
+msgid "Selected type:"
+msgstr "Tipo selezionato:"
 
