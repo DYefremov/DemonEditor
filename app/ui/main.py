@@ -1364,6 +1364,10 @@ class Application(Gtk.Application):
 
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
+        if not paths:
+            self.show_error_message("No selected item!")
+            return
+
         model_name = get_base_model(model).get_name()
         itrs = [model.get_iter(path) for path in paths]
         rows = [model[in_itr][:] for in_itr in itrs]
@@ -2904,6 +2908,11 @@ class Application(Gtk.Application):
                 self.update_bouquet_list()
 
     def on_view_focus(self, view, focus_event=None):
+        # Preventing focus lack for some cases.
+        if not focus_event and not view.is_focus():
+            view.grab_focus()
+            return True
+
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0 if model else False
         is_service = model_name == self.SERVICE_MODEL
