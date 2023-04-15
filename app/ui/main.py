@@ -687,6 +687,19 @@ class Application(Gtk.Application):
         ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
         ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path, "extensions"]
         extensions = {}
+        switchable = []
+        default = []
+
+        def ac(a, v):
+            c = extensions[a.get_name()]
+            e = c(self)
+            e.exec()
+
+        def sw(a, v):
+            c = extensions[a.get_name()]
+            a.set_state(v)
+            e = c(self)
+            e.exec() if v else e.stop()
 
         for importer, name, is_package in pkgutil.iter_modules(ext_paths):
             if is_package:
@@ -694,17 +707,25 @@ class Application(Gtk.Application):
                 cls_name = name.capitalize()
                 if hasattr(m, cls_name):
                     cls = getattr(m, cls_name)
+                    if cls.EMBEDDED:
+                        cls(self)
+                        continue
+
                     action_name = f"on_{name}_extension"
                     item = Gio.MenuItem.new(cls.LABEL, f"app.{action_name}")
-                    ext_section.append_item(item)
                     extensions[action_name] = cls
 
-                    def ac(a, v):
-                        c = extensions[a.get_name()]
-                        e = c(self)
-                        e.exec()
+                    if cls.SWITCHABLE:
+                        switchable.append(item)
+                        self.set_state_action(action_name, sw, False)
+                    else:
+                        default.append(item)
+                        self.set_action(action_name, ac)
 
-                    self.set_action(action_name, ac)
+        switchable.sort(key=lambda i: i.get_attribute_value("label"), reverse=True)
+        default.sort(key=lambda i: i.get_attribute_value("label"), reverse=True)
+        [ext_section.append_item(item) for item in switchable]
+        [ext_section.append_item(item) for item in default]
 
     def init_actions(self):
         # Main actions.

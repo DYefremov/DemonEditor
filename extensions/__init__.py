@@ -47,6 +47,9 @@ class BaseExtension(metaclass=Singleton):
     # The label that will be displayed in the "Tools" menu.
     LABEL = "Base extension"
     VERSION = "1.0"
+    # Additional flags.
+    EMBEDDED = False
+    SWITCHABLE = False
 
     _LOGGER_NAME = "main_logger"
 
@@ -64,6 +67,10 @@ class BaseExtension(metaclass=Singleton):
             E.g. shows a dialog or runs an external script.
         """
         self.app.show_info_message(f"Hello from {self.__class__.__name__} class!")
+
+    def stop(self):
+        """ Stops (terminates) the task or the extension itself. """
+        self.log("Terminating a task...")
 
     def log(self, message, level=logging.ERROR):
         """ Shows log messages. """
