@@ -131,33 +131,37 @@ class UtfFTP(FTP):
     def download_dir(self, path, save_path, callback=None):
         """  Downloads directory from FTP with all contents.
 
-            Creates a leaf directory and all intermediate ones. This is recursive.
+             Creates a leaf directory and all intermediate ones. This is recursive.
          """
-        os.makedirs(os.path.join(save_path, path), exist_ok=True)
+        dir_path = os.path.join(save_path, path, "")
+        os.makedirs(dir_path, exist_ok=True)
+        current_path = self.pwd()
 
         files = []
         self.dir(path, files.append)
+
+        try:
+            self.cwd(path)
+        except all_errors as e:
+            msg = f"Download dir error: {e}".rstrip()
+            log(msg)
+            return f"500 {msg}"
+
         for f in files:
             f_data = self.get_file_data(f)
             f_path = f_data[8]
 
             if f_data[0][0] == "d":
-                try:
-                    os.makedirs(os.path.join(save_path, f_path), exist_ok=True)
-                except OSError as e:
-                    msg = "Download dir error: {}".format(e).rstrip()
-                    log(msg)
-                    return "500 " + msg
-                else:
-                    self.download_dir(f_path, save_path, callback)
+                self.download_dir(f_path, dir_path, callback)
             else:
                 try:
-                    self.download_file(f_path, save_path, callback)
+                    self.download_file(f_path, dir_path, callback)
                 except OSError as e:
-                    log("Download dir error: {}".format(e).rstrip())
+                    log(f"Download dir error: {e}".rstrip())
 
+        self.cwd(current_path)
         resp = "226 Transfer complete."
-        msg = "Copy directory {}.   Status: {}".format(path, resp)
+        msg = f"Copying directory: {path}.   Status: {resp}"
         log(msg)
 
         if callback:
