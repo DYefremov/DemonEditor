@@ -856,6 +856,7 @@ class ServicesUpdateDialog(UpdateDialog):
         box.pack_start(Gtk.Label(get_message("Create Regional bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_lang_switch, False, True, 0)
         self._kos_options_box.add(box)
+        self._kos_options_box.connect("realize", self.on_source_changed)
         self._general_options_box.pack_start(self._kos_options_box, True, True, 0)
         self._general_options_box.show_all()
 
@@ -867,8 +868,8 @@ class ServicesUpdateDialog(UpdateDialog):
 
         self.receive_services()
 
-    def on_source_changed(self, itme):
-        is_kos = itme.get_active_id() == SatelliteSource.KINGOFSAT.name
+    def on_source_changed(self, item):
+        is_kos = self._source_box.get_active_id() == SatelliteSource.KINGOFSAT.name
         self._kos_options_box.set_sensitive(is_kos)
         if not is_kos:
             self._kos_bq_groups_switch.set_active(False)
