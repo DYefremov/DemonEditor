@@ -652,6 +652,9 @@ class HttpAPI:
         N_ZAP = "zapto"
         N_STREAM = "build_playlist?id="
 
+        def __str__(self):
+            return self.value
+
     class Remote(str, Enum):
         """ Args for HttpRequestType [REMOTE] class. """
         ONE = "2"
@@ -686,6 +689,9 @@ class HttpAPI:
         NEXT = "407"
         BACK = "412"
 
+        def __str__(self):
+            return self.value
+
     class Power(str, Enum):
         """ Args for HttpRequestType [POWER] class. """
         TOGGLE_STANDBY = "0"
@@ -694,6 +700,9 @@ class HttpAPI:
         RESTART_GUI = "3"
         WAKEUP = "4"
         STANDBY = "5"
+
+        def __str__(self):
+            return self.value
 
     PARAM_REQUESTS = {Request.REMOTE,
                       Request.POWER,
