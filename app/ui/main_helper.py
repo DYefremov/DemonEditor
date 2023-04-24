@@ -44,7 +44,7 @@ from itertools import groupby
 from pathlib import Path
 from urllib.parse import unquote
 
-from gi.repository import GdkPixbuf, GLib
+from gi.repository import GdkPixbuf, GLib, Gio
 
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
@@ -563,6 +563,19 @@ def get_picon_pixbuf(path, size=32):
         return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width=size, height=size, preserve_aspect_ratio=True)
     except GLib.GError:
         pass  # NOP
+
+
+def get_pixbuf_from_data(img_data, w=48, h=32):
+    if img_data:
+        f = Gio.MemoryInputStream.new_from_data(img_data)
+        return GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, w, h, True, None)
+
+
+def get_pixbuf_at_scale(path, width, height, p_ratio):
+    try:
+        return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width, height, p_ratio)
+    except GLib.GError:
+        pass
 
 
 @lru_cache(50)
