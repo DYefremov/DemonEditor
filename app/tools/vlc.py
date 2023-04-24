@@ -41,20 +41,21 @@ C{get_instance} method of L{MediaPlayer} and L{MediaListPlayer}.
 """
 
 import ctypes
-import functools
-import logging
+from ctypes.util import find_library
 import os
 import sys
-from ctypes.util import find_library
+import functools
+
 # Used by EventManager in override.py
-from inspect import getargspec, signature
+import inspect as _inspect
+import logging
 
 logger = logging.getLogger(__name__)
 
-__version__ = "3.0.12118"
-__libvlc_version__ = "3.0.12"
-__generator_version__ = "1.18"
-build_date = "Tue Apr 20 20:46:07 2021 3.0.12"
+__version__ = "3.0.18122"
+__libvlc_version__ = "3.0.18"
+__generator_version__ = "1.22"
+build_date = "Wed Apr 19 17:27:23 2023 3.0.18"
 
 # The libvlc doc states that filenames are expected to be in UTF8, do
 # not rely on sys.getfilesystemencoding() which will be confused,
@@ -85,6 +86,13 @@ if sys.version_info[0] > 2:
             return b.decode(DEFAULT_ENCODING)
         else:
             return b
+
+
+    def len_args(func):
+        """Return number of positional arguments.
+        """
+        return len(_inspect.signature(func).parameters)
+
 else:
     str = str
     unicode = unicode
@@ -109,6 +117,12 @@ else:
             return unicode(b, DEFAULT_ENCODING)
         else:
             return b
+
+
+    def len_args(func):
+        """Return number of positional arguments.
+        """
+        return len(_inspect.getargspec(func).args)
 
 # Internal guard to prevent internal classes to be directly
 # instanciated.
@@ -1158,6 +1172,29 @@ MediaPlayerRole._None = MediaPlayerRole(0)
 
 # End of generated enum types #
 
+class EventUnion(ctypes.Union):
+    _fields_ = [
+        ('meta_type', ctypes.c_uint),
+        ('new_child', ctypes.c_uint),
+        ('new_duration', ctypes.c_longlong),
+        ('new_status', ctypes.c_int),
+        ('media', ctypes.c_void_p),
+        ('new_state', ctypes.c_uint),
+        # FIXME: Media instance
+        ('new_cache', ctypes.c_float),
+        ('new_position', ctypes.c_float),
+        ('new_time', ctypes.c_longlong),
+        ('new_title', ctypes.c_int),
+        ('new_seekable', ctypes.c_longlong),
+        ('new_pausable', ctypes.c_longlong),
+        ('new_scrambled', ctypes.c_longlong),
+        ('new_count', ctypes.c_longlong),
+        # FIXME: Skipped MediaList and MediaListView...
+        ('filename', ctypes.c_char_p),
+        ('new_length', ctypes.c_longlong),
+    ]
+
+
 # Generated structs #
 class LogMessage(ctypes.Structure):
     '''N/A
@@ -1203,13 +1240,11 @@ class Event(ctypes.Structure):
     '''A libvlc event.
     '''
     pass
-
-
-Event._fields_ = (
-    ('type', ctypes.c_int),
-    ('obj', ctypes.c_void_p),
-    ('meta_type', Meta),
-)
+    _fields_ = [
+        ('type', EventType),
+        ('object', ctypes.c_void_p),
+        ('u', EventUnion),
+    ]
 
 
 class MediaStats(ctypes.Structure):
@@ -1894,7 +1929,7 @@ class EventManager(_Ctype):
 
     @note: Only a single notification can be registered
     for each event type in an EventManager instance.
-    
+
     '''
 
     _callback_handler = None
@@ -1927,7 +1962,7 @@ class EventManager(_Ctype):
         if not hasattr(callback, '__call__'):  # callable()
             raise VLCException("%s required: %r" % ('callable', callback))
         # check that the callback expects arguments
-        if not any(getargspec(callback)[:2]):  # list(...)
+        if len_args(callback) < 1:  # list(...)
             raise VLCException("%s required: %r" % ('argument', callback))
 
         if self._callback_handler is None:
@@ -1979,7 +2014,7 @@ class Instance(_Ctype):
       - a string
       - a list of strings as first parameters
       - the parameters given as the constructor parameters (must be strings)
-    
+
     '''
 
     def __new__(cls, *args):
@@ -2077,11 +2112,9 @@ class Instance(_Ctype):
         """
         # API 3 vs 4: libvlc_media_list_new does not take any
         # parameter as input anymore.
-        if len(signature(libvlc_media_list_new).parameters) == 1:
-            # API <= 3
+        if len_args(libvlc_media_list_new) == 1:  # API <= 3
             l = libvlc_media_list_new(self)
-        else:
-            # API >= 4
+        else:  # API >= 4
             l = libvlc_media_list_new()
         # We should take the lock, but since we did not leak the
         # reference, nobody else can access it.
@@ -2592,7 +2625,7 @@ class Instance(_Ctype):
 
 class LogIterator(_Ctype):
     '''Create a new VLC log iterator.
-    
+
     '''
 
     def __new__(cls, ptr=_internal_guard):
@@ -2632,7 +2665,7 @@ class Media(_Ctype):
     Usage: Media(MRL, *options)
 
     See vlc.Instance.media_new documentation for details.
-    
+
     '''
 
     def __new__(cls, *args):
@@ -3059,7 +3092,7 @@ class MediaList(_Ctype):
     Usage: MediaList(list_of_MRLs)
 
     See vlc.Instance.media_list_new documentation for details.
-    
+
     '''
 
     def __new__(cls, *args):
@@ -3197,7 +3230,7 @@ class MediaListPlayer(_Ctype):
     It may take as parameter either:
       - a vlc.Instance
       - nothing
-    
+
     '''
 
     def __new__(cls, arg=None):
@@ -3337,7 +3370,7 @@ class MediaPlayer(_Ctype):
     It may take as parameter either:
       - a string (media URI), options... In this case, a vlc.Instance will be created.
       - a vlc.Instance, a string (media URI), options...
-    
+
     '''
 
     def __new__(cls, *args):
@@ -3413,7 +3446,8 @@ class MediaPlayer(_Ctype):
         @version: LibVLC 3.0.0 and later.
         '''
         chapterDescription_pp = ctypes.POINTER(ChapterDescription)()
-        n = libvlc_media_player_get_full_chapter_descriptions(self, ctypes.byref(chapterDescription_pp))
+        n = libvlc_media_player_get_full_chapter_descriptions(self, i_chapters_of_title,
+                                                              ctypes.byref(chapterDescription_pp))
         info = ctypes.cast(chapterDescription_pp, ctypes.POINTER(ctypes.POINTER(ChapterDescription) * n))
         try:
             contents = info.contents
@@ -3677,12 +3711,12 @@ class MediaPlayer(_Ctype):
         If you want to use it along with Qt see the QMacCocoaViewContainer. Then
         the following code should work:
         @code.mm
-        
+
             NSView *video = [[NSView alloc] init];
             QMacCocoaViewContainer *container = new QMacCocoaViewContainer(video, parent);
             L{set_nsobject}(mp, video);
             [video release];
-        
+
         @endcode
         You can find a live example in VLCVideoView in VLCKit.framework.
         @param drawable: the drawable that is either an NSView or an object following the VLCOpenGLVideoViewEmbedding protocol.
@@ -4918,6 +4952,19 @@ def libvlc_playlist_play(p_instance, i_id, i_options, ppsz_options):
         _Cfunction('libvlc_playlist_play', ((1,), (1,), (1,), (1,),), None,
                    None, Instance, ctypes.c_int, ctypes.c_int, ListPOINTER(ctypes.c_char_p))
     return f(p_instance, i_id, i_options, ppsz_options)
+
+
+def libvlc_errmsg():
+    '''A human-readable error message for the last LibVLC error in the calling
+    thread. The resulting string is valid until another error occurs (at least
+    until the next LibVLC call).
+    @warning
+    This will be None if there was no error.
+    '''
+    f = _Cfunctions.get('libvlc_errmsg', None) or \
+        _Cfunction('libvlc_errmsg', (), None,
+                   ctypes.c_char_p)
+    return f()
 
 
 def libvlc_clearerr():
@@ -6580,12 +6627,12 @@ def libvlc_media_player_set_nsobject(p_mi, drawable):
     If you want to use it along with Qt see the QMacCocoaViewContainer. Then
     the following code should work:
     @code.mm
-    
+
         NSView *video = [[NSView alloc] init];
         QMacCocoaViewContainer *container = new QMacCocoaViewContainer(video, parent);
         L{libvlc_media_player_set_nsobject}(mp, video);
         [video release];
-    
+
     @endcode
     You can find a live example in VLCVideoView in VLCKit.framework.
     @param p_mi: the Media Player.
@@ -8651,7 +8698,7 @@ def libvlc_vlm_get_event_manager(p_instance):
 #  libvlc_printerr
 #  libvlc_set_exit_handler
 
-# 39 function(s) not wrapped as methods:
+# 40 function(s) not wrapped as methods:
 #  libvlc_audio_equalizer_get_band_count
 #  libvlc_audio_equalizer_get_band_frequency
 #  libvlc_audio_equalizer_get_preset_count
@@ -8668,6 +8715,7 @@ def libvlc_vlm_get_event_manager(p_instance):
 #  libvlc_dialog_post_action
 #  libvlc_dialog_post_login
 #  libvlc_dialog_set_context
+#  libvlc_errmsg
 #  libvlc_event_type_name
 #  libvlc_free
 #  libvlc_get_changeset
@@ -8771,6 +8819,40 @@ def debug_callback(event, *args, **kwds):
     print('Debug callback (%s)' % ', '.join(l))
 
 
+def print_python():
+    from platform import architecture, machine, mac_ver, uname, win32_ver
+    if 'intelpython' in sys.executable:
+        t = 'Intel-'
+    # elif 'PyPy ' in sys.version:
+    #     t = 'PyPy-'
+    else:
+        t = ''
+    t = '%sPython: %s (%s)' % (t, sys.version.split()[0], architecture()[0])
+    if win32_ver()[0]:
+        t = t, 'Windows', win32_ver()[0]
+    elif mac_ver()[0]:
+        t = t, ('iOS' if sys.platform == 'ios' else 'macOS'), mac_ver()[0], machine()
+    else:
+        try:
+            import distro  # <http://GitHub.com/nir0s/distro>
+            t = t, bytes_to_str(distro.name()), bytes_to_str(distro.version())
+        except ImportError:
+            t = (t,) + uname()[0:3:2]
+    print(' '.join(t))
+
+
+def print_version():
+    """Print version of this vlc.py and of the libvlc"""
+    try:
+        print('%s: %s (%s)' % (os.path.basename(__file__), __version__, build_date))
+        print('libVLC: %s (%#x)' % (bytes_to_str(libvlc_get_version()), libvlc_hex_version()))
+        # print('libVLC %s' % bytes_to_str(libvlc_get_compiler()))
+        if plugin_path:
+            print('plugins: %s' % plugin_path)
+    except Exception:
+        print('Error: %s' % sys.exc_info()[1])
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     try:
@@ -8807,40 +8889,6 @@ if __name__ == '__main__':
             sys.stdout.flush()
 
 
-    def print_python():
-        from platform import architecture, mac_ver, uname, win32_ver
-        if 'intelpython' in sys.executable:
-            t = 'Intel-'
-        # elif 'PyPy ' in sys.version:
-        #     t = 'PyPy-'
-        else:
-            t = ''
-        t = '%sPython: %s (%s)' % (t, sys.version.split()[0], architecture()[0])
-        if win32_ver()[0]:
-            t = t, 'Windows', win32_ver()[0]
-        elif mac_ver()[0]:
-            t = t, ('iOS' if sys.platform == 'ios' else 'macOS'), mac_ver()[0]
-        else:
-            try:
-                import distro  # <http://GitHub.com/nir0s/distro>
-                t = t, bytes_to_str(distro.name()), bytes_to_str(distro.version())
-            except ImportError:
-                t = (t,) + uname()[0:3:2]
-        print(' '.join(t))
-
-
-    def print_version():
-        """Print version of this vlc.py and of the libvlc"""
-        try:
-            print('%s: %s (%s)' % (os.path.basename(__file__), __version__, build_date))
-            print('LibVLC version: %s (%#x)' % (bytes_to_str(libvlc_get_version()), libvlc_hex_version()))
-            print('LibVLC compiler: %s' % bytes_to_str(libvlc_get_compiler()))
-            if plugin_path:
-                print('Plugin path: %s' % plugin_path)
-        except Exception:
-            print('Error: %s' % sys.exc_info()[1])
-
-
     if '-h' in sys.argv[:2] or '--help' in sys.argv[:2]:
         print('Usage: %s [options] <movie_filename>' % sys.argv[0])
         print('Once launched, type ? for help.')
@@ -8874,7 +8922,8 @@ if __name__ == '__main__':
         # Instance() call above, see <http://www.videolan.org/doc/play-howto/en/ch04.html>
         player.video_set_marquee_int(VideoMarqueeOption.Enable, 1)
         player.video_set_marquee_int(VideoMarqueeOption.Size, 24)  # pixels
-        player.video_set_marquee_int(VideoMarqueeOption.Position, Position.Bottom)
+        # FIXME: This crashes the module - it should be investigated
+        # player.video_set_marquee_int(VideoMarqueeOption.Position, Position.bottom)
         if False:  # only one marquee can be specified
             player.video_set_marquee_int(VideoMarqueeOption.Timeout, 5000)  # millisec, 0==forever
             t = media.get_mrl()  # movie
