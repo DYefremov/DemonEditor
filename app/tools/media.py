@@ -41,6 +41,8 @@ class Player(Gtk.DrawingArea):
 
     def __init__(self, mode, widget, **kwargs):
         super().__init__(**kwargs)
+        self._mode = mode
+        self._is_playing = False
 
         GObject.signal_new("error", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -198,9 +200,6 @@ class MpvPlayer(Player):
             log(f"{__class__.__name__}: Load library error: {e}")
             raise ImportError("No libmpv is found. Check that it is installed!")
         else:
-            self._mode = mode
-            self._is_playing = False
-
             @self._player.event_callback(mpv.MpvEventID.FILE_LOADED)
             def on_open(event):
                 log("Starting playback...")
@@ -241,8 +240,9 @@ class MpvPlayer(Player):
         self._is_playing = True
 
     def stop(self):
-        self._player.stop()
-        self._is_playing = True
+        if self._is_playing:
+            self._player.stop()
+        self._is_playing = False
 
     def pause(self):
         self._player.pause = not self._player.pause
@@ -252,8 +252,9 @@ class MpvPlayer(Player):
 
     @run_task
     def release(self):
-        self._player.terminate()
-        self.__INSTANCE = None
+        if self._player:
+            self._player.terminate()
+            self.__INSTANCE = None
 
     def is_playing(self):
         return self._is_playing
@@ -290,8 +291,6 @@ class GstPlayer(Player):
             self.STATE = Gst.State
             self.STAT_RETURN = Gst.StateChangeReturn
 
-            self._mode = mode
-            self._is_playing = False
             self._player = Gst.ElementFactory.make("playbin", "player")
             self._player.set_window_handle(self.get_window_handle())
 
@@ -329,8 +328,9 @@ class GstPlayer(Player):
             self._is_playing = True
 
     def stop(self):
-        log("Stop playback...")
-        self._player.set_state(self.STATE.READY)
+        if self._is_playing:
+            log("Stop playback...")
+            self._player.set_state(self.STATE.READY)
         self._is_playing = False
 
     def pause(self):
@@ -345,9 +345,10 @@ class GstPlayer(Player):
 
     @run_task
     def release(self):
-        self._is_playing = False
-        self._player.set_state(self.STATE.NULL)
-        self.__INSTANCE = None
+        if self._player:
+            self._is_playing = False
+            self._player.set_state(self.STATE.NULL)
+            self.__INSTANCE = None
 
     def set_mrl(self, mrl):
         self._player.set_property("uri", mrl)
@@ -420,9 +421,6 @@ class VlcPlayer(Player):
             log(f"{__class__.__name__}: Load library error: {e}")
             raise ImportError("No VLC is found. Check that it is installed!")
         else:
-            self._mode = mode
-            self._is_playing = False
-
             ev_mgr = self._player.event_manager()
             ev_mgr.event_attach(EventType.MediaPlayerVout, self.on_playback_start)
             ev_mgr.event_attach(EventType.MediaPlayerTimeChanged,
@@ -449,7 +447,7 @@ class VlcPlayer(Player):
     def stop(self):
         if self._is_playing:
             self._player.stop()
-            self._is_playing = False
+        self._is_playing = False
 
     def pause(self):
         self._player.pause()
