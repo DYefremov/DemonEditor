@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -221,7 +221,8 @@ class PiconsCzDownloader:
                 "piconblack80": "b50",
                 "piconblack3d": "b50",
                 "piconwin11": "win11220",
-                "piconSNPtransparent": "t50"
+                "piconSNPtransparent": "t50",
+                "piconSNPblack": "b50",
                 }
 
     def get_name_map(self):
