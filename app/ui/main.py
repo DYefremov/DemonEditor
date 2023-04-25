@@ -3855,7 +3855,7 @@ class Application(Gtk.Application):
                                                               r[Column.SRV_PACKAGE],
                                                               r[Column.SRV_TYPE],
                                                               r[Column.SRV_SSID],
-                                                              r[Column.SRV_POS])).upper()))
+                                                              r[Column.SRV_FREQ])).upper()))
 
     def update_iptv_filter_cache(self):
         self._iptv_filter_cache.clear()
