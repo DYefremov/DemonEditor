@@ -50,7 +50,7 @@ class SatelliteSource(Enum):
     FLYSAT = ("https://www.flysat.com/en/satellitelist",)
     LYNGSAT = ("https://www.lyngsat.com/asia.html", "https://www.lyngsat.com/europe.html",
                "https://www.lyngsat.com/atlantic.html", "https://www.lyngsat.com/america.html")
-    KINGOFSAT = ("https://en.kingofsat.net/satellites.php",)
+    KINGOFSAT = ("https://en.kingofsat.tv/satellites.php",)
 
     @staticmethod
     def get_sources(src):
@@ -271,7 +271,7 @@ class SatellitesParser(HTMLParser):
         trs = []
 
         if self._source is SatelliteSource.KINGOFSAT:
-            sat_url = "https://en.kingofsat.net/" + sat_url
+            sat_url = f"https://en.kingofsat.tv/{sat_url}"
 
         try:
             request = requests.get(url=sat_url, headers=_HEADERS, timeout=_TIMEOUT)
@@ -571,7 +571,7 @@ class ServicesParser(HTMLParser):
         """ Returns transponder links. """
         try:
             if self._source is SatelliteSource.KINGOFSAT:
-                sat_url = "https://en.kingofsat.net/" + sat_url
+                sat_url = f"https://en.kingofsat.tv/{sat_url}"
             self.init_data(sat_url)
         except ValueError as e:
             log(e)
@@ -586,7 +586,7 @@ class ServicesParser(HTMLParser):
                     if len(r) == 13 and SatellitesParser.POS_PAT.match(r[0].text):
                         t_cell = r[4]
                         if t_cell.url and t_cell.url.startswith("tp.php?tp="):
-                            t_cell.url = f"https://{self._lang}.kingofsat.net/{t_cell.url}"
+                            t_cell.url = f"https://{self._lang}.kingofsat.tv/{t_cell.url}"
                             t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
                             trs.append(t_cell)
                 return trs
