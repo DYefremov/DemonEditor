@@ -41,7 +41,7 @@ from app.ui.main_helper import get_iptv_url
 from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, Page
 
 
-class PlayerBox(Gtk.Box):
+class PlayerBox(Gtk.Overlay):
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
@@ -75,6 +75,8 @@ class PlayerBox(Gtk.Box):
 
         handlers = {"on_realize": self.on_realize,
                     "on_press": self.on_press,
+                    "on_pause": self.on_pause,
+                    "on_stop": self.on_stop,
                     "on_next": self.on_next,
                     "on_previous": self.on_previous,
                     "on_rewind": self.on_rewind,
@@ -82,12 +84,11 @@ class PlayerBox(Gtk.Box):
                     "on_close": self.on_close}
 
         builder = get_builder(UI_RESOURCES_PATH + "playback.glade", handlers)
-        self.set_spacing(5)
-        self.set_orientation(Gtk.Orientation.VERTICAL)
         self._event_box = builder.get_object("event_box")
-        self.pack_start(self._event_box, True, True, 0)
+        self.add(self._event_box)
+
         if not IS_DARWIN:
-            self.pack_end(builder.get_object("tool_bar"), False, True, 0)
+            self.add_overlay(builder.get_object("tool_bar"))
             self._scale = builder.get_object("scale")
             self._full_time_label = builder.get_object("full_time_label")
             self._current_time_label = builder.get_object("current_time_label")
@@ -224,15 +225,20 @@ class PlayerBox(Gtk.Box):
     def on_play(self, action=None, value=None):
         self.emit("play", None)
 
+    def on_pause(self, action=None, value=None):
+        self.emit("pause", None)
+
     def on_stop(self, action=None, value=None):
         self.emit("stop", None)
 
     def on_next(self, button):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
+            self.update_buttons()
             self.set_player_action()
 
     def on_previous(self, button):
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
+            self.update_buttons()
             self.set_player_action()
 
     def on_rewind(self, scale, scroll_type, value):
@@ -306,7 +312,7 @@ class PlayerBox(Gtk.Box):
 
     @run_with_delay(1)
     def set_player_action(self):
-        click_mode = self._app.app_settings.fav_click_mode
+        click_mode = FavClickMode(self._app.app_settings.fav_click_mode)
         self._fav_view.set_sensitive(False)
         if click_mode is FavClickMode.PLAY:
             self.on_play_service()
@@ -319,8 +325,8 @@ class PlayerBox(Gtk.Box):
         if self._player:
             path, column = self._fav_view.get_cursor()
             current_index = path[0]
-            self._player_prev_button.set_sensitive(current_index != 0)
-            self._player_next_button.set_sensitive(len(self._fav_model) != current_index + 1)
+            self._prev_button.set_sensitive(current_index != 0)
+            self._next_button.set_sensitive(len(self._fav_view.get_model()) != current_index + 1)
 
     @lru_cache(maxsize=1)
     def on_duration_changed(self, duration):
@@ -444,6 +450,9 @@ class PlayerBox(Gtk.Box):
             self.emit("play", url)
         else:
             self._current_mrl = url
+
+        self._fav_view.set_sensitive(True)
+        self._fav_view.grab_focus()
 
     @run_idle
     def on_played(self, player, duration):
