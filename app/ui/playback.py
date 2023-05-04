@@ -77,6 +77,7 @@ class PlayerBox(Gtk.Overlay):
                     "on_draw": self.on_draw,
                     "on_mouse_motion": self.on_mouse_motion,
                     "on_press": self.on_press,
+                    "on_play": self.on_play,
                     "on_pause": self.on_pause,
                     "on_stop": self.on_stop,
                     "on_next": self.on_next,
@@ -99,6 +100,7 @@ class PlayerBox(Gtk.Overlay):
             self._current_time_label = builder.get_object("current_time_label")
             self._rewind_box = builder.get_object("rewind_box")
             self._tool_bar = builder.get_object("tool_bar")
+            self._stop_button = builder.get_object("stop_button")
             self._prev_button = builder.get_object("prev_button")
             self._next_button = builder.get_object("next_button")
             self._audio_menu_button = builder.get_object("audio_menu_button")
@@ -186,7 +188,7 @@ class PlayerBox(Gtk.Overlay):
                 return True
             else:
                 self.init_playback_elements()
-                GLib.idle_add(self.emit, "play", self._current_mrl)
+                self.on_play()
 
     def init_playback_elements(self):
         self._player.connect("error", self.on_error)
@@ -229,13 +231,16 @@ class PlayerBox(Gtk.Overlay):
         subtitle_track_action.connect("activate", self.on_set_subtitle_track)
         self._app.add_action(subtitle_track_action)
 
+    @run_idle
     def on_play(self, action=None, value=None):
-        self.emit("play", None)
+        self.emit("play", self._current_mrl)
 
     def on_pause(self, action=None, value=None):
         self.emit("pause", None)
 
     def on_stop(self, action=None, value=None):
+        if not IS_DARWIN:
+            self._stop_button.set_visible(False)
         self.emit("stop", None)
 
     def on_next(self, button):
@@ -454,10 +459,9 @@ class PlayerBox(Gtk.Overlay):
         elif self._play_mode is PlayStreamsMode.WINDOW:
             self.show_playback_window(title)
 
+        self._current_mrl = url
         if self._player:
             self.emit("play", url)
-        else:
-            self._current_mrl = url
 
         self._fav_view.grab_focus()
 
@@ -465,6 +469,7 @@ class PlayerBox(Gtk.Overlay):
     def on_played(self, player, duration):
         self._stack.set_visible_child_name("playback")
         if not IS_DARWIN:
+            self._stop_button.set_visible(True)
             self.on_duration_changed(duration)
 
     @run_idle

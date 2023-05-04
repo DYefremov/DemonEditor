@@ -99,18 +99,16 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
     <child>
-      <object class="GtkButton" id="pause_button">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
+      <object class="GtkButton" id="play_button">
+        <property name="visible" bind-source="stop_button" bind-property="visible" bind-flags="invert-boolean">False</property>
+        <property name="can-focus">True</property>
         <property name="receives-default">True</property>
-        <property name="tooltip-text" translatable="yes">Pause</property>
-        <signal name="clicked" handler="on_pause" swapped="no"/>
+        <signal name="clicked" handler="on_play" swapped="no"/>
         <child>
-          <object class="GtkImage" id="pause_button_image">
+          <object class="GtkImage" id="play_button_image">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="icon-name">media-playback-pause-symbolic</property>
-            <property name="icon_size">2</property>
+            <property name="icon-name">media-playback-start-symbolic</property>
           </object>
         </child>
       </object>
@@ -143,6 +141,28 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
     <child>
+      <object class="GtkButton" id="pause_button">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="receives-default">True</property>
+        <property name="tooltip-text" translatable="yes">Pause</property>
+        <signal name="clicked" handler="on_pause" swapped="no"/>
+        <child>
+          <object class="GtkImage" id="pause_button_image">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">media-playback-pause-symbolic</property>
+            <property name="icon_size">2</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkButton" id="next_button">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -161,7 +181,7 @@ Author: Dmitriy Yefremov
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">3</property>
+        <property name="position">4</property>
       </packing>
     </child>
     <child>
@@ -221,7 +241,7 @@ Author: Dmitriy Yefremov
       <packing>
         <property name="expand">True</property>
         <property name="fill">True</property>
-        <property name="position">4</property>
+        <property name="position">5</property>
       </packing>
     </child>
     <child>
@@ -300,7 +320,7 @@ Author: Dmitriy Yefremov
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">5</property>
+        <property name="position">6</property>
       </packing>
     </child>
     <child>
@@ -322,7 +342,7 @@ Author: Dmitriy Yefremov
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">6</property>
+        <property name="position">7</property>
       </packing>
     </child>
     <child>
@@ -344,7 +364,7 @@ Author: Dmitriy Yefremov
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">7</property>
+        <property name="position">8</property>
       </packing>
     </child>
   </object>
