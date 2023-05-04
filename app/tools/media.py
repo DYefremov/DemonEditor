@@ -30,19 +30,20 @@ import os
 import sys
 from datetime import datetime
 
-from gi.repository import Gdk, Gtk, GObject
+from gi.repository import GObject
 
-from app.commons import run_task, log, LOG_DATE_FORMAT, run_with_delay
+from app.commons import run_task, log, LOG_DATE_FORMAT
 from app.settings import IS_DARWIN, IS_LINUX, IS_WIN
 
 
-class Player(Gtk.DrawingArea):
+class Player(GObject.GObject):
     """ Base player class. Also used as a factory. """
 
     def __init__(self, mode, widget, **kwargs):
         super().__init__(**kwargs)
         self._mode = mode
         self._is_playing = False
+        self._handle = self.get_window_handle(widget.playback_widget)
 
         GObject.signal_new("error", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -57,16 +58,9 @@ class Player(Gtk.DrawingArea):
         GObject.signal_new("subtitle-track", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
-        self.connect("draw", self.on_draw)
-        self.connect("motion-notify-event", self.on_mouse_motion)
-        self.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
-        widget.add(self)
-
-        parent = widget.get_parent()
-        parent.connect("play", self.on_play)
-        parent.connect("stop", self.on_stop)
-        parent.connect("pause", self.on_pause)
-        self.show()
+        widget.connect("play", self.on_play)
+        widget.connect("stop", self.on_stop)
+        widget.connect("pause", self.on_pause)
 
     def get_play_mode(self):
         pass
@@ -116,14 +110,14 @@ class Player(Gtk.DrawingArea):
     def on_release(self, widget, state):
         self.release()
 
-    def get_window_handle(self):
+    def get_window_handle(self, widget):
         """ Returns the identifier [pointer] for the window.
 
             Based on gtkvlc.py[get_window_pointer] example from here:
             https://github.com/oaubert/python-vlc/tree/master/examples
         """
         if IS_LINUX:
-            return self.get_window().get_xid()
+            return widget.get_window().get_xid()
         else:
             try:
                 import ctypes
@@ -135,30 +129,12 @@ class Player(Gtk.DrawingArea):
                 # https://gitlab.gnome.org/GNOME/pygobject/-/issues/112
                 ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
                 ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(self.get_window().__gpointer__, None)
+                gpointer = ctypes.pythonapi.PyCapsule_GetPointer(widget.get_window().__gpointer__, None)
                 get_pointer = libgdk.gdk_quartz_window_get_nsview if IS_DARWIN else libgdk.gdk_win32_window_get_handle
                 get_pointer.restype = ctypes.c_void_p
                 get_pointer.argtypes = [ctypes.c_void_p]
 
                 return get_pointer(gpointer)
-
-    def on_draw(self, widget, cr):
-        """ Used for black background drawing in the player drawing area. """
-        cr.set_source_rgb(0, 0, 0)
-        cr.paint()
-
-    def on_mouse_motion(self, widget, event):
-        display = widget.get_display()
-        window = widget.get_window()
-        cursor = Gdk.Cursor.new_from_name(display, "default")
-        window.set_cursor(cursor)
-
-        self.hide_mouse_cursor(window, display)
-
-    @run_with_delay(3)
-    def hide_mouse_cursor(self, window, display):
-        cursor = Gdk.Cursor.new_for_display(display, Gdk.CursorType.BLANK_CURSOR)
-        window.set_cursor(cursor)
 
     @staticmethod
     def make(name, mode, widget):
@@ -192,7 +168,7 @@ class MpvPlayer(Player):
         try:
             from app.tools import mpv
 
-            self._player = mpv.MPV(wid=str(self.get_window_handle()),
+            self._player = mpv.MPV(wid=str(self._handle),
                                    input_default_bindings=False,
                                    input_cursor=False,
                                    cursor_autohide="no")
@@ -292,7 +268,7 @@ class GstPlayer(Player):
             self.STAT_RETURN = Gst.StateChangeReturn
 
             self._player = Gst.ElementFactory.make("playbin", "player")
-            self._player.set_window_handle(self.get_window_handle())
+            self._player.set_window_handle(self._handle)
 
             bus = self._player.get_bus()
             bus.add_signal_watch()
@@ -427,7 +403,7 @@ class VlcPlayer(Player):
                                 lambda et: self.emit("position", self._player.get_time()))
             ev_mgr.event_attach(EventType.MediaPlayerEncounteredError, lambda et: self.emit("error", "Can't Playback!"))
 
-            self.init_video_widget(widget)
+            self.init_video_widget()
 
     @classmethod
     def get_instance(cls, mode, widget):
@@ -490,13 +466,13 @@ class VlcPlayer(Player):
         s_desc = self._player.video_get_spu_description()
         self.emit("subtitle-track", [(s[0], s[1].decode(encoding="utf-8", errors="ignore")) for s in s_desc])
 
-    def init_video_widget(self, widget):
+    def init_video_widget(self):
         if IS_LINUX:
-            self._player.set_xwindow(self.get_window_handle())
+            self._player.set_xwindow(self._handle)
         elif IS_DARWIN:
-            self._player.set_nsobject(self.get_window_handle())
+            self._player.set_nsobject(self._handle)
         else:
-            self._player.set_hwnd(self.get_window_handle())
+            self._player.set_hwnd(self._handle)
 
 
 class Recorder:

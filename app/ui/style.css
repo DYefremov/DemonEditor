@@ -104,3 +104,8 @@ paned.vertical > separator {
   padding-right: 5px;
   min-width: 50px;
 }
+
+.playback {
+  background-color: #000000;
+  color: #ffffff;
+}

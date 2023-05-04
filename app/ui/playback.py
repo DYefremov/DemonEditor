@@ -71,9 +71,11 @@ class PlayerBox(Gtk.Overlay):
         self._playback_window = None
         self._audio_track_menu = None
         self._subtitle_track_menu = None
-        self._play_mode = self._app.app_settings.play_streams_mode
+        self._play_mode = PlayStreamsMode(self._app.app_settings.play_streams_mode)
 
         handlers = {"on_realize": self.on_realize,
+                    "on_draw": self.on_draw,
+                    "on_mouse_motion": self.on_mouse_motion,
                     "on_press": self.on_press,
                     "on_pause": self.on_pause,
                     "on_stop": self.on_stop,
@@ -84,8 +86,11 @@ class PlayerBox(Gtk.Overlay):
                     "on_close": self.on_close}
 
         builder = get_builder(UI_RESOURCES_PATH + "playback.glade", handlers)
-        self._event_box = builder.get_object("event_box")
-        self.add(self._event_box)
+        self._stack = builder.get_object("stack")
+        self._playback_area = builder.get_object("playback_area")
+        self._playback_area.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
+        self._playback_area.connect("motion-notify-event", self.on_mouse_motion)
+        self.add(self._stack)
 
         if not IS_DARWIN:
             self.add_overlay(builder.get_object("tool_bar"))
@@ -105,6 +110,10 @@ class PlayerBox(Gtk.Overlay):
         self.connect("delete-event", self.on_delete)
         self.connect("show", self.set_player_area_size)
 
+    @property
+    def playback_widget(self):
+        return self._playback_area
+
     def on_fav_clicked(self, app, mode):
         if mode is not FavClickMode.STREAM and not self._app.http_api:
             return
@@ -112,7 +121,7 @@ class PlayerBox(Gtk.Overlay):
         if len(self._fav_view.get_model()) == 0:
             return
 
-        self._fav_view.set_sensitive(False)
+        self._stack.set_visible_child_name("load")
         if mode is FavClickMode.STREAM:
             self.on_play_stream()
         elif mode is FavClickMode.ZAP_PLAY:
@@ -166,20 +175,18 @@ class PlayerBox(Gtk.Overlay):
         self.on_close()
         self.set_visible(False)
 
-    def on_realize(self, box):
+    def on_realize(self, area):
         if not self._player:
             settings = self._app.app_settings
+            self._stack.set_visible_child_name("load")
             try:
-                self._player = Player.make(settings.stream_lib, settings.play_streams_mode, self._event_box)
+                self._player = Player.make(settings.stream_lib, settings.play_streams_mode, self)
             except (ImportError, NameError) as e:
                 self._app.show_error_message(str(e))
                 return True
             else:
                 self.init_playback_elements()
-                self.emit("play", self._current_mrl)
-            finally:
-                if settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
-                    self.set_player_area_size(box)
+                GLib.idle_add(self.emit, "play", self._current_mrl)
 
     def init_playback_elements(self):
         self._player.connect("error", self.on_error)
@@ -313,7 +320,7 @@ class PlayerBox(Gtk.Overlay):
     @run_with_delay(1)
     def set_player_action(self):
         click_mode = FavClickMode(self._app.app_settings.fav_click_mode)
-        self._fav_view.set_sensitive(False)
+        self._stack.set_visible_child_name("load")
         if click_mode is FavClickMode.PLAY:
             self.on_play_service()
         elif click_mode is FavClickMode.ZAP_PLAY:
@@ -351,6 +358,7 @@ class PlayerBox(Gtk.Overlay):
     def set_player_area_size(self, widget):
         w, h = self._app.app_window.get_size()
         widget.set_size_request(w * 0.6, -1)
+        self._stack.set_visible_child_name("playback")
 
     @run_idle
     def show_playback_window(self, title=None):
@@ -369,7 +377,7 @@ class PlayerBox(Gtk.Overlay):
 
             self._playback_window.connect("delete-event", self.on_close)
             self._playback_window.connect("key-press-event", self.on_key_press)
-            self._playback_window.bind_property("visible", self._event_box, "visible")
+            self._playback_window.bind_property("visible", self._stack, "visible")
 
             if not IS_DARWIN:
                 self._prev_button.set_visible(False)
@@ -451,19 +459,36 @@ class PlayerBox(Gtk.Overlay):
         else:
             self._current_mrl = url
 
-        self._fav_view.set_sensitive(True)
         self._fav_view.grab_focus()
 
     @run_idle
     def on_played(self, player, duration):
-        self._fav_view.set_sensitive(True)
+        self._stack.set_visible_child_name("playback")
         if not IS_DARWIN:
             self.on_duration_changed(duration)
 
     @run_idle
     def on_error(self, player, msg):
         self._app.show_error_message(msg)
-        self._fav_view.set_sensitive(True)
+        self._stack.set_visible_child_name("playback")
+
+    def on_draw(self, widget, cr):
+        """ Used for black background drawing in the player drawing area. """
+        cr.set_source_rgb(0, 0, 0)
+        cr.paint()
+
+    def on_mouse_motion(self, widget, event):
+        display = widget.get_display()
+        window = widget.get_window()
+        cursor = Gdk.Cursor.new_from_name(display, "default")
+        window.set_cursor(cursor)
+
+        self.hide_mouse_cursor(window, display)
+
+    @run_with_delay(3)
+    def hide_mouse_cursor(self, window, display):
+        cursor = Gdk.Cursor.new_for_display(display, Gdk.CursorType.BLANK_CURSOR)
+        window.set_cursor(cursor)
 
 
 if __name__ == "__main__":
