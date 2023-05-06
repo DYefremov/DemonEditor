@@ -682,8 +682,12 @@ class Application(Gtk.Application):
 
     def init_extensions(self, builder):
         import pkgutil
+        from app.ui.extensions.management import ExtensionManager
         # Extensions (Plugins) section.
         ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
+        self.set_action("on_extension_manager", lambda a, v: ExtensionManager(self).show())
+        ext_section.append_item(Gio.MenuItem.new(get_message("Extension Manager"), "app.on_extension_manager"))
+
         ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
         ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path, "extensions"]
         extensions = {}
