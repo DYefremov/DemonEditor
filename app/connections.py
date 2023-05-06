@@ -907,10 +907,7 @@ def test_http(host, port, user, password, timeout=5, use_ssl=False, skip_message
     try:
         log("Testing HTTP connection...")
         resp = HttpAPI.get_response(HttpAPI.Request.TEST, url, data, s_type)
-
-        if s_type is SettingsType.ENIGMA_2:
-            return resp.get("e2enigmaversion", "")
-        return resp
+        return resp.get("e2enigmaversion" if s_type is SettingsType.ENIGMA_2 else "data", "")
     except (RemoteDisconnected, URLError, HTTPError) as e:
         raise TestException(e)
 
