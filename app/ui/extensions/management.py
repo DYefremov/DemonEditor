@@ -28,12 +28,13 @@
 
 import os
 import pkgutil
+import shutil
+from pathlib import Path
 
 import requests
+from gi.repository import Gtk, Gdk, GLib
 
 from app.commons import log, run_task, run_idle
-from gi.repository import Gtk, GLib
-
 from app.ui.dialogs import get_message
 from app.ui.uicommons import HeaderBar
 
@@ -51,11 +52,12 @@ class ExtensionManager(Gtk.Window):
                          default_width=560, default_height=320, modal=True, **kwargs)
 
         self._app = app
+        self._ext_path = f"{self._app.app_settings.default_data_path}tools{os.sep}extensions"
 
         titles = (get_message("Title"), get_message("Description"), get_message("Status"))
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
-
-        self._model = Gtk.ListStore.new((str, str, str, str))
+        # Title, Description, Satus, URL, Path.
+        self._model = Gtk.ListStore.new((str, str, str, str, object))
         self._model.connect("row-deleted", self.on_model_changed)
         self._model.connect("row-inserted", self.on_model_changed)
         self._view = Gtk.TreeView(activate_on_single_click=True, enable_grid_lines=Gtk.TreeViewGridLines.BOTH)
@@ -81,15 +83,34 @@ class ExtensionManager(Gtk.Window):
         status_box.pack_start(self._count_label, False, False, 0)
 
         data_box.pack_end(status_box, False, True, 0)
-        data_box.pack_start(self._view, True, True, 0)
+        scorelled = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
+        scorelled.add(self._view)
+        data_box.pack_start(scorelled, True, True, 0)
         frame.add(data_box)
         self.add(main_box)
 
+        # Popup menu.
+        menu = Gtk.Menu()
+        item = Gtk.ImageMenuItem.new_from_stock("gtk-goto-bottom")
+        item.set_label(get_message("Download"))
+        item.connect("activate", self.on_download)
+        menu.append(item)
+        item = Gtk.ImageMenuItem.new_from_stock("gtk-remove")
+        item.set_label(get_message("Remove"))
+        item.connect("activate", self.on_remove)
+        menu.append(item)
+        menu.show_all()
+        self._view.connect("button-press-event", self.on_view_popup_menu, menu)
+
         # Header and toolbar.
         download_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic", Gtk.IconSize.BUTTON)
-        download_button.set_tooltip_text(get_message("Download"))
+        download_button.set_label(get_message("Download"))
+        download_button.set_always_show_image(True)
+        download_button.connect("clicked", self.on_download)
         remove_button = Gtk.Button.new_from_icon_name("user-trash-symbolic", Gtk.IconSize.BUTTON)
-        remove_button.set_tooltip_text(get_message("Remove"))
+        remove_button.set_label(get_message("Remove"))
+        remove_button.set_always_show_image(True)
+        remove_button.connect("clicked", self.on_remove)
 
         if app.app_settings.use_header_bar:
             header = HeaderBar()
@@ -101,7 +122,7 @@ class ExtensionManager(Gtk.Window):
         else:
             toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             toolbar.get_style_context().add_class("primary-toolbar")
-            button_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, **margin)
+            button_box = Gtk.Box(spacing=2, orientation=Gtk.Orientation.HORIZONTAL, **margin)
             button_box.pack_start(download_button, False, False, 0)
             button_box.pack_start(remove_button, False, False, 0)
             toolbar.pack_start(button_box, True, True, 0)
@@ -113,10 +134,10 @@ class ExtensionManager(Gtk.Window):
         self.update()
 
     def get_installed(self):
-        ext_path = f"{self._app.app_settings.default_data_path}tools{os.sep}extensions"
-        ext_paths = [f"{os.path.dirname(__file__)}{os.sep}", ext_path, "extensions"]
+        ext_paths = [f"{os.path.dirname(__file__)}{os.sep}", self._ext_path, "extensions"]
 
-        return {name for importer, name, is_package in pkgutil.iter_modules(ext_paths) if is_package}
+        return {name: Path(importer.find_module(name).path).parent for importer, name, is_package in
+                pkgutil.iter_modules(ext_paths) if is_package}
 
     @run_task
     def update(self):
@@ -128,11 +149,12 @@ class ExtensionManager(Gtk.Window):
                     for f in resp.json():
                         if f.get("type") == "dir":
                             name = f.get("name")
-                            extensions.append((name, None, "Installed" if name in installed else None, None))
+                            path = installed.get(name)
+                            extensions.append((name, None, "Installed" if path else None, f.get("url", None), path))
                 except ValueError as e:
-                    log(f"ExtensionManager [update] error: {e}")
+                    log(f"{self.__class__.__name__} [update] error: {e}")
             else:
-                log(f"ExtensionManager [update] error: {resp.reason}")
+                log(f"{self.__class__.__name__} [update] error: {resp.reason}")
 
         self.update_data(extensions)
 
@@ -141,8 +163,70 @@ class ExtensionManager(Gtk.Window):
         self._model.clear()
         [self._model.append(e) for e in data]
 
+    def on_remove(self, item):
+        model, paths = self._view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
+        path = model[paths][-1]
+        if path:
+            try:
+                shutil.rmtree(path)
+            except OSError as e:
+                log(f"{self.__class__.__name__} [remove] error: {e}")
+            else:
+                model[paths][-1] = None
+                model[paths][2] = get_message("Removed")
+
+    @run_task
+    def on_download(self, item):
+        model, paths = self._view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
+        url = model[paths][-2]
+        if not url:
+            return
+
+        urls = {}
+        with requests.get(url=url, headers=HEADERS, stream=True) as resp:
+            if resp.status_code == 200:
+                try:
+                    for f in resp.json():
+                        url = f.get("download_url", None)
+                        if url:
+                            urls[url] = f.get("name", None)
+                except ValueError as e:
+                    log(f"{self.__class__.__name__} [download] error: {e}")
+            else:
+                log(f"{self.__class__.__name__} [download] error: {resp.reason}")
+
+        if urls:
+            path = f"{self._ext_path}{os.sep}{model[paths][0]}{os.sep}"
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            if all((self.download_file(u, f"{path}{n}") for u, n in urls.items())):
+                itr = model.get_iter(paths)
+                GLib.idle_add(model.set_value, itr, 2, "Downloaded")
+                GLib.idle_add(model.set_value, itr, 4, path)
+                msg = f"Extension is downloaded. {get_message('Restart the program to apply all changes.')}"
+                self._app.show_info_message(msg, Gtk.MessageType.WARNING)
+
+    def download_file(self, url, path):
+        with requests.get(url=url, headers=HEADERS, stream=True) as resp:
+            if resp.status_code == 200:
+                with open(path, mode="bw") as f:
+                    for data in resp.iter_content(chunk_size=1024):
+                        f.write(data)
+                return True
+
     def on_model_changed(self, model, path, itr=None):
         self._count_label.set_text(str(len(model)))
+
+    def on_view_popup_menu(self, view, event, menu):
+        if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
+            menu.popup(None, None, None, None, event.button, event.time)
+            return True
+        return False
 
 
 if __name__ == "__main__":
