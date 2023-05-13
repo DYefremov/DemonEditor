@@ -34,11 +34,11 @@ from gi.repository import GLib, GObject, Gio
 from app.commons import run_idle, run_with_delay
 from app.connections import HttpAPI
 from app.eparser.ecommons import BqServiceType
-from app.settings import PlayStreamsMode, IS_DARWIN, SettingsType, USE_HEADER_BAR
+from app.settings import PlayStreamsMode, PlaybackMode, IS_DARWIN, SettingsType, USE_HEADER_BAR
 from app.tools.media import Player
 from app.ui.dialogs import get_builder, get_message
 from app.ui.main_helper import get_iptv_url
-from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, Column, Page
+from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, Page
 
 
 class PlayerBox(Gtk.Overlay):
@@ -86,7 +86,7 @@ class PlayerBox(Gtk.Overlay):
                     "on_full_screen": self.on_full_screen,
                     "on_close": self.on_close}
 
-        builder = get_builder(UI_RESOURCES_PATH + "playback.glade", handlers)
+        builder = get_builder(f"{UI_RESOURCES_PATH}playback.glade", handlers)
         self._stack = builder.get_object("stack")
         self._playback_area = builder.get_object("playback_area")
         self._playback_area.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
@@ -117,19 +117,13 @@ class PlayerBox(Gtk.Overlay):
         return self._playback_area
 
     def on_fav_clicked(self, app, mode):
-        if mode is not FavClickMode.STREAM and not self._app.http_api:
+        if mode is not PlaybackMode.STREAM and not self._app.http_api:
             return
 
         if len(self._fav_view.get_model()) == 0:
             return
 
-        self._stack.set_visible_child_name("load")
-        if mode is FavClickMode.STREAM:
-            self.on_play_stream()
-        elif mode is FavClickMode.ZAP_PLAY:
-            self._app.on_zap(self.on_watch)
-        elif mode is FavClickMode.PLAY:
-            self.on_play_service()
+        self.start_playback(mode)
 
     def on_srv_clicked(self, app, mode):
         if not self._app.http_api:
@@ -197,7 +191,7 @@ class PlayerBox(Gtk.Overlay):
         self._player.connect("subtitle-track", self.on_subtitle_track_changed)
         self._app.app_window.connect("key-press-event", self.on_key_press)
 
-        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui")
+        builder = get_builder(f"{UI_RESOURCES_PATH}app_menu.ui")
         self._audio_track_menu = builder.get_object("audio_track_menu")
         self._subtitle_track_menu = builder.get_object("subtitle_track_menu")
         audio_menu = builder.get_object("audio_menu")
@@ -233,6 +227,7 @@ class PlayerBox(Gtk.Overlay):
 
     @run_idle
     def on_play(self, action=None, value=None):
+        self._stack.set_visible_child_name("load")
         self.emit("play", self._current_mrl)
 
     def on_pause(self, action=None, value=None):
@@ -244,12 +239,14 @@ class PlayerBox(Gtk.Overlay):
         self.emit("stop", None)
 
     def on_next(self, button):
-        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, 1):
-            self.update_buttons()
-            self.set_player_action()
+        self.switch_service(1)
 
     def on_previous(self, button):
-        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, -1):
+        self.switch_service(-1)
+
+    def switch_service(self, count):
+        self._fav_view.grab_focus()
+        if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, count):
             self.update_buttons()
             self.set_player_action()
 
@@ -324,14 +321,7 @@ class PlayerBox(Gtk.Overlay):
 
     @run_with_delay(1)
     def set_player_action(self):
-        click_mode = FavClickMode(self._app.app_settings.fav_click_mode)
-        self._stack.set_visible_child_name("load")
-        if click_mode is FavClickMode.PLAY:
-            self.on_play_service()
-        elif click_mode is FavClickMode.ZAP_PLAY:
-            self._app.on_zap(self.on_watch)
-        elif click_mode is FavClickMode.STREAM:
-            self.on_play_stream()
+        self.start_playback(PlaybackMode(self._app.app_settings.fav_click_mode))
 
     def update_buttons(self):
         if self._player:
@@ -463,9 +453,16 @@ class PlayerBox(Gtk.Overlay):
         if self._player:
             self.emit("play", url)
 
-        self._fav_view.grab_focus()
+    def start_playback(self, mode):
+        self._stack.set_visible_child_name("load")
+        if mode is PlaybackMode.PLAY:
+            self.on_play_service()
+        elif mode is PlaybackMode.ZAP_PLAY:
+            self._app.on_zap(self.on_watch)
+        elif mode is PlaybackMode.STREAM:
+            self.on_play_stream()
 
-    @run_idle
+    @run_with_delay(1)
     def on_played(self, player, duration):
         self._stack.set_visible_child_name("playback")
         if not IS_DARWIN:

@@ -37,7 +37,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gtk, Gdk, GLib
 
-from app.settings import Settings, SettingsException, IS_DARWIN, GTK_PATH, IS_LINUX
+from app.settings import Settings, SettingsException, IS_DARWIN, IS_LINUX, GTK_PATH
 
 # Setting mod mask for keyboard depending on platform
 MOD_MASK = Gdk.ModifierType.MOD2_MASK if IS_DARWIN else Gdk.ModifierType.CONTROL_MASK
@@ -184,15 +184,6 @@ class Page(Enum):
     RECORDINGS = "recordings"
     FTP = "ftp"
     CONTROL = "control"
-
-
-class FavClickMode(IntEnum):
-    """ Double click mode on the service in the bouquet(FAV) list. """
-    DISABLED = 0
-    STREAM = 1
-    PLAY = 2
-    ZAP = 3
-    ZAP_PLAY = 4
 
 
 class ViewTarget(Enum):

@@ -47,8 +47,8 @@ from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u, StreamType
 from app.eparser.neutrino.bouquets import BqType
-from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
-                          IS_DARWIN, PlayStreamsMode, IS_LINUX, USE_HEADER_BAR)
+from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException, IS_DARWIN, IS_LINUX,
+                          PlayStreamsMode, PlaybackMode, USE_HEADER_BAR)
 from app.tools.media import Recorder
 from app.ui.control import ControlTool
 from app.ui.epg.epg import EpgCache, EpgSettingsPopover, EpgDialog, EpgTool
@@ -69,7 +69,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT, Page, HeaderBar)
+                        MOD_MASK, APP_FONT, Page, HeaderBar)
 from .xml.dialogs import ServicesUpdateDialog
 from .xml.edit import SatellitesTool
 
@@ -2058,7 +2058,7 @@ class Application(Gtk.Application):
             name, model = get_model_data(view)
             self.delete_views_selection(name)
         elif event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
-            if self._settings.main_list_playback and self._fav_click_mode is not FavClickMode.DISABLED:
+            if self._settings.main_list_playback and self._fav_click_mode is not PlaybackMode.DISABLED:
                 if view is self._services_view:
                     self.emit("srv-clicked", self._fav_click_mode)
                 elif view is self._iptv_services_view:
@@ -2923,9 +2923,9 @@ class Application(Gtk.Application):
             view.do_unselect_all(view)
         elif ctrl and model_name == self.FAV_MODEL:
             if key is KeyboardKey.P:
-                self.emit("fav-clicked", FavClickMode.STREAM)
+                self.emit("fav-clicked", PlaybackMode.STREAM)
             if key is KeyboardKey.W:
-                self.emit("fav-clicked", FavClickMode.ZAP_PLAY)
+                self.emit("fav-clicked", PlaybackMode.ZAP_PLAY)
             if key is KeyboardKey.Z:
                 self.on_zap()
             elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
@@ -3039,10 +3039,10 @@ class Application(Gtk.Application):
 
     def on_fav_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            if self._fav_click_mode is FavClickMode.DISABLED:
+            if self._fav_click_mode is PlaybackMode.DISABLED:
                 return
 
-            if self._fav_click_mode is FavClickMode.ZAP:
+            if self._fav_click_mode is PlaybackMode.ZAP:
                 self.on_zap()
             else:
                 self.emit("fav-clicked", self._fav_click_mode)
@@ -3417,7 +3417,7 @@ class Application(Gtk.Application):
     # ************************* Streams ***************************** #
 
     def on_play_stream(self, item=None):
-        self.emit("fav-clicked", FavClickMode.STREAM)
+        self.emit("fav-clicked", PlaybackMode.STREAM)
 
     def on_play_current(self, item=None):
         """  starts playback of the current channel. """
@@ -3483,7 +3483,7 @@ class Application(Gtk.Application):
     # ************************ HTTP API **************************** #
 
     def init_http_api(self):
-        self._fav_click_mode = FavClickMode(self._settings.fav_click_mode)
+        self._fav_click_mode = PlaybackMode(self._settings.fav_click_mode)
         api_enable = self._settings.http_api_support
         GLib.idle_add(self._http_status_image.set_visible, api_enable and not self._receiver_info_box.get_visible())
 

@@ -389,7 +389,7 @@ class VlcPlayer(Player):
             from app.tools import vlc
             from app.tools.vlc import EventType
 
-            args = f"--quiet {'' if IS_DARWIN else '--no-xlib'}"
+            args = f"--quiet {'--no-xlib' if IS_LINUX else ''}"
             self._player = vlc.Instance(args).media_player_new()
             vlc.libvlc_video_set_key_input(self._player, False)
             vlc.libvlc_video_set_mouse_input(self._player, False)

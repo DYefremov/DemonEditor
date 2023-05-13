@@ -161,6 +161,15 @@ class PlayStreamsMode(IntEnum):
     M3U = 2
 
 
+class PlaybackMode(IntEnum):
+    """ Playback mode by double click of mouse in the bouquet (FAV) list. """
+    DISABLED = 0
+    STREAM = 1
+    PLAY = 2
+    ZAP = 3
+    ZAP_PLAY = 4
+
+
 class EpgSource(IntEnum):
     HTTP = 0  # HTTP API -> WebIf
     DAT = 1  # epg.dat file

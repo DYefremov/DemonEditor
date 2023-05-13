@@ -32,10 +32,10 @@ from collections import Counter
 
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
-from app.settings import SettingsType, Settings, PlayStreamsMode, IS_LINUX, SEP, IS_WIN
+from app.settings import SettingsType, Settings, PlayStreamsMode, PlaybackMode, IS_LINUX, SEP, IS_WIN
 from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, FavClickMode, DEFAULT_ICON, APP_FONT, HeaderBar
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, DEFAULT_ICON, APP_FONT, HeaderBar
 
 
 class SettingsDialog:
@@ -694,17 +694,17 @@ class SettingsDialog:
         if self._main_stack.get_visible_child_name() != "streaming":
             return
 
-        mode = FavClickMode(int(self._double_click_combo_box.get_active_id()))
-        if mode is FavClickMode.PLAY:
+        mode = PlaybackMode(int(self._double_click_combo_box.get_active_id()))
+        if mode is PlaybackMode.PLAY:
             self.show_info_message("Operates in standby mode or current active transponder!", Gtk.MessageType.WARNING)
-        elif mode is FavClickMode.STREAM:
+        elif mode is PlaybackMode.STREAM:
             self.show_info_message("Playback IPTV streams only!", Gtk.MessageType.WARNING)
-        elif mode is FavClickMode.DISABLED:
+        elif mode is PlaybackMode.DISABLED:
             self._allow_main_list_playback_switch.set_active(False)
         else:
             self.on_info_bar_close()
 
-        self._allow_main_list_playback_switch.set_sensitive(mode is not FavClickMode.DISABLED)
+        self._allow_main_list_playback_switch.set_sensitive(mode is not PlaybackMode.DISABLED)
 
     def on_play_mode_changed(self, button):
         if self._main_stack.get_visible_child_name() != "streaming":

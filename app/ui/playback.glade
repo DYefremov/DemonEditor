@@ -262,7 +262,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="audio_menu_button_image">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="icon-name">audio-volume-high-symbolic</property>
+                <property name="icon-name">audio-card-symbolic</property>
               </object>
             </child>
           </object>
