@@ -43,7 +43,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
                               parse_m3u, PICON_FORMAT)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
-from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
+from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder
 from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf
 from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon, HeaderBar)
 
@@ -164,14 +164,14 @@ class IptvDialog:
             self.on_url_changed(self._url_entry)
 
         if not is_data_correct(self._digit_elems) or self._url_entry.get_name() == _DIGIT_ENTRY_NAME:
-            self.show_info_message(get_message("Error. Verify the data!"), Gtk.MessageType.ERROR)
+            self.show_info_message(translate("Error. Verify the data!"), Gtk.MessageType.ERROR)
             return
 
         url = self._url_entry.get_text()
         if all((self._url_prefix_box.get_visible(),
                 self._url_prefix_combobox.get_active_id(),
                 url.count("http") > 1 or urlparse(url).scheme.upper() in _URL_PREFIXES)):
-            self.show_info_message(get_message("Invalid prefix for the given URL!"), Gtk.MessageType.ERROR)
+            self.show_info_message(translate("Invalid prefix for the given URL!"), Gtk.MessageType.ERROR)
             return
 
         if show_dialog(DialogType.QUESTION, self._dialog) in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
@@ -297,7 +297,7 @@ class IptvDialog:
             links, title = self._yt_dl.get_yt_link(video_id, entry.get_text())
             yield True
         except urllib.error.URLError as e:
-            self.show_info_message(f"{get_message('Getting link error:')} {e}", Gtk.MessageType.ERROR)
+            self.show_info_message(f"{translate('Getting link error:')} {e}", Gtk.MessageType.ERROR)
             return
         except YouTubeException as e:
             self.show_info_message((str(e)), Gtk.MessageType.ERROR)
@@ -312,7 +312,7 @@ class IptvDialog:
                 entry.set_text(links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
                 self._yt_links = links
             else:
-                msg = f"{get_message('Getting link error:')} No link received for id: {video_id}"
+                msg = f"{translate('Getting link error:')} No link received for id: {video_id}"
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
         finally:
             entry.set_sensitive(True)
@@ -697,14 +697,14 @@ class M3uImportDialog(IptvListDialog):
         self._max_count = 0
         self._is_download = False
         self._cancellable = Gio.Cancellable()
-        self._dialog.set_title(get_message("Playlist import"))
+        self._dialog.set_title(translate("Playlist import"))
         self._dialog.connect("delete-event", self.on_close)
-        self._apply_button.set_label(get_message("Import"))
+        self._apply_button.set_label(translate("Import"))
         # Progress
         self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
         self._spinner = Gtk.Spinner(active=False)
         self._info_label = Gtk.Label(visible=True, ellipsize="end", max_width_chars=30)
-        load_label = Gtk.Label(label=get_message("Loading data..."))
+        load_label = Gtk.Label(label=translate("Loading data..."))
         self._spinner.bind_property("active", self._spinner, "visible")
         self._spinner.bind_property("visible", load_label, "visible")
         self._spinner.bind_property("active", self._start_values_grid, "sensitive", 4)
@@ -717,7 +717,7 @@ class M3uImportDialog(IptvListDialog):
         self._picons_switch = Gtk.Switch(visible=True)
         self._picon_box = Gtk.HBox(visible=True, sensitive=False, spacing=5)
         self._picon_box.pack_end(self._picons_switch, False, False, 0)
-        self._picon_box.pack_end(Gtk.Label(visible=True, label=get_message("Download picons")), False, False, 0)
+        self._picon_box.pack_end(Gtk.Label(visible=True, label=translate("Download picons")), False, False, 0)
         # Extra box
         extra_box = Gtk.HBox(visible=True, spacing=2, margin_bottom=5, margin_top=5)
         extra_box.set_center_widget(progress_box)
@@ -740,7 +740,7 @@ class M3uImportDialog(IptvListDialog):
                     GLib.idle_add(self._picon_box.set_sensitive, True)
                     break
         finally:
-            msg = f"{get_message('Streams detected:')} {len(self._services) if self._services else 0}."
+            msg = f"{translate('Streams detected:')} {len(self._services) if self._services else 0}."
             GLib.idle_add(self._info_label.set_text, msg)
             GLib.idle_add(self._spinner.set_property, "active", False)
 
@@ -941,7 +941,7 @@ class YtListImportDialog:
         builder.get_object("yt_url_prefix_box").set_visible(self._s_type is SettingsType.ENIGMA_2)
 
         if self._settings.use_header_bar:
-            header_bar = HeaderBar(title="YouTube", subtitle=get_message("Playlist import"))
+            header_bar = HeaderBar(title="YouTube", subtitle=translate("Playlist import"))
             self._dialog.set_titlebar(header_bar)
             actions_box = builder.get_object("yt_actions_box")
             import_box = builder.get_object("yt_import_box")
@@ -1073,7 +1073,7 @@ class YtListImportDialog:
             srvs.append(srv)
 
         self.appender(srvs)
-        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+        self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     @run_idle
     def update_active_elements(self, sensitive):

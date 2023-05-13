@@ -91,7 +91,7 @@ class WaitDialog:
 
     @run_idle
     def set_text(self, text):
-        self._label.set_text(get_message(text or self._default_text))
+        self._label.set_text(translate(text or self._default_text))
 
     @run_idle
     def hide(self):
@@ -135,7 +135,7 @@ def get_chooser_dialog(transient, settings, name, patterns, title=None, file_fil
 
 def get_file_chooser_dialog(transient, text, settings, action_type, file_filter, buttons=None, title=None, dirs=False):
     action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
-    dialog = Gtk.FileChooserNative.new(get_message(title) if title else "", transient, action_type)
+    dialog = Gtk.FileChooserNative.new(translate(title) if title else "", transient, action_type)
     dialog.set_create_folders(dirs)
     dialog.set_modal(True)
 
@@ -174,7 +174,7 @@ def get_message_dialog(transient, message_type, buttons_type, text):
     builder.add_from_string(dialog_str)
     dialog = builder.get_object("message_dialog")
     dialog.set_transient_for(transient)
-    dialog.set_markup(get_message(text))
+    dialog.set_markup(translate(text))
     response = dialog.run()
     dialog.destroy()
 
@@ -202,7 +202,7 @@ def get_dialog_from_xml(dialog_type, transient, use_header=0, title=""):
     return builder, dialog
 
 
-def get_message(message):
+def translate(message):
     """ returns translated message """
     return gettext.dgettext(TEXT_DOMAIN, message)
 
@@ -246,9 +246,9 @@ def translate_xml(path, tag="property"):
     root = et.getroot()
     for e in root.iter():
         if e.tag == tag and e.attrib.get("translatable", None) == "yes":
-            e.text = get_message(e.text)
+            e.text = translate(e.text)
         elif e.tag == "item" and e.attrib.get("translatable", None) == "yes":
-            e.text = get_message(e.text)
+            e.text = translate(e.text)
 
     return ET.tostring(root, encoding="unicode", method="xml")
 

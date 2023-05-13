@@ -33,7 +33,7 @@ from collections import Counter
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
 from app.settings import SettingsType, Settings, PlayStreamsMode, PlaybackMode, IS_LINUX, SEP, IS_WIN
-from app.ui.dialogs import show_dialog, DialogType, get_message, get_chooser_dialog, get_builder
+from app.ui.dialogs import show_dialog, DialogType, translate, get_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, DEFAULT_ICON, APP_FONT, HeaderBar
 
@@ -264,9 +264,9 @@ class SettingsDialog:
     def update_title(self):
         title = "{} [{}]"
         if self._s_type is SettingsType.ENIGMA_2:
-            self._dialog.set_title(title.format(get_message("Options"), self._enigma_radio_button.get_label()))
+            self._dialog.set_title(title.format(translate("Options"), self._enigma_radio_button.get_label()))
         elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._dialog.set_title(title.format(get_message("Options"), self._neutrino_radio_button.get_label()))
+            self._dialog.set_title(title.format(translate("Options"), self._neutrino_radio_button.get_label()))
 
     def update_picon_paths(self):
         model = self._picons_paths_box.get_model()
@@ -497,7 +497,7 @@ class SettingsDialog:
     def show_info_message(self, text, message_type):
         self._info_bar.set_visible(False)
         self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(get_message(text))
+        self._message_label.set_text(translate(text))
         self._info_bar.set_visible(True)
 
     @run_idle
@@ -661,7 +661,7 @@ class SettingsDialog:
         self._ext_settings.picons_paths = tuple(r[0] for r in model)
 
     def on_remove_picon_path(self, button):
-        msg = f"{get_message('This may change the settings of other profiles!')}\n\n\t\t{get_message('Are you sure?')}"
+        msg = f"{translate('This may change the settings of other profiles!')}\n\n\t\t{translate('Are you sure?')}"
         if show_dialog(DialogType.QUESTION, self._dialog, msg) != Gtk.ResponseType.OK:
             return
 

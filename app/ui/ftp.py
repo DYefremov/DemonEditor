@@ -43,7 +43,7 @@ from gi.repository import GLib
 from app.commons import log, run_task, run_idle, get_size_from_bytes
 from app.connections import UtfFTP
 from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP, USE_HEADER_BAR
-from app.ui.dialogs import show_dialog, DialogType, get_builder, get_message
+from app.ui.dialogs import show_dialog, DialogType, get_builder, translate
 from app.ui.main_helper import on_popup_menu
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, Page
 
@@ -147,7 +147,7 @@ class AttributesDialog(BaseDialog):
     """ Dialog for editing file attributes (permissions). """
 
     def __init__(self, attrs, use_header_bar=0, *args, **kwargs):
-        super().__init__(title=get_message("Permissions"), use_header_bar=use_header_bar, *args, **kwargs)
+        super().__init__(title=translate("Permissions"), use_header_bar=use_header_bar, *args, **kwargs)
 
         self.set_default_size(360, 100)
         self.set_resizable(False)

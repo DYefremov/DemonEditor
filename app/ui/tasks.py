@@ -24,7 +24,7 @@
 #
 # Author: Dmitriy Yefremov
 #
-from app.ui.dialogs import get_message
+from app.ui.dialogs import translate
 from .uicommons import Gtk, GLib
 
 
@@ -37,7 +37,7 @@ class BGTaskWidget(Gtk.Box):
         super().__init__(spacing=2, orientation=Gtk.Orientation.HORIZONTAL, valign=Gtk.Align.CENTER)
         self._app = app
 
-        self._label = Gtk.Label(get_message(text))
+        self._label = Gtk.Label(translate(text))
         self.pack_start(self._label, False, False, 0)
 
         self._spinner = Gtk.Spinner(active=True)
@@ -46,7 +46,7 @@ class BGTaskWidget(Gtk.Box):
         close_button = Gtk.Button.new_from_icon_name("window-close", Gtk.IconSize.MENU)
         close_button.set_relief(Gtk.ReliefStyle.NONE)
         close_button.set_valign(Gtk.Align.CENTER)
-        close_button.set_tooltip_text(get_message("Cancel"))
+        close_button.set_tooltip_text(translate("Cancel"))
         close_button.set_name("task-button")
         close_button.connect("clicked", lambda b: self._app.emit("task-cancel", self))
         self.pack_start(close_button, False, False, 0)

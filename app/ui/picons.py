@@ -41,7 +41,7 @@ from app.settings import SettingsType, Settings, SEP, IS_DARWIN
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
                               PiconsError)
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .dialogs import show_dialog, DialogType, get_message, get_builder, get_chooser_dialog
+from .dialogs import show_dialog, DialogType, translate, get_builder, get_chooser_dialog
 from .main_helper import (scroll_to, on_popup_menu, get_base_model, set_picon, get_picon_pixbuf, get_picon_dialog,
                           get_picon_file_name, get_pixbuf_from_data, get_pixbuf_at_scale)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
@@ -201,7 +201,7 @@ class PiconManager(Gtk.Box):
         self.show()
 
         if not len(self._picon_ids) and self._s_type is SettingsType.ENIGMA_2:
-            message = get_message("To automatically set the identifiers for picons,\n"
+            message = translate("To automatically set the identifiers for picons,\n"
                                   "first load the required services list into the main application window.")
             self.show_info_message(message, Gtk.MessageType.WARNING)
             self._satellite_label.show()
@@ -439,7 +439,7 @@ class PiconManager(Gtk.Box):
 
     def on_add(self, item):
         """ Adds (copies) picons from an external folder to the profile picons folder. """
-        dialog = get_picon_dialog(self._app_window, get_message("Add picons"), get_message("Add"))
+        dialog = get_picon_dialog(self._app_window, translate("Add picons"), translate("Add"))
         if dialog.run() in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -531,10 +531,10 @@ class PiconManager(Gtk.Box):
         settings = Settings(self._settings.settings)
         settings.profile_picons_path = f"{dest_path}{SEP}"
         settings.current_profile = self._settings.current_profile
-        self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
+        self.show_info_message(translate("Please, wait..."), Gtk.MessageType.INFO)
         self.run_func(lambda: upload_data(settings=settings,
                                           download_type=DownloadType.PICONS,
-                                          done_callback=lambda: self.show_info_message(get_message("Done!"),
+                                          done_callback=lambda: self.show_info_message(translate("Done!"),
                                                                                        Gtk.MessageType.INFO),
                                           files_filter=files_filter))
 
@@ -556,7 +556,7 @@ class PiconManager(Gtk.Box):
             return
 
         self.run_func(lambda: remove_picons(settings=self._settings,
-                                            done_callback=lambda: self.show_info_message(get_message("Done!"),
+                                            done_callback=lambda: self.show_info_message(translate("Done!"),
                                                                                          Gtk.MessageType.INFO),
                                             files_filter=files_filter))
 
@@ -620,7 +620,7 @@ class PiconManager(Gtk.Box):
             tooltip = f"{link} (by Chocholoušek)"
         elif self._download_src is self.DownloadSource.LYNG_SAT:
             link = "https://www.lyngsat.com"
-            tooltip = f"{get_message('Providers')} [{link}]"
+            tooltip = f"{translate('Providers')} [{link}]"
         else:
             link = ""
             tooltip = ""
@@ -724,14 +724,14 @@ class PiconManager(Gtk.Box):
         for prv in providers:
             if self._download_src is self.DownloadSource.LYNG_SAT and not self._POS_PATTERN.match(prv[2]):
                 self.show_info_message(
-                    get_message("Specify the correct position value for the provider!"), Gtk.MessageType.ERROR)
+                    translate("Specify the correct position value for the provider!"), Gtk.MessageType.ERROR)
                 scroll_to(prv.path, self._providers_view)
                 return
 
         try:
             picons_path = self._current_path_label.get_text()
             os.makedirs(os.path.dirname(picons_path), exist_ok=True)
-            self.show_info_message(get_message("Please, wait..."), Gtk.MessageType.INFO)
+            self.show_info_message(translate("Please, wait..."), Gtk.MessageType.INFO)
             providers = (Provider(*p) for p in providers)
 
             if self._download_src is self.DownloadSource.LYNG_SAT:
@@ -773,7 +773,7 @@ class PiconManager(Gtk.Box):
             for future in not_done:
                 future.cancel()
             concurrent.futures.wait(not_done)
-            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+            self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     def get_picons_for_picon_cz(self, path, providers):
         p_ids = None
@@ -789,7 +789,7 @@ class PiconManager(Gtk.Box):
             log(f"Error: {str(e)}\n")
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
-            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+            self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     def get_bouquet_picon_ids(self):
         """ Returns picon ids for selected bouquet or None. """
@@ -817,13 +817,13 @@ class PiconManager(Gtk.Box):
 
     @run_task
     def resize(self, path):
-        self.show_info_message(get_message("Resizing..."), Gtk.MessageType.INFO)
+        self.show_info_message(translate("Resizing..."), Gtk.MessageType.INFO)
 
         try:
             from pathlib import Path
             from PIL import Image
         except ImportError as e:
-            self.show_info_message(f"{get_message('Conversion error.')} {e}", Gtk.MessageType.ERROR)
+            self.show_info_message(f"{translate('Conversion error.')} {e}", Gtk.MessageType.ERROR)
         else:
             res = (220, 132) if self._resize_220_132_radio_button.get_active() else (100, 60)
 
@@ -832,7 +832,7 @@ class PiconManager(Gtk.Box):
                 img = img.resize(res, Image.ANTIALIAS)
                 img.save(img_file, "PNG", optimize=True)
 
-            self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+            self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     def on_cancel(self, item=None):
         if self._is_downloading and show_dialog(DialogType.QUESTION, self._app_window) == Gtk.ResponseType.CANCEL:
@@ -844,7 +844,7 @@ class PiconManager(Gtk.Box):
     def terminate_task(self):
         self._terminate = True
         self._is_downloading = False
-        self.show_info_message(get_message("The task is canceled!"), Gtk.MessageType.WARNING)
+        self.show_info_message(translate("The task is canceled!"), Gtk.MessageType.WARNING)
 
     @run_task
     def run_func(self, func, update=False):
@@ -951,8 +951,8 @@ class PiconManager(Gtk.Box):
             return self._app.get_hint_for_srv_list(srv)
 
         header, ref = self._app.get_hint_header_info(srv)
-        return "{}  {}: {}\n{}: {}  {}: {}\n{}".format(header.rstrip(), get_message("Package"), srv.package,
-                                                       get_message("System"), srv.system, get_message("Freq"), srv.freq,
+        return "{}  {}: {}\n{}: {}  {}: {}\n{}".format(header.rstrip(), translate("Package"), srv.package,
+                                                       translate("System"), srv.system, translate("Freq"), srv.freq,
                                                        ref)
 
     def on_view_query_tooltip(self, view, x, y, keyboard_mode, tooltip):
@@ -1002,7 +1002,7 @@ class PiconManager(Gtk.Box):
         convert_to(src_path=picons_path,
                    dest_path=save_path,
                    s_type=SettingsType.ENIGMA_2,
-                   done_callback=lambda: self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO))
+                   done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
 
     @run_idle
     def update_receive_button_state(self):

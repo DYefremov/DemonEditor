@@ -50,7 +50,7 @@ from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
 from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.settings import SettingsType, SEP, IS_WIN, IS_DARWIN, IS_LINUX
-from .dialogs import show_dialog, DialogType, get_message
+from .dialogs import show_dialog, DialogType, translate
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
 
 
@@ -430,7 +430,7 @@ def assign_picons(target, srv_view, fav_view, transient, picons, settings, servi
     picons_files = []
 
     if not src_path:
-        dialog = get_picon_dialog(transient, get_message("Picon selection"), get_message("Open"), False)
+        dialog = get_picon_dialog(transient, translate("Picon selection"), translate("Open"), False)
         if dialog.run() in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT) or not dialog.get_filenames():
             return picons_files
 
@@ -607,7 +607,7 @@ def gen_bouquets(app, gen_type):
     cond = srv.package if gen_type is BqGenType.PACKAGE else srv.pos if gen_type is BqGenType.SAT else srv.service_type
 
     if gen_type is BqGenType.TYPE and cond == "Data":
-        msg = f"{get_message('Selected type:')} '{cond}'\n\n{get_message('Are you sure?')}"
+        msg = f"{translate('Selected type:')} '{cond}'\n\n{translate('Are you sure?')}"
         if show_dialog(DialogType.QUESTION, app.app_window, msg) != Gtk.ResponseType.OK:
             return
 

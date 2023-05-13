@@ -45,7 +45,7 @@ from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC,
 from app.eparser.satxml import get_pos_str
 from app.settings import USE_HEADER_BAR, Settings, CONFIG_PATH
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
-from ..dialogs import show_dialog, DialogType, get_message, get_builder
+from ..dialogs import show_dialog, DialogType, translate, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu, get_services_type_groups
 from ..search import SearchProvider
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HeaderBar
@@ -58,7 +58,7 @@ class DVBDialog(Gtk.Dialog):
 
     def __init__(self, parent, title, data=None, *args, **kwargs):
         super().__init__(transient_for=parent,
-                         title=get_message(title),
+                         title=translate(title),
                          modal=True,
                          resizable=False,
                          default_width=320,
@@ -85,7 +85,7 @@ class TransponderDialog(DVBDialog):
 
     def __init__(self, parent, title, data=None, *args, **kwargs):
         super().__init__(parent, title, data, *args, **kwargs)
-        self.frame.set_label(get_message("Transponder properties:"))
+        self.frame.set_label(translate("Transponder properties:"))
         # Pattern for digits entries.
         self.digit_pattern = re.compile(r"\D")
         # Style
@@ -125,7 +125,7 @@ class TCDialog(DVBDialog):
 
         self._entry = Gtk.Entry(margin=5)
         self.frame.add(self._entry)
-        self.frame.set_label(get_message("Name:"))
+        self.frame.set_label(translate("Name:"))
         self.show_all()
 
         if data:
@@ -141,7 +141,7 @@ class SatelliteDialog(DVBDialog):
                               objects=("sat_dialog_box", "side_store", "pos_adjustment"))
 
         self.frame.add(builder.get_object("sat_dialog_box"))
-        self.frame.set_label(get_message("Satellite properties:"))
+        self.frame.set_label(translate("Satellite properties:"))
         self._sat_name = builder.get_object("sat_name_entry")
         self._sat_position = builder.get_object("sat_position_button")
         self._side = builder.get_object("side_box")
@@ -687,7 +687,7 @@ class SatellitesUpdateDialog(UpdateDialog):
         self._merge_sat_switch = Gtk.Switch(active=self._dialog_settings.get("merge_satellites", False))
         self._merge_sat_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"merge_satellites": s}))
         box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL)
-        box.pack_start(Gtk.Label(get_message("Merge satellites by positions")), False, True, 0)
+        box.pack_start(Gtk.Label(translate("Merge satellites by positions")), False, True, 0)
         box.pack_end(self._merge_sat_switch, False, True, 0)
         self._general_options_box.pack_start(box, True, True, 0)
         self._general_options_box.show_all()
@@ -829,7 +829,7 @@ class ServicesUpdateDialog(UpdateDialog):
         select_all_item.connect("activate", lambda w: self.update_transponder_selection(True))
         tr_popup_menu.append(select_all_item)
         remove_selection_item = Gtk.ImageMenuItem.new_from_stock("gtk-undo")
-        remove_selection_item.set_label(get_message("Remove selection"))
+        remove_selection_item.set_label(translate("Remove selection"))
         remove_selection_item.connect("activate", lambda w: self.update_transponder_selection(False))
         tr_popup_menu.append(remove_selection_item)
         tr_popup_menu.show_all()
@@ -849,11 +849,11 @@ class ServicesUpdateDialog(UpdateDialog):
         self._kos_bq_lang_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"kos_bq_lang": s}))
         self._kos_options_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
-        box.pack_start(Gtk.Label(get_message("Create Category bouquets")), False, True, 0)
+        box.pack_start(Gtk.Label(translate("Create Category bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_groups_switch, False, True, 0)
         self._kos_options_box.add(box)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_bottom=5)
-        box.pack_start(Gtk.Label(get_message("Create Regional bouquets")), False, True, 0)
+        box.pack_start(Gtk.Label(translate("Create Regional bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_lang_switch, False, True, 0)
         self._kos_options_box.add(box)
         self._kos_options_box.connect("realize", self.on_source_changed)
@@ -874,7 +874,7 @@ class ServicesUpdateDialog(UpdateDialog):
         if not is_kos:
             self._kos_bq_groups_switch.set_active(False)
             self._kos_bq_lang_switch.set_active(False)
-        self._kos_options_box.set_tooltip_text(None if is_kos else get_message("KingOfSat only!"))
+        self._kos_options_box.set_tooltip_text(None if is_kos else translate("KingOfSat only!"))
 
     @run_task
     def receive_services(self):

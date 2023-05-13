@@ -40,7 +40,7 @@ from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTE
 from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable, get_pos_str
 from .dialogs import (SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog,
                       CableTransponderDialog, TerTransponderDialog)
-from ..dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
+from ..dialogs import show_dialog, DialogType, get_chooser_dialog, translate, get_builder
 from ..main_helper import move_items, on_popup_menu, scroll_to
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
 
@@ -368,7 +368,7 @@ class SatellitesTool(Gtk.Box):
             data = func(path)
             yield True
         except FileNotFoundError as e:
-            msg = get_message("Please, download files from receiver or setup your path for read data!")
+            msg = translate("Please, download files from receiver or setup your path for read data!")
             self._app.show_error_message(f"{e}\n{msg}")
         except ExpatError as e:
             msg = f"The file [{path}] is not formatted correctly or contains invalid characters! Cause: {e}"

@@ -60,7 +60,7 @@ from app.ui.telnet import TelnetClient
 from app.ui.timers import TimerTool
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path, restore_data
-from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
+from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, translate, get_builder
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import *
@@ -659,12 +659,12 @@ class Application(Gtk.Application):
         else:
             tools_menu = builder.get_object("tools_menu")
             tools_button = Gtk.MenuButton(visible=True, menu_model=tools_menu, direction=Gtk.ArrowType.NONE)
-            tools_button.set_tooltip_text(get_message("Tools"))
+            tools_button.set_tooltip_text(translate("Tools"))
             tools_button.set_image(Gtk.Image.new_from_icon_name("applications-utilities-symbolic", Gtk.IconSize.BUTTON))
 
             view_menu = builder.get_object("view_menu")
             view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
-            view_button.set_tooltip_text(get_message("View"))
+            view_button.set_tooltip_text(translate("View"))
 
             box = Gtk.ButtonBox(visible=True, layout_style="expand")
             box.add(tools_button)
@@ -686,7 +686,7 @@ class Application(Gtk.Application):
         # Extensions (Plugins) section.
         ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
         self.set_action("on_extension_manager", lambda a, v: ExtensionManager(self).show())
-        ext_section.append_item(Gio.MenuItem.new(get_message("Extension Manager"), "app.on_extension_manager"))
+        ext_section.append_item(Gio.MenuItem.new(translate("Extension Manager"), "app.on_extension_manager"))
 
         ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
         ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path, "extensions"]
@@ -1031,13 +1031,13 @@ class Application(Gtk.Application):
         self._settings.add("fav_paned_position", self._fav_paned.get_position())
 
         if self.is_data_loading():
-            msg = f"{get_message('Data loading in progress!')}\n\n\t{get_message('Are you sure?')}"
+            msg = f"{translate('Data loading in progress!')}\n\n\t{translate('Are you sure?')}"
             if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                 return True
 
         if self._recorder:
             if self._recorder.is_record():
-                msg = f"{get_message('Recording in progress!')}\n\n\t{get_message('Are you sure?')}"
+                msg = f"{translate('Recording in progress!')}\n\n\t{translate('Are you sure?')}"
                 if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                     return True
             self._recorder.release()
@@ -1145,10 +1145,10 @@ class Application(Gtk.Application):
         value = bool(value)
         self._settings.use_header_bar = bool(value)
 
-        msg = get_message("Restart the program to apply all changes.")
+        msg = translate("Restart the program to apply all changes.")
         if value:
             warn = "It can cause some problems."
-            msg = f"{get_message('EXPERIMENTAL!')} {warn} {msg}"
+            msg = f"{translate('EXPERIMENTAL!')} {warn} {msg}"
         self.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_idle
@@ -1156,8 +1156,8 @@ class Application(Gtk.Application):
         is_alt = bool(value)
         self.reverse_main_elements(is_alt)
         if self._settings.play_streams_mode is PlayStreamsMode.BUILT_IN:
-            msg = get_message("Layout of elements has been changed!")
-            msg = f"{msg} {get_message('Restart the program to apply all changes.')}"
+            msg = translate("Layout of elements has been changed!")
+            msg = f"{msg} {translate('Restart the program to apply all changes.')}"
             self.show_info_message(msg, Gtk.MessageType.WARNING)
 
         self.emit("layout-changed", is_alt)
@@ -1384,7 +1384,7 @@ class Application(Gtk.Application):
             returns deleted rows list!
         """
         if self.is_data_loading():
-            show_dialog(DialogType.ERROR, self._main_window, get_message("Data loading in progress!"))
+            show_dialog(DialogType.ERROR, self._main_window, translate("Data loading in progress!"))
             return
 
         selection = view.get_selection()
@@ -1525,7 +1525,7 @@ class Application(Gtk.Application):
             key = f"{response}:{bq_type}"
 
             while key in self._bouquets:
-                self.show_error_message(get_message("A bouquet with that name exists!"))
+                self.show_error_message(translate("A bouquet with that name exists!"))
                 response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
                 if response == Gtk.ResponseType.CANCEL:
                     return
@@ -1652,7 +1652,7 @@ class Application(Gtk.Application):
         model, paths = self._fav_view.get_selection().get_selected_rows()
 
         if len(paths) < 2 and len(bq) > self.FAV_FACTOR or len(paths) > self.FAV_FACTOR:
-            self._wait_dialog.show(get_message("Sorting data..."))
+            self._wait_dialog.show(translate("Sorting data..."))
         GLib.idle_add(self.sort_fav, c_num, bq, paths, order, 0 if c_num == Column.FAV_NUM else "")
 
     def sort_fav(self, c_num, bq, paths, rev=False, nv=""):
@@ -1711,7 +1711,7 @@ class Application(Gtk.Application):
 
         counter = Counter(s.service_type for s in filter(None, (self._services.get(f_id, None) for f_id in bq)))
         services_txt = "\n".join(f"{k}: {v}" for k, v in counter.items())
-        n_msg, s_msg, f_msg = get_message("Name"), get_message("Services"), get_message("File")
+        n_msg, s_msg, f_msg = translate("Name"), translate("Services"), translate("File")
         f = f"\n\n{f_msg}: *.{self._bq_file.get(b_id, None)}.{b_type}" if self._s_type is SettingsType.ENIGMA_2 else ""
         tooltip.set_text(f"{n_msg}: {name}\n{s_msg}:\n{services_txt}{f}")
         view.set_tooltip_row(tooltip, path)
@@ -1754,7 +1754,7 @@ class Application(Gtk.Application):
             tooltip.set_icon(self.get_tooltip_picon(srv))
             fav_id = srv.fav_id
             names = (b[:b.rindex(":")] for b, ids in self._bouquets.items() if fav_id in ids)
-            text = f"{get_message('Name')}: {srv.service}\n{get_message('Bouquets')}: {', '.join(names)}"
+            text = f"{translate('Name')}: {srv.service}\n{translate('Bouquets')}: {', '.join(names)}"
             tooltip.set_text(text)
             view.set_tooltip_row(tooltip, path)
             return True
@@ -1781,14 +1781,14 @@ class Application(Gtk.Application):
         if srv.service_type == BqServiceType.IPTV.name:
             return f"{header}{ref}"
 
-        pol = ", {}: {},".format(get_message("Pol"), srv.pol) if srv.pol else ","
+        pol = ", {}: {},".format(translate("Pol"), srv.pol) if srv.pol else ","
         fec = "{}: {}".format("FEC", srv.fec) if srv.fec else ","
         ht = "{}{}: {}\n{}: {}\n{}: {}\n{}: {}{} {}, {}\n{}"
         return ht.format(header,
-                         get_message("Package"), srv.package,
-                         get_message("System"), srv.system,
-                         get_message("Freq"), srv.freq,
-                         get_message("Rate"), srv.rate, pol, fec,
+                         translate("Package"), srv.package,
+                         translate("System"), srv.system,
+                         translate("Freq"), srv.freq,
+                         translate("Rate"), srv.rate, pol, fec,
                          self.get_ssid_info(srv),
                          ref)
 
@@ -1798,8 +1798,8 @@ class Application(Gtk.Application):
         return f"{header}{self.get_ssid_info(srv)}\n{ref}"
 
     def get_hint_header_info(self, srv):
-        header = f"{get_message('Name')}: {srv.service}\n{get_message('Type')}: {srv.service_type}\n"
-        ref = f"{get_message('Service reference')}: {get_service_reference(srv)}"
+        header = f"{translate('Name')}: {srv.service}\n{translate('Type')}: {srv.service_type}\n"
+        ref = f"{translate('Service reference')}: {get_service_reference(srv)}"
         return header, ref
 
     def get_ssid_info(self, srv):
@@ -2298,7 +2298,7 @@ class Application(Gtk.Application):
             services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
             yield True
         except FileNotFoundError as e:
-            msg = get_message("Please, download files from receiver or setup your path for read data!")
+            msg = translate("Please, download files from receiver or setup your path for read data!")
             self.show_error_message(getattr(e, "message", str(e)) + "\n\n" + msg)
             return
         except SyntaxError as e:
@@ -2307,7 +2307,7 @@ class Application(Gtk.Application):
         except Exception as e:
             msg = "Reading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
-            self.show_error_message("{}\n{}".format(get_message("Reading data error!"), e))
+            self.show_error_message("{}\n{}".format(translate("Reading data error!"), e))
             return
         else:
             self.append_blacklist(black_list)
@@ -2550,8 +2550,8 @@ class Application(Gtk.Application):
             return
 
         if os.listdir(response):
-            msg = "{}\n\n\t\t{}".format(get_message("The selected folder already contains files!"),
-                                        get_message("Are you sure?"))
+            msg = "{}\n\n\t\t{}".format(translate("The selected folder already contains files!"),
+                                        translate("Are you sure?"))
             if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                 return
 
@@ -2991,8 +2991,8 @@ class Application(Gtk.Application):
                     model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
 
             if self._s_type is SettingsType.ENIGMA_2:
-                msg = get_message("After uploading the changes you may need to completely reboot the receiver!")
-                self.show_info_message(f"{get_message('EXPERIMENTAL!')} {msg}", Gtk.MessageType.WARNING)
+                msg = translate("After uploading the changes you may need to completely reboot the receiver!")
+                self.show_info_message(f"{translate('EXPERIMENTAL!')} {msg}", Gtk.MessageType.WARNING)
         else:
             if self._s_type is SettingsType.ENIGMA_2:
                 set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
@@ -3964,7 +3964,7 @@ class Application(Gtk.Application):
 
             bq = f"{response}:{bq_type}"
             if bq in self._bouquets:
-                self.show_error_message(get_message("A bouquet with that name exists!"))
+                self.show_error_message(translate("A bouquet with that name exists!"))
                 return
 
             model.set_value(itr, Column.BQ_NAME, response)
@@ -4080,9 +4080,9 @@ class Application(Gtk.Application):
                 return
             gen = self.remove_favs(to_remove, self._fav_model)
             GLib.idle_add(lambda: next(gen, False))
-            self.show_info_message(f"{get_message('Done!')} {get_message('Removed')}: {count}")
+            self.show_info_message(f"{translate('Done!')} {translate('Removed')}: {count}")
         else:
-            self.show_info_message(f"{get_message('Done!')} {get_message('Found')}: {count}")
+            self.show_info_message(f"{translate('Done!')} {translate('Found')}: {count}")
 
     def on_services_mark_not_in_bouquets(self, item):
         if self.is_data_loading():
@@ -4436,7 +4436,7 @@ class Application(Gtk.Application):
         self._current_ip_label.set_text(f"{label}: {self._settings.host}")
 
         profile_name = self._profile_combo_box.get_active_text()
-        msg = get_message("Profile:")
+        msg = translate("Profile:")
 
         if self._s_type is SettingsType.ENIGMA_2:
             title = f"DemonEditor [{msg} {profile_name} - Enigma2 v.{self.get_format_version()}]"
@@ -4453,7 +4453,7 @@ class Application(Gtk.Application):
     @run_idle
     def show_info_message(self, text, message_type=Gtk.MessageType.INFO):
         self._info_bar.set_visible(False)
-        self._info_label.set_text(get_message(text))
+        self._info_label.set_text(translate(text))
         self._info_bar.set_message_type(message_type)
         self._info_bar.set_visible(True)
 
@@ -4579,16 +4579,16 @@ def start_app():
     try:
         Settings.get_instance()
     except SettingsReadException as e:
-        msg = f"{get_message('Error reading or writing program settings!')}\n {e}"
+        msg = f"{translate('Error reading or writing program settings!')}\n {e}"
         show_dialog(DialogType.INFO, transient=Gtk.Dialog(), text=msg)
     except SettingsException as e:
-        msg = f"{e}\n\n{get_message('It is recommended to load the default settings!')}"
+        msg = f"{e}\n\n{translate('It is recommended to load the default settings!')}"
         dlg = Gtk.Dialog()
         if show_dialog(DialogType.QUESTION, dlg, msg) != Gtk.ResponseType.OK:
             return True
 
         Settings.reset_to_default()
-        show_dialog(DialogType.INFO, transient=dlg, text=get_message("All setting were reset. Restart the program!"))
+        show_dialog(DialogType.INFO, transient=dlg, text=translate("All setting were reset. Restart the program!"))
     else:
         app = Application()
         app.run(sys.argv)

@@ -45,7 +45,7 @@ from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP, EpgSource, IS_WIN
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
-from app.ui.dialogs import get_message, show_dialog, DialogType, get_builder
+from app.ui.dialogs import translate, show_dialog, DialogType, get_builder
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
 from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions
@@ -478,7 +478,7 @@ class EpgDialog:
         self._epg_dat_source_box = builder.get_object("epg_dat_source_box")
 
         if self._settings.use_header_bar:
-            header_bar = HeaderBar(title="EPG", subtitle=get_message("List configuration"))
+            header_bar = HeaderBar(title="EPG", subtitle=translate("List configuration"))
             self._dialog.set_titlebar(header_bar)
             builder.get_object("left_action_box").reparent(header_bar)
             right_box = builder.get_object("right_action_box")
@@ -618,8 +618,8 @@ class EpgDialog:
 
                     if content_type != "application/gzip":
                         self._download_xml_is_active = False
-                        raise ValueError("{} {} {}".format(get_message("Download XML file error."),
-                                                           get_message("Unsupported file type:"),
+                        raise ValueError("{} {} {}".format(translate("Download XML file error."),
+                                                           translate("Unsupported file type:"),
                                                            content_type))
 
                     file_name = os.path.basename(url)
@@ -645,7 +645,7 @@ class EpgDialog:
 
                         path = tfp.name.rstrip(".gz")
             except (HTTPError, URLError) as e:
-                raise ValueError(f"{get_message('Download XML file error.')} {e}")
+                raise ValueError(f"{translate('Download XML file error.')} {e}")
             else:
                 try:
                     with open(path, "wb") as f_out:
@@ -653,7 +653,7 @@ class EpgDialog:
                             shutil.copyfileobj(f, f_out)
                     os.remove(tfp.name)
                 except Exception as e:
-                    raise ValueError(f"{get_message('Unpacking data error.')} {e}")
+                    raise ValueError(f"{translate('Unpacking data error.')} {e}")
             finally:
                 self._download_xml_is_active = False
                 self.update_active_header_elements(True)
@@ -662,7 +662,7 @@ class EpgDialog:
             s_refs, info = ChannelsParser.get_refs_from_xml(path)
             yield True
         except Exception as e:
-            raise ValueError(f"{get_message('XML parsing error:')} {e}")
+            raise ValueError(f"{translate('XML parsing error:')} {e}")
         else:
             refs = refs or {}
             factor = self._app.DEL_FACTOR / 4
@@ -718,7 +718,7 @@ class EpgDialog:
         if self._refs_source is RefsSource.XML:
             text = f"ID = {ch_id}"
         else:
-            text = f"{get_message('Service reference')}: {ch_id.rstrip('.png')}"
+            text = f"{translate('Service reference')}: {ch_id.rstrip('.png')}"
 
         tooltip.set_text(text)
         view.set_tooltip_row(tooltip, path)
@@ -742,7 +742,7 @@ class EpgDialog:
                 services.append(srv)
 
         ChannelsParser.write_refs_to_xml("{}{}.xml".format(response, self._bouquet_name), services)
-        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
+        self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     @run_idle
     def on_auto_configuration(self, item):
@@ -785,8 +785,8 @@ class EpgDialog:
                     break
 
         self.update_epg_count()
-        self.show_info_message("{} {} {}".format(get_message("Done!"),
-                                                 get_message("Count of successfully configured services:"),
+        self.show_info_message("{} {} {}".format(translate("Done!"),
+                                                 translate("Count of successfully configured services:"),
                                                  success_count), Gtk.MessageType.INFO)
 
     def assign_refs(self, model, paths, data):
@@ -796,7 +796,7 @@ class EpgDialog:
     def assign_data(self, row, data, show_error=False):
         if row[Column.FAV_TYPE] != BqServiceType.IPTV.value:
             if not show_error:
-                self.show_info_message(get_message("Not allowed in this context!"), Gtk.MessageType.ERROR)
+                self.show_info_message(translate("Not allowed in this context!"), Gtk.MessageType.ERROR)
             return
 
         fav_id = row[Column.FAV_ID]
@@ -814,8 +814,8 @@ class EpgDialog:
         row[Column.FAV_LOCKED] = EPG_ICON
 
         pos = f"({data[1] if self._refs_source is RefsSource.SERVICES else 'XML'})"
-        src = f"{get_message('EPG source')}: {(GLib.markup_escape_text(data[0] or ''))} {pos}"
-        row[Column.FAV_TOOLTIP] = f"{get_message('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
+        src = f"{translate('EPG source')}: {(GLib.markup_escape_text(data[0] or ''))} {pos}"
+        row[Column.FAV_TOOLTIP] = f"{translate('Service reference')}: {':'.join(fav_id_data[:10])}\n{src}"
 
     def on_filter_toggled(self, button):
         self._filter_bar.set_visible(button.get_active())
@@ -888,7 +888,7 @@ class EpgDialog:
         source_count = len(self._services_model)
         self._source_count_label.set_text(str(source_count))
         if self._enable_dat_filter and source_count == 0:
-            msg = get_message("Current epg.dat file does not contains references for the services of this bouquet!")
+            msg = translate("Current epg.dat file does not contains references for the services of this bouquet!")
             self.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_idle
@@ -933,7 +933,7 @@ class EpgDialog:
             if all(s_data[:-1]):
                 data.set_text("::::".join(s_data), -1)
             else:
-                self.show_info_message(get_message("Source error!"), Gtk.MessageType.ERROR)
+                self.show_info_message(translate("Source error!"), Gtk.MessageType.ERROR)
 
     def on_drag_data_received(self, view, drag_context, x, y, data, info, time):
         path, pos = view.get_dest_row_at_pos(x, y)

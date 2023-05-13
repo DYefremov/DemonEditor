@@ -36,7 +36,7 @@ from app.connections import HttpAPI
 from app.eparser.ecommons import BqServiceType
 from app.settings import PlayStreamsMode, PlaybackMode, IS_DARWIN, SettingsType, USE_HEADER_BAR
 from app.tools.media import Player
-from app.ui.dialogs import get_builder, get_message
+from app.ui.dialogs import get_builder, translate
 from app.ui.main_helper import get_iptv_url
 from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, Page
 
@@ -391,8 +391,8 @@ class PlayerBox(Gtk.Overlay):
             if path:
                 return f"DemonEditor [{self._app.fav_view.get_model()[path][:][Column.FAV_SERVICE]}]"
         else:
-            return f"DemonEditor [{get_message('Recordings')}]"
-        return f"DemonEditor [{get_message('Playback')}]"
+            return f"DemonEditor [{translate('Recordings')}]"
+        return f"DemonEditor [{translate('Playback')}]"
 
     def on_play_stream(self):
         path, column = self._fav_view.get_cursor()

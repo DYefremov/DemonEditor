@@ -33,7 +33,7 @@ from urllib.parse import quote
 
 from app.settings import USE_HEADER_BAR
 from app.ui.main_helper import on_popup_menu
-from .dialogs import get_builder, get_message, show_dialog, DialogType
+from .dialogs import get_builder, translate, show_dialog, DialogType
 from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Page, Column, KeyboardKey, MOD_MASK
 from ..commons import run_idle, log
 from ..connections import HttpAPI
@@ -71,7 +71,7 @@ class TimerTool(Gtk.Box):
                                            "min_end_adjustment", "timer_begins_popover", "begins_hour_adjustment",
                                            "min_begins_adjustment"))
 
-            self.set_title(get_message("Timer"))
+            self.set_title(translate("Timer"))
             self.set_modal(True)
             self.set_skip_pager_hint(True)
             self.set_skip_taskbar_hint(True)
@@ -111,7 +111,7 @@ class TimerTool(Gtk.Box):
             self._timer_desc_entry.drag_dest_unset()
             self._timer_service_entry.drag_dest_unset()
 
-            self.add_buttons(get_message("Cancel"), Gtk.ResponseType.CANCEL, get_message("Save"), Gtk.ResponseType.OK)
+            self.add_buttons(translate("Cancel"), Gtk.ResponseType.CANCEL, translate("Save"), Gtk.ResponseType.OK)
             self.get_content_area().pack_start(builder.get_object("timer_dialog_frame"), True, True, 5)
 
             if self._action is TimerTool.TimerAction.ADD:
@@ -489,8 +489,8 @@ class TimerTool(Gtk.Box):
         self._info_enabled_switch.set_active((timer.get("e2disabled", "0") == "0"))
         self._ref_info_label.set_text(timer.get("e2servicereference", ""))
         self._event_id_info_label.set_text(timer.get("e2eit", ""))
-        self._action_info_label.set_text(get_message(self.ACTION.get(timer.get("e2justplay", "0"), "0")))
-        self._after_info_label.set_text(get_message(self.AFTER_EVENT.get(timer.get("e2afterevent", "0"), "0")))
+        self._action_info_label.set_text(translate(self.ACTION.get(timer.get("e2justplay", "0"), "0")))
+        self._after_info_label.set_text(translate(self.AFTER_EVENT.get(timer.get("e2afterevent", "0"), "0")))
         self._begins_info_label.set_text(str(datetime.fromtimestamp(int(timer.get("e2timebegin", "0")))))
         self._ends_info_label.set_text(str(datetime.fromtimestamp(int(timer.get("e2timeend", "0")))))
         self.set_repetition_flags(int(timer.get("e2repeated", "0")), self._days_buttons)

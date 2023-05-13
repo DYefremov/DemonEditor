@@ -32,7 +32,7 @@ import re
 
 from gi.repository import GLib
 
-from .dialogs import get_builder, get_message
+from .dialogs import get_builder, translate
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI
@@ -41,8 +41,8 @@ from ..settings import IS_DARWIN, IS_LINUX, IS_WIN
 
 class ControlTool(Gtk.Box):
 
-    def __init__(self, app, settings, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app, settings, **kwargs):
+        super().__init__(**kwargs)
 
         self._settings = settings
         self._app = app
@@ -335,7 +335,7 @@ class ControlTool(Gtk.Box):
         except OSError as e:
             log(e)
         else:
-            state = get_message("On" if resp.get("e2instandby", "N/A").strip() == "false" else "Standby")
+            state = translate("On" if resp.get("e2instandby", "N/A").strip() == "false" else "Standby")
             GLib.idle_add(self._network_model.set_value, itr, 2, state)
 
 

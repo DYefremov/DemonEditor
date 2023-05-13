@@ -35,7 +35,7 @@ from app.eparser import get_bouquets, get_services, BouquetsReader
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.settings import SettingsType, IS_DARWIN, SEP
-from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, get_message, get_builder
+from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, translate, get_builder
 from app.ui.main_helper import on_popup_menu, get_iptv_data
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, Page, HeaderBar
 
@@ -219,7 +219,7 @@ class ImportDialog:
     def on_import(self, item):
         if self._page is Page.SERVICES:
             if not any(r[-1] for r in self._bq_model):
-                self.show_info_message(get_message("No selected item!"), Gtk.MessageType.ERROR)
+                self.show_info_message(translate("No selected item!"), Gtk.MessageType.ERROR)
                 return
 
             if not self._bouquets or show_dialog(DialogType.QUESTION, self._dialog_window) != Gtk.ResponseType.OK:
@@ -346,8 +346,8 @@ class ImportDialog:
             row = self._services_model[path][:]
             if row[1] == "IPTV":
                 ref, url = get_iptv_data(row[-1])
-                ref = f"{get_message('Service reference')}: {ref}"
-                info = f"{get_message('Name')}: {row[0]}\n{ref}\nURL: {url}"
+                ref = f"{translate('Service reference')}: {ref}"
+                info = f"{translate('Name')}: {row[0]}\n{ref}\nURL: {url}"
                 self._service_info_label.set_text(info)
             else:
                 srv = self._services.get(row[-1], None)

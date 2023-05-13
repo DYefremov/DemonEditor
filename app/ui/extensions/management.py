@@ -29,13 +29,14 @@
 import os
 import pkgutil
 import shutil
+from enum import IntEnum
 from pathlib import Path
 
 import requests
 from gi.repository import Gtk, Gdk, GLib
 
 from app.commons import log, run_task, run_idle
-from app.ui.dialogs import get_message
+from app.ui.dialogs import translate
 from app.ui.uicommons import HeaderBar
 
 EXT_URL = "https://api.github.com/repos/DYefremov/demoneditor-extensions/contents/extensions"
@@ -44,9 +45,15 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:112.0) Gecko/20100101
 
 
 class ExtensionManager(Gtk.Window):
+    class Column(IntEnum):
+        TITLE = 0
+        DESC = 1
+        STATUS = 2
+        URL = 3
+        PATH = 4
 
     def __init__(self, app, **kwargs):
-        super().__init__(title=get_message("Extensions"), icon_name="demon-editor", application=app,
+        super().__init__(title=translate("Extensions"), icon_name="demon-editor", application=app,
                          transient_for=app.app_window, destroy_with_parent=True,
                          window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
                          default_width=560, default_height=320, modal=True, **kwargs)
@@ -54,7 +61,7 @@ class ExtensionManager(Gtk.Window):
         self._app = app
         self._ext_path = f"{self._app.app_settings.default_data_path}tools{os.sep}extensions"
 
-        titles = (get_message("Title"), get_message("Description"), get_message("Status"))
+        titles = (translate("Title"), translate("Description"), translate("Status"))
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         # Title, Description, Satus, URL, Path.
         self._model = Gtk.ListStore.new((str, str, str, str, object))
@@ -92,11 +99,11 @@ class ExtensionManager(Gtk.Window):
         # Popup menu.
         menu = Gtk.Menu()
         item = Gtk.ImageMenuItem.new_from_stock("gtk-goto-bottom")
-        item.set_label(get_message("Download"))
+        item.set_label(translate("Download"))
         item.connect("activate", self.on_download)
         menu.append(item)
         item = Gtk.ImageMenuItem.new_from_stock("gtk-remove")
-        item.set_label(get_message("Remove"))
+        item.set_label(translate("Remove"))
         item.connect("activate", self.on_remove)
         menu.append(item)
         menu.show_all()
@@ -104,11 +111,11 @@ class ExtensionManager(Gtk.Window):
 
         # Header and toolbar.
         download_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic", Gtk.IconSize.BUTTON)
-        download_button.set_label(get_message("Download"))
+        download_button.set_label(translate("Download"))
         download_button.set_always_show_image(True)
         download_button.connect("clicked", self.on_download)
         remove_button = Gtk.Button.new_from_icon_name("user-trash-symbolic", Gtk.IconSize.BUTTON)
-        remove_button.set_label(get_message("Remove"))
+        remove_button.set_label(translate("Remove"))
         remove_button.set_always_show_image(True)
         remove_button.connect("clicked", self.on_remove)
 
@@ -175,8 +182,8 @@ class ExtensionManager(Gtk.Window):
             except OSError as e:
                 log(f"{self.__class__.__name__} [remove] error: {e}")
             else:
-                model[paths][-1] = None
-                model[paths][2] = get_message("Removed")
+                model[paths][self.Column.PATH] = None
+                model[paths][self.Column.STATUS] = translate("Removed")
 
     @run_task
     def on_download(self, item):
@@ -184,7 +191,7 @@ class ExtensionManager(Gtk.Window):
         if not paths:
             return
 
-        url = model[paths][-2]
+        url = model[paths][self.Column.URL]
         if not url:
             return
 
@@ -206,9 +213,9 @@ class ExtensionManager(Gtk.Window):
             os.makedirs(os.path.dirname(path), exist_ok=True)
             if all((self.download_file(u, f"{path}{n}") for u, n in urls.items())):
                 itr = model.get_iter(paths)
-                GLib.idle_add(model.set_value, itr, 2, "Downloaded")
-                GLib.idle_add(model.set_value, itr, 4, path)
-                msg = f"Extension is downloaded. {get_message('Restart the program to apply all changes.')}"
+                GLib.idle_add(model.set_value, itr, self.Column.STATUS, "Downloaded")
+                GLib.idle_add(model.set_value, itr, self.Column.PATH, path)
+                msg = translate('Restart the program to apply all changes.')
                 self._app.show_info_message(msg, Gtk.MessageType.WARNING)
 
     def download_file(self, url, path):
