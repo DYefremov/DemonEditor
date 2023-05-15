@@ -33,13 +33,14 @@ from enum import IntEnum
 from pathlib import Path
 
 import requests
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk, GLib, Pango
 
 from app.commons import log, run_task, run_idle
 from app.ui.dialogs import translate
 from app.ui.uicommons import HeaderBar
 
-EXT_URL = "https://api.github.com/repos/DYefremov/demoneditor-extensions/contents/extensions"
+EXT_URL = "https://api.github.com/repos/DYefremov/demoneditor-extensions/contents/extensions/"
+EXT_LIST_FILE = "https://raw.githubusercontent.com/DYefremov/demoneditor-extensions/main/extensions/extension-list"
 HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:112.0) Gecko/20100101 Firefox/112.0",
            "Accept": "application/json"}
 
@@ -49,8 +50,9 @@ class ExtensionManager(Gtk.Window):
         TITLE = 0
         DESC = 1
         STATUS = 2
-        URL = 3
-        PATH = 4
+        NAME = 3
+        URL = 4
+        PATH = 5
 
     def __init__(self, app, **kwargs):
         super().__init__(title=translate("Extensions"), icon_name="demon-editor", application=app,
@@ -64,20 +66,29 @@ class ExtensionManager(Gtk.Window):
         titles = (translate("Title"), translate("Description"), translate("Status"))
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         # Title, Description, Satus, URL, Path.
-        self._model = Gtk.ListStore.new((str, str, str, str, object))
+        self._model = Gtk.ListStore.new((str, str, str, str, str, object))
         self._model.connect("row-deleted", self.on_model_changed)
         self._model.connect("row-inserted", self.on_model_changed)
         self._view = Gtk.TreeView(activate_on_single_click=True, enable_grid_lines=Gtk.TreeViewGridLines.BOTH)
         self._view.set_model(self._model)
+        self._view.set_tooltip_column(self.Column.DESC)
 
         for i, t in enumerate(titles):
-            renderer = Gtk.CellRendererText(xalign=0.05)
+            renderer = Gtk.CellRendererText(xalign=0.05, ellipsize=Pango.EllipsizeMode.END)
             column = Gtk.TreeViewColumn(title=t, cell_renderer=renderer, text=i)
-            column.set_resizable(True)
-            column.set_expand(True)
             column.set_alignment(0.5)
-            column.set_min_width(50)
             self._view.append_column(column)
+
+        column = self._view.get_column(self.Column.TITLE)
+        column.set_min_width(170)
+        column.set_resizable(True)
+
+        column = self._view.get_column(self.Column.DESC)
+        column.set_resizable(True)
+        column.set_expand(True)
+
+        column = self._view.get_column(self.Column.STATUS)
+        column.set_fixed_width(120)
 
         main_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN, **margin)
@@ -90,9 +101,9 @@ class ExtensionManager(Gtk.Window):
         status_box.pack_start(self._count_label, False, False, 0)
 
         data_box.pack_end(status_box, False, True, 0)
-        scorelled = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
-        scorelled.add(self._view)
-        data_box.pack_start(scorelled, True, True, 0)
+        scrolled = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
+        scrolled.add(self._view)
+        data_box.pack_start(scrolled, True, True, 0)
         frame.add(data_box)
         self.add(main_box)
 
@@ -138,6 +149,12 @@ class ExtensionManager(Gtk.Window):
         main_box.pack_start(frame, True, True, 0)
         main_box.show_all()
 
+        ws_property = "extension_manager_window_size"
+        window_size = self._app.app_settings.get(ws_property, None)
+        if window_size:
+            self.resize(*window_size)
+
+        self.connect("delete-event", lambda w, e: self._app.app_settings.add(ws_property, w.get_size()))
         self.update()
 
     def get_installed(self):
@@ -150,14 +167,14 @@ class ExtensionManager(Gtk.Window):
     def update(self):
         installed = self.get_installed()
         extensions = []
-        with requests.get(url=EXT_URL, headers=HEADERS, stream=True) as resp:
+        with requests.get(url=EXT_LIST_FILE, stream=True) as resp:
             if resp.status_code == 200:
                 try:
-                    for f in resp.json():
-                        if f.get("type") == "dir":
-                            name = f.get("name")
-                            path = installed.get(name)
-                            extensions.append((name, None, "Installed" if path else None, f.get("url", None), path))
+                    for e, d in resp.json().items():
+                        path = installed.get(e)
+                        url = f"{EXT_URL}{d.get('ref', '')}"
+                        desc = d.get("description", "")
+                        extensions.append((d.get('label'), desc, "Installed" if path else None, e, url, path))
                 except ValueError as e:
                     log(f"{self.__class__.__name__} [update] error: {e}")
             else:
@@ -184,6 +201,8 @@ class ExtensionManager(Gtk.Window):
             else:
                 model[paths][self.Column.PATH] = None
                 model[paths][self.Column.STATUS] = translate("Removed")
+                msg = translate('Restart the program to apply all changes.')
+                self._app.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_task
     def on_download(self, item):
@@ -209,7 +228,7 @@ class ExtensionManager(Gtk.Window):
                 log(f"{self.__class__.__name__} [download] error: {resp.reason}")
 
         if urls:
-            path = f"{self._ext_path}{os.sep}{model[paths][0]}{os.sep}"
+            path = f"{self._ext_path}{os.sep}{model[paths][self.Column.NAME]}{os.sep}"
             os.makedirs(os.path.dirname(path), exist_ok=True)
             if all((self.download_file(u, f"{path}{n}") for u, n in urls.items())):
                 itr = model.get_iter(paths)
