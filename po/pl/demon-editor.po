@@ -4,16 +4,16 @@
 #
 msgid ""
 msgstr ""
-"Last-Translator: lareq <lareq@lareq.eu>\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: acypaczom\n"
+"Language-Team: \n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 msgid "translator-credits"
 msgstr ""
@@ -34,7 +34,7 @@ msgid "Picon"
 msgstr "Pikon"
 
 msgid "Freq"
-msgstr "Freq"
+msgstr "Częst"
 
 msgid "Rate"
 msgstr "Rate"
@@ -453,7 +453,7 @@ msgid "Preferences"
 msgstr "Preferencje"
 
 msgid "Profile:"
-msgstr "Profile:"
+msgstr "Profil:"
 
 msgid "Timeout between commands in seconds"
 msgstr "Limit czasu między poleceniami w sekundach"
@@ -1375,3 +1375,136 @@ msgstr "Wszystkie bukiety"
 
 msgid "Playback from the main list"
 msgstr "Odtwarzanie z listy głównej"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Włącza parsowanie adresów URL przy użyciu youtube-dl w celu uzyskania bezpośrednich linków do multimediów."
+
+msgid "Permissions..."
+msgstr "Uprawnienia..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Wyświetl EPG na liście bukietów"
+
+msgid "EPG *.dat file:"
+msgstr "Plik EPG *.dat:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Użyj protokołu HTTP, aby ponownie załadować dane do odbiornika"
+
+msgid "Enable picons compression"
+msgstr "Włącz kompresję picon"
+
+msgid "Update interval (sec):"
+msgstr "Interwał aktualizacji (sec):"
+
+msgid "Update:"
+msgstr "Aktualizacja:"
+
+msgid "Daily"
+msgstr "Codziennie"
+
+msgid "Assign reference"
+msgstr "Przypisz referencję"
+
+msgid "Specify hostname or IP address"
+msgstr "Określ nazwę hosta lub adres IP"
+
+msgid "Default selection"
+msgstr "Domyślny wybór"
+
+msgid "Don't change power state"
+msgstr "Nie zmieniaj stanu zasilania"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Nie przełączaj w tryb czuwania  podczas aktualizowania bukietów i usług."
+
+msgid "Region"
+msgstr "Region"
+
+msgid "Provider"
+msgstr "Dostawca"
+
+msgid ""
+"Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr ""
+"Umożliwia przesyłanie jako archiwum, jeśli wybrano dużą liczbę ikon (> 1000).\n"
+"                           Zalecane tylko w przypadku posiadania pamięci zewnętrznej."
+
+msgid "Clear \"New\" flag"
+msgstr "Wyczyść znacznik „Nowy”."
+
+msgid "Group by"
+msgstr "Grupuj według"
+
+msgid "Replace existing"
+msgstr "Zastąp istniejące"
+
+msgid "Already exists"
+msgstr "Już istnieje"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Włącz nieograniczony bufor kopiowania"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Włącza nieograniczony bufor kopii dla zakładki bukiety."
+
+msgid "Start time"
+msgstr "Czas początku"
+
+msgid "End time"
+msgstr "Czas końca"
+
+msgid "Enable extensions support"
+msgstr "Włącz obsługę rozszerzeń"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Po załadowaniu zmian może być konieczne  ponowne uruchomienie odbiornika!"
+
+msgid "Remove duplicates"
+msgstr "Usuń duplikaty"
+
+msgid "Removed"
+msgstr "Usunięty"
+
+msgid "Enables overwriting existing main list services."
+msgstr "zezwól na nadpisanie istniejących usług głównych serwisów ."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Umożliwia pomijanie importu usług z lamedb."
+
+msgid "Bouquets data only"
+msgstr "Tylko dane dotyczące bukietów"
+
+msgid "Create Category bouquets"
+msgstr "Utwórz bukiety kategorii"
+
+msgid "Create Regional bouquets"
+msgstr "Twórz regionalne bukiety"
+
+msgid "Skip C-band"
+msgstr "Pomiń pasmo C"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Ustaw automatycznie wybraną nazwę  na liście bukietów."
+
+msgid "Merge satellites by positions"
+msgstr "Połącz satelity według pozycji"
+
+msgid "Save satellite selection"
+msgstr "Zapisz wybór satelit"
+
+msgid "Extract direct links"
+msgstr "Wyodrębnij bezpośrednie linki"
+
+msgid "URL prefix:"
+msgstr "Prefiks adresu URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Nieprawidłowy prefiks dla podanego adresu URL!"
+
+msgid "Alternate window title"
+msgstr "Alternatywny tytuł okna"
+
+msgid "Selected type:"
+msgstr "Wybrany typ:"
