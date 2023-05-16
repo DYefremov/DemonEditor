@@ -14,9 +14,26 @@
   margin: 1px;
 }
 
-#stack-switch-button {
+#task-button {
+  padding: 0;
+}
+
+#header-button {
   padding-top: 0;
   padding-bottom: 0;
+}
+
+#header-entry {
+  min-height: 0;
+}
+
+#header-stack-switcher > button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+buttonbox {
+  padding: 0;
 }
 
 paned > separator {

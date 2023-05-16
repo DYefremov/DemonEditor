@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,13 @@ import time
 import zipfile
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 
-from app.commons import run_idle
+from app.commons import run_idle, get_size_from_bytes
 from app.settings import SettingsType, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, HeaderBar
 
 
 class RestoreType(Enum):
@@ -63,7 +64,7 @@ class BackupDialog:
         self._settings = settings
         self._s_type = settings.setting_type
         self._data_path = self._settings.profile_data_path
-        self._backup_path = self._settings.profile_backup_path or "{}backup{}".format(self._data_path, os.sep)
+        self._backup_path = self._settings.profile_backup_path or f"{self._data_path}backup{os.sep}"
         self._open_data_callback = callback
         self._dialog_window = builder.get_object("dialog_window")
         self._dialog_window.set_transient_for(transient)
@@ -74,9 +75,10 @@ class BackupDialog:
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
+        self._file_count_label = builder.get_object("file_count_label")
 
-        if IS_GNOME_SESSION:
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
+        if self._settings.use_header_bar:
+            header_bar = HeaderBar()
             self._dialog_window.set_titlebar(header_bar)
 
             button_box = builder.get_object("main_button_box")
@@ -106,9 +108,13 @@ class BackupDialog:
     def init_data(self):
         if os.path.isdir(self._backup_path):
             for file in filter(lambda x: x.endswith(".zip"), os.listdir(self._backup_path)):
-                self._model.append((file.rstrip(".zip"), False))
+                p = Path(os.path.join(self._backup_path, file))
+                if p.is_file():
+                    self._model.append((p.stem, get_size_from_bytes(p.stat().st_size)))
         else:
             os.makedirs(os.path.dirname(self._backup_path), exist_ok=True)
+
+        self._file_count_label.set_text(str(len(self._model)))
 
     def on_restore_bouquets(self, item):
         self.restore(RestoreType.BOUQUETS)
@@ -129,12 +135,14 @@ class BackupDialog:
         try:
             for itr in map(model.get_iter, paths):
                 file_name = model.get_value(itr, 0)
-                os.remove("{}{}{}".format(self._backup_path, file_name, ".zip"))
+                os.remove(f"{self._backup_path}{file_name}.zip")
                 itrs_to_delete.append(itr)
         except FileNotFoundError as e:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             list(map(model.remove, itrs_to_delete))
+
+        self._file_count_label.set_text(str(len(self._model)))
 
     def on_view_popup_menu(self, menu, event):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
@@ -165,7 +173,7 @@ class BackupDialog:
                 file_name = self._backup_path + model.get_value(model.get_iter(paths[0]), 0) + ".zip"
                 created = time.ctime(os.path.getctime(file_name))
                 self._text_view.get_buffer().set_text(
-                    "Created: {}\n********** Files: **********\n".format(created))
+                    f"Created: {created}\n********** Files: **********\n")
                 with zipfile.ZipFile(file_name) as zip_file:
                     for name in zip_file.namelist():
                         append_text_to_tview(name + "\n", self._text_view)
@@ -234,15 +242,15 @@ def backup_data(path, backup_path, move=True):
 
         Returns full path to the compressed file.
     """
-    backup_path = "{}{}{}".format(backup_path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), SEP)
+    backup_path = f"{backup_path}{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}{SEP}"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    # backup files in data dir(skipping dirs and satellites.xml)
-    for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+    # Backup files in data dir(skipping dirs and *.xml).
+    for file in filter(lambda f: not f.endswith(".xml") and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         src, dst = os.path.join(path, file), backup_path + file
         shutil.move(src, dst) if move else shutil.copy(src, dst)
-    # compressing to zip and delete remaining files
-    zip_file = shutil.make_archive(backup_path, "zip", backup_path)
+    # Compressing to zip and delete remaining files.
+    zip_file = shutil.make_archive(backup_path.rstrip(SEP), "zip", backup_path)
     shutil.rmtree(backup_path)
 
     return zip_file
@@ -255,8 +263,8 @@ def restore_data(src, dst):
 
 
 def clear_data_path(path):
-    """ Clearing data at the specified path excluding satellites.xml file """
-    for file in filter(lambda f: f != "satellites.xml" and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+    """ Clearing data at the specified path excluding *.xml file. """
+    for file in filter(lambda f: not f.endswith(".xml") and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         os.remove(os.path.join(path, file))
 
 

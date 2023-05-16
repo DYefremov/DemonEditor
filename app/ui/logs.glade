@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2021 Dmitriy Yefremov
+Copyright (c) 2018-2022 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellite list editor. -->
-  <!-- interface-copyright 2018-2021 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2022 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkFrame" id="log_frame">
     <property name="visible">True</property>
@@ -80,7 +80,27 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkButton" id="close_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Close</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="on_close" swapped="no"/>
+                <child>
+                  <object class="GtkImage" id="close_button_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-close</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>

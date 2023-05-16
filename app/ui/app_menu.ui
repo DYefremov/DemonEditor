@@ -58,21 +58,30 @@
         </item>
       </section>
       <section>
-        <item>
+        <submenu>
           <attribute name="label" translatable="yes">FTP-transfer</attribute>
-          <attribute name="action">app.on_download</attribute>
-        </item>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Download from the receiver</attribute>
+              <attribute name="action">app.on_receive</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Transfer to receiver</attribute>
+              <attribute name="action">app.on_send</attribute>
+            </item>
+          </section>
+        </submenu>
       </section>
       <section>
         <item>
           <attribute name="label" translatable="yes">Settings</attribute>
-          <attribute name="action">app.on_settings</attribute>
+          <attribute name="action">app.preferences</attribute>
         </item>
       </section>
       <section>
         <item>
           <attribute name="label" translatable="yes">Exit</attribute>
-          <attribute name="action">app.on_close_app</attribute>
+          <attribute name="action">app.quit</attribute>
         </item>
       </section>
     </submenu>
@@ -139,8 +148,18 @@
           <attribute name="action">app.display_picons</attribute>
         </item>
         <item>
+          <attribute name="label" translatable="yes">Display EPG in bouquet list</attribute>
+          <attribute name="action">app.display_epg</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">Alternate layout</attribute>
           <attribute name="action">app.set_alternate_layout</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Alternate window title</attribute>
+          <attribute name="action">app.set_alternate_title</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
       </section>
     </submenu>
@@ -162,6 +181,8 @@
           <attribute name="action">app.on_logs_show</attribute>
         </item>
       </section>
+      <section id="extension_section">
+      </section>
     </submenu>
     <submenu>
       <attribute name="label" translatable="yes">FTP client</attribute>
@@ -177,7 +198,7 @@
       <section>
         <item>
           <attribute name="label" translatable="yes">About</attribute>
-          <attribute name="action">app.on_about_app</attribute>
+          <attribute name="action">app.about</attribute>
         </item>
       </section>
     </submenu>
@@ -186,19 +207,19 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">About</attribute>
-        <attribute name="action">app.on_about_app</attribute>
+        <attribute name="action">app.about</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Settings</attribute>
-        <attribute name="action">app.on_settings</attribute>
+        <attribute name="action">app.preferences</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Exit</attribute>
-        <attribute name="action">app.on_close_app</attribute>
+        <attribute name="action">app.quit</attribute>
       </item>
     </section>
   </menu>
@@ -270,10 +291,19 @@
         </item>
       </section>
       <section>
-        <item>
+        <submenu>
           <attribute name="label" translatable="yes">FTP-transfer</attribute>
-          <attribute name="action">app.on_download</attribute>
-        </item>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Download from the receiver</attribute>
+              <attribute name="action">app.on_receive</attribute>
+            </item>
+            <item>
+              <attribute name="label" translatable="yes">Transfer to receiver</attribute>
+              <attribute name="action">app.on_send</attribute>
+            </item>
+          </section>
+        </submenu>
       </section>
     </submenu>
     <submenu>
@@ -339,8 +369,18 @@
           <attribute name="action">app.display_picons</attribute>
         </item>
         <item>
+          <attribute name="label" translatable="yes">Display EPG in bouquet list</attribute>
+          <attribute name="action">app.display_epg</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">Alternate layout</attribute>
           <attribute name="action">app.set_alternate_layout</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Alternate window title</attribute>
+          <attribute name="action">app.set_alternate_title</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
       </section>
     </submenu>
@@ -361,6 +401,8 @@
           <attribute name="label" translatable="yes">Logs</attribute>
           <attribute name="action">app.on_logs_show</attribute>
         </item>
+      </section>
+      <section id="mac_extension_section">
       </section>
     </submenu>
     <submenu>

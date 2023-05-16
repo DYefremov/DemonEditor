@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -129,8 +129,7 @@ class YouTube:
         fmts = streaming_data.get("formats", None) if streaming_data else None
 
         if fmts:
-            links = {Quality[i["itag"]]: i["url"] for i in filter(
-                lambda i: i.get("itag", -1) in Quality, fmts) if "url" in i}
+            links = {Quality[i["itag"]]: i["url"] for i in fmts if i.get("itag", -1) in Quality and "url" in i}
 
             if links and title:
                 return links, title.replace("+", " ")

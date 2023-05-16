@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,17 +40,18 @@ from gi.repository import GLib, Gio, GdkPixbuf
 from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, Service
 from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
-                              parse_m3u)
+                              parse_m3u, PICON_FORMAT)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, get_message, get_builder
 from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf
-from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon)
+from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon, HeaderBar)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
-_ENIGMA2_REFERENCE = "{}:{}:{}:{:X}:{:X}:{:X}:{:X}:0:0:0"
+_ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
 _UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
+_URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "streamlink://", "No": None}
 
 
 def is_data_correct(elems):
@@ -81,6 +82,7 @@ class IptvDialog:
         handlers = {"on_response": self.on_response,
                     "on_entry_changed": self.on_entry_changed,
                     "on_url_changed": self.on_url_changed,
+                    "on_url_paste": self.on_url_paste,
                     "on_save": self.on_save,
                     "on_stream_type_changed": self.on_stream_type_changed,
                     "on_yt_quality_changed": self.on_yt_quality_changed,
@@ -93,6 +95,7 @@ class IptvDialog:
         self._bouquet = bouquet
         self._yt_links = None
         self._yt_dl = None
+        self._inserted_url = False
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
                               objects=("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
@@ -116,8 +119,10 @@ class IptvDialog:
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._yt_quality_box = builder.get_object("yt_iptv_quality_combobox")
+        self._url_prefix_box = builder.get_object("iptv_url_prefix_box")
+        self._url_prefix_combobox = builder.get_object("iptv_url_prefix_combobox")
         self._model, self._paths = view.get_selection().get_selected_rows()
-        # style
+        # Style.
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         self._digit_elems = (self._srv_id_entry, self._srv_type_entry, self._sid_entry, self._tr_id_entry,
@@ -134,6 +139,8 @@ class IptvDialog:
         else:
             self._description_entry.set_visible(False)
             builder.get_object("iptv_description_label").set_visible(False)
+            [self._url_prefix_combobox.append(v, k) for k, v in _URL_PREFIXES.items()]
+            self._url_prefix_combobox.set_active(0)
 
         if self._action is Action.ADD:
             self._save_button.set_visible(False)
@@ -158,6 +165,13 @@ class IptvDialog:
 
         if not is_data_correct(self._digit_elems) or self._url_entry.get_name() == _DIGIT_ENTRY_NAME:
             self.show_info_message(get_message("Error. Verify the data!"), Gtk.MessageType.ERROR)
+            return
+
+        url = self._url_entry.get_text()
+        if all((self._url_prefix_box.get_visible(),
+                self._url_prefix_combobox.get_active_id(),
+                url.count("http") > 1 or urlparse(url).scheme.upper() in _URL_PREFIXES)):
+            self.show_info_message(get_message("Invalid prefix for the given URL!"), Gtk.MessageType.ERROR)
             return
 
         if show_dialog(DialogType.QUESTION, self._dialog) in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
@@ -194,15 +208,25 @@ class IptvDialog:
             elif stream_type is StreamType.E_SERVICE_HLS:
                 self._stream_type_combobox.set_active(5)
         except ValueError:
-            self.show_info_message("Unknown stream type {}".format(s_type), Gtk.MessageType.ERROR)
+            self.show_info_message(f"Unknown stream type {s_type}", Gtk.MessageType.ERROR)
 
         self._srv_id_entry.set_text(data[1])
-        self._srv_type_entry.set_text(data[2])
+        self._srv_type_entry.set_text(str(int(data[2], 16)))
         self._sid_entry.set_text(str(int(data[3], 16)))
         self._tr_id_entry.set_text(str(int(data[4], 16)))
         self._net_id_entry.set_text(str(int(data[5], 16)))
         self._namespace_entry.set_text(str(int(data[6], 16)))
-        self._url_entry.set_text(unquote(data[10].strip()))
+        # URL.
+        url = unquote(data[10].strip())
+        sch = urlparse(url).scheme.upper()
+        if YouTube.get_yt_id(url) and sch in _URL_PREFIXES:
+            active_prefix = _URL_PREFIXES.get(sch)
+            url = re.sub(active_prefix, "", url, 1, re.IGNORECASE)
+            self._url_prefix_combobox.set_active_id(active_prefix)
+        else:
+            self._url_prefix_combobox.set_active(len(_URL_PREFIXES) - 1)
+
+        self._url_entry.set_text(url)
         self.update_reference_entry()
 
     def init_neutrino_data(self, fav_id):
@@ -212,10 +236,9 @@ class IptvDialog:
 
     def update_reference_entry(self):
         if self._s_type is SettingsType.ENIGMA_2 and is_data_correct(self._digit_elems):
-            self.on_url_changed(self._url_entry)
             self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_id_entry.get_text(),
-                                                                     self._srv_type_entry.get_text(),
+                                                                     int(self._srv_type_entry.get_text()),
                                                                      int(self._sid_entry.get_text()),
                                                                      int(self._tr_id_entry.get_text()),
                                                                      int(self._net_id_entry.get_text()),
@@ -242,15 +265,25 @@ class IptvDialog:
         if yt_id:
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
             text = "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
-            if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
-                entry.set_sensitive(False)
-                gen = self.set_yt_url(entry, yt_id)
-                GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            if self._inserted_url and url_str.count("http") == 1:
+                if show_dialog(DialogType.QUESTION, self._dialog, text=text) == Gtk.ResponseType.OK:
+                    entry.set_sensitive(False)
+                    gen = self.set_yt_url(entry, yt_id)
+                    GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+                else:
+                    self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
+            else:
+                self._url_prefix_box.set_visible(self._s_type is SettingsType.ENIGMA_2)
+            self._inserted_url = False
         elif YouTube.is_yt_video_link(url_str):
             entry.set_icon_from_pixbuf(Gtk.EntryIconPosition.SECONDARY, get_yt_icon("youtube", 32))
         else:
             entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, None)
-            self._yt_quality_box.set_visible(False)
+            self._url_prefix_box.set_visible(False)
+
+    def on_url_paste(self, entry):
+        self._inserted_url = True
+        self._yt_quality_box.set_visible(False)
 
     def set_yt_url(self, entry, video_id):
         try:
@@ -264,7 +297,7 @@ class IptvDialog:
             links, title = self._yt_dl.get_yt_link(video_id, entry.get_text())
             yield True
         except urllib.error.URLError as e:
-            self.show_info_message(get_message("Getting link error:") + (str(e)), Gtk.MessageType.ERROR)
+            self.show_info_message(f"{get_message('Getting link error:')} {e}", Gtk.MessageType.ERROR)
             return
         except YouTubeException as e:
             self.show_info_message((str(e)), Gtk.MessageType.ERROR)
@@ -279,7 +312,7 @@ class IptvDialog:
                 entry.set_text(links[sorted(links, key=lambda x: int(x.rstrip("p")), reverse=True)[0]])
                 self._yt_links = links
             else:
-                msg = get_message("Getting link error:") + " No link received for id: {}".format(video_id)
+                msg = f"{get_message('Getting link error:')} No link received for id: {video_id}"
                 self.show_info_message(msg, Gtk.MessageType.ERROR)
         finally:
             entry.set_sensitive(True)
@@ -291,22 +324,33 @@ class IptvDialog:
         self.update_reference_entry()
 
     def on_yt_quality_changed(self, box):
+        if not self._yt_links:
+            return
+
         model = box.get_model()
         active = model.get_value(box.get_active_iter(), 0)
-        if self._yt_links and active in self._yt_links:
+        if active in self._yt_links:
             self._url_entry.set_text(self._yt_links[active])
+        else:
+            self._url_entry.set_text(self._yt_links.get(max(self._yt_links, default=None), ""))
 
     def save_enigma2_data(self):
         name = self._name_entry.get_text().strip()
+        if self._url_prefix_box.get_visible():
+            prefix = self._url_prefix_combobox.get_active_id()
+            url = self._url_entry.get_text().replace(':', '%3A', 1 if prefix else -1)
+            url = f"{quote(prefix) if prefix else ''}{url}"
+        else:
+            url = quote(self._url_entry.get_text())
+
         fav_id = ENIGMA2_FAV_ID_FORMAT.format(self.get_type(),
                                               self._srv_id_entry.get_text(),
-                                              self._srv_type_entry.get_text(),
+                                              int(self._srv_type_entry.get_text()),
                                               int(self._sid_entry.get_text()),
                                               int(self._tr_id_entry.get_text()),
                                               int(self._net_id_entry.get_text()),
                                               int(self._namespace_entry.get_text()),
-                                              quote(self._url_entry.get_text()),
-                                              name, name)
+                                              url, name, name)
 
         self.update_bouquet_data(name, fav_id)
 
@@ -328,7 +372,7 @@ class IptvDialog:
             old_srv = services.pop(self._current_srv.fav_id)
             new_service = old_srv._replace(service=name, fav_id=fav_id, picon_id=picon_id)
             services[fav_id] = new_service
-            self._app.emit("iptv-service-edited", (old_srv, new_service))
+            self._app.emit("iptv-service-edited", {self._current_srv.fav_id: (old_srv, new_service)})
         else:
             aggr = [None] * 8
             s_type = BqServiceType.IPTV.name
@@ -601,11 +645,12 @@ class IptvListConfigurationDialog(IptvListDialog):
 
             st_type = get_stream_type(self._stream_type_combobox)
             s_id = "0" if id_default else self._list_srv_id_entry.get_text()
-            srv_type = "1" if type_default else self._list_srv_type_entry.get_text()
+            srv_type = int("1" if type_default else self._list_srv_type_entry.get_text())
             sid = "0" if sid_auto else self._list_sid_entry.get_text()
             tid = "0" if tid_default else f"{int(self._list_tid_entry.get_text()):X}"
             nid = "0" if nid_default else f"{int(self._list_nid_entry.get_text()):X}"
             namespace = "0" if namespace_default else f"{int(self._list_namespace_entry.get_text()):X}"
+            params = [int(el.get_text()) for el in self._digit_elems[2:]]
 
             for index, row in enumerate(self._rows):
                 fav_id = row[Column.FAV_ID]
@@ -615,16 +660,20 @@ class IptvListConfigurationDialog(IptvListDialog):
                 if all_default:
                     data[1], data[2], data[3], data[4], data[5], data[6] = "010000"
                 else:
-                    data[0], data[1], data[2], data[4], data[5], data[6] = st_type, s_id, srv_type, tid, nid, namespace
+                    data[0], data[1], data[4], data[5], data[6] = st_type, s_id, tid, nid, namespace
+                    data[2] = f"{srv_type:X}"
 
                 data[3] = f"{index:X}" if sid_auto else sid
+                if sid_auto:
+                    params[0] = index
+                picon_id = PICON_FORMAT.format(st_type, int(s_id), srv_type, *params)
                 data = ":".join(data)
                 new_fav_id = f"{data}{sep}{desc}"
                 row[Column.FAV_ID] = new_fav_id
                 srv = self._services.pop(fav_id, None)
 
                 if srv:
-                    self._services[new_fav_id] = srv._replace(fav_id=new_fav_id)
+                    self._services[new_fav_id] = srv._replace(fav_id=new_fav_id, picon_id=picon_id)
 
             self._bouquet.clear()
             list(map(lambda r: self._bouquet.append(r[Column.FAV_ID]), self._fav_model))
@@ -720,7 +769,7 @@ class M3uImportDialog(IptvListDialog):
                     continue
 
                 params[0] = i if sid_auto else sid
-                picon_id = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png".format(st_type, s_id, s_type, *params)
+                picon_id = PICON_FORMAT.format(st_type, s_id, s_type, *params)
                 fav_id = get_fav_id(s.data_id, s.service, self._s_type, params, st_type, s_id, s_type)
                 if s.picon:
                     picons[s.picon] = picon_id
@@ -855,7 +904,6 @@ class YtListImportDialog:
                     "on_key_press": self.on_key_press,
                     "on_close": self.on_close}
 
-        # self._main_window, self._settings, self.append_imported_services
         self.appender = app.append_imported_services
         self._settings = app.app_settings
         self._s_type = self._settings.setting_type
@@ -883,26 +931,54 @@ class YtListImportDialog:
         self._import_button = builder.get_object("yt_import_button")
         self._quality_box = builder.get_object("yt_quality_combobox")
         self._quality_model = builder.get_object("yt_quality_liststore")
-        self._import_button.bind_property("visible", self._quality_box, "visible")
-        self._import_button.bind_property("sensitive", self._quality_box, "sensitive")
-        self._receive_button.bind_property("sensitive", self._import_button, "sensitive")
+        self._extract_switch = builder.get_object("yt_extract_links_switch")
+
+        self._url_prefix_combobox = builder.get_object("yt_url_prefix_combobox")
+        [self._url_prefix_combobox.append(v, k) for k, v in _URL_PREFIXES.items()]
+        self._url_prefix_combobox.set_active(0)
+
+        builder.get_object("yt_extract_links_box").set_visible(self._s_type is SettingsType.ENIGMA_2)
+        builder.get_object("yt_url_prefix_box").set_visible(self._s_type is SettingsType.ENIGMA_2)
+
+        if self._settings.use_header_bar:
+            header_bar = HeaderBar(title="YouTube", subtitle=get_message("Playlist import"))
+            self._dialog.set_titlebar(header_bar)
+            actions_box = builder.get_object("yt_actions_box")
+            import_box = builder.get_object("yt_import_box")
+            actions_box.remove(import_box)
+            header_bar.pack_end(import_box)
+            actions_box.remove(self._receive_button)
+            header_bar.pack_start(self._receive_button)
+            actions_box.set_visible(False)
 
         window_size = self._settings.get("yt_import_dialog_size")
         if window_size:
             self._dialog.resize(*window_size)
-        # Style
+        # Style.
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        style_provider.load_from_path(f"{UI_RESOURCES_PATH}style.css")
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def show(self):
         self._dialog.show()
 
-    @run_task
     def on_import(self, item):
         self.on_info_bar_close()
         self.update_active_elements(False)
+
+        if self._extract_switch.get_active():
+            self.extract_direct_links()
+        else:
+            prefix = self._url_prefix_combobox.get_active_id()
+            selected = filter(lambda r: r[2], self._model)
+            prefix = quote(prefix) if prefix else ''
+            links = [(f"{prefix}https{quote(':')}//www.youtube.com/watch?v={r[1]}", r[0]) for r in selected]
+            self.append_services(links)
+            self.update_active_elements(True)
+
+    @run_task
+    def extract_direct_links(self):
         self._download_task = True
 
         try:
@@ -931,7 +1007,6 @@ class YtListImportDialog:
             self.show_info_message(str(e), Gtk.MessageType.ERROR)
         else:
             if self._download_task:
-                self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
                 self.append_services([done_links[r] for r in rows])
         finally:
             self._download_task = False
@@ -974,22 +1049,31 @@ class YtListImportDialog:
         aggr = [None] * 9
         srvs = []
 
-        if self._yt_list_title:
+        if self._yt_list_title and self._s_type is SettingsType.ENIGMA_2:
             title = self._yt_list_title
             fav_id = MARKER_FORMAT.format(0, title, title)
             mk = Service(None, None, None, title, *aggr[0:3], BqServiceType.MARKER.name, *aggr, 0, fav_id, None)
             srvs.append(mk)
 
-        act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0)
+        extract = self._extract_switch.get_active()
+
+        act = self._quality_model.get_value(self._quality_box.get_active_iter(), 0) if extract else None
         for link in links:
             lnk, title = link or (None, None)
             if not lnk:
                 continue
-            ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
-            fav_id = get_fav_id(ln, title, self._s_type)
+
+            if extract:
+                ln = lnk.get(act) if act in lnk else lnk[sorted(lnk, key=lambda x: int(x.rstrip("p")), reverse=True)[0]]
+            else:
+                ln = lnk
+
+            fav_id = get_fav_id(ln, title, self._s_type, force_quote=extract)
             srv = Service(None, None, IPTV_ICON, title, *aggr[0:3], BqServiceType.IPTV.name, *aggr, None, fav_id, None)
             srvs.append(srv)
+
         self.appender(srvs)
+        self.show_info_message(get_message("Done!"), Gtk.MessageType.INFO)
 
     @run_idle
     def update_active_elements(self, sensitive):

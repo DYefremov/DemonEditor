@@ -57,12 +57,18 @@ Bouquet.__new__.__defaults__ = (None, BqServiceType.DEFAULT, [], None, None, Non
 Bouquets = namedtuple("Bouquets", ["name", "type", "bouquets"])
 BouquetService = namedtuple("BouquetService", ["name", "type", "data", "num"])
 
-# ***************** Satellites *******************#
+# *************** *.xml [Satellites, Terrestrial, Cable] ***************** #
 
 Satellite = namedtuple("Satellite", ["name", "flags", "position", "transponders"])
+Terrestrial = namedtuple("Terrestrial", ["name", "flags", "countrycode", "transponders"])
+Cable = namedtuple("Cable", ["name", "flags", "satfeed", "countrycode", "transponders"])
 
 Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner", "system",
                                          "modulation", "pls_mode", "pls_code", "is_id", "t2mi_plp_id"])
+TerTransponder = namedtuple("TerTransponder", ["centre_frequency", "system", "bandwidth", "constellation",
+                                               "code_rate_hp", "code_rate_lp", "guard_interval", "transmission_mode",
+                                               "hierarchy_information", "inversion", "plp_id"])
+CableTransponder = namedtuple("CableTransponder", ["frequency", "symbol_rate", "fec_inner", "modulation"])
 
 
 class TrType(Enum):
@@ -195,6 +201,8 @@ SERVICE_TYPE = {"-2": "Data", "1": "TV", "2": "Radio", "3": "Data", "10": "Radio
 # Terrestrial
 BANDWIDTH = {"0": "8MHz", "1": "7MHz", "2": "6MHz", "3": "Auto", "4": "5MHz", "5": "1/712MHz", "6": "10MHz"}
 
+CONSTELLATION = {"0": "QPSK", "1": "16-QAM", "2": "64-QAM", "3": "Auto"}
+
 T_MODULATION = {"0": "QPSK", "1": "QAM16", "2": "QAM64", "3": "Auto", "4": "QAM256"}
 
 TRANSMISSION_MODE = {"0": "2k", "1": "8k", "2": "Auto", "3": "4k", "4": "1k", "5": "16k", "6": "32k"}
@@ -209,7 +217,7 @@ T_FEC = {"0": "1/2", "1": "2/3", "2": "3/4", "3": "5/6", "4": "7/8", "5": "Auto"
 T_SYSTEM = {"0": "DVB-T", "1": "DVB-T2", "-1": "DVB-T/T2"}
 
 # Cable
-C_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256"}
+C_MODULATION = {"0": "QPSK", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256", "6": "Auto"}
 
 # ATSC
 A_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM128", "5": "QAM256", "6": "8VSB",
@@ -252,13 +260,13 @@ def is_transponder_valid(tr: Transponder):
         log(f"Transponder validation error: {e}\n{tr}")
         return False
 
-    if tr.polarization not in POLARIZATION.values():
+    if tr.polarization not in POLARIZATION:
         return False
-    if tr.fec_inner not in FEC.values():
+    if tr.fec_inner not in FEC:
         return False
-    if tr.system not in SYSTEM.values():
+    if tr.system not in SYSTEM:
         return False
-    if tr.modulation not in MODULATION.values():
+    if tr.modulation not in MODULATION:
         return False
 
     return True

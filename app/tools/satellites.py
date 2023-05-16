@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ class SatelliteSource(Enum):
     FLYSAT = ("https://www.flysat.com/en/satellitelist",)
     LYNGSAT = ("https://www.lyngsat.com/asia.html", "https://www.lyngsat.com/europe.html",
                "https://www.lyngsat.com/atlantic.html", "https://www.lyngsat.com/america.html")
-    KINGOFSAT = ("https://en.kingofsat.net/satellites.php",)
+    KINGOFSAT = ("https://en.kingofsat.tv/satellites.php",)
 
     @staticmethod
     def get_sources(src):
@@ -121,7 +121,12 @@ class SatellitesParser(HTMLParser):
         self._current_cell = []
         self._rows = []
         self._source = source
-        self.pls_modes = {v: k for k, v in PLS_MODE.items()}
+
+        self.PLS_MODES = {v: k for k, v in PLS_MODE.items()}
+        self.POLARIZATION = {v: k for k, v in POLARIZATION.items()}
+        self.FEC = {v: k for k, v in FEC.items()}
+        self.SYSTEM = {v: k for k, v in SYSTEM.items()}
+        self.MODULATION = {v: k for k, v in MODULATION.items()}
 
     def handle_starttag(self, tag, attrs):
         if tag == "td":
@@ -266,7 +271,7 @@ class SatellitesParser(HTMLParser):
         trs = []
 
         if self._source is SatelliteSource.KINGOFSAT:
-            sat_url = "https://en.kingofsat.net/" + sat_url
+            sat_url = f"https://en.kingofsat.tv/{sat_url}"
 
         try:
             request = requests.get(url=sat_url, headers=_HEADERS, timeout=_TIMEOUT)
@@ -318,7 +323,7 @@ class SatellitesParser(HTMLParser):
                 pls_code = None
                 pls_mode = None
                 if pls:
-                    pls_mode = self.pls_modes.get(pls.group(1), None)
+                    pls_mode = self.PLS_MODES.get(pls.group(1), None)
                     pls_code = pls.group(2)
 
                 if is_ids:
@@ -328,7 +333,12 @@ class SatellitesParser(HTMLParser):
                         if is_transponder_valid(tr):
                             n_trs.append(tr)
 
-                tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, None, None)
+                tr = Transponder(f"{freq}000", f"{sr}000",
+                                 self.POLARIZATION.get(pol, None),
+                                 self.FEC.get(fec, None),
+                                 self.SYSTEM.get(sys, None),
+                                 self.MODULATION.get(mod, None),
+                                 pls_mode, pls_code, None, None)
                 if is_transponder_valid(tr):
                     trs.append(tr)
 
@@ -359,12 +369,17 @@ class SatellitesParser(HTMLParser):
             sys, mod, sr, fec = res.group(1), res.group(2), res.group(3), res.group(4)
             mod = mod.strip() if mod else "Auto"
             plp, pls_mode, pls_code, is_id = res.group(5), res.group(6), res.group(7), res.group(8)
-            pls_mode = self.pls_modes.get(pls_mode, None)
+            pls_mode = self.PLS_MODES.get(pls_mode, None)
 
             if plp is not None:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(f"{freq}000", f"{sr}000", pol, fec, sys, mod, pls_mode, pls_code, is_id, None)
+            tr = Transponder(f"{freq}000", f"{sr}000",
+                             self.POLARIZATION.get(pol, None),
+                             self.FEC.get(fec, None),
+                             self.SYSTEM.get(sys, None),
+                             self.MODULATION.get(mod, None),
+                             pls_mode, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -386,7 +401,7 @@ class SatellitesParser(HTMLParser):
             if not res:
                 continue
             sys, t2_mi, pls_id, pls_code = res.group(1), res.group(2), res.group(3), res.group(4)
-            pls_id = self.pls_modes.get(pls_id, None)
+            pls_id = self.PLS_MODES.get(pls_id, None)
 
             res = re.match(mod_pat, row[9])
             if not res:
@@ -401,7 +416,12 @@ class SatellitesParser(HTMLParser):
             if t2_mi:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
 
-            tr = Transponder(freq, f"{sr}000", pol, fec, sys, mod, pls_id, pls_code, is_id, None)
+            tr = Transponder(freq, f"{sr}000",
+                             self.POLARIZATION.get(pol, None),
+                             self.FEC.get(fec, None),
+                             self.SYSTEM.get(sys, None),
+                             self.MODULATION.get(mod, None),
+                             pls_id, pls_code, is_id, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -409,7 +429,7 @@ class SatellitesParser(HTMLParser):
 class ServicesParser(HTMLParser):
     """ Services parser for LYNGSAT source. """
 
-    def __init__(self, source=SatelliteSource.LYNGSAT, entities=False, separator=' '):
+    def __init__(self, source=SatelliteSource.LYNGSAT, entities=False, separator=' ', lang=None):
 
         HTMLParser.__init__(self)
 
@@ -432,6 +452,12 @@ class ServicesParser(HTMLParser):
         self._KING_TR_PAT = re.compile((r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*"
                                         r"?(?:PLS:\s+(Root|Gold|Combo)\+(\d+))?"
                                         r"\s+(.*PSK).*?(?:.*Stream\s+(\d+))?.*"))
+        self._lang = "en"
+        if lang:
+            langs = {"en", "fr", "nl", "de", "se", "no", "pt", "es", "it", "pl",
+                     "cz", "gr", "fi", "ar", "tr", "ru", "sc", "ro", "hu", "sq"}
+            lang, _, _ = lang.partition("_")
+            self._lang = lang if lang in langs else self._lang
 
         self._parse_html_entities = entities
         self._separator = separator
@@ -545,7 +571,7 @@ class ServicesParser(HTMLParser):
         """ Returns transponder links. """
         try:
             if self._source is SatelliteSource.KINGOFSAT:
-                sat_url = "https://en.kingofsat.net/" + sat_url
+                sat_url = f"https://en.kingofsat.tv/{sat_url}"
             self.init_data(sat_url)
         except ValueError as e:
             log(e)
@@ -560,7 +586,7 @@ class ServicesParser(HTMLParser):
                     if len(r) == 13 and SatellitesParser.POS_PAT.match(r[0].text):
                         t_cell = r[4]
                         if t_cell.url and t_cell.url.startswith("tp.php?tp="):
-                            t_cell.url = f"https://en.kingofsat.net/{t_cell.url}"
+                            t_cell.url = f"https://{self._lang}.kingofsat.tv/{t_cell.url}"
                             t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
                             trs.append(t_cell)
                 return trs
@@ -710,11 +736,12 @@ class ServicesParser(HTMLParser):
 
                 s_type = self._S_TYPES.get(s_type, "3")
                 _s_type = SERVICE_TYPE.get(s_type, SERVICE_TYPE.get("3"))
+                reg, grp = r[3].text, r[4].text
 
                 name, pkg, cas, sid, v_pid, a_pid = r[2].text, r[5].text, r[6].text, r[7].text, None, None
                 flags, sid, fav_id, picon_id, data_id = self.get_service_data(s_type, pkg, sid, tid, nid, nsp,
                                                                               v_pid, a_pid, cas, use_pids)
-                services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, None, picon_id,
+                services.append(Service(flags, "s", None, name, reg, grp, pkg, _s_type, None, picon_id,
                                         sid, str(freq), sr, pol, fec, sys, pos, data_id, fav_id, multi_tr or tr))
 
         return services
@@ -723,9 +750,9 @@ class ServicesParser(HTMLParser):
         """ Returns converted transponder data. """
         sys = get_key_by_value(SYSTEM, sys)
         mod = get_key_by_value(MODULATION, mod)
-        fec = get_key_by_value(FEC, fec)
+        fec = get_key_by_value(FEC, fec) or "0"
         # For negative (West) positions: 3600 - numeric position value!!!
-        namespace = f"{3600 - pos if pos < 0 else pos:04x}0000"
+        namespace = f"{3600 - abs(pos) if pos < 0 else pos:04x}0000"
         tr_flag = 1
         roll_off = 0  # 35% DVB-S2/DVB-S (default)
         pilot = 2  # Auto

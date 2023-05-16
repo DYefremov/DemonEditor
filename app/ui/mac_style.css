@@ -60,10 +60,6 @@ switch slider {
   min-width: 1.5em;
 }
 
-popover .view {
-  background-color: transparent;
-}
-
 .font > box {
   min-height: 1.5em;
   padding-top: 0.1em;

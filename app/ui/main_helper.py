@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,18 +29,22 @@
 """ Helper module for the GUI. """
 
 __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "locate_in_services",
-           "scroll_to", "get_base_model", "copy_picon_reference", "assign_picons", "remove_picon",
-           "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection",
+           "scroll_to", "get_base_model", "get_base_paths", "copy_reference", "assign_picons", "remove_picon",
+           "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection", "get_service_reference",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
-           "update_entry_data", "append_text_to_tview", "on_popup_menu")
+           "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name",
+           "update_toggle_model", "update_popup_filter_model", "update_filter_sat_positions", "get_pos_num")
 
 import os
+import re
 import shutil
-from collections import defaultdict
+import unicodedata
+from functools import lru_cache
+from itertools import groupby
 from pathlib import Path
 from urllib.parse import unquote
 
-from gi.repository import GdkPixbuf, GLib
+from gi.repository import GdkPixbuf, GLib, Gio
 
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
@@ -523,27 +527,6 @@ def remove_picon(target, srv_view, fav_view, picons, settings):
     remove_picons(settings, picon_ids, picons)
 
 
-def copy_picon_reference(target, view, services, clipboard, transient):
-    """ Copying picon id to clipboard """
-    model, paths = view.get_selection().get_selected_rows()
-    if not is_only_one_item_selected(paths, transient):
-        return
-
-    if target is ViewTarget.SERVICES:
-        picon_id = model.get_value(model.get_iter(paths), Column.SRV_PICON_ID)
-        if picon_id:
-            clipboard.set_text(picon_id.rstrip(".png"), -1)
-        else:
-            show_dialog(DialogType.ERROR, transient, "No reference is present!")
-    elif target is ViewTarget.FAV:
-        fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
-        srv = services.get(fav_id, None)
-        if srv and srv.picon_id:
-            clipboard.set_text(srv.picon_id.rstrip(".png"), -1)
-        else:
-            show_dialog(DialogType.ERROR, transient, "No reference is present!")
-
-
 def remove_all_unused_picons(settings, services):
     """ Removes picons from profile picons folder if there are no services for these picons. """
     ids = {s.picon_id for s in services}
@@ -563,13 +546,13 @@ def remove_picons(settings, picon_ids, picons):
             shutil.move(src, backup_path + p_id)
 
 
-def is_only_one_item_selected(paths, transient):
+def is_only_one_item_selected(paths, app):
     if len(paths) > 1:
-        show_dialog(DialogType.ERROR, transient, "Please, select only one item!")
+        app.show_error_message("Please, select only one item!")
         return False
 
     if not paths:
-        show_dialog(DialogType.ERROR, transient, "No selected item!")
+        app.show_error_message("No selected item!")
         return False
 
     return True
@@ -578,50 +561,115 @@ def is_only_one_item_selected(paths, transient):
 def get_picon_pixbuf(path, size=32):
     try:
         return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width=size, height=size, preserve_aspect_ratio=True)
-    except GLib.GError as e:
+    except GLib.GError:
+        pass  # NOP
+
+
+def get_pixbuf_from_data(img_data, w=48, h=32):
+    if img_data:
+        f = Gio.MemoryInputStream.new_from_data(img_data)
+        return GdkPixbuf.Pixbuf.new_from_stream_at_scale(f, w, h, True, None)
+
+
+def get_pixbuf_at_scale(path, width, height, p_ratio):
+    try:
+        return GdkPixbuf.Pixbuf.new_from_file_at_scale(path, width, height, p_ratio)
+    except GLib.GError:
         pass
+
+
+@lru_cache(50)
+def get_picon_file_name(service_name):
+    """ Returns picon file name by service name. """
+    name = unicodedata.normalize("NFKD", service_name).encode("ASCII", errors="ignore").decode(errors="ignore")
+    return f"{re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())}.png"
 
 
 # ***************** Bouquets ********************* #
 
-def gen_bouquets(view, bq_view, transient, gen_type, s_type, callback):
+def gen_bouquets(app, gen_type):
     """ Auto-generate and append list of bouquets. """
-    model, paths = view.get_selection().get_selected_rows()
-    single_types = (BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE)
-    if gen_type in single_types:
-        if not is_only_one_item_selected(paths, transient):
-            return
+    model, paths = app.services_view.get_selection().get_selected_rows()
+    single_types = {BqGenType.SAT, BqGenType.PACKAGE, BqGenType.TYPE}
+    if gen_type in single_types and not is_only_one_item_selected(paths, app):
+        return
 
-    fav_id_index = Column.SRV_FAV_ID
     index = Column.SRV_TYPE
     if gen_type in (BqGenType.PACKAGE, BqGenType.EACH_PACKAGE):
         index = Column.SRV_PACKAGE
     elif gen_type in (BqGenType.SAT, BqGenType.EACH_SAT):
         index = Column.SRV_POS
 
-    # Splitting services [caching] by column value.
-    s_data = defaultdict(list)
-    for row in model:
-        s_data[row[index]].append(BouquetService(None, BqServiceType.DEFAULT, row[fav_id_index], 0))
+    ids = {row[Column.SRV_FAV_ID] for row in model}
+    services = [v for k, v in app.current_services.items() if k in ids]
 
-    bq_type = BqType.BOUQUET.value if s_type is SettingsType.NEUTRINO_MP else BqType.TV.value
-    bq_index = 0 if s_type is SettingsType.ENIGMA_2 else 1
-    bq_root_iter = bq_view.get_model().get_iter(bq_index)
     srv = Service(*model[paths][:Column.SRV_TOOLTIP])
     cond = srv.package if gen_type is BqGenType.PACKAGE else srv.pos if gen_type is BqGenType.SAT else srv.service_type
-    bq_view.expand_row(Gtk.TreePath(bq_index), 0)
+
+    if gen_type is BqGenType.TYPE and cond == "Data":
+        msg = f"{get_message('Selected type:')} '{cond}'\n\n{get_message('Are you sure?')}"
+        if show_dialog(DialogType.QUESTION, app.app_window, msg) != Gtk.ResponseType.OK:
+            return
+
+    def grouper(s):
+        data = s[index]
+        return data if data else "None"
+
+    services = {k: list(v) for k, v in groupby(sorted(services, key=grouper), key=grouper)}
+
+    bq_view = app.bouquets_view
+    bq_type = BqType.TV.value if app.is_enigma else BqType.BOUQUET.value
+    bq_index = 0 if app.is_enigma else 1
+    bq_root_iter = bq_view.get_model().get_iter(bq_index)
 
     bq_names = get_bouquets_names(bq_view.get_model())
 
     if gen_type in single_types:
         if cond in bq_names:
-            show_dialog(DialogType.ERROR, transient, "A bouquet with that name exists!")
-        else:
-            callback(Bouquet(cond, bq_type, s_data.get(cond)), bq_root_iter)
+            app.show_error_message("A bouquet with that name exists!")
+            return
+
+        bq_services = get_services_type_groups(services.get(cond, []))
+        if app.is_enigma:
+            if srv.service_type == "Radio":
+                bq_index = 1
+                bq_type = BqType.RADIO.value
+                bq_root_iter = bq_view.get_model().get_iter(bq_index)
+                bq_view.expand_row(Gtk.TreePath(bq_index), 1)
+                bq_services = bq_services.get("Radio", [])
+            else:
+                bq_view.expand_row(Gtk.TreePath(bq_index), 0)
+                bq_services = bq_services.get("Data" if srv.service_type == "Data" else "TV", [])
+        app.append_bouquet(Bouquet(cond, bq_type, get_bouquet_services(bq_services)), bq_root_iter)
     else:
+        bq_view.expand_row(Gtk.TreePath(bq_index), 0)
         # We add a bouquet only if the given name is missing [keys - names]!
-        for name in sorted(s_data.keys() - bq_names):
-            callback(Bouquet(name, BqType.TV.value, s_data.get(name)), bq_root_iter)
+        if gen_type is BqGenType.EACH_SAT:
+            bq_names = sorted(services.keys() - bq_names, key=get_pos_num, reverse=True)
+        else:
+            bq_names = sorted(services.keys() - bq_names)
+
+        tv_bqs = []
+        radio_bqs = []
+        for n in bq_names:
+            bqs = services.get(n, [])
+            # TV and Radio separation.
+            bq_grp = get_services_type_groups(bqs)
+            tv_bq = bq_grp.get("TV", [])
+            tv_bqs.append(Bouquet(n, BqType.TV.value, get_bouquet_services(tv_bq))) if tv_bq else None
+            radio_bq = bq_grp.get("Radio", [])
+            radio_bqs.append(Bouquet(n, BqType.RADIO.value, get_bouquet_services(radio_bq))) if radio_bq else None
+
+        [app.append_bouquet(b, bq_root_iter) for b in tv_bqs]
+        if app.is_enigma:
+            bq_root_iter = bq_view.get_model().get_iter(bq_index + 1)
+            bq_view.expand_row(Gtk.TreePath(bq_index + 1), 0)
+            [app.append_bouquet(b, bq_root_iter) for b in radio_bqs]
+
+
+def get_bouquet_services(services):
+    services.sort(key=lambda s: s.service)
+    return [BouquetService(None, BqServiceType.DEFAULT, s.fav_id, 0) for s in services]
 
 
 def get_bouquets_names(model):
@@ -637,7 +685,53 @@ def get_bouquets_names(model):
     return bouquets_names
 
 
-# ***************** Others *********************#
+def get_services_type_groups(services):
+    """ Returns services grouped by main types [TV, Radio, Data]. -> dict """
+
+    def type_grouper(s):
+        s_type = s.service_type
+
+        if s_type == "Data":
+            return s_type
+        elif s_type == "Radio":
+            return s_type
+        else:
+            return "TV"
+
+    return {k: list(v) for k, v in groupby(sorted(services, key=type_grouper), key=type_grouper)}
+
+
+# ***************** Others ********************* #
+
+def copy_reference(view, app):
+    """ Copying picon id to clipboard. """
+    model, paths = view.get_selection().get_selected_rows()
+    if not is_only_one_item_selected(paths, app):
+        return
+
+    target = app.get_target_view(view)
+    clipboard = app._clipboard
+
+    if target is ViewTarget.SERVICES:
+        picon_id = model.get_value(model.get_iter(paths), Column.SRV_PICON_ID)
+        if picon_id:
+            clipboard.set_text(picon_id.rstrip(".png"), -1)
+        else:
+            app.show_error_message("No reference is present!")
+    elif target is ViewTarget.FAV:
+        fav_id = model.get_value(model.get_iter(paths), Column.FAV_ID)
+        srv = app.current_services.get(fav_id, None)
+        if srv and srv.picon_id:
+            clipboard.set_text(get_service_reference(srv), -1)
+        else:
+            app.show_error_message("No reference is present!")
+
+    app.emit("clipboard-changed", clipboard.wait_is_text_available())
+
+
+def get_service_reference(srv):
+    return srv.picon_id.rstrip(".png")
+
 
 def update_entry_data(entry, dialog, settings):
     """ Updates value in text entry from chooser dialog. """
@@ -678,6 +772,44 @@ def get_model_data(view):
     return model_name, model
 
 
+def update_toggle_model(model, path, toggle):
+    """ Updates the toggle state for the model. """
+    active = not toggle.get_active()
+    if path == "0":
+        model.foreach(lambda m, p, i: m.set_value(i, 1, active))
+    else:
+        model.set_value(model.get_iter(path), 1, active)
+        if active:
+            model.set_value(model.get_iter_first(), 1, len({r[0] for r in model if r[1]}) == len(model) - 1)
+        else:
+            model.set_value(model.get_iter_first(), 1, False)
+
+
+def update_popup_filter_model(model, elements: set):
+    first = model[model.get_iter_first()][:]
+    model.clear()
+    model.append((first[0], True))
+    elements.discard(first[0])
+
+
+def update_filter_sat_positions(model, sat_positions):
+    """ Updates the values for the satellite positions button model. """
+    update_popup_filter_model(model, sat_positions)
+    list(map(lambda pos: model.append((pos, True)), sorted(sat_positions, key=get_pos_num, reverse=True)))
+
+
+def get_pos_num(pos):
+    """ Returns num [float] representation of satellite position. """
+    if not pos:
+        return -183.0
+
+    if len(pos) > 1:
+        m = -1 if pos[-1] == "W" else 1
+        return float(pos[:-1]) * m
+
+    return -181.0 if pos == "T" else -182.0
+
+
 def append_text_to_tview(char, view):
     """ Appending text and scrolling  to a given line in the text view. """
     buf = view.get_buffer()
@@ -694,6 +826,15 @@ def get_iptv_url(row, s_type, column=Column.FAV_ID):
     if data:
         url = data[0]
         return unquote(url) if s_type is SettingsType.ENIGMA_2 else url
+
+
+def get_iptv_data(fav_id):
+    """ Returns the reference and URL as a tuple from the fav_id. """
+    data, sep, desc = fav_id.partition("#DESCRIPTION")
+    data = data.split(":")
+    if len(data) < 11:
+        return None, desc
+    return ":".join(data[:10]), unquote(data[10].strip())
 
 
 def on_popup_menu(menu, event):

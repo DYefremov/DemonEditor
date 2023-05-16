@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.commons import run_idle
-from app.settings import SEP, IS_WIN
-from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN, IS_GNOME_SESSION
+from app.settings import SEP, IS_WIN, USE_HEADER_BAR
+from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
 class Dialog(Enum):
@@ -157,7 +157,7 @@ def get_file_chooser_dialog(transient, text, settings, action_type, file_filter,
 
 
 def get_input_dialog(transient, text):
-    builder, dialog = get_dialog_from_xml(DialogType.INPUT, transient, use_header=IS_GNOME_SESSION)
+    builder, dialog = get_dialog_from_xml(DialogType.INPUT, transient, use_header=USE_HEADER_BAR)
     entry = builder.get_object("input_entry")
     entry.set_text(text if text else "")
     response = dialog.run()
@@ -223,9 +223,9 @@ def get_builder(path, handlers=None, use_str=False, objects=None, tag="property"
 
     if use_str:
         if objects:
-            builder.add_objects_from_string(get_dialogs_string(path, tag).format(use_header=IS_GNOME_SESSION), objects)
+            builder.add_objects_from_string(get_dialogs_string(path, tag).format(use_header=USE_HEADER_BAR), objects)
         else:
-            builder.add_from_string(get_dialogs_string(path, tag).format(use_header=IS_GNOME_SESSION))
+            builder.add_from_string(get_dialogs_string(path, tag).format(use_header=USE_HEADER_BAR))
     else:
         if objects:
             builder.add_objects_from_string(get_dialogs_string(path, tag), objects)

@@ -2,8 +2,8 @@
 # This file is distributed under the MIT license.
 #
 # Charly, 2019.
-# Dmitriy Yefremov, 2020-2021.
-# Thomas Schmidt, 2021
+# Dmitriy Yefremov, 2020-2023.
+# Thomas Schmidt, 2021.
 msgid ""
 msgstr ""
 "Last-Translator: Dmitriy Yefremov\n"
@@ -1374,3 +1374,131 @@ msgstr "Wiedergabe aus der Hauptliste"
 
 msgid "Enables URL parsing using youtube-dl to get direct links to media."
 msgstr "Aktiviert URL-Parsing mit youtube-dl, um direkte Links zu Medien zu erhalten."
+
+msgid "Permissions..."
+msgstr "Berechtigungen..."
+
+msgid "Display EPG in bouquet list"
+msgstr "EPG in Bouquet-Liste anzeigen"
+
+msgid "EPG *.dat file:"
+msgstr "EPG *.dat Datei:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "HTTP verwenden, um Daten in den Receiver updaten"
+
+msgid "Enable picons compression"
+msgstr "Picon-Komprimierung aktivieren"
+
+msgid "Update interval (sec):"
+msgstr "Aktualisierungsintervall (sec):"
+
+msgid "Update:"
+msgstr "Aktualisieren:"
+
+msgid "Daily"
+msgstr "Täglich"
+
+msgid "Assign reference"
+msgstr "Referenz zuweisen"
+
+msgid "Specify hostname or IP address"
+msgstr "Hostname oder IP-Adresse angeben"
+
+msgid "Default selection"
+msgstr "Standardauswahl"
+
+msgid "Don't change power state"
+msgstr "Energiezustand nicht ändern"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Schalten beim Aktualisieren von Bouquets und Services nicht in den Standby-Modus um."
+
+msgid "Region"
+msgstr "Region"
+
+msgid "Provider"
+msgstr "Provider"
+
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Ermöglicht das Hochladen als Archiv, wenn eine große Anzahl von Picons (> 1000)"
+" ausgewählt ist. Empfohlen nur, wenn einen externen Speicher verfügt wird."
+
+msgid "Clear \"New\" flag"
+msgstr "Das \"Neu\"-Flag entfernen"
+
+msgid "Group by"
+msgstr "Gruppieren nach"
+
+msgid "Replace existing"
+msgstr "Vorhandene ersetzen"
+
+msgid "Already exists"
+msgstr "Bereits vorhanden"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Unbegrenzte Zwischenablage aktivieren"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Aktiviert unbegrenzte Zwischenablage für die Bouquets-Tab."
+
+msgid "Start time"
+msgstr "Anfangszeit"
+
+msgid "End time"
+msgstr "Endzeit"
+
+msgid "Enable extensions support"
+msgstr "Erweiterungen Unterstützung aktivieren"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Nach dem Hochladen der Änderungen muss den Receiver eventuell komplett neu starten!"
+
+msgid "Remove duplicates"
+msgstr "Duplikate entfernen"
+
+msgid "Removed"
+msgstr "Entfernt"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Ermöglicht das Überschreiben vorhandener Hauptlistendienste."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Ermöglicht das Überspringen von Dienstimporten aus lamedb."
+
+msgid "Bouquets data only"
+msgstr "Nur Bouquets-Daten"
+
+msgid "Create Category bouquets"
+msgstr "Erstellen Kategories-Bouquets"
+
+msgid "Create Regional bouquets"
+msgstr "Erstellen Regionale-Bouquets"
+
+msgid "Skip C-band"
+msgstr "C-Band überspringen"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Stellen in der Bouquet-Liste ausgewählten Namen automatisch ein."
+
+msgid "Merge satellites by positions"
+msgstr "Satelliten nach Pos. zusammenführen"
+
+msgid "Save satellite selection"
+msgstr "Satellitenauswahl speichern"
+
+msgid "Extract direct links"
+msgstr "Direktlinks extrahieren"
+
+msgid "URL prefix:"
+msgstr "URL-Präfix:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Ungültiges Präfix für die angegebene URL!"
+
+msgid "Alternate window title"
+msgstr "Alternativer Fenstertitel"
+
+msgid "Selected type:"
+msgstr "Ausgewählt Typ:"

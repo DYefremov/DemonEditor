@@ -1,14 +1,14 @@
-# Copyright (C) 2018-2022 Víctor Pont
+# Copyright (C) 2018-2023 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-# Frank Neirynck <frank@insink.be>, 2018-2020.
+# Frank Neirynck <frank@insink.be>, 2018-2023.
 # Víctor Pont <victor@pont.cat>, 2021-2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
-"Last-Translator: Víctor Pont\n"
+"Last-Translator: Frank Neirynck\n"
 "Language-Team: \n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -1382,3 +1382,116 @@ msgstr "Añadir marcador"
 
 msgid "All bouquets"
 msgstr "Todos los bouquets"
+
+msgid "Playback from the main list"
+msgstr "Reproducción desde la lista principal"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Habilita el análisis de URL usando youtube-dl para obtener enlaces directos a los medios."
+
+msgid "Permissions..."
+msgstr "Permisos..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Mostrar EPG en la lista de bouquet"
+
+msgid "EPG *.dat file:"
+msgstr "Archivo EPG *.dat:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Use HTTP para recargar datos en el receptor"
+
+msgid "Enable picons compression"
+msgstr "Habilitar la compresión de picons"
+
+msgid "Update interval (sec):"
+msgstr "Intervalo de actualización (sec):"
+
+msgid "Update:"
+msgstr "Actualización:"
+
+msgid "Daily"
+msgstr "Diariamente"
+
+msgid "Assign reference"
+msgstr "Asignar referencia"
+
+msgid "Specify hostname or IP address"
+msgstr "Especifique el nombre de host o la dirección IP"
+
+msgid "Default selection"
+msgstr "Selección predeterminada"
+
+msgid "Don't change power state"
+msgstr "No apagues el dispositivo"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "No cambie el modo de espera al actualizar bouquets y servicios."
+
+msgid "Region"
+msgstr "Región"
+
+msgid "Provider"
+msgstr "Proveedor"
+
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Habilita la carga como un archivo si se selecciona una gran cantidad de picon (> 1000).\n"
+"                    Recomendado solo si tienes almacenamiento externo."
+
+msgid "Clear \"New\" flag"
+msgstr "Limpiar \"Nuevo\" flag"
+
+msgid "Group by"
+msgstr "Agrupar por"
+
+msgid "Replace existing"
+msgstr "Sustituir los existentes"
+
+msgid "Already exists"
+msgstr "Ya existe"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Activar búfer de copia ilimitado"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Activa el búfer de copia ilimitado para la pestaña de bouquets."
+
+msgid "Start time"
+msgstr "Hora de inicio"
+
+msgid "End time"
+msgstr "Hora final"
+
+msgid "Enable extensions support"
+msgstr "Activar el soporte de extensiones"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Después de cargar los cambios, es posible que tenga que reiniciar completamente el receptor."
+
+msgid "Remove duplicates"
+msgstr "Eliminar duplicados"
+
+msgid "Removed"
+msgstr "Eliminado"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Permite sobrescribir los servicios existentes de la lista principal."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Permite omitir la importación de servicios desde lamedb."
+
+msgid "Bouquets data only"
+msgstr "Sólo datos de bouquets"
+
+msgid "Create Category bouquets"
+msgstr "Crear categoría de bouquets"
+
+msgid "Create Regional bouquets"
+msgstr "Crear bouquets regionales"
+
+msgid "Skip C-band"
+msgstr "Omitir banda C"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Establece automáticamente el nombre seleccionado en la lista de bouquets."

@@ -1,7 +1,7 @@
-# Copyright (C) 2018-2020 Frank Neirynck
+# Copyright (C) 2018-2023 Frank Neirynck
 # This file is distributed under the MIT license.
 #
-# Frank Neirynck <frank@insink.be>, 2018-2020.
+# Frank Neirynck <frank@insink.be>, 2018-2022.
 #
 msgid ""
 msgstr ""
@@ -25,7 +25,7 @@ msgid "Type"
 msgstr "Type"
 
 msgid "Picon"
-msgstr "Picon"
+msgstr "Pict."
 
 msgid "Freq"
 msgstr "Freq."
@@ -148,10 +148,10 @@ msgid "Parent lock On/Off     Ctrl + L"
 msgstr "Ouderlijk slot aan/uit     Ctrl + L"
 
 msgid "Picons"
-msgstr "Picons"
+msgstr "Pictogrammen"
 
 msgid "Picons downloader"
-msgstr "Picons downloader"
+msgstr "Pictogrammen downloader"
 
 msgid "Satellites downloader"
 msgstr "Satellieten downloader"
@@ -286,22 +286,22 @@ msgid "Providers"
 msgstr "Leveranciers"
 
 msgid "Receive picons"
-msgstr "Ontvang picons"
+msgstr "Ontvang pictogrammen"
 
 msgid "Picons name format:"
-msgstr "Picons naam formaat:"
+msgstr "Pictogrammen naam formaat:"
 
 msgid "Resize:"
 msgstr "Verklein/vergroot:"
 
 msgid "Current picons path:"
-msgstr "Huidig pad picons:"
+msgstr "Huidig pad Pictogrammen:"
 
 msgid "Receiver picons path:"
-msgstr "Ontvanger picons pad:"
+msgstr "Ontvanger Pictogrammen pad:"
 
 msgid "Picons download tool"
-msgstr "Picons download gereedschap"
+msgstr "Pictogrammen download gereedschap"
 
 msgid "Transfer to receiver"
 msgstr "Transfereren naar ontvanger"
@@ -319,7 +319,7 @@ msgid "Path to save:"
 msgstr "Pad om op te slaan:"
 
 msgid "Path to Enigma2 picons:"
-msgstr "Pad naar Enigma2 picons:"
+msgstr "Pad naar Enigma2 Pictogrammen:"
 
 msgid "Specify the correct position value for the provider!"
 msgstr "Geeft de juiste positie waarde voor de provider!"
@@ -328,16 +328,16 @@ msgid "Converter between name formats"
 msgstr "Omvormer tussen naam formaten"
 
 msgid "Receive picons for providers"
-msgstr "Ontvang picons voor leveranciers"
+msgstr "Ontvang Pictogrammen voor providers"
 
 msgid "Load satellite providers."
-msgstr "Laad satelliet leveranciers."
+msgstr "Laad satelliet providers."
 
 msgid ""
 "To automatically set the identifiers for picons,\n"
 "first load the required services list into the main application window."
 msgstr ""
-"Om automatisch de ID in te stellen voor picons,\n"
+"Om automatisch de ID in te stellen voor pictogrammen,\n"
 "laad eerst de vereiste serviceslijst in via het hoofdvenster van het programma."
 
 # Satellites editor
@@ -462,7 +462,7 @@ msgid "Password:"
 msgstr "Paswoord:"
 
 msgid "Picons:"
-msgstr "Picons:"
+msgstr "Pictogrammen:"
 
 msgid "Port:"
 msgstr "Poort:"
@@ -471,7 +471,7 @@ msgid "Data path:"
 msgstr "Gegevenspad:"
 
 msgid "Picons path:"
-msgstr "Picons pad:"
+msgstr "Pictogrammen pad:"
 
 msgid "Network settings:"
 msgstr "Netwerk instellingen:"
@@ -825,7 +825,7 @@ msgid "File"
 msgstr "File"
 
 msgid "Picons manager"
-msgstr "Picons manager"
+msgstr "Pictogrammen manager"
 
 msgid "Explorer"
 msgstr "Explorer"
@@ -1013,3 +1013,445 @@ msgstr "Schermafbeelding"
 msgid "Video"
 msgstr "Vidео"
 
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino heeft alleen experimentele ondersteuning. Niet alle functies worden ondersteund!"
+
+msgid "Enable experimental features"
+msgstr "Schakel experimentele functies in"
+
+msgid "Can't Playback!"
+msgstr "Kan niet afspelen!"
+
+msgid "Enable Dark Mode"
+msgstr "Schakel de donkere modus in"
+
+msgid "Extract..."
+msgstr "Extract..."
+
+msgid "Unsupported format!"
+msgstr "Niet ondersteund formaat!"
+
+msgid "Combine with the current data?"
+msgstr "Combineren met de huidige gegevens?"
+
+msgid "Importing data done!"
+msgstr "Gegevens importeren klaar!"
+
+msgid "Current service"
+msgstr "Huidige dienst"
+
+msgid "Open folder"
+msgstr "Open Map"
+
+msgid "Open archive"
+msgstr "Open Archief"
+
+msgid "Import from Web"
+msgstr "Importeren van internet"
+
+msgid "Control"
+msgstr "Controle"
+
+msgid "Timers"
+msgstr "Timers"
+
+msgid "Timer"
+msgstr "Timer"
+
+msgid "Add timer"
+msgstr "Timer toevoegen"
+
+msgid "Hr."
+msgstr "U."
+
+msgid "Min."
+msgstr "мin."
+
+msgid "Power"
+msgstr "Power"
+
+msgid "Standby"
+msgstr "Standby"
+
+msgid "Wake Up"
+msgstr "Wake Up"
+
+msgid "Reboot"
+msgstr "Herstart"
+
+msgid "Restart GUI"
+msgstr "Herstart GUI"
+
+msgid "Shutdown"
+msgstr "Uitschakelen"
+
+msgid "Shut down"
+msgstr "Uitschakelen"
+
+msgid "Do Nothing"
+msgstr "Doe niets"
+
+msgid "Auto"
+msgstr "Auto"
+
+msgid "Grab screenshot"
+msgstr "Maak schermafbeelding"
+
+msgid "Enabled:"
+msgstr "Ingeschakeld:"
+
+msgid "Name:"
+msgstr "Naam:"
+
+msgid "Description:"
+msgstr "Omschrijving:"
+
+msgid "Service:"
+msgstr "Dienst:"
+
+msgid "Service reference:"
+msgstr "Service referentie:"
+
+msgid "Event ID:"
+msgstr "Event ID:"
+
+msgid "Begins:"
+msgstr "Begint:"
+
+msgid "Ends:"
+msgstr "Stopt:"
+
+msgid "Repeated:"
+msgstr "Herhaald:"
+
+msgid "Action:"
+msgstr "Actie:"
+
+msgid "After event:"
+msgstr "Na Event:"
+
+msgid "Location:"
+msgstr "Locatiе:"
+
+msgid "Mo"
+msgstr "Ma"
+
+msgid "Tu"
+msgstr "Di"
+
+msgid "We"
+msgstr "Wo"
+
+msgid "Th"
+msgstr "Do"
+
+msgid "Fr"
+msgstr "Vr"
+
+msgid "Sa"
+msgstr "Za"
+
+msgid "Su"
+msgstr "Zo"
+
+msgid "Set"
+msgstr "Set"
+
+msgid "Services update"
+msgstr "Services-update"
+
+msgid "Create folder"
+msgstr "Map aanmaken"
+
+msgid "FTP client"
+msgstr "FTP client"
+
+msgid "The file size is too large!"
+msgstr "De bestandsgrootte is te groot!"
+
+msgid "Connect"
+msgstr "Verbind"
+
+msgid "Disconnect"
+msgstr "Verbreek Verbinding"
+
+msgid "Size"
+msgstr "Grootte"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Toggle display position"
+msgstr "Weergavepositie wisselen"
+
+msgid "Alternatives"
+msgstr "Alternatieven"
+
+msgid "Add alternatives"
+msgstr "Alternatieven toevoegen"
+
+msgid "DreamOS only!"
+msgstr "Enkel DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Een vergelijkbare service staat al in deze lijst!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "De afspeelmodus is gewijzigd!\nStart het programma opnieuw om de instellingen toe te passen."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Stel waarden in voor TID, NID en Namespace voor correcte naamgeving van de pictogrammen!"
+
+msgid "Streams detected:"
+msgstr "Streams gedetecteerd:"
+
+msgid "Download picons"
+msgstr "Pictogrammen downloaden"
+
+msgid "Errors:"
+msgstr "Fouten:"
+
+msgid "Use to play streams:"
+msgstr "Gebruik om streams af te spelen:"
+
+msgid "Font in the lists:"
+msgstr "Lettertype in de lijsten:"
+
+msgid "Picons size in the lists:"
+msgstr "Pictogramgrootte in de lijsten:"
+
+msgid "Logo size in tooltips:"
+msgstr "Logogrootte in knopinfo:"
+
+msgid "Save as"
+msgstr "Opslaan als"
+
+msgid "Mark duplicates"
+msgstr "Markeer duplicaten"
+
+msgid "Load only for selected bouquet"
+msgstr "Laad alleen voor geselecteerd boeket"
+
+msgid "The task is canceled!"
+msgstr "De taak is geannuleerd!"
+
+msgid "Data loading in progress!"
+msgstr "Gegevens worden geladen!"
+
+msgid "Recordings"
+msgstr "Opnames"
+
+msgid "Recordings:"
+msgstr "Opnames:"
+
+msgid "Help"
+msgstr "Help"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP-API is niet geactiveerd. Controleer uw instellingen!"
+
+msgid "Add picons"
+msgstr "Pictogrammen toevoegen"
+
+msgid "Logs"
+msgstr "Logs"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Time"
+msgstr "Tijd"
+
+msgid "Length"
+msgstr "Lengte"
+
+msgid "Additional source"
+msgstr "Extra bron"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Stel automatisch de geselecteerde naam in de favorietenlijst in."
+
+msgid "Playback"
+msgstr "Weergave"
+
+msgid "Playback:"
+msgstr "Weergave:"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Audio Track"
+msgstr "Audio Spoor"
+
+msgid "Subtitle"
+msgstr "Ondertitel"
+
+msgid "Subtitle Track"
+msgstr "Ondertitel Spoor"
+
+msgid "Aspect ratio"
+msgstr "Beeldverhouding"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Hierdoor kunnen de instellingen van andere profielen veranderen!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Sleep de services naar het gewenste pictogram of het pictogram naar de lijst met geselecteerde services."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Stelt de profielmap in als standaard om pictogrammen, back-ups, etc. op te slaan."
+
+msgid "New sub-bouquet"
+msgstr "Nieuw sub-boeket"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Stel in als niet in Boeketten"
+
+msgid "Not in Bouquets"
+msgstr "Niet in Boeketten"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Laat geen services zien die aanwezig zijn in Boeketten."
+
+msgid "IPTV services only"
+msgstr "Enkel IPTV diensten"
+
+msgid "Display picons"
+msgstr "Toon pictogrammen"
+
+msgid "Alternate layout"
+msgstr "Alternatieve indeling"
+
+msgid "Layout of elements has been changed!"
+msgstr "Lay-out van elementen is gewijzigd!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Start het programma opnieuw om alle wijzigingen toe te passen."
+
+msgid "New folder"
+msgstr "Nieuwe map"
+
+msgid "Rename"
+msgstr "Hernoem"
+
+msgid "Bookmarks"
+msgstr "Bladwijzers"
+
+msgid "Add bookmark"
+msgstr "Bladwijzer toevoegen"
+
+msgid "All bouquets"
+msgstr "Alle boeketten"
+
+msgid "Playback from the main list"
+msgstr "Afspelen vanuit de hoofdlijst"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Schakelt URL-parsing met behulp van youtube-dl in, om directe links naar media te krijgen."
+
+msgid "Permissions..."
+msgstr "Rechten..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Toon EPG in boeketlijst"
+
+msgid "EPG *.dat file:"
+msgstr "EPG *.dat file:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Gebruik HTTP om gegevens opnieuw in de ontvanger te laden"
+
+msgid "Enable picons compression"
+msgstr "Pictogrammen-compressie inschakelen"
+
+msgid "Update interval (sec):"
+msgstr "Update-interval (sec):"
+
+msgid "Update:"
+msgstr "Update:"
+
+msgid "Daily"
+msgstr "Dagelijks"
+
+msgid "Assign reference"
+msgstr "Referentie toewijzen"
+
+msgid "Specify hostname or IP address"
+msgstr "Geef de hostnaam of het IP-adres op"
+
+msgid "Default selection"
+msgstr "Standaard selectie"
+
+msgid "Don't change power state"
+msgstr "Schakel het toestel niet uit"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Schakel de stand-bymodus niet in bij het updaten van boeketten en services."
+
+msgid "Region"
+msgstr "Regio"
+
+msgid "Provider"
+msgstr "Provider"
+
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Maakt uploaden als archief mogelijk als een groot aantal pictogrammen (> 1000) is geselecteerd.\n"
+"                    Alleen aanbevolen als u externe opslag heeft."
+
+msgid "Clear \"New\" flag"
+msgstr "Opruimen \"Niew\" flag"
+
+msgid "Group by"
+msgstr "Groeperen per"
+
+msgid "Replace existing"
+msgstr "Vervang bestaande"
+
+msgid "Already exists"
+msgstr "Bestaat reeds"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Onbeperkte kopieerbuffer inschakelen"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Schakelt een onbeperkte kopieerbuffer in voor het boeketten tabblad."
+
+msgid "Start time"
+msgstr "Starttijd"
+
+msgid "End time"
+msgstr "Eindtijd"
+
+msgid "Enable extensions support"
+msgstr "Ondersteuning voor extensies inschakelen"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Na het uploaden van de wijzigingen kan het nodig zijn de ontvanger volledig opnieuw op te starten!"
+
+msgid "Remove duplicates"
+msgstr "Duplicaten verwijderen"
+
+msgid "Removed"
+msgstr "Verwijderd"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Maakt het overschrijven van bestaande hoofdlijst diensten mogelijk."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Maakt het overslaan van dienstenimport uit lamedb mogelijk."
+
+msgid "Bouquets data only"
+msgstr "Alleen gegevens over boeketten"
+
+msgid "Create Category bouquets"
+msgstr "Maak categorie boeketten"
+
+msgid "Create Regional bouquets"
+msgstr "Maak regionale boeketten"
+
+msgid "Skip C-band"
+msgstr "C-band overslaan"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Stel automatisch de naam in die is geselecteerd in de boeketlijst."

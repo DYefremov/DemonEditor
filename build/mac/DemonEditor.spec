@@ -21,8 +21,11 @@ excludes = ['app.tools.mpv',
 ui_files = [('app/ui/*.glade', 'ui'),
             ('app/ui/*.css', 'ui'),
             ('app/ui/*.ui', 'ui'),
+            ('app/ui/epg/*.glade', 'ui/epg'),
+            ('app/ui/xml/*.glade', 'ui/xml'),
             ('app/ui/lang*', 'share/locale'),
-            ('app/ui/icons*', 'share/icons')
+            ('app/ui/icons*', 'share/icons'),
+            ('extensions/*', 'extensions')
             ]
 
 a = Analysis([EXE_NAME],
@@ -37,8 +40,7 @@ a = Analysis([EXE_NAME],
                     "languages": ["en", "be", "es", "it", "nl",
                                   "pl", "pt", "ru", "tr", "zh_CN"],
                     "module-versions": {
-                        "Gtk": "3.0",
-                        "GtkSource": "3",
+                        "Gtk": "3.0"
                     },
                 },
              },
@@ -79,8 +81,8 @@ app = BUNDLE(coll,
                  'CFBundleGetInfoString': "Enigma2 channel and satellite editor",
                  'LSApplicationCategoryType': 'public.app-category.utilities',
                  'LSMinimumSystemVersion': '10.13',
-                 'CFBundleShortVersionString': f"2.2.4.{BUILD_DATE} Beta",
-                 'NSHumanReadableCopyright': u"Copyright © 2022, Dmitriy Yefremov",
+                 'CFBundleShortVersionString': f"3.6.2.{BUILD_DATE} Beta",
+                 'NSHumanReadableCopyright': u"Copyright © 2023, Dmitriy Yefremov",
                  'NSRequiresAquaSystemAppearance': 'false',
                  'NSHighResolutionCapable': 'true'
              })

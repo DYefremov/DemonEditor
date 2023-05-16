@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -68,10 +68,9 @@ def write_bouquet(path, bq, s_type):
         write_bouquet(path, bq)
 
 
-@run_task
-def write_bouquets(path, bouquets, s_type, force_bq_names=False):
+def write_bouquets(path, bouquets, s_type, force_bq_names=False, blacklist=None):
     if s_type is SettingsType.ENIGMA_2:
-        BouquetsWriter(path, bouquets, force_bq_names).write()
+        BouquetsWriter(path, bouquets, force_bq_names, blacklist).write()
     elif s_type is SettingsType.NEUTRINO_MP:
         write_neutrino_bouquets(path, bouquets)
 

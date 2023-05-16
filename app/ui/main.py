@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,19 +27,20 @@
 
 
 import os
+import re
 import sys
 from collections import Counter
 from contextlib import suppress
 from datetime import datetime
 from functools import lru_cache
+from html import escape
 from itertools import chain
 from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib, Gio, GObject
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger, DefaultDict
-from app.connections import (HttpAPI, download_data, DownloadType, upload_data, test_http, TestException,
-                             HttpApiException, STC_XML_FILE)
+from app.connections import (HttpAPI, download_data, DownloadType, upload_data, STC_XML_FILE)
 from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
@@ -47,28 +48,30 @@ from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.iptv import export_to_m3u, StreamType
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException,
-                          IS_DARWIN, PlayStreamsMode, IS_LINUX)
+                          IS_DARWIN, PlayStreamsMode, IS_LINUX, USE_HEADER_BAR)
 from app.tools.media import Recorder
-from app.ui.control import ControlTool, EpgTool, TimerTool, RecordingsTool
-from app.ui.epg import EpgDialog
+from app.ui.control import ControlTool
+from app.ui.epg.epg import EpgCache, EpgSettingsPopover, EpgDialog, EpgTool
 from app.ui.ftp import FtpClientBox
 from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
+from app.ui.recordings import RecordingsTool
 from app.ui.telnet import TelnetClient
+from app.ui.timers import TimerTool
 from app.ui.transmitter import LinksTransmitter
-from .backup import BackupDialog, backup_data, clear_data_path
+from .backup import BackupDialog, backup_data, clear_data_path, restore_data
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, get_message, get_builder
-from .download_dialog import DownloadDialog
 from .imports import ImportDialog, import_bouquet
 from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
 from .main_helper import *
 from .picons import PiconManager
-from .satellites import SatellitesTool, ServicesUpdateDialog
 from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        FavClickMode, MOD_MASK, APP_FONT, Page, IS_GNOME_SESSION)
+                        FavClickMode, MOD_MASK, APP_FONT, Page, HeaderBar)
+from .xml.dialogs import ServicesUpdateDialog
+from .xml.edit import SatellitesTool
 
 
 class Application(Gtk.Application):
@@ -85,6 +88,8 @@ class Application(Gtk.Application):
 
     _TV_TYPES = ("TV", "TV (HD)", "TV (UHD)", "TV (H264)")
 
+    BG_TASK_LIMIT = 5
+
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
                          "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
@@ -93,7 +98,8 @@ class Application(Gtk.Application):
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
                      "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item", "fav_add_alt_popup_item",
-                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item")
+                     "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item", "fav_remove_dup_popup_item",
+                     "fav_reference_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
@@ -105,8 +111,6 @@ class Application(Gtk.Application):
 
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_menu_button",
                           "iptv_menu_button")
-
-    _LOCK_HIDE_ELEMENTS = ("enigma_lock_hide_box", "bouquet_lock_hide_box")
 
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
@@ -130,6 +134,8 @@ class Application(Gtk.Application):
                     "on_iptv_services_copy": self.on_iptv_services_copy,
                     "on_fav_copy": self.on_fav_copy,
                     "on_bouquets_copy": self.on_bouquets_copy,
+                    "on_reference_copy": self.on_reference_copy,
+                    "on_reference_assign": self.on_reference_assign,
                     "on_fav_paste": self.on_fav_paste,
                     "on_bouquets_paste": self.on_bouquets_paste,
                     "on_rename_for_bouquet": self.on_rename_for_bouquet,
@@ -169,8 +175,10 @@ class Application(Gtk.Application):
                     "on_fav_press": self.on_fav_press,
                     "on_locate_in_services": self.on_locate_in_services,
                     "on_mark_duplicates": self.on_mark_duplicates,
+                    "on_remove_duplicates": self.on_remove_duplicates,
                     "on_services_mark_not_in_bouquets": self.on_services_mark_not_in_bouquets,
                     "on_services_clear_marked": self.on_services_clear_marked,
+                    "on_services_clear_new_marked": self.on_services_clear_new_marked,
                     "on_filter_changed": self.on_filter_changed,
                     "on_iptv_filter_changed": self.on_iptv_filter_changed,
                     "on_filter_type_toggled": self.on_filter_type_toggled,
@@ -182,7 +190,6 @@ class Application(Gtk.Application):
                     "on_assign_picon_file": self.on_assign_picon_file,
                     "on_assign_picon": self.on_assign_picon,
                     "on_remove_picon": self.on_remove_picon,
-                    "on_reference_picon": self.on_reference_picon,
                     "on_remove_unused_picons": self.on_remove_unused_picons,
                     "on_iptv": self.on_iptv,
                     "on_epg_list_configuration": self.on_epg_list_configuration,
@@ -209,7 +216,6 @@ class Application(Gtk.Application):
                     "on_control_realize": self.on_control_realize,
                     "on_ftp_realize": self.on_ftp_realize,
                     "on_telnet_realize": self.on_telnet_realize,
-                    "on_logs_realize": self.on_logs_realize,
                     "on_visible_page": self.on_visible_page,
                     "on_iptv_toggled": self.on_iptv_toggled,
                     "on_data_paned_realize": self.init_main_paned_position}
@@ -217,11 +223,12 @@ class Application(Gtk.Application):
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
         self._is_enigma = self._s_type is SettingsType.ENIGMA_2
+        self._is_send_data_enabled = True
+        self._is_receive_data_enabled = True
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
         self._bouquets_buffer = []
-        self._picons_buffer = []
         self._services = {}
         self._bouquets = {}
         self._bq_file = {}
@@ -233,11 +240,13 @@ class Application(Gtk.Application):
         self._in_bouquets = set()
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
-        self._picons = DefaultDict(self.get_picon)
         self._blacklist = set()
         self._current_bq_name = None
         self._bq_selected = ""  # Current selected bouquet
         self._select_enabled = True  # Multiple selection
+        # Picons
+        self._picons_buffer = []
+        self._picons = DefaultDict(self.get_picon)
         # Current satellite positions in the services list
         self._sat_positions = set()
         self._service_types = set()
@@ -267,8 +276,11 @@ class Application(Gtk.Application):
         # Current page.
         self._page = Page.INFO
         self._fav_pages = {Page.SERVICES, Page.PICONS, Page.EPG, Page.TIMERS}
+        self._no_download_pages = {Page.TIMERS, Page.CONTROL}
         # Signals.
         GObject.signal_new("profile-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("bouquet-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -296,9 +308,31 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("epg-dat-downloaded", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("services-update", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("iptv-service-edited", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("iptv-service-added", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-receive", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-send", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-save", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-save-as", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("add-background-task", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("task-done", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("task-cancel", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("task-canceled", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,)),
+        GObject.signal_new("list-font-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("clipboard-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
@@ -351,7 +385,7 @@ class Application(Gtk.Application):
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
-        self._save_tool_button.bind_property("visible", builder.get_object("fav_assign_picon_popup_item"), "sensitive")
+        self._task_box = builder.get_object("task_box")
         # Alternatives
         self._alt_view = builder.get_object("alt_tree_view")
         self._alt_model = builder.get_object("alt_list_store")
@@ -363,6 +397,11 @@ class Application(Gtk.Application):
         self._fav_view.connect("key-press-event", self.force_ctrl)
         # Clipboard
         self._clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        ref_item = builder.get_object("fav_assign_ref_popup_item")
+        self.bind_property("is_enigma", ref_item, "visible")
+        # We use a custom event for observe clipboard state.
+        # "owner-change" -> https://gitlab.gnome.org/GNOME/gtk/-/issues/1757
+        self.connect("clipboard-changed", lambda a, o: ref_item.set_sensitive(o))
         # Wait dialog
         self._wait_dialog = WaitDialog(self._main_window)
         # Filter
@@ -381,7 +420,6 @@ class Application(Gtk.Application):
         self._filter_only_free_button = builder.get_object("filter_only_free_button")
         self._filter_not_in_bq_button = builder.get_object("filter_not_in_bq_button")
         self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
-        self._services_load_spinner.bind_property("active", self._filter_box, "sensitive", 4)
         self._filter_iptv_services_button = builder.get_object("filter_iptv_services_button")
         # Search.
         services_search_provider = SearchProvider(self._services_view,
@@ -421,11 +459,14 @@ class Application(Gtk.Application):
         self._record_image = builder.get_object("record_button_image")
         # Dynamically active elements depending on the selected view.
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
-                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._LOCK_HIDE_ELEMENTS)
+                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
         # Lock, Hide.
-        self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[0]), "visible")
-        self.bind_property("is-enigma", self._tool_elements.get(self._LOCK_HIDE_ELEMENTS[1]), "visible", 4)
+        self._bouquet_lock_hide_box = builder.get_object("bouquet_lock_hide_box")
+        self._bouquets_view.bind_property("is-focus", self._bouquet_lock_hide_box, "sensitive")
+        self.bind_property("is-enigma", builder.get_object("enigma_lock_hide_box"), "visible")
+        # Clear "New" menu item
+        self.bind_property("is-enigma", builder.get_object("services_clear_new_flag_item"), "visible")
         # Sub-bouquets menu item.
         self.bind_property("is-enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
         # Export bouquet to m3u menu items.
@@ -448,13 +489,29 @@ class Application(Gtk.Application):
         # Extra tools.
         self._telnet_box = builder.get_object("telnet_box")
         self._logs_box = builder.get_object("logs_box")
+        self._logs_box.pack_start(LogsClient(self), True, True, 0)
         self._bottom_paned = builder.get_object("bottom_paned")
+        self.connect("services-update", self.on_services_update)
+        # Send/Receive.
+        self.connect("data-receive", self.on_download)
+        self.connect("data-send", self.on_upload)
+        # Data save.
+        self.connect("data-save", self.on_data_save)
+        self.connect("data-save-as", self.on_data_save_as)
+        # Background tasks.
+        self.connect("add-background-task", self.on_bg_task_add)
+        self.connect("task-done", self.on_task_done)
+        self.connect("task-cancel", self.on_task_cancel)
+        # Font.
+        self.connect("list-font-changed", self.on_list_font_changed)
         # Header bar.
         profile_box = builder.get_object("profile_combo_box")
         toolbar_box = builder.get_object("toolbar_main_box")
-        if IS_GNOME_SESSION:
-            header_bar = Gtk.HeaderBar(visible=True, show_close_button=True)
-            header_bar.pack_start(builder.get_object("file_header_button"))
+        if self._settings.use_header_bar:
+            header_bar = HeaderBar()
+            if not IS_DARWIN:
+                header_bar.pack_start(builder.get_object("file_header_button"))
+
             header_bar.pack_start(profile_box)
             header_bar.pack_start(toolbar_box)
             header_bar.set_custom_title(builder.get_object("stack_switcher"))
@@ -493,8 +550,6 @@ class Application(Gtk.Application):
         self._dvb_button = builder.get_object("dvb_button")
         iptv_type_column = builder.get_object("iptv_type_column")
         iptv_type_column.set_cell_data_func(builder.get_object("iptv_type_renderer"), self.iptv_type_data_func)
-        iptv_ref_column = builder.get_object("iptv_ref_column")
-        iptv_ref_column.set_cell_data_func(builder.get_object("iptv_ref_renderer"), self.iptv_ref_data_func)
         iptv_button = builder.get_object("iptv_button")
         iptv_button.bind_property("active", self._filter_services_button, "visible", 4)
         iptv_button.bind_property("active", self._srv_search_button, "visible", 4)
@@ -510,12 +565,24 @@ class Application(Gtk.Application):
         self.connect("profile-changed", self.init_iptv)
         self.connect("iptv-service-added", self.on_iptv_service_added)
         self.connect("iptv-service-edited", self.on_iptv_service_edited)
+        # EPG.
+        self._display_epg = False
+        self._epg_cache = None
+        fav_service_column = builder.get_object("fav_service_column")
+        fav_service_column.set_cell_data_func(builder.get_object("fav_service_renderer"), self.fav_service_data_func)
+        self._epg_menu_button = builder.get_object("epg_menu_button")
+        self._epg_menu_button.connect("realize", lambda b: b.set_popover(EpgSettingsPopover(self)))
+        self.bind_property("is_enigma", self._epg_menu_button, "sensitive")
+        self._epg_start_time_fmt = "%a, %H:%M"
+        self._epg_end_time_fmt = "%H:%M"
         # Hiding for Neutrino.
         self.bind_property("is_enigma", builder.get_object("services_button_box"), "visible")
         # Setting the last size of the window if it was saved.
         main_window_size = self._settings.get("window_size")
         if main_window_size:
             self._main_window.resize(*main_window_size)
+        # Layout.
+        self.init_layout()
         # Style.
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
@@ -524,151 +591,22 @@ class Application(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
-        # App menu.
-        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
-        if not IS_GNOME_SESSION:
-            if IS_DARWIN:
-                self.set_app_menu(builder.get_object("mac_app_menu"))
-                self.set_menubar(builder.get_object("mac_menu_bar"))
-            else:
-                self.set_menubar(builder.get_object("menu_bar"))
-        else:
-            tools_menu = builder.get_object("tools_menu")
-            tools_button = Gtk.MenuButton(visible=True, menu_model=tools_menu, direction=Gtk.ArrowType.NONE)
-            tools_button.set_tooltip_text(get_message("Tools"))
-            tools_button.set_image(Gtk.Image.new_from_icon_name("applications-utilities-symbolic", Gtk.IconSize.BUTTON))
-
-            view_menu = builder.get_object("view_menu")
-            view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
-            view_button.set_tooltip_text(get_message("View"))
-
-            box = Gtk.ButtonBox(visible=True, layout_style="expand")
-            box.add(tools_button)
-            box.add(view_button)
-            self._main_window.get_titlebar().pack_end(box)
-        # IPTV menu.
-        self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
-        iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
-        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_iptv_to_m3u,
-                  self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
-            iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
-
+        self.init_app_menu()
         self.init_actions()
         self.set_accels()
-        self.init_layout()
 
         self.init_drag_and_drop()
         self.init_appearance()
         self.filter_set_default()
 
-        self.init_profiles()
-        gen = self.init_http_api()
-        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
-
-    def init_actions(self):
-        self.set_action("on_import_bouquet", self.on_import_bouquet)
-        self.set_action("on_import_bouquets", self.on_import_bouquets)
-        self.set_action("on_new_configuration", self.on_new_configuration)
-        self.set_action("on_import_from_web", self.on_import_from_web)
-        self.set_action("on_settings", self.on_settings)
-        self.set_action("on_backup_tool_show", self.on_backup_tool_show)
-        self.set_action("on_about_app", self.on_about_app)
-        self.set_action("on_close_app", self.on_close_app)
-        self.set_state_action("on_telnet_show", self.on_telnet_show, False)
-        self.set_state_action("on_logs_show", self.on_logs_show, False)
-        # Filter.
-        filter_action = Gio.SimpleAction.new("filter", None)
-        filter_action.connect("activate", lambda a, v: self.emit("filter-toggled", None))
-        self._main_window.add_action(filter_action)  # For "win.*" actions!
-        self.connect("filter-toggled", self.on_services_filter_toggled)
-        self.connect("filter-toggled", self.on_iptv_services_filter_toggled)
-        # Lock, Hide.
-        self.set_action("on_hide", self.on_hide)
-        self.set_action("on_locked", self.on_locked)
-        # Open and download/upload data.
-        self.set_action("open_data", lambda a, v: self.open_data())
-        self.set_action("on_download_data", self.on_download_data)
-        self.set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
-        self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
-        self.set_action("on_data_save", self.on_data_save)
-        self.set_action("on_data_save_as", self.on_data_save_as)
-        self.set_action("on_download", self.on_download)
-        self.set_action("on_data_open", self.on_data_open)
-        self.set_action("on_archive_open", self.on_archive_open)
-        # Edit.
-        self.set_action("on_edit", self.on_edit)
-        # View actions.
-        sa = self.set_state_action("show_bouquets", self.on_page_show, self._settings.get("show_bouquets", True))
-        sa.connect("change-state", lambda a, v: self._stack_services_frame.set_visible(v))
-        sa = self.set_state_action("show_satellites", self.on_page_show, self._settings.get("show_satellites", True))
-        sa.connect("change-state", lambda a, v: self._stack_satellite_box.set_visible(v))
-        sa = self.set_state_action("show_picons", self.on_page_show, self._settings.get("show_picons", True))
-        sa.connect("change-state", lambda a, v: self._stack_picon_box.set_visible(v))
-        sa = self.set_state_action("show_epg", self.on_page_show, self._settings.get("show_epg", True))
-        sa.connect("change-state", lambda a, v: self._stack_epg_box.set_visible(v))
-        self.bind_property("is-enigma", sa, "enabled")
-        sa = self.set_state_action("show_timers", self.on_page_show, self._settings.get("show_timers", True))
-        sa.connect("change-state", lambda a, v: self._stack_timers_box.set_visible(v))
-        self.bind_property("is-enigma", sa, "enabled")
-        sa = self.set_state_action("show_recordings", self.on_page_show, self._settings.get("show_recordings", True))
-        sa.connect("change-state", lambda a, v: self._stack_recordings_box.set_visible(v))
-        self.bind_property("is-enigma", sa, "enabled")
-        sa = self.set_state_action("show_ftp", self.on_page_show, self._settings.get("show_ftp", True))
-        sa.connect("change-state", lambda a, v: self._stack_ftp_box.set_visible(v))
-        sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
-        sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
-        self.bind_property("is-enigma", sa, "enabled")
-        # Display picons.
-        self.set_state_action("display_picons", self.set_display_picons, self._settings.display_picons)
-        # Alternate layout.
-        sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
-        sa.connect("change-state", self.on_layout_change)
-        # Menu bar and playback.
-        self.set_action("on_playback_close", self._player_box.on_close)
-        if not IS_GNOME_SESSION:
-            # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
-            hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
-            self._player_box.bind_property("visible", hide_bar_action, "enabled", 4)
-            self.add_action(hide_bar_action)
-            hide_media_bar = Gio.SimpleAction.new("hide_media_bar", None)
-            hide_media_bar.set_enabled(False)
-            self._player_box.bind_property("visible", hide_media_bar, "enabled")
-            self.add_action(hide_media_bar)
-
-    def set_action(self, name, fun, enabled=True):
-        ac = Gio.SimpleAction.new(name, None)
-        ac.connect("activate", fun)
-        ac.set_enabled(enabled)
-        self.add_action(ac)
-
-        return ac
-
-    def set_state_action(self, name, fun, enabled=True):
-        action = Gio.SimpleAction.new_stateful(name, None, GLib.Variant.new_boolean(enabled))
-        action.connect("change-state", fun)
-        self.add_action(action)
-
-        return action
-
-    def set_accels(self):
-        """ Setting accelerators for the actions. """
-        self.set_accels_for_action("app.on_data_save", ["<primary>s"])
-        self.set_accels_for_action("app.on_download_data", ["<primary>d"])
-        self.set_accels_for_action("app.upload_all", ["<primary>u"])
-        self.set_accels_for_action("app.upload_bouquets", ["<primary>b"])
-        self.set_accels_for_action("app.open_data", ["<primary>o"])
-        self.set_accels_for_action("app.on_hide", ["<primary>h"])
-        self.set_accels_for_action("app.on_locked", ["<primary>l"])
-        self.set_accels_for_action("app.on_close_app", ["<primary>q"])
-        self.set_accels_for_action("app.on_edit", ["<primary>e"])
-        self.set_accels_for_action("app.on_telnet_show", ["<primary>t"])
-        self.set_accels_for_action("app.on_logs_show", ["<shift><primary>l"])
-        self.set_accels_for_action("win.filter", ["<shift><primary>f"])
-
     def do_activate(self):
         self._main_window.set_application(self)
         self._main_window.set_wmclass("DemonEditor", "DemonEditor")
         self._main_window.present()
+
+        self.init_profiles()
+        gen = self.init_http_api()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def do_shutdown(self):
         """  Performs shutdown tasks """
@@ -708,6 +646,199 @@ class Application(Gtk.Application):
 
         self.activate()
         return 0
+
+    def init_app_menu(self):
+        builder = get_builder(UI_RESOURCES_PATH + "app_menu.ui", tag="attribute")
+        if not USE_HEADER_BAR:
+            if IS_DARWIN:
+                if not self.get_app_menu():
+                    self.set_app_menu(builder.get_object("mac_app_menu"))
+                self.set_menubar(builder.get_object("mac_menu_bar"))
+            else:
+                self.set_menubar(builder.get_object("menu_bar"))
+        else:
+            tools_menu = builder.get_object("tools_menu")
+            tools_button = Gtk.MenuButton(visible=True, menu_model=tools_menu, direction=Gtk.ArrowType.NONE)
+            tools_button.set_tooltip_text(get_message("Tools"))
+            tools_button.set_image(Gtk.Image.new_from_icon_name("applications-utilities-symbolic", Gtk.IconSize.BUTTON))
+
+            view_menu = builder.get_object("view_menu")
+            view_button = Gtk.MenuButton(visible=True, menu_model=view_menu, direction=Gtk.ArrowType.NONE)
+            view_button.set_tooltip_text(get_message("View"))
+
+            box = Gtk.ButtonBox(visible=True, layout_style="expand")
+            box.add(tools_button)
+            box.add(view_button)
+            self._main_window.get_titlebar().pack_end(box)
+        # IPTV menu.
+        self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
+        iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
+        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_iptv_to_m3u,
+                  self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
+            iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
+
+        if self._settings.extensions_support:
+            self.init_extensions(builder)
+
+    def init_extensions(self, builder):
+        import pkgutil
+        # Extensions (Plugins) section.
+        ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
+        ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
+        ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path, "extensions"]
+        extensions = {}
+        switchable = []
+        default = []
+
+        def ac(a, v):
+            c = extensions[a.get_name()]
+            e = c(self)
+            e.exec()
+
+        def sw(a, v):
+            c = extensions[a.get_name()]
+            a.set_state(v)
+            e = c(self)
+            e.exec() if v else e.stop()
+
+        for importer, name, is_package in pkgutil.iter_modules(ext_paths):
+            if is_package:
+                m = importer.find_module(name).load_module()
+                cls_name = name.capitalize()
+                if hasattr(m, cls_name):
+                    cls = getattr(m, cls_name)
+                    if cls.EMBEDDED:
+                        cls(self)
+                        continue
+
+                    action_name = f"on_{name}_extension"
+                    item = Gio.MenuItem.new(cls.LABEL, f"app.{action_name}")
+                    extensions[action_name] = cls
+
+                    if cls.SWITCHABLE:
+                        switchable.append(item)
+                        self.set_state_action(action_name, sw, False)
+                    else:
+                        default.append(item)
+                        self.set_action(action_name, ac)
+
+        switchable.sort(key=lambda i: i.get_attribute_value("label"), reverse=True)
+        default.sort(key=lambda i: i.get_attribute_value("label"), reverse=True)
+        [ext_section.append_item(item) for item in switchable]
+        [ext_section.append_item(item) for item in default]
+
+    def init_actions(self):
+        # Main actions.
+        self.set_action("preferences", self.on_settings)
+        self.set_action("about", self.on_about_app)
+        self.set_action("quit", self.on_close_app)
+        # Import.
+        self.set_action("on_import_bouquet", self.on_import_bouquet)
+        self.set_action("on_import_bouquets", self.on_import_bouquets)
+        self.set_action("on_new_configuration", self.on_new_configuration)
+        self.set_action("on_import_from_web", self.on_import_from_web)
+        # Tools.
+        self.set_action("on_backup_tool_show", self.on_backup_tool_show)
+        self.set_state_action("on_telnet_show", self.on_telnet_show, False)
+        self.set_state_action("on_logs_show", self.on_logs_show, False)
+        # Filter.
+        filter_action = Gio.SimpleAction.new("filter", None)
+        filter_action.connect("activate", lambda a, v: self.emit("filter-toggled", None))
+        self._main_window.add_action(filter_action)  # For "win.*" actions!
+        self.connect("filter-toggled", self.on_services_filter_toggled)
+        self.connect("filter-toggled", self.on_iptv_services_filter_toggled)
+        # Lock, Hide.
+        self.set_action("on_hide", self.on_hide)
+        self.set_action("on_locked", self.on_locked)
+        # Open and download/upload data.
+        self.set_action("open_data", lambda a, v: self.open_data())
+        self.set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
+        self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
+        self.set_action("on_data_save", lambda a, v: self.emit("data-save", self._page))
+        self.set_action("on_data_save_as", lambda a, v: self.emit("data-save-as", self._page))
+        sa = self.set_action("on_receive", self.on_receive)
+        self.bind_property("is-receive-data-enabled", sa, "enabled")
+        sa = self.set_action("on_send", self.on_send)
+        self.bind_property("is-send-data-enabled", sa, "enabled")
+        sa = self.set_action("on_data_open", self.on_data_open)
+        self.bind_property("is-send-data-enabled", sa, "enabled")
+        self.set_action("on_archive_open", self.on_archive_open)
+        # Edit.
+        self.set_action("on_edit", self.on_edit)
+        # View actions.
+        sa = self.set_state_action("show_bouquets", self.on_page_show, self._settings.get("show_bouquets", True))
+        sa.connect("change-state", lambda a, v: self._stack_services_frame.set_visible(v))
+        sa = self.set_state_action("show_satellites", self.on_page_show, self._settings.get("show_satellites", True))
+        sa.connect("change-state", lambda a, v: self._stack_satellite_box.set_visible(v))
+        sa = self.set_state_action("show_picons", self.on_page_show, self._settings.get("show_picons", True))
+        sa.connect("change-state", lambda a, v: self._stack_picon_box.set_visible(v))
+        sa = self.set_state_action("show_epg", self.on_page_show, self._settings.get("show_epg", True))
+        sa.connect("change-state", lambda a, v: self._stack_epg_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
+        sa = self.set_state_action("show_timers", self.on_page_show, self._settings.get("show_timers", True))
+        sa.connect("change-state", lambda a, v: self._stack_timers_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
+        sa = self.set_state_action("show_recordings", self.on_page_show, self._settings.get("show_recordings", True))
+        sa.connect("change-state", lambda a, v: self._stack_recordings_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
+        sa = self.set_state_action("show_ftp", self.on_page_show, self._settings.get("show_ftp", True))
+        sa.connect("change-state", lambda a, v: self._stack_ftp_box.set_visible(v))
+        sa = self.set_state_action("show_control", self.on_page_show, self._settings.get("show_control", True))
+        sa.connect("change-state", lambda a, v: self._stack_control_box.set_visible(v))
+        self.bind_property("is-enigma", sa, "enabled")
+        # Display picons.
+        self.set_state_action("display_picons", self.set_display_picons, self._settings.display_picons)
+        # Display EPG.
+        sa = self.set_state_action("display_epg", self.set_display_epg, self._settings.display_epg)
+        self.change_action_state("display_epg", GLib.Variant.new_boolean(self._settings.display_epg))
+        self.bind_property("is-enigma", sa, "enabled")
+        # Alternate layout.
+        sa = self.set_state_action("set_alternate_layout", self.set_use_alt_layout, self._settings.alternate_layout)
+        sa.connect("change-state", self.on_layout_change)
+        # Header bar for macOS.
+        sa = self.set_state_action("set_alternate_title", self.set_use_alt_title, self._settings.use_header_bar)
+        sa.set_enabled(IS_DARWIN)
+        # Menu bar and playback.
+        self.set_action("on_playback_close", self._player_box.on_close)
+        if not USE_HEADER_BAR:
+            # We are working with the "hidden-when" submenu attribute. See 'app_menu_.ui' file.
+            hide_bar_action = Gio.SimpleAction.new("hide_menu_bar", None)
+            self._player_box.bind_property("visible", hide_bar_action, "enabled", 4)
+            self.add_action(hide_bar_action)
+            hide_media_bar = Gio.SimpleAction.new("hide_media_bar", None)
+            hide_media_bar.set_enabled(False)
+            self._player_box.bind_property("visible", hide_media_bar, "enabled")
+            self.add_action(hide_media_bar)
+
+    def set_action(self, name, fun, enabled=True):
+        ac = Gio.SimpleAction.new(name, None)
+        ac.connect("activate", fun)
+        ac.set_enabled(enabled)
+        self.add_action(ac)
+
+        return ac
+
+    def set_state_action(self, name, fun, enabled=True):
+        action = Gio.SimpleAction.new_stateful(name, None, GLib.Variant.new_boolean(enabled))
+        action.connect("change-state", fun)
+        self.add_action(action)
+
+        return action
+
+    def set_accels(self):
+        """ Setting accelerators for the actions. """
+        self.set_accels_for_action("app.on_data_save", ["<primary>s"])
+        self.set_accels_for_action("app.on_download_data", ["<primary>d"])
+        self.set_accels_for_action("app.upload_all", ["<primary>u"])
+        self.set_accels_for_action("app.upload_bouquets", ["<primary>b"])
+        self.set_accels_for_action("app.open_data", ["<primary>o"])
+        self.set_accels_for_action("app.on_hide", ["<primary>h"])
+        self.set_accels_for_action("app.on_locked", ["<primary>l"])
+        self.set_accels_for_action("app.quit", ["<primary>q"])
+        self.set_accels_for_action("app.on_edit", ["<primary>e"])
+        self.set_accels_for_action("app.on_telnet_show", ["<primary>t"])
+        self.set_accels_for_action("app.on_logs_show", ["<shift><primary>l"])
+        self.set_accels_for_action("win.filter", ["<shift><primary>f"])
 
     def init_profiles(self):
         self.update_profiles()
@@ -775,11 +906,8 @@ class Application(Gtk.Application):
             If update=False - first call on program start, else - after options changes!
         """
         if self._current_font != self._settings.list_font:
-            from gi.repository import Pango
-
-            font_desc = Pango.FontDescription.from_string(self._settings.list_font)
-            list(map(lambda v: v.modify_font(font_desc), (self._services_view, self._fav_view, self._bouquets_view)))
             self._current_font = self._settings.list_font
+            self.emit("list-font-changed", self._current_font)
 
         if self._picons_size != self._settings.list_picon_size:
             self._picons_size = self._settings.list_picon_size
@@ -808,12 +936,12 @@ class Application(Gtk.Application):
     def init_layout(self):
         """ Initializes an alternate layout, if enabled. """
         if self._settings.alternate_layout:
-            self._main_paned.pack2(self._player_box, True, False)
+            self._main_paned.pack2(self._player_box, True, True)
             self.reverse_main_elements(True)
         else:
             self._main_paned.remove(self._data_paned)
-            self._main_paned.pack1(self._player_box, True, False)
-            self._main_paned.pack2(self._data_paned, True, False)
+            self._main_paned.pack1(self._player_box, True, True)
+            self._main_paned.pack2(self._data_paned, True, True)
 
     def init_bq_position(self):
         self._fav_paned.remove(self._fav_frame)
@@ -830,7 +958,7 @@ class Application(Gtk.Application):
         """ Initializes starting positions of main paned widgets. """
         width = paned.get_allocated_width()
         main_position = self._settings.get("data_paned_position", width * 0.5)
-        fav_position = self._settings.get("fav_paned_position", width * 0.27)
+        fav_position = self._settings.get("fav_paned_position", width * 0.25)
         paned.set_position(main_position)
         self._fav_paned.set_position(fav_position)
 
@@ -875,6 +1003,13 @@ class Application(Gtk.Application):
         self._NEW_COLOR = new_color
         self._EXTRA_COLOR = extra_color
         yield True
+
+    def on_list_font_changed(self, app, font):
+        """ Modifies the font of the main views when changed in the settings. """
+        from gi.repository import Pango
+        font_desc = Pango.FontDescription.from_string(font)
+        views = (self._services_view, self._iptv_services_view, self._fav_view, self._bouquets_view)
+        list(map(lambda v: v.modify_font(font_desc), views))
 
     @staticmethod
     def force_ctrl(view, event):
@@ -974,13 +1109,12 @@ class Application(Gtk.Application):
     def on_telnet_realize(self, box):
         box.pack_start(TelnetClient(self), True, True, 0)
 
-    def on_logs_realize(self, box):
-        box.pack_start(LogsClient(self), True, True, 0)
-
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(self._page in self._fav_pages)
         self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
+        self.is_send_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.RECORDINGS, Page.CONTROL)
+        self.is_receive_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.CONTROL)
         self.emit("page-changed", self._page)
 
     def on_iptv_toggled(self, button):
@@ -1001,6 +1135,17 @@ class Application(Gtk.Application):
     def set_use_alt_layout(self, action, value):
         action.set_state(value)
         self._settings.alternate_layout = bool(value)
+
+    def set_use_alt_title(self, action, value):
+        action.set_state(value)
+        value = bool(value)
+        self._settings.use_header_bar = bool(value)
+
+        msg = get_message("Restart the program to apply all changes.")
+        if value:
+            warn = "It can cause some problems."
+            msg = f"{get_message('EXPERIMENTAL!')} {warn} {msg}"
+        self.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_idle
     def on_layout_change(self, action, value):
@@ -1028,22 +1173,22 @@ class Application(Gtk.Application):
         f_data = fav_id.split(":", maxsplit=1)
         renderer.set_property("text", f"{StreamType(f_data[0].strip() if f_data else '0').name}")
 
-    def iptv_ref_data_func(self, column, renderer, model, itr, data):
-        p_id = model.get_value(itr, Column.IPTV_PICON_ID)
-        renderer.set_property("text", p_id.rstrip(".png").replace("_", ":") if p_id else None)
-
     def iptv_picon_data_func(self, column, renderer, model, itr, data):
-        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.IPTV_PICON_ID)))
+        picon_id, name = model.get_value(itr, Column.IPTV_PICON_ID), model.get_value(itr, Column.IPTV_SERVICE)
+        renderer.set_property("pixbuf", self.get_picon_pixbuf(picon_id, name))
 
     def picon_data_func(self, column, renderer, model, itr, data):
-        renderer.set_property("pixbuf", self._picons.get(model.get_value(itr, Column.SRV_PICON_ID)))
+        picon = self._picons.get(model.get_value(itr, Column.SRV_PICON_ID))
+        if not picon:
+            picon = self._picons.get(get_picon_file_name(model.get_value(itr, Column.SRV_SERVICE)))
+        renderer.set_property("pixbuf", picon)
 
     def fav_picon_data_func(self, column, renderer, model, itr, data):
         srv = self._services.get(model.get_value(itr, Column.FAV_ID), None)
         if not srv:
             return True
 
-        picon = self._picons.get(srv.picon_id, None)
+        picon = self.get_picon_pixbuf(srv.picon_id, srv.service)
         # Alternatives.
         if srv.service_type == BqServiceType.ALT.name:
             alt_servs = srv.transponder
@@ -1053,6 +1198,42 @@ class Application(Gtk.Application):
                     picon = self._picons.get(alt_srv.picon_id, None) if srv else None
 
         renderer.set_property("pixbuf", picon)
+
+    def get_picon_pixbuf(self, picon_id, srv_name):
+        """ Returns a picon pixbuf by id or service name.
+
+            Used for models with IPTV services.
+        """
+        picon = self._picons.get(picon_id)
+        # Trying to get a satellite service piсon.
+        if not picon and picon_id:
+            picon = self._picons.get(picon_id.replace(picon_id[:picon_id.find("_")], "1", 1))
+        # Getting picon by service name.
+        if not picon:
+            picon = self._picons.get(get_picon_file_name(srv_name))
+
+        return picon
+
+    def fav_service_data_func(self, column, renderer, model, itr, data):
+        if self._display_epg and self._s_type is SettingsType.ENIGMA_2:
+            srv_name = model.get_value(itr, Column.FAV_SERVICE)
+            if model.get_value(itr, Column.FAV_TYPE) in self._marker_types:
+                return True
+
+            event = self._epg_cache.get_current_event(srv_name)
+            if event:
+                if event.start:
+                    start = datetime.fromtimestamp(event.start).strftime(self._epg_start_time_fmt)
+                    end = datetime.fromtimestamp(event.end).strftime(self._epg_end_time_fmt)
+                    sep = "-"
+                else:
+                    start, end, sep = "", "", ""
+                # https://docs.gtk.org/Pango/pango_markup.html
+                renderer.set_property("markup", (f'{escape(srv_name)}\n\n'
+                                                 f'<span size="small" weight="bold">{escape(event.title)}</span>\n'
+                                                 f'<span size="small" style="italic">{start} {sep} {end}</span>'))
+                return False
+        return True
 
     def view_selection_func(self, *args):
         """ Used to control selection via drag and drop in views [via _select_enabled field].
@@ -1076,6 +1257,9 @@ class Application(Gtk.Application):
         self.on_copy(view, target=ViewTarget.BOUQUET)
 
     def on_copy(self, view, target):
+        if not self._settings.unlimited_copy_buffer:
+            self._bouquets_buffer.clear() if target is ViewTarget.BOUQUET else self._rows_buffer.clear()
+
         model, paths = view.get_selection().get_selected_rows()
 
         if target is ViewTarget.FAV:
@@ -1093,6 +1277,10 @@ class Application(Gtk.Application):
             if to_copy:
                 self._bouquets_buffer.extend([model[i][:] for i in to_copy])
 
+    def on_reference_copy(self, view):
+        """ Copying picon id to clipboard. """
+        copy_reference(view, self)
+
     def on_fav_cut(self, view):
         self.on_cut(view, ViewTarget.FAV)
 
@@ -1100,6 +1288,9 @@ class Application(Gtk.Application):
         self.on_cut(view, ViewTarget.BOUQUET)
 
     def on_cut(self, view, target=None):
+        if not self._settings.unlimited_copy_buffer:
+            self._bouquets_buffer.clear() if target is ViewTarget.BOUQUET else self._rows_buffer.clear()
+
         if target is ViewTarget.FAV:
             for row in tuple(self.on_delete(view)):
                 self._rows_buffer.append(row)
@@ -1167,6 +1358,20 @@ class Application(Gtk.Application):
         self._bouquets_buffer.clear()
         self.update_bouquets_type()
 
+    def on_services_update(self, app, services):
+        """ Updates services in the main model. """
+        for r in self._fav_model:
+            fav_id = r[Column.FAV_ID]
+            if fav_id in services:
+                service = services[fav_id]
+                r[Column.FAV_SERVICE] = service.service
+
+        for r in self._services_model:
+            fav_id = r[Column.SRV_FAV_ID]
+            if fav_id in services:
+                service = services[fav_id]
+                r[Column.SRV_SERVICE] = service.service
+
     # ***************** Deletion ********************* #
 
     def on_delete(self, view):
@@ -1180,6 +1385,10 @@ class Application(Gtk.Application):
 
         selection = view.get_selection()
         model, paths = selection.get_selected_rows()
+        if not paths:
+            self.show_error_message("No selected item!")
+            return
+
         model_name = get_base_model(model).get_name()
         itrs = [model.get_iter(path) for path in paths]
         rows = [model[in_itr][:] for in_itr in itrs]
@@ -1458,7 +1667,7 @@ class Application(Gtk.Application):
 
         for s_row, row in zip(sorted(map(
                 lambda r: r[:], rows),
-                key=lambda r: r[c_num] or nv if c_num != Column.FAV_POS else self.get_pos_num(r[c_num]),
+                key=lambda r: r[c_num] or nv if c_num != Column.FAV_POS else get_pos_num(r[c_num]),
                 reverse=rev), rows):
             self._fav_model.set(row.iter, columns, s_row)
             bq[index] = s_row[Column.FAV_ID]
@@ -1474,18 +1683,7 @@ class Application(Gtk.Application):
 
     def position_sort_func(self, model, iter1, iter2, column):
         """ Custom sort function for position column. """
-        return self.get_pos_num(model.get_value(iter1, column)) - self.get_pos_num(model.get_value(iter2, column))
-
-    def get_pos_num(self, pos):
-        """ Returns num [float] representation of satellite position. """
-        if not pos:
-            return -183.0
-
-        if len(pos) > 1:
-            m = -1 if pos[-1] == "W" else 1
-            return float(pos[:-1]) * m
-
-        return -181.0 if pos == "T" else -182.0
+        return get_pos_num(model.get_value(iter1, column)) - get_pos_num(model.get_value(iter2, column))
 
     # ********************* Hints ************************* #
 
@@ -1549,8 +1747,7 @@ class Application(Gtk.Application):
         path, pos = result
         srv = self._services.get(view.get_model()[path][Column.IPTV_FAV_ID], None)
         if srv and srv.picon_id:
-            tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
-                                              size=self._settings.tooltip_logo_size))
+            tooltip.set_icon(self.get_tooltip_picon(srv))
             fav_id = srv.fav_id
             names = (b[:b.rindex(":")] for b, ids in self._bouquets.items() if fav_id in ids)
             text = f"{get_message('Name')}: {srv.service}\n{get_message('Bouquets')}: {', '.join(names)}"
@@ -1566,8 +1763,7 @@ class Application(Gtk.Application):
         target_column = Column.FAV_ID if target is ViewTarget.FAV else Column.SRV_FAV_ID
         srv = self._services.get(model[path][target_column], None)
         if srv and srv.picon_id:
-            tooltip.set_icon(get_picon_pixbuf(self._settings.profile_picons_path + srv.picon_id,
-                                              size=self._settings.tooltip_logo_size))
+            tooltip.set_icon(self.get_tooltip_picon(srv))
             txt = self.get_hint_for_fav_list(srv) if target is ViewTarget.FAV else self.get_hint_for_srv_list(srv)
             tooltip.set_text(txt)
             view.set_tooltip_row(tooltip, path)
@@ -1578,7 +1774,7 @@ class Application(Gtk.Application):
         """ Returns detailed info about service as formatted string for using as hint. """
         header, ref = self.get_hint_header_info(srv)
 
-        if srv.service_type == "IPTV":
+        if srv.service_type == BqServiceType.IPTV.name:
             return f"{header}{ref}"
 
         pol = ", {}: {},".format(get_message("Pol"), srv.pol) if srv.pol else ","
@@ -1599,7 +1795,7 @@ class Application(Gtk.Application):
 
     def get_hint_header_info(self, srv):
         header = f"{get_message('Name')}: {srv.service}\n{get_message('Type')}: {srv.service_type}\n"
-        ref = f"{get_message('Service reference')}: {srv.picon_id.rstrip('.png')}"
+        ref = f"{get_message('Service reference')}: {get_service_reference(srv)}"
         return header, ref
 
     def get_ssid_info(self, srv):
@@ -1614,7 +1810,7 @@ class Application(Gtk.Application):
 
         return f"SID: 0x{sid.upper()}"
 
-    # ***************** Drag-and-drop *********************#
+    # ***************** Drag-and-drop ********************* #
 
     def on_view_drag_begin(self, view, context):
         """ Sets its own icon for dragging.
@@ -1896,61 +2092,90 @@ class Application(Gtk.Application):
             menu.popup(None, None, None, None, event.button, event.time)
             return True
 
-    def on_download(self, action=None, value=None):
-        dialog = DownloadDialog(self._main_window, self._settings, self.open_data, self.update_settings)
+    # ***************** Send/Receive data ********************* #
 
-        if not self.is_data_saved():
-            gen = self.save_data(dialog.show)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+    def on_receive(self, action=None, value=None):
+        if self._page not in self._no_download_pages:
+            self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+            self.emit("data-receive", self._page)
         else:
-            dialog.show()
+            self.show_error_message("Not allowed in this context!")
+
+    def on_send(self, action=None, value=None):
+        if self._page not in self._no_download_pages:
+            self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+            self.emit("data-send", self._page)
+        else:
+            self.show_error_message("Not allowed in this context!")
+
+    def on_download(self, app, page):
+        if page is Page.SERVICES or page is Page.INFO:
+            self.on_download_data()
+
+    def on_upload(self, app, page):
+        if page is Page.SERVICES or page is Page.INFO:
+            self.on_upload_data()
+
+    def on_bg_task_add(self, app, task):
+        if len(self._task_box) <= self.BG_TASK_LIMIT:
+            self._task_box.add(task)
+        else:
+            self.show_error_message("Task limit (> 5) exceeded!")
+
+    def on_task_done(self, app, task):
+        self._task_box.remove(task)
+        task.destroy()
+
+    def on_task_cancel(self, app, task):
+        if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.OK:
+            task.cancel()
+            self.on_task_done(app, task)
 
     @run_task
-    def on_download_data(self, *args):
+    def on_download_data(self, download_type=DownloadType.ALL):
+        backup, backup_src, data_path = self._settings.backup_before_downloading, None, None
         try:
-            download_data(settings=self._settings,
-                          download_type=DownloadType.ALL,
-                          callback=lambda x: print(x, end=""))
+            if backup and download_type is not DownloadType.SATELLITES:
+                data_path = self._settings.profile_data_path
+                backup_path = self._settings.profile_backup_path or self._settings.default_backup_path
+                backup_src = backup_data(data_path, backup_path, download_type is DownloadType.ALL)
+
+            download_data(settings=self._settings, download_type=download_type)
         except Exception as e:
             msg = "Downloading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_message(str(e))
+            if all((backup, data_path)):
+                restore_data(backup_src, data_path)
         else:
-            GLib.idle_add(self.open_data)
+            if download_type is DownloadType.SATELLITES:
+                self._satellite_tool.load_satellites_list()
+            else:
+                GLib.idle_add(self.open_data)
 
-    def on_upload_data(self, download_type):
+    def on_upload_data(self, download_type=DownloadType.ALL):
         if not self.is_data_saved():
-            gen = self.save_data(lambda: self.on_upload_data(download_type))
+            gen = self.save_data(lambda: self.upload_data(download_type))
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         else:
             self.upload_data(download_type)
 
     @run_task
     def upload_data(self, download_type):
-        try:
-            profile = self._s_type
-            opts = self._settings
-            use_http = profile is SettingsType.ENIGMA_2
-
-            if profile is SettingsType.ENIGMA_2:
-                host, port, user, password = opts.host, opts.http_port, opts.user, opts.password
-                try:
-                    test_http(host, port, user, password,
-                              use_ssl=opts.http_use_ssl,
-                              skip_message=True,
-                              s_type=self._s_type)
-                except (TestException, HttpApiException):
-                    use_http = False
-
-            upload_data(settings=opts,
-                        download_type=download_type,
-                        remove_unused=True,
-                        callback=lambda x: print(x, end=""),
-                        use_http=use_http)
-        except Exception as e:
-            msg = "Uploading data error: {}"
-            log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
-            self.show_error_message(str(e))
+        opts = self._settings
+        use_http = self._s_type is SettingsType.ENIGMA_2 and opts.use_http
+        multiple = len(self._settings.hosts) > 1
+        for host in self._settings.hosts:
+            if multiple:
+                log(f"##### Uploading data on [{host}] #####")
+            try:
+                upload_data(settings=opts, download_type=download_type, ext_host=host)
+            except Exception as e:
+                msg = "Uploading data error: {}"
+                log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
+                if host == self._settings.host:
+                    self.show_error_message(str(e))
+        log(f"##### Done! #####")
 
     def on_data_open(self, action=None, value=None):
         """ Opening data via "File/Open". """
@@ -2147,7 +2372,13 @@ class Application(Gtk.Application):
                         self.append_bouquet(bq, row.iter)
 
     def append_bouquet(self, bq, parent):
-        name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, bq.hidden
+        name, bq_type, locked, hidden = bq.name, bq.type, bq.locked, HIDE_ICON if bq.hidden else None
+        # Parental control state.
+        if self._s_type is SettingsType.ENIGMA_2:
+            locked = LOCKED_ICON if bq.locked in self._blacklist else None
+        else:
+            locked = LOCKED_ICON if bq.locked else None
+
         bouquet = self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
         bq_id = f"{name}:{bq_type}"
         services = []
@@ -2208,7 +2439,10 @@ class Application(Gtk.Application):
                     break
 
     def append_services(self, services):
+        to_add = []
         for srv in services:
+            if srv.fav_id not in self._services:
+                to_add.append(srv)
             #  Adding channels to dict with fav_id as keys.
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
@@ -2216,7 +2450,7 @@ class Application(Gtk.Application):
         self._services_load_spinner.start()
         factor = self.DEL_FACTOR / 4
 
-        for index, srv in enumerate(services):
+        for index, srv in enumerate(to_add):
             background = self.get_new_background(srv.flags_cas)
             s = srv + (None, background)
             self._services_model.append(s)
@@ -2229,11 +2463,10 @@ class Application(Gtk.Application):
     def append_iptv_data(self, services=None):
         self._iptv_services_load_spinner.start()
         services = services or self._services.values()
-        services = ((s.service, None, None, None, s.fav_id, s.picon_id) for s in services if
-                    s.service_type == BqServiceType.IPTV.name)
 
-        for index, s in enumerate(services, start=1):
-            self._iptv_model.append(s)
+        for index, s in enumerate(filter(lambda x: x.service_type == BqServiceType.IPTV.name, services), start=1):
+            ref, url = get_iptv_data(s.fav_id)
+            self._iptv_model.append((s.service, None, None, ref, url, s.fav_id, s.picon_id, None))
             if index % self.DEL_FACTOR == 0:
                 self._iptv_count_label.set_text(str(index))
                 yield True
@@ -2282,22 +2515,15 @@ class Application(Gtk.Application):
         self._wait_dialog.set_text(None)
         yield True
 
-    def on_data_save(self, *args):
-        if self._page is Page.SERVICES:
+    def on_data_save(self, app, page):
+        if page is Page.SERVICES:
             self.on_services_save()
-        elif self._page is Page.SATELLITE:
-            self._satellite_tool.on_save()
 
-    def on_data_save_as(self, action=None, value=None):
-        if self._page is Page.SERVICES:
+    def on_data_save_as(self, app, page):
+        if page is Page.SERVICES:
             self.on_services_save_as()
-        elif self._page is Page.SATELLITE:
-            self._satellite_tool.on_save_as()
 
     def on_services_save(self):
-        if self._app_info_box.get_visible():
-            return
-
         if len(self._bouquets_model) == 0:
             self.show_error_message("No data to save!")
             return
@@ -2348,7 +2574,7 @@ class Application(Gtk.Application):
 
         # Getting bouquets
         self._bouquets_view.get_model().foreach(parse_bouquets)
-        write_bouquets(path, bouquets, profile, self._settings.force_bq_names)
+        write_bouquets(path, bouquets, profile, self._settings.force_bq_names, self._blacklist)
         yield True
         # Getting services
         services_model = get_base_model(self._services_view.get_model())
@@ -2480,6 +2706,7 @@ class Application(Gtk.Application):
             self._bouquets_view.expand_row(path, column)
 
         if len(path) > 1:
+            self.emit("bouquet-changed", self._bq_selected)
             gen = self.update_bouquet_services(model, path)
             GLib.idle_add(lambda: next(gen, False))
 
@@ -2596,6 +2823,8 @@ class Application(Gtk.Application):
 
         if changed:
             self.open_data()
+            if self._settings.display_epg:
+                self.change_action_state("display_epg", GLib.Variant.new_boolean(self._settings.display_epg))
             self.emit("profile-changed", None)
 
     def set_profile(self, active):
@@ -2604,7 +2833,7 @@ class Application(Gtk.Application):
         self.update_profile_label()
         is_enigma = self._s_type is SettingsType.ENIGMA_2
         self.set_property("is-enigma", is_enigma)
-        self.update_stack_elements_visibility(is_enigma)
+        self.update_elements_visibility(is_enigma)
 
     def update_profiles(self):
         self._profile_combo_box.remove_all()
@@ -2612,7 +2841,7 @@ class Application(Gtk.Application):
             self._profile_combo_box.append(p, p)
 
     @run_idle
-    def update_stack_elements_visibility(self, is_enigma=False):
+    def update_elements_visibility(self, is_enigma=False):
         self._stack_services_frame.set_visible(self._settings.get("show_bouquets", True))
         self._stack_satellite_box.set_visible(self._settings.get("show_satellites", True))
         self._stack_picon_box.set_visible(self._settings.get("show_picons", True))
@@ -2700,6 +2929,11 @@ class Application(Gtk.Application):
                 self.update_bouquet_list()
 
     def on_view_focus(self, view, focus_event=None):
+        # Preventing focus lack for some cases.
+        if not focus_event and not view.is_focus():
+            view.grab_focus()
+            return True
+
         model_name, model = get_model_data(view)
         not_empty = len(model) > 0 if model else False
         is_service = model_name == self.SERVICE_MODEL
@@ -2711,9 +2945,6 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty)
                 if elem == "bouquets_paste_popup_item":
                     self._tool_elements[elem].set_sensitive(not_empty and self._bouquets_buffer)
-            if self._s_type is SettingsType.NEUTRINO_MP:
-                for elem in self._LOCK_HIDE_ELEMENTS:
-                    self._tool_elements[elem].set_sensitive(not_empty)
         else:
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "fav_paste_popup_item"):
@@ -2726,8 +2957,6 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty and is_service)
             for elem in self._BOUQUET_ELEMENTS:
                 self._tool_elements[elem].set_sensitive(False)
-            for elem in self._LOCK_HIDE_ELEMENTS:
-                self._tool_elements[elem].set_sensitive(not_empty and self._s_type is SettingsType.ENIGMA_2)
 
         for elem in self._FAV_IPTV_ELEMENTS:
             is_iptv = self._bq_selected and not is_service
@@ -2748,14 +2977,21 @@ class Application(Gtk.Application):
         self.set_service_flags(Flag.LOCK)
 
     def set_service_flags(self, flag):
-        if self._s_type is SettingsType.ENIGMA_2:
-            set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
-        elif self._s_type is SettingsType.NEUTRINO_MP and self._bq_selected:
+        if self._bouquets_view.is_focus() and self._bq_selected:
             model, paths = self._bouquets_view.get_selection().get_selected_rows()
-            itr = model.get_iter(paths[0])
-            value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
-            value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
-            model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
+            for p in paths:
+                itr = model.get_iter(p)
+                if not model.iter_has_child(itr):
+                    value = model.get_value(itr, 1 if flag is Flag.LOCK else 2)
+                    value = None if value else LOCKED_ICON if flag is Flag.LOCK else HIDE_ICON
+                    model.set_value(itr, 1 if flag is Flag.LOCK else 2, value)
+
+            if self._s_type is SettingsType.ENIGMA_2:
+                msg = get_message("After uploading the changes you may need to completely reboot the receiver!")
+                self.show_info_message(f"{get_message('EXPERIMENTAL!')} {msg}", Gtk.MessageType.WARNING)
+        else:
+            if self._s_type is SettingsType.ENIGMA_2:
+                set_flags(flag, self._services_view, self._fav_view, self._services, self._blacklist)
 
     def on_model_changed(self, model, path=None, itr=None):
         model_name = model.get_name()
@@ -2829,23 +3065,31 @@ class Application(Gtk.Application):
             log(f"Error. Service with id '{fav_id}' not found!")
 
     @run_idle
-    def on_iptv_service_edited(self, app, services):
-        old, new = services
-        fav_id = old.fav_id
-        name, new_fav_id = new.service, new.fav_id
+    def on_iptv_service_edited(self, app, services: dict):
         for srvs in self._bouquets.values():
             for i, s in enumerate(srvs):
-                if s == fav_id:
+                if s in services:
+                    old, new = services[s]
                     srvs[i] = new.fav_id
 
         for r in self._fav_model:
-            if r[Column.FAV_ID] == fav_id:
+            fav_id = r[Column.FAV_ID]
+            if fav_id in services:
+                old, new = services[fav_id]
+                name, new_fav_id = new.service, new.fav_id
                 r[Column.FAV_SERVICE] = name
                 r[Column.FAV_ID] = new_fav_id
 
         for r in self._iptv_model:
-            if r[Column.IPTV_FAV_ID] == fav_id:
+            fav_id = r[Column.IPTV_FAV_ID]
+            if fav_id in services:
+                old, new = services[fav_id]
+                name, new_fav_id = new.service, new.fav_id
+                ref, url = get_iptv_data(new_fav_id)
                 r[Column.IPTV_SERVICE] = name
+                r[Column.IPTV_PICON_ID] = new.picon_id
+                r[Column.IPTV_REF] = ref
+                r[Column.IPTV_URL] = url
                 r[Column.IPTV_FAV_ID] = new_fav_id
 
     @run_idle
@@ -2885,7 +3129,48 @@ class Application(Gtk.Application):
             gen = self.remove_favs(response, self._fav_model)
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    # ****************** EPG  **********************#
+    def on_reference_assign(self, view):
+        """ Assigns DVB reference to the selected IPTV services. """
+        model, paths = view.get_selection().get_selected_rows()
+        iptv_paths = [p for p in paths if model[p][Column.FAV_TYPE] == BqServiceType.IPTV.value]
+        if not iptv_paths:
+            self.show_error_message("No IPTV services selected!")
+            return
+
+        ref = self._clipboard.wait_for_text()
+        if ref and re.match(r"\d+_\d+_\w+_\w+_\w+_\w+_\w+_0_0_0", ref):
+            [self.assign_reference(model, p, ref) for p in iptv_paths]
+            self._clipboard.clear()
+        else:
+            log(f"Error parsing reference [{ref}].")
+
+        self.emit("clipboard-changed", self._clipboard.wait_is_text_available())
+
+    def assign_reference(self, model, path, ref):
+        ref_data = ref.split("_")
+        row = model[path]
+        fav_id = row[Column.FAV_ID]
+        fav_id_data = fav_id.split(":")
+        fav_id_data[2:7] = ref_data[2:7]
+        new_fav_id = ":".join(fav_id_data)
+        new_data_id = ":".join(fav_id_data[:11]).strip()
+        old_srv = self._services.pop(fav_id, None)
+        if old_srv:
+            picon_id_data = old_srv.picon_id.split("_")
+            picon_id_data[2:7] = ref_data[2:7]
+            new_service = old_srv._replace(data_id=new_data_id, fav_id=new_fav_id, picon_id="_".join(picon_id_data))
+            self._services[new_fav_id] = new_service
+            self.emit("iptv-service-edited", {fav_id: (old_srv, new_service)})
+
+    # ****************** EPG  ********************** #
+
+    def set_display_epg(self, action, value):
+        action.set_state(value)
+        set_display = bool(value)
+        self._settings.display_epg = set_display
+        self._epg_menu_button.set_visible(set_display)
+        self._epg_cache = EpgCache(self) if set_display else None
+        self._display_epg = set_display
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
@@ -2896,8 +3181,7 @@ class Application(Gtk.Application):
             self.show_error_message("This list does not contains IPTV streams!")
             return
 
-        bq = self._bouquets.get(self._bq_selected)
-        EpgDialog(self, bq, self._current_bq_name).show()
+        EpgDialog(self, self._current_bq_name).show()
 
     # ***************** Import ******************** #
 
@@ -2953,7 +3237,7 @@ class Application(Gtk.Application):
             return
 
         appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
-        import_bouquet(self._main_window, model, paths[0], self._settings, self._services, appender, file_path)
+        import_bouquet(self, model, paths[0], appender, file_path)
 
     def on_import_bouquets(self, action, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
@@ -2977,8 +3261,8 @@ class Application(Gtk.Application):
             gen = self.append_imported_data(b, s, callback)
             GLib.idle_add(lambda: next(gen, False))
 
-        dialog = ImportDialog(self._main_window, path, self._settings, self._services.keys(), append)
-        dialog.import_data() if force else dialog.show()
+        dialog = ImportDialog(self, path, append)
+        dialog.import_bouquets_data() if force else dialog.show()
 
     def append_imported_data(self, bouquets, services, callback=None):
         try:
@@ -2994,26 +3278,26 @@ class Application(Gtk.Application):
         if self._s_type is not SettingsType.ENIGMA_2:
             self.show_error_message("Not allowed in this context!")
             return
-        ServicesUpdateDialog(self._main_window, self._settings, self.on_import_data_from_web).show()
+        ServicesUpdateDialog(self).show()
 
     @run_idle
-    def on_import_data_from_web(self, services):
+    def on_import_data_from_web(self, services, bouquets=None):
         msg = "Combine with the current data?"
+
+        def clb():
+            self.show_info_message("Done!")
+
         if len(self._services_model) > 0 and show_dialog(DialogType.QUESTION, self._main_window,
                                                          msg) == Gtk.ResponseType.OK:
-            gen = self.append_imported_data([], services)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            gen = self.append_imported_data(bouquets or [], services, clb)
         else:
-            gen = self.import_data_from_web(services)
-            GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+            gen = self.import_data_from_web(services, bouquets, clb)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    def import_data_from_web(self, services):
+    def import_data_from_web(self, services, bouquets, callback=None):
         self._wait_dialog.show()
-        if self._app_info_box.get_visible():
-            yield from self.create_new_configuration(self._s_type)
-        yield from self.append_services(services)
-        self.update_sat_positions()
-        yield True
+        yield from self.create_new_configuration(self._s_type)
+        yield from self.append_imported_data(bouquets or [], services, callback)
         self._wait_dialog.hide()
 
     # ***************** Export  ******************** #
@@ -3138,7 +3422,7 @@ class Application(Gtk.Application):
     def on_playback_full_screen(self, box, state):
         self._data_paned.set_visible(state)
         self._main_window.unfullscreen() if state else self._main_window.fullscreen()
-        if not IS_GNOME_SESSION:
+        if not USE_HEADER_BAR:
             self._main_window.set_show_menubar(state)
 
     def on_playback_show(self, box):
@@ -3309,11 +3593,11 @@ class Application(Gtk.Application):
         else:
             self.show_error_message("This type of settings is not supported!")
 
-    def get_service_ref(self, path):
+    def get_service_ref(self, path, show_error=True):
         row = self._fav_model[path][:]
         srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
 
-        if srv_type in self._marker_types:
+        if srv_type in self._marker_types and show_error:
             self.show_error_message("Not allowed in this context!")
             return
 
@@ -3331,7 +3615,7 @@ class Application(Gtk.Application):
         elif self._s_type is SettingsType.NEUTRINO_MP:
             # It may require some correction for cable and terrestrial channels!
             try:
-                pos, freq = int(self.get_pos_num(srv.pos)) * 10, int(srv.freq)
+                pos, freq = int(get_pos_num(srv.pos)) * 10, int(srv.freq)
                 tid, nid, sid = int(ref[: -8], 16), int(ref[-8: -4], 16), int(srv.ssid, 16)
             except ValueError:
                 log(f"Error getting reference for: {srv}")
@@ -3533,16 +3817,7 @@ class Application(Gtk.Application):
         elif self._s_type is SettingsType.NEUTRINO_MP:
             list(map(lambda s: self._sat_positions.add(s.pos), filter(lambda s: s.pos, self._services.values())))
 
-        self.update_filter_sat_positions()
-
-    def update_filter_sat_positions(self):
-        """ Updates the values for the satellite positions button model. """
-        first = self._filter_sat_pos_model[self._filter_sat_pos_model.get_iter_first()][:]
-        self._filter_sat_pos_model.clear()
-        self._filter_sat_pos_model.append((first[0], True))
-        self._sat_positions.discard(first[0])
-        list(map(lambda pos: self._filter_sat_pos_model.append((pos, True)),
-                 sorted(self._sat_positions, key=self.get_pos_num, reverse=True)))
+        update_filter_sat_positions(self._filter_sat_pos_model, self._sat_positions)
 
     @run_with_delay(2)
     def on_filter_changed(self, item=None):
@@ -3552,7 +3827,6 @@ class Application(Gtk.Application):
 
     @run_with_delay(2)
     def on_iptv_filter_changed(self, item=None):
-        self._iptv_filter_box.set_sensitive(False)
         self.update_iptv_filter_cache()
         self.update_iptv_filter_state()
 
@@ -3564,7 +3838,6 @@ class Application(Gtk.Application):
     @run_idle
     def update_iptv_filter_state(self):
         self._iptv_services_model_filter.refilter()
-        GLib.idle_add(self._iptv_filter_box.set_sensitive, True)
 
     def update_filter_cache(self):
         self._filter_cache.clear()
@@ -3582,7 +3855,7 @@ class Application(Gtk.Application):
                                                               r[Column.SRV_PACKAGE],
                                                               r[Column.SRV_TYPE],
                                                               r[Column.SRV_SSID],
-                                                              r[Column.SRV_POS])).upper()))
+                                                              r[Column.SRV_FREQ])).upper()))
 
     def update_iptv_filter_cache(self):
         self._iptv_filter_cache.clear()
@@ -3627,16 +3900,7 @@ class Application(Gtk.Application):
             self.on_filter_changed()
 
     def update_filter_toggle_model(self, model, toggle, path, values_set):
-        active = not toggle.get_active()
-        if path == "0":
-            model.foreach(lambda m, p, i: m.set_value(i, 1, active))
-        else:
-            model.set_value(model.get_iter(path), 1, active)
-            if active:
-                model.set_value(model.get_iter_first(), 1, len({r[0] for r in model if r[1]}) == len(model) - 1)
-            else:
-                model.set_value(model.get_iter_first(), 1, False)
-
+        update_toggle_model(model, path, toggle)
         values_set.clear()
         values_set.update({r[0] for r in model if r[1]})
         self.on_iptv_filter_changed() if self._iptv_button.get_active() else self.on_filter_changed()
@@ -3656,7 +3920,7 @@ class Application(Gtk.Application):
             return self.show_error_message("Data loading in progress!")
 
         model, paths = view.get_selection().get_selected_rows()
-        if is_only_one_item_selected(paths, self._main_window):
+        if is_only_one_item_selected(paths, self):
             model_name = get_base_model(model).get_name()
             if model_name == self.FAV_MODEL:
                 srv_type = model.get_value(model.get_iter(paths), Column.FAV_TYPE)
@@ -3681,7 +3945,7 @@ class Application(Gtk.Application):
 
     def on_bouquets_edit(self, view):
         """ Renaming bouquets. """
-        if not self._bq_selected:
+        if not self._bq_selected and self._s_type is SettingsType.NEUTRINO_MP:
             self.show_error_message("This item is not allowed to edit!")
             return
 
@@ -3689,7 +3953,7 @@ class Application(Gtk.Application):
 
         if paths:
             itr = model.get_iter(paths[0])
-            bq_name, bq_type = model.get(itr, 0, 3)
+            bq_name, bq_type = model.get(itr, Column.BQ_NAME, Column.BQ_TYPE)
             response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
             if response == Gtk.ResponseType.CANCEL:
                 return
@@ -3699,14 +3963,17 @@ class Application(Gtk.Application):
                 self.show_error_message(get_message("A bouquet with that name exists!"))
                 return
 
-            model.set_value(itr, 0, response)
+            model.set_value(itr, Column.BQ_NAME, response)
+            if not model.iter_parent(itr):
+                return
+
             old_bq_name = f"{bq_name}:{bq_type}"
             self._bouquets[bq] = self._bouquets.pop(old_bq_name)
             self._bq_file[bq] = self._bq_file.pop(old_bq_name, None)
             self._current_bq_name = response
             self._bq_name_label.set_text(self._current_bq_name)
             self._bq_selected = bq
-            # services with extra names for the bouquet
+            # Services with extra names for the bouquet.
             ext_bq = self._extra_bouquets.get(old_bq_name, None)
             if ext_bq:
                 self._extra_bouquets[bq] = ext_bq
@@ -3793,6 +4060,26 @@ class Application(Gtk.Application):
             if r[Column.FAV_SERVICE] in dup:
                 r[Column.FAV_BACKGROUND] = self._NEW_COLOR
 
+    def on_remove_duplicates(self, item):
+        exist = set()
+        to_remove = []
+        for r in self._fav_model:
+            fav_id = r[Column.FAV_ID]
+            if fav_id in exist:
+                to_remove.append(r.iter)
+            else:
+                exist.add(fav_id)
+
+        count = len(to_remove)
+        if count:
+            if show_dialog(DialogType.QUESTION, self._main_window) != Gtk.ResponseType.OK:
+                return
+            gen = self.remove_favs(to_remove, self._fav_model)
+            GLib.idle_add(lambda: next(gen, False))
+            self.show_info_message(f"{get_message('Done!')} {get_message('Removed')}: {count}")
+        else:
+            self.show_info_message(f"{get_message('Done!')} {get_message('Found')}: {count}")
+
     def on_services_mark_not_in_bouquets(self, item):
         if self.is_data_loading():
             self.show_error_message("Data loading in progress!")
@@ -3834,6 +4121,54 @@ class Application(Gtk.Application):
         self._services_load_spinner.stop()
         yield True
 
+    def on_services_clear_new_marked(self, item):
+        if self.is_data_loading():
+            self.show_error_message("Data loading in progress!")
+            return
+
+        model, paths = self._services_view.get_selection().get_selected_rows()
+        if not paths:
+            self.show_error_message("No selected item!")
+            return
+
+        gen = self.clear_new_marked(model, paths)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def clear_new_marked(self, model, paths):
+        self._services_load_spinner.start()
+
+        paths = get_base_paths(paths, model)
+        model = get_base_model(model)
+        for index, p in enumerate(paths):
+            flags = model[p][Column.SRV_CAS_FLAGS]
+            if flags:
+                flags_data = flags.split(",")
+                for i, f in enumerate(flags_data):
+                    if f.startswith("f:"):
+                        flag = Flag.parse(f)
+                        if Flag.is_new(flag):
+                            flag -= Flag.NEW.value
+                            if flag:
+                                flags_data[i] = f"f:{flag:02d}"
+                            else:
+                                flags_data.remove(f)
+
+                            flags = ",".join(flags_data)
+                            model[p][Column.SRV_BACKGROUND] = None
+                            model[p][Column.SRV_CAS_FLAGS] = flags
+                            fav_id = model[p][Column.SRV_FAV_ID]
+                            srv = self._services.get(fav_id, None)
+                            if srv:
+                                self._services[fav_id] = srv._replace(flags_cas=flags)
+                            break
+
+            if index % self.FAV_FACTOR == 0:
+                yield True
+
+        self.show_info_message("Done!", Gtk.MessageType.INFO)
+        self._services_load_spinner.stop()
+        yield True
+
     # ***************** Picons ********************* #
 
     @run_idle
@@ -3865,6 +4200,16 @@ class Application(Gtk.Application):
     def get_picon(self, p_id):
         return get_picon_pixbuf(f"{self._settings.profile_picons_path}{p_id}", self._picons_size)
 
+    def get_tooltip_picon(self, srv):
+        size, path, picon_id = self._settings.tooltip_logo_size, self._settings.profile_picons_path, srv.picon_id
+        pix = get_picon_pixbuf(f"{path}{picon_id}", size=size)
+        if not pix:
+            picon_id = picon_id.replace(picon_id[:picon_id.find("_")], "1", 1)
+            pix = get_picon_pixbuf(f"{path}{picon_id}", size=size)
+        if not pix:
+            pix = get_picon_pixbuf(f"{path}{get_picon_file_name(srv.service)}", size=size)
+        return pix
+
     def on_assign_picon(self, view, src_path=None, dst_path=None):
         self._stack.set_visible_child_name(Page.PICONS.value)
         self.emit("picon-assign", self.get_target_view(view))
@@ -3875,10 +4220,6 @@ class Application(Gtk.Application):
 
     def on_remove_picon(self, view):
         remove_picon(self.get_target_view(view), self._services_view, self._fav_view, self._picons, self._settings)
-
-    def on_reference_picon(self, view):
-        """ Copying picon id to clipboard """
-        copy_picon_reference(self.get_target_view(view), view, self._services, self._clipboard, self._main_window)
 
     def on_remove_unused_picons(self, item):
         if show_dialog(DialogType.QUESTION, self._main_window) == Gtk.ResponseType.CANCEL:
@@ -3918,8 +4259,7 @@ class Application(Gtk.Application):
             self.show_error_message("No bouquets config is loaded. Load or create a new config!")
             return
 
-        gen_bouquets(self._services_view, self._bouquets_view, self._main_window, g_type, self._s_type,
-                     self.append_bouquet)
+        gen_bouquets(self, g_type)
 
     # ***************** Alternatives ********************* #
 
@@ -4074,11 +4414,15 @@ class Application(Gtk.Application):
         return True
 
     def on_alt_selection(self, model, path, column):
-        if self._control_tool and self._control_tool.update_epg:
+        if self._page is Page.EPG:
             row = model[path][:]
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
-                self._control_tool.on_service_changed(srv.picon_id.rstrip(".png").replace("_", ":"))
+                ref = self.get_service_ref_data(srv)
+                if not ref:
+                    return
+
+                self.emit("fav-changed", ref)
 
     # ***************** Profile label ********************* #
 
@@ -4103,7 +4447,7 @@ class Application(Gtk.Application):
         self.show_info_message(message, Gtk.MessageType.ERROR)
 
     @run_idle
-    def show_info_message(self, text, message_type):
+    def show_info_message(self, text, message_type=Gtk.MessageType.INFO):
         self._info_bar.set_visible(False)
         self._info_label.set_text(get_message(text))
         self._info_bar.set_message_type(message_type)
@@ -4160,6 +4504,10 @@ class Application(Gtk.Application):
         return self._bouquets
 
     @property
+    def current_bouquet_files(self):
+        return self._bq_file
+
+    @property
     def picons(self):
         return self._picons
 
@@ -4198,9 +4546,29 @@ class Application(Gtk.Application):
     def is_enigma(self, value):
         self._is_enigma = value
 
+    @GObject.Property(type=bool, default=True)
+    def is_send_data_enabled(self):
+        return self._is_send_data_enabled
+
+    @is_send_data_enabled.setter
+    def is_send_data_enabled(self, value):
+        self._is_send_data_enabled = value
+
+    @GObject.Property(type=bool, default=True)
+    def is_receive_data_enabled(self):
+        return self._is_receive_data_enabled
+
+    @is_receive_data_enabled.setter
+    def is_receive_data_enabled(self, value):
+        self._is_receive_data_enabled = value
+
     @property
     def page(self):
         return self._page
+
+    @property
+    def display_epg(self):
+        return self._display_epg
 
 
 def start_app():

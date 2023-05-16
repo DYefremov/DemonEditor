@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 
 
 """ Simple FTP client module. """
+import stat
 import subprocess
 from collections import namedtuple
 from datetime import datetime
@@ -39,14 +40,174 @@ from urllib.parse import urlparse, unquote
 
 from gi.repository import GLib
 
-from app.commons import log, run_task, run_idle
+from app.commons import log, run_task, run_idle, get_size_from_bytes
 from app.connections import UtfFTP
-from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP
-from app.ui.dialogs import show_dialog, DialogType, get_builder
+from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP, USE_HEADER_BAR
+from app.ui.dialogs import show_dialog, DialogType, get_builder, get_message
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, IS_GNOME_SESSION
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, Page
 
 File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
+
+
+class BaseDialog(Gtk.Dialog):
+    """ Base class for additional FTP dialogs. """
+
+    def __init__(self, title, use_header_bar=0, *args, **kwargs):
+        super().__init__(title=title, use_header_bar=use_header_bar, *args, **kwargs)
+
+        self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        self.set_modal(True)
+        self.set_skip_pager_hint(True)
+        self.set_skip_taskbar_hint(True)
+        self.set_position(Gtk.PositionType.BOTTOM)
+        self.set_default_icon_name("document-properties-symbolic")
+
+
+class TextEditDialog(BaseDialog):
+    """ Simple text edit dialog. """
+
+    def __init__(self, path, use_header_bar=0, *args, **kwargs):
+        super().__init__(title=f"DemonEditor [{path}]", use_header_bar=use_header_bar, *args, **kwargs)
+
+        content_box = self.get_content_area()
+        self._search_entry = Gtk.SearchEntry(visible=True, primary_icon_name="system-search-symbolic")
+        self._search_entry.connect("search-changed", self.on_search_changed)
+
+        if use_header_bar:
+            bar = self.get_header_bar()
+            bar.pack_start(self._search_entry)
+            bar.set_title("DemonEditor")
+            bar.set_subtitle(path)
+        else:
+            search_bar = Gtk.SearchBar(visible=True)
+            search_bar.add(self._search_entry)
+            search_bar.set_search_mode(True)
+            content_box.pack_start(search_bar, False, False, 0)
+
+        scrolled_window = Gtk.ScrolledWindow(hexpand=True, vexpand=True,
+                                             min_content_width=720,
+                                             min_content_height=320)
+        content_box.pack_start(scrolled_window, True, True, 0)
+
+        try:
+            import gi
+
+            gi.require_version("GtkSource", "3.0")
+            from gi.repository import GtkSource
+        except (ImportError, ValueError) as e:
+            self._text_view = Gtk.TextView()
+            self._buf = self._text_view.get_buffer()
+            log(e)
+        else:
+            self._text_view = GtkSource.View(show_line_numbers=True, show_line_marks=True)
+            self._buf = self._text_view.get_buffer()
+            self._buf.set_highlight_syntax(True)
+            self._buf.set_highlight_matching_brackets(True)
+            lang_manager = GtkSource.LanguageManager.new()
+            self._buf.set_language(lang_manager.guess_language(path))
+            # Style
+            self._buf.set_style_scheme(GtkSource.StyleSchemeManager().get_default().get_scheme("tango"))
+
+        self._tag_found = self._buf.create_tag("found", background="yellow")
+        scrolled_window.add(self._text_view)
+
+        self.show_all()
+
+    @property
+    def text(self):
+        return self._buf.get_text(self._buf.get_start_iter(), self._buf.get_end_iter(), include_hidden_chars=True)
+
+    @text.setter
+    def text(self, value):
+        self._buf.set_text(value)
+
+    def on_search_changed(self, entry):
+        self._buf.remove_tag(self._tag_found, self._buf.get_start_iter(), self._buf.get_end_iter())
+        cursor_mark = self._buf.get_insert()
+        start = self._buf.get_iter_at_mark(cursor_mark)
+        if start.get_offset() == self._buf.get_char_count():
+            start = self._buf.get_start_iter()
+
+        self.search_and_mark(entry.get_text(), start)
+
+    def search_and_mark(self, text, start, first=True):
+        end = self._buf.get_end_iter()
+        match = start.forward_search(text, 0, end)
+
+        if match is not None:
+            match_start, match_end = match
+            self._buf.apply_tag(self._tag_found, match_start, match_end)
+            if first:
+                self._text_view.scroll_to_iter(match_start, 0.0, False, 0.0, 0.0)
+            GLib.idle_add(self.search_and_mark, text, match_end, False)
+
+
+class AttributesDialog(BaseDialog):
+    """ Dialog for editing file attributes (permissions). """
+
+    def __init__(self, attrs, use_header_bar=0, *args, **kwargs):
+        super().__init__(title=get_message("Permissions"), use_header_bar=use_header_bar, *args, **kwargs)
+
+        self.set_default_size(360, 100)
+        self.set_resizable(False)
+
+        builder = get_builder(f"{UI_RESOURCES_PATH}ftp.glade", use_str=True, objects=("attributes_box",))
+        content_box = self.get_content_area()
+        content_box.pack_start(builder.get_object("attributes_box"), True, True, 0)
+        self._num_value_entry = builder.get_object("num_value_entry")
+        # Buttons.
+        self._owner_read_button = builder.get_object("owner_read_button")
+        self._group_read_button = builder.get_object("group_read_button")
+        self._others_read_button = builder.get_object("others_read_button")
+        self._owner_write_button = builder.get_object("owner_write_button")
+        self._group_write_button = builder.get_object("group_write_button")
+        self._others_write_button = builder.get_object("others_write_button")
+        self._owner_exec_button = builder.get_object("owner_exec_button")
+        self._group_exec_button = builder.get_object("group_exec_button")
+        self._others_exec_button = builder.get_object("others_exec_button")
+        self.init_attrs(attrs)
+
+        for b in (self._owner_read_button, self._group_read_button, self._others_read_button, self._owner_write_button,
+                  self._group_write_button, self._others_write_button, self._owner_exec_button, self._group_exec_button,
+                  self._others_exec_button):
+            b.connect("toggled", self.update_num_value)
+
+        self.show_all()
+
+    @property
+    def permissions(self):
+        return self._num_value_entry.get_text()
+
+    def init_attrs(self, attrs):
+        # Owner.
+        self._owner_read_button.set_active(attrs[1] != "-")
+        self._owner_write_button.set_active(attrs[2] != "-")
+        self._owner_exec_button.set_active(attrs[3] != "-")
+        # Group.
+        self._group_read_button.set_active(attrs[4] != "-")
+        self._group_write_button.set_active(attrs[5] != "-")
+        self._group_exec_button.set_active(attrs[6] != "-")
+        # Others.
+        self._others_read_button.set_active(attrs[7] != "-")
+        self._others_write_button.set_active(attrs[8] != "-")
+        self._others_exec_button.set_active(attrs[9] != "-")
+
+        self.update_num_value()
+
+    def update_num_value(self, button=None):
+        val = 0
+        val |= stat.S_IRUSR if self._owner_read_button.get_active() else val
+        val |= stat.S_IWUSR if self._owner_write_button.get_active() else val
+        val |= stat.S_IXUSR if self._owner_exec_button.get_active() else val
+        val |= stat.S_IRGRP if self._group_read_button.get_active() else val
+        val |= stat.S_IWGRP if self._group_write_button.get_active() else val
+        val |= stat.S_IXGRP if self._group_exec_button.get_active() else val
+        val |= stat.S_IROTH if self._others_read_button.get_active() else val
+        val |= stat.S_IWOTH if self._others_write_button.get_active() else val
+        val |= stat.S_IXOTH if self._others_exec_button.get_active() else val
+
+        self._num_value_entry.set_text(f"{val:o}")
 
 
 class FtpClientBox(Gtk.HBox):
@@ -65,92 +226,14 @@ class FtpClientBox(Gtk.HBox):
         ATTR = 4
         EXTRA = 5
 
-    class TextEditDialog(Gtk.Dialog):
-        """ Simple text edit dialog. """
-
-        def __init__(self, path, use_header_bar=0, *args, **kwargs):
-            super().__init__(title=f"DemonEditor [{path}]", use_header_bar=use_header_bar, *args, **kwargs)
-
-            self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK, )
-
-            content_box = self.get_content_area()
-            self._search_entry = Gtk.SearchEntry(visible=True, primary_icon_name="system-search-symbolic")
-            self._search_entry.connect("search-changed", self.on_search_changed)
-
-            if use_header_bar:
-                bar = self.get_header_bar()
-                bar.pack_start(self._search_entry)
-                bar.set_title("DemonEditor")
-                bar.set_subtitle(path)
-            else:
-                search_bar = Gtk.SearchBar(visible=True)
-                search_bar.add(self._search_entry)
-                search_bar.set_search_mode(True)
-                content_box.pack_start(search_bar, False, False, 0)
-
-            scrolled_window = Gtk.ScrolledWindow(hexpand=True, vexpand=True,
-                                                 min_content_width=720,
-                                                 min_content_height=320)
-            content_box.pack_start(scrolled_window, True, True, 0)
-
-            try:
-                import gi
-
-                gi.require_version("GtkSource", "3.0")
-                from gi.repository import GtkSource
-            except (ImportError, ValueError) as e:
-                self._text_view = Gtk.TextView()
-                self._buf = self._text_view.get_buffer()
-                log(e)
-            else:
-                self._text_view = GtkSource.View(show_line_numbers=True, show_line_marks=True)
-                self._buf = self._text_view.get_buffer()
-                self._buf.set_highlight_syntax(True)
-                self._buf.set_highlight_matching_brackets(True)
-                lang_manager = GtkSource.LanguageManager.new()
-                self._buf.set_language(lang_manager.guess_language(path))
-                # Style
-                self._buf.set_style_scheme(GtkSource.StyleSchemeManager().get_default().get_scheme("tango"))
-
-            self._tag_found = self._buf.create_tag("found", background="yellow")
-            scrolled_window.add(self._text_view)
-
-            self.show_all()
-
-        @property
-        def text(self):
-            return self._buf.get_text(self._buf.get_start_iter(), self._buf.get_end_iter(), include_hidden_chars=True)
-
-        @text.setter
-        def text(self, value):
-            self._buf.set_text(value)
-
-        def on_search_changed(self, entry):
-            self._buf.remove_tag(self._tag_found, self._buf.get_start_iter(), self._buf.get_end_iter())
-            cursor_mark = self._buf.get_insert()
-            start = self._buf.get_iter_at_mark(cursor_mark)
-            if start.get_offset() == self._buf.get_char_count():
-                start = self._buf.get_start_iter()
-
-            self.search_and_mark(entry.get_text(), start)
-
-        def search_and_mark(self, text, start, first=True):
-            end = self._buf.get_end_iter()
-            match = start.forward_search(text, 0, end)
-
-            if match is not None:
-                match_start, match_end = match
-                self._buf.apply_tag(self._tag_found, match_start, match_end)
-                if first:
-                    self._text_view.scroll_to_iter(match_start, 0.0, False, 0.0, 0.0)
-                GLib.idle_add(self.search_and_mark, text, match_end, False)
-
     def __init__(self, app, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_spacing(2)
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
         self._app = app
+        self._app.connect("data-receive", self.on_receive)
+        self._app.connect("data-send", self.on_send)
         self._settings = settings
         self._ftp = None
         self._select_enabled = True
@@ -163,6 +246,7 @@ class FtpClientBox(Gtk.HBox):
                     "on_ftp_edit": self.on_ftp_edit,
                     "on_ftp_rename": self.on_ftp_rename,
                     "on_ftp_renamed": self.on_ftp_renamed,
+                    "on_ftp_attr_change": self.on_ftp_attr_change,
                     "on_ftp_copy": self.on_ftp_copy,
                     "on_file_rename": self.on_file_rename,
                     "on_file_renamed": self.on_file_renamed,
@@ -185,7 +269,7 @@ class FtpClientBox(Gtk.HBox):
                     "on_view_release": self.on_view_release,
                     "on_paned_size_allocate": self.on_paned_size_allocate}
 
-        builder = get_builder(UI_RESOURCES_PATH + "ftp.glade", handlers)
+        builder = get_builder(f"{UI_RESOURCES_PATH}ftp.glade", handlers)
 
         self.add(builder.get_object("main_ftp_box"))
         self._ftp_info_label = builder.get_object("ftp_info_label")
@@ -223,6 +307,14 @@ class FtpClientBox(Gtk.HBox):
         self.init_ftp()
         self.init_file_data()
         self.show()
+
+    def on_receive(self, app, page):
+        if page is Page.FTP:
+            self.on_ftp_copy()
+
+    def on_send(self, app, page):
+        if page is Page.FTP:
+            self.on_file_copy()
 
     @run_task
     def init_ftp(self):
@@ -290,7 +382,7 @@ class FtpClientBox(Gtk.HBox):
                     r_size = self.LINK
                     icon = self._link_icon
                 else:
-                    r_size = self.get_size_from_bytes(size)
+                    r_size = get_size_from_bytes(size)
 
                 self._file_model.append(File(icon, p.name, r_size, date, str(p.resolve()), size))
 
@@ -314,7 +406,7 @@ class FtpClientBox(Gtk.HBox):
                 r_size = self.LINK
                 icon = self._link_icon
             else:
-                r_size = self.get_size_from_bytes(size)
+                r_size = get_size_from_bytes(size)
 
             date = f"{f_data[5]}, {f_data[6]}  {f_data[7]}"
             self._ftp_model.append(File(icon, f_data[8], r_size, date, f_data[0], size))
@@ -437,7 +529,7 @@ class FtpClientBox(Gtk.HBox):
 
     @run_idle
     def show_edit_dialog(self, f_path, data):
-        dialog = self.TextEditDialog(f_path, IS_GNOME_SESSION)
+        dialog = TextEditDialog(f_path, USE_HEADER_BAR)
         dialog.text = data
         ok = Gtk.ResponseType.OK
         if dialog.run() == ok and show_dialog(DialogType.QUESTION, self._app.app_window) == ok:
@@ -471,6 +563,28 @@ class FtpClientBox(Gtk.HBox):
         self.update_ftp_info(f"{old_name}   Status: {resp}")
         if resp[0] == "2":
             row[self.Column.NAME] = new_value
+
+    def on_ftp_attr_change(self, item):
+        path = self.get_ftp_edit_path()
+        if path:
+            row = self._ftp_model[path]
+            file = row[self.Column.NAME]
+            if file == self.ROOT:
+                self._app.show_error_message("Not allowed in this context!")
+                return
+
+            attrs = row[self.Column.ATTR]
+            if len(attrs) != 10:
+                log(f"Init attributes error [{attrs}]. Invalid length!")
+                return
+
+            dialog = AttributesDialog(attrs, USE_HEADER_BAR)
+            ok = Gtk.ResponseType.OK
+            if dialog.run() == ok and show_dialog(DialogType.QUESTION, self._app.app_window) == ok:
+                log(self._ftp.sendcmd(f"SITE CHMOD {dialog.permissions} {file}"))
+                f_data = self._ftp.sendcmd(f"STAT {file}").split()
+                row[self.Column.ATTR] = f_data[2] if len(f_data) > 3 else attrs
+            dialog.destroy()
 
     def on_file_rename(self, renderer):
         model, paths = self._file_view.get_selection().get_selected_rows()
@@ -801,25 +915,6 @@ class FtpClientBox(Gtk.HBox):
         """ Sets default homogeneous sizes. """
         paned.set_position(0.5 * allocation.width)
 
-    @staticmethod
-    def get_size_from_bytes(size):
-        """ Simple convert function from bytes to other units like K, M or G. """
-        try:
-            b = float(size)
-        except ValueError:
-            return size
-        else:
-            kb, mb, gb = 1024.0, 1048576.0, 1073741824.0
 
-            if b < kb:
-                return str(b)
-            elif kb <= b < mb:
-                return f"{b / kb:.1f} K"
-            elif mb <= b < gb:
-                return f"{b / mb:.1f} M"
-            elif gb <= b:
-                return f"{b / gb:.1f} G"
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

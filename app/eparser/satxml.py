@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,126 +26,175 @@
 #
 
 
-""" Module for parsing satellites.xml file.
+""" Module for working with *.xml files.
 
-    For more info see __COMMENT
+    For more info see comments.
 """
-from xml.dom.minidom import parse, Document
+import xml.etree.ElementTree as ETree
 
-from app.commons import log
-from .ecommons import POLARIZATION, FEC, SYSTEM, MODULATION, Transponder, Satellite, get_key_by_value
+from .ecommons import Satellite, Terrestrial, Cable, Transponder, TerTransponder, CableTransponder
 
-__COMMENT = ("   File was created in DemonEditor\n\n"
-             "usable flags are\n"
-             "	1: Network Scan\n"
-             "	2: use BAT\n"
-             "	4: use ONIT\n"
-             "	8: skip NITs of known networks\n"
-             "	and combinations of this.\n\n"
+_SAT_COMMENT = ("\tFile was created in DemonEditor.\n\n"
+                "Usable flags are:\n"
+                "	1: Network Scan\n"
+                "	2: use BAT\n"
+                "	4: use ONIT\n"
+                "	8: skip NITs of known networks\n"
+                "   This is a bitmap and combinations can be used.\n\n"
+                "Transponder parameters:\n"
+                "\tpolarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular\n"
+                "\tfec_inner: 0 - Auto, 1 - 1/2, 2 - 2/3, 3 - 3/4, 4 - 5/6, 5 - 7/8, 6 -  8/9, 7 - 3/5,\n"
+                "\t8 - 4/5, 9 - 9/10, 15 - None\n"
+                "\tmodulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 4 - 16APSK, 5 - 32APSK\n"
+                "\trolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto\n"
+                "\tpilot: 0 - Off, 1 - On, 2 - Auto\n"
+                "\tinversion: 0 = Off, 1 = On, 2 = Auto (default)\n"
+                "\tsystem: 0 = DVB-S, 1 = DVB-S2\n"
+                "\tis_id: 0 - 255\n"
+                "\tpls_mode: 0 - Root, 1 - Gold, 2 - Combo\n"
+                "\tpls_code: 0 - 262142\n\n")
 
-             "transponder parameters:\n"
-             "polarization: 0 - Horizontal, 1 - Vertical, 2 - Left Circular, 3 - Right Circular\n"
-             "fec_inner: 0 - Auto, 1 - 1/2, 2 - 2/3, 3 - 3/4, 4 - 5/6, 5 - 7/8, 6 -  8/9, 7 - 3/5,\n"
-             "8 - 4/5, 9 - 9/10, 15 - None\n"
-             "modulation: 0 - Auto, 1 - QPSK, 2 - 8PSK, 4 - 16APSK, 5 - 32APSK\n"
-             "rolloff: 0 - 0.35, 1 - 0.25, 2 - 0.20, 3 - Auto\n"
-             "pilot: 0 - Off, 1 - On, 2 - Auto\n"
-             "inversion: 0 = Off, 1 = On, 2 = Auto (default)\n"
-             "system: 0 = DVB-S, 1 = DVB-S2\n"
-             "is_id: 0 - 255\n"
-             "pls_mode: 0 - Root, 1 - Gold, 2 - Combo\n"
-             "pls_code: 0 - 262142\n\n")
+_TERRESTRIAL_COMMENT = ("\tFile was created in DemonEditor.\n\n"
+                        "Usable flags are:\n"
+                        "	1: Network Scan\n"
+                        "	2: use BAT\n"
+                        "	4: use ONIT\n"
+                        "	8: skip NITs of known networks\n"
+                        "   This is a bitmap and combinations can be used.\n\n")
+
+_CABLE_COMMENT = ("\tFile was created in DemonEditor.\n\n"
+                  "Transponder parameters:\n"
+                  "\tmodulation:\n"
+                  "\t3: QAM64\n"
+                  "\t5: QAM256\n")
 
 
 def get_satellites(path):
-    return parse_satellites(path)
+    """ Returns data [Satellite] list from *.xml. """
+    return [Satellite(e.get("name", None),
+                      e.get("flags", None),
+                      e.get("position", None) or "0",
+                      get_sat_transponders(e)) for e in ETree.parse(path).iter("sat")]
 
 
-def write_satellites(satellites, data_path):
-    """ Creation satellites.xml file """
-    doc = Document()
-    comment = doc.createComment(__COMMENT)
-    doc.appendChild(comment)
-    root = doc.createElement("satellites")
-    doc.appendChild(root)
-
-    for sat in satellites:
-        #    Create Element
-        sat_child = doc.createElement("sat")
-        sat_child.setAttribute("name", sat.name)
-        sat_child.setAttribute("flags", sat.flags)
-        sat_child.setAttribute("position", sat.position)
-
-        for tr in sat.transponders:
-            transponder_child = doc.createElement("transponder")
-            transponder_child.setAttribute("frequency", tr.frequency)
-            transponder_child.setAttribute("symbol_rate", tr.symbol_rate)
-            transponder_child.setAttribute("polarization", get_key_by_value(POLARIZATION, tr.polarization))
-            transponder_child.setAttribute("fec_inner", get_key_by_value(FEC, tr.fec_inner) or "0")
-            transponder_child.setAttribute("system", get_key_by_value(SYSTEM, tr.system) or "0")
-            transponder_child.setAttribute("modulation", get_key_by_value(MODULATION, tr.modulation) or "0")
-            if tr.pls_mode:
-                transponder_child.setAttribute("pls_mode", tr.pls_mode)
-            if tr.pls_code:
-                transponder_child.setAttribute("pls_code", tr.pls_code)
-            if tr.is_id:
-                transponder_child.setAttribute("is_id", tr.is_id)
-            if tr.t2mi_plp_id:
-                transponder_child.setAttribute("t2mi_plp_id", tr.t2mi_plp_id)
-            sat_child.appendChild(transponder_child)
-        root.appendChild(sat_child)
-    doc.writexml(open(data_path, "w"),
-                 # indent="",
-                 addindent="    ",
-                 newl='\n',
-                 encoding="iso-8859-1")
-    doc.unlink()
+def get_sat_transponders(elem):
+    """ Returns satellite transponders list. """
+    return [Transponder(e.get("frequency", "0"),
+                        e.get("symbol_rate", "0"),
+                        e.get("polarization", None),
+                        e.get("fec_inner", None),
+                        e.get("system", None),
+                        e.get("modulation", None),
+                        e.get("pls_mode", None),
+                        e.get("pls_code", None),
+                        e.get("is_id", None),
+                        e.get("t2mi_plp_id", None)) for e in elem.iter("transponder")]
 
 
-def parse_transponders(elem, sat_name):
-    """ Parsing satellite transponders """
-    transponders = []
-    for el in elem.getElementsByTagName("transponder"):
-        if el.hasAttributes():
-            atr = el.attributes
-            try:
-                tr = Transponder(atr["frequency"].value,
-                                 atr["symbol_rate"].value,
-                                 POLARIZATION[atr["polarization"].value],
-                                 FEC[atr["fec_inner"].value],
-                                 SYSTEM[atr["system"].value],
-                                 MODULATION[atr["modulation"].value],
-                                 atr["pls_mode"].value if "pls_mode" in atr else None,
-                                 atr["pls_code"].value if "pls_code" in atr else None,
-                                 atr["is_id"].value if "is_id" in atr else None,
-                                 atr["t2mi_plp_id"].value if "t2mi_plp_id" in atr else None)
-            except Exception as e:
-                message = f"Error: can't parse transponder for '{sat_name}' satellite! {repr(e)}"
-                log(message)
-            else:
-                transponders.append(tr)
-    return transponders
+def get_terrestrial(path):
+    """ Returns data [Terrestrial] list from *.xml. """
+    return [Terrestrial(e.get("name", None),
+                        e.get("flags", None),
+                        e.get("countrycode", None),
+                        [get_ter_transponder(e) for e in e.iter("transponder")]
+                        ) for e in ETree.parse(path).iter("terrestrial")]
 
 
-def parse_sat(elem):
-    """ Parsing satellite. """
-    sat_name = elem.attributes["name"].value
-    return Satellite(sat_name,
-                     elem.attributes["flags"].value,
-                     elem.attributes["position"].value,
-                     parse_transponders(elem, sat_name))
+def get_ter_transponder(elem):
+    """ Returns terrestrial transponder. """
+    return TerTransponder(elem.get("centre_frequency", "0"),
+                          elem.get("system", None),
+                          elem.get("bandwidth", None),
+                          elem.get("constellation", None),
+                          elem.get("code_rate_hp", None),
+                          elem.get("code_rate_lp", None),
+                          elem.get("guard_interval", None),
+                          elem.get("transmission_mode", None),
+                          elem.get("hierarchy_information", None),
+                          elem.get("inversion", None),
+                          elem.get("plp_id", None))
 
 
-def parse_satellites(path):
-    """ Parsing satellites from xml. """
-    dom = parse(path)
-    satellites = []
+def get_cable(path):
+    """ Returns data [Cable] list from *.xml. """
+    return [Cable(e.get("name", None),
+                  e.get("flags", None),
+                  e.get("satfeed", None),
+                  e.get("countrycode", None),
+                  get_cable_transponders(e)) for e in ETree.parse(path).iter("cable")]
 
-    for elem in dom.getElementsByTagName("sat"):
-        if elem.hasAttributes():
-            satellites.append(parse_sat(elem))
 
-    return satellites
+def get_cable_transponders(elem):
+    """ Returns cable transponders list. """
+    return [CableTransponder(e.get("frequency", "0"),
+                             e.get("symbol_rate", "0"),
+                             e.get("fec_inner", None),
+                             e.get("modulation", None)) for e in elem.iter("transponder")]
+
+
+def write_satellites(satellites, data_path, encoding="UTF-8"):
+    """ Creates satellites.xml file. """
+    write_xml("satellites", "sat", satellites, data_path, _SAT_COMMENT, encoding)
+
+
+def write_terrestrial(terrestrial, data_path, encoding="UTF-8"):
+    """ Creates terrestrial.xml file. """
+    write_xml("locations", "terrestrial", terrestrial, data_path, _TERRESTRIAL_COMMENT, encoding)
+
+
+def write_cable(cables, data_path, encoding="UTF-8"):
+    """ Creates cables.xml file. """
+    write_xml("cables", "cable", cables, data_path, _CABLE_COMMENT, encoding)
+
+
+def write_xml(root_name, sub_name, data, data_path, comment="", encoding="UTF-8"):
+    """ Creates *.xml files. """
+    xml = ETree.Element(root_name)
+    [write_element(sub_name, "transponder", t, xml) for t in data]
+
+    tree = ETree.ElementTree(xml)
+    indent(tree.getroot())
+
+    with open(data_path, "wb") as f:
+        # To put comment on top.
+        f.write(f'<?xml version="1.0" encoding="{encoding}"?>\n<!--\n{comment}-->\n\n'.encode("utf-8"))
+        tree.write(f, encoding=encoding)
+
+
+def write_element(e_name, ch_name, e_data, root):
+    """ Writes element with sub elements.
+
+        @param e_name: Element name.
+        @param ch_name: Child element name.
+        @param e_data: Element data -> defaultdict
+        @param root: Parent of the element.
+    """
+    t = e_data._asdict()
+    subs = t.pop("transponders")
+    root_sub = ETree.SubElement(root, e_name, {k: v for k, v in t.items() if v})
+    [ETree.SubElement(root_sub, ch_name, {k: v for k, v in tr._asdict().items() if v}) for tr in subs]
+
+
+def indent(elem, parent=None, index=-1, level=0, space="    "):
+    """  Appends whitespace to the subtree to indent the tree visually.
+
+        Since the minimum supported version < 3.9, we will use our own implementation.
+    """
+    for i, sub in enumerate(elem):
+        indent(sub, elem, i, level + 1)
+    if parent:
+        if index == 0:
+            parent.text = f"\n{space * level}"
+        else:
+            parent[index - 1].tail = f"\n{space * level}"
+
+        if index == len(parent) - 1:
+            elem.tail = f"\n{space * (level - 1)}"
+
+
+def get_pos_str(pos: int) -> str:
+    """ Converts satellite position int value to readable string. """
+    return f"{abs(pos / 10):0.1f}{'W' if pos < 0 else 'E'}"
 
 
 if __name__ == "__main__":

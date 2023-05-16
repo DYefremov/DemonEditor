@@ -3,15 +3,15 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2022-04-17 22:05+0300\n"
+"PO-Revision-Date: 2023-04-22 16:34+0300\n"
+"Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
+"Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: audi06_19 <audi06_19@hotmail.com>\n"
-"Language-Team: \n"
-"X-Generator: Poedit 3.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: tr\n"
+"X-Generator: Poedit 3.2.2\n"
 
 msgid "translator-credits"
 msgstr "audi06_19 <info@dreamosat-forum.com>"
@@ -1282,6 +1282,9 @@ msgstr "Veri yükleme devam ediyor!"
 msgid "Recordings"
 msgstr "Kayıtlar"
 
+msgid "Recordings:"
+msgstr "Kayıtlar:"
+
 msgid "Help"
 msgstr "Yardım"
 
@@ -1383,3 +1386,136 @@ msgstr "Tüm buketler"
 
 msgid "Playback from the main list"
 msgstr "Ana listeden oynatma"
+
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgstr "Medyaya doğrudan bağlantılar almak için youtube-dl kullanarak URL ayrıştırmayı etkinleştirir."
+
+msgid "Permissions..."
+msgstr "İzinler..."
+
+msgid "Display EPG in bouquet list"
+msgstr "EPG'yi buket listesinde göster"
+
+msgid "EPG *.dat file:"
+msgstr "EPG *.dat dosyası:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Alıcıdaki verileri yeniden yüklemek için HTTP kullanın"
+
+msgid "Enable picons compression"
+msgstr "Picon sıkıştırmayı etkinleştir"
+
+msgid "Update interval (sec):"
+msgstr "Güncelleme aralığı (sn):"
+
+msgid "Update:"
+msgstr "Güncelleme:"
+
+msgid "Daily"
+msgstr "Günlük"
+
+msgid "Assign reference"
+msgstr "Referans ata"
+
+msgid "Specify hostname or IP address"
+msgstr "Ana bilgisayar adını veya IP adresini belirtin"
+
+msgid "Default selection"
+msgstr "Varsayılan seçim"
+
+msgid "Don't change power state"
+msgstr "Güç durumunu değiştirme"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Buketleri ve servisleri güncellerken bekleme moduna geçmeyin."
+
+msgid "Region"
+msgstr "Bölge"
+
+msgid "Provider"
+msgstr "Sağlayıcı"
+
+msgid ""
+"Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr ""
+"Çok sayıda picon (> 1000) seçilirse arşiv olarak yüklemeyi etkinleştirir.\n"
+"                          Yalnızca harici depolamanız varsa önerilir."
+
+msgid "Clear \"New\" flag"
+msgstr "\"Yeni\" bayrağını temizleyin"
+
+msgid "Group by"
+msgstr "Göre gruplandır"
+
+msgid "Replace existing"
+msgstr "Mevcut olanı değiştir"
+
+msgid "Already exists"
+msgstr "Zaten var"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Sınırsız kopya arabelleğini etkinleştir"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Buketler sekmesi için sınırsız kopya arabelleğini etkinleştirir."
+
+msgid "Start time"
+msgstr "Başlangıç ​​saati"
+
+msgid "End time"
+msgstr "Bitiş zamanı"
+
+msgid "Enable extensions support"
+msgstr "Uzantı desteğini etkinleştir"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Değişiklikleri yükledikten sonra, alıcıyı tamamen yeniden başlatmanız gerekebilir!"
+
+msgid "Remove duplicates"
+msgstr "Kopyaları kaldır"
+
+msgid "Removed"
+msgstr "Kaldırıldı"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Mevcut ana liste hizmetlerinin üzerine yazılmasını sağlar."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Lamedb'den içe aktarılan hizmetlerin atlanmasını sağlar."
+
+msgid "Bouquets data only"
+msgstr "Yalnızca buket verileri"
+
+msgid "Create Category bouquets"
+msgstr "Kategori buketleri oluştur"
+
+msgid "Create Regional bouquets"
+msgstr "Bölgesel buketler oluşturun"
+
+msgid "Skip C-band"
+msgstr "C-band atla"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Buket listesinde seçilen isimleri otomatik olarak ayarlayın."
+
+msgid "Merge satellites by positions"
+msgstr "Uyduları konumlara göre birleştir"
+
+msgid "Save satellite selection"
+msgstr "Uydu seçimini kaydet"
+
+msgid "Extract direct links"
+msgstr "Doğrudan bağlantıları ayıklayın"
+
+msgid "URL prefix:"
+msgstr "URL öneki:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Belirtilen URL için geçersiz önek!"
+
+msgid "Alternate window title"
+msgstr "Alternatif pencere başlığı"
+
+msgid "Selected type:"
+msgstr "Seçilen tip:"

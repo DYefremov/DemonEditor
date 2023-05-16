@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2022 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ import logging
 
 from gi.repository import GLib
 
-from app.commons import LOGGER_NAME
+from app.commons import LOGGER_NAME, LOG_FORMAT, LOG_DATE_FORMAT
 from app.ui.dialogs import get_builder
 from app.ui.main_helper import append_text_to_tview
 from app.ui.uicommons import Gtk, UI_RESOURCES_PATH
@@ -43,15 +43,16 @@ class LogsClient(Gtk.Box):
         def __init__(self, view):
             logging.Handler.__init__(self)
             self._view = view
+            self.setFormatter(logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
 
-        def handle(self, rec):
-            GLib.idle_add(append_text_to_tview, f"{rec.msg}\n", self._view)
+        def handle(self, rec: logging.LogRecord):
+            GLib.idle_add(append_text_to_tview, f"{self.format(rec)}\n", self._view)
 
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._app = app
 
-        handlers = {"on_clear": self.on_clear}
+        handlers = {"on_clear": self.on_clear, "on_close": self.on_close}
         builder = get_builder(UI_RESOURCES_PATH + "logs.glade", handlers)
 
         self._log_view = builder.get_object("log_view")
@@ -64,3 +65,10 @@ class LogsClient(Gtk.Box):
 
     def on_clear(self, button):
         GLib.idle_add(self._log_view.get_buffer().set_text, "")
+
+    def on_close(self, button):
+        self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(False))
+
+
+if __name__ == "__main__":
+    pass

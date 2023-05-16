@@ -26,12 +26,13 @@ Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
   [<img src="https://user-images.githubusercontent.com/7511379/141684475-4511ea4f-b152-42d5-b9c8-f3e1e9a160d0.png" width="480"/>](https://user-images.githubusercontent.com/7511379/141684475-4511ea4f-b152-42d5-b9c8-f3e1e9a160d0.png)
 * Ability to view EPG and manage timers (via HTTP API).  
 * Simple FTP client (experimental).   
-  [<img src="https://user-images.githubusercontent.com/7511379/141681165-5679c331-72e7-4044-b365-dcdb30b1433c.png" width="480"/>](https://user-images.githubusercontent.com/7511379/141681165-5679c331-72e7-4044-b365-dcdb30b1433c.png)
+  [<img src="https://user-images.githubusercontent.com/7511379/141681165-5679c331-72e7-4044-b365-dcdb30b1433c.png" width="480"/>](https://user-images.githubusercontent.com/7511379/141681165-5679c331-72e7-4044-b365-dcdb30b1433c.png)  
+
+**To increase program functionality you can use [extensions](https://github.com/DYefremov/demoneditor-extensions).**   
   
 #### Keyboard shortcuts
 * **Ctrl + X** - only in bouquet list.
-* **Ctrl + C** - only in services list.                                                              
-Clipboard is **"rubber"**. There is an accumulation before the insertion!                                                                                                                     
+* **Ctrl + C** - only in services list.                                                               
 * **Ctrl + Insert** - copies the selected channels from the main list to the bouquet  
   beginning or inserts (creates) a new bouquet.  
 * **Ctrl + BackSpace** - copies the selected channels from the main list to the bouquet end.
@@ -109,7 +110,7 @@ just load your data via *"File/Open"* and press *"Save"*. When importing separat
 
 **The built-in Telnet client does not support ANSI escape sequences!**
 
-For streams playback, this app supports [VLC](https://www.videolan.org/vlc/), [MPV](https://mpv.io/) and [GStreamer](https://gstreamer.freedesktop.org/). Depending on your distro, you may need to install additional packages and libraries. 
+For streams playback, this app supports [VLC](https://www.videolan.org/vlc/), [MPV](https://mpv.io/) and [GStreamer](https://gstreamer.freedesktop.org/). Depending on your distro, you may need to install additional packages and libraries.   
 #### Command line arguments:
 * **-l** - write logs to file.
 * **-d on/off** - turn on/off debug mode. Allows to display more information in the logs.

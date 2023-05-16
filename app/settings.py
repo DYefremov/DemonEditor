@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -39,14 +39,16 @@ from textwrap import dedent
 
 SEP = os.sep
 HOME_PATH = str(Path.home())
-CONFIG_PATH = HOME_PATH + "{}.config{}demon-editor{}".format(SEP, SEP, SEP)
+CONFIG_PATH = HOME_PATH + f"{SEP}.config{SEP}demon-editor{SEP}"
 CONFIG_FILE = CONFIG_PATH + "config.json"
-DATA_PATH = HOME_PATH + "{}DemonEditor{}".format(SEP, SEP)
+DATA_PATH = HOME_PATH + f"{SEP}DemonEditor{SEP}"
 GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_DARWIN = sys.platform == "darwin"
 IS_WIN = sys.platform == "win32"
 IS_LINUX = sys.platform == "linux"
+
+USE_HEADER_BAR = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 
 
 class Defaults(Enum):
@@ -61,25 +63,30 @@ class Defaults(Enum):
     # Enigma2.
     BOX_SERVICES_PATH = "/etc/enigma2/"
     BOX_SATELLITE_PATH = "/etc/tuxbox/"
+    BOX_EPG_PATH = "/etc/enigma2/"
     BOX_PICON_PATH = "/usr/share/enigma2/picon/"
     BOX_PICON_PATHS = ("/usr/share/enigma2/picon/",
                        "/media/hdd/picon/",
                        "/media/usb/picon/",
                        "/media/mmc/picon/",
-                       "/media/cf/picon/")
+                       "/media/cf/picon/",
+                       "/hdd/picon/",
+                       "/usb/picon/")
     # Neutrino.
     NEUTRINO_BOX_SERVICES_PATH = "/var/tuxbox/config/zapit/"
     NEUTRINO_BOX_SATELLITE_PATH = "/var/tuxbox/config/"
     NEUTRINO_BOX_PICON_PATH = "/usr/share/tuxbox/neutrino/icons/logo/"
     NEUTRINO_BOX_PICON_PATHS = ("/usr/share/tuxbox/neutrino/icons/logo/",)
     # Paths.
-    BACKUP_PATH = "{}backup{}".format(DATA_PATH, SEP)
-    PICON_PATH = "{}picons{}".format(DATA_PATH, SEP)
+    BACKUP_PATH = f"{DATA_PATH}backup{SEP}"
+    PICON_PATH = f"{DATA_PATH}picons{SEP}"
 
     DEFAULT_PROFILE = "default"
     BACKUP_BEFORE_DOWNLOADING = True
     BACKUP_BEFORE_SAVE = True
     V5_SUPPORT = False
+    UNLIMITED_COPY_BUFFER = False
+    EXTENSIONS_SUPPORT = False
     FORCE_BQ_NAMES = False
     HTTP_API_SUPPORT = True
     ENABLE_YT_DL = False
@@ -94,9 +101,9 @@ class Defaults(Enum):
     STREAM_LIB = "mpv" if IS_WIN else "vlc"
     MAIN_LIST_PLAYBACK = False
     PROFILE_FOLDER_DEFAULT = False
-    RECORDS_PATH = DATA_PATH + "records{}".format(SEP)
+    RECORDINGS_PATH = f"{DATA_PATH}recordings{SEP}"
     ACTIVATE_TRANSCODING = False
-    ACTIVE_TRANSCODING_PRESET = "720p TV{}device".format(SEP)
+    ACTIVE_TRANSCODING_PRESET = f"720p TV{SEP}device"
 
 
 class SettingsType(IntEnum):
@@ -110,12 +117,14 @@ class SettingsType(IntEnum):
             srv_path = Defaults.BOX_SERVICES_PATH.value
             sat_path = Defaults.BOX_SATELLITE_PATH.value
             picons_path = Defaults.BOX_PICON_PATH.value
+            epg_path = Defaults.BOX_EPG_PATH.value
             http_timeout = 5
             telnet_timeout = 5
         else:
             srv_path = Defaults.NEUTRINO_BOX_SERVICES_PATH.value
             sat_path = Defaults.NEUTRINO_BOX_SATELLITE_PATH.value
             picons_path = Defaults.NEUTRINO_BOX_PICON_PATH.value
+            epg_path = ""
             http_timeout = 2
             telnet_timeout = 1
 
@@ -133,6 +142,7 @@ class SettingsType(IntEnum):
                 "services_path": srv_path,
                 "user_bouquet_path": srv_path,
                 "satellites_xml_path": sat_path,
+                "epg_dat_path": epg_path,
                 "picons_path": picons_path}
 
 
@@ -149,6 +159,12 @@ class PlayStreamsMode(IntEnum):
     BUILT_IN = 0
     WINDOW = 1
     M3U = 2
+
+
+class EpgSource(IntEnum):
+    HTTP = 0  # HTTP API -> WebIf
+    DAT = 1  # epg.dat file
+    XML = 2  # XML TV
 
 
 class Settings:
@@ -272,6 +288,14 @@ class Settings:
         self._cp_settings["host"] = value
 
     @property
+    def hosts(self):
+        return self._cp_settings.get("hosts", [self.host, ])
+
+    @hosts.setter
+    def hosts(self, value):
+        self._cp_settings["hosts"] = value
+
+    @property
     def port(self):
         return self._cp_settings.get("port", self.get_default("port"))
 
@@ -360,6 +384,14 @@ class Settings:
         self._cp_settings["satellites_xml_path"] = value
 
     @property
+    def epg_dat_path(self):
+        return self._cp_settings.get("epg_dat_path", self.get_default("epg_dat_path"))
+
+    @epg_dat_path.setter
+    def epg_dat_path(self, value):
+        self._cp_settings["epg_dat_path"] = value
+
+    @property
     def picons_path(self):
         return self._cp_settings.get("picons_path", self.get_default("picons_path"))
 
@@ -397,7 +429,7 @@ class Settings:
 
     @default_data_path.setter
     def default_data_path(self, value):
-        self._settings["default_data_path"] = value
+        self._settings["default_data_path"] = Settings.normalize_path(value)
 
     @property
     def default_backup_path(self):
@@ -405,7 +437,7 @@ class Settings:
 
     @default_backup_path.setter
     def default_backup_path(self, value):
-        self._settings["default_backup_path"] = value
+        self._settings["default_backup_path"] = Settings.normalize_path(value)
 
     @property
     def default_picon_path(self):
@@ -413,7 +445,7 @@ class Settings:
 
     @default_picon_path.setter
     def default_picon_path(self, value):
-        self._settings["default_picon_path"] = value
+        self._settings["default_picon_path"] = Settings.normalize_path(value)
 
     @property
     def profile_data_path(self):
@@ -444,12 +476,12 @@ class Settings:
         self._cp_settings["profile_backup_path"] = value
 
     @property
-    def records_path(self):
-        return self._settings.get("records_path", Defaults.RECORDS_PATH.value)
+    def recordings_path(self):
+        return self._settings.get("recordings_path", Defaults.RECORDINGS_PATH.value)
 
-    @records_path.setter
-    def records_path(self, value):
-        self._settings["records_path"] = value
+    @recordings_path.setter
+    def recordings_path(self, value):
+        self._settings["recordings_path"] = Settings.normalize_path(value)
 
     # ******** Streaming ********* #
 
@@ -520,6 +552,30 @@ class Settings:
     def epg_options(self, value):
         self._cp_settings["epg_options"] = value
 
+    @property
+    def epg_source(self):
+        return EpgSource(self._cp_settings.get("epg_source", EpgSource.HTTP))
+
+    @epg_source.setter
+    def epg_source(self, value):
+        self._cp_settings["epg_source"] = value
+
+    @property
+    def epg_update_interval(self):
+        return self._cp_settings.get("epg_update_interval", 5)
+
+    @epg_update_interval.setter
+    def epg_update_interval(self, value):
+        self._cp_settings["epg_update_interval"] = value
+
+    @property
+    def epg_xml_source(self):
+        return self._cp_settings.get("epg_xml_source", "")
+
+    @epg_xml_source.setter
+    def epg_xml_source(self, value):
+        self._cp_settings["epg_xml_source"] = value
+
     # *********** FTP ************ #
 
     @property
@@ -555,6 +611,22 @@ class Settings:
     @v5_support.setter
     def v5_support(self, value):
         self._settings["v5_support"] = value
+
+    @property
+    def unlimited_copy_buffer(self):
+        return self._settings.get("unlimited_copy_buffer", Defaults.UNLIMITED_COPY_BUFFER.value)
+
+    @unlimited_copy_buffer.setter
+    def unlimited_copy_buffer(self, value):
+        self._settings["unlimited_copy_buffer"] = value
+
+    @property
+    def extensions_support(self):
+        return self._settings.get("extensions_support", Defaults.EXTENSIONS_SUPPORT.value)
+
+    @extensions_support.setter
+    def extensions_support(self, value):
+        self._settings["extensions_support"] = value
 
     @property
     def force_bq_names(self):
@@ -633,6 +705,14 @@ class Settings:
     # *********** Appearance *********** #
 
     @property
+    def use_header_bar(self):
+        return self._settings.get("use_header_bar", USE_HEADER_BAR)
+
+    @use_header_bar.setter
+    def use_header_bar(self, value):
+        self._settings["use_header_bar"] = value
+
+    @property
     def list_font(self):
         return self._settings.get("list_font", "")
 
@@ -704,6 +784,14 @@ class Settings:
         self._settings["display_picons"] = value
 
     @property
+    def display_epg(self):
+        return self._settings.get("display_epg", False)
+
+    @display_epg.setter
+    def display_epg(self, value):
+        self._settings["display_epg"] = value
+
+    @property
     def alternate_layout(self):
         return self._settings.get("alternate_layout", IS_DARWIN)
 
@@ -757,7 +845,7 @@ class Settings:
     def is_darwin(self):
         return IS_DARWIN
 
-    # *********** Download dialog *********** #
+    # ************* Download  ************** #
 
     @property
     def use_http(self):
@@ -774,6 +862,22 @@ class Settings:
     @remove_unused_bouquets.setter
     def remove_unused_bouquets(self, value):
         self._settings["remove_unused_bouquets"] = value
+
+    @property
+    def keep_power_mode(self):
+        return self._settings.get("keep_power_mode", False)
+
+    @keep_power_mode.setter
+    def keep_power_mode(self, value):
+        self._settings["keep_power_mode"] = value
+
+    @property
+    def compress_picons(self):
+        return self._settings.get("compress_picons", False)
+
+    @compress_picons.setter
+    def compress_picons(self, value):
+        self._settings["compress_picons"] = value
 
     # **************** Debug **************** #
 
@@ -799,13 +903,14 @@ class Settings:
     # **************** Get-Set settings **************** #
 
     @staticmethod
-    def get_settings():
-        if not os.path.isfile(CONFIG_FILE) or os.stat(CONFIG_FILE).st_size == 0:
-            Settings.write_settings(Settings.get_default_settings())
+    def get_settings(config_file=CONFIG_FILE, default_settings=None):
+        if not os.path.isfile(config_file) or os.stat(config_file).st_size == 0:
+            df = Settings.get_default_settings() if default_settings is None else default_settings
+            Settings.write_settings(df, config_file=config_file)
 
-        with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
+        with open(config_file, "r", encoding="utf-8") as cf:
             try:
-                return json.load(config_file)
+                return json.load(cf)
             except ValueError as e:
                 raise SettingsReadException(e)
 
@@ -826,7 +931,7 @@ class Settings:
             "extra_color": Defaults.EXTRA_COLOR.value,
             "fav_click_mode": Defaults.FAV_CLICK_MODE.value,
             "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
-            "records_path": Defaults.RECORDS_PATH.value
+            "records_path": Defaults.RECORDINGS_PATH.value
         }
 
     @staticmethod
@@ -837,10 +942,14 @@ class Settings:
                                     "ab": "192", "channels": "2", "samplerate": "44100", "scodec": "none"}}
 
     @staticmethod
-    def write_settings(config):
-        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-            json.dump(config, config_file, indent="    ")
+    def write_settings(config, config_path=CONFIG_PATH, config_file=CONFIG_FILE):
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_file, "w", encoding="utf-8") as cf:
+            json.dump(config, cf, indent="    ")
+
+    @staticmethod
+    def normalize_path(path):
+        return f"{os.path.normpath(path)}{SEP}"
 
 
 if __name__ == "__main__":

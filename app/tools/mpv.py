@@ -16,25 +16,26 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-from ctypes import *
-import ctypes.util
-import threading
-import os
-import sys
-from warnings import warn
-from functools import partial, wraps
-from contextlib import contextmanager
 import collections
+import ctypes.util
+import os
 import re
+import sys
+import threading
 import traceback
+from contextlib import contextmanager
+from ctypes import *
+from functools import partial, wraps
+from warnings import warn
 
 if os.name == 'nt':
-    dll = ctypes.util.find_library('mpv-1.dll')
+    dll = ctypes.util.find_library('libmpv-2.dll') or ctypes.util.find_library('mpv-1.dll')
     if dll is None:
-        raise OSError('Cannot find mpv-1.dll in your system %PATH%. One way to deal with this is to ship mpv-1.dll '
-                      'with your script and put the directory your script is in into %PATH% before "import mpv": '
-                      'os.environ["PATH"] = os.path.dirname(__file__) + os.pathsep + os.environ["PATH"] '
-                      'If mpv-1.dll is located elsewhere, you can add that path to os.environ["PATH"].')
+        raise OSError(
+            'Cannot find [lib]mpv-*.dll in your system %PATH%. One way to deal with this is to ship [lib]mpv-*.dll '
+            'with your script and put the directory your script is in into %PATH% before "import mpv": '
+            'os.environ["PATH"] = os.path.dirname(__file__) + os.pathsep + os.environ["PATH"] '
+            'If mpv-1.dll is located elsewhere, you can add that path to os.environ["PATH"].')
     backend = CDLL(dll)
     fs_enc = 'utf-8'
 else:
@@ -569,10 +570,13 @@ _mpv_free_node_contents = backend.mpv_free_node_contents
 backend.mpv_create.restype = MpvHandle
 _mpv_create = backend.mpv_create
 
+_API_VER = _mpv_client_api_version()[0]
+
+_handle_func('mpv_destroy' if _API_VER > 1 else 'mpv_detach_destroy', [], None, errcheck=None)
 _handle_func('mpv_create_client', [c_char_p], MpvHandle, notnull_errcheck)
 _handle_func('mpv_client_name', [], c_char_p, errcheck=None)
 _handle_func('mpv_initialize', [], c_int, ec_errcheck)
-_handle_func('mpv_detach_destroy', [], None, errcheck=None)
+
 _handle_func('mpv_terminate_destroy', [], None, errcheck=None)
 _handle_func('mpv_load_config_file', [c_char_p], c_int, ec_errcheck)
 _handle_func('mpv_get_time_us', [], c_ulonglong, errcheck=None)
@@ -607,28 +611,6 @@ _handle_func('mpv_set_wakeup_callback', [WakeupCallback, c_void_p], None, errche
 _handle_func('mpv_get_wakeup_pipe', [], c_int, errcheck=None)
 
 _handle_func('mpv_stream_cb_add_ro', [c_char_p, c_void_p, StreamOpenFn], c_int, ec_errcheck)
-
-# Disabled for compatibility with the old version of mpv!!!
-# _handle_func('mpv_render_context_create',               [MpvRenderCtxHandle, MpvHandle, POINTER(MpvRenderParam)],   c_int, ec_errcheck,     ctx=None)
-# _handle_func('mpv_render_context_set_parameter',        [MpvRenderParam],                                           c_int, ec_errcheck,     ctx=MpvRenderCtxHandle)
-# _handle_func('mpv_render_context_get_info',             [MpvRenderParam],                                           c_int, ec_errcheck,     ctx=MpvRenderCtxHandle)
-# _handle_func('mpv_render_context_set_update_callback',  [RenderUpdateFn, c_void_p],                                 None, errcheck=None,    ctx=MpvRenderCtxHandle)
-# _handle_func('mpv_render_context_update',               [],                                                         c_int64, errcheck=None, ctx=MpvRenderCtxHandle)
-# _handle_func('mpv_render_context_render',               [POINTER(MpvRenderParam)],                                  c_int, ec_errcheck,     ctx=MpvRenderCtxHandle)
-# _handle_func('mpv_render_context_report_swap',          [],                                                         None, errcheck=None,    ctx=MpvRenderCtxHandle)
-# _handle_func('mpv_render_context_free',                 [],                                                         None, errcheck=None,    ctx=MpvRenderCtxHandle)
-
-
-# Deprecated in v0.29.0 and may disappear eventually
-if hasattr(backend, 'mpv_get_sub_api'):
-    _handle_func('mpv_get_sub_api', [MpvSubApi], c_void_p, notnull_errcheck, deprecated=True)
-
-    _handle_gl_func('mpv_opengl_cb_set_update_callback', [OpenGlCbUpdateFn, c_void_p], deprecated=True)
-    _handle_gl_func('mpv_opengl_cb_init_gl', [c_char_p, OpenGlCbGetProcAddrFn, c_void_p], c_int, deprecated=True)
-    _handle_gl_func('mpv_opengl_cb_draw', [c_int, c_int, c_int], c_int, deprecated=True)
-    _handle_gl_func('mpv_opengl_cb_render', [c_int, c_int], c_int, deprecated=True)
-    _handle_gl_func('mpv_opengl_cb_report_flip', [c_ulonglong], c_int, deprecated=True)
-    _handle_gl_func('mpv_opengl_cb_uninit_gl', [], c_int, deprecated=True)
 
 
 def _mpv_coax_proptype(value, proptype=str):
@@ -934,7 +916,7 @@ class MPV(object):
                         self._message_handlers[target](*args)
 
                 if eid == MpvEventID.SHUTDOWN:
-                    _mpv_detach_destroy(self._event_handle)
+                    _mpv_destroy(self._event_handle) if _API_VER > 1 else _mpv_detach_destroy(self._event_handle)
                     return
 
             except Exception as e:

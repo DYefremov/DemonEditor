@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2021 Dmitriy Yefremov
+# Copyright (C) 2018-2023 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1360,3 +1360,131 @@ msgstr "Прайграванне з асноўнага спіса"
 
 msgid "Enables URL parsing using youtube-dl to get direct links to media."
 msgstr "Улучае аналіз URL-адрасоў з дапамогай youtube-dl для атрымання прамых спасылак на медыя."
+
+msgid "Permissions..."
+msgstr "Дазволы..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Адлюстроўваць EPG у спісе букета"
+
+msgid "EPG *.dat file:"
+msgstr "Файл EPG *.dat:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Скарыстаць HTTP для перазагрузкі дадзеных у рэсіверы"
+
+msgid "Enable picons compression"
+msgstr "Уключыць сціск пiконаў"
+
+msgid "Update interval (sec):"
+msgstr "Інтэрвал абнаўлення (сек):"
+
+msgid "Update:"
+msgstr "Абнаўляць:"
+
+msgid "Daily"
+msgstr "Штодня"
+
+msgid "Assign reference"
+msgstr "Прысвоіць спасылку"
+
+msgid "Specify hostname or IP address"
+msgstr "Задайце імя хоста або IP-адрас"
+
+msgid "Default selection"
+msgstr "Выбар па змаўчанні"
+
+msgid "Don't change power state"
+msgstr "Не змяняць стан сілкавання"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Не перамыкаць у рэжым чакання пры абнаўленні букетаў і сэрвісаў."
+
+msgid "Region"
+msgstr "Рэгіён"
+
+msgid "Provider"
+msgstr "Правайдар"
+
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Улучае загрузку ў выглядзе архіва, калі абрана вялікая колькасць пiконаў (> 1000).\n"
+"                    Рэкамендуецца, толькі калі ў вас ёсць вонкавае сховішча."
+
+msgid "Clear \"New\" flag"
+msgstr "Здаліць сцяжок \"New\""
+
+msgid "Group by"
+msgstr "Групаваць па"
+
+msgid "Replace existing"
+msgstr "Замяніць існуючыя"
+
+msgid "Already exists"
+msgstr "Ужо існуе"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Уключыць неабмежаваны буфер капіявання"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Улучае неабмежаваны буфер капіявання для ўкладкі букетаў."
+
+msgid "Start time"
+msgstr "Пачатак"
+
+msgid "End time"
+msgstr "Сканчэнне"
+
+msgid "Enable extensions support"
+msgstr "Уключыць падтрымку пашырэнняў"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Пасля загрузкі змен можа запатрабавацца перазапуск рэсівера!"
+
+msgid "Remove duplicates"
+msgstr "Выдаліць дублікаты"
+
+msgid "Removed"
+msgstr "Выдалена"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Улучае перазапіс існых сэрвісаў асноўнага спіса."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Улучае пропуск імпарту сэрвісаў з lamedb."
+
+msgid "Bouquets data only"
+msgstr "Толькі дадзеныя букетаў"
+
+msgid "Create Category bouquets"
+msgstr "Стварыць букеты па катэгорыях"
+
+msgid "Create Regional bouquets"
+msgstr "Стварыць букеты па рэгіёнах"
+
+msgid "Skip C-band"
+msgstr "Прапусціць C-дыяпазон"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Аўтаматычная ўсталёўка імя, абранага ў спісе букетаў."
+
+msgid "Merge satellites by positions"
+msgstr "Аб'яднаць спадарожнікі па пазіцыях"
+
+msgid "Save satellite selection"
+msgstr "Захоўваць выбар спадарожнікаў"
+
+msgid "Extract direct links"
+msgstr "Выняць простыя спасылкі"
+
+msgid "URL prefix:"
+msgstr "Префикс URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Недапушчальны прэфікс для дадзенага URL!"
+
+msgid "Alternate window title"
+msgstr "Альтэрнатыўны загаловак акна"
+
+msgid "Selected type:"
+msgstr "Абраны тып:"
