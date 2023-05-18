@@ -63,42 +63,50 @@ class ExtensionManager(Gtk.Window):
         self._app = app
         self._ext_path = f"{self._app.app_settings.default_data_path}tools{os.sep}extensions"
 
-        titles = (translate("Title"), translate("Description"), translate("Status"))
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
-        # Title, Description, Satus, URL, Path.
-        self._model = Gtk.ListStore.new((str, str, str, str, str, object))
+        # Title, Description, Status, Name, URL, Path.
+        self._model = Gtk.ListStore.new((str, str, bool, str, str, object))
         self._model.connect("row-deleted", self.on_model_changed)
         self._model.connect("row-inserted", self.on_model_changed)
         self._view = Gtk.TreeView(activate_on_single_click=True, enable_grid_lines=Gtk.TreeViewGridLines.BOTH)
         self._view.set_model(self._model)
         self._view.set_tooltip_column(self.Column.DESC)
-
-        for i, t in enumerate(titles):
-            renderer = Gtk.CellRendererText(xalign=0.05, ellipsize=Pango.EllipsizeMode.END)
-            column = Gtk.TreeViewColumn(title=t, cell_renderer=renderer, text=i)
-            column.set_alignment(0.5)
-            self._view.append_column(column)
-
-        column = self._view.get_column(self.Column.TITLE)
+        # Title
+        renderer = Gtk.CellRendererText(xalign=0.05, ellipsize=Pango.EllipsizeMode.END)
+        column = Gtk.TreeViewColumn(title=translate("Title"), cell_renderer=renderer, text=self.Column.TITLE)
+        column.set_alignment(0.5)
         column.set_min_width(170)
         column.set_resizable(True)
-
-        column = self._view.get_column(self.Column.DESC)
+        self._view.append_column(column)
+        # Description
+        renderer = Gtk.CellRendererText(xalign=0.05, ellipsize=Pango.EllipsizeMode.END)
+        column = Gtk.TreeViewColumn(title=translate("Description"), cell_renderer=renderer, text=self.Column.DESC)
         column.set_resizable(True)
         column.set_expand(True)
-
-        column = self._view.get_column(self.Column.STATUS)
-        column.set_fixed_width(120)
+        self._view.append_column(column)
+        # Status
+        renderer = Gtk.CellRendererToggle(xalign=0.5)
+        column = Gtk.TreeViewColumn(title=translate("Installed"), cell_renderer=renderer, active=self.Column.STATUS)
+        column.set_alignment(0.5)
+        column.set_fixed_width(100)
+        self._view.append_column(column)
 
         main_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN, **margin)
         data_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL, **margin)
         # Status bar.
-        status_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, margin_start=5, margin_left=5)
+        status_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, margin_start=5, margin_end=5)
         count_icon = Gtk.Image.new_from_icon_name("document-properties", Gtk.IconSize.SMALL_TOOLBAR)
         status_box.pack_start(count_icon, False, False, 0)
         self._count_label = Gtk.Label(label="0", width_chars=4, xalign=0)
         status_box.pack_start(self._count_label, False, False, 0)
+        status_box.show_all()
+        load_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, margin_end=10, no_show_all=True)
+        load_box.pack_start(Gtk.Label(label=translate("Loading data..."), visible=True), False, False, 0)
+        self._load_spinner = Gtk.Spinner(visible=True)
+        self._load_spinner.bind_property("active", load_box, "visible")
+        load_box.pack_end(self._load_spinner, False, False, 0)
+        status_box.pack_end(load_box, False, False, 0)
 
         data_box.pack_end(status_box, False, True, 0)
         scrolled = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
@@ -155,6 +163,8 @@ class ExtensionManager(Gtk.Window):
             self.resize(*window_size)
 
         self.connect("delete-event", lambda w, e: self._app.app_settings.add(ws_property, w.get_size()))
+
+        self._load_spinner.start()
         self.update()
 
     def get_installed(self):
@@ -174,7 +184,7 @@ class ExtensionManager(Gtk.Window):
                         path = installed.get(e)
                         url = f"{EXT_URL}{d.get('ref', '')}"
                         desc = d.get("description", "")
-                        extensions.append((d.get('label'), desc, "Installed" if path else None, e, url, path))
+                        extensions.append((d.get('label'), desc, True if path else None, e, url, path))
                 except ValueError as e:
                     log(f"{self.__class__.__name__} [update] error: {e}")
             else:
@@ -186,6 +196,7 @@ class ExtensionManager(Gtk.Window):
     def update_data(self, data):
         self._model.clear()
         [self._model.append(e) for e in data]
+        self._load_spinner.stop()
 
     def on_remove(self, item):
         model, paths = self._view.get_selection().get_selected_rows()
@@ -200,7 +211,7 @@ class ExtensionManager(Gtk.Window):
                 log(f"{self.__class__.__name__} [remove] error: {e}")
             else:
                 model[paths][self.Column.PATH] = None
-                model[paths][self.Column.STATUS] = translate("Removed")
+                model[paths][self.Column.STATUS] = None
                 msg = translate('Restart the program to apply all changes.')
                 self._app.show_info_message(msg, Gtk.MessageType.WARNING)
 
@@ -214,6 +225,7 @@ class ExtensionManager(Gtk.Window):
         if not url:
             return
 
+        GLib.idle_add(self._load_spinner.start)
         urls = {}
         with requests.get(url=url, headers=HEADERS, stream=True) as resp:
             if resp.status_code == 200:
@@ -232,10 +244,12 @@ class ExtensionManager(Gtk.Window):
             os.makedirs(os.path.dirname(path), exist_ok=True)
             if all((self.download_file(u, f"{path}{n}") for u, n in urls.items())):
                 itr = model.get_iter(paths)
-                GLib.idle_add(model.set_value, itr, self.Column.STATUS, "Downloaded")
+                GLib.idle_add(model.set_value, itr, self.Column.STATUS, True)
                 GLib.idle_add(model.set_value, itr, self.Column.PATH, path)
                 msg = translate('Restart the program to apply all changes.')
                 self._app.show_info_message(msg, Gtk.MessageType.WARNING)
+
+        GLib.idle_add(self._load_spinner.stop)
 
     def download_file(self, url, path):
         with requests.get(url=url, headers=HEADERS, stream=True) as resp:
