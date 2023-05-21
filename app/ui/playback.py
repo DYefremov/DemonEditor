@@ -27,6 +27,7 @@
 
 
 """ Additional module for playback. """
+from enum import Enum
 from functools import lru_cache
 
 from gi.repository import GLib, GObject, Gio
@@ -42,6 +43,12 @@ from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, Page
 
 
 class PlayerBox(Gtk.Overlay):
+    class Page(str, Enum):
+        LOAD = "load"
+        PLAYBACK = "playback"
+
+        def __str__(self):
+            return self.value
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
@@ -64,6 +71,8 @@ class PlayerBox(Gtk.Overlay):
         self._app.connect("page-changed", self.on_page_changed)
         self._app.connect("play-current", self.on_play_current)
         self._app.connect("play-recording", self.on_play_recording)
+
+        self._s_type = self._app.app_settings.setting_type
         self._fav_view = app.fav_view
         self._player = None
         self._current_mrl = None
@@ -137,18 +146,7 @@ class PlayerBox(Gtk.Overlay):
                 return
 
             ref = self._app.get_service_ref_data(srv)
-            s_type = self._app.app_settings.setting_type
-            error_msg = "No connection to the receiver!"
-            if s_type is SettingsType.ENIGMA_2:
-                def zap(rq):
-                    self.on_watch() if rq and rq.get("e2state", False) else self.on_error(None, error_msg)
-
-                self._app.http_api.send(HttpAPI.Request.ZAP, ref, zap)
-            elif self._s_type is SettingsType.NEUTRINO_MP:
-                def zap(rq):
-                    self.on_watch() if rq and rq.get("data", None) == "ok" else self.on_error(None, error_msg)
-
-                self._app.http_api.send(HttpAPI.Request.N_ZAP, f"?{ref}", zap)
+            self.zap(ref, self.play_current)
 
     def on_iptv_clicked(self, app, mode):
         if not self._app.http_api:
@@ -162,7 +160,7 @@ class PlayerBox(Gtk.Overlay):
             self.play(url, row[Column.IPTV_SERVICE]) if url else self.on_error(None, "No reference is present!")
 
     def on_play_current(self, app, url):
-        self.on_watch()
+        self.play_current()
 
     def on_play_recording(self, app, url):
         self.play(url)
@@ -174,7 +172,7 @@ class PlayerBox(Gtk.Overlay):
     def on_realize(self, area):
         if not self._player:
             settings = self._app.app_settings
-            self._stack.set_visible_child_name("load")
+            self._stack.set_visible_child_name(self.Page.LOAD)
             try:
                 self._player = Player.make(settings.stream_lib, settings.play_streams_mode, self)
             except (ImportError, NameError) as e:
@@ -227,7 +225,7 @@ class PlayerBox(Gtk.Overlay):
 
     @run_idle
     def on_play(self, action=None, value=None):
-        self._stack.set_visible_child_name("load")
+        self._stack.set_visible_child_name(self.Page.LOAD)
         self.emit("play", self._current_mrl)
 
     def on_pause(self, action=None, value=None):
@@ -353,7 +351,7 @@ class PlayerBox(Gtk.Overlay):
     def set_player_area_size(self, widget):
         w, h = self._app.app_window.get_size()
         widget.set_size_request(w * 0.6, -1)
-        self._stack.set_visible_child_name("playback")
+        self._stack.set_visible_child_name(self.Page.PLAYBACK)
 
     @run_idle
     def show_playback_window(self, title=None):
@@ -394,6 +392,17 @@ class PlayerBox(Gtk.Overlay):
             return f"DemonEditor [{translate('Recordings')}]"
         return f"DemonEditor [{translate('Playback')}]"
 
+    def start_playback(self, mode):
+        self._stack.set_visible_child_name(self.Page.LOAD)
+        if mode is PlaybackMode.PLAY:
+            self.on_play_service()
+        elif mode is PlaybackMode.ZAP:
+            self.on_zap()
+        elif mode is PlaybackMode.ZAP_PLAY:
+            self.on_zap(self.play_current)
+        elif mode is PlaybackMode.STREAM:
+            self.on_play_stream()
+
     def on_play_stream(self):
         path, column = self._fav_view.get_cursor()
         if path:
@@ -406,34 +415,60 @@ class PlayerBox(Gtk.Overlay):
             self.play(url) if url else self.on_error(None, "No reference is present!")
 
     def on_play_service(self, item=None):
-        path, column = self._fav_view.get_cursor()
-        if not path or not self._app.http_api:
-            return
-
-        ref = self._app.get_service_ref(path)
+        ref, path = self.get_ref()
         if not ref:
             return
 
-        if self._player and self._player.is_playing():
-            self.emit("stop", None)
-
+        self.on_stop()
         s_type = self._app.app_settings.setting_type
         req = HttpAPI.Request.STREAM if s_type is SettingsType.ENIGMA_2 else HttpAPI.Request.N_STREAM
         self._app.http_api.send(req, ref, self.watch)
 
-    def on_watch(self, item=None):
-        """ Switch to the channel and watch in the player. """
-        s_type = self._app.app_settings.setting_type
-        if s_type is SettingsType.ENIGMA_2:
-            self._app.http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
-        elif s_type is SettingsType.NEUTRINO_MP:
-            self._app.http_api.send(HttpAPI.Request.N_ZAP, "",
-                                    lambda rf: self._app.http_api.send(HttpAPI.Request.N_STREAM, rf.get("data", ""),
-                                                                       self.watch))
+    def on_zap(self, callback=None):
+        """ Switch(zap) the channel """
+        ref, path = self.get_ref()
+        if not ref:
+            return
+
+        self.on_stop()
+        # IPTV type checking
+        row = self._fav_view.get_model()[path][:]
+        if row[Column.FAV_TYPE] == BqServiceType.IPTV.name and callback:
+            callback = self.play(get_iptv_url(row, self._s_type))
+
+        self.zap(ref, callback)
+
+    def get_ref(self):
+        """ Returns reference and currently selected path as a tuple. """
+        path, column = self._fav_view.get_cursor()
+        if not path or not self._app.http_api:
+            return
+        return self._app.get_service_ref(path), path
+
+    def zap(self, ref, callback):
+        if self._s_type is SettingsType.ENIGMA_2:
+            def zp(rq):
+                if rq and rq.get("e2state", False):
+                    if callback:
+                        callback()
+                else:
+                    self._app.show_error_message("No connection to the receiver!")
+
+            self._app.http_api.send(HttpAPI.Request.ZAP, ref, zp)
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            def zp(rq):
+                if rq and rq.get("data", None) == "ok":
+                    if callback:
+                        callback()
+                else:
+                    self._app.show_error_message("No connection to the receiver!")
+
+            self._app.http_api.send(HttpAPI.Request.N_ZAP, f"?{ref}", zp)
+        else:
+            self._app.show_error_message("This type of settings is not supported!")
 
     def watch(self, data):
-        url = self._app.get_url_from_m3u(data)
-        GLib.timeout_add_seconds(1, self.play, url) if url else self.on_error(None, "Can't Playback!")
+        GLib.timeout_add_seconds(1, self.play, self._app.get_url_from_m3u(data))
 
     def play(self, url, title=None):
         if self._play_mode is PlayStreamsMode.M3U:
@@ -453,18 +488,17 @@ class PlayerBox(Gtk.Overlay):
         if self._player:
             self.emit("play", url)
 
-    def start_playback(self, mode):
-        self._stack.set_visible_child_name("load")
-        if mode is PlaybackMode.PLAY:
-            self.on_play_service()
-        elif mode is PlaybackMode.ZAP_PLAY:
-            self._app.on_zap(self.on_watch)
-        elif mode is PlaybackMode.STREAM:
-            self.on_play_stream()
+    def play_current(self):
+        if self._s_type is SettingsType.ENIGMA_2:
+            self._app.http_api.send(HttpAPI.Request.STREAM_CURRENT, "", self.watch)
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            self._app.http_api.send(HttpAPI.Request.N_ZAP, "",
+                                    lambda rf: self._app.http_api.send(HttpAPI.Request.N_STREAM, rf.get("data", ""),
+                                                                       self.watch))
 
     @run_with_delay(1)
     def on_played(self, player, duration):
-        self._stack.set_visible_child_name("playback")
+        self._stack.set_visible_child_name(self.Page.PLAYBACK)
         if not IS_DARWIN:
             self._stop_button.set_visible(True)
             self.on_duration_changed(duration)
@@ -472,7 +506,7 @@ class PlayerBox(Gtk.Overlay):
     @run_idle
     def on_error(self, player, msg):
         self._app.show_error_message(msg)
-        self._stack.set_visible_child_name("playback")
+        self._stack.set_visible_child_name(self.Page.PLAYBACK)
 
     def on_draw(self, widget, cr):
         """ Used for black background drawing in the player drawing area. """

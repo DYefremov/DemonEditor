@@ -2927,7 +2927,7 @@ class Application(Gtk.Application):
             if key is KeyboardKey.W:
                 self.emit("fav-clicked", PlaybackMode.ZAP_PLAY)
             if key is KeyboardKey.Z:
-                self.on_zap()
+                self.emit("fav-clicked", PlaybackMode.ZAP)
             elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
                 self.update_fav_num_column(model)
                 self.update_bouquet_list()
@@ -3042,10 +3042,7 @@ class Application(Gtk.Application):
             if self._fav_click_mode is PlaybackMode.DISABLED:
                 return
 
-            if self._fav_click_mode is PlaybackMode.ZAP:
-                self.on_zap()
-            else:
-                self.emit("fav-clicked", self._fav_click_mode)
+            self.emit("fav-clicked", self._fav_click_mode)
         else:
             return self.on_view_popup_menu(menu, event)
 
@@ -3556,46 +3553,6 @@ class Application(Gtk.Application):
             show_dialog(DialogType.INFO, self._main_window, "Done!")
         finally:
             GLib.idle_add(self._fav_view.set_sensitive, True)
-
-    @run_idle
-    def on_zap(self, callback=None):
-        """ Switch(zap) the channel """
-        path, column = self._fav_view.get_cursor()
-        if not path or not self._http_api:
-            return
-
-        ref = self.get_service_ref(path)
-        if not ref:
-            return
-
-        self._player_box.on_stop()
-        # IPTV type checking
-        row = self._fav_model[path][:]
-        if row[Column.FAV_TYPE] == BqServiceType.IPTV.name and callback:
-            callback = self._player_box.play(get_iptv_url(row, self._s_type))
-
-        if self._s_type is SettingsType.ENIGMA_2:
-            def zap(rq):
-                if rq and rq.get("e2state", False):
-                    GLib.idle_add(scroll_to, path, self._fav_view)
-                    if callback:
-                        callback()
-                else:
-                    self.show_error_message("No connection to the receiver!")
-
-            self._http_api.send(HttpAPI.Request.ZAP, ref, zap)
-        elif self._s_type is SettingsType.NEUTRINO_MP:
-            def zap(rq):
-                if rq and rq.get("data", None) == "ok":
-                    GLib.idle_add(scroll_to, path, self._fav_view)
-                    if callback:
-                        callback()
-                else:
-                    self.show_error_message("No connection to the receiver!")
-
-            self._http_api.send(HttpAPI.Request.N_ZAP, f"?{ref}", zap)
-        else:
-            self.show_error_message("This type of settings is not supported!")
 
     def get_service_ref(self, path, show_error=True):
         row = self._fav_model[path][:]
