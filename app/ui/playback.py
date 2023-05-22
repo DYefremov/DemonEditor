@@ -74,12 +74,14 @@ class PlayerBox(Gtk.Overlay):
 
         self._s_type = self._app.app_settings.setting_type
         self._fav_view = app.fav_view
+        self._page = None
         self._player = None
         self._current_mrl = None
         self._full_screen = False
         self._playback_window = None
         self._audio_track_menu = None
         self._subtitle_track_menu = None
+        self._is_cursor_visible = True
         self._play_mode = PlayStreamsMode(self._app.app_settings.play_streams_mode)
 
         handlers = {"on_realize": self.on_realize,
@@ -99,7 +101,7 @@ class PlayerBox(Gtk.Overlay):
         self._stack = builder.get_object("stack")
         self._playback_area = builder.get_object("playback_area")
         self._playback_area.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
-        self._playback_area.connect("motion-notify-event", self.on_mouse_motion)
+        self.connect("motion-notify-event", self.on_mouse_motion)
         self.add(self._stack)
 
         if not IS_DARWIN:
@@ -109,6 +111,7 @@ class PlayerBox(Gtk.Overlay):
             self._current_time_label = builder.get_object("current_time_label")
             self._rewind_box = builder.get_object("rewind_box")
             self._tool_bar = builder.get_object("tool_bar")
+            self.bind_property("is_cursor_visible", self._tool_bar, "visible")
             self._stop_button = builder.get_object("stop_button")
             self._prev_button = builder.get_object("prev_button")
             self._next_button = builder.get_object("next_button")
@@ -124,6 +127,14 @@ class PlayerBox(Gtk.Overlay):
     @property
     def playback_widget(self):
         return self._playback_area
+
+    @GObject.Property(type=bool, default=True)
+    def is_cursor_visible(self):
+        return self._is_cursor_visible
+
+    @is_cursor_visible.setter
+    def is_cursor_hidden(self, value):
+        self._is_cursor_visible = value
 
     def on_fav_clicked(self, app, mode):
         if mode is not PlaybackMode.STREAM and not self._app.http_api:
@@ -166,8 +177,11 @@ class PlayerBox(Gtk.Overlay):
         self.play(url)
 
     def on_page_changed(self, app, page):
-        self.on_close()
-        self.set_visible(False)
+        self._page = page
+        if self._player:
+            self.update_buttons()
+            self.on_close()
+            self.set_visible(False)
 
     def on_realize(self, area):
         if not self._player:
@@ -254,17 +268,17 @@ class PlayerBox(Gtk.Overlay):
     def on_full_screen(self, item=None):
         self._full_screen = not self._full_screen
         if self._play_mode is PlayStreamsMode.BUILT_IN:
-            self._tool_bar.set_visible(not self._full_screen)
             self.emit("playback-full-screen", not self._full_screen)
         elif self._playback_window:
-            if not IS_DARWIN:
-                self._tool_bar.set_visible(not self._full_screen)
             self._playback_window.fullscreen() if self._full_screen else self._playback_window.unfullscreen()
 
     def on_close(self, action=None, value=None):
         if self._playback_window:
             self._app.app_settings.add("playback_window_size", self._playback_window.get_size())
             self._playback_window.hide()
+
+        if self._full_screen:
+            GLib.idle_add(self.on_full_screen)
 
         self.on_stop()
         self.hide()
@@ -327,6 +341,9 @@ class PlayerBox(Gtk.Overlay):
             current_index = path[0]
             self._prev_button.set_sensitive(current_index != 0)
             self._next_button.set_sensitive(len(self._fav_view.get_model()) != current_index + 1)
+
+            self._prev_button.set_visible(self._page is Page.SERVICES)
+            self._next_button.set_visible(self._page is Page.SERVICES)
 
     @lru_cache(maxsize=1)
     def on_duration_changed(self, duration):
@@ -393,13 +410,16 @@ class PlayerBox(Gtk.Overlay):
         return f"DemonEditor [{translate('Playback')}]"
 
     def start_playback(self, mode):
+        self.on_stop() if mode is not PlaybackMode.ZAP else None
         self._stack.set_visible_child_name(self.Page.LOAD)
+
         if mode is PlaybackMode.PLAY:
             self.on_play_service()
         elif mode is PlaybackMode.ZAP:
             self.on_zap()
         elif mode is PlaybackMode.ZAP_PLAY:
-            self.on_zap(self.play_current)
+            ref = self.on_play_service()
+            self.zap(ref) if ref else None
         elif mode is PlaybackMode.STREAM:
             self.on_play_stream()
 
@@ -415,22 +435,22 @@ class PlayerBox(Gtk.Overlay):
             self.play(url) if url else self.on_error(None, "No reference is present!")
 
     def on_play_service(self, item=None):
+        """ Playback without switching channel on the Box [returns current reference]"""
         ref, path = self.get_ref()
         if not ref:
             return
 
-        self.on_stop()
         s_type = self._app.app_settings.setting_type
         req = HttpAPI.Request.STREAM if s_type is SettingsType.ENIGMA_2 else HttpAPI.Request.N_STREAM
         self._app.http_api.send(req, ref, self.watch)
+        return ref
 
     def on_zap(self, callback=None):
-        """ Switch(zap) the channel """
+        """ Switch(zap) the channel.  """
         ref, path = self.get_ref()
         if not ref:
             return
 
-        self.on_stop()
         # IPTV type checking
         row = self._fav_view.get_model()[path][:]
         if row[Column.FAV_TYPE] == BqServiceType.IPTV.name and callback:
@@ -445,7 +465,7 @@ class PlayerBox(Gtk.Overlay):
             return
         return self._app.get_service_ref(path), path
 
-    def zap(self, ref, callback):
+    def zap(self, ref, callback=None):
         if self._s_type is SettingsType.ENIGMA_2:
             def zp(rq):
                 if rq and rq.get("e2state", False):
@@ -468,7 +488,7 @@ class PlayerBox(Gtk.Overlay):
             self._app.show_error_message("This type of settings is not supported!")
 
     def watch(self, data):
-        GLib.timeout_add_seconds(1, self.play, self._app.get_url_from_m3u(data))
+        self.play(self._app.get_url_from_m3u(data))
 
     def play(self, url, title=None):
         if self._play_mode is PlayStreamsMode.M3U:
@@ -520,11 +540,13 @@ class PlayerBox(Gtk.Overlay):
         window.set_cursor(cursor)
 
         self.hide_mouse_cursor(window, display)
+        self.is_cursor_visible = True
 
     @run_with_delay(3)
     def hide_mouse_cursor(self, window, display):
         cursor = Gdk.Cursor.new_for_display(display, Gdk.CursorType.BLANK_CURSOR)
         window.set_cursor(cursor)
+        self.is_cursor_visible = False
 
 
 if __name__ == "__main__":
