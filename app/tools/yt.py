@@ -172,17 +172,22 @@ class InnerTube:
     _BASE_URI = "https://www.youtube.com/youtubei/v1"
 
     _DEFAULT_CLIENTS = {
-        "ANDROID": {
-            "context": {"client": {"clientName": "ANDROID", "clientVersion": "16.20"}},
-            "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
-        },
-        "ANDROID_EMBED": {
-            "context": {"client": {"clientName": "ANDROID", "clientVersion": "16.20", "clientScreen": "EMBED"}},
-            "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
-        }
+        "WEB_EMBED": {"context": {"client": {"clientName": "WEB_EMBEDDED_PLAYER",
+                                             "clientVersion": "2.20210721.00.00",
+                                             "clientScreen": "EMBED"}},
+                      "header": {"User-Agent": "Mozilla/5.0"},
+                      "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"},
+
+        "ANDROID_EMBED": {"context": {"client": {"clientName": "ANDROID_EMBEDDED_PLAYER",
+                                                 "clientVersion": "17.31.35",
+                                                 "clientScreen": "EMBED",
+                                                 "androidSdkVersion": 30}},
+                          "header": {"User-Agent": "com.google.android.youtube/"},
+                          "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"}
+
     }
 
-    def __init__(self, client="ANDROID"):
+    def __init__(self, client="ANDROID_EMBED"):
         """ Initialize an InnerTube object.
 
             @param client: Client to use for the object. Default to web because it returns the most playback types.
