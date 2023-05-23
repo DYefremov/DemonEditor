@@ -33,7 +33,7 @@ from enum import IntEnum
 from pathlib import Path
 
 import requests
-from gi.repository import Gtk, Gdk, GLib, Pango
+from gi.repository import Gtk, Gdk, GLib, Pango, GObject
 
 from app.commons import log, run_task, run_idle
 from app.ui.dialogs import translate
@@ -86,6 +86,7 @@ class ExtensionManager(Gtk.Window):
         self._view.append_column(column)
         # Status
         renderer = Gtk.CellRendererToggle(xalign=0.5)
+        renderer.connect("toggled", self.on_install_toggled)
         column = Gtk.TreeViewColumn(title=translate("Installed"), cell_renderer=renderer, active=self.Column.STATUS)
         column.set_alignment(0.5)
         column.set_fixed_width(100)
@@ -105,6 +106,7 @@ class ExtensionManager(Gtk.Window):
         load_box.pack_start(Gtk.Label(label=translate("Loading data..."), visible=True), False, False, 0)
         self._load_spinner = Gtk.Spinner(visible=True)
         self._load_spinner.bind_property("active", load_box, "visible")
+        self._load_spinner.bind_property("active", self._view, "sensitive", GObject.BindingFlags.INVERT_BOOLEAN)
         load_box.pack_end(self._load_spinner, False, False, 0)
         status_box.pack_end(load_box, False, False, 0)
 
@@ -114,7 +116,6 @@ class ExtensionManager(Gtk.Window):
         data_box.pack_start(scrolled, True, True, 0)
         frame.add(data_box)
         self.add(main_box)
-
         # Popup menu.
         menu = Gtk.Menu()
         item = Gtk.ImageMenuItem.new_from_stock("gtk-goto-bottom")
@@ -127,7 +128,6 @@ class ExtensionManager(Gtk.Window):
         menu.append(item)
         menu.show_all()
         self._view.connect("button-press-event", self.on_view_popup_menu, menu)
-
         # Header and toolbar.
         download_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic", Gtk.IconSize.BUTTON)
         download_button.set_label(translate("Download"))
@@ -198,7 +198,10 @@ class ExtensionManager(Gtk.Window):
         [self._model.append(e) for e in data]
         self._load_spinner.stop()
 
-    def on_remove(self, item):
+    def on_install_toggled(self, toggle, path):
+        self.on_remove() if toggle.get_active() else self.on_download()
+
+    def on_remove(self, item=None):
         model, paths = self._view.get_selection().get_selected_rows()
         if not paths:
             return
@@ -216,7 +219,7 @@ class ExtensionManager(Gtk.Window):
                 self._app.show_info_message(msg, Gtk.MessageType.WARNING)
 
     @run_task
-    def on_download(self, item):
+    def on_download(self, item=None):
         model, paths = self._view.get_selection().get_selected_rows()
         if not paths:
             return
