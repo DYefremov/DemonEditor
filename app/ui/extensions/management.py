@@ -46,14 +46,18 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:112.0) Gecko/20100101
 
 
 class ExtensionManager(Gtk.Window):
+    ICON_INFO = "emblem-important-symbolic"
+    ICON_UPDATE = "network-receive-symbolic"
+
     class Column(IntEnum):
         TITLE = 0
         DESC = 1
         VER = 2
-        STATUS = 3
-        NAME = 4
-        URL = 5
-        PATH = 6
+        INFO = 3
+        STATUS = 4
+        NAME = 5
+        URL = 6
+        PATH = 7
 
     def __init__(self, app, **kwargs):
         super().__init__(title=translate("Extensions"), icon_name="demon-editor", application=app,
@@ -65,8 +69,8 @@ class ExtensionManager(Gtk.Window):
         self._ext_path = f"{self._app.app_settings.default_data_path}tools{os.sep}extensions"
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
-        # Title, Description, Status, Name, URL, Path.
-        self._model = Gtk.ListStore.new((str, str, str, bool, str, str, object))
+        # Title, Description, Version, Info, Status, Name, URL, Path.
+        self._model = Gtk.ListStore.new((str, str, str, str, bool, str, str, object))
         self._model.connect("row-deleted", self.on_model_changed)
         self._model.connect("row-inserted", self.on_model_changed)
         self._view = Gtk.TreeView(activate_on_single_click=True, enable_grid_lines=Gtk.TreeViewGridLines.BOTH)
@@ -88,10 +92,15 @@ class ExtensionManager(Gtk.Window):
         column.set_expand(True)
         self._view.append_column(column)
         # Version
-        renderer = Gtk.CellRendererText(xalign=0.5)
-        column = Gtk.TreeViewColumn(title=translate("Ver."), cell_renderer=renderer, text=self.Column.VER)
+        column = Gtk.TreeViewColumn(translate("Ver."))
         column.set_alignment(0.5)
-        column.set_fixed_width(50)
+        column.set_fixed_width(70)
+        renderer = Gtk.CellRendererText(xalign=0.5)
+        column.pack_start(renderer, True)
+        column.add_attribute(renderer, "text", self.Column.VER)
+        renderer = Gtk.CellRendererPixbuf()
+        column.pack_start(renderer, True)
+        column.add_attribute(renderer, "icon_name", self.Column.INFO)
         self._view.append_column(column)
         # Status
         renderer = Gtk.CellRendererToggle(xalign=0.5)
@@ -178,34 +187,55 @@ class ExtensionManager(Gtk.Window):
 
     def get_installed(self):
         ext_paths = [f"{os.path.dirname(__file__)}{os.sep}", self._ext_path, "extensions"]
+        installed = {}
 
-        return {name: Path(importer.find_module(name).path).parent for importer, name, is_package in
-                pkgutil.iter_modules(ext_paths) if is_package}
+        for importer, name, is_package in pkgutil.iter_modules(ext_paths):
+            if is_package:
+                m = importer.find_module(name).load_module()
+                cls_name = name.capitalize()
+                if hasattr(m, cls_name):
+                    cls = getattr(m, cls_name)
+                    path = Path(importer.find_module(name).path).parent
+                    installed[name] = (cls, path)
+
+        return installed
 
     @run_task
     def update(self):
-        installed = self.get_installed()
-        extensions = []
         with requests.get(url=EXT_LIST_FILE, stream=True) as resp:
             if resp.status_code == 200:
                 try:
-                    for e, d in resp.json().items():
-                        path = installed.get(e)
-                        url = f"{EXT_URL}{d.get('ref', '')}"
-                        desc = d.get("description", "")
-                        ver = d.get("version", "N/A")
-                        extensions.append((d.get('label'), desc, ver, True if path else None, e, url, path))
+                    self.update_data(resp.json())
                 except ValueError as e:
                     log(f"{self.__class__.__name__} [update] error: {e}")
             else:
                 log(f"{self.__class__.__name__} [update] error: {resp.reason}")
 
-        self.update_data(extensions)
-
     @run_idle
     def update_data(self, data):
         self._model.clear()
-        [self._model.append(e) for e in data]
+        gen = self.append_data(data)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def append_data(self, data):
+        installed = self.get_installed()
+        for e, d in data.items():
+            url = f"{EXT_URL}{d.get('ref', '')}"
+            desc = d.get("description", "")
+            ver = d.get("version", "1.0")
+            info = self.ICON_UPDATE
+            path = None
+
+            ext = installed.get(e)
+            if ext:
+                info = None
+                ext_ver = ext[0].VERSION
+                path = ext[1]
+                if ext_ver < ver:
+                    ver = ext_ver
+                    info = self.ICON_INFO
+
+            yield self._model.append((d.get('label'), desc, ver, info, path, e, url, path))
         self._load_spinner.stop()
 
     def on_remove(self, item=None):
@@ -213,15 +243,15 @@ class ExtensionManager(Gtk.Window):
         if not paths:
             return
 
-        path = model[paths][self.Column.PATH]
+        itr = model.get_iter(paths)
+        path = model[itr][self.Column.PATH]
         if path:
             try:
                 shutil.rmtree(path)
             except OSError as e:
                 log(f"{self.__class__.__name__} [remove] error: {e}")
             else:
-                model[paths][self.Column.PATH] = None
-                model[paths][self.Column.STATUS] = None
+                model.set(itr, {self.Column.INFO: self.ICON_UPDATE, self.Column.STATUS: None, self.Column.PATH: None})
                 msg = translate('Restart the program to apply all changes.')
                 self._app.show_info_message(msg, Gtk.MessageType.WARNING)
 
@@ -233,6 +263,7 @@ class ExtensionManager(Gtk.Window):
 
         itr = model.get_iter(paths)
         url = model[itr][self.Column.URL]
+        ver = model[itr][self.Column.VER]
         if not url:
             return
 
@@ -243,6 +274,7 @@ class ExtensionManager(Gtk.Window):
                 try:
                     for f in resp.json():
                         url = f.get("download_url", None)
+                        ver = f.get("version", "1.0")
                         if url:
                             urls[url] = f.get("name", None)
                 except ValueError as e:
@@ -254,8 +286,8 @@ class ExtensionManager(Gtk.Window):
             path = f"{self._ext_path}{os.sep}{model[paths][self.Column.NAME]}{os.sep}"
             os.makedirs(os.path.dirname(path), exist_ok=True)
             if all((self.download_file(u, f"{path}{n}") for u, n in urls.items())):
-                GLib.idle_add(model.set_value, itr, self.Column.STATUS, True)
-                GLib.idle_add(model.set_value, itr, self.Column.PATH, path)
+                data = {self.Column.VER: ver, self.Column.INFO: None, self.Column.STATUS: True, self.Column.PATH: path}
+                GLib.idle_add(model.set, itr, data)
                 msg = translate('Restart the program to apply all changes.')
                 self._app.show_info_message(msg, Gtk.MessageType.WARNING)
 
