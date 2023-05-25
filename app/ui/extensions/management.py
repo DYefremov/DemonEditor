@@ -49,10 +49,11 @@ class ExtensionManager(Gtk.Window):
     class Column(IntEnum):
         TITLE = 0
         DESC = 1
-        STATUS = 2
-        NAME = 3
-        URL = 4
-        PATH = 5
+        VER = 2
+        STATUS = 3
+        NAME = 4
+        URL = 5
+        PATH = 6
 
     def __init__(self, app, **kwargs):
         super().__init__(title=translate("Extensions"), icon_name="demon-editor", application=app,
@@ -65,12 +66,13 @@ class ExtensionManager(Gtk.Window):
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         # Title, Description, Status, Name, URL, Path.
-        self._model = Gtk.ListStore.new((str, str, bool, str, str, object))
+        self._model = Gtk.ListStore.new((str, str, str, bool, str, str, object))
         self._model.connect("row-deleted", self.on_model_changed)
         self._model.connect("row-inserted", self.on_model_changed)
         self._view = Gtk.TreeView(activate_on_single_click=True, enable_grid_lines=Gtk.TreeViewGridLines.BOTH)
         self._view.set_model(self._model)
         self._view.set_tooltip_column(self.Column.DESC)
+        self._view.connect("row-activated", self.on_row_activated)
         # Title
         renderer = Gtk.CellRendererText(xalign=0.05, ellipsize=Pango.EllipsizeMode.END)
         column = Gtk.TreeViewColumn(title=translate("Title"), cell_renderer=renderer, text=self.Column.TITLE)
@@ -81,16 +83,23 @@ class ExtensionManager(Gtk.Window):
         # Description
         renderer = Gtk.CellRendererText(xalign=0.05, ellipsize=Pango.EllipsizeMode.END)
         column = Gtk.TreeViewColumn(title=translate("Description"), cell_renderer=renderer, text=self.Column.DESC)
+        column.set_alignment(0.5)
         column.set_resizable(True)
         column.set_expand(True)
         self._view.append_column(column)
+        # Version
+        renderer = Gtk.CellRendererText(xalign=0.5)
+        column = Gtk.TreeViewColumn(title=translate("Ver."), cell_renderer=renderer, text=self.Column.VER)
+        column.set_alignment(0.5)
+        column.set_fixed_width(50)
+        self._view.append_column(column)
         # Status
         renderer = Gtk.CellRendererToggle(xalign=0.5)
-        renderer.connect("toggled", self.on_install_toggled)
         column = Gtk.TreeViewColumn(title=translate("Installed"), cell_renderer=renderer, active=self.Column.STATUS)
         column.set_alignment(0.5)
         column.set_fixed_width(100)
         self._view.append_column(column)
+        self._status_column = column
 
         main_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN, **margin)
@@ -184,7 +193,8 @@ class ExtensionManager(Gtk.Window):
                         path = installed.get(e)
                         url = f"{EXT_URL}{d.get('ref', '')}"
                         desc = d.get("description", "")
-                        extensions.append((d.get('label'), desc, True if path else None, e, url, path))
+                        ver = d.get("version", "N/A")
+                        extensions.append((d.get('label'), desc, ver, True if path else None, e, url, path))
                 except ValueError as e:
                     log(f"{self.__class__.__name__} [update] error: {e}")
             else:
@@ -198,15 +208,12 @@ class ExtensionManager(Gtk.Window):
         [self._model.append(e) for e in data]
         self._load_spinner.stop()
 
-    def on_install_toggled(self, toggle, path):
-        self.on_remove() if toggle.get_active() else self.on_download()
-
     def on_remove(self, item=None):
         model, paths = self._view.get_selection().get_selected_rows()
         if not paths:
             return
 
-        path = model[paths][-1]
+        path = model[paths][self.Column.PATH]
         if path:
             try:
                 shutil.rmtree(path)
@@ -224,7 +231,8 @@ class ExtensionManager(Gtk.Window):
         if not paths:
             return
 
-        url = model[paths][self.Column.URL]
+        itr = model.get_iter(paths)
+        url = model[itr][self.Column.URL]
         if not url:
             return
 
@@ -246,7 +254,6 @@ class ExtensionManager(Gtk.Window):
             path = f"{self._ext_path}{os.sep}{model[paths][self.Column.NAME]}{os.sep}"
             os.makedirs(os.path.dirname(path), exist_ok=True)
             if all((self.download_file(u, f"{path}{n}") for u, n in urls.items())):
-                itr = model.get_iter(paths)
                 GLib.idle_add(model.set_value, itr, self.Column.STATUS, True)
                 GLib.idle_add(model.set_value, itr, self.Column.PATH, path)
                 msg = translate('Restart the program to apply all changes.')
@@ -264,6 +271,10 @@ class ExtensionManager(Gtk.Window):
 
     def on_model_changed(self, model, path, itr=None):
         self._count_label.set_text(str(len(model)))
+
+    def on_row_activated(self, view, path, column):
+        if column is self._status_column:
+            self.on_remove() if view.get_model()[path][self.Column.STATUS] else self.on_download()
 
     def on_view_popup_menu(self, view, event, menu):
         if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
