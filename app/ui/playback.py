@@ -123,6 +123,7 @@ class PlayerBox(Gtk.Overlay):
 
         self.connect("delete-event", self.on_delete)
         self.connect("show", self.set_player_area_size)
+        self.connect("unrealize", self.on_unrealize)
 
     @property
     def playback_widget(self):
@@ -195,6 +196,10 @@ class PlayerBox(Gtk.Overlay):
             else:
                 self.init_playback_elements()
                 self.on_play()
+
+    def on_unrealize(self, box):
+        if self._player:
+            self._player.release()
 
     def init_playback_elements(self):
         self._player.connect("error", self.on_error)
@@ -418,8 +423,7 @@ class PlayerBox(Gtk.Overlay):
         elif mode is PlaybackMode.ZAP:
             self.on_zap()
         elif mode is PlaybackMode.ZAP_PLAY:
-            ref = self.on_play_service()
-            self.zap(ref) if ref else None
+            self.on_zap(self.play_current)
         elif mode is PlaybackMode.STREAM:
             self.on_play_stream()
 

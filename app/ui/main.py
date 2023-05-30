@@ -3524,7 +3524,8 @@ class Application(Gtk.Application):
 
     def get_url_from_m3u(self, data):
         error_code = data.get("error_code", 0)
-        if error_code or self._http_status_image.get_visible():
+        if error_code:
+            log(f"HTTP connection error [{error_code}].")
             self.show_error_message("No connection to the receiver!")
             return
 
