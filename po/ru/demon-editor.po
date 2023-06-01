@@ -1485,3 +1485,12 @@ msgstr "Альтернативный заголовок окна"
 
 msgid "Selected type:"
 msgstr "Выбран тип:"
+
+msgid "Extension Manager"
+msgstr "Менеджер расширений"
+
+msgid "Ver."
+msgstr "Вер."
+
+msgid "Installed"
+msgstr "Установлено"

@@ -1488,3 +1488,12 @@ msgstr "Альтэрнатыўны загаловак акна"
 
 msgid "Selected type:"
 msgstr "Абраны тып:"
+
+msgid "Extension Manager"
+msgstr "Менеджар пашырэнняў"
+
+msgid "Ver."
+msgstr "Вер."
+
+msgid "Installed"
+msgstr "Усталявана"

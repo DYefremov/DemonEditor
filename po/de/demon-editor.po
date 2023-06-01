@@ -1502,3 +1502,12 @@ msgstr "Alternativer Fenstertitel"
 
 msgid "Selected type:"
 msgstr "Ausgewählt Typ:"
+
+msgid "Extension Manager"
+msgstr "Erweiterungs-Manager"
+
+msgid "Ver."
+msgstr "Ver."
+
+msgid "Installed"
+msgstr "Installiert"
