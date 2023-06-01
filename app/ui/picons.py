@@ -202,7 +202,7 @@ class PiconManager(Gtk.Box):
 
         if not len(self._picon_ids) and self._s_type is SettingsType.ENIGMA_2:
             message = translate("To automatically set the identifiers for picons,\n"
-                                  "first load the required services list into the main application window.")
+                                "first load the required services list into the main application window.")
             self.show_info_message(message, Gtk.MessageType.WARNING)
             self._satellite_label.show()
 
@@ -540,6 +540,7 @@ class PiconManager(Gtk.Box):
 
     def on_download(self, app, page):
         if page is Page.PICONS:
+            self._app.picons.clear()
             self.on_picons_download()
 
     def on_picons_download(self, item=None, files_filter=None, path=None):
