@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-04-13 02:15+0200\n"
+"PO-Revision-Date: 2023-06-02 06:05+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 22.12.3\n"
+"X-Generator: Lokalize 23.04.1\n"
 
 msgid "translator-credits"
 msgstr ""
@@ -819,7 +819,7 @@ msgid "Language:"
 msgstr "Lingua:"
 
 msgid "Load the last open configuration at program startup"
-msgstr "Carica l'ultima configurazione aperta all'avvio del programma"
+msgstr "Carica ultima configurazione aperta all'avvio del programma"
 
 msgid "Enable direct playback bar"
 msgstr "Abilita barra di riproduzione diretta"
@@ -1551,3 +1551,12 @@ msgstr "Titolo alternativo della finestra"
 
 msgid "Selected type:"
 msgstr "Tipo selezionato:"
+
+msgid "Extension Manager"
+msgstr "Manager estensioni"
+
+msgid "Ver."
+msgstr "Ver."
+
+msgid "Installed"
+msgstr "Installato"
