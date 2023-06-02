@@ -1,7 +1,7 @@
 # Copyright (C) 2018-2022 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
-#
+# Nicola Fanghella, 2021
 # Massimo Pissarello <mapi68@gmail.com>, 2022, 2023.
 msgid ""
 msgstr ""
@@ -17,7 +17,9 @@ msgstr ""
 "X-Generator: Lokalize 23.04.1\n"
 
 msgid "translator-credits"
-msgstr "Massimo Pissarello"
+msgstr ""
+"Nicola Fanghella\n"
+"Massimo Pissarello"
 
 # Main
 msgid "Service"
