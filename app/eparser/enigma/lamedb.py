@@ -69,7 +69,7 @@ class LameDbReader:
             return self.parse_v5()
         raise SyntaxError("Unsupported version of the format.")
 
-    def parse_v3(self, services, transponders):
+    def parse_v3(self, services_data, transponders):
         """ Parsing version 3. """
         for t in transponders:
             tr = transponders[t].lower()
@@ -92,7 +92,7 @@ class LameDbReader:
 
             transponders[t] = tr
 
-        return self.parse_services(services, transponders)
+        return self.parse_services(services_data, transponders)
 
     def parse_v4(self):
         """ Parsing version 4. """
@@ -134,15 +134,12 @@ class LameDbReader:
 
             return self.parse_services(srvs, trs)
 
-    def parse_services(self, services, transponders):
+    def parse_services(self, services_data, transponders):
         """ Parsing services. """
         services_list = []
         blacklist = get_blacklist(self._path) if self._path else {}
-        srvs = self.split(services, 3)
-        if srvs[0][0] == "":  # Remove first empty element.
-            srvs.remove(srvs[0])
 
-        for srv in srvs:
+        for srv in self.get_services(services_data):
             data_id = str(srv[0]).lower()  # Lower is for lamedb ver.3.
             data = data_id.split(_SEP)
             sp = "0"
@@ -243,11 +240,12 @@ class LameDbReader:
 
         transponders, sep, services = services.partition("services")  # 2 step
         services, sep, _ = services.partition("\nend")  # 3 step
+        services = services.strip()
 
         if match.group() == "/3/":
-            return self.parse_v3(services.split("\n"), self.parse_transponders(transponders.split("/")))
+            return self.parse_v3(services.splitlines(), self.parse_transponders(transponders.split("/")))
 
-        return self.parse_services(services.split("\n"), self.parse_transponders(transponders.split("/")))
+        return self.parse_services(services.splitlines(), self.parse_transponders(transponders.split("/")))
 
     @staticmethod
     def get_services_lines(services):
@@ -282,17 +280,25 @@ class LameDbReader:
 
         return transponders
 
-    def split(self, itr, size):
-        """ Divide the iterable. """
-        srv = []
+    def get_services(self, itr, size=3):
+        """ Separates and extract services data. """
+        services = []
         tmp = []
-        for i, line in enumerate(itr):
+        i = 0
+        for line in itr:
+            i += 1
             tmp.append(line)
-            if i % size == 0:
-                srv.append(tuple(tmp))
-                tmp.clear()
-
-        return srv
+            if i == size:
+                if not line.startswith("p:"):
+                    # To prevent cases of incorrect service data formation
+                    # (e.g. the name contains a line break)
+                    tmp.pop()
+                    i -= 1
+                else:
+                    services.append(tuple(tmp))
+                    tmp.clear()
+                    i = 0
+        return services
 
 
 class LameDbWriter:
