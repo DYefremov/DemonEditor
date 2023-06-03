@@ -1369,7 +1369,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkGrid" id="format_box">
-                    <property name="visible">True</property>
+                    <property name="visible" bind-source="providers_header_box" bind-property="sensitive" bind-flags="invert-boolean">False</property>
                     <property name="can_focus">False</property>
                     <property name="column_spacing">5</property>
                     <property name="column_homogeneous">True</property>
