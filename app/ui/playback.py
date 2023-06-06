@@ -180,7 +180,7 @@ class PlayerBox(Gtk.Overlay):
     def on_page_changed(self, app, page):
         self._page = page
         if self._player:
-            self.update_buttons()
+            self.update_buttons() if not IS_DARWIN else None
             self.on_close()
             self.set_visible(False)
 
@@ -251,8 +251,7 @@ class PlayerBox(Gtk.Overlay):
         self.emit("pause", None)
 
     def on_stop(self, action=None, value=None):
-        if not IS_DARWIN:
-            self._stop_button.set_visible(False)
+        self._stop_button.set_visible(False) if not IS_DARWIN else None
         self.emit("stop", None)
 
     def on_next(self, button):
@@ -264,7 +263,7 @@ class PlayerBox(Gtk.Overlay):
     def switch_service(self, count):
         self._fav_view.grab_focus()
         if self._fav_view.do_move_cursor(self._fav_view, Gtk.MovementStep.DISPLAY_LINES, count):
-            self.update_buttons()
+            self.update_buttons() if not IS_DARWIN else None
             self.set_player_action()
 
     def on_rewind(self, scale, scroll_type, value):
