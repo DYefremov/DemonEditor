@@ -639,8 +639,10 @@ class Application(Gtk.Application):
             elif d_op == "off":
                 self._settings.debug_mode = False
             else:
-                log("No valid [on, off] arguments for -d found!")
+                msg = "No valid [on, off] arguments for -d found!"
+                log(msg) if "log" in options else print(msg)
                 return 1
+
             log(f"Debug mode is {d_op}.")
             self._settings.save()
 
