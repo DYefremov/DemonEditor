@@ -111,7 +111,7 @@ class YouTube:
             if not self._yt_dl:
                 self._yt_dl = YouTubeDL.get_instance(self._settings, self._callback)
                 if not self._yt_dl:
-                    raise YouTubeException("youtube-dl initialization error.")
+                    raise YouTubeException("yt-dlp initialization error.")
             return self._yt_dl.get_yt_link(url, skip_errors)
 
         return self.get_yt_link_by_id(video_id)
@@ -148,7 +148,7 @@ class YouTube:
         if self._settings.enable_yt_dl and url:
             try:
                 if not self._yt_dl:
-                    raise YouTubeException("youtube-dl is not initialized!")
+                    raise YouTubeException("yt-dlp is not initialized!")
 
                 self._yt_dl.update_options({"noplaylist": False, "extract_flat": True})
                 info = self._yt_dl.get_info(url, skip_errors=False)
@@ -307,14 +307,14 @@ class PlayListParser(HTMLParser):
 
 
 class YouTubeDL:
-    """ Utility class [experimental] for working with youtube-dl.
+    """ Utility class [experimental] for working with yt-dlp.
 
-         [https://github.com/ytdl-org/youtube-dl]
+         [https://github.com/yt-dlp/yt-dlp]
      """
 
     _DL_INSTANCE = None
     _DownloadError = None
-    _LATEST_RELEASE_URL = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
+    _LATEST_RELEASE_URL = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
     _OPTIONS = {"noplaylist": True,  # Single video instead of a playlist [ignoring playlist in URL].
                 "extract_flat": False,  # Do not resolve URLs, return the immediate result.
                 "quiet": True,  # Do not print messages to stdout.
@@ -339,7 +339,7 @@ class YouTubeDL:
         return cls._DL_INSTANCE
 
     def init(self):
-        if not os.path.isfile(f"{self._path}youtube_dl{SEP}version.py"):
+        if not os.path.isfile(f"{self._path}yt_dlp{SEP}version.py"):
             self.get_latest_release()
 
         if self._path not in sys.path:
@@ -349,39 +349,39 @@ class YouTubeDL:
 
     def init_dl(self):
         try:
-            import youtube_dl
+            import yt_dlp
         except ModuleNotFoundError as e:
             log(f"YouTubeDLHelper error: {e}")
             raise YouTubeException(e)
         except ImportError as e:
             log(f"YouTubeDLHelper error: {e}")
         else:
-            if self._path not in youtube_dl.__file__:
-                msg = "Another version of youtube-dl was found on your system!"
+            if self._path not in yt_dlp.__file__:
+                msg = "Another version of yt-dlp was found on your system!"
                 log(msg)
                 raise YouTubeException(msg)
 
             if self._update:
-                if hasattr(youtube_dl.version, "__version__"):
+                if hasattr(yt_dlp.version, "__version__"):
                     l_ver = self.get_last_release_id()
-                    cur_ver = youtube_dl.version.__version__
-                    if l_ver and youtube_dl.version.__version__ < l_ver:
-                        msg = f"youtube-dl has new release!\nCurrent: {cur_ver}. Last: {l_ver}."
+                    cur_ver = yt_dlp.version.__version__
+                    if l_ver and yt_dlp.version.__version__ < l_ver:
+                        msg = f"yt-dlp has new release!\nCurrent: {cur_ver}. Last: {l_ver}."
                         show_notification(msg)
                         log(msg)
                         self._callback(msg, False)
                         self.get_latest_release()
 
-            self._DownloadError = youtube_dl.utils.DownloadError
-            self._dl = youtube_dl.YoutubeDL(self._OPTIONS)
-            msg = "youtube-dl initialized..."
+            self._DownloadError = yt_dlp.utils.DownloadError
+            self._dl = yt_dlp.YoutubeDL(self._OPTIONS)
+            msg = "yt-dlp initialized..."
             show_notification(msg)
             log(msg)
 
     @staticmethod
     def get_last_release_id():
         """ Getting last release id. """
-        url = "https://api.github.com/repos/ytdl-org/youtube-dl/releases/latest"
+        url = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
         try:
             with urlopen(url, timeout=10) as resp:
                 return json.loads(resp.read().decode("utf-8")).get("tag_name", "0")
@@ -391,7 +391,7 @@ class YouTubeDL:
     def get_latest_release(self):
         try:
             self._is_update_process = True
-            log("Getting the last youtube-dl release...")
+            log("Getting the last yt-dlp release...")
 
             with urlopen(YouTubeDL._LATEST_RELEASE_URL, timeout=10) as resp:
                 r = json.loads(resp.read().decode("utf-8"))
@@ -400,7 +400,7 @@ class YouTubeDL:
                     if os.path.isdir(self._path):
                         shutil.rmtree(self._path)
 
-                    zip_file = self._path + "yt.zip"
+                    zip_file = f"{self._path}yt.zip"
                     os.makedirs(os.path.dirname(self._path), exist_ok=True)
                     f_name, headers = urlretrieve(zip_url, filename=zip_file)
 
@@ -408,12 +408,12 @@ class YouTubeDL:
 
                     with zipfile.ZipFile(f_name) as arch:
                         for info in arch.infolist():
-                            pref, sep, f = info.filename.partition("/youtube_dl/")
+                            pref, sep, f = info.filename.partition("/yt_dlp/")
                             if sep:
                                 arch.extract(info.filename)
                                 shutil.move(info.filename, f"{self._path}{sep}{f}")
                         shutil.rmtree(pref)
-                        msg = "Getting the last youtube-dl release is done!"
+                        msg = "Getting the last yt-dlp release is done!"
                         show_notification(msg)
                         log(msg)
                         self._callback(msg, False)

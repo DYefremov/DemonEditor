@@ -3079,7 +3079,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkBox" id="enable_yt_dl_box">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="tooltip-text" translatable="yes">Enables URL parsing using youtube-dl to get direct links to media.</property>
+                                <property name="tooltip-text" translatable="yes">Enables URL parsing using yt-dlp to get direct links to media.</property>
                                 <child>
                                   <object class="GtkLabel" id="enable_yt_dl_label">
                                     <property name="visible">True</property>
@@ -3109,7 +3109,7 @@ Author: Dmitriy Yefremov
                                 </child>
                                 <child>
                                   <object class="GtkLinkButton" id="yt_dl_link_button">
-                                    <property name="label">youtube-dl</property>
+                                    <property name="label">yt-dlp</property>
                                     <property name="name">status-bar-button</property>
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
@@ -3117,7 +3117,7 @@ Author: Dmitriy Yefremov
                                     <property name="halign">start</property>
                                     <property name="valign">center</property>
                                     <property name="relief">none</property>
-                                    <property name="uri">https://youtube-dl.org/</property>
+                                    <property name="uri">https://github.com/yt-dlp/yt-dlp</property>
                                   </object>
                                   <packing>
                                     <property name="expand">True</property>
