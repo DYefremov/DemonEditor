@@ -711,6 +711,10 @@ class ServicesParser(HTMLParser):
                 sr, fec = sr_fec.split()
                 pol = get_key_by_value(POLARIZATION, pol)
                 sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, fec, sys, mod)
+                if not all((freq, nid, tid)):
+                    log(f"Error. Not enough parameters [Frequency={freq}, NID={nid}, TID={tid}].")
+                    continue
+
                 freq, nid, tid = int(float(freq)), int(nid), int(tid)
                 tr = self._TR.format(freq, sr, pol, fec, pos, inv, sys, s2_flags)
 
