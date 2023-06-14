@@ -509,7 +509,7 @@ class Application(Gtk.Application):
         toolbar_box = builder.get_object("toolbar_main_box")
         if self._settings.use_header_bar:
             header_bar = HeaderBar()
-            if not IS_DARWIN:
+            if IS_LINUX:
                 header_bar.pack_start(builder.get_object("file_header_button"))
 
             header_bar.pack_start(profile_box)
@@ -803,7 +803,7 @@ class Application(Gtk.Application):
         sa.connect("change-state", self.on_layout_change)
         # Header bar for macOS.
         sa = self.set_state_action("set_alternate_title", self.set_use_alt_title, self._settings.use_header_bar)
-        sa.set_enabled(IS_DARWIN)
+        sa.set_enabled(not IS_LINUX)
         # Menu bar and playback.
         self.set_action("on_playback_close", self._player_box.on_close)
         if not USE_HEADER_BAR:
