@@ -577,7 +577,7 @@ Author: Dmitriy Yefremov
                   <object class="GtkFrame" id="local_file_paths_frame">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label-xalign">0.05000000074505806</property>
+                    <property name="label-xalign">0.02</property>
                     <property name="shadow-type">in</property>
                     <child>
                       <object class="GtkBox" id="local_paths_box">
@@ -2922,23 +2922,23 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">EXPERIMENTAL!</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkBox" id="experimental_features_box">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="margin-start">5</property>
                     <property name="margin-end">5</property>
+                    <child type="center">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">EXPERIMENTAL!</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                     <child>
                       <object class="GtkLabel" id="enable_experimental_label">
                         <property name="visible">True</property>
@@ -3225,7 +3225,7 @@ Author: Dmitriy Yefremov
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
                   </packing>
