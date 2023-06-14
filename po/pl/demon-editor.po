@@ -1376,8 +1376,8 @@ msgstr "Wszystkie bukiety"
 msgid "Playback from the main list"
 msgstr "Odtwarzanie z listy głównej"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
-msgstr "Włącza parsowanie adresów URL przy użyciu youtube-dl w celu uzyskania bezpośrednich linków do multimediów."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Włącza parsowanie adresów URL przy użyciu yt-dlp w celu uzyskania bezpośrednich linków do multimediów."
 
 msgid "Permissions..."
 msgstr "Uprawnienia..."

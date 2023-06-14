@@ -1358,8 +1358,8 @@ msgstr "Усе букеты"
 msgid "Playback from the main list"
 msgstr "Прайграванне з асноўнага спіса"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
-msgstr "Улучае аналіз URL-адрасоў з дапамогай youtube-dl для атрымання прамых спасылак на медыя."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Улучае аналіз URL-адрасоў з дапамогай yt-dlp для атрымання прамых спасылак на медыя."
 
 msgid "Permissions..."
 msgstr "Дазволы..."

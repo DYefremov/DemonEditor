@@ -1387,8 +1387,8 @@ msgstr "Tüm buketler"
 msgid "Playback from the main list"
 msgstr "Ana listeden oynatma"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
-msgstr "Medyaya doğrudan bağlantılar almak için youtube-dl kullanarak URL ayrıştırmayı etkinleştirir."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Medyaya doğrudan bağlantılar almak için yt-dlp kullanarak URL ayrıştırmayı etkinleştirir."
 
 msgid "Permissions..."
 msgstr "İzinler..."

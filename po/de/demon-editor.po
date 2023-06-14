@@ -797,7 +797,7 @@ msgid "Apply profile settings"
 msgstr "Profileinstellungen anwenden"
 
 msgid "Settings type:"
-msgstr "Art der Einstellungen:"
+msgstr "Einstellungstyp:"
 
 msgid "Set default"
 msgstr "Standard wiederherstellen"
@@ -1372,8 +1372,8 @@ msgstr "Alle Bouquets"
 msgid "Playback from the main list"
 msgstr "Wiedergabe aus der Hauptliste"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
-msgstr "Aktiviert URL-Parsing mit youtube-dl, um direkte Links zu Medien zu erhalten."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Aktiviert URL-Parsing mit yt-dlp, um direkte Links zu Medien zu erhalten."
 
 msgid "Permissions..."
 msgstr "Berechtigungen..."

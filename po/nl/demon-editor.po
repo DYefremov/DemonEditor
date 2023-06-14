@@ -1346,8 +1346,8 @@ msgstr "Alle boeketten"
 msgid "Playback from the main list"
 msgstr "Afspelen vanuit de hoofdlijst"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
-msgstr "Schakelt URL-parsing met behulp van youtube-dl in, om directe links naar media te krijgen."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Schakelt URL-parsing met behulp van yt-dlp in, om directe links naar media te krijgen."
 
 msgid "Permissions..."
 msgstr "Rechten..."
