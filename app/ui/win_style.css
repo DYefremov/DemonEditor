@@ -22,3 +22,7 @@ grid > button {
 popover .view {
   background-color: transparent;
 }
+
+headerbar .titlebutton {
+  padding: 5px 10px;
+}
