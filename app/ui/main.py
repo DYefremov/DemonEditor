@@ -3716,7 +3716,10 @@ class Application(Gtk.Application):
 
         active = not self._filter_box.get_visible()
         self._filter_services_button.set_active(active)
-        self._filter_entry.grab_focus() if active else self.on_filter_changed()
+        if active:
+            self._filter_entry.grab_focus()
+        elif len(self._services_model) != len(self._services_model_filter):
+            self.on_filter_changed()
         self.filter_set_default()
         self._filter_box.set_visible(active)
 
@@ -3725,7 +3728,10 @@ class Application(Gtk.Application):
             return True
 
         active = not self._iptv_filter_box.get_visible()
-        self._iptv_filter_entry.grab_focus() if active else self.on_iptv_filter_changed()
+        if active:
+            self._iptv_filter_entry.grab_focus()
+        elif len(self._iptv_model) != len(self._iptv_services_model_filter):
+            self.on_iptv_filter_changed()
         self._iptv_filter_box.set_visible(active)
         # Defaults.
         self.iptv_filter_set_default()
