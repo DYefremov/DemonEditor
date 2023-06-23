@@ -3789,25 +3789,39 @@ class Application(Gtk.Application):
 
         update_filter_sat_positions(self._filter_sat_pos_model, self._sat_positions)
 
-    @run_with_delay(2)
+    @run_with_delay(1)
     def on_filter_changed(self, item=None):
         self._services_load_spinner.start()
         self.update_filter_cache()
         self.update_filter_state()
 
-    @run_with_delay(2)
+    @run_with_delay(1)
     def on_iptv_filter_changed(self, item=None):
         self.update_iptv_filter_cache()
         self.update_iptv_filter_state()
 
-    @run_idle
     def update_filter_state(self):
-        self._services_model_filter.refilter()
-        GLib.idle_add(self._services_load_spinner.stop)
+        factor = self.DEL_FACTOR * 2
+        refresh = len(self._services_model_filter) > factor and self._filter_services_button.get_active()
+        gen = self.refilter(self._services_view, self._services_model, factor, refresh)
+        GLib.idle_add(lambda: next(gen, False))
 
-    @run_idle
     def update_iptv_filter_state(self):
-        self._iptv_services_model_filter.refilter()
+        factor = self.DEL_FACTOR * 2
+        refresh = len(self._iptv_services_model_filter) > factor and self._filter_iptv_services_button.get_active()
+        gen = self.refilter(self._iptv_services_view, self._iptv_model, factor, refresh)
+        GLib.idle_add(lambda: next(gen, False))
+
+    def refilter(self, view, model, factor=100, refresh=False):
+        main_model = view.get_model()
+        view.set_model(None) if refresh else None
+
+        for i, r in enumerate(model.emit("row-changed", r.path, r.iter) for r in model):
+            if i % factor == 0:
+                yield True
+
+        view.set_model(main_model)
+        GLib.idle_add(self._services_load_spinner.stop)
 
     def update_filter_cache(self):
         self._filter_cache.clear()
