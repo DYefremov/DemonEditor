@@ -31,7 +31,7 @@ import json
 import locale
 import os
 import sys
-from enum import Enum, IntEnum
+from enum import IntEnum
 from functools import lru_cache
 from pathlib import Path
 from pprint import pformat
@@ -51,8 +51,8 @@ IS_LINUX = sys.platform == "linux"
 USE_HEADER_BAR = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
 
 
-class Defaults(Enum):
-    """ Default program settings """
+class Defaults:
+    """ Default program settings. """
     USER = "root"
     PASSWORD = ""
     HOST = "127.0.0.1"
@@ -114,30 +114,30 @@ class SettingsType(IntEnum):
     def get_default_settings(self):
         """ Returns default settings for current type. """
         if self is self.ENIGMA_2:
-            srv_path = Defaults.BOX_SERVICES_PATH.value
-            sat_path = Defaults.BOX_SATELLITE_PATH.value
-            picons_path = Defaults.BOX_PICON_PATH.value
-            epg_path = Defaults.BOX_EPG_PATH.value
+            srv_path = Defaults.BOX_SERVICES_PATH
+            sat_path = Defaults.BOX_SATELLITE_PATH
+            picons_path = Defaults.BOX_PICON_PATH
+            epg_path = Defaults.BOX_EPG_PATH
             http_timeout = 5
             telnet_timeout = 5
         else:
-            srv_path = Defaults.NEUTRINO_BOX_SERVICES_PATH.value
-            sat_path = Defaults.NEUTRINO_BOX_SATELLITE_PATH.value
-            picons_path = Defaults.NEUTRINO_BOX_PICON_PATH.value
+            srv_path = Defaults.NEUTRINO_BOX_SERVICES_PATH
+            sat_path = Defaults.NEUTRINO_BOX_SATELLITE_PATH
+            picons_path = Defaults.NEUTRINO_BOX_PICON_PATH
             epg_path = ""
             http_timeout = 2
             telnet_timeout = 1
 
         return {"setting_type": self.value,
-                "host": Defaults.HOST.value,
-                "port": Defaults.FTP_PORT.value,
+                "host": Defaults.HOST,
+                "port": Defaults.FTP_PORT,
                 "timeout": 5,
-                "user": Defaults.USER.value,
-                "password": Defaults.PASSWORD.value,
-                "http_port": Defaults.HTTP_PORT.value,
+                "user": Defaults.USER,
+                "password": Defaults.PASSWORD,
+                "http_port": Defaults.HTTP_PORT,
                 "http_timeout": http_timeout,
-                "http_use_ssl": Defaults.HTTP_USE_SSL.value,
-                "telnet_port": Defaults.TELNET_PORT.value,
+                "http_use_ssl": Defaults.HTTP_USE_SSL,
+                "telnet_port": Defaults.TELNET_PORT,
                 "telnet_timeout": telnet_timeout,
                 "services_path": srv_path,
                 "user_bouquet_path": srv_path,
@@ -411,9 +411,9 @@ class Settings:
     @property
     def picons_paths(self):
         if self.setting_type is SettingsType.NEUTRINO_MP:
-            return self._settings.get("neutrino_picon_paths", Defaults.NEUTRINO_BOX_PICON_PATHS.value)
+            return self._settings.get("neutrino_picon_paths", Defaults.NEUTRINO_BOX_PICON_PATHS)
         else:
-            return self._settings.get("picon_paths", Defaults.BOX_PICON_PATHS.value)
+            return self._settings.get("picon_paths", Defaults.BOX_PICON_PATHS)
 
     @picons_paths.setter
     def picons_paths(self, value):
@@ -426,11 +426,19 @@ class Settings:
 
     @property
     def profile_folder_is_default(self):
-        return self._settings.get("profile_folder_is_default", Defaults.PROFILE_FOLDER_DEFAULT.value)
+        return self._settings.get("profile_folder_is_default", Defaults.PROFILE_FOLDER_DEFAULT)
 
     @profile_folder_is_default.setter
     def profile_folder_is_default(self, value):
         self._settings["profile_folder_is_default"] = value
+
+    @property
+    def use_common_picon_path(self):
+        return self._settings.get("use_common_picon_path", False)
+
+    @use_common_picon_path.setter
+    def use_common_picon_path(self, value):
+        self._settings["use_common_picon_path"] = value
 
     @property
     def default_data_path(self):
@@ -442,7 +450,7 @@ class Settings:
 
     @property
     def default_backup_path(self):
-        return self._settings.get("default_backup_path", Defaults.BACKUP_PATH.value)
+        return self._settings.get("default_backup_path", Defaults.BACKUP_PATH)
 
     @default_backup_path.setter
     def default_backup_path(self, value):
@@ -450,7 +458,7 @@ class Settings:
 
     @property
     def default_picon_path(self):
-        return self._settings.get("default_picon_path", Defaults.PICON_PATH.value)
+        return self._settings.get("default_picon_path", Defaults.PICON_PATH)
 
     @default_picon_path.setter
     def default_picon_path(self, value):
@@ -486,7 +494,7 @@ class Settings:
 
     @property
     def recordings_path(self):
-        return self._settings.get("recordings_path", Defaults.RECORDINGS_PATH.value)
+        return self._settings.get("recordings_path", Defaults.RECORDINGS_PATH)
 
     @recordings_path.setter
     def recordings_path(self, value):
@@ -496,7 +504,7 @@ class Settings:
 
     @property
     def activate_transcoding(self):
-        return self._settings.get("activate_transcoding", Defaults.ACTIVATE_TRANSCODING.value)
+        return self._settings.get("activate_transcoding", Defaults.ACTIVATE_TRANSCODING)
 
     @activate_transcoding.setter
     def activate_transcoding(self, value):
@@ -504,7 +512,7 @@ class Settings:
 
     @property
     def active_preset(self):
-        return self._settings.get("active_preset", Defaults.ACTIVE_TRANSCODING_PRESET.value)
+        return self._settings.get("active_preset", Defaults.ACTIVE_TRANSCODING_PRESET)
 
     @active_preset.setter
     def active_preset(self, value):
@@ -520,7 +528,7 @@ class Settings:
 
     @property
     def play_streams_mode(self):
-        return PlayStreamsMode(self._settings.get("play_streams_mode", Defaults.PLAY_STREAMS_MODE.value))
+        return PlayStreamsMode(self._settings.get("play_streams_mode", Defaults.PLAY_STREAMS_MODE))
 
     @play_streams_mode.setter
     def play_streams_mode(self, value):
@@ -528,7 +536,7 @@ class Settings:
 
     @property
     def stream_lib(self):
-        return self._settings.get("stream_lib", Defaults.STREAM_LIB.value)
+        return self._settings.get("stream_lib", Defaults.STREAM_LIB)
 
     @stream_lib.setter
     def stream_lib(self, value):
@@ -536,7 +544,7 @@ class Settings:
 
     @property
     def fav_click_mode(self):
-        return self._settings.get("fav_click_mode", Defaults.FAV_CLICK_MODE.value)
+        return self._settings.get("fav_click_mode", Defaults.FAV_CLICK_MODE)
 
     @fav_click_mode.setter
     def fav_click_mode(self, value):
@@ -544,7 +552,7 @@ class Settings:
 
     @property
     def main_list_playback(self):
-        return self._settings.get("main_list_playback", Defaults.MAIN_LIST_PLAYBACK.value)
+        return self._settings.get("main_list_playback", Defaults.MAIN_LIST_PLAYBACK)
 
     @main_list_playback.setter
     def main_list_playback(self, value):
@@ -599,7 +607,7 @@ class Settings:
 
     @property
     def backup_before_save(self):
-        return self._settings.get("backup_before_save", Defaults.BACKUP_BEFORE_SAVE.value)
+        return self._settings.get("backup_before_save", Defaults.BACKUP_BEFORE_SAVE)
 
     @backup_before_save.setter
     def backup_before_save(self, value):
@@ -607,7 +615,7 @@ class Settings:
 
     @property
     def backup_before_downloading(self):
-        return self._settings.get("backup_before_downloading", Defaults.BACKUP_BEFORE_DOWNLOADING.value)
+        return self._settings.get("backup_before_downloading", Defaults.BACKUP_BEFORE_DOWNLOADING)
 
     @backup_before_downloading.setter
     def backup_before_downloading(self, value):
@@ -615,7 +623,7 @@ class Settings:
 
     @property
     def v5_support(self):
-        return self._settings.get("v5_support", Defaults.V5_SUPPORT.value)
+        return self._settings.get("v5_support", Defaults.V5_SUPPORT)
 
     @v5_support.setter
     def v5_support(self, value):
@@ -623,7 +631,7 @@ class Settings:
 
     @property
     def unlimited_copy_buffer(self):
-        return self._settings.get("unlimited_copy_buffer", Defaults.UNLIMITED_COPY_BUFFER.value)
+        return self._settings.get("unlimited_copy_buffer", Defaults.UNLIMITED_COPY_BUFFER)
 
     @unlimited_copy_buffer.setter
     def unlimited_copy_buffer(self, value):
@@ -631,7 +639,7 @@ class Settings:
 
     @property
     def extensions_support(self):
-        return self._settings.get("extensions_support", Defaults.EXTENSIONS_SUPPORT.value)
+        return self._settings.get("extensions_support", Defaults.EXTENSIONS_SUPPORT)
 
     @extensions_support.setter
     def extensions_support(self, value):
@@ -639,7 +647,7 @@ class Settings:
 
     @property
     def force_bq_names(self):
-        return self._settings.get("force_bq_names", Defaults.FORCE_BQ_NAMES.value)
+        return self._settings.get("force_bq_names", Defaults.FORCE_BQ_NAMES)
 
     @force_bq_names.setter
     def force_bq_names(self, value):
@@ -647,7 +655,7 @@ class Settings:
 
     @property
     def http_api_support(self):
-        return self._settings.get("http_api_support", Defaults.HTTP_API_SUPPORT.value)
+        return self._settings.get("http_api_support", Defaults.HTTP_API_SUPPORT)
 
     @http_api_support.setter
     def http_api_support(self, value):
@@ -655,7 +663,7 @@ class Settings:
 
     @property
     def enable_yt_dl(self):
-        return self._settings.get("enable_yt_dl", Defaults.ENABLE_YT_DL.value)
+        return self._settings.get("enable_yt_dl", Defaults.ENABLE_YT_DL)
 
     @enable_yt_dl.setter
     def enable_yt_dl(self, value):
@@ -663,7 +671,7 @@ class Settings:
 
     @property
     def enable_yt_dl_update(self):
-        return self._settings.get("enable_yt_dl_update", Defaults.ENABLE_YT_DL.value)
+        return self._settings.get("enable_yt_dl_update", Defaults.ENABLE_YT_DL)
 
     @enable_yt_dl_update.setter
     def enable_yt_dl_update(self, value):
@@ -671,7 +679,7 @@ class Settings:
 
     @property
     def enable_send_to(self):
-        return self._settings.get("enable_send_to", Defaults.ENABLE_SEND_TO.value)
+        return self._settings.get("enable_send_to", Defaults.ENABLE_SEND_TO)
 
     @enable_send_to.setter
     def enable_send_to(self, value):
@@ -731,7 +739,7 @@ class Settings:
 
     @property
     def list_picon_size(self):
-        return self._settings.get("list_picon_size", Defaults.LIST_PICON_SIZE.value)
+        return self._settings.get("list_picon_size", Defaults.LIST_PICON_SIZE)
 
     @list_picon_size.setter
     def list_picon_size(self, value):
@@ -739,7 +747,7 @@ class Settings:
 
     @property
     def tooltip_logo_size(self):
-        return self._settings.get("tooltip_logo_size", Defaults.TOOLTIP_LOGO_SIZE.value)
+        return self._settings.get("tooltip_logo_size", Defaults.TOOLTIP_LOGO_SIZE)
 
     @tooltip_logo_size.setter
     def tooltip_logo_size(self, value):
@@ -747,7 +755,7 @@ class Settings:
 
     @property
     def use_colors(self):
-        return self._settings.get("use_colors", Defaults.USE_COLORS.value)
+        return self._settings.get("use_colors", Defaults.USE_COLORS)
 
     @use_colors.setter
     def use_colors(self, value):
@@ -755,7 +763,7 @@ class Settings:
 
     @property
     def new_color(self):
-        return self._settings.get("new_color", Defaults.NEW_COLOR.value)
+        return self._settings.get("new_color", Defaults.NEW_COLOR)
 
     @new_color.setter
     def new_color(self, value):
@@ -763,7 +771,7 @@ class Settings:
 
     @property
     def extra_color(self):
-        return self._settings.get("extra_color", Defaults.EXTRA_COLOR.value)
+        return self._settings.get("extra_color", Defaults.EXTRA_COLOR)
 
     @extra_color.setter
     def extra_color(self, value):
@@ -929,18 +937,18 @@ class Settings:
 
         return {
             "version": Settings.__VERSION,
-            "default_profile": Defaults.DEFAULT_PROFILE.value,
+            "default_profile": Defaults.DEFAULT_PROFILE,
             "profiles": {profile_name: def_settings},
-            "v5_support": Defaults.V5_SUPPORT.value,
-            "http_api_support": Defaults.HTTP_API_SUPPORT.value,
-            "enable_yt_dl": Defaults.ENABLE_YT_DL.value,
-            "enable_send_to": Defaults.ENABLE_SEND_TO.value,
-            "use_colors": Defaults.USE_COLORS.value,
-            "new_color": Defaults.NEW_COLOR.value,
-            "extra_color": Defaults.EXTRA_COLOR.value,
-            "fav_click_mode": Defaults.FAV_CLICK_MODE.value,
-            "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT.value,
-            "records_path": Defaults.RECORDINGS_PATH.value
+            "v5_support": Defaults.V5_SUPPORT,
+            "http_api_support": Defaults.HTTP_API_SUPPORT,
+            "enable_yt_dl": Defaults.ENABLE_YT_DL,
+            "enable_send_to": Defaults.ENABLE_SEND_TO,
+            "use_colors": Defaults.USE_COLORS,
+            "new_color": Defaults.NEW_COLOR,
+            "extra_color": Defaults.EXTRA_COLOR,
+            "fav_click_mode": Defaults.FAV_CLICK_MODE,
+            "profile_folder_is_default": Defaults.PROFILE_FOLDER_DEFAULT,
+            "records_path": Defaults.RECORDINGS_PATH
         }
 
     @staticmethod

@@ -129,13 +129,13 @@ class SettingsDialog:
         self._backup_path_field = builder.get_object("backup_path_field")
         self._recordings_path_field = builder.get_object("recordings_path_field")
         self._default_data_paths_switch = builder.get_object("default_data_paths_switch")
-        self._default_data_paths_switch.bind_property("active", builder.get_object("picons_path_box"), "sensitive", 4)
-        self._default_data_paths_switch.bind_property("active", builder.get_object("backup_path_box"), "sensitive", 4)
+        self._use_common_picon_path_switch = builder.get_object("use_common_picon_path_switch")
         # Info bar.
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("info_bar_message_label")
         self._test_spinner = builder.get_object("test_spinner")
         # Settings type.
+        self._settings_type_box = builder.get_object("settings_type_combo_box")
         self._enigma_radio_button = builder.get_object("enigma_radio_button")
         self._neutrino_radio_button = builder.get_object("neutrino_radio_button")
         # Streaming.
@@ -187,18 +187,10 @@ class SettingsDialog:
         self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
         self._enable_send_to_switch = builder.get_object("enable_send_to_switch")
         self._enable_exp_switch = builder.get_object("enable_experimental_switch")
-        # Enigma2 only.
-        self._enigma_radio_button.bind_property("active", builder.get_object("bq_naming_grid"), "sensitive")
-        self._enigma_radio_button.bind_property("active", builder.get_object("program_frame"), "sensitive")
-        self._enigma_radio_button.bind_property("active", builder.get_object("experimental_box"), "sensitive")
-        self._enigma_radio_button.bind_property("active", builder.get_object("allow_double_click_box"), "sensitive")
         # Profiles.
         self._profile_view = builder.get_object("profile_tree_view")
         self._profile_add_button = builder.get_object("profile_add_button")
         self._profile_remove_button = builder.get_object("profile_remove_button")
-        # Network.
-        # Separated due to a bug with response (presumably in the builder) in ubuntu 18.04 and derivatives.
-        builder.get_object("network_settings_frame").add(builder.get_object("network_grid"))
         # Style.
         style_provider = Gtk.CssProvider()
         style_provider.load_from_path(f"{UI_RESOURCES_PATH}style.css")
@@ -223,29 +215,27 @@ class SettingsDialog:
 
         if not IS_LINUX:
             # Themes.
-            builder.get_object("style_frame").set_visible(IS_WIN)
-            builder.get_object("themes_support_frame").set_visible(True)
-            self._layout_switch = builder.get_object("layout_switch")
-            self._layout_switch.set_active(self._ext_settings.alternate_layout)
-            self._theme_frame = builder.get_object("theme_frame")
-            self._theme_frame.set_visible(True)
+            builder.get_object("dark_mode_box").set_visible(IS_WIN)
+            builder.get_object("style_box_view").set_visible(True)
+            self._theme_view = builder.get_object("theme_view")
+            self._theme_view.set_visible(True)
             self._theme_thumbnail_image = builder.get_object("theme_thumbnail_image")
             self._theme_combo_box = builder.get_object("theme_combo_box")
             self._icon_theme_combo_box = builder.get_object("icon_theme_combo_box")
             self._dark_mode_switch = builder.get_object("dark_mode_switch")
             self._dark_mode_switch.set_active(self._ext_settings.dark_mode)
             self._themes_support_switch = builder.get_object("themes_support_switch")
-            self._themes_support_switch.bind_property("active", self._theme_frame, "sensitive")
+            self._themes_support_switch.bind_property("active", self._theme_view, "sensitive")
             self.init_themes()
 
     def init_ui_elements(self):
-        is_enigma_profile = self._s_type is SettingsType.ENIGMA_2
-        self._neutrino_radio_button.set_active(self._s_type is SettingsType.NEUTRINO_MP)
         self.update_picon_paths()
-        self.update_title()
+        self._dialog.set_title(f"{translate('Options')} [{self._settings_type_box.get_active_text()}]")
         self._lang_combo_box.set_active_id(self._ext_settings.language)
-        self.on_info_bar_close() if is_enigma_profile else self.show_info_message(
+        is_enigma = self._s_type is SettingsType.ENIGMA_2
+        self.on_info_bar_close() if is_enigma else self.show_info_message(
             "The Neutrino has only experimental support. Not all features are supported!", Gtk.MessageType.WARNING)
+        self._epg_dat_box.set_sensitive(is_enigma)
 
     def init_profiles(self):
         p_def = self._settings.default_profile
@@ -260,13 +250,6 @@ class SettingsDialog:
 
     def init_element_style(self, elem, screen, provider):
         elem.get_style_context().add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
-
-    def update_title(self):
-        title = "{} [{}]"
-        if self._s_type is SettingsType.ENIGMA_2:
-            self._dialog.set_title(title.format(translate("Options"), self._enigma_radio_button.get_label()))
-        elif self._s_type is SettingsType.NEUTRINO_MP:
-            self._dialog.set_title(title.format(translate("Options"), self._neutrino_radio_button.get_label()))
 
     def update_picon_paths(self):
         model = self._picons_paths_box.get_model()
@@ -292,7 +275,7 @@ class SettingsDialog:
         update_entry_data(entry, self._dialog, self._settings)
 
     def on_settings_type_changed(self, item):
-        s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
+        s_type = SettingsType(int(self._settings_type_box.get_active_id()))
         if s_type is not self._s_type:
             self._settings.setting_type = s_type
             self._s_type = s_type
@@ -334,6 +317,7 @@ class SettingsDialog:
         self._bouquet_hints_switch.set_active(self._settings.show_bq_hints)
         self._services_hints_switch.set_active(self._settings.show_srv_hints)
         self._default_data_paths_switch.set_active(self._settings.profile_folder_is_default)
+        self._use_common_picon_path_switch.set_active(self._settings.use_common_picon_path)
         self._transcoding_switch.set_active(self._settings.activate_transcoding)
         self._presets_combo_box.set_active_id(self._settings.active_preset)
         self.on_transcoding_preset_changed(self._presets_combo_box)
@@ -363,17 +347,14 @@ class SettingsDialog:
             self._new_color_button.set_rgba(new_rgb)
             self._extra_color_button.set_rgba(extra_rgb)
 
-        if self._s_type is SettingsType.ENIGMA_2:
-            self._enigma_radio_button.activate()
-        else:
-            self._neutrino_radio_button.activate()
+        self._settings_type_box.set_active_id(str(self._s_type.value))
 
     def on_apply_profile_settings(self, item=None):
         if not self.is_data_correct(self._digit_elems):
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
             return
 
-        self._s_type = SettingsType.ENIGMA_2 if self._enigma_radio_button.get_active() else SettingsType.NEUTRINO_MP
+        self._s_type = SettingsType(int(self._settings_type_box.get_active_id()))
         self._settings.setting_type = self._s_type
         self._settings.host = self._host_field.get_text()
         self._settings.hosts = [h[1] for h in self._hosts_box.get_model()]
@@ -406,6 +387,7 @@ class SettingsDialog:
         self._ext_settings.show_bq_hints = self._bouquet_hints_switch.get_active()
         self._ext_settings.show_srv_hints = self._services_hints_switch.get_active()
         self._ext_settings.profile_folder_is_default = self._default_data_paths_switch.get_active()
+        self._ext_settings.use_common_picon_path = self._use_common_picon_path_switch.get_active()
         self._ext_settings.default_data_path = self._data_path_field.get_text()
         self._ext_settings.default_backup_path = self._backup_path_field.get_text()
         self._ext_settings.default_picon_path = self._picons_path_field.get_text()
@@ -419,7 +401,6 @@ class SettingsDialog:
 
         if not IS_LINUX:
             self._ext_settings.dark_mode = self._dark_mode_switch.get_active()
-            self._ext_settings.alternate_layout = self._layout_switch.get_active()
             self._ext_settings.is_themes_support = self._themes_support_switch.get_active()
             self._ext_settings.theme = self._theme_combo_box.get_active_id()
             self._ext_settings.icon_theme = self._icon_theme_combo_box.get_active_id()
@@ -536,7 +517,7 @@ class SettingsDialog:
         self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
 
     def on_default_path_mode_switch(self, switch, state):
-        self._settings.profile_folder_is_default = state
+        self._use_common_picon_path_switch.set_active(False) if state else None
 
     def on_profile_add(self, item):
         model = self._profile_view.get_model()
@@ -799,7 +780,7 @@ class SettingsDialog:
         response = get_chooser_dialog(self._dialog, self._settings, "Themes Archive [*.xz, *.zip]", ("*.xz", "*.zip"))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
-        self._theme_frame.set_sensitive(False)
+        self._theme_view.set_sensitive(False)
         self.unpack_theme(response, path, button)
 
     @run_task
@@ -829,7 +810,7 @@ class SettingsDialog:
                 button.append(theme, theme)
                 button.set_active_id(theme)
         self.show_info_message("Done!", Gtk.MessageType.INFO)
-        self._theme_frame.set_sensitive(True)
+        self._theme_view.set_sensitive(True)
 
     @run_idle
     def remove_theme(self, button, path):
