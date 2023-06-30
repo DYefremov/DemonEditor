@@ -474,6 +474,9 @@ class Settings:
 
     @property
     def profile_picons_path(self):
+        if self.use_common_picon_path:
+            return self.default_picon_path
+
         if self.profile_folder_is_default:
             return f"{self.profile_data_path}picons{SEP}"
         return f"{self.default_picon_path}{self._current_profile}{SEP}"
