@@ -70,8 +70,13 @@ class DVBDialog(Gtk.Dialog):
                          buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK),
                          *args, **kwargs)
 
-        self.frame = Gtk.Frame(margin=5, label_xalign=0.02)
-        self.get_content_area().pack_start(self.frame, True, True, 0)
+        self._viewport = Gtk.Viewport(margin_top=2)
+        self._viewport.get_style_context().add_class("view")
+        self._frame = Gtk.Frame(margin=10, label_xalign=0.02, shadow_type=Gtk.ShadowType.NONE)
+        self._label = Gtk.Label(margin_bottom=2, use_markup=True)
+        self._frame.set_label_widget(self._label)
+        self._frame.add(self._viewport)
+        self.get_content_area().pack_start(self._frame, True, True, 0)
 
         self._data = data
 
@@ -79,13 +84,19 @@ class DVBDialog(Gtk.Dialog):
     def data(self):
         return self._data
 
+    def set_content(self, widget):
+        self._viewport.add(widget)
+
+    def set_label_text(self, text):
+        self._label.set_markup(f"<b>{text}</b>")
+
 
 class TransponderDialog(DVBDialog):
     """ Base transponder dialog class. """
 
     def __init__(self, parent, title, data=None, *args, **kwargs):
         super().__init__(parent, title, data, *args, **kwargs)
-        self.frame.set_label(translate("Transponder properties:"))
+        self.set_label_text(translate("Transponder properties:"))
         # Pattern for digits entries.
         self.digit_pattern = re.compile(r"\D")
         # Style
@@ -124,8 +135,8 @@ class TCDialog(DVBDialog):
         super().__init__(parent, title, data, *args, **kwargs)
 
         self._entry = Gtk.Entry(margin=5)
-        self.frame.add(self._entry)
-        self.frame.set_label(translate("Name:"))
+        self.set_content(self._entry)
+        self.set_label_text(translate("Name:"))
         self.show_all()
 
         if data:
@@ -140,8 +151,8 @@ class SatelliteDialog(DVBDialog):
         builder = get_builder(_DIALOGS_UI_PATH, use_str=True,
                               objects=("sat_dialog_box", "side_store", "pos_adjustment"))
 
-        self.frame.add(builder.get_object("sat_dialog_box"))
-        self.frame.set_label(translate("Satellite properties:"))
+        self.set_content(builder.get_object("sat_dialog_box"))
+        self.set_label_text(translate("Satellite properties:"))
         self._sat_name = builder.get_object("sat_name_entry")
         self._sat_position = builder.get_object("sat_position_button")
         self._side = builder.get_object("side_box")
@@ -196,7 +207,7 @@ class SatTransponderDialog(TransponderDialog):
         objects = ("sat_tr_box", "pol_store", "fec_store", "mod_store", "system_store", "pls_mode_store")
         builder = get_builder(_DIALOGS_UI_PATH, handlers, use_str=True, objects=objects)
 
-        self.frame.add(builder.get_object("sat_tr_box"))
+        self.set_content(builder.get_object("sat_tr_box"))
         self._freq_entry = builder.get_object("freq_entry")
         self._rate_entry = builder.get_object("rate_entry")
         self._pol_box = builder.get_object("pol_box")
@@ -268,7 +279,7 @@ class TerTransponderDialog(TransponderDialog):
         handlers = {"on_entry_changed": self.on_entry_changed}
         builder = get_builder(_DIALOGS_UI_PATH, handlers, use_str=True, objects=("ter_tr_box",))
 
-        self.frame.add(builder.get_object("ter_tr_box"))
+        self.set_content(builder.get_object("ter_tr_box"))
         self._freq_entry = builder.get_object("ter_freq_entry")
         self._sys_box = builder.get_object("ter_sys_box")
         self._bandwidth_box = builder.get_object("ter_bandwidth_box")
@@ -346,7 +357,7 @@ class CableTransponderDialog(TransponderDialog):
         handlers = {"on_entry_changed": self.on_entry_changed}
         builder = get_builder(_DIALOGS_UI_PATH, handlers, use_str=True, objects=("cable_tr_box",))
 
-        self.frame.add(builder.get_object("cable_tr_box"))
+        self.set_content(builder.get_object("cable_tr_box"))
 
         self._freq_entry = builder.get_object("cable_freq_entry")
         self._rate_entry = builder.get_object("cable_rate_entry")
