@@ -72,7 +72,7 @@ class DVBDialog(Gtk.Dialog):
 
         self._viewport = Gtk.Viewport(margin_top=2)
         self._viewport.get_style_context().add_class("view")
-        self._frame = Gtk.Frame(margin=10, label_xalign=0.02, shadow_type=Gtk.ShadowType.NONE)
+        self._frame = Gtk.Frame(margin=5, label_xalign=0.02, shadow_type=Gtk.ShadowType.NONE)
         self._label = Gtk.Label(margin_bottom=2, use_markup=True)
         self._frame.set_label_widget(self._label)
         self._frame.add(self._viewport)
