@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 
+<!-- Generated with glade 3.38.2
 
 The MIT License (MIT)
 
@@ -41,43 +41,98 @@ Author: Dmitriy Yefremov
     </child>
   </object>
   <object class="GtkTextBuffer" id="text_buffer">
-    <property name="tag_table">tag_table</property>
+    <property name="tag-table">tag_table</property>
   </object>
   <object class="GtkFrame" id="telnet_frame">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="label_xalign">0.49000000953674316</property>
-    <property name="shadow_type">in</property>
+    <property name="can-focus">False</property>
+    <property name="label-xalign">0.49000000953674316</property>
+    <property name="shadow-type">none</property>
     <child>
-      <object class="GtkBox" id="telnet_main_box">
+      <object class="GtkViewport" id="viewport">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_right">5</property>
-        <property name="margin_bottom">5</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">5</property>
+        <property name="can-focus">False</property>
         <child>
-          <object class="GtkBox" id="commands_entry">
+          <object class="GtkBox" id="telnet_main_box">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_bottom">2</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">5</property>
+            <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
-              <object class="GtkButton" id="connect_button">
+              <object class="GtkBox" id="commands_entry">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Connect</property>
-                <signal name="clicked" handler="on_connect" swapped="no"/>
+                <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
+                <property name="margin-bottom">5</property>
+                <property name="spacing">5</property>
                 <child>
-                  <object class="GtkImage" id="connect_button_image">
+                  <object class="GtkButton" id="connect_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-connect</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Connect</property>
+                    <signal name="clicked" handler="on_connect" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="connect_button_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="stock">gtk-connect</property>
+                      </object>
+                    </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="disconnect_button">
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Disconnect</property>
+                    <signal name="clicked" handler="on_disconnect" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="disconnect_button_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="stock">gtk-disconnect</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="clear_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Clear</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <signal name="clicked" handler="on_clear" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="clear_button_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="stock">gtk-clear</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -87,90 +142,49 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="disconnect_button">
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Disconnect</property>
-                <signal name="clicked" handler="on_disconnect" swapped="no"/>
+              <object class="GtkScrolledWindow" id="telnet_scrolled_window">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="shadow-type">in</property>
                 <child>
-                  <object class="GtkImage" id="disconnect_button_image">
+                  <object class="GtkTextView" id="text_view">
+                    <property name="name">textview-large</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-disconnect</property>
+                    <property name="can-focus">True</property>
+                    <property name="wrap-mode">char</property>
+                    <property name="left-margin">5</property>
+                    <property name="right-margin">5</property>
+                    <property name="buffer">text_buffer</property>
+                    <property name="overwrite">True</property>
+                    <property name="input-hints">GTK_INPUT_HINT_WORD_COMPLETION | GTK_INPUT_HINT_NONE</property>
+                    <property name="monospace">True</property>
+                    <signal name="key-press-event" handler="on_view_key_press" swapped="no"/>
+                    <signal name="realize" handler="on_text_view_realize" swapped="no"/>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkButton" id="clear_button">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Clear</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <signal name="clicked" handler="on_clear" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="clear_button_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-clear</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
-        <child>
-          <object class="GtkScrolledWindow" id="telnet_scrolled_window">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkTextView" id="text_view">
-                <property name="name">textview-large</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="wrap_mode">char</property>
-                <property name="left_margin">5</property>
-                <property name="right_margin">5</property>
-                <property name="buffer">text_buffer</property>
-                <property name="overwrite">True</property>
-                <property name="input_hints">GTK_INPUT_HINT_WORD_COMPLETION | GTK_INPUT_HINT_NONE</property>
-                <property name="monospace">True</property>
-                <signal name="key-press-event" handler="on_view_key_press" swapped="no"/>
-                <signal name="realize" handler="on_text_view_realize" swapped="no"/>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
+        <style>
+          <class name="view"/>
+        </style>
       </object>
     </child>
     <child type="label">
       <object class="GtkLabel">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
+        <property name="margin-bottom">2</property>
         <property name="label" translatable="yes">Telnet</property>
+        <attributes>
+          <attribute name="weight" value="bold"/>
+        </attributes>
       </object>
     </child>
   </object>
