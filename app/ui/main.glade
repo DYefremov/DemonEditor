@@ -4344,8 +4344,8 @@ Author: Dmitriy Yefremov
             <child>
               <object class="GtkPaned" id="bottom_paned">
                 <property name="can-focus">False</property>
-                <property name="margin-start">5</property>
-                <property name="margin-end">5</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
                 <property name="margin-bottom">5</property>
                 <property name="wide-handle">True</property>
                 <child>
@@ -4482,7 +4482,7 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="receiver_info_box">
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin-left">10</property>
+                <property name="margin-start">10</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkImage" id="info_image">
@@ -4542,8 +4542,8 @@ Author: Dmitriy Yefremov
                 <property name="tooltip-text" translatable="yes">No connection to the receiver!</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
-                <property name="margin-left">10</property>
-                <property name="margin-right">10</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
                 <property name="icon-name">network-offline-symbolic</property>
               </object>
               <packing>
@@ -4558,8 +4558,8 @@ Author: Dmitriy Yefremov
                 <property name="can-focus">False</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
-                <property name="margin-left">10</property>
-                <property name="margin-right">10</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkLabel" id="service_epg_label">
