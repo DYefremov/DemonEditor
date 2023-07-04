@@ -336,10 +336,10 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="network_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="margin-start">5</property>
-                <property name="margin-end">5</property>
-                <property name="margin-top">5</property>
-                <property name="margin-bottom">5</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin-top">10</property>
+                <property name="margin-bottom">10</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="network_scrolled_window">
@@ -422,6 +422,9 @@ Author: Dmitriy Yefremov
             <child type="label_item">
               <placeholder/>
             </child>
+            <style>
+              <class name="view"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -439,8 +442,8 @@ Author: Dmitriy Yefremov
               <object class="GtkBox" id="info_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="margin-left">5</property>
-                <property name="margin-right">5</property>
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
                 <property name="margin-top">5</property>
                 <property name="margin-bottom">5</property>
                 <property name="orientation">vertical</property>
@@ -448,10 +451,10 @@ Author: Dmitriy Yefremov
                   <object class="GtkViewport" id="screenshot_view_port">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="margin-left">2</property>
-                    <property name="margin-right">2</property>
-                    <property name="margin-top">2</property>
-                    <property name="margin-bottom">2</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">5</property>
+                    <property name="margin-bottom">5</property>
                     <child>
                       <object class="GtkDrawingArea" id="screenshot_area">
                         <property name="can-focus">False</property>
@@ -469,8 +472,8 @@ Author: Dmitriy Yefremov
                   <object class="GtkBox" id="remote_signal_box">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="margin-left">25</property>
-                    <property name="margin-right">25</property>
+                    <property name="margin-start">25</property>
+                    <property name="margin-end">25</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">5</property>
                     <property name="orientation">vertical</property>
@@ -620,6 +623,9 @@ Author: Dmitriy Yefremov
             <child type="label_item">
               <placeholder/>
             </child>
+            <style>
+              <class name="view"/>
+            </style>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -652,8 +658,8 @@ Author: Dmitriy Yefremov
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="margin-left">5</property>
-                    <property name="margin-right">5</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
                     <property name="margin-top">5</property>
                     <property name="margin-bottom">5</property>
                     <property name="row-spacing">5</property>
@@ -1336,6 +1342,9 @@ audio-volume-medium-symbolic</property>
             <child type="label_item">
               <placeholder/>
             </child>
+            <style>
+              <class name="view"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
