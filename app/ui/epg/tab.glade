@@ -62,148 +62,58 @@ Author: Dmitriy Yefremov
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <property name="label-xalign">0.49</property>
-    <property name="shadow-type">in</property>
+    <property name="shadow-type">none</property>
     <child>
-      <object class="GtkBox" id="epg_box">
+      <object class="GtkViewport" id="viewport">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="margin-start">5</property>
-        <property name="margin-end">5</property>
-        <property name="margin-top">2</property>
-        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="epg_action_box">
+          <object class="GtkBox" id="epg_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="border-width">5</property>
-            <property name="spacing">5</property>
-            <child type="center">
-              <object class="GtkToggleButton" id="multi_epg_button">
-                <property name="label" translatable="yes">Multi EPG</property>
-                <property name="name">header-button</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">5</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox" id="epg_action_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="receives-default">True</property>
-                <signal name="toggled" handler="on_multi_epg_toggled" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxText" id="src_combo_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">EPG source</property>
-                <property name="active">0</property>
-                <property name="has-entry">True</property>
-                <property name="active-id">0</property>
-                <items>
-                  <item id="0" translatable="yes">Receiver</item>
-                </items>
-                <child internal-child="entry">
-                  <object class="GtkEntry">
-                    <property name="name">header-entry</property>
-                    <property name="can-focus">False</property>
-                    <property name="editable">False</property>
-                    <property name="width-chars">10</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="epg_filter_button">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="focus-on-click">False</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Filter</property>
-                <signal name="toggled" handler="on_epg_filter_toggled" swapped="no"/>
-                <child>
-                  <object class="GtkImage" id="epg_filter_button_image">
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
+                <property name="margin-top">5</property>
+                <property name="spacing">5</property>
+                <child type="center">
+                  <object class="GtkToggleButton" id="multi_epg_button">
+                    <property name="label" translatable="yes">Multi EPG</property>
+                    <property name="name">header-button</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="icon-name">edit-find-replace-symbolic</property>
+                    <property name="receives-default">True</property>
+                    <signal name="toggled" handler="on_multi_epg_toggled" swapped="no"/>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="epg_add_timer_button">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="focus-on-click">False</property>
-                <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Add timer</property>
-                <property name="always-show-image">True</property>
-                <signal name="clicked" handler="on_timer_add" swapped="no"/>
                 <child>
-                  <object class="GtkImage" id="add_timer_image">
+                  <object class="GtkComboBoxText" id="src_combo_box">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="icon-name">alarm-symbolic</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="epg_fs_box">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-start">5</property>
-            <property name="margin-end">5</property>
-            <property name="margin-bottom">5</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkSearchEntry" id="epg_filter_entry">
-                <property name="visible" bind-source="epg_filter_button" bind-property="active">False</property>
-                <property name="can-focus">True</property>
-                <property name="primary-icon-name">edit-find-replace-symbolic</property>
-                <property name="primary-icon-activatable">False</property>
-                <property name="primary-icon-sensitive">False</property>
-                <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="fav_search_box">
-                <property name="can-focus">False</property>
-                <property name="valign">center</property>
-                <child>
-                  <object class="GtkSearchEntry" id="epg_search_entry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="primary-icon-name">edit-find-symbolic</property>
-                    <property name="primary-icon-activatable">False</property>
-                    <property name="primary-icon-sensitive">False</property>
+                    <property name="tooltip-text" translatable="yes">EPG source</property>
+                    <property name="active">0</property>
+                    <property name="has-entry">True</property>
+                    <property name="active-id">0</property>
+                    <items>
+                      <item id="0" translatable="yes">Receiver</item>
+                    </items>
+                    <child internal-child="entry">
+                      <object class="GtkEntry">
+                        <property name="can-focus">False</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -212,18 +122,141 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="epg_search_down_button">
+                  <object class="GtkToggleButton" id="epg_filter_button">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Filter</property>
+                    <signal name="toggled" handler="on_epg_filter_toggled" swapped="no"/>
                     <child>
-                      <object class="GtkArrow" id="epg_down_arrow">
+                      <object class="GtkImage" id="epg_filter_button_image">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="arrow-type">down</property>
+                        <property name="icon-name">edit-find-replace-symbolic</property>
                       </object>
                     </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="epg_add_timer_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Add timer</property>
+                    <property name="always-show-image">True</property>
+                    <signal name="clicked" handler="on_timer_add" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="add_timer_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">alarm-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="epg_fs_box">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
+                <property name="margin-top">5</property>
+                <property name="spacing">10</property>
+                <child>
+                  <object class="GtkSearchEntry" id="epg_filter_entry">
+                    <property name="visible" bind-source="epg_filter_button" bind-property="active">False</property>
+                    <property name="can-focus">True</property>
+                    <property name="primary-icon-name">edit-find-replace-symbolic</property>
+                    <property name="primary-icon-activatable">False</property>
+                    <property name="primary-icon-sensitive">False</property>
+                    <signal name="search-changed" handler="on_epg_filter_changed" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="fav_search_box">
+                    <property name="can-focus">False</property>
+                    <property name="valign">center</property>
+                    <child>
+                      <object class="GtkSearchEntry" id="epg_search_entry">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="primary-icon-name">edit-find-symbolic</property>
+                        <property name="primary-icon-activatable">False</property>
+                        <property name="primary-icon-sensitive">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="epg_search_down_button">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkArrow" id="epg_down_arrow">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="arrow-type">down</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="epg_search_up_button">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <child>
+                          <object class="GtkArrow" id="epg_up_arrow">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="arrow-type">up</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="group"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -231,237 +264,217 @@ Author: Dmitriy Yefremov
                     <property name="position">1</property>
                   </packing>
                 </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="epg_view_scrolled_window">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="margin-top">5</property>
+                <property name="shadow-type">in</property>
                 <child>
-                  <object class="GtkButton" id="epg_search_up_button">
+                  <object class="GtkTreeView" id="epg_view">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <child>
-                      <object class="GtkArrow" id="epg_up_arrow">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="arrow-type">up</property>
+                    <property name="model">epg_sort_model</property>
+                    <property name="fixed-height-mode">True</property>
+                    <property name="rubber-banding">True</property>
+                    <property name="enable-grid-lines">both</property>
+                    <property name="tooltip-column">6</property>
+                    <signal name="button-press-event" handler="on_epg_press" swapped="no"/>
+                    <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="epg_view_selection">
+                        <property name="mode">multiple</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="epg_service_column">
+                        <property name="visible" bind-source="multi_epg_button" bind-property="active">False</property>
+                        <property name="resizable">True</property>
+                        <property name="sizing">fixed</property>
+                        <property name="fixed-width">100</property>
+                        <property name="min-width">40</property>
+                        <property name="title" translatable="yes">Service</property>
+                        <property name="alignment">0.49000000953674316</property>
+                        <property name="sort-column-id">0</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="epg_service_renderer">
+                            <property name="xpad">5</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="epg_title_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">fixed</property>
+                        <property name="min-width">150</property>
+                        <property name="title" translatable="yes">Title</property>
+                        <property name="alignment">0.49000000953674316</property>
+                        <property name="sort-column-id">1</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="epg_title_renderer">
+                            <property name="xpad">5</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="epg_start_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">fixed</property>
+                        <property name="min-width">50</property>
+                        <property name="title" translatable="yes">Start time</property>
+                        <property name="alignment">0.49000000953674316</property>
+                        <property name="sort-column-id">2</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="epg_start_renderer">
+                            <property name="xpad">5</property>
+                            <property name="xalign">0.49000000953674316</property>
+                            <property name="width-chars">27</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="epg_end_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">fixed</property>
+                        <property name="min-width">50</property>
+                        <property name="title" translatable="yes">End time</property>
+                        <property name="alignment">0.49000000953674316</property>
+                        <property name="sort-column-id">3</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="epg_end_renderer">
+                            <property name="xpad">5</property>
+                            <property name="xalign">0.49000000953674316</property>
+                            <property name="width-chars">27</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="epg_length_column">
+                        <property name="resizable">True</property>
+                        <property name="sizing">fixed</property>
+                        <property name="fixed-width">100</property>
+                        <property name="min-width">50</property>
+                        <property name="title" translatable="yes">Length</property>
+                        <property name="alignment">0.49000000953674316</property>
+                        <property name="sort-column-id">4</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="epg_length_renderer">
+                            <property name="xpad">5</property>
+                            <property name="xalign">0.49000000953674316</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">4</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="epg_desc_column">
+                        <property name="sizing">fixed</property>
+                        <property name="min-width">100</property>
+                        <property name="title" translatable="yes">Description</property>
+                        <property name="expand">True</property>
+                        <property name="alignment">0.49000000953674316</property>
+                        <property name="sort-column-id">5</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="epg_desc_renderer">
+                            <property name="ellipsize">end</property>
+                          </object>
+                          <attributes>
+                            <attribute name="text">5</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="status_box">
+                <property name="height-request">26</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
+                <property name="margin-end">5</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkImage" id="event_count_image">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">document-properties</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">2</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
-                <style>
-                  <class name="group"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScrolledWindow" id="epg_view_scrolled_window">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="shadow-type">in</property>
-            <child>
-              <object class="GtkTreeView" id="epg_view">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="model">epg_sort_model</property>
-                <property name="fixed-height-mode">True</property>
-                <property name="rubber-banding">True</property>
-                <property name="enable-grid-lines">both</property>
-                <property name="tooltip-column">6</property>
-                <signal name="button-press-event" handler="on_epg_press" swapped="no"/>
-                <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="epg_selection">
-                    <property name="mode">multiple</property>
-                  </object>
-                </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="epg_service_column">
-                    <property name="visible" bind-source="multi_epg_button" bind-property="active">False</property>
-                    <property name="resizable">True</property>
-                    <property name="sizing">fixed</property>
-                    <property name="fixed-width">100</property>
-                    <property name="min-width">40</property>
-                    <property name="title" translatable="yes">Service</property>
-                    <property name="alignment">0.49</property>
-                    <property name="sort-column-id">0</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="epg_service_renderer">
-                        <property name="xpad">5</property>
-                      </object>
-                      <attributes>
-                        <attribute name="text">0</attribute>
-                      </attributes>
-                    </child>
+                  <object class="GtkLabel" id="event_count_label">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">0</property>
+                    <property name="width-chars">4</property>
+                    <property name="xalign">0</property>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="epg_title_column">
-                    <property name="resizable">True</property>
-                    <property name="sizing">fixed</property>
-                    <property name="min-width">150</property>
-                    <property name="title" translatable="yes">Title</property>
-                    <property name="alignment">0.49</property>
-                    <property name="sort-column-id">1</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="epg_title_renderer">
-                        <property name="xpad">5</property>
-                      </object>
-                      <attributes>
-                        <attribute name="text">1</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="epg_start_column">
-                    <property name="resizable">True</property>
-                    <property name="sizing">fixed</property>
-                    <property name="min-width">50</property>
-                    <property name="title" translatable="yes">Start time</property>
-                    <property name="alignment">0.49</property>
-                    <property name="sort-column-id">2</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="epg_start_renderer">
-                        <property name="xpad">5</property>
-                        <property name="xalign">0.49</property>
-                        <property name="width-chars">27</property>
-                      </object>
-                      <attributes>
-                        <attribute name="text">2</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="epg_end_column">
-                    <property name="resizable">True</property>
-                    <property name="sizing">fixed</property>
-                    <property name="min-width">50</property>
-                    <property name="title" translatable="yes">End time</property>
-                    <property name="alignment">0.49</property>
-                    <property name="sort-column-id">3</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="epg_end_renderer">
-                        <property name="xpad">5</property>
-                        <property name="xalign">0.49</property>
-                        <property name="width-chars">27</property>
-                      </object>
-                      <attributes>
-                        <attribute name="text">3</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="epg_length_column">
-                    <property name="resizable">True</property>
-                    <property name="sizing">fixed</property>
-                    <property name="fixed-width">100</property>
-                    <property name="min-width">50</property>
-                    <property name="title" translatable="yes">Length</property>
-                    <property name="alignment">0.49</property>
-                    <property name="sort-column-id">4</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="epg_length_renderer">
-                        <property name="xpad">5</property>
-                        <property name="xalign">0.49</property>
-                      </object>
-                      <attributes>
-                        <attribute name="text">4</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="epg_desc_column">
-                    <property name="sizing">fixed</property>
-                    <property name="min-width">100</property>
-                    <property name="title" translatable="yes">Description</property>
-                    <property name="expand">True</property>
-                    <property name="alignment">0.49</property>
-                    <property name="sort-column-id">5</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="epg_desc_renderer">
-                        <property name="ellipsize">end</property>
-                      </object>
-                      <attributes>
-                        <attribute name="text">5</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="status_box">
-            <property name="height-request">26</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-start">5</property>
-            <property name="margin-end">5</property>
-            <property name="spacing">5</property>
-            <child>
-              <object class="GtkImage" id="event_count_image">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="icon-name">document-properties</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="event_count_label">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">0</property>
-                <property name="width-chars">4</property>
-                <property name="xalign">0</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
         </child>
+        <style>
+          <class name="view"/>
+        </style>
       </object>
     </child>
     <child type="label">
       <object class="GtkLabel" id="epg_label">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="margin-bottom">2</property>
         <property name="label" translatable="yes">EPG</property>
+        <attributes>
+          <attribute name="weight" value="bold"/>
+        </attributes>
       </object>
     </child>
   </object>
