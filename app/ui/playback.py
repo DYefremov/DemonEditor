@@ -179,7 +179,7 @@ class PlayerBox(Gtk.Overlay):
 
     def on_page_changed(self, app, page):
         self._page = page
-        if self._player:
+        if self._player and self.is_visible():
             self.update_buttons() if not IS_DARWIN else None
             self.on_close()
             self.set_visible(False)
@@ -342,9 +342,10 @@ class PlayerBox(Gtk.Overlay):
     def update_buttons(self):
         if self._player:
             path, column = self._fav_view.get_cursor()
-            current_index = path[0]
-            self._prev_button.set_sensitive(current_index != 0)
-            self._next_button.set_sensitive(len(self._fav_view.get_model()) != current_index + 1)
+            if path:
+                current_index = path[0]
+                self._prev_button.set_sensitive(current_index != 0)
+                self._next_button.set_sensitive(len(self._fav_view.get_model()) != current_index + 1)
 
             self._prev_button.set_visible(self._page is Page.SERVICES)
             self._next_button.set_visible(self._page is Page.SERVICES)
