@@ -310,7 +310,9 @@ Author: Dmitriy Yefremov
                                 <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                                 <signal name="realize" handler="on_satellite_view_realize" swapped="no"/>
                                 <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
+                                  <object class="GtkTreeSelection" id="satellite_view_selection">
+                                    <property name="mode">multiple</property>
+                                  </object>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="sat_name_column">
@@ -708,7 +710,9 @@ Author: Dmitriy Yefremov
                                 <signal name="button-press-event" handler="on_tr_button_press" object="transponder_popup_menu" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tr_key_press" swapped="no"/>
                                 <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
+                                  <object class="GtkTreeSelection" id="sat_tr_view_selection">
+                                    <property name="mode">multiple</property>
+                                  </object>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="freq_column">
@@ -880,8 +884,8 @@ Author: Dmitriy Yefremov
                             <property name="height-request">26</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="margin-left">5</property>
-                            <property name="margin-right">5</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-end">5</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkImage" id="sat_tr_count_image">

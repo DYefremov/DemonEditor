@@ -651,7 +651,9 @@ Author: Dmitriy Yefremov
                                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
                                         <child internal-child="selection">
-                                          <object class="GtkTreeSelection"/>
+                                          <object class="GtkTreeSelection" id="picons_src_view_selection">
+                                            <property name="mode">multiple</property>
+                                          </object>
                                         </child>
                                         <child>
                                           <object class="GtkTreeViewColumn" id="src_picon_column">
@@ -786,7 +788,9 @@ Author: Dmitriy Yefremov
                                         <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                         <signal name="query-tooltip" handler="on_view_query_tooltip" swapped="no"/>
                                         <child internal-child="selection">
-                                          <object class="GtkTreeSelection"/>
+                                          <object class="GtkTreeSelection" id="picons_dest_view_selection">
+                                            <property name="mode">multiple</property>
+                                          </object>
                                         </child>
                                         <child>
                                           <object class="GtkTreeViewColumn" id="dest_picon_column">
@@ -1048,7 +1052,7 @@ Author: Dmitriy Yefremov
                                           </packing>
                                         </child>
                                         <child>
-                                          <!-- n-columns=3 n-rows=3 -->
+                                          <!-- n-columns=2 n-rows=1 -->
                                           <object class="GtkGrid" id="satellite_filter_grid">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
@@ -1076,27 +1080,6 @@ Author: Dmitriy Yefremov
                                                 <property name="left-attach">1</property>
                                                 <property name="top-attach">0</property>
                                               </packing>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
                                             </child>
                                           </object>
                                           <packing>
