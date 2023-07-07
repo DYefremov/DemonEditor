@@ -704,233 +704,58 @@ Author: Dmitriy Yefremov
           <object class="GtkPaned" id="sat_update_main_paned">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
-            <property name="margin-start">5</property>
-            <property name="margin-end">5</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
             <property name="margin-top">5</property>
-            <property name="margin-bottom">5</property>
+            <property name="margin-bottom">10</property>
             <property name="wide-handle">True</property>
             <child>
               <object class="GtkFrame" id="sat_update_frame">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label-xalign">0.49000000953674316</property>
-                <property name="shadow-type">in</property>
+                <property name="shadow-type">none</property>
                 <child>
-                  <object class="GtkBox" id="sat_update_box">
+                  <object class="GtkViewport" id="sat_viewport">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="margin-start">5</property>
-                    <property name="margin-end">5</property>
-                    <property name="margin-top">5</property>
-                    <property name="margin-bottom">5</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">5</property>
                     <child>
-                      <object class="GtkScrolledWindow" id="sat_update_scrolled_window">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="shadow-type">in</property>
-                        <child>
-                          <object class="GtkTreeView" id="sat_update_tree_view">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="model">update_sat_list_model_sort</property>
-                            <property name="search-column">0</property>
-                            <property name="activate-on-single-click">True</property>
-                            <signal name="button-press-event" handler="on_popup_menu" object="satellites_update_popup_menu" swapped="no"/>
-                            <signal name="select-all" handler="on_select_all" swapped="no"/>
-                            <child internal-child="selection">
-                              <object class="GtkTreeSelection">
-                                <property name="mode">multiple</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="upd_satellite_column">
-                                <property name="title" translatable="yes">Satellite</property>
-                                <property name="expand">True</property>
-                                <property name="clickable">True</property>
-                                <property name="alignment">0.5</property>
-                                <property name="reorderable">True</property>
-                                <property name="sort-column-id">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="upd_satellite_cellrenderertext">
-                                    <property name="xalign">0.009999999776482582</property>
-                                    <property name="ellipsize">end</property>
-                                  </object>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="upd_position_column">
-                                <property name="title" translatable="yes">Position</property>
-                                <property name="clickable">True</property>
-                                <property name="alignment">0.5</property>
-                                <property name="reorderable">True</property>
-                                <property name="sort-column-id">1</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="upd_position_cellrenderertext">
-                                    <property name="xalign">0.49000000953674316</property>
-                                  </object>
-                                  <attributes>
-                                    <attribute name="text">1</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="upd_type_column">
-                                <property name="title" translatable="yes">Type</property>
-                                <property name="clickable">True</property>
-                                <property name="alignment">0.5</property>
-                                <property name="reorderable">True</property>
-                                <property name="sort-column-id">2</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="upd_type_cellrenderertext">
-                                    <property name="xalign">0.49000000953674316</property>
-                                  </object>
-                                  <attributes>
-                                    <attribute name="text">2</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="upd_url_column">
-                                <property name="visible">False</property>
-                                <property name="title" translatable="yes">Url</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="upd_url_cellrenderertext"/>
-                                  <attributes>
-                                    <attribute name="text">3</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn" id="upd_selected_column">
-                                <property name="title" translatable="yes">Selected</property>
-                                <property name="clickable">True</property>
-                                <property name="reorderable">True</property>
-                                <property name="sort-column-id">4</property>
-                                <child>
-                                  <object class="GtkCellRendererToggle" id="upd_selected_cellrenderer">
-                                    <signal name="toggled" handler="on_satellite_toggled" swapped="no"/>
-                                  </object>
-                                  <attributes>
-                                    <attribute name="active">4</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="sat_update_status_box">
+                      <object class="GtkBox" id="sat_update_box">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>
-                        <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkImage" id="satellites_count_image">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="icon-name">document-properties-symbolic</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="satellites_count_label">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label">0</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="sat_update_frame_label">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Satellites</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkPaned" id="sat_update_tr_paned">
-                <property name="can-focus">True</property>
-                <property name="orientation">vertical</property>
-                <property name="wide-handle">True</property>
-                <child>
-                  <object class="GtkFrame" id="sat_update_tr_frame">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label-xalign">0.49000000953674316</property>
-                    <property name="shadow-type">in</property>
-                    <child>
-                      <object class="GtkBox" id="sat_update_tr_box">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="margin-bottom">5</property>
+                        <property name="margin-top">10</property>
                         <property name="orientation">vertical</property>
-                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkScrolledWindow" id="sat_update_tr_scrolled_window">
+                          <object class="GtkScrolledWindow" id="sat_update_scrolled_window">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="shadow-type">in</property>
                             <child>
-                              <object class="GtkTreeView" id="sat_update_tr_view">
+                              <object class="GtkTreeView" id="sat_update_tree_view">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
-                                <property name="model">update_transponder_store</property>
+                                <property name="model">update_sat_list_model_sort</property>
                                 <property name="search-column">0</property>
                                 <property name="activate-on-single-click">True</property>
+                                <signal name="button-press-event" handler="on_popup_menu" object="satellites_update_popup_menu" swapped="no"/>
+                                <signal name="select-all" handler="on_select_all" swapped="no"/>
                                 <child internal-child="selection">
                                   <object class="GtkTreeSelection"/>
                                 </child>
                                 <child>
-                                  <object class="GtkTreeViewColumn" id="tr_view_tr_column">
-                                    <property name="title" translatable="yes">Transponder</property>
+                                  <object class="GtkTreeViewColumn" id="upd_satellite_column">
+                                    <property name="title" translatable="yes">Satellite</property>
                                     <property name="expand">True</property>
+                                    <property name="clickable">True</property>
                                     <property name="alignment">0.5</property>
+                                    <property name="reorderable">True</property>
+                                    <property name="sort-column-id">0</property>
                                     <child>
-                                      <object class="GtkCellRendererText" id="upd_tr_renderer">
+                                      <object class="GtkCellRendererText" id="upd_satellite_cellrenderertext">
                                         <property name="xalign">0.009999999776482582</property>
+                                        <property name="ellipsize">end</property>
                                       </object>
                                       <attributes>
                                         <attribute name="text">0</attribute>
@@ -939,11 +764,16 @@ Author: Dmitriy Yefremov
                                   </object>
                                 </child>
                                 <child>
-                                  <object class="GtkTreeViewColumn" id="tr_view_link_column">
-                                    <property name="visible">False</property>
-                                    <property name="title" translatable="yes">link</property>
+                                  <object class="GtkTreeViewColumn" id="upd_position_column">
+                                    <property name="title" translatable="yes">Position</property>
+                                    <property name="clickable">True</property>
+                                    <property name="alignment">0.5</property>
+                                    <property name="reorderable">True</property>
+                                    <property name="sort-column-id">1</property>
                                     <child>
-                                      <object class="GtkCellRendererText" id="upd_tr_link_renderer"/>
+                                      <object class="GtkCellRendererText" id="upd_position_cellrenderertext">
+                                        <property name="xalign">0.49000000953674316</property>
+                                      </object>
                                       <attributes>
                                         <attribute name="text">1</attribute>
                                       </attributes>
@@ -951,14 +781,46 @@ Author: Dmitriy Yefremov
                                   </object>
                                 </child>
                                 <child>
-                                  <object class="GtkTreeViewColumn" id="tr_view_selected_column">
-                                    <property name="title" translatable="yes">Selected</property>
+                                  <object class="GtkTreeViewColumn" id="upd_type_column">
+                                    <property name="title" translatable="yes">Type</property>
+                                    <property name="clickable">True</property>
+                                    <property name="alignment">0.5</property>
+                                    <property name="reorderable">True</property>
+                                    <property name="sort-column-id">2</property>
                                     <child>
-                                      <object class="GtkCellRendererToggle" id="upd_tr_select_renderer">
-                                        <signal name="toggled" handler="on_transponder_toggled" swapped="no"/>
+                                      <object class="GtkCellRendererText" id="upd_type_cellrenderertext">
+                                        <property name="xalign">0.49000000953674316</property>
                                       </object>
                                       <attributes>
-                                        <attribute name="active">2</attribute>
+                                        <attribute name="text">2</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="upd_url_column">
+                                    <property name="visible">False</property>
+                                    <property name="title" translatable="yes">Url</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="upd_url_cellrenderertext"/>
+                                      <attributes>
+                                        <attribute name="text">3</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn" id="upd_selected_column">
+                                    <property name="title" translatable="yes">Selected</property>
+                                    <property name="clickable">True</property>
+                                    <property name="reorderable">True</property>
+                                    <property name="sort-column-id">4</property>
+                                    <child>
+                                      <object class="GtkCellRendererToggle" id="upd_selected_cellrenderer">
+                                        <signal name="toggled" handler="on_satellite_toggled" swapped="no"/>
+                                      </object>
+                                      <attributes>
+                                        <attribute name="active">4</attribute>
                                       </attributes>
                                     </child>
                                   </object>
@@ -969,18 +831,19 @@ Author: Dmitriy Yefremov
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="sat_update_tr_status_box">
+                          <object class="GtkBox" id="sat_update_status_box">
+                            <property name="height-request">26</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="margin-start">10</property>
                             <property name="margin-end">10</property>
                             <property name="spacing">5</property>
                             <child>
-                              <object class="GtkImage" id="transponders_count_image">
+                              <object class="GtkImage" id="satellites_count_image">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="icon-name">document-properties-symbolic</property>
@@ -992,7 +855,7 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="transponders_count_label">
+                              <object class="GtkLabel" id="satellites_count_label">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label">0</property>
@@ -1012,11 +875,170 @@ Author: Dmitriy Yefremov
                         </child>
                       </object>
                     </child>
+                    <style>
+                      <class name="view"/>
+                    </style>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="sat_update_frame_label">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-bottom">2</property>
+                    <property name="label" translatable="yes">Satellites</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkPaned" id="sat_update_tr_paned">
+                <property name="can-focus">True</property>
+                <property name="orientation">vertical</property>
+                <property name="wide-handle">True</property>
+                <child>
+                  <object class="GtkFrame" id="sat_update_tr_frame">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label-xalign">0.49000000953674316</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <object class="GtkViewport" id="sat_viewpor">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkBox" id="sat_update_tr_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-top">10</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkScrolledWindow" id="sat_update_tr_scrolled_window">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="shadow-type">in</property>
+                                <child>
+                                  <object class="GtkTreeView" id="sat_update_tr_view">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="model">update_transponder_store</property>
+                                    <property name="search-column">0</property>
+                                    <property name="activate-on-single-click">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection"/>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="tr_view_tr_column">
+                                        <property name="title" translatable="yes">Transponder</property>
+                                        <property name="expand">True</property>
+                                        <property name="alignment">0.5</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="upd_tr_renderer">
+                                            <property name="xalign">0.009999999776482582</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="tr_view_link_column">
+                                        <property name="visible">False</property>
+                                        <property name="title" translatable="yes">link</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="upd_tr_link_renderer"/>
+                                          <attributes>
+                                            <attribute name="text">1</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="tr_view_selected_column">
+                                        <property name="title" translatable="yes">Selected</property>
+                                        <child>
+                                          <object class="GtkCellRendererToggle" id="upd_tr_select_renderer">
+                                            <signal name="toggled" handler="on_transponder_toggled" swapped="no"/>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="active">2</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox" id="sat_update_tr_status_box">
+                                <property name="height-request">26</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">15</property>
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkImage" id="transponders_count_image">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">document-properties-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="transponders_count_label">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label">0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="view"/>
+                        </style>
+                      </object>
+                    </child>
                     <child type="label">
                       <object class="GtkLabel" id="sat_update_tr_frame_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-bottom">2</property>
                         <property name="label" translatable="yes">Transponders</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                     </child>
                   </object>
@@ -1030,145 +1052,155 @@ Author: Dmitriy Yefremov
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label-xalign">0.49000000953674316</property>
-                    <property name="shadow-type">in</property>
+                    <property name="shadow-type">none</property>
                     <child>
-                      <object class="GtkBox" id="sat_update_srv_box">
+                      <object class="GtkViewport" id="services_viewport">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="margin-bottom">5</property>
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkScrolledWindow" id="sat_update_srv_scrolled_window">
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="shadow-type">in</property>
-                            <child>
-                              <object class="GtkTreeView" id="sat_update_srv_view">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="model">update_service_store</property>
-                                <property name="search-column">1</property>
-                                <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
-                                </child>
-                                <child>
-                                  <object class="GtkTreeViewColumn" id="srv_view_servcie_column">
-                                    <property name="title" translatable="yes">Service</property>
-                                    <property name="expand">True</property>
-                                    <property name="alignment">0.5</property>
-                                    <child>
-                                      <object class="GtkCellRendererPixbuf" id="srv_picon_renderer">
-                                        <property name="xpad">2</property>
-                                      </object>
-                                      <attributes>
-                                        <attribute name="pixbuf">0</attribute>
-                                      </attributes>
-                                    </child>
-                                    <child>
-                                      <object class="GtkCellRendererText" id="srv_service_renderer">
-                                        <property name="xalign">0.009999999776482582</property>
-                                      </object>
-                                      <attributes>
-                                        <attribute name="text">1</attribute>
-                                      </attributes>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkTreeViewColumn" id="srv_view_package_column">
-                                    <property name="title" translatable="yes">Package</property>
-                                    <property name="expand">True</property>
-                                    <property name="alignment">0.5</property>
-                                    <child>
-                                      <object class="GtkCellRendererText" id="srv_package_renderer">
-                                        <property name="ellipsize">end</property>
-                                      </object>
-                                      <attributes>
-                                        <attribute name="text">2</attribute>
-                                      </attributes>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkTreeViewColumn" id="srv_view_type_column">
-                                    <property name="title" translatable="yes">Type</property>
-                                    <property name="expand">True</property>
-                                    <property name="alignment">0.5</property>
-                                    <child>
-                                      <object class="GtkCellRendererText" id="srv_type_renderer">
-                                        <property name="xalign">0.49000000953674316</property>
-                                      </object>
-                                      <attributes>
-                                        <attribute name="text">3</attribute>
-                                      </attributes>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkTreeViewColumn" id="srv_view_sid_column">
-                                    <property name="title" translatable="yes">SID</property>
-                                    <property name="expand">True</property>
-                                    <property name="alignment">0.5</property>
-                                    <child>
-                                      <object class="GtkCellRendererText" id="srv_sid_renderer">
-                                        <property name="xalign">0.49000000953674316</property>
-                                      </object>
-                                      <attributes>
-                                        <attribute name="text">4</attribute>
-                                      </attributes>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkTreeViewColumn" id="srv_view_cas_column">
-                                    <property name="visible">False</property>
-                                    <property name="title" translatable="yes">CAS</property>
-                                    <property name="expand">True</property>
-                                    <property name="alignment">0.5</property>
-                                    <child>
-                                      <object class="GtkCellRendererText" id="srv_cas_renderer">
-                                        <property name="xalign">0.49000000953674316</property>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="sat_update_srv_status_box">
+                          <object class="GtkBox" id="sat_update_srv_box">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="margin-start">10</property>
                             <property name="margin-end">10</property>
-                            <property name="spacing">5</property>
+                            <property name="margin-top">10</property>
+                            <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkImage" id="services_count_image">
+                              <object class="GtkScrolledWindow" id="sat_update_srv_scrolled_window">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="icon-name">document-properties-symbolic</property>
+                                <property name="can-focus">True</property>
+                                <property name="shadow-type">in</property>
+                                <child>
+                                  <object class="GtkTreeView" id="sat_update_srv_view">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="model">update_service_store</property>
+                                    <property name="search-column">1</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection"/>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="srv_view_servcie_column">
+                                        <property name="title" translatable="yes">Service</property>
+                                        <property name="expand">True</property>
+                                        <property name="alignment">0.5</property>
+                                        <child>
+                                          <object class="GtkCellRendererPixbuf" id="srv_picon_renderer">
+                                            <property name="xpad">2</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="pixbuf">0</attribute>
+                                          </attributes>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="srv_service_renderer">
+                                            <property name="xalign">0.009999999776482582</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">1</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="srv_view_package_column">
+                                        <property name="title" translatable="yes">Package</property>
+                                        <property name="expand">True</property>
+                                        <property name="alignment">0.5</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="srv_package_renderer">
+                                            <property name="ellipsize">end</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">2</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="srv_view_type_column">
+                                        <property name="title" translatable="yes">Type</property>
+                                        <property name="expand">True</property>
+                                        <property name="alignment">0.5</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="srv_type_renderer">
+                                            <property name="xalign">0.49000000953674316</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">3</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="srv_view_sid_column">
+                                        <property name="title" translatable="yes">SID</property>
+                                        <property name="expand">True</property>
+                                        <property name="alignment">0.5</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="srv_sid_renderer">
+                                            <property name="xalign">0.49000000953674316</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">4</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="srv_view_cas_column">
+                                        <property name="visible">False</property>
+                                        <property name="title" translatable="yes">CAS</property>
+                                        <property name="expand">True</property>
+                                        <property name="alignment">0.5</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="srv_cas_renderer">
+                                            <property name="xalign">0.49000000953674316</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="services_count_label">
+                              <object class="GtkBox" id="sat_update_srv_status_box">
+                                <property name="height-request">26</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label">0</property>
+                                <property name="margin-start">10</property>
+                                <property name="margin-end">10</property>
+                                <property name="spacing">5</property>
+                                <child>
+                                  <object class="GtkImage" id="services_count_image">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">document-properties-symbolic</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="services_count_label">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label">0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -1177,22 +1209,21 @@ Author: Dmitriy Yefremov
                               </packing>
                             </child>
                           </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
                         </child>
-                        <child>
-                          <placeholder/>
-                        </child>
+                        <style>
+                          <class name="view"/>
+                        </style>
                       </object>
                     </child>
                     <child type="label">
                       <object class="GtkLabel" id="sat_update_srv_frame_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="margin-bottom">2</property>
                         <property name="label" translatable="yes">Services</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
                       </object>
                     </child>
                   </object>
