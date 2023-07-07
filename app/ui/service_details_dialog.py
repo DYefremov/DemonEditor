@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -140,7 +140,7 @@ class ServiceDetailsDialog:
         self._srv_type_entry = self._non_empty_elements.get("srv_type_entry")
         self._service_type_combo_box = builder.get_object("service_type_combo_box")
         self._cas_entry = builder.get_object("cas_entry")
-        self._reference_entry = builder.get_object("reference_entry")
+        self._reference_label = builder.get_object("reference_label")
         self._keep_check_button = builder.get_object("keep_check_button")
         self._hide_check_button = builder.get_object("hide_check_button")
         self._use_pids_check_button = builder.get_object("use_pids_check_button")
@@ -159,7 +159,6 @@ class ServiceDetailsDialog:
         self._pilot_combo_box = builder.get_object("pilot_combo_box")
         self._pls_mode_combo_box = builder.get_object("pls_mode_combo_box")
         self._tr_edit_switch = builder.get_object("tr_edit_switch")
-        self._tr_extra_expander = builder.get_object("tr_extra_expander")
 
         self._DVB_S2_ELEMENTS = (self._mod_combo_box, self._rolloff_combo_box, self._pilot_combo_box,
                                  self._pls_mode_combo_box, self._pls_code_entry, self._stream_id_entry)
@@ -186,7 +185,6 @@ class ServiceDetailsDialog:
             elem.set_text(" ")
             elem.set_text("")
         self._new_check_button.set_active(True)
-        self._tr_extra_expander.activate()
         self._service_type_combo_box.set_active(0)
         self._pol_combo_box.set_active(0)
         self._fec_combo_box.set_active(0)
@@ -366,8 +364,7 @@ class ServiceDetailsDialog:
         tr_grid = self._builder.get_object("tr_grid")
         tr_grid.remove_column(7)
         tr_grid.set_margin_bottom(5)
-        self._builder.get_object("tr_extra_expander").set_visible(False)
-        self._builder.get_object("srv_separator").set_visible(False)
+        self._builder.get_object("extra_transponder_grid").set_visible(False)
         self._package_entry.set_sensitive(False)
 
     # ***************** Init Sat positions *********************#
@@ -527,7 +524,7 @@ class ServiceDetailsDialog:
                        package=self._package_entry.get_text(),
                        service_type=SERVICE_TYPE.get(self._srv_type_entry.get_text(), SERVICE_TYPE["3"]),
                        picon=self._old_service.picon,
-                       picon_id=self._reference_entry.get_text().replace(":", "_") + ".png",
+                       picon_id=self._reference_label.get_text().replace(":", "_") + ".png",
                        ssid="{:04x}".format(int(self._sid_entry.get_text())),
                        freq=freq,
                        rate=rate,
@@ -798,9 +795,9 @@ class ServiceDetailsDialog:
         if self._s_type is SettingsType.ENIGMA_2:
             on_id = int(self._namespace_entry.get_text())
             ref = "1:0:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0".format(srv_type, ssid, tid, nid, on_id)
-            self._reference_entry.set_text(ref)
+            self._reference_label.set_text(ref)
         else:
-            self._reference_entry.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
+            self._reference_label.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
 
     def update_ui_for_terrestrial(self):
         tr_grid = self.get_transponder_grid_for_non_satellite()
@@ -891,7 +888,6 @@ class ServiceDetailsDialog:
         # FEC
         fec_model.append(("None",))
         # Extra
-        tr_box.remove(self._tr_extra_expander)
         tr_grid.set_margin_bottom(5)
         self._freq_entry.set_width_chars(10)
         self._freq_entry.set_max_width_chars(10)
