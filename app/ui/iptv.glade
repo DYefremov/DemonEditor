@@ -378,7 +378,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkLabel" id="reference_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">4097:0:1:0:0:0:0:0:0:0</property>
+                        <property name="label">4097:0:1:0:0:0:0:0:0:0</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -1383,10 +1383,13 @@ Author: Dmitriy Yefremov
                         <property name="margin-top">5</property>
                         <property name="spacing">1</property>
                         <child>
-                          <object class="GtkLabel" id="iptv_reference_label">
+                          <object class="GtkLabel" id="iptv_ref_label">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label" translatable="yes">Reference</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1399,6 +1402,9 @@ Author: Dmitriy Yefremov
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="label">:</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1407,14 +1413,15 @@ Author: Dmitriy Yefremov
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="reference_entry">
+                          <object class="GtkLabel" id="iptv_reference_label">
                             <property name="visible">True</property>
-                            <property name="can-focus">True</property>
+                            <property name="can-focus">False</property>
                             <property name="margin-start">5</property>
-                            <property name="editable">False</property>
-                            <property name="has-frame">False</property>
-                            <property name="width-chars">25</property>
-                            <property name="caps-lock-warning">False</property>
+                            <property name="margin-end">5</property>
+                            <property name="selectable">True</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
                           </object>
                           <packing>
                             <property name="expand">False</property>

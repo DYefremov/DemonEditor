@@ -105,7 +105,7 @@ class IptvDialog:
         self._name_entry = builder.get_object("name_entry")
         self._description_entry = builder.get_object("description_entry")
         self._url_entry = builder.get_object("url_entry")
-        self._reference_entry = builder.get_object("reference_entry")
+        self._reference_label = builder.get_object("iptv_reference_label")
         self._srv_type_entry = builder.get_object("srv_type_entry")
         self._srv_id_entry = builder.get_object("srv_id_entry")
         self._sid_entry = builder.get_object("sid_entry")
@@ -236,7 +236,7 @@ class IptvDialog:
 
     def update_reference_entry(self):
         if self._s_type is SettingsType.ENIGMA_2 and is_data_correct(self._digit_elems):
-            self._reference_entry.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
+            self._reference_label.set_text(_ENIGMA2_REFERENCE.format(self.get_type(),
                                                                      self._srv_id_entry.get_text(),
                                                                      int(self._srv_type_entry.get_text()),
                                                                      int(self._sid_entry.get_text()),
@@ -365,7 +365,7 @@ class IptvDialog:
         self._dialog.destroy()
 
     def update_bouquet_data(self, name, fav_id):
-        picon_id = f"{self._reference_entry.get_text().replace(':', '_')}.png"
+        picon_id = f"{self._reference_label.get_text().replace(':', '_')}.png"
 
         if self._action is Action.EDIT:
             services = self._app.current_services
