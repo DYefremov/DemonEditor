@@ -69,6 +69,7 @@ class ExtensionManager(Gtk.Window):
         self._ext_path = f"{self._app.app_settings.default_data_path}tools{os.sep}extensions"
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
+        base_margin = {"margin_start": 10, "margin_end": 10, "margin_top": 10, "margin_bottom": 10}
         # Title, Description, Version, Info, Status, Name, URL, Path.
         self._model = Gtk.ListStore.new((str, str, str, str, bool, str, str, object))
         self._model.connect("row-deleted", self.on_model_changed)
@@ -110,9 +111,11 @@ class ExtensionManager(Gtk.Window):
         self._view.append_column(column)
         self._status_column = column
 
-        main_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
-        frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN, **margin)
-        data_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL, **margin)
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN, **base_margin)
+        frame.get_style_context().add_class("view")
+        data_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL, **base_margin)
+        data_box.set_margin_bottom(margin.get("margin_bottom", 5))
         # Status bar.
         status_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, margin_start=5, margin_end=5)
         count_icon = Gtk.Image.new_from_icon_name("document-properties", Gtk.IconSize.SMALL_TOOLBAR)
@@ -132,16 +135,15 @@ class ExtensionManager(Gtk.Window):
         scrolled = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
         scrolled.add(self._view)
         data_box.pack_start(scrolled, True, True, 0)
+        data_box.set_margin_start(10)
         frame.add(data_box)
         self.add(main_box)
         # Popup menu.
         menu = Gtk.Menu()
-        item = Gtk.ImageMenuItem.new_from_stock("gtk-goto-bottom")
-        item.set_label(translate("Download"))
+        item = Gtk.MenuItem.new_with_label(translate("Download"))
         item.connect("activate", self.on_download)
         menu.append(item)
-        item = Gtk.ImageMenuItem.new_from_stock("gtk-remove")
-        item.set_label(translate("Remove"))
+        item = Gtk.MenuItem.new_with_label(translate("Remove"))
         item.connect("activate", self.on_remove)
         menu.append(item)
         menu.show_all()
