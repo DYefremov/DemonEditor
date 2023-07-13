@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2023 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -292,7 +292,7 @@ class TimerTool(Gtk.Box):
                     "on_timer_remove": self.on_timer_remove,
                     "on_model_changed": self.on_model_changed,
                     "on_timers_press": self.on_timers_press,
-                    "on_timers_key_press": self.on_timers_key_press,
+                    "on_timers_key_release": self.on_timers_key_release,
                     "on_timer_cursor_changed": self.on_timer_cursor_changed,
                     "on_timers_drag_data_received": self.on_timers_drag_data_received}
 
@@ -465,7 +465,7 @@ class TimerTool(Gtk.Box):
         else:
             on_popup_menu(menu, event)
 
-    def on_timers_key_press(self, view, event):
+    def on_timers_key_release(self, view, event):
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
             return
@@ -475,10 +475,10 @@ class TimerTool(Gtk.Box):
 
         if key is KeyboardKey.DELETE:
             self.on_timer_remove()
-        elif key is KeyboardKey.INSERT:
-            self.on_timer_add()
         elif ctrl and key is KeyboardKey.E:
             self.on_timer_edit()
+        elif ctrl and key is KeyboardKey.INSERT:
+            self.on_timer_add()
 
     def on_timer_cursor_changed(self, view):
         path, column = view.get_cursor()
