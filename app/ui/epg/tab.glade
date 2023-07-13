@@ -111,7 +111,10 @@ Author: Dmitriy Yefremov
                     </items>
                     <child internal-child="entry">
                       <object class="GtkEntry">
+                        <property name="name">header-entry</property>
                         <property name="can-focus">False</property>
+                        <property name="editable">False</property>
+                        <property name="width-chars">10</property>
                       </object>
                     </child>
                   </object>
