@@ -71,7 +71,6 @@ class BackupDialog:
         self._model = builder.get_object("main_list_store")
         self._main_view = builder.get_object("main_view")
         self._text_view = builder.get_object("text_view")
-        self._text_view_scrolled_window = builder.get_object("text_view_scrolled_window")
         self._info_check_button = builder.get_object("info_check_button")
         self._info_bar = builder.get_object("info_bar")
         self._message_label = builder.get_object("message_label")
@@ -149,9 +148,7 @@ class BackupDialog:
             menu.popup(None, None, None, None, event.button, event.time)
 
     def on_info_button_toggled(self, button):
-        active = button.get_active()
-        self._text_view_scrolled_window.set_visible(active)
-        if active:
+        if button.get_active():
             self.on_cursor_changed(self._main_view)
 
     @run_idle
