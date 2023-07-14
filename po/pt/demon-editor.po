@@ -1010,3 +1010,476 @@ msgstr "Captura de pantalla"
 
 msgid "Video"
 msgstr "Vidео"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "Neutrino имеет только экспериментальную поддержку. Поддерживаются не все функции!"
+
+msgid "Enable experimental features"
+msgstr "Ativar funcionalidades experimentais"
+
+msgid "Can't Playback!"
+msgstr "Não consigo reproduzir!"
+
+msgid "Enable Dark Mode"
+msgstr "Ativar o modo escuro"
+
+msgid "Extract..."
+msgstr "Extrair..."
+
+msgid "Unsupported format!"
+msgstr "Formato não suportado!"
+
+msgid "Combine with the current data?"
+msgstr "Combinar com os dados actuais?"
+
+msgid "Importing data done!"
+msgstr "Importação de dados concluída!"
+
+msgid "Current service"
+msgstr "Serviço atual"
+
+msgid "Open folder"
+msgstr "Abrir pasta"
+
+msgid "Open archive"
+msgstr "Abrir ficheiro"
+
+msgid "Import from Web"
+msgstr "Importar da Web"
+
+msgid "Control"
+msgstr "Control"
+
+msgid "Timers"
+msgstr "Temporizadores"
+
+msgid "Timer"
+msgstr "Temporizador"
+
+msgid "Add timer"
+msgstr "Adicionar temporizador"
+
+msgid "Hr."
+msgstr "Hr."
+
+msgid "Min."
+msgstr "Min."
+
+msgid "Power"
+msgstr "Ligar"
+
+msgid "Standby"
+msgstr "Em espera"
+
+msgid "Wake Up"
+msgstr "Despertar"
+
+msgid "Reboot"
+msgstr "Reinicialização"
+
+msgid "Restart GUI"
+msgstr "Reiniciar a GUI"
+
+msgid "Shutdown"
+msgstr "Desativação"
+
+msgid "Shut down"
+msgstr "Desativar"
+
+msgid "Do Nothing"
+msgstr "Não fazer nada"
+
+msgid "Auto"
+msgstr "Auto"
+
+msgid "Grab screenshot"
+msgstr "Captura de ecrã"
+
+msgid "Enabled:"
+msgstr "Ativado:"
+
+msgid "Name:"
+msgstr "Nome:"
+
+msgid "Description:"
+msgstr "Descrição:"
+
+msgid "Service:"
+msgstr "Serviço:"
+
+msgid "Service reference:"
+msgstr "Referência do serviço:"
+
+msgid "Event ID:"
+msgstr "ID do evento:"
+
+msgid "Begins:"
+msgstr "Começa:"
+
+msgid "Ends:"
+msgstr "Termina:"
+
+msgid "Repeated:"
+msgstr "Repetido:"
+
+msgid "Action:"
+msgstr "Ação:"
+
+msgid "After event:"
+msgstr "Após o evento:"
+
+msgid "Location:"
+msgstr "Localização:"
+
+msgid "Mo"
+msgstr "Seg"
+
+msgid "Tu"
+msgstr "Ter"
+
+msgid "We"
+msgstr "Qua"
+
+msgid "Th"
+msgstr "Qui"
+
+msgid "Fr"
+msgstr "Sex"
+
+msgid "Sa"
+msgstr "Sáb"
+
+msgid "Dom"
+msgstr "Вс"
+
+msgid "Set"
+msgstr "Set"
+
+msgid "Services update"
+msgstr "Atualização de serviços"
+
+msgid "Create folder"
+msgstr "Criar pasta"
+
+msgid "FTP client"
+msgstr "Cliente FTP"
+
+msgid "The file size is too large!"
+msgstr "O ficheiro é demasiado grande!"
+
+msgid "Connect"
+msgstr "Ligar"
+
+msgid "Disconnect"
+msgstr "Desligar"
+
+msgid "Size"
+msgstr "Tamanho"
+
+msgid "Date"
+msgstr "Data"
+
+msgid "Toggle display position"
+msgstr "Alternar a posição de visualização"
+
+msgid "Alternatives"
+msgstr "Alternativas"
+
+msgid "Add alternatives"
+msgstr "Adicionar alternativas"
+
+msgid "DreamOS only!"
+msgstr "Apenas DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Um serviço semelhante já consta desta lista!"
+
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "O modo de reprodução foi alterado!\nReinicie o programa para aplicar as definições."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Definir valores para TID, NID e Namespace para nomear corretamente os picons!"
+
+msgid "Streams detected:"
+msgstr "Fluxos detectados:"
+
+msgid "Download picons"
+msgstr "Descarregar picons"
+
+msgid "Errors:"
+msgstr "Erros:"
+
+msgid "Use to play streams:"
+msgstr "Utilizar para reproduzir fluxos:"
+
+msgid "Font in the lists:"
+msgstr "Fonte nas listas:"
+
+msgid "Picons size in the lists:"
+msgstr "Tamanho dos picões nas listas:"
+
+msgid "Logo size in tooltips:"
+msgstr "Tamanho do logótipo nas dicas de ferramenta:"
+
+msgid "Save as"
+msgstr "Salvar como"
+
+msgid "Mark duplicates"
+msgstr "Marcar duplicações"
+
+msgid "Load only for selected bouquet"
+msgstr "Carregar apenas para o bouquet selecionado"
+
+msgid "The task is canceled!"
+msgstr "A tarefa foi cancelada!"
+
+msgid "Data loading in progress!"
+msgstr "Carregamento de dados em curso!"
+
+msgid "Recordings"
+msgstr "Gravações"
+
+msgid "Recordings:"
+msgstr "Gravações:"
+
+msgid "Help"
+msgstr "Ajuda"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "A API HTTP não está activada. Verifique as suas definições!"
+
+msgid "Add picons"
+msgstr "Adicionar picons"
+
+msgid "Logs"
+msgstr "Registos"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Time"
+msgstr "Tempo"
+
+msgid "Length"
+msgstr "Duração"
+
+msgid "Additional source"
+msgstr "Fonte complementar"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Definir automaticamente o nome selecionado na lista de favoritos."
+
+msgid "Playback"
+msgstr "Reprodução"
+
+msgid "Playback:"
+msgstr "Reprodução:"
+
+msgid "Audio"
+msgstr "Áudio"
+
+msgid "Audio Track"
+msgstr "Pista áudio"
+
+msgid "Subtitle"
+msgstr "Legenda"
+
+msgid "Subtitle Track"
+msgstr "Faixa de legenda"
+
+msgid "Aspect ratio"
+msgstr "Rácio de aspeto"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Isto pode alterar as definições de outros perfis!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Arraste os serviços para o picon pretendido ou picon para a lista de serviços seleccionados."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Define a pasta de perfil como predefinida para armazenar picons, cópias de segurança, etc."
+
+msgid "New sub-bouquet"
+msgstr "Novo sub-bouquet"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Marca não apresentada em bouquets"
+
+msgid "Not in Bouquets"
+msgstr "Não em bouquets"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Não mostrar serviços presentes em bouquets."
+
+msgid "IPTV services only"
+msgstr "Apenas serviços IPTV"
+
+msgid "Display picons"
+msgstr "Mostrar picons"
+
+msgid "Alternate layout"
+msgstr "Esquema alternativo"
+
+msgid "Layout of elements has been changed!"
+msgstr "O esquema dos elementos foi alterado!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Reinicie o programa para aplicar todas as alterações."
+
+msgid "New folder"
+msgstr "Novo ficheiro"
+
+msgid "Rename"
+msgstr "Renomear"
+
+msgid "Bookmarks"
+msgstr "Marcadores"
+
+msgid "Add bookmark"
+msgstr "Adicionar marcador"
+
+msgid "All bouquets"
+msgstr "Todos os bouquets"
+
+msgid "Playback from the main list"
+msgstr "Reprodução da lista principal"
+
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Permite a análise de URLs usando yt-dlp para obter links diretos para mídia."
+
+msgid "Permissions..."
+msgstr "Permissões..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Apresentar EPG na lista de bouquet"
+
+msgid "EPG *.dat file:"
+msgstr "Ficheiro EPG *.dat:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Utilizar HTTP para recarregar dados no recetor"
+
+msgid "Enable picons compression"
+msgstr "Ativar a compressão de picons"
+
+msgid "Update interval (sec):"
+msgstr "Intervalo de atualização (seg):"
+
+msgid "Update:"
+msgstr "Atualização:"
+
+msgid "Daily"
+msgstr "Diário"
+
+msgid "Assign reference"
+msgstr "Atribuir referência"
+
+msgid "Specify hostname or IP address"
+msgstr "Especificar o nome do anfitrião ou o endereço IP"
+
+msgid "Default selection"
+msgstr "Seleção predefinida"
+
+msgid "Don't change power state"
+msgstr "Não alterar o estado de alimentação"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Não alterne o modo de espera ao atualizar bouquets e serviços."
+
+msgid "Region"
+msgstr "Região"
+
+msgid "Provider"
+msgstr "Provedor"
+
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr "Permite o carregamento como um arquivo se for selecionado um grande número de picons (> 1000).\n"
+"                    Recomendado apenas se tiver armazenamento externo."
+
+msgid "Clear \"New\" flag"
+msgstr "Apagar a bandeira \"Novo\""
+
+msgid "Group by"
+msgstr "Agrupar por"
+
+msgid "Replace existing"
+msgstr "Substituir o existente"
+
+msgid "Already exists"
+msgstr "Já existe"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Ativar o buffer de cópia ilimitado"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Ativa a memória intermédia de cópia ilimitada para o separador bouquets."
+
+msgid "Start time"
+msgstr "Hora de início"
+
+msgid "End time"
+msgstr "Hora de fim"
+
+msgid "Enable extensions support"
+msgstr "Ativar o suporte de extensões"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Depois de carregar as alterações, poderá ser necessário reiniciar completamente o recetor!"
+
+msgid "Remove duplicates"
+msgstr "Eliminar duplicados"
+
+msgid "Removed"
+msgstr "Removido"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Permite substituir os serviços da lista principal existentes."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Permite saltar a importação de serviços de lamedb."
+
+msgid "Bouquets data only"
+msgstr "Apenas dados de bouquets"
+
+msgid "Create Category bouquets"
+msgstr "Criar bouquets de categoria"
+
+msgid "Create Regional bouquets"
+msgstr "Criar bouquets regionais"
+
+msgid "Skip C-band"
+msgstr "Saltar a banda C"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Definir automaticamente o nome selecionado na lista de bouquets."
+
+msgid "Merge satellites by positions"
+msgstr "Unir satélites por posições"
+
+msgid "Save satellite selection"
+msgstr "Guardar a seleção de satélite"
+
+msgid "Extract direct links"
+msgstr "Extrair ligações directas"
+
+msgid "URL prefix:"
+msgstr "Prefixo URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Prefixo inválido para o URL indicado!"
+
+msgid "Alternate window title"
+msgstr "Título alternativo da janela"
+
+msgid "Selected type:"
+msgstr "Tipo selecionado:"
+
+msgid "Extension Manager"
+msgstr "Gestor de extensões"
+
+msgid "Ver."
+msgstr "Ver."
+
+msgid "Installed"
+msgstr "Instalado"
