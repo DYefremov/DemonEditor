@@ -1495,3 +1495,33 @@ msgstr "Omitir banda C"
 
 msgid "Automatically set the name selected in the bouquet list."
 msgstr "Establece automáticamente el nombre seleccionado en la lista de bouquets."
+
+msgid "Merge satellites by positions"
+msgstr "Combinar satélites por posiciones"
+
+msgid "Save satellite selection"
+msgstr "Guardar selección de satélites"
+
+msgid "Extract direct links"
+msgstr "Extraer enlaces directos"
+
+msgid "URL prefix:"
+msgstr "Prefijo URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "¡Prefijo inválido para la URL dada!"
+
+msgid "Alternate window title"
+msgstr "Título alternativo de ventana"
+
+msgid "Selected type:"
+msgstr "Tipo elegido:"
+
+msgid "Extension Manager"
+msgstr "Gestor de extensiones"
+
+msgid "Ver."
+msgstr "Ver."
+
+msgid "Installed"
+msgstr "Instalado"
