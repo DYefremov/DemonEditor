@@ -133,7 +133,6 @@ class IptvDialog:
         if self._s_type is SettingsType.NEUTRINO_MP:
             builder.get_object("iptv_dialog_ts_data_frame").set_visible(False)
             builder.get_object("iptv_type_label").set_visible(False)
-            builder.get_object("reference_entry").set_visible(False)
             builder.get_object("iptv_ref_box").set_visible(False)
             self._stream_type_combobox.set_visible(False)
         else:
