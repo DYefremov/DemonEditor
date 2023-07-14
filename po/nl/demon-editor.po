@@ -1455,3 +1455,33 @@ msgstr "C-band overslaan"
 
 msgid "Automatically set the name selected in the bouquet list."
 msgstr "Stel automatisch de naam in die is geselecteerd in de boeketlijst."
+
+msgid "Merge satellites by positions"
+msgstr "Satellieten samenvoegen op basis van positie"
+
+msgid "Save satellite selection"
+msgstr "Satellietselectie opslaan"
+
+msgid "Extract direct links"
+msgstr "Directe links uitpakken"
+
+msgid "URL prefix:"
+msgstr "Prefix URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Ongeldige prefix voor de opgegeven URL!"
+
+msgid "Alternate window title"
+msgstr "Alternatieve venstertitel"
+
+msgid "Selected type:"
+msgstr "Geselecteerde type:"
+
+msgid "Extension Manager"
+msgstr "Uitbreidings Manager"
+
+msgid "Ver."
+msgstr "Ver."
+
+msgid "Installed"
+msgstr "Geïnstalleerd"
