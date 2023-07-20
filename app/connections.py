@@ -51,7 +51,7 @@ BQ_FILES_LIST = ("tv", "radio",  # Enigma2.
 DATA_FILES_LIST = ("lamedb", "lamedb5", "blacklist", "whitelist",)
 
 STC_XML_FILE = ("satellites.xml", "terrestrial.xml", "cables.xml")
-WEB_TV_XML_FILE = ("webtv.xml",)
+WEB_TV_XML_FILE = ("webtv.xml", "webtv_usr.xml")
 PICONS_SUF = (".jpg", ".png")
 PICONS_MAX_NUM = 1000  # Maximum picon number for sending without compression.
 

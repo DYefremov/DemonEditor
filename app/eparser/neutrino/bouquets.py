@@ -28,6 +28,7 @@
 
 import os
 
+from app.commons import log
 from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
 from app.eparser.neutrino import KSP, SP, get_xml_attributes, get_attributes, API_VER
 from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
@@ -35,7 +36,7 @@ from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDE
 
 _FILE = "bouquets.xml"
 _U_FILE = "ubouquets.xml"
-_W_FILE = "webtv.xml"
+_W_FILE = "webtv_usr.xml"
 
 _COMMENT = " File was created in DemonEditor. Enjoy watching! "
 
@@ -60,20 +61,27 @@ def parse_bouquets(file, name, bq_type):
             hidden = bq_attrs.get("hidden", "0")
             locked = bq_attrs.get("locked", "0")
             services = []
+
             for srv_elem in elem.getElementsByTagName("S"):
                 if srv_elem.hasAttributes():
                     s_attrs = get_xml_attributes(srv_elem)
-                    ssid = s_attrs.get("i", "0")
-                    on = s_attrs.get("on", "0")
-                    tr_id = s_attrs.get("t", "0")
-                    fav_id = "{}:{}:{}".format(tr_id, on, ssid)
-                    services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
+                    if "i" in s_attrs:
+                        ssid = s_attrs.get("i", "0")
+                        on = s_attrs.get("on", "0")
+                        tr_id = s_attrs.get("t", "0")
+                        fav_id = f"{tr_id}:{on}:{ssid}"
+                        services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
+                    elif "u" in s_attrs:
+                        services.append(BouquetService(s_attrs.get("n"), BqServiceType.IPTV, s_attrs.get("u"), 0))
+                    else:
+                        log(f"Parse bouquets [Neutrino] error: Unknown service type. -> {s_attrs}")
+
             bouquets[2].append(Bouquet(name=bq_name,
                                        type=bq_type,
                                        services=services,
                                        locked=locked == "1",
                                        hidden=hidden == "1",
-                                       file=SP.join("{}{}{}".format(k, KSP, v) for k, v in bq_attrs.items())))
+                                       file=SP.join(f"{k}{KSP}{v}" for k, v in bq_attrs.items())))
 
     if BqType(bq_type) is BqType.BOUQUET:
         for bq in bouquets.bouquets:
@@ -153,14 +161,25 @@ def write_bouquet(file, bouquet):
         root.appendChild(bq_elem)
 
         for srv in bq.services:
-            tr_id, on, ssid = srv.fav_id.split(":")
             srv_elem = doc.createElement("S")
-            srv_elem.setAttribute("i", ssid)
             srv_elem.setAttribute("n", srv.service)
-            srv_elem.setAttribute("t", tr_id)
-            srv_elem.setAttribute("on", on)
-            srv_elem.setAttribute("frq", srv.freq)
-            srv_elem.setAttribute("s", get_attributes(srv.flags_cas).get("position", "0"))
+            s_type = BqServiceType(srv.service_type)
+
+            if s_type is BqServiceType.DEFAULT:
+                tr_id, on, ssid = srv.fav_id.split(":")
+                srv_elem.setAttribute("i", ssid)
+                srv_elem.setAttribute("t", tr_id)
+                srv_elem.setAttribute("on", on)
+                srv_elem.setAttribute("frq", srv.freq)
+                srv_elem.setAttribute("s", get_attributes(srv.flags_cas).get("position", "0"))
+            elif s_type is BqServiceType.IPTV:
+                s_data = srv.fav_id.split("::")
+                if s_data:
+                    srv_elem.setAttribute("n", srv.service)
+                    srv_elem.setAttribute("u", s_data[0])
+            else:
+                log(f"Write bouquet [Neutrino] error: Unsupported service type. -> {s_type.value}")
+
             bq_elem.appendChild(srv_elem)
 
     doc.write_xml(file)
