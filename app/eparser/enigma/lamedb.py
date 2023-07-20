@@ -112,7 +112,7 @@ class LameDbReader:
             if lns and not lns[0].endswith("/5/\n"):
                 raise SyntaxError("lamedb ver.5 parsing error: unsupported format.")
 
-            trs, srvs = {}, [""]
+            trs, srvs = {}, []
             for line in lns:
                 if line.startswith("s:"):
                     srv_data = line.strip("s:").split(",", 2)
