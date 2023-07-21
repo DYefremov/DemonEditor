@@ -72,7 +72,7 @@ def parse_bouquets(file, name, bq_type):
                         fav_id = f"{tr_id}:{on}:{ssid}"
                         services.append(BouquetService(None, BqServiceType.DEFAULT, fav_id, 0))
                     elif "u" in s_attrs:
-                        services.append(BouquetService(s_attrs.get("n"), BqServiceType.IPTV, s_attrs.get("u"), 0))
+                        services.append(get_webtv_service(s_attrs))
                     else:
                         log(f"Parse bouquets [Neutrino] error: Unknown service type. -> {s_attrs}")
 
@@ -104,25 +104,27 @@ def parse_webtv(path, name, bq_type):
     for elem in dom.getElementsByTagName("webtv"):
         if elem.hasAttributes():
             web_attrs = get_xml_attributes(elem)
-            title = web_attrs.get("title", "")
-            url = web_attrs.get("url", "")
-            description = web_attrs.get("description", "")
-            urlkey = web_attrs.get("urlkey", None)
-            account = web_attrs.get("account", None)
-            usrname = web_attrs.get("usrname", None)
-            psw = web_attrs.get("psw", None)
-            s_type = web_attrs.get("type", None)
-            iconsrc = web_attrs.get("iconsrc", None)
-            iconsrc_b = web_attrs.get("iconsrc_b", None)
-            group = web_attrs.get("group", None)
-            fav_id = NEUTRINO_FAV_ID_FORMAT.format(url, description, urlkey, account, usrname, psw, s_type, iconsrc,
-                                                   iconsrc_b, group)
-            services.append(BouquetService(name=title, type=BqServiceType.IPTV, data=fav_id, num=0))
+            services.append(get_webtv_service(web_attrs))
 
     bouquet = Bouquet(name="default", type=bq_type, services=services, locked=None, hidden=None, file=None)
     bouquets[2].append(bouquet)
 
     return bouquets
+
+
+def get_webtv_service(web_attrs):
+    title = web_attrs.get("title", web_attrs.get("n", ""))
+    fav_id = NEUTRINO_FAV_ID_FORMAT.format(web_attrs.get("url", web_attrs.get("u", )),
+                                           web_attrs.get("description", ""),
+                                           web_attrs.get("urlkey", None),
+                                           web_attrs.get("account", None),
+                                           web_attrs.get("usrname", None),
+                                           web_attrs.get("psw", None),
+                                           web_attrs.get("type", None),
+                                           web_attrs.get("iconsrc", None),
+                                           web_attrs.get("iconsrc_b", None),
+                                           web_attrs.get("group", None))
+    return BouquetService(name=title, type=BqServiceType.IPTV, data=fav_id, num=0)
 
 
 def write_bouquets(path, bouquets):
