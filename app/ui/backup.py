@@ -193,7 +193,7 @@ class BackupDialog:
             return
 
         file_name = model.get_value(model.get_iter(paths[0]), 0)
-        full_file_name = self._backup_path + file_name + ".zip"
+        full_file_name = f"{self._backup_path}{file_name}.zip"
 
         try:
             if restore_type is RestoreType.ALL:
@@ -242,8 +242,8 @@ def backup_data(path, backup_path, move=True):
     backup_path = f"{backup_path}{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}{SEP}"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    # Backup files in data dir(skipping dirs and *.xml).
-    for file in filter(lambda f: not f.endswith(".xml") and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+    # Backup files in data dir.
+    for file in filter(lambda f: os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         src, dst = os.path.join(path, file), backup_path + file
         shutil.move(src, dst) if move else shutil.copy(src, dst)
     # Compressing to zip and delete remaining files.
