@@ -61,7 +61,7 @@ class DVBDialog(Gtk.Dialog):
                          title=translate(title),
                          modal=True,
                          resizable=False,
-                         default_width=320,
+                         default_width=240,
                          skip_taskbar_hint=True,
                          skip_pager_hint=True,
                          destroy_with_parent=True,
