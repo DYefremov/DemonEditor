@@ -933,6 +933,8 @@ Author: Dmitriy Yefremov
             <property name="can-focus">False</property>
             <property name="margin-start">5</property>
             <property name="margin-end">5</property>
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
