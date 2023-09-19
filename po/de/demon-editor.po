@@ -1511,3 +1511,9 @@ msgstr "Ver."
 
 msgid "Installed"
 msgstr "Installiert"
+
+msgid "Use common folder for picons"
+msgstr "Gemeinsamen Ordner für Picons verwenden"
+
+msgid "Activates single folder use for several profiles."
+msgstr "Aktiviert die Verwendung eines einzelnen Ordners für mehrere Profile."
