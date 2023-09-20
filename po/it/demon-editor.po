@@ -1409,9 +1409,9 @@ msgstr "Tutti i bouquet"
 msgid "Playback from the main list"
 msgstr "Riproduci dall'elenco principale"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
 msgstr ""
-"Abilita l'analisi degli URL utilizzando youtube-dl per ottenere collegamenti"
+"Abilita l'analisi degli URL utilizzando yt-dlp per ottenere collegamenti"
 " diretti ai media."
 
 msgid "Permissions..."
