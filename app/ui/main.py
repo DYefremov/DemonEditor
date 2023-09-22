@@ -1191,7 +1191,7 @@ class Application(Gtk.Application):
 
     def fav_picon_data_func(self, column, renderer, model, itr, data):
         srv = self._services.get(model.get_value(itr, Column.FAV_ID), None)
-        if not srv:
+        if not srv or not srv.service:
             return True
 
         picon = self.get_picon_pixbuf(srv.picon_id, srv.service)
