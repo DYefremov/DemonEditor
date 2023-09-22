@@ -276,7 +276,7 @@ class ExtensionManager(Gtk.Window):
                 try:
                     for f in resp.json():
                         url = f.get("download_url", None)
-                        ver = f.get("version", "1.0")
+                        ver = f.get("version", ver)
                         if url:
                             urls[url] = f.get("name", None)
                 except ValueError as e:
