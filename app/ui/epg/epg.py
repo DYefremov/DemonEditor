@@ -423,7 +423,8 @@ class EpgDialog:
                     "on_field_icon_press": self.on_field_icon_press,
                     "on_key_press": self.on_key_press,
                     "on_bq_cursor_changed": self.on_bq_cursor_changed,
-                    "on_source_view_query_tooltip": self.on_source_view_query_tooltip}
+                    "on_source_view_query_tooltip": self.on_source_view_query_tooltip,
+                    "on_paned_size_allocate": lambda p, a: p.set_position(0.5 * a.width)}
 
         self._app = app
         self._ex_services = self._app.current_services
@@ -455,7 +456,7 @@ class EpgDialog:
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_entry = builder.get_object("filter_entry")
-        self._filter_auto_switch = builder.get_object("filter_auto_switch")
+        self._filter_auto_button = builder.get_object("filter_auto_button")
         self._services_filter_model = builder.get_object("services_filter_model")
         self._services_filter_model.set_visible_func(self.services_filter_function)
         self._sat_pos_filter_model = builder.get_object("sat_pos_filter_model")
@@ -699,7 +700,7 @@ class EpgDialog:
             self.on_assign_ref()
 
     def on_bq_cursor_changed(self, view):
-        if self._filter_bar.get_visible() and self._filter_auto_switch.get_active():
+        if self._filter_bar.get_visible() and self._filter_auto_button.get_active():
             path, column = view.get_cursor()
             model = view.get_model()
             if path:
