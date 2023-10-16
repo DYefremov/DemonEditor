@@ -1714,7 +1714,7 @@ class Application(Gtk.Application):
         counter = Counter(s.service_type for s in filter(None, (self._services.get(f_id, None) for f_id in bq)))
         services_txt = "\n".join(f"{k}: {v}" for k, v in counter.items())
         n_msg, s_msg, f_msg = translate("Name"), translate("Services"), translate("File")
-        f = f"\n\n{f_msg}: *.{self._bq_file.get(b_id, None)}.{b_type}" if self._s_type is SettingsType.ENIGMA_2 else ""
+        f = f"\n\n{f_msg}: {self._bq_file.get(b_id, '')}" if self._s_type is SettingsType.ENIGMA_2 else ""
         tooltip.set_text(f"{n_msg}: {name}\n{s_msg}:\n{services_txt}{f}")
         view.set_tooltip_row(tooltip, path)
 
@@ -2603,18 +2603,19 @@ class Application(Gtk.Application):
         """ Constructs and returns Bouquet class instance. """
         bq_name, locked, hidden, bq_type = model[itr][:]
         bq_id = f"{bq_name}:{bq_type}"
+        bq_file = self._bq_file.get(bq_id, None)
         favs = self._bouquets.get(bq_id, [])
         ex_s = self._extra_bouquets.get(bq_id, None)
         bq_s = list(filter(None, [self._services.get(f_id, None) for f_id in favs]))
         # Sub bouquets.
         if model.iter_has_child(itr):
             s_bs = [self.get_bouquet(model.iter_nth_child(itr, n), model) for n in range(model.iter_n_children(itr))]
-            return Bouquet(bq_name, BqType.BOUQUET.value, s_bs, locked, hidden, bq_name)
+            return Bouquet(bq_name, BqType.BOUQUET.value, s_bs, locked, hidden, bq_file)
 
         if self._s_type is SettingsType.ENIGMA_2:
             bq_s = self.get_enigma_bq_services(bq_s, ex_s)
 
-        return Bouquet(bq_name, bq_type, bq_s, locked, hidden, self._bq_file.get(bq_id, None))
+        return Bouquet(bq_name, bq_type, bq_s, locked, hidden, bq_file)
 
     def get_enigma_bq_services(self, services, ext_services):
         """ Preparing a list of services for the Enigma2 bouquet. """
