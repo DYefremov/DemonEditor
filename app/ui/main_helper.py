@@ -819,13 +819,16 @@ def append_text_to_tview(char, view):
 
 
 def get_iptv_url(row, s_type, column=Column.FAV_ID):
-    """ Returns url from iptv type row """
+    """ Returns URL from IPTV type row. """
     data = row[column].split(":" if s_type is SettingsType.ENIGMA_2 else "::")
-    if s_type is SettingsType.ENIGMA_2:
-        data = list(filter(lambda x: "http" in x, data))
+
     if data:
-        url = data[0]
-        return unquote(url) if s_type is SettingsType.ENIGMA_2 else url
+        if s_type is SettingsType.ENIGMA_2:
+            if len(data) > 10 and "http" in data[10]:
+                url, sep, desc = data[10].partition("#DESCRIPTION")
+                return unquote(url.strip())
+        else:
+            return data[0]
 
 
 def get_iptv_data(fav_id):
