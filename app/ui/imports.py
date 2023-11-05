@@ -52,7 +52,7 @@ def import_bouquet(app, model, path, appender, file_path=None):
 
     if profile is SettingsType.ENIGMA_2:
         pattern = f".{bq_type.value}"
-        f_pattern = f"{'' if IS_DARWIN else 'userbouquet.'}*{pattern}"
+        f_pattern = f"*{pattern}"
     elif profile is SettingsType.NEUTRINO_MP:
         pattern = "webtv.xml" if bq_type is BqType.WEBTV else "bouquets.xml"
         f_pattern = "bouquets.xml"
@@ -96,10 +96,9 @@ def import_bouquet(app, model, path, appender, file_path=None):
 
 
 def get_enigma2_bouquet(path):
-    path, sep, f_name = path.rpartition("userbouquet.")
-    name, sep, suf = f_name.rpartition(".")
-    bq = BouquetsReader.get_bouquet(path, name, suf)
-    bouquet = Bouquet(name=bq[0], type=BqType(suf).value, services=bq[1], locked=None, hidden=None)
+    p = Path(path)
+    bq = BouquetsReader.get_bouquet(f"{p.parent}{SEP}", f"{p.stem}{p.suffix}", p.stem)
+    bouquet = Bouquet(name=bq[0], type=BqType(p.suffix.lstrip(".")).value, services=bq[1], locked=None, hidden=None)
     return bouquet
 
 
