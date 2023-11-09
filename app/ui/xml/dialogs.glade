@@ -43,7 +43,6 @@ Author: Dmitriy Yefremov
     <property name="margin-bottom">10</property>
     <property name="row-spacing">5</property>
     <property name="column-spacing">5</property>
-    <property name="column-homogeneous">True</property>
     <child>
       <object class="GtkEntry" id="cable_freq_entry">
         <property name="visible">True</property>
@@ -105,6 +104,7 @@ Author: Dmitriy Yefremov
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="hexpand">True</property>
         <child>
           <object class="GtkLabel" id="cable_freq_label">
             <property name="visible">True</property>
@@ -542,7 +542,6 @@ Author: Dmitriy Yefremov
         <property name="can-focus">False</property>
         <property name="row-spacing">5</property>
         <property name="column-spacing">5</property>
-        <property name="column-homogeneous">True</property>
         <child>
           <object class="GtkEntry" id="freq_entry">
             <property name="visible">True</property>
@@ -654,6 +653,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel" id="sat_freq_label">
                 <property name="visible">True</property>
@@ -885,7 +885,6 @@ Author: Dmitriy Yefremov
         <property name="can-focus">False</property>
         <property name="row-spacing">5</property>
         <property name="column-spacing">5</property>
-        <property name="column-homogeneous">True</property>
         <child>
           <object class="GtkComboBox" id="pls_mode_box">
             <property name="visible">True</property>
@@ -959,6 +958,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel" id="tr_pls_mode_label">
                 <property name="visible">True</property>
@@ -1119,7 +1119,6 @@ Author: Dmitriy Yefremov
         <property name="can-focus">False</property>
         <property name="row-spacing">5</property>
         <property name="column-spacing">5</property>
-        <property name="column-homogeneous">True</property>
         <child>
           <object class="GtkEntry" id="ter_freq_entry">
             <property name="visible">True</property>
@@ -1198,6 +1197,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel" id="ter_freq_label">
                 <property name="visible">True</property>
@@ -1436,7 +1436,6 @@ Author: Dmitriy Yefremov
         <property name="margin-bottom">5</property>
         <property name="row-spacing">5</property>
         <property name="column-spacing">5</property>
-        <property name="column-homogeneous">True</property>
         <child>
           <object class="GtkComboBoxText" id="ter_guard_box">
             <property name="visible">True</property>
@@ -1497,6 +1496,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel" id="ter_guard_label">
                 <property name="visible">True</property>
