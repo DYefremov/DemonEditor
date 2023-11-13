@@ -2988,7 +2988,9 @@ Author: Dmitriy Yefremov
                                                     <signal name="key-press-event" handler="on_tree_view_key_press" swapped="no"/>
                                                     <signal name="query-tooltip" handler="on_iptv_view_query_tooltip" swapped="no"/>
                                                     <child internal-child="selection">
-                                                      <object class="GtkTreeSelection"/>
+                                                      <object class="GtkTreeSelection">
+                                                        <property name="mode">multiple</property>
+                                                      </object>
                                                     </child>
                                                     <child>
                                                       <object class="GtkTreeViewColumn" id="iptv_service_column">
