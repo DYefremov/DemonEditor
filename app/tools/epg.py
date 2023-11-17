@@ -229,6 +229,8 @@ class XmlTvReader(Reader):
 
     TIME_FORMAT_STR = "%Y%m%d%H%M%S %z"
 
+    SUFFIXES = {".gz", ".xz", ".lzma", ".xml"}
+
     Service = namedtuple("Service", ["id", "names", "logo", "events"])
     Event = namedtuple("EpgEvent", ["start", "duration", "title", "desc"])
 
@@ -247,7 +249,7 @@ class XmlTvReader(Reader):
         with requests.get(url=self._url, stream=True) as request:
             if request.reason == "OK":
                 suf = self._url[self._url.rfind("."):]
-                if suf not in (".gz", ".xz", ".lzma"):
+                if suf not in self.SUFFIXES:
                     log(f"{self.__class__.__name__} [download] error: Unsupported file extension.")
                     return
 
@@ -281,6 +283,13 @@ class XmlTvReader(Reader):
                                 shutil.copyfileobj(lzf, self._path)
                         except (lzma.LZMAError, OSError) as e:
                             log(f"{self.__class__.__name__} [download *.xz] error: {e}")
+                    else:
+                        try:
+                            import gzip
+                            with gzip.open(self._path, "wb") as f_out:
+                                shutil.copyfileobj(tf, f_out)
+                        except OSError as e:
+                            log(f"{self.__class__.__name__} [download *.xml] error: {e}")
 
                     if IS_WIN and os.path.isfile(tf.name):
                         tf.close()
