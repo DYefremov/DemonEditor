@@ -84,44 +84,49 @@ Author: Dmitriy Yefremov
                 <property name="margin-top">5</property>
                 <property name="spacing">5</property>
                 <child type="center">
-                  <object class="GtkToggleButton" id="multi_epg_button">
-                    <property name="label" translatable="yes">Multi EPG</property>
-                    <property name="name">header-button</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="receives-default">True</property>
-                    <signal name="toggled" handler="on_multi_epg_toggled" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBoxText" id="src_combo_box">
+                  <object class="GtkButtonBox" id="src_box">
+                    <property name="name">header-stack-switcher</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="tooltip-text" translatable="yes">EPG source</property>
-                    <property name="active">0</property>
-                    <property name="has-entry">True</property>
-                    <property name="active-id">0</property>
-                    <items>
-                      <item id="0" translatable="yes">Receiver</item>
-                    </items>
-                    <child internal-child="entry">
-                      <object class="GtkEntry">
-                        <property name="name">header-entry</property>
-                        <property name="can-focus">False</property>
-                        <property name="editable">False</property>
-                        <property name="width-chars">10</property>
+                    <property name="halign">center</property>
+                    <property name="layout-style">expand</property>
+                    <child>
+                      <object class="GtkRadioButton" id="src_receiver_button">
+                        <property name="label" translatable="yes">Receiver</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">False</property>
+                        <property name="group">src_xmltv_button</property>
                       </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="src_xmltv_button">
+                        <property name="label" translatable="yes">XML TV</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">False</property>
+                        <property name="group">src_receiver_button</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -143,7 +148,7 @@ Author: Dmitriy Yefremov
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -160,6 +165,28 @@ Author: Dmitriy Yefremov
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="icon-name">alarm-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="multi_epg_button">
+                    <property name="name">header-button</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Multi EPG</property>
+                    <signal name="toggled" handler="on_multi_epg_toggled" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="multi_epg_button_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">edit-select-all-symbolic</property>
                       </object>
                     </child>
                   </object>
