@@ -83,6 +83,8 @@ class Application(Gtk.Application):
     IPTV_MODEL = "iptv_list_store"
     DRAG_SEP = "::::"
 
+    MARKER_TYPES = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
+
     DEL_FACTOR = 100  # Batch size to delete in one pass.
     FAV_FACTOR = DEL_FACTOR * 5
 
@@ -251,7 +253,6 @@ class Application(Gtk.Application):
         self._sat_positions = set()
         self._service_types = set()
         self._bq_names = set()
-        self._marker_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
         self._services_models = {self.SERVICE_MODEL, self.IPTV_MODEL}
         # Tools
         self._links_transmitter = None
@@ -1223,7 +1224,7 @@ class Application(Gtk.Application):
     def fav_service_data_func(self, column, renderer, model, itr, data):
         if self._display_epg and self._s_type is SettingsType.ENIGMA_2:
             srv_name = model.get_value(itr, Column.FAV_SERVICE)
-            if model.get_value(itr, Column.FAV_TYPE) in self._marker_types:
+            if model.get_value(itr, Column.FAV_TYPE) in self.MARKER_TYPES:
                 return True
 
             event = self._epg_cache.get_current_event(srv_name)
@@ -1602,7 +1603,7 @@ class Application(Gtk.Application):
     def update_num_column(self, model):
         num = 0
         for row in model:
-            is_marker = row[Column.FAV_TYPE] in self._marker_types
+            is_marker = row[Column.FAV_TYPE] in self.MARKER_TYPES
             if not is_marker:
                 num += 1
             row[Column.FAV_NUM] = 0 if is_marker else num
@@ -2661,28 +2662,25 @@ class Application(Gtk.Application):
 
     def on_fav_selection(self, model, path, column):
         row = model[path][:]
+        fav_id = row[Column.FAV_ID]
+        srv = self._services.get(fav_id, None)
+
         if row[Column.FAV_TYPE] == BqServiceType.ALT.name:
             self._alt_model.clear()
-            a_id = row[Column.FAV_ID]
-            srv = self._services.get(a_id, None)
             if srv:
                 for i, s in enumerate(srv[-1] or [], start=1):
-                    srv = self._services.get(s.data, None)
-                    if srv:
-                        pic = self._picons.get(srv.picon_id, None)
+                    s = self._services.get(s.data, None)
+                    if s:
+                        pic = self._picons.get(s.picon_id, None)
                         itr = model.get_string_from_iter(model.get_iter(path))
-                        self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, a_id, itr))
+                        self._alt_model.append((i, pic, s.service, s.service_type, s.pos, s.fav_id, fav_id, itr))
                 self._alt_revealer.set_visible(True)
         else:
             self._alt_revealer.set_visible(False)
             self.on_info_bar_close()
 
-            if self._page is Page.EPG:
-                ref = self.get_service_ref(path)
-                if not ref:
-                    return
-
-                self.emit("fav-changed", ref)
+            if self._page is Page.EPG and srv.service_type not in self.MARKER_TYPES:
+                self.emit("fav-changed", srv)
 
     def on_services_selection(self, model, path, column):
         self.update_service_bar(model, path)
@@ -2744,7 +2742,7 @@ class Application(Gtk.Application):
                 background = self._EXTRA_COLOR if self._use_colors and ex_srv_name else None
 
                 srv_type = srv.service_type
-                is_marker = srv_type in self._marker_types
+                is_marker = srv_type in self.MARKER_TYPES
                 if not is_marker:
                     num += 1
 
@@ -3562,7 +3560,7 @@ class Application(Gtk.Application):
         row = self._fav_model[path][:]
         srv_type, fav_id = row[Column.FAV_TYPE], row[Column.FAV_ID]
 
-        if srv_type in self._marker_types and show_error:
+        if srv_type in self.MARKER_TYPES and show_error:
             self.show_error_message("Not allowed in this context!")
             return
 
@@ -3574,7 +3572,7 @@ class Application(Gtk.Application):
                 return self.get_service_ref_data(srv)
 
     def get_service_ref_data(self, srv):
-        ref = srv.picon_id.rstrip(".png").replace("_", ":")
+        ref = srv.picon_id.rstrip(".png").replace("_", ":") if srv.picon_id else ""
         if self._s_type is SettingsType.ENIGMA_2:
             return ref
         elif self._s_type is SettingsType.NEUTRINO_MP:
@@ -3912,7 +3910,7 @@ class Application(Gtk.Application):
                 if srv_type == BqServiceType.ALT.name:
                     return self.show_error_message("Operation not allowed in this context!")
 
-                if srv_type in self._marker_types:
+                if srv_type in self.MARKER_TYPES:
                     return self.on_rename(view)
                 elif srv_type == BqServiceType.IPTV.name:
                     return self.on_iptv_service_edit(model[paths][Column.FAV_ID], view)
@@ -4038,7 +4036,7 @@ class Application(Gtk.Application):
         """ Marks services with duplicate [names] in the fav list.  """
         from collections import Counter
 
-        dup = Counter(r[Column.FAV_SERVICE] for r in self._fav_model if r[Column.FAV_TYPE] not in self._marker_types)
+        dup = Counter(r[Column.FAV_SERVICE] for r in self._fav_model if r[Column.FAV_TYPE] not in self.MARKER_TYPES)
         dup = {k for k, v in dup.items() if v > 1}
 
         for r in self._fav_model:
@@ -4403,11 +4401,7 @@ class Application(Gtk.Application):
             row = model[path][:]
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
-                ref = self.get_service_ref_data(srv)
-                if not ref:
-                    return
-
-                self.emit("fav-changed", ref)
+                self.emit("fav-changed", srv)
 
     # ***************** Profile label ********************* #
 
@@ -4483,6 +4477,10 @@ class Application(Gtk.Application):
     @property
     def current_services(self):
         return self._services
+
+    @property
+    def current_bouquet(self):
+        return self._current_bq_name
 
     @property
     def current_bouquets(self):

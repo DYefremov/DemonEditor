@@ -60,9 +60,9 @@ class RefsSource(Enum):
 class EpgCache(dict):
     def __init__(self, app):
         super().__init__()
-        self._current_bq = None
         self._reader = None
         self._canceled = False
+        self._current_bq = app.current_bouquet
 
         self._settings = app.app_settings
         self._src = self._settings.epg_source
@@ -284,8 +284,12 @@ class EpgTool(Gtk.Box):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(view.get_model()) > 0:
             self.on_timer_add()
 
-    def on_service_changed(self, app, ref):
+    def on_service_changed(self, app, srv):
         if app.page is Page.EPG:
+            ref = app.get_service_ref_data(srv)
+            if not ref:
+                return
+
             if self._multi_epg_button.get_active():
                 ref += ":"
                 path = next((r.path for r in self._model if r[-1].get("e2eventservicereference", None) == ref), None)
