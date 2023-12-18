@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-09-20 04:14+0200\n"
+"PO-Revision-Date: 2023-12-18 05:40+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 23.08.0\n"
+"X-Generator: Lokalize 23.08.4\n"
 
 msgid "translator-credits"
 msgstr "Massimo Pissarello"
@@ -293,10 +293,10 @@ msgstr "Chiudi"
 
 # Picons dialog
 msgid "Load providers"
-msgstr "Carica provider"
+msgstr "Carica fornitori"
 
 msgid "Providers"
-msgstr "Provider"
+msgstr "Fornitori"
 
 msgid "Receive picons"
 msgstr "Scarica picon"
@@ -335,16 +335,16 @@ msgid "Path to Enigma2 picons:"
 msgstr "Persorso picon su Enigma2:"
 
 msgid "Specify the correct position value for the provider!"
-msgstr "Specifica il valore di posizione corretto per il provider!"
+msgstr "Specifica il valore di posizione corretto per il fornitore!"
 
 msgid "Converter between name formats"
 msgstr "Convertitore tra formati di nome"
 
 msgid "Receive picons for providers"
-msgstr "Scarica picon per provider"
+msgstr "Scarica picon per fornitore"
 
 msgid "Load satellite providers."
-msgstr "Carica provider satellitari"
+msgstr "Carica fornitori satellitari"
 
 msgid ""
 "To automatically set the identifiers for picons,\n"
@@ -511,8 +511,7 @@ msgstr "Non consentito in questo contesto!"
 
 msgid "Please, download files from receiver or setup your path for read data!"
 msgstr ""
-"Per favore, scarica i file dal ricevitore o imposta il percorso da cui"
-" leggere i dati!"
+"Scarica i file dal ricevitore o imposta il percorso da cui leggere i dati!"
 
 msgid "Reading data error!"
 msgstr "Errore lettura dati!"
@@ -527,7 +526,7 @@ msgid "The text of marker is empty, please try again!"
 msgstr "Il testo del marcatore è vuoto, riprova!"
 
 msgid "Please, select only one item!"
-msgstr "Per favore, seleziona solo un elemento!"
+msgstr "Seleziona solo un elemento!"
 
 msgid "No png file is selected!"
 msgstr "Nessun file png selezionato!"
@@ -548,7 +547,7 @@ msgid "Done!"
 msgstr "Fatto!"
 
 msgid "Please, wait..."
-msgstr "Attendere prego..."
+msgstr "Attendi..."
 
 msgid "Resizing..."
 msgstr "Ridimensionamento..."
@@ -560,10 +559,10 @@ msgid "No satellite is selected!"
 msgstr "Nessun satellite selezionato!"
 
 msgid "Please, select only one satellite!"
-msgstr "Per favore, seleziona solo un satellite!"
+msgstr "Seleziona solo un satellite!"
 
 msgid "Please check your parameters and try again."
-msgstr "Per favore, controlla i tuoi parametri e riprova di nuovo."
+msgstr "Controlla i parametri e riprova di nuovo."
 
 msgid "No satellites.xml file is selected!"
 msgstr "Nessun file satellites.xml selezionato!"
@@ -579,7 +578,7 @@ msgstr "VLC non trovato! Controlla che sia installato!"
 
 # Search unavailable streams dialog
 msgid "Please wait,  streams testing  in progress..."
-msgstr "Attendere prego, test degli stream in corso..."
+msgstr "Test degli stream in corso..."
 
 msgid "Found"
 msgstr "Trovato"
@@ -591,7 +590,7 @@ msgid "No changes required!"
 msgstr "Non sono richiesti cambiamenti!"
 
 msgid "This list does not contains IPTV streams!"
-msgstr "L'elenco non contiene stream IPTV!"
+msgstr "Questo elenco non contiene stream IPTV!"
 
 msgid "New empty configuration"
 msgstr "Nuova configurazione vuota"
@@ -727,7 +726,7 @@ msgid "XML file"
 msgstr "File XML"
 
 msgid "Use web source"
-msgstr "Utilizza fonte web"
+msgstr "Usa fonte web"
 
 msgid "Url to *.xml.gz file:"
 msgstr "Da URL a file *.xml.gz:"
@@ -779,7 +778,7 @@ msgstr ""
 " bouquet!"
 
 msgid "Use HTTP"
-msgstr "Utilizza HTTP"
+msgstr "Usa HTTP"
 
 msgid "Close playback"
 msgstr "Ferma riproduzione"
@@ -961,7 +960,7 @@ msgstr ""
 " dell'elenco dei preferiti!"
 
 msgid "Operates in standby mode or current active transponder!"
-msgstr "Funziona in modalità standby o transponder attivo corrente!"
+msgstr "Funziona in modalità standby o con il transponder attualmente attivo!"
 
 msgid "No connection to the receiver!"
 msgstr "Nessuna connessione con il ricevitore!"
@@ -1260,7 +1259,7 @@ msgstr ""
 " picon!"
 
 msgid "Streams detected:"
-msgstr "Rilevati stream:"
+msgstr "Stream rilevati:"
 
 msgid "Download picons"
 msgstr "Scarica picon"
@@ -1287,7 +1286,7 @@ msgid "Mark duplicates"
 msgstr "Contrassegna duplicati"
 
 msgid "Load only for selected bouquet"
-msgstr "Scarica solo per i bouquet selezionati"
+msgstr "Carica solo per i bouquet selezionati"
 
 msgid "The task is canceled!"
 msgstr "L'attività è stata annullata!"
@@ -1305,13 +1304,13 @@ msgid "Help"
 msgstr "Aiuto"
 
 msgid "HTTP API is not activated. Check your settings!"
-msgstr "API HTTP non attivata. Controlla le tue impostazioni!"
+msgstr "API HTTP non attivata. Controlla le impostazioni!"
 
 msgid "Add picons"
 msgstr "Aggiungi picon"
 
 msgid "Logs"
-msgstr "Log"
+msgstr "Registri"
 
 msgid "Title"
 msgstr "Titolo"
@@ -1409,9 +1408,9 @@ msgstr "Tutti i bouquet"
 msgid "Playback from the main list"
 msgstr "Riproduci dall'elenco principale"
 
-msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgid "Enables URL parsing using youtube-dl to get direct links to media."
 msgstr ""
-"Abilita l'analisi degli URL utilizzando yt-dlp per ottenere collegamenti"
+"Abilita l'analisi degli URL usando youtube-dl per ottenere collegamenti"
 " diretti ai media."
 
 msgid "Permissions..."
@@ -1424,7 +1423,7 @@ msgid "EPG *.dat file:"
 msgstr "File EPG *.dat:"
 
 msgid "Use HTTP to reload data in the receiver"
-msgstr "Utilizza HTTP per ricaricare i dati nel ricevitore"
+msgstr "Usa HTTP per ricaricare i dati nel ricevitore"
 
 msgid "Enable picons compression"
 msgstr "Abilita compressione picon"
@@ -1458,7 +1457,7 @@ msgid "Region"
 msgstr "Regione"
 
 msgid "Provider"
-msgstr "Provider"
+msgstr "Fornitore"
 
 msgid ""
 "Enables upload as an archive if a large number of picon (> 1000) is"
@@ -1550,7 +1549,7 @@ msgid "Selected type:"
 msgstr "Tipo selezionato:"
 
 msgid "Extension Manager"
-msgstr "Manager estensioni"
+msgstr "Gestore estensioni"
 
 msgid "Ver."
 msgstr "Ver."
@@ -1559,7 +1558,9 @@ msgid "Installed"
 msgstr "Installato"
 
 msgid "Use common folder for picons"
-msgstr "Usa cartella comune per i picon"
+msgstr "Usa la cartella comune per i picon"
 
 msgid "Activates single folder use for several profiles."
-msgstr "Attiva l'utilizzo di una singola cartella per diversi profili."
+msgstr "Attiva l'uso di una singola cartella per diversi profili."
+
+
