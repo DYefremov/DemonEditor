@@ -16,7 +16,9 @@ msgstr ""
 "X-Generator: Lokalize 23.08.4\n"
 
 msgid "translator-credits"
-msgstr "Massimo Pissarello"
+msgstr ""
+"Nicola Fanghella\n"
+"Massimo Pissarello"
 
 # Main
 msgid "Service"
@@ -1408,9 +1410,9 @@ msgstr "Tutti i bouquet"
 msgid "Playback from the main list"
 msgstr "Riproduci dall'elenco principale"
 
-msgid "Enables URL parsing using youtube-dl to get direct links to media."
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
 msgstr ""
-"Abilita l'analisi degli URL usando youtube-dl per ottenere collegamenti"
+"Abilita l'analisi degli URL usando yt-dlp per ottenere collegamenti"
 " diretti ai media."
 
 msgid "Permissions..."
