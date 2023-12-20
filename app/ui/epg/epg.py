@@ -27,6 +27,7 @@
 
 
 """ Module for working with EPG. """
+import abc
 import gzip
 import locale
 import os
@@ -57,19 +58,47 @@ class RefsSource(Enum):
     XML = 1
 
 
-class EpgCache(dict):
+class EpgCache(abc.ABC):
     def __init__(self, app):
         super().__init__()
+        self.events = {}
+
         self._reader = None
         self._canceled = False
         self._current_bq = app.current_bouquet
 
         self._settings = app.app_settings
-        self._src = self._settings.epg_source
+        self._src = EpgSource.XML
+
         self._app = app
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("task-canceled", self.on_xml_load_cancel)
+
+    def on_bouquet_changed(self, app, bq):
+        self._current_bq = bq
+
+    def on_profile_changed(self, app, p):
+        self.events.clear()
+
+    def on_xml_load_cancel(self, app, widget):
+        self._canceled = True
+
+    @abc.abstractmethod
+    def update_epg_data(self) -> bool: pass
+
+    @abc.abstractmethod
+    def get_current_event(self, service_name) -> EpgEvent: pass
+
+    @abc.abstractmethod
+    def get_current_events(self, service_name) -> list[EpgEvent]: pass
+
+
+class FavEpgCache(EpgCache):
+
+    def __init__(self, app):
+        super().__init__(app)
+        self._src = self._settings.epg_source
 
         self.init()
 
@@ -104,15 +133,6 @@ class EpgCache(dict):
 
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
-    def on_bouquet_changed(self, app, bq):
-        self._current_bq = bq
-
-    def on_profile_changed(self, app, p):
-        self.clear()
-
-    def on_xml_load_cancel(self, app, widget):
-        self._canceled = True
-
     def update_epg_data(self):
         if self._src is EpgSource.HTTP:
             api = self._app.http_api
@@ -128,17 +148,22 @@ class EpgCache(dict):
 
     def update_http_data(self, epg):
         for e in (EpgTool.get_event(e, False) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit()):
-            self[e.event_data.get("e2eventservicename", "")] = e
+            self.events[e.event_data.get("e2eventservicename", "")] = e
 
     @run_task
     def update_xml_data(self):
         services = self._app.current_services
         names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}
-        for name, e in self._reader.get_current_events(names).items():
-            self[name] = e
+        for name, events in self._reader.get_current_events(names).items():
+            ev = max(events, key=lambda x: x.start, default=None)
+            if ev:
+                self.events[name] = ev
 
     def get_current_event(self, service_name):
-        return self.get(service_name, EpgEvent())
+        return self.events.get(service_name, EpgEvent())
+
+    def get_current_events(self, service_name):
+        return [EpgEvent()]
 
 
 class EpgSettingsPopover(Gtk.Popover):

@@ -34,7 +34,7 @@ import shutil
 import struct
 import sys
 import xml.etree.ElementTree as ET
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from datetime import datetime, timezone
 from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
@@ -301,24 +301,25 @@ class XmlTvReader(Reader):
             clb()
 
     def get_current_events(self, names: set) -> dict:
-        events = {}
+        events = defaultdict(list)
 
         dt = datetime.utcnow()
         utc = dt.timestamp()
         offset = datetime.now() - dt
 
         for srv in filter(lambda s: any(name in names for name in s.names), self._ids.values()):
-            ev = max(filter(lambda s: s.start < utc, srv.events), key=lambda x: x.start, default=None)
-            if ev:
-                start = datetime.fromtimestamp(ev.start) + offset
-                end_time = datetime.fromtimestamp(ev.duration) + offset
-                start = start.timestamp()
-                end_time = end_time.timestamp()
-
-                for n in srv.names:
-                    events[n] = EpgEvent(n, ev.title, start, end_time, int(ev.duration), ev.desc, ev)
+            [self.process_event(ev, events, offset, srv) for ev in filter(lambda s: s.start < utc, srv.events)]
 
         return events
+
+    @staticmethod
+    def process_event(ev, events, offset, srv):
+        start = datetime.fromtimestamp(ev.start) + offset
+        end_time = datetime.fromtimestamp(ev.duration) + offset
+        start = start.timestamp()
+        end_time = end_time.timestamp()
+        for n in srv.names:
+            events[n].append(EpgEvent(n, ev.title, start, end_time, int(ev.duration), ev.desc, ev))
 
     def parse(self):
         """ Parses XML. """

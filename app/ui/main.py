@@ -51,7 +51,7 @@ from app.settings import (SettingsType, Settings, SettingsException, SettingsRea
                           PlayStreamsMode, PlaybackMode, USE_HEADER_BAR)
 from app.tools.media import Recorder
 from app.ui.control import ControlTool
-from app.ui.epg.epg import EpgCache, EpgSettingsPopover, EpgDialog, EpgTool
+from app.ui.epg.epg import FavEpgCache, EpgSettingsPopover, EpgDialog, EpgTool
 from app.ui.ftp import FtpClientBox
 from app.ui.logs import LogsClient
 from app.ui.playback import PlayerBox
@@ -3171,7 +3171,7 @@ class Application(Gtk.Application):
         set_display = bool(value)
         self._settings.display_epg = set_display
         self._epg_menu_button.set_visible(set_display)
-        self._epg_cache = EpgCache(self) if set_display else None
+        self._epg_cache = FavEpgCache(self) if set_display else None
         self._display_epg = set_display
 
     def on_epg_list_configuration(self, action, value=None):
@@ -4480,7 +4480,7 @@ class Application(Gtk.Application):
 
     @property
     def current_bouquet(self):
-        return self._current_bq_name
+        return self._bq_selected
 
     @property
     def current_bouquets(self):
