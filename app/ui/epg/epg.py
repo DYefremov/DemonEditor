@@ -173,8 +173,13 @@ class EpgSettingsPopover(Gtk.Popover):
         self._app = app
         self._app.connect("profile-changed", self.on_profile_changed)
 
-        handlers = {"on_apply": self.on_apply,
+        handlers = {"on_add_url": self.on_ad_url,
+                    "on_remove_url": self.on_remove_url,
+                    "on_apply_url": self.on_apply_url,
+                    "on_url_entry_focus_out": self.on_url_entry_focus_out,
+                    "on_apply": self.on_apply,
                     "on_close": lambda b: self.popdown()}
+
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}settings.glade", handlers)
         self.add(builder.get_object("main_box"))
 
@@ -182,8 +187,11 @@ class EpgSettingsPopover(Gtk.Popover):
         self._xml_src_button = builder.get_object("xml_src_button")
         self._dat_src_button = builder.get_object("dat_src_button")
         self._interval_button = builder.get_object("interval_button")
+        self._download_interval_button = builder.get_object("download_interval_button")
+        self._url_combo_box = builder.get_object("url_combo_box")
         self._url_entry = builder.get_object("url_entry")
         self._dat_path_box = builder.get_object("dat_path_box")
+        self._remove_url_button = builder.get_object("remove_url_button")
 
         self.init()
 
@@ -198,8 +206,37 @@ class EpgSettingsPopover(Gtk.Popover):
             self._dat_src_button.set_active(True)
 
         self._interval_button.set_value(settings.epg_update_interval)
-        self._url_entry.set_text(settings.epg_xml_source)
         self._dat_path_box.set_active_id(settings.epg_dat_path)
+        [self._url_combo_box.append(i, i) for i in settings.epg_xml_sources if i]
+        self._url_combo_box.set_active_id(settings.epg_xml_source)
+
+    def on_ad_url(self, button):
+        self._url_entry.set_can_focus(True)
+        self._url_entry.grab_focus()
+
+    def on_remove_url(self, button):
+        self._url_combo_box.remove(self._url_combo_box.get_active())
+        self._url_combo_box.set_active(0)
+        self._remove_url_button.set_sensitive(len(self._url_combo_box.get_model()) > 1)
+
+    def on_apply_url(self, button):
+        url = self._url_entry.get_text()
+        ids = {r[0] for r in self._url_combo_box.get_model()}
+        if url in ids:
+            self._app.show_error_message("This URL already exists!")
+            return True
+
+        self._url_combo_box.append(url, url)
+        self._url_combo_box.set_active_id(url)
+        self._download_interval_button.grab_focus()
+        self._remove_url_button.set_sensitive(len(ids))
+
+    def on_url_entry_focus_out(self, entry, event):
+        entry.set_can_focus(False)
+        active = self._url_combo_box.get_active_id()
+        txt = entry.get_text()
+        if active != txt:
+            entry.set_text(active or "")
 
     def on_apply(self, button):
         settings = self._app.app_settings
@@ -211,7 +248,8 @@ class EpgSettingsPopover(Gtk.Popover):
             settings.epg_source = EpgSource.DAT
 
         settings.epg_update_interval = self._interval_button.get_value()
-        settings.epg_xml_source = self._url_entry.get_text()
+        settings.epg_xml_source = self._url_combo_box.get_active_id()
+        settings.epg_xml_sources = [r[0] for r in self._url_combo_box.get_model()]
         settings.epg_dat_path = self._dat_path_box.get_active_id()
         self.popdown()
 

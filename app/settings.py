@@ -596,6 +596,14 @@ class Settings:
     def epg_xml_source(self, value):
         self._cp_settings["epg_xml_source"] = value
 
+    @property
+    def epg_xml_sources(self):
+        return self._cp_settings.get("epg_xml_sources", [self.epg_xml_source])
+
+    @epg_xml_sources.setter
+    def epg_xml_sources(self, value):
+        self._cp_settings["epg_xml_sources"] = value
+
     # *********** FTP ************ #
 
     @property
