@@ -335,6 +335,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("clipboard-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("epg-settings-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -2698,9 +2700,10 @@ class Application(Gtk.Application):
         self._alt_revealer.set_visible(False)
         self._current_bq_name = model[path][0] if len(path) > 1 else None
         self._bq_name_label.set_text(self._current_bq_name if self._current_bq_name else "")
+        itr = model.get_iter(path)
 
         if self._current_bq_name:
-            ch_row = model[model.get_iter(path)][:]
+            ch_row = model[itr][:]
             self._bq_selected = f"{ch_row[Column.BQ_NAME]}:{ch_row[Column.BQ_TYPE]}"
         else:
             self._bq_selected = ""
@@ -2711,9 +2714,10 @@ class Application(Gtk.Application):
             self._bouquets_view.expand_row(path, column)
 
         if len(path) > 1:
-            self.emit("bouquet-changed", self._bq_selected)
             gen = self.update_bouquet_services(model, path)
             GLib.idle_add(lambda: next(gen, False))
+            if not model.iter_has_child(itr):
+                self.emit("bouquet-changed", self._bq_selected)
 
     def update_bouquet_services(self, model, path, bq_key=None):
         """ Updates list of bouquet services """
@@ -3171,8 +3175,12 @@ class Application(Gtk.Application):
         set_display = bool(value)
         self._settings.display_epg = set_display
         self._epg_menu_button.set_visible(set_display)
-        self._epg_cache = FavEpgCache(self) if set_display else None
         self._display_epg = set_display
+        if set_display:
+            if self._epg_cache is None:
+                self._epg_cache = FavEpgCache(self)
+        else:
+            self._epg_cache = None
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:

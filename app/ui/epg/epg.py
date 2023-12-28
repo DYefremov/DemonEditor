@@ -65,6 +65,7 @@ class EpgCache(abc.ABC):
 
         self._reader = None
         self._canceled = False
+        self._is_run = False
         self._current_bq = app.current_bouquet
 
         self._settings = app.app_settings
@@ -73,16 +74,23 @@ class EpgCache(abc.ABC):
         self._app = app
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
+        self._app.connect("epg-settings-changed", self.on_settings_changed)
         self._app.connect("task-canceled", self.on_xml_load_cancel)
 
     def on_bouquet_changed(self, app, bq):
         self._current_bq = bq
 
     def on_profile_changed(self, app, p):
-        self.events.clear()
+        self.reset()
+
+    def on_settings_changed(self, app, s):
+        self.reset()
 
     def on_xml_load_cancel(self, app, widget):
         self._canceled = True
+
+    @abc.abstractmethod
+    def reset(self) -> None: pass
 
     @abc.abstractmethod
     def update_epg_data(self) -> bool: pass
@@ -99,11 +107,10 @@ class FavEpgCache(EpgCache):
     def __init__(self, app):
         super().__init__(app)
         self._src = self._settings.epg_source
+        GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
 
-        self.init()
-
-    @run_with_delay(5)
     def init(self):
+        self._is_run = True
         if self._src is EpgSource.XML:
             url = self._settings.epg_xml_source
             gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
@@ -133,6 +140,10 @@ class FavEpgCache(EpgCache):
 
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
+    def reset(self) -> None:
+        self._is_run = False
+        GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
+
     def update_epg_data(self):
         if self._src is EpgSource.HTTP:
             api = self._app.http_api
@@ -144,7 +155,7 @@ class FavEpgCache(EpgCache):
         elif self._src is EpgSource.XML:
             self.update_xml_data()
 
-        return self._app.display_epg
+        return self._app.display_epg and self._is_run
 
     def update_http_data(self, epg):
         for e in (EpgTool.get_event(e, False) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit()):
@@ -178,7 +189,7 @@ class EpgSettingsPopover(Gtk.Popover):
                     "on_apply_url": self.on_apply_url,
                     "on_url_entry_focus_out": self.on_url_entry_focus_out,
                     "on_apply": self.on_apply,
-                    "on_close": lambda b: self.popdown()}
+                    "on_close": self.on_close}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}settings.glade", handlers)
         self.add(builder.get_object("main_box"))
@@ -207,6 +218,7 @@ class EpgSettingsPopover(Gtk.Popover):
 
         self._interval_button.set_value(settings.epg_update_interval)
         self._dat_path_box.set_active_id(settings.epg_dat_path)
+        self._url_combo_box.get_model().clear()
         [self._url_combo_box.append(i, i) for i in settings.epg_xml_sources if i]
         self._url_combo_box.set_active_id(settings.epg_xml_source)
 
@@ -241,19 +253,32 @@ class EpgSettingsPopover(Gtk.Popover):
     def on_apply(self, button):
         settings = self._app.app_settings
         if self._http_src_button.get_active():
-            settings.epg_source = EpgSource.HTTP
+            src = EpgSource.HTTP
         elif self._xml_src_button.get_active():
-            settings.epg_source = EpgSource.XML
+            src = EpgSource.XML
         else:
-            settings.epg_source = EpgSource.DAT
+            src = EpgSource.DAT
 
-        settings.epg_update_interval = self._interval_button.get_value()
-        settings.epg_xml_source = self._url_combo_box.get_active_id()
+        xml_src = self._url_combo_box.get_active_id()
+        update_interval = self._interval_button.get_value()
+        dat_path = self._dat_path_box.get_active_id()
+
+        if any((src != settings.epg_source,
+                xml_src != settings.epg_xml_source,
+                update_interval != settings.epg_update_interval,
+                dat_path != settings.epg_dat_path)):
+            self._app.emit("epg-settings-changed", settings)
+
+        settings.epg_update_interval = update_interval
+        settings.epg_source = src
+        settings.epg_xml_source = xml_src
         settings.epg_xml_sources = [r[0] for r in self._url_combo_box.get_model()]
-        settings.epg_dat_path = self._dat_path_box.get_active_id()
+        settings.epg_dat_path = dat_path
         self.popdown()
 
-        self._app.change_action_state("display_epg", GLib.Variant.new_boolean(True))
+    def on_close(self, button):
+        self.init()
+        self.popdown()
 
     def on_profile_changed(self, app, p):
         self.init()
