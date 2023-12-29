@@ -36,6 +36,7 @@ import shutil
 import urllib.request
 from datetime import datetime
 from enum import Enum
+from itertools import chain
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 
@@ -141,8 +142,9 @@ class FavEpgCache(EpgCache):
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
     def reset(self) -> None:
-        self._is_run = False
-        GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
+        if self._is_run:
+            self._is_run = False
+            GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
 
     def update_epg_data(self):
         if self._src is EpgSource.HTTP:
@@ -166,7 +168,7 @@ class FavEpgCache(EpgCache):
         services = self._app.current_services
         names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}
         for name, events in self._reader.get_current_events(names).items():
-            ev = max(events, key=lambda x: x.start, default=None)
+            ev = min(events, key=lambda x: x.start, default=None)
             if ev:
                 self.events[name] = ev
 
@@ -175,6 +177,61 @@ class FavEpgCache(EpgCache):
 
     def get_current_events(self, service_name):
         return [EpgEvent()]
+
+
+class TabEpgCache(EpgCache):
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.init()
+
+    def init(self):
+        self._is_run = True
+        url = self._settings.epg_xml_source
+        gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
+        self._reader = XmlTvReader(gz_file, url)
+
+        if os.path.isfile(gz_file):
+            # Difference calculation between the current time and file modification.
+            dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
+            # We will update daily. -> Temporarily!!!
+            if dif.days > 0 and not self._canceled:
+                task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
+                self._app.emit("add-background-task", task)
+            else:
+                self.process_data()
+        else:
+            if not self._canceled:
+                task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
+                self._app.emit("add-background-task", task)
+
+    def process_data(self):
+        self._app.wait_dialog.show()
+
+        def process():
+            self._reader.parse()
+            self.update_epg_data()
+            self._app.wait_dialog.hide()
+
+        t = BGTaskWidget(self._app, "Processing XMLTV data...", process, )
+        self._app.emit("add-background-task", t)
+
+    def reset(self) -> None:
+        pass
+
+    def update_epg_data(self) -> bool:
+        services = self._app.current_services
+        names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}
+        for name, events in self._reader.get_current_events(names).items():
+            self.events[name] = events
+
+        return self._is_run
+
+    def get_current_event(self, service_name) -> EpgEvent:
+        pass
+
+    def get_current_events(self, service_name) -> list[EpgEvent]:
+        return self.events.get(service_name, [])
 
 
 class EpgSettingsPopover(Gtk.Popover):
@@ -288,7 +345,10 @@ class EpgTool(Gtk.Box):
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
 
-        self._current_bq = None
+        self._epg_cache = None
+        self._src = EpgSource.HTTP
+        self._current_bq = app.current_bouquet
+
         self._app = app
         self._app.connect("fav-changed", self.on_service_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
@@ -300,7 +360,8 @@ class EpgTool(Gtk.Box):
                     "on_epg_filter_changed": self.on_epg_filter_changed,
                     "on_epg_filter_toggled": self.on_epg_filter_toggled,
                     "on_view_query_tooltip": self.on_view_query_tooltip,
-                    "on_multi_epg_toggled": self.on_multi_epg_toggled}
+                    "on_multi_epg_toggled": self.on_multi_epg_toggled,
+                    "on_xmltv_toggled": self.on_xmltv_toggled}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}tab.glade", handlers)
 
@@ -334,7 +395,7 @@ class EpgTool(Gtk.Box):
         p_count = len(paths)
 
         if p_count == 1:
-            dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1])
+            dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1] or {})
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
                 gen = self.write_timers_list([dialog.get_request()])
@@ -373,7 +434,10 @@ class EpgTool(Gtk.Box):
             self.on_timer_add()
 
     def on_service_changed(self, app, srv):
-        if app.page is Page.EPG:
+        if app.page is not Page.EPG:
+            return
+
+        if self._src is EpgSource.HTTP:
             ref = app.get_service_ref_data(srv)
             if not ref:
                 return
@@ -384,20 +448,35 @@ class EpgTool(Gtk.Box):
                 scroll_to(path, self._view) if path else None
             else:
                 self._app.wait_dialog.show()
-                self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_epg_data)
+                self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_http_epg_data)
+        else:
+            if self._multi_epg_button.get_active():
+                path = next((r.path for r in self._model if r[-1].get("e2eventservicename", None) == srv.service), None)
+                scroll_to(path, self._view) if path else None
+            else:
+                self.update_xmltv_epg_data([srv.service])
 
     def on_profile_changed(self, app, prf):
-        self.update_epg_data()
+        self.update_http_epg_data()
 
     @run_idle
-    def update_epg_data(self, epg=None):
-        self._event_count_label.set_text("0")
-        self._model.clear()
+    def update_http_epg_data(self, epg=None):
+        self.clear()
         if epg:
             list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", [])
                                           if e.get("e2eventid", "").isdigit())))
         self._event_count_label.set_text(str(len(self._model)))
         self._app.wait_dialog.hide()
+
+    def update_xmltv_epg_data(self, names):
+        self.clear()
+        events = chain.from_iterable(self._epg_cache.get_current_events(n) for n in names)
+        [self._model.append(e) for e in events]
+        self._event_count_label.set_text(str(len(self._model)))
+
+    def clear(self):
+        self._model.clear()
+        self._event_count_label.set_text("0")
 
     @staticmethod
     def get_event(event, show_day=True):
@@ -450,8 +529,13 @@ class EpgTool(Gtk.Box):
         path, pos = dst
         model = view.get_model()
         data = model[path][-1]
+        if not data:
+            return False
+
         desc = data.get("e2eventdescription", "") or ""
         ext_desc = data.get("e2eventdescriptionextended", "") or ""
+        if not any((desc, ext_desc)):
+            return False
 
         tooltip.set_text(ext_desc if ext_desc else desc)
         view.set_tooltip_row(tooltip, path)
@@ -459,11 +543,18 @@ class EpgTool(Gtk.Box):
         return True
 
     def on_multi_epg_toggled(self, button):
-        self._model.clear()
-        self._event_count_label.set_text("0")
+        self.clear()
 
         if button.get_active():
             self.get_multi_epg()
+
+    def on_xmltv_toggled(self, button):
+        if button.get_active():
+            self._src = EpgSource.XML
+            if self._epg_cache is None:
+                self._epg_cache = TabEpgCache(self._app)
+        else:
+            self._src = EpgSource.HTTP
 
     def on_bouquet_changed(self, app, bq):
         self._current_bq = bq
@@ -474,14 +565,18 @@ class EpgTool(Gtk.Box):
         if not self._current_bq:
             return
 
-        self._app.wait_dialog.show()
-        bq = self._app.current_bouquet_files.get(self._current_bq, None)
-        api = self._app.http_api
+        if self._src is EpgSource.HTTP:
+            self._app.wait_dialog.show()
+            bq = self._app.current_bouquet_files.get(self._current_bq, None)
+            api = self._app.http_api
 
-        if bq and api:
-            tm = datetime.now().timestamp()
-            req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"&time={tm}')
-            api.send(HttpAPI.Request.EPG_MULTI, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_epg_data, timeout=15)
+            if bq and api:
+                tm = datetime.now().timestamp()
+                req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"&time={tm}')
+                api.send(HttpAPI.Request.EPG_MULTI, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_http_epg_data, timeout=15)
+        else:
+            srvs = self._app.current_services
+            self.update_xmltv_epg_data(srvs[s].service for s in self._app.current_bouquets.get(self._current_bq, []))
 
 
 class EpgDialog:
