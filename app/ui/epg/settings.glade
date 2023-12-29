@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c)  2018-2022 Dmitriy Yefremov
+Copyright (c)  2018-2023 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ THE SOFTWARE.
 Author: Dmitriy Yefremov
 
 -->
-<interface>
+<interface domain="demon-editor">
   <requires lib="gtk+" version="3.22"/>
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
@@ -50,8 +50,8 @@ Author: Dmitriy Yefremov
     <property name="orientation">vertical</property>
     <property name="spacing">2</property>
     <child>
-      <object class="GtkLabel">
-        <property name="visible">True</property>
+      <object class="GtkLabel" id="src_label">
+         <property name="visible" bind-source="source_selection_box" bind-property="visible">True</property>
         <property name="can-focus">False</property>
         <property name="halign">center</property>
         <property name="label" translatable="yes">Source:</property>
@@ -132,6 +132,7 @@ Author: Dmitriy Yefremov
           <object class="GtkBox" id="interval_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-top">5</property>
             <property name="spacing">5</property>
             <child>
               <object class="GtkLabel" id="interval_label">

@@ -251,6 +251,7 @@ class EpgSettingsPopover(Gtk.Popover):
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}settings.glade", handlers)
         self.add(builder.get_object("main_box"))
 
+        self._src_selection_box = builder.get_object("source_selection_box")
         self._http_src_button = builder.get_object("http_src_button")
         self._xml_src_button = builder.get_object("xml_src_button")
         self._dat_src_button = builder.get_object("dat_src_button")
@@ -341,6 +342,33 @@ class EpgSettingsPopover(Gtk.Popover):
         self.init()
 
 
+class TabEpgSettingsPopover(EpgSettingsPopover):
+
+    def init(self):
+        self._xml_src_button.set_active(True)
+        self._http_src_button.set_visible(False)
+        self._src_selection_box.set_visible(False)
+
+        settings = self._app.app_settings
+        self._interval_button.set_value(settings.epg_update_interval)
+        self._url_combo_box.get_model().clear()
+        [self._url_combo_box.append(i, i) for i in settings.epg_xml_sources if i]
+        self._url_combo_box.set_active_id(settings.epg_xml_source)
+
+    def on_apply(self, button):
+        settings = self._app.app_settings
+        xml_src = self._url_combo_box.get_active_id()
+        update_interval = self._interval_button.get_value()
+
+        if xml_src != settings.epg_xml_source or update_interval != settings.epg_update_interval:
+            self._app.emit("epg-settings-changed", settings)
+
+        settings.epg_update_interval = update_interval
+        settings.epg_xml_source = xml_src
+        settings.epg_xml_sources = [r[0] for r in self._url_combo_box.get_model()]
+        self.popdown()
+
+
 class EpgTool(Gtk.Box):
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
@@ -372,6 +400,8 @@ class EpgTool(Gtk.Box):
         self._filter_button = builder.get_object("epg_filter_button")
         self._filter_entry = builder.get_object("epg_filter_entry")
         self._multi_epg_button = builder.get_object("multi_epg_button")
+        self._epg_options_button = builder.get_object("epg_options_button")
+        self._epg_options_button.connect("realize", lambda b: b.set_popover(TabEpgSettingsPopover(self._app)))
         self._event_count_label = builder.get_object("event_count_label")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         # Custom data functions.
