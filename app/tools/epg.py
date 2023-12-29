@@ -308,7 +308,7 @@ class XmlTvReader(Reader):
         offset = datetime.now() - dt
 
         for srv in filter(lambda s: any(name in names for name in s.names), self._ids.values()):
-            [self.process_event(ev, events, offset, srv) for ev in filter(lambda s: s.start < utc, srv.events)]
+            [self.process_event(ev, events, offset, srv) for ev in filter(lambda s: s.duration > utc, srv.events)]
 
         return events
 
@@ -319,7 +319,12 @@ class XmlTvReader(Reader):
         start = start.timestamp()
         end_time = end_time.timestamp()
         for n in srv.names:
-            events[n].append(EpgEvent(n, ev.title, start, end_time, int(ev.duration), ev.desc, ev))
+            data = {"e2eventservicename": n,
+                    "e2eventtitle": ev.title,
+                    "e2eventdescription": ev.desc,
+                    "e2eventstart": start,
+                    "e2eventduration": ev.duration}
+            events[n].append(EpgEvent(n, ev.title, start, end_time, end_time - start, ev.desc, data))
 
     def parse(self):
         """ Parses XML. """
