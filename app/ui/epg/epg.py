@@ -542,7 +542,7 @@ class EpgTool(Gtk.Box):
         return next((s for s in model.get(itr,
                                           Column.EPG_SERVICE,
                                           Column.EPG_TITLE,
-                                          Column.EPG_DESC) if txt in s.upper()), False)
+                                          Column.EPG_DESC) if s and txt in s.upper()), False)
 
     def on_filter_toggled(self, app, value):
         if self._app.page is Page.EPG:
