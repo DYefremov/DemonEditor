@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,7 @@ class EpgCache(abc.ABC):
 
         self._settings = app.app_settings
         self._src = EpgSource.XML
+        self._xml_src = None
 
         self._app = app
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
@@ -82,6 +83,7 @@ class EpgCache(abc.ABC):
         self._current_bq = bq
 
     def on_profile_changed(self, app, p):
+        self._xml_src = self._settings.epg_xml_source
         self.reset()
 
     def on_settings_changed(self, app, s):
@@ -117,6 +119,11 @@ class FavEpgCache(EpgCache):
             gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
             self._reader = XmlTvReader(gz_file, url)
 
+            if url != self._xml_src:
+                self._xml_src = url
+                if os.path.isfile(gz_file):
+                    os.remove(gz_file)
+
             @run_with_delay(2)
             def process_data():
                 t = BGTaskWidget(self._app, "Processing XMLTV data...", self._reader.parse, )
@@ -142,6 +149,7 @@ class FavEpgCache(EpgCache):
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
     def reset(self) -> None:
+        self.events.clear()
         if self._is_run:
             self._is_run = False
             GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
