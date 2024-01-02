@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2023 Dmitriy Yefremov
+# Copyright (c) 2023-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 # Author: Dmitriy Yefremov
 #
 
-
+import json
 import os
 import pkgutil
 import shutil
@@ -41,6 +41,9 @@ from app.ui.uicommons import HeaderBar
 
 EXT_URL = "https://api.github.com/repos/DYefremov/demoneditor-extensions/contents/extensions/"
 EXT_LIST_FILE = "https://raw.githubusercontent.com/DYefremov/demoneditor-extensions/main/extensions/extension-list"
+# Config file name. The config file must be in json format!
+# E.g. -> {"EXT_URL": "repo URL",  "EXT_LIST_FILE": "URL to 'extension-list' file."}
+EXT_CONFIG_FILE = "ext_sources"
 HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:112.0) Gecko/20100101 Firefox/112.0",
            "Accept": "application/json"}
 
@@ -183,8 +186,18 @@ class ExtensionManager(Gtk.Window):
             self.resize(*window_size)
 
         self.connect("delete-event", lambda w, e: self._app.app_settings.add(ws_property, w.get_size()))
+        self.connect("realize", self.init)
 
+    def init(self, widget):
         self._load_spinner.start()
+        scf = f"{os.path.dirname(__file__)}{os.sep}{EXT_CONFIG_FILE}"
+        if os.path.isfile(scf):
+            with (open(scf, "r", encoding="utf-8", errors="ignore") as cf):
+                config = json.load(cf)
+                global EXT_URL, EXT_LIST_FILE
+                EXT_URL = config.get("EXT_URL", EXT_URL)
+                EXT_LIST_FILE = config.get("EXT_LIST_FILE", EXT_LIST_FILE)
+
         self.update()
 
     def get_installed(self):
@@ -205,13 +218,19 @@ class ExtensionManager(Gtk.Window):
     @run_task
     def update(self):
         with requests.get(url=EXT_LIST_FILE, stream=True) as resp:
+            error_msg = None
             if resp.status_code == 200:
                 try:
                     self.update_data(resp.json())
                 except ValueError as e:
-                    log(f"{self.__class__.__name__} [update] error: {e}")
+                    error_msg = f"{self.__class__.__name__} [update] error: {e}"
             else:
-                log(f"{self.__class__.__name__} [update] error: {resp.reason}")
+                error_msg = f"{self.__class__.__name__} [update] error: {resp.reason}"
+
+            if error_msg:
+                log(error_msg)
+                GLib.idle_add(self._load_spinner.stop)
+                GLib.idle_add(self._app.show_error_message, "Data loading error!")
 
     @run_idle
     def update_data(self, data):
