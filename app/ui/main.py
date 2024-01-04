@@ -489,6 +489,7 @@ class Application(Gtk.Application):
         self._stack_ftp_box = builder.get_object("ftp_box")
         self._stack_control_box = builder.get_object("control_box")
         self.connect("change-page", self.on_page_change)
+        self.connect("page-changed", self.on_page_changed)
         # Extra tools.
         self._telnet_box = builder.get_object("telnet_box")
         self._logs_box = builder.get_object("logs_box")
@@ -1140,6 +1141,10 @@ class Application(Gtk.Application):
 
     def on_page_change(self, app, page_name):
         self._stack.set_visible_child_name(page_name)
+
+    def on_page_changed(self, app, page):
+        if page is Page.SERVICES and not len(self._bouquets_model):
+            self.open_data()
 
     def set_use_alt_layout(self, action, value):
         action.set_state(value)
