@@ -204,6 +204,7 @@ Author: Dmitriy Yefremov
                     <property name="can-focus">True</property>
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Options</property>
                     <child>
                       <object class="GtkImage" id="epg_options_button_image">
                         <property name="visible">True</property>

@@ -68,6 +68,7 @@ class EpgCache(abc.ABC):
         self._canceled = False
         self._is_run = False
         self._current_bq = app.current_bouquet
+        self._page = Page.SERVICES
 
         self._settings = app.app_settings
         self._src = EpgSource.XML
@@ -86,8 +87,9 @@ class EpgCache(abc.ABC):
         self._xml_src = self._settings.epg_xml_source
         self.reset()
 
-    def on_settings_changed(self, app, s):
-        self.reset()
+    def on_settings_changed(self, app, page):
+        if page is self._page:
+            self.reset()
 
     def on_xml_load_cancel(self, app, widget):
         self._canceled = True
@@ -110,6 +112,7 @@ class FavEpgCache(EpgCache):
     def __init__(self, app):
         super().__init__(app)
         self._src = self._settings.epg_source
+        self._xml_src = self._settings.epg_xml_source
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
 
     def init(self):
@@ -191,6 +194,8 @@ class TabEpgCache(EpgCache):
 
     def __init__(self, app):
         super().__init__(app)
+        self._page = Page.EPG
+        self._task = None
         self.init()
 
     def init(self):
@@ -204,28 +209,33 @@ class TabEpgCache(EpgCache):
             dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
             # We will update daily. -> Temporarily!!!
             if dif.days > 0 and not self._canceled:
-                task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
-                self._app.emit("add-background-task", task)
+                self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
+                self._app.emit("add-background-task", self._task)
             else:
                 self.process_data()
         else:
             if not self._canceled:
-                task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
-                self._app.emit("add-background-task", task)
+                self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
+                self._app.emit("add-background-task", self._task)
 
     def process_data(self):
-        self._app.wait_dialog.show()
+        GLib.idle_add(self._app.wait_dialog.show)
 
         def process():
             self._reader.parse()
             self.update_epg_data()
             self._app.wait_dialog.hide()
+            self._task = None
 
-        t = BGTaskWidget(self._app, "Processing XMLTV data...", process, )
-        self._app.emit("add-background-task", t)
+        self._task = BGTaskWidget(self._app, "Processing XMLTV data...", process, )
+        self._app.emit("add-background-task", self._task)
 
     def reset(self) -> None:
-        pass
+        self._is_run = False
+        if self._task:
+            self._task.cancel()
+
+        self.init()
 
     def update_epg_data(self) -> bool:
         services = self._app.current_services
@@ -260,6 +270,8 @@ class EpgSettingsPopover(Gtk.Popover):
         self.add(builder.get_object("main_box"))
 
         self._src_selection_box = builder.get_object("source_selection_box")
+        self._xml_source_box = builder.get_object("xml_source_box")
+        self._interval_box = builder.get_object("interval_box")
         self._http_src_button = builder.get_object("http_src_button")
         self._xml_src_button = builder.get_object("xml_src_button")
         self._dat_src_button = builder.get_object("dat_src_button")
@@ -333,7 +345,7 @@ class EpgSettingsPopover(Gtk.Popover):
                 xml_src != settings.epg_xml_source,
                 update_interval != settings.epg_update_interval,
                 dat_path != settings.epg_dat_path)):
-            self._app.emit("epg-settings-changed", settings)
+            self._app.emit("epg-settings-changed", Page.SERVICES)
 
         settings.epg_update_interval = update_interval
         settings.epg_source = src
@@ -356,6 +368,8 @@ class TabEpgSettingsPopover(EpgSettingsPopover):
         self._xml_src_button.set_active(True)
         self._http_src_button.set_visible(False)
         self._src_selection_box.set_visible(False)
+        self._interval_box.set_visible(False)
+        self._xml_source_box.set_margin_top(5)
 
         settings = self._app.app_settings
         self._interval_button.set_value(settings.epg_update_interval)
@@ -366,12 +380,10 @@ class TabEpgSettingsPopover(EpgSettingsPopover):
     def on_apply(self, button):
         settings = self._app.app_settings
         xml_src = self._url_combo_box.get_active_id()
-        update_interval = self._interval_button.get_value()
 
-        if xml_src != settings.epg_xml_source or update_interval != settings.epg_update_interval:
-            self._app.emit("epg-settings-changed", settings)
+        if xml_src != settings.epg_xml_source:
+            self._app.emit("epg-settings-changed", Page.EPG)
 
-        settings.epg_update_interval = update_interval
         settings.epg_xml_source = xml_src
         settings.epg_xml_sources = [r[0] for r in self._url_combo_box.get_model()]
         self.popdown()
