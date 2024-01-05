@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -56,6 +56,7 @@ class PiconManager(Gtk.Box):
         super().__init__(**kwargs)
 
         self._app = app
+        self._app.connect("data-open", self.on_open)
         self._app.connect("data-receive", self.on_download)
         self._app.connect("data-send", self.on_send)
         self._app.connect("page-changed", self.update_picons_dest)
@@ -228,8 +229,11 @@ class PiconManager(Gtk.Box):
         if is_explorer:
             self.update_picons_data(self._picons_dest_view)
 
-    def on_open(self):
+    def on_open(self, app, page):
         """ Opens picons from local path [in src view]. """
+        if page is not Page.PICONS:
+            return
+
         response = show_dialog(DialogType.CHOOSER, self._app.app_window, settings=self._settings, title="Open folder")
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return

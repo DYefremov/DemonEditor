@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -315,6 +315,8 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("iptv-service-added", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-open", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("data-receive", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("data-send", self, GObject.SIGNAL_RUN_LAST,
@@ -497,6 +499,7 @@ class Application(Gtk.Application):
         self._bottom_paned = builder.get_object("bottom_paned")
         self.connect("services-update", self.on_services_update)
         # Send/Receive.
+        self.connect("data-open", self.on_data_open)
         self.connect("data-receive", self.on_download)
         self.connect("data-send", self.on_upload)
         # Data save.
@@ -770,7 +773,7 @@ class Application(Gtk.Application):
         self.bind_property("is-receive-data-enabled", sa, "enabled")
         sa = self.set_action("on_send", self.on_send)
         self.bind_property("is-send-data-enabled", sa, "enabled")
-        sa = self.set_action("on_data_open", self.on_data_open)
+        sa = self.set_action("on_data_open", lambda a, v: self.emit("data-open", self._page))
         self.bind_property("is-send-data-enabled", sa, "enabled")
         self.set_action("on_archive_open", self.on_archive_open)
         # Edit.
@@ -2191,17 +2194,13 @@ class Application(Gtk.Application):
                     self.show_error_message(str(e))
         log(f"##### Done! #####")
 
-    def on_data_open(self, action=None, value=None):
+    def on_data_open(self, app, page):
         """ Opening data via "File/Open". """
-        if self._page is Page.SERVICES or self._page is Page.INFO:
+        if page is Page.SERVICES or page is Page.INFO:
             response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, title="Open folder")
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
             self.open_data(response)
-        elif self._page is Page.SATELLITE:
-            self._satellite_tool.on_open()
-        elif self._page is Page.PICONS:
-            self._picon_manager.on_open()
 
     def on_archive_open(self, action=None, value=None):
         """ Opening the data archive via "File/Open archive". """

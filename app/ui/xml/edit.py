@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,7 @@ class SatellitesTool(Gtk.Box):
         super().__init__(**kwargs)
 
         self._app = app
+        self._app.connect("data-open", self.on_open)
         self._app.connect("data-save", self.on_save)
         self._app.connect("data-save-as", self.on_save_as)
         self._app.connect("data-receive", self.on_download)
@@ -522,8 +523,10 @@ class SatellitesTool(Gtk.Box):
             return self._ter_tr_view
         return self._cable_tr_view
 
-    @run_idle
-    def on_open(self):
+    def on_open(self, app, page):
+        if page is not Page.SATELLITE:
+            return
+
         xml_file = "satellites.xml"
         if self._dvb_type is self.DVB.TERRESTRIAL:
             xml_file = "terrestrial.xml"
