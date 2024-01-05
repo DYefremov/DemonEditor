@@ -1126,7 +1126,7 @@ class Application(Gtk.Application):
         self._page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(self._page in self._fav_pages)
         self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
-        self.is_send_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.RECORDINGS, Page.CONTROL)
+        self.is_send_data_enabled = self._page not in (Page.TIMERS, Page.RECORDINGS, Page.CONTROL)
         self.is_receive_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.CONTROL)
         self.emit("page-changed", self._page)
 
@@ -1146,7 +1146,7 @@ class Application(Gtk.Application):
         self._stack.set_visible_child_name(page_name)
 
     def on_page_changed(self, app, page):
-        if page is Page.SERVICES and not len(self._bouquets_model):
+        if not len(self._bouquets_model):
             self.open_data()
 
     def set_use_alt_layout(self, action, value):

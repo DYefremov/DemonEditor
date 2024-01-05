@@ -234,7 +234,7 @@ class XmlTvReader(Reader):
     Service = namedtuple("Service", ["id", "names", "logo", "events"])
     Event = namedtuple("EpgEvent", ["start", "duration", "title", "desc"])
 
-    def __init__(self, path, url):
+    def __init__(self, path, url=None):
         self._path = path
         self._url = url
         self._ids = {}
@@ -329,14 +329,22 @@ class XmlTvReader(Reader):
     def parse(self):
         """ Parses XML. """
         try:
-            import gzip
+            log("Processing XMLTV data...")
+            suf = os.path.splitext(self._path)[1]
+            if suf == ".gz":
+                import gzip
 
-            with gzip.open(self._path, "rb") as gzf:
-                log("Processing XMLTV data...")
-                list(map(self.process_node, ET.iterparse(gzf)))
-                log("XMLTV data parsing is complete.")
+                with gzip.open(self._path, "rb") as gzf:
+                    list(map(self.process_node, ET.iterparse(gzf)))
+            elif suf == ".xml":
+                with open(self._path, "rb") as xml:
+                    list(map(self.process_node, ET.iterparse(xml)))
+            else:
+                log(f"{self.__class__.__name__} [parse] error: Unsupported file type [{suf}].")
         except OSError as e:
             log(f"{self.__class__.__name__} [parse] error: {e}")
+        else:
+            log("XMLTV data parsing is complete.")
 
     def process_node(self, node):
         event, element = node

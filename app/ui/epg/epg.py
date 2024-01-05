@@ -47,7 +47,7 @@ from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP, EpgSource, IS_WIN
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
-from app.ui.dialogs import translate, show_dialog, DialogType, get_builder
+from app.ui.dialogs import translate, show_dialog, DialogType, get_builder, get_chooser_dialog
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
 from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions
@@ -192,21 +192,25 @@ class FavEpgCache(EpgCache):
 
 class TabEpgCache(EpgCache):
 
-    def __init__(self, app):
+    def __init__(self, app, path, url=None):
         super().__init__(app)
         self._page = Page.EPG
+        self._path = path
+        self._xml_src = url
         self._task = None
         self.init()
 
+    def on_bouquet_changed(self, app, bq):
+        self._current_bq = bq
+        self.update_epg_data()
+
     def init(self):
         self._is_run = True
-        url = self._settings.epg_xml_source
-        gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
-        self._reader = XmlTvReader(gz_file, url)
+        self._reader = XmlTvReader(self._path, url=self._xml_src)
 
-        if os.path.isfile(gz_file):
+        if os.path.isfile(self._path):
             # Difference calculation between the current time and file modification.
-            dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(gz_file))
+            dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(self._path))
             # We will update daily. -> Temporarily!!!
             if dif.days > 0 and not self._canceled:
                 self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
@@ -239,7 +243,7 @@ class TabEpgCache(EpgCache):
 
     def update_epg_data(self) -> bool:
         services = self._app.current_services
-        names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}
+        names = {services[s].service for s in chain.from_iterable(self._app.current_bouquets.values())}
         for name, events in self._reader.get_current_events(names).items():
             self.events[name] = events
 
@@ -398,6 +402,7 @@ class EpgTool(Gtk.Box):
         self._current_bq = app.current_bouquet
 
         self._app = app
+        self._app.connect("data-open", self.on_data_open)
         self._app.connect("fav-changed", self.on_service_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
@@ -420,6 +425,7 @@ class EpgTool(Gtk.Box):
         self._filter_button = builder.get_object("epg_filter_button")
         self._filter_entry = builder.get_object("epg_filter_entry")
         self._multi_epg_button = builder.get_object("multi_epg_button")
+        self._src_xmltv_button = builder.get_object("src_xmltv_button")
         self._epg_options_button = builder.get_object("epg_options_button")
         self._epg_options_button.connect("realize", lambda b: b.set_popover(TabEpgSettingsPopover(self._app)))
         self._event_count_label = builder.get_object("event_count_label")
@@ -482,6 +488,19 @@ class EpgTool(Gtk.Box):
     def on_epg_press(self, view, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(view.get_model()) > 0:
             self.on_timer_add()
+
+    def on_data_open(self, app, page):
+        if page is not Page.EPG:
+            return
+
+        response = get_chooser_dialog(self._app.app_window, self._app.app_settings, "XMLTV", ("*.xml",))
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        self.clear()
+        self._epg_cache = TabEpgCache(self._app, response)
+        if not self._src_xmltv_button.get_active():
+            self._src_xmltv_button.set_active(True)
 
     def on_service_changed(self, app, srv):
         if app.page is not Page.EPG:
@@ -602,9 +621,12 @@ class EpgTool(Gtk.Box):
         if button.get_active():
             self._src = EpgSource.XML
             if self._epg_cache is None:
-                self._epg_cache = TabEpgCache(self._app)
+                settings = self._app.app_settings
+                gz_file = f"{settings.profile_data_path}epg{os.sep}epg.gz"
+                self._epg_cache = TabEpgCache(self._app, gz_file, url=settings.epg_xml_source)
         else:
             self._src = EpgSource.HTTP
+            self.update_http_epg_data()
 
     def on_bouquet_changed(self, app, bq):
         self._current_bq = bq
